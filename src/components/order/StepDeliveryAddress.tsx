@@ -41,7 +41,7 @@ const StepDeliveryAddress = ({ data, update, onNext }: Props) => {
       </div>
 
       <div className="p-4 rounded-lg bg-muted text-sm text-muted-foreground font-sans">
-        📦 Physical caricatures are delivered within 20–25 days due to high demand.
+        📦 Caricatures are delivered within 25–30 days due to high demand.
       </div>
 
       <Button onClick={onNext} disabled={!canProceed} className="w-full rounded-full font-sans" size="lg">

@@ -1,8 +1,5 @@
 export interface OrderFormData {
-  // Step 1
-  caricatureType: "digital" | "physical";
-
-  // Location (physical only)
+  // Location
   country: string;
   state: string;
   city: string;
@@ -12,6 +9,7 @@ export interface OrderFormData {
   customerName: string;
   customerMobile: string;
   customerEmail: string;
+  instagramId: string;
 
   // Order details
   orderType: "single" | "couple" | "group";
@@ -22,7 +20,7 @@ export interface OrderFormData {
   // Photos
   photos: File[];
 
-  // Delivery address (physical only)
+  // Delivery address
   deliveryAddress: string;
   deliveryCity: string;
   deliveryState: string;
@@ -30,7 +28,6 @@ export interface OrderFormData {
 }
 
 export const initialFormData: OrderFormData = {
-  caricatureType: "digital",
   country: "India",
   state: "",
   city: "",
@@ -38,6 +35,7 @@ export const initialFormData: OrderFormData = {
   customerName: "",
   customerMobile: "",
   customerEmail: "",
+  instagramId: "",
   orderType: "single",
   faceCount: 1,
   style: "artists_choice",

@@ -11,14 +11,10 @@ interface Props {
   data: OrderFormData;
   update: (partial: Partial<OrderFormData>) => void;
   onNext: () => void;
-  includeCustomerFields: boolean;
 }
 
-const StepOrderDetails = ({ data, update, onNext, includeCustomerFields }: Props) => {
-  const amount = calculatePrice(data.caricatureType, data.orderType, data.faceCount);
-
-  const customerFilled = !includeCustomerFields || (data.customerName.trim() && data.customerMobile.trim() && data.customerEmail.trim());
-  const canProceed = customerFilled;
+const StepOrderDetails = ({ data, update, onNext }: Props) => {
+  const amount = calculatePrice(data.orderType, data.faceCount);
 
   return (
     <div className="space-y-6">
@@ -26,26 +22,6 @@ const StepOrderDetails = ({ data, update, onNext, includeCustomerFields }: Props
         <h2 className="font-display text-2xl font-bold mb-1">Order Details</h2>
         <p className="text-sm text-muted-foreground font-sans">Configure your caricature order</p>
       </div>
-
-      {/* Customer fields for digital flow */}
-      {includeCustomerFields && (
-        <div className="space-y-4">
-          <div>
-            <Label className="font-sans">Full Name</Label>
-            <Input value={data.customerName} onChange={(e) => update({ customerName: e.target.value })} placeholder="Your full name" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="font-sans">Mobile Number</Label>
-              <Input value={data.customerMobile} onChange={(e) => update({ customerMobile: e.target.value })} placeholder="+91 98765 43210" type="tel" />
-            </div>
-            <div>
-              <Label className="font-sans">Email</Label>
-              <Input value={data.customerEmail} onChange={(e) => update({ customerEmail: e.target.value })} placeholder="you@email.com" type="email" />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Order Type */}
       <div className="space-y-3">
@@ -63,8 +39,8 @@ const StepOrderDetails = ({ data, update, onNext, includeCustomerFields }: Props
               <CardContent className="p-3 text-center">
                 <p className="font-sans font-semibold text-sm capitalize">{type}</p>
                 <p className="text-xs text-muted-foreground font-sans">
-                  {type === "group" ? `${formatPrice(data.caricatureType === "digital" ? 3000 : 3000)}/face` :
-                    formatPrice(calculatePrice(data.caricatureType, type, type === "couple" ? 2 : 1))}
+                  {type === "group" ? `${formatPrice(3000)}/face` :
+                    formatPrice(calculatePrice(type, type === "couple" ? 2 : 1))}
                 </p>
               </CardContent>
             </Card>
@@ -119,7 +95,7 @@ const StepOrderDetails = ({ data, update, onNext, includeCustomerFields }: Props
         </CardContent>
       </Card>
 
-      <Button onClick={onNext} disabled={!canProceed} className="w-full rounded-full font-sans" size="lg">
+      <Button onClick={onNext} className="w-full rounded-full font-sans" size="lg">
         Continue
       </Button>
     </div>
