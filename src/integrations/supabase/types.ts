@@ -63,6 +63,7 @@ export type Database = {
           district: string | null
           face_count: number
           id: string
+          instagram_id: string | null
           is_framed: boolean | null
           notes: string | null
           order_type: Database["public"]["Enums"]["order_type"]
@@ -90,6 +91,7 @@ export type Database = {
           district?: string | null
           face_count?: number
           id?: string
+          instagram_id?: string | null
           is_framed?: boolean | null
           notes?: string | null
           order_type: Database["public"]["Enums"]["order_type"]
@@ -117,6 +119,7 @@ export type Database = {
           district?: string | null
           face_count?: number
           id?: string
+          instagram_id?: string | null
           is_framed?: boolean | null
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]

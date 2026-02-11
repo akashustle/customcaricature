@@ -1,14 +1,7 @@
 export const PRICING = {
-  digital: {
-    single: 3000,
-    couple: 9000,
-    groupPerFace: 3000,
-  },
-  physical: {
-    single: 5000,
-    couple: 9000,
-    groupPerFace: 3000,
-  },
+  single: 5000,
+  couple: 9000,
+  groupPerFace: 3000,
 } as const;
 
 export const STYLES = [
@@ -21,14 +14,12 @@ export const STYLES = [
 ] as const;
 
 export function calculatePrice(
-  caricatureType: "digital" | "physical",
   orderType: "single" | "couple" | "group",
   faceCount: number
 ): number {
-  const prices = PRICING[caricatureType];
-  if (orderType === "single") return prices.single;
-  if (orderType === "couple") return prices.couple;
-  return prices.groupPerFace * faceCount;
+  if (orderType === "single") return PRICING.single;
+  if (orderType === "couple") return PRICING.couple;
+  return PRICING.groupPerFace * faceCount;
 }
 
 export function formatPrice(amount: number): string {

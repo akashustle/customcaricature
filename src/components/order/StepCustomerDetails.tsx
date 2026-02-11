@@ -32,6 +32,10 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
           <Label className="font-sans">Email Address</Label>
           <Input value={data.customerEmail} onChange={(e) => update({ customerEmail: e.target.value })} placeholder="you@email.com" type="email" />
         </div>
+        <div>
+          <Label className="font-sans">Instagram ID (optional)</Label>
+          <Input value={data.instagramId} onChange={(e) => update({ instagramId: e.target.value })} placeholder="@yourusername" />
+        </div>
       </div>
 
       <Button onClick={onNext} disabled={!canProceed} className="w-full rounded-full font-sans" size="lg">
