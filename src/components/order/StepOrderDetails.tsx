@@ -4,8 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STYLES, calculatePrice, formatPrice, PRICING, GROUP_MIN_FACES, GROUP_MAX_FACES } from "@/lib/pricing";
+import { STYLES, formatPrice } from "@/lib/pricing";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePricing } from "@/hooks/usePricing";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   data: OrderFormData;
@@ -14,7 +16,12 @@ interface Props {
 }
 
 const StepOrderDetails = ({ data, update, onNext }: Props) => {
-  const amount = calculatePrice(data.orderType, data.faceCount);
+  const { types, loading: pricingLoading, getPrice, getType } = usePricing();
+
+  const amount = getPrice(data.orderType, data.faceCount);
+  const groupType = getType("group");
+  const GROUP_MIN_FACES = groupType?.min_faces ?? 3;
+  const GROUP_MAX_FACES = groupType?.max_faces ?? 6;
 
   const handleFaceCountChange = (val: string) => {
     const num = parseInt(val) || 0;
@@ -27,6 +34,14 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
 
   const canProceed = data.orderType !== "group" || data.faceCount >= GROUP_MIN_FACES;
 
+  if (pricingLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -38,24 +53,27 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
       <div className="space-y-3">
         <Label className="font-sans text-base font-semibold">Order Type</Label>
         <div className="grid grid-cols-3 gap-3">
-          {(["single", "couple", "group"] as const).map((type) => (
-            <Card
-              key={type}
-              className={`cursor-pointer border-2 transition-all ${data.orderType === type ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}
-              onClick={() => {
-                const fc = type === "single" ? 1 : type === "couple" ? 2 : Math.max(data.faceCount, GROUP_MIN_FACES);
-                update({ orderType: type, faceCount: fc });
-              }}
-            >
-              <CardContent className="p-3 text-center">
-                <p className="font-sans font-semibold text-sm capitalize">{type}</p>
-                <p className="text-xs text-muted-foreground font-sans">
-                  {type === "group" ? `${formatPrice(PRICING.groupPerFace)}/face` :
-                    formatPrice(calculatePrice(type, type === "couple" ? 2 : 1))}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+          {(["single", "couple", "group"] as const).map((type) => {
+            const typeData = getType(type);
+            const price = typeData ? (typeData.per_face ? typeData.price : typeData.price) : 0;
+            return (
+              <Card
+                key={type}
+                className={`cursor-pointer border-2 transition-all ${data.orderType === type ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}
+                onClick={() => {
+                  const fc = type === "single" ? 1 : type === "couple" ? 2 : Math.max(data.faceCount, GROUP_MIN_FACES);
+                  update({ orderType: type, faceCount: fc });
+                }}
+              >
+                <CardContent className="p-3 text-center">
+                  <p className="font-sans font-semibold text-sm capitalize">{type}</p>
+                  <p className="text-xs text-muted-foreground font-sans">
+                    {typeData?.per_face ? `${formatPrice(price)}/face` : formatPrice(getPrice(type, type === "couple" ? 2 : 1))}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 

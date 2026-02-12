@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OrderFormData, initialFormData } from "@/lib/order-types";
-import { calculatePrice } from "@/lib/pricing";
+import { usePricing } from "@/hooks/usePricing";
 import StepLocation from "@/components/order/StepLocation";
 import StepCustomerDetails from "@/components/order/StepCustomerDetails";
 import StepOrderDetails from "@/components/order/StepOrderDetails";
@@ -29,6 +29,7 @@ const STEP_LABELS: Record<string, string> = {
 const Order = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { getPrice } = usePricing();
   const [formData, setFormData] = useState<OrderFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -71,7 +72,7 @@ const Order = () => {
 
   const step = STEPS[currentStep];
   const totalSteps = STEPS.length;
-  const amount = calculatePrice(formData.orderType, formData.faceCount);
+  const amount = getPrice(formData.orderType, formData.faceCount);
 
   const update = (partial: Partial<OrderFormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
