@@ -1,8 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight } from "lucide-react";
+import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import gallery1 from "@/assets/gallery/gallery-1.jpeg";
 import gallery2 from "@/assets/gallery/gallery-2.jpeg";
@@ -55,9 +63,59 @@ const InfiniteScrollGallery = () => {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, loading, signOut } = useAuth();
+
+  const handleOrderClick = () => {
+    if (!user) {
+      navigate("/register");
+    } else {
+      navigate("/order");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Top Nav */}
+      <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
+            <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {!loading && (
+              user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full font-sans gap-2">
+                      <User className="w-4 h-4" />
+                      <span className="hidden sm:inline">My Account</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-sans">
+                      <User className="w-4 h-4 mr-2" /> Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/order")} className="font-sans">
+                      <Palette className="w-4 h-4 mr-2" /> New Order
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="font-sans text-destructive">
+                      <LogOut className="w-4 h-4 mr-2" /> Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/login")} className="font-sans">Login</Button>
+                  <Button size="sm" onClick={() => navigate("/register")} className="rounded-full font-sans">Register</Button>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <div className="container mx-auto px-4 py-16 md:py-28">
@@ -82,13 +140,10 @@ const Index = () => {
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto font-sans">
               Custom hand-crafted caricatures that capture personality in every stroke. Delivered to your doorstep.
             </p>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Button
                 size="lg"
-                onClick={() => navigate("/order")}
+                onClick={handleOrderClick}
                 className="text-base md:text-lg px-8 md:px-10 py-6 rounded-full font-sans font-semibold shadow-lg hover:shadow-xl transition-all"
                 style={{ boxShadow: "var(--shadow-warm)" }}
               >
@@ -203,7 +258,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section - replaces pricing */}
+      {/* CTA Section */}
       <section className="container mx-auto px-4 py-16 md:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -218,7 +273,7 @@ const Index = () => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
             <Button
               size="lg"
-              onClick={() => navigate("/order")}
+              onClick={handleOrderClick}
               className="rounded-full px-10 py-6 text-base md:text-lg font-sans font-semibold"
             >
               Start Your Order <ArrowRight className="w-5 h-5 ml-2" />
@@ -234,7 +289,7 @@ const Index = () => {
           <p className="text-muted-foreground font-sans mb-6">Reach out to us anytime for support</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I have a question about caricatures.`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I have a question about caricatures.")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-[#25D366] text-white rounded-full py-3 px-6 font-sans font-medium hover:opacity-90 transition-opacity"
@@ -263,32 +318,17 @@ const Index = () => {
               <p className="font-display text-lg font-semibold text-foreground">Creative Caricature Club</p>
             </div>
             <p className="text-sm text-muted-foreground font-sans text-center">Custom caricatures crafted with love ✨</p>
-
-            {/* Social Links */}
-            <div className="flex items-center gap-4">
-              <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors" aria-label="Instagram">
-                <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-              </a>
-              <a href="https://www.youtube.com/@creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors" aria-label="YouTube">
-                <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-              </a>
-              <a href="https://www.facebook.com/creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary/10 transition-colors" aria-label="Facebook">
-                <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-              </a>
-            </div>
-
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground font-sans">
-              <a href="/about" className="hover:text-foreground transition-colors">About Us</a>
+              <Link to="/about" className="hover:text-foreground transition-colors">About Us</Link>
               <span>•</span>
-              <a href="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</a>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link>
               <span>•</span>
-              <a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
               <span>•</span>
-              <a href="/refund" className="hover:text-foreground transition-colors">Refund Policy</a>
+              <Link to="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link>
               <span>•</span>
-              <a href="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</a>
+              <Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</Link>
             </div>
-
             <p className="text-xs text-muted-foreground font-sans">© 2025 Creative Caricature Club. All rights reserved.</p>
           </div>
         </div>
