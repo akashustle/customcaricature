@@ -8,10 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 type Profile = {
   full_name: string;
@@ -35,6 +41,8 @@ type Order = {
   payment_verified: boolean | null;
   created_at: string;
   customer_name: string;
+  customer_email: string;
+  customer_mobile: string;
   delivery_address: string | null;
   delivery_city: string | null;
   delivery_state: string | null;
@@ -73,6 +81,7 @@ const Dashboard = () => {
   const [editForm, setEditForm] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -82,10 +91,9 @@ const Dashboard = () => {
     if (user) {
       fetchProfile(user.id);
       fetchOrders(user.id);
-      // Subscribe to realtime order updates
       const channel = supabase
         .channel("user-orders")
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
+        .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
           fetchOrders(user.id);
         })
         .subscribe();
@@ -101,7 +109,7 @@ const Dashboard = () => {
 
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
@@ -124,6 +132,72 @@ const Dashboard = () => {
       setProfile(editForm);
       setEditing(false);
       toast({ title: "Profile Updated" });
+    }
+  };
+
+  const handlePayNow = async (order: Order) => {
+    setPayingOrderId(order.id);
+    try {
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: {
+          amount: order.amount,
+          order_id: order.id,
+          customer_name: order.customer_name,
+          customer_email: order.customer_email,
+          customer_mobile: order.customer_mobile,
+        },
+      });
+
+      if (rzpError || !rzpData?.razorpay_order_id) {
+        throw new Error(rzpError?.message || "Failed to create payment order");
+      }
+
+      const options = {
+        key: rzpData.razorpay_key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: "Creative Caricature Club",
+        description: `${order.order_type} Caricature - ${order.style}`,
+        image: "/logo.png",
+        order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: order.id,
+              },
+            });
+            if (verifyError || !verifyData?.verified) {
+              throw new Error("Payment verification failed");
+            }
+            toast({ title: "Payment Successful!", description: "Your payment has been confirmed." });
+            if (user) fetchOrders(user.id);
+          } catch (err: any) {
+            toast({ title: "Payment Verification Failed", description: "Contact support with order ID: " + order.id.slice(0, 8).toUpperCase(), variant: "destructive" });
+          }
+          setPayingOrderId(null);
+        },
+        prefill: {
+          name: order.customer_name,
+          email: order.customer_email,
+          contact: `+91${order.customer_mobile}`,
+        },
+        theme: { color: "#E8633B" },
+        modal: {
+          ondismiss: () => {
+            setPayingOrderId(null);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to initiate payment", variant: "destructive" });
+      setPayingOrderId(null);
     }
   };
 
@@ -203,7 +277,6 @@ const Dashboard = () => {
                           </Badge>
                         </div>
 
-                        {/* Expanded details */}
                         {expandedOrder === order.id && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
@@ -223,12 +296,20 @@ const Dashboard = () => {
                             } />
                             {order.payment_status !== "confirmed" && (
                               <div className="pt-2">
-                                <Button size="sm" className="rounded-full font-sans w-full" onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Re-initiate payment for unpaid orders
-                                  toast({ title: "Contact Support", description: "Please contact us on WhatsApp for payment assistance." });
-                                }}>
-                                  Complete Payment
+                                <Button
+                                  size="sm"
+                                  className="rounded-full font-sans w-full"
+                                  disabled={payingOrderId === order.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePayNow(order);
+                                  }}
+                                >
+                                  {payingOrderId === order.id ? (
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                                  ) : (
+                                    <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(order.amount)} Now</>
+                                  )}
                                 </Button>
                               </div>
                             )}
@@ -289,7 +370,6 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Support */}
         <div className="mt-6">
           <a
             href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`}

@@ -61,8 +61,12 @@ type Profile = {
   mobile: string;
   email: string;
   instagram_id: string | null;
+  address: string | null;
   city: string | null;
   state: string | null;
+  pincode: string | null;
+  secret_code: string | null;
+  created_at: string;
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -90,12 +94,15 @@ const Admin = () => {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
+  const [customerSearch, setCustomerSearch] = useState("");
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
   const [negotiateOrderId, setNegotiateOrderId] = useState<string | null>(null);
   const [negotiatedAmount, setNegotiatedAmount] = useState("");
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [showAddType, setShowAddType] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<string | null>(null);
+  const [editCustomerData, setEditCustomerData] = useState<Partial<Profile>>({});
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
 
@@ -133,7 +140,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, city, state");
+    const { data } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at");
     if (data) setCustomers(data as any);
   };
 
@@ -168,7 +175,7 @@ const Admin = () => {
 
   const saveTypeEdit = async (id: string) => {
     await supabase.from("caricature_types").update(editTypeData as any).eq("id", id);
-    toast({ title: "Pricing Updated" });
+    toast({ title: "Pricing Updated — changes are live on the website!" });
     setEditingType(null);
     fetchCaricatureTypes();
   };
@@ -220,10 +227,31 @@ const Admin = () => {
   };
 
   const deleteCustomer = async (userId: string) => {
-    if (!confirm("Delete this customer?")) return;
+    // Delete profile and associated orders
+    await supabase.from("orders").delete().eq("user_id", userId);
     await supabase.from("profiles").delete().eq("user_id", userId);
-    toast({ title: "Customer Deleted" });
+    toast({ title: "Customer & their orders deleted" });
     fetchCustomers();
+    fetchOrders();
+  };
+
+  const saveCustomerEdit = async (userId: string) => {
+    const { error } = await supabase.from("profiles").update({
+      full_name: editCustomerData.full_name,
+      mobile: editCustomerData.mobile,
+      instagram_id: editCustomerData.instagram_id,
+      address: editCustomerData.address,
+      city: editCustomerData.city,
+      state: editCustomerData.state,
+      pincode: editCustomerData.pincode,
+    } as any).eq("user_id", userId);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Customer Updated" });
+      setEditingCustomer(null);
+      fetchCustomers();
+    }
   };
 
   const handleLogout = async () => {
@@ -235,6 +263,12 @@ const Admin = () => {
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
     if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase()) && !o.id.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
+  });
+
+  const filteredCustomers = customers.filter((c) => {
+    if (!customerSearch) return true;
+    const q = customerSearch.toLowerCase();
+    return c.full_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.mobile.includes(q);
   });
 
   const getDaysRemaining = (order: Order) => {
@@ -431,15 +465,18 @@ const Admin = () => {
 
           {/* Pricing Tab */}
           <TabsContent value="pricing">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-display text-xl font-bold">Caricature Types & Pricing</h2>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="font-display text-xl font-bold">Caricature Types & Pricing</h2>
+                <p className="text-xs text-muted-foreground font-sans">Changes here update pricing across the entire website in real-time</p>
+              </div>
               <Dialog open={showAddType} onOpenChange={setShowAddType}>
                 <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Type</Button></DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle className="font-display">Add Caricature Type</DialogTitle></DialogHeader>
                   <div className="space-y-4">
                     <div><Label>Name</Label><Input value={newType.name} onChange={(e) => setNewType({ ...newType, name: e.target.value })} placeholder="e.g. Family" /></div>
-                    <div><Label>Slug</Label><Input value={newType.slug} onChange={(e) => setNewType({ ...newType, slug: e.target.value.toLowerCase().replace(/\s/g, "_") })} placeholder="e.g. family" /></div>
+                    <div><Label>Slug (must match order_type: single/couple/group)</Label><Input value={newType.slug} onChange={(e) => setNewType({ ...newType, slug: e.target.value.toLowerCase().replace(/\s/g, "_") })} placeholder="e.g. family" /></div>
                     <div><Label>Price (₹)</Label><Input type="number" value={newType.price} onChange={(e) => setNewType({ ...newType, price: parseInt(e.target.value) || 0 })} /></div>
                     <div className="flex items-center gap-2">
                       <input type="checkbox" checked={newType.per_face} onChange={(e) => setNewType({ ...newType, per_face: e.target.checked })} />
@@ -467,6 +504,10 @@ const Admin = () => {
                         <div className="grid grid-cols-2 gap-3">
                           <div><Label className="text-xs">Min Faces</Label><Input type="number" value={editTypeData.min_faces || 1} onChange={(e) => setEditTypeData({ ...editTypeData, min_faces: parseInt(e.target.value) || 1 })} /></div>
                           <div><Label className="text-xs">Max Faces</Label><Input type="number" value={editTypeData.max_faces || 1} onChange={(e) => setEditTypeData({ ...editTypeData, max_faces: parseInt(e.target.value) || 1 })} /></div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked={editTypeData.per_face || false} onChange={(e) => setEditTypeData({ ...editTypeData, per_face: e.target.checked })} />
+                          <Label className="text-xs">Per Face Pricing</Label>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => saveTypeEdit(type.id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
@@ -501,45 +542,94 @@ const Admin = () => {
 
           {/* Customers Tab */}
           <TabsContent value="customers">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
               <h2 className="font-display text-xl font-bold">Customers ({customers.length})</h2>
-              <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
-                <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Customer</Button></DialogTrigger>
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
-                  <DialogHeader><DialogTitle className="font-display">Add Customer Manually</DialogTitle></DialogHeader>
-                  <div className="space-y-3">
-                    <div><Label>Full Name *</Label><Input value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} /></div>
-                    <div><Label>Email *</Label><Input type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} /></div>
-                    <div><Label>Mobile * (10 digits)</Label><Input value={newCustomer.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewCustomer({ ...newCustomer, mobile: d }); }} maxLength={10} /></div>
-                    <div><Label>Password *</Label><Input type="password" value={newCustomer.password} onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })} /></div>
-                    <div><Label>Instagram</Label><Input value={newCustomer.instagram_id} onChange={(e) => setNewCustomer({ ...newCustomer, instagram_id: e.target.value })} /></div>
-                    <div><Label>Address</Label><Input value={newCustomer.address} onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} /></div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><Label>City</Label><Input value={newCustomer.city} onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })} /></div>
-                      <div><Label>State</Label><Input value={newCustomer.state} onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })} /></div>
+              <div className="flex gap-2 w-full md:w-auto">
+                <div className="relative flex-1 md:w-60">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input placeholder="Search customers..." value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} className="pl-10 font-sans" />
+                </div>
+                <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
+                  <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add</Button></DialogTrigger>
+                  <DialogContent className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader><DialogTitle className="font-display">Add Customer Manually</DialogTitle></DialogHeader>
+                    <div className="space-y-3">
+                      <div><Label>Full Name *</Label><Input value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} /></div>
+                      <div><Label>Email *</Label><Input type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} /></div>
+                      <div><Label>Mobile * (10 digits)</Label><Input value={newCustomer.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewCustomer({ ...newCustomer, mobile: d }); }} maxLength={10} /></div>
+                      <div><Label>Password *</Label><Input type="password" value={newCustomer.password} onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })} /></div>
+                      <div><Label>Instagram</Label><Input value={newCustomer.instagram_id} onChange={(e) => setNewCustomer({ ...newCustomer, instagram_id: e.target.value })} /></div>
+                      <div><Label>Address</Label><Input value={newCustomer.address} onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} /></div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>City</Label><Input value={newCustomer.city} onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })} /></div>
+                        <div><Label>State</Label><Input value={newCustomer.state} onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })} /></div>
+                      </div>
+                      <div><Label>Pincode</Label><Input value={newCustomer.pincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setNewCustomer({ ...newCustomer, pincode: d }); }} maxLength={6} /></div>
+                      <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password} className="w-full font-sans">Add Customer</Button>
                     </div>
-                    <div><Label>Pincode</Label><Input value={newCustomer.pincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setNewCustomer({ ...newCustomer, pincode: d }); }} maxLength={6} /></div>
-                    <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password} className="w-full font-sans">Add Customer</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
             <div className="space-y-3">
-              {customers.map((c) => (
+              {filteredCustomers.map((c) => (
                 <Card key={c.id}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div>
-                      <p className="font-sans font-semibold">{c.full_name}</p>
-                      <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
-                      {c.city && <p className="text-xs text-muted-foreground font-sans">{c.city}, {c.state}</p>}
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader><AlertDialogTitle>Delete Customer?</AlertDialogTitle></AlertDialogHeader>
-                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction></AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                  <CardContent className="p-4">
+                    {editingCustomer === c.user_id ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div><Label className="text-xs">Full Name</Label><Input value={editCustomerData.full_name || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, full_name: e.target.value })} /></div>
+                          <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
+                        </div>
+                        <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                        <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
+                        <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div><Label className="text-xs">City</Label><Input value={editCustomerData.city || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, city: e.target.value })} /></div>
+                          <div><Label className="text-xs">State</Label><Input value={editCustomerData.state || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, state: e.target.value })} /></div>
+                          <div><Label className="text-xs">Pincode</Label><Input value={editCustomerData.pincode || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditCustomerData({ ...editCustomerData, pincode: d }); }} maxLength={6} /></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => saveCustomerEdit(c.user_id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingCustomer(null)}><X className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <p className="font-sans font-semibold">{c.full_name}</p>
+                          <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
+                          {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
+                          {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
+                          {(c.city || c.state || c.pincode) && (
+                            <p className="text-xs text-muted-foreground font-sans">
+                              {[c.city, c.state, c.pincode].filter(Boolean).join(", ")}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground font-sans">
+                            Registered: {new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
+                                <AlertDialogDescription>This will delete the customer profile and all their orders permanently.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
