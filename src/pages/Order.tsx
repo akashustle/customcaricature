@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OrderFormData, initialFormData } from "@/lib/order-types";
 import { calculatePrice } from "@/lib/pricing";
@@ -12,6 +12,8 @@ import OrderConfirmation from "@/components/order/OrderConfirmation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = ["location", "customer", "details", "photos", "address", "summary"] as const;
 
@@ -26,10 +28,46 @@ const STEP_LABELS: Record<string, string> = {
 
 const Order = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [formData, setFormData] = useState<OrderFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Redirect to register if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/register");
+    }
+  }, [authLoading, user, navigate]);
+
+  // Auto-fill from profile
+  useEffect(() => {
+    if (user && !profileLoaded) {
+      loadProfile(user.id);
+    }
+  }, [user, profileLoaded]);
+
+  const loadProfile = async (userId: string) => {
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+    if (data) {
+      setFormData((prev) => ({
+        ...prev,
+        customerName: data.full_name || prev.customerName,
+        customerMobile: data.mobile || prev.customerMobile,
+        customerEmail: data.email || prev.customerEmail,
+        instagramId: data.instagram_id || prev.instagramId,
+        state: data.state || prev.state,
+        city: data.city || prev.city,
+        deliveryAddress: data.address || prev.deliveryAddress,
+        deliveryCity: data.city || prev.deliveryCity,
+        deliveryState: data.state || prev.deliveryState,
+        deliveryPincode: data.pincode || prev.deliveryPincode,
+      }));
+    }
+    setProfileLoaded(true);
+  };
 
   const step = STEPS[currentStep];
   const totalSteps = STEPS.length;
@@ -51,6 +89,10 @@ const Order = () => {
     setOrderId(id);
     setOrderComplete(true);
   };
+
+  if (authLoading) {
+    return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
+  }
 
   if (orderComplete && orderId) {
     return <OrderConfirmation orderId={orderId} />;
@@ -97,7 +139,7 @@ const Order = () => {
             {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} />}
             {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
             {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
-            {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} />}
+            {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
           </motion.div>
         </AnimatePresence>
       </div>

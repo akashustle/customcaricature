@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Check if secret code matches
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("secret_code, user_id")
@@ -55,18 +55,23 @@ const ForgotPassword = () => {
       toast({ title: "Error", description: "Passwords don't match", variant: "destructive" });
       return;
     }
+    if (newPassword.length < 6) {
+      toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      // We need an edge function to reset password by admin/secret code
-      // For now use Supabase's standard password reset
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email, secret_code: secretCode, new_password: newPassword },
       });
+
       if (error) throw error;
-      toast({ title: "Reset Link Sent", description: "Check your email for password reset link" });
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: "Password Reset Successful!", description: "You can now login with your new password" });
       navigate("/login");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message || "Failed to reset password", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -78,7 +83,9 @@ const ForgotPassword = () => {
         <CardHeader className="text-center">
           <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
           <CardTitle className="font-display text-2xl">Reset Password</CardTitle>
-          <CardDescription className="font-sans">Enter your email and secret code</CardDescription>
+          <CardDescription className="font-sans">
+            {verified ? "Create your new password" : "Enter your email and 4-digit secret code"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!verified ? (
@@ -89,24 +96,27 @@ const ForgotPassword = () => {
               </div>
               <div>
                 <Label className="font-sans">4-digit Secret Code</Label>
-                <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required />
+                <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required placeholder="Enter your secret code" />
               </div>
               <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full rounded-full font-sans">
-                {loading ? "Verifying..." : "Verify"}
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify"}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <Label className="font-sans">New Password</Label>
-                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                <Label className="font-sans">New Password (min 6 characters)</Label>
+                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} />
               </div>
               <div>
                 <Label className="font-sans">Confirm Password</Label>
                 <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full font-sans">
-                {loading ? "Resetting..." : "Reset Password"}
+              {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                <p className="text-xs text-destructive font-sans">Passwords don't match</p>
+              )}
+              <Button type="submit" disabled={loading || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans">
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
               </Button>
             </form>
           )}

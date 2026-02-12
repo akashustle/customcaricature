@@ -6,24 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2 } from "lucide-react";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 type Order = {
   id: string;
@@ -32,12 +31,38 @@ type Order = {
   customer_name: string;
   city: string | null;
   amount: number;
+  negotiated_amount: number | null;
   is_framed: boolean | null;
   status: string;
   payment_status: string | null;
   priority: number | null;
   created_at: string;
   expected_delivery_date: string | null;
+  customer_mobile: string;
+  customer_email: string;
+};
+
+type CaricatureType = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  per_face: boolean;
+  min_faces: number;
+  max_faces: number;
+  is_active: boolean;
+  sort_order: number;
+};
+
+type Profile = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  mobile: string;
+  email: string;
+  instagram_id: string | null;
+  city: string | null;
+  state: string | null;
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -48,49 +73,46 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "bg-green-100 text-green-800",
   completed: "bg-green-200 text-green-900",
 };
-
 const STATUS_LABELS: Record<string, string> = {
-  new: "New Order",
-  in_progress: "In Progress",
-  artwork_ready: "Artwork Ready",
-  dispatched: "Dispatched",
-  delivered: "Delivered",
-  completed: "Completed",
+  new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
+  dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
 };
-
-const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-};
-
-const PAYMENT_COLORS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-green-100 text-green-800",
-};
+const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
+const PAYMENT_COLORS: Record<string, string> = { pending: "bg-amber-100 text-amber-800", confirmed: "bg-green-100 text-green-800" };
 
 const Admin = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
+  const [customers, setCustomers] = useState<Profile[]>([]);
+  const [editingType, setEditingType] = useState<string | null>(null);
+  const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
+  const [negotiateOrderId, setNegotiateOrderId] = useState<string | null>(null);
+  const [negotiatedAmount, setNegotiatedAmount] = useState("");
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [showAddType, setShowAddType] = useState(false);
+  const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
+  const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
 
   useEffect(() => {
-    checkAuth();
-    fetchOrders();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!authLoading && user) {
+      checkAdmin();
+      fetchOrders();
+      fetchCaricatureTypes();
+      fetchCustomers();
+    } else if (!authLoading && !user) {
       navigate("/customcad75");
-      return;
     }
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id);
+  }, [user, authLoading]);
+
+  const checkAdmin = async () => {
+    if (!user) return;
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
     if (!roles || roles.length === 0) {
       await supabase.auth.signOut();
       navigate("/customcad75");
@@ -98,36 +120,110 @@ const Admin = () => {
   };
 
   const fetchOrders = async () => {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("id, caricature_type, order_type, customer_name, city, amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date")
+    const { data } = await supabase.from("orders")
+      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date")
       .order("created_at", { ascending: false });
-    if (!error && data) setOrders(data as any);
+    if (data) setOrders(data as any);
     setLoading(false);
+  };
+
+  const fetchCaricatureTypes = async () => {
+    const { data } = await supabase.from("caricature_types").select("*").order("sort_order");
+    if (data) setCaricatureTypes(data as any);
+  };
+
+  const fetchCustomers = async () => {
+    const { data } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, city, state");
+    if (data) setCustomers(data as any);
   };
 
   const updateStatus = async (orderId: string, status: string) => {
     if (!confirm(`Change order status to "${STATUS_LABELS[status]}"?`)) return;
     await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
-    toast({ title: "Status Updated", description: `Order status changed to ${STATUS_LABELS[status]}` });
+    toast({ title: "Status Updated" });
     fetchOrders();
   };
 
   const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
-    if (!confirm(`Change payment status to "${PAYMENT_STATUS_LABELS[paymentStatus]}"?`)) return;
-    await supabase.from("orders").update({ payment_status: paymentStatus } as any).eq("id", orderId);
-    toast({ title: "Payment Status Updated", description: `Payment status changed to ${PAYMENT_STATUS_LABELS[paymentStatus]}` });
+    if (!confirm(`Change payment to "${PAYMENT_STATUS_LABELS[paymentStatus]}"?`)) return;
+    await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
+    toast({ title: "Payment Updated" });
     fetchOrders();
   };
 
   const deleteOrder = async (orderId: string) => {
-    const { error } = await supabase.from("orders").delete().eq("id", orderId);
-    if (error) {
-      toast({ title: "Error", description: "Cannot delete order. Admin permissions required.", variant: "destructive" });
-    } else {
-      toast({ title: "Deleted", description: "Order deleted successfully" });
-      fetchOrders();
+    await supabase.from("orders").delete().eq("id", orderId);
+    toast({ title: "Deleted" });
+    fetchOrders();
+  };
+
+  const saveNegotiatedAmount = async () => {
+    if (!negotiateOrderId || !negotiatedAmount) return;
+    await supabase.from("orders").update({ negotiated_amount: parseInt(negotiatedAmount), amount: parseInt(negotiatedAmount) } as any).eq("id", negotiateOrderId);
+    toast({ title: "Price Updated" });
+    setNegotiateOrderId(null);
+    setNegotiatedAmount("");
+    fetchOrders();
+  };
+
+  const saveTypeEdit = async (id: string) => {
+    await supabase.from("caricature_types").update(editTypeData as any).eq("id", id);
+    toast({ title: "Pricing Updated" });
+    setEditingType(null);
+    fetchCaricatureTypes();
+  };
+
+  const addNewType = async () => {
+    if (!newType.name || !newType.slug) return;
+    await supabase.from("caricature_types").insert({ ...newType, sort_order: caricatureTypes.length + 1 } as any);
+    toast({ title: "Caricature Type Added" });
+    setShowAddType(false);
+    setNewType({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
+    fetchCaricatureTypes();
+  };
+
+  const deleteType = async (id: string) => {
+    await supabase.from("caricature_types").delete().eq("id", id);
+    toast({ title: "Type Deleted" });
+    fetchCaricatureTypes();
+  };
+
+  const addCustomerManual = async () => {
+    if (!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password) return;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: newCustomer.email,
+        password: newCustomer.password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      if (data.user) {
+        await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          full_name: newCustomer.full_name,
+          mobile: newCustomer.mobile,
+          email: newCustomer.email,
+          instagram_id: newCustomer.instagram_id || null,
+          address: newCustomer.address || null,
+          city: newCustomer.city || null,
+          state: newCustomer.state || null,
+          pincode: newCustomer.pincode || null,
+        });
+      }
+      toast({ title: "Customer Added" });
+      setShowAddCustomer(false);
+      setNewCustomer({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
+      fetchCustomers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
+  };
+
+  const deleteCustomer = async (userId: string) => {
+    if (!confirm("Delete this customer?")) return;
+    await supabase.from("profiles").delete().eq("user_id", userId);
+    toast({ title: "Customer Deleted" });
+    fetchCustomers();
   };
 
   const handleLogout = async () => {
@@ -142,14 +238,9 @@ const Admin = () => {
   });
 
   const getDaysRemaining = (order: Order) => {
-    if (!order.expected_delivery_date) {
-      const orderDate = new Date(order.created_at);
-      const dueDate = new Date(orderDate);
-      dueDate.setDate(dueDate.getDate() + 30);
-      const remaining = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      return remaining;
-    }
-    const due = new Date(order.expected_delivery_date);
+    const due = order.expected_delivery_date
+      ? new Date(order.expected_delivery_date)
+      : new Date(new Date(order.created_at).getTime() + 30 * 24 * 60 * 60 * 1000);
     return Math.ceil((due.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   };
 
@@ -159,7 +250,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
@@ -173,41 +264,32 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="orders">
-          <TabsList className="mb-6 w-full md:w-auto">
-            <TabsTrigger value="orders" className="font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
-            <TabsTrigger value="analytics" className="font-sans"><BarChart3 className="w-4 h-4 mr-2" />Analytics</TabsTrigger>
+          <TabsList className="mb-6 w-full overflow-x-auto flex">
+            <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
+            <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
+            <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
+            <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
           </TabsList>
 
+          {/* Orders Tab */}
           <TabsContent value="orders">
-            {/* Filters */}
             <div className="flex flex-col md:flex-row gap-3 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or order ID..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 font-sans"
-                />
+                <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-40 font-sans"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                  ))}
+                  {Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Mobile Cards / Desktop Table */}
+            {/* Mobile Cards */}
             <div className="block md:hidden space-y-3">
-              {loading ? (
-                <p className="text-center text-muted-foreground font-sans py-10">Loading...</p>
-              ) : filtered.length === 0 ? (
-                <p className="text-center text-muted-foreground font-sans py-10">No orders found</p>
-              ) : (
+              {loading ? <p className="text-center text-muted-foreground font-sans py-10">Loading...</p> : filtered.length === 0 ? <p className="text-center text-muted-foreground font-sans py-10">No orders</p> : (
                 filtered.map((order) => {
                   const daysLeft = getDaysRemaining(order);
                   return (
@@ -218,51 +300,41 @@ const Admin = () => {
                             <p className="font-sans font-semibold">{order.customer_name}</p>
                             <p className="font-mono text-xs text-muted-foreground">{order.id.slice(0, 8).toUpperCase()}</p>
                           </div>
-                          <p className="font-sans font-medium text-primary">{formatPrice(order.amount)}</p>
+                          <div className="text-right">
+                            <p className="font-sans font-medium text-primary">{formatPrice(order.negotiated_amount || order.amount)}</p>
+                            {order.negotiated_amount && order.negotiated_amount !== order.amount && (
+                              <p className="text-xs text-muted-foreground line-through">{formatPrice(order.amount)}</p>
+                            )}
+                          </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>
-                            {STATUS_LABELS[order.status] || order.status}
-                          </Badge>
-                          <Badge className={`${PAYMENT_COLORS[order.payment_status || "pending"]} border-none text-xs`}>
-                            Pay: {PAYMENT_STATUS_LABELS[order.payment_status || "pending"]}
-                          </Badge>
+                          <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status]}</Badge>
+                          <Badge className={`${PAYMENT_COLORS[order.payment_status || "pending"]} border-none text-xs`}>Pay: {PAYMENT_STATUS_LABELS[order.payment_status || "pending"]}</Badge>
                           {daysLeft <= 10 && !["delivered", "completed"].includes(order.status) && (
-                            <Badge className="bg-red-100 text-red-800 border-none text-xs">
-                              <AlertTriangle className="w-3 h-3 mr-1" />{daysLeft}d left
-                            </Badge>
+                            <Badge className="bg-red-100 text-red-800 border-none text-xs"><AlertTriangle className="w-3 h-3 mr-1" />{daysLeft}d left</Badge>
                           )}
                         </div>
                         <div className="flex gap-2">
                           <Select value={order.status} onValueChange={(v) => updateStatus(order.id, v)}>
                             <SelectTrigger className="h-8 flex-1 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                                <SelectItem key={k} value={k}>{v}</SelectItem>
-                              ))}
-                            </SelectContent>
+                            <SelectContent>{Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                           </Select>
                           <Select value={order.payment_status || "pending"} onValueChange={(v) => updatePaymentStatus(order.id, v)}>
                             <SelectTrigger className="h-8 flex-1 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => (
-                                <SelectItem key={k} value={k}>{v}</SelectItem>
-                              ))}
-                            </SelectContent>
+                            <SelectContent>{Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedOrder(order.id)}>
-                            <Eye className="w-4 h-4 mr-1" /> View
+                          <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedOrder(order.id)}><Eye className="w-4 h-4 mr-1" />View</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setNegotiateOrderId(order.id); setNegotiatedAmount(String(order.negotiated_amount || order.amount)); }}>
+                            <DollarSign className="w-4 h-4" />
                           </Button>
                           <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="sm"><Trash2 className="w-4 h-4" /></Button>
-                            </AlertDialogTrigger>
+                            <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Order?</AlertDialogTitle>
-                                <AlertDialogDescription>This will permanently delete this order.</AlertDialogDescription>
+                                <AlertDialogDescription>Permanently delete this order.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -284,7 +356,7 @@ const Admin = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-sans">Order ID</TableHead>
+                      <TableHead className="font-sans">ID</TableHead>
                       <TableHead className="font-sans">Customer</TableHead>
                       <TableHead className="font-sans">City</TableHead>
                       <TableHead className="font-sans">Amount</TableHead>
@@ -296,9 +368,9 @@ const Admin = () => {
                   </TableHeader>
                   <TableBody>
                     {loading ? (
-                      <TableRow><TableCell colSpan={8} className="text-center py-10 font-sans text-muted-foreground">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={8} className="text-center py-10">Loading...</TableCell></TableRow>
                     ) : filtered.length === 0 ? (
-                      <TableRow><TableCell colSpan={8} className="text-center py-10 font-sans text-muted-foreground">No orders found</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={8} className="text-center py-10">No orders</TableCell></TableRow>
                     ) : (
                       filtered.map((order) => {
                         const daysLeft = getDaysRemaining(order);
@@ -307,64 +379,42 @@ const Admin = () => {
                             <TableCell className="font-mono text-xs">{order.id.slice(0, 8).toUpperCase()}</TableCell>
                             <TableCell className="font-sans">{order.customer_name}</TableCell>
                             <TableCell className="font-sans">{order.city || "—"}</TableCell>
-                            <TableCell className="font-sans font-medium">{formatPrice(order.amount)}</TableCell>
                             <TableCell className="font-sans">
-                              {daysLeft <= 10 && !["delivered", "completed"].includes(order.status) ? (
-                                <span className="text-destructive font-semibold flex items-center gap-1">
-                                  <AlertTriangle className="w-3 h-3" />{daysLeft}d
-                                </span>
-                              ) : (
-                                <span>{daysLeft}d</span>
+                              <span className="font-medium">{formatPrice(order.negotiated_amount || order.amount)}</span>
+                              {order.negotiated_amount && order.negotiated_amount !== order.amount && (
+                                <span className="text-xs text-muted-foreground line-through ml-1">{formatPrice(order.amount)}</span>
                               )}
                             </TableCell>
+                            <TableCell>{daysLeft <= 10 && !["delivered", "completed"].includes(order.status) ? (
+                              <span className="text-destructive font-semibold flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{daysLeft}d</span>
+                            ) : <span>{daysLeft}d</span>}</TableCell>
                             <TableCell>
                               <Select value={order.payment_status || "pending"} onValueChange={(v) => updatePaymentStatus(order.id, v)}>
                                 <SelectTrigger className="h-8 w-28">
-                                  <Badge className={`${PAYMENT_COLORS[order.payment_status || "pending"]} border-none text-xs`}>
-                                    {PAYMENT_STATUS_LABELS[order.payment_status || "pending"]}
-                                  </Badge>
+                                  <Badge className={`${PAYMENT_COLORS[order.payment_status || "pending"]} border-none text-xs`}>{PAYMENT_STATUS_LABELS[order.payment_status || "pending"]}</Badge>
                                 </SelectTrigger>
-                                <SelectContent>
-                                  {Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => (
-                                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                                  ))}
-                                </SelectContent>
+                                <SelectContent>{Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                               </Select>
                             </TableCell>
                             <TableCell>
                               <Select value={order.status} onValueChange={(v) => updateStatus(order.id, v)}>
                                 <SelectTrigger className="h-8 w-36">
-                                  <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>
-                                    {STATUS_LABELS[order.status] || order.status}
-                                  </Badge>
+                                  <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status]}</Badge>
                                 </SelectTrigger>
-                                <SelectContent>
-                                  {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                                    <SelectItem key={k} value={k}>{v}</SelectItem>
-                                  ))}
-                                </SelectContent>
+                                <SelectContent>{Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                               </Select>
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1">
-                                <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order.id)}>
-                                  <Eye className="w-4 h-4" />
+                                <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order.id)}><Eye className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setNegotiateOrderId(order.id); setNegotiatedAmount(String(order.negotiated_amount || order.amount)); }}>
+                                  <DollarSign className="w-4 h-4" />
                                 </Button>
                                 <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
+                                  <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                                   <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Order?</AlertDialogTitle>
-                                      <AlertDialogDescription>This will permanently delete this order and cannot be undone.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => deleteOrder(order.id)}>Delete</AlertDialogAction>
-                                    </AlertDialogFooter>
+                                    <AlertDialogHeader><AlertDialogTitle>Delete Order?</AlertDialogTitle><AlertDialogDescription>Permanently delete this order.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteOrder(order.id)}>Delete</AlertDialogAction></AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
                               </div>
@@ -379,11 +429,147 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
+          {/* Pricing Tab */}
+          <TabsContent value="pricing">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-display text-xl font-bold">Caricature Types & Pricing</h2>
+              <Dialog open={showAddType} onOpenChange={setShowAddType}>
+                <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Type</Button></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle className="font-display">Add Caricature Type</DialogTitle></DialogHeader>
+                  <div className="space-y-4">
+                    <div><Label>Name</Label><Input value={newType.name} onChange={(e) => setNewType({ ...newType, name: e.target.value })} placeholder="e.g. Family" /></div>
+                    <div><Label>Slug</Label><Input value={newType.slug} onChange={(e) => setNewType({ ...newType, slug: e.target.value.toLowerCase().replace(/\s/g, "_") })} placeholder="e.g. family" /></div>
+                    <div><Label>Price (₹)</Label><Input type="number" value={newType.price} onChange={(e) => setNewType({ ...newType, price: parseInt(e.target.value) || 0 })} /></div>
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" checked={newType.per_face} onChange={(e) => setNewType({ ...newType, per_face: e.target.checked })} />
+                      <Label>Per Face Pricing</Label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Min Faces</Label><Input type="number" value={newType.min_faces} onChange={(e) => setNewType({ ...newType, min_faces: parseInt(e.target.value) || 1 })} /></div>
+                      <div><Label>Max Faces</Label><Input type="number" value={newType.max_faces} onChange={(e) => setNewType({ ...newType, max_faces: parseInt(e.target.value) || 1 })} /></div>
+                    </div>
+                    <Button onClick={addNewType} className="w-full font-sans">Add Type</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-3">
+              {caricatureTypes.map((type) => (
+                <Card key={type.id}>
+                  <CardContent className="p-4">
+                    {editingType === type.id ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div><Label className="text-xs">Name</Label><Input value={editTypeData.name || ""} onChange={(e) => setEditTypeData({ ...editTypeData, name: e.target.value })} /></div>
+                          <div><Label className="text-xs">Price (₹)</Label><Input type="number" value={editTypeData.price || 0} onChange={(e) => setEditTypeData({ ...editTypeData, price: parseInt(e.target.value) || 0 })} /></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div><Label className="text-xs">Min Faces</Label><Input type="number" value={editTypeData.min_faces || 1} onChange={(e) => setEditTypeData({ ...editTypeData, min_faces: parseInt(e.target.value) || 1 })} /></div>
+                          <div><Label className="text-xs">Max Faces</Label><Input type="number" value={editTypeData.max_faces || 1} onChange={(e) => setEditTypeData({ ...editTypeData, max_faces: parseInt(e.target.value) || 1 })} /></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => saveTypeEdit(type.id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingType(null)}><X className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-sans font-semibold">{type.name}</p>
+                          <p className="text-sm text-muted-foreground font-sans">
+                            {formatPrice(type.price)}{type.per_face ? "/face" : ""} · {type.min_faces}–{type.max_faces} faces
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingType(type.id); setEditTypeData(type); }}><Edit2 className="w-4 h-4" /></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader><AlertDialogTitle>Delete Type?</AlertDialogTitle></AlertDialogHeader>
+                              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteType(type.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Customers Tab */}
+          <TabsContent value="customers">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-display text-xl font-bold">Customers ({customers.length})</h2>
+              <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
+                <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Customer</Button></DialogTrigger>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                  <DialogHeader><DialogTitle className="font-display">Add Customer Manually</DialogTitle></DialogHeader>
+                  <div className="space-y-3">
+                    <div><Label>Full Name *</Label><Input value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} /></div>
+                    <div><Label>Email *</Label><Input type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} /></div>
+                    <div><Label>Mobile * (10 digits)</Label><Input value={newCustomer.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewCustomer({ ...newCustomer, mobile: d }); }} maxLength={10} /></div>
+                    <div><Label>Password *</Label><Input type="password" value={newCustomer.password} onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })} /></div>
+                    <div><Label>Instagram</Label><Input value={newCustomer.instagram_id} onChange={(e) => setNewCustomer({ ...newCustomer, instagram_id: e.target.value })} /></div>
+                    <div><Label>Address</Label><Input value={newCustomer.address} onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })} /></div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>City</Label><Input value={newCustomer.city} onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })} /></div>
+                      <div><Label>State</Label><Input value={newCustomer.state} onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })} /></div>
+                    </div>
+                    <div><Label>Pincode</Label><Input value={newCustomer.pincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setNewCustomer({ ...newCustomer, pincode: d }); }} maxLength={6} /></div>
+                    <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password} className="w-full font-sans">Add Customer</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-3">
+              {customers.map((c) => (
+                <Card key={c.id}>
+                  <CardContent className="p-4 flex justify-between items-center">
+                    <div>
+                      <p className="font-sans font-semibold">{c.full_name}</p>
+                      <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
+                      {c.city && <p className="text-xs text-muted-foreground font-sans">{c.city}, {c.state}</p>}
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader><AlertDialogTitle>Delete Customer?</AlertDialogTitle></AlertDialogHeader>
+                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
           <TabsContent value="analytics">
-            <AdminAnalytics orders={orders} />
+            <AdminAnalytics orders={orders as any} />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Negotiate Price Dialog */}
+      {negotiateOrderId && (
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setNegotiateOrderId(null)}>
+          <Card className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <CardHeader><CardTitle className="font-display text-lg">Set Custom Price</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label className="font-sans">Negotiated Amount (₹)</Label>
+                <Input type="number" value={negotiatedAmount} onChange={(e) => setNegotiatedAmount(e.target.value)} />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={saveNegotiatedAmount} className="flex-1 font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+                <Button variant="ghost" onClick={() => setNegotiateOrderId(null)} className="font-sans">Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

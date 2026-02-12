@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 type Profile = {
   full_name: string;
@@ -31,8 +32,16 @@ type Order = {
   amount: number;
   status: string;
   payment_status: string | null;
+  payment_verified: boolean | null;
   created_at: string;
   customer_name: string;
+  delivery_address: string | null;
+  delivery_city: string | null;
+  delivery_state: string | null;
+  delivery_pincode: string | null;
+  notes: string | null;
+  expected_delivery_date: string | null;
+  artist_name: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -54,26 +63,35 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate("/login"); return; }
-    fetchProfile(session.user.id);
-    fetchOrders(session.user.id);
-  };
+    if (!authLoading && !user) {
+      navigate("/login");
+      return;
+    }
+    if (user) {
+      fetchProfile(user.id);
+      fetchOrders(user.id);
+      // Subscribe to realtime order updates
+      const channel = supabase
+        .channel("user-orders")
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
+          fetchOrders(user.id);
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
+    }
+  }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
@@ -82,14 +100,15 @@ const Dashboard = () => {
   };
 
   const fetchOrders = async (userId: string) => {
-    const { data } = await supabase.from("orders").select("id, order_type, style, face_count, amount, status, payment_status, created_at, customer_name").eq("user_id", userId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("orders")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
 
   const saveProfile = async () => {
-    if (!editForm) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    if (!editForm || !user) return;
     const { error } = await supabase.from("profiles").update({
       full_name: editForm.full_name,
       mobile: editForm.mobile,
@@ -98,7 +117,7 @@ const Dashboard = () => {
       city: editForm.city,
       state: editForm.state,
       pincode: editForm.pincode,
-    }).eq("user_id", session.user.id);
+    }).eq("user_id", user.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
@@ -109,23 +128,28 @@ const Dashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate("/");
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
+  if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
             <h1 className="font-display text-lg font-bold">My Dashboard</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
-            <LogOut className="w-4 h-4 mr-2" /> Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans">
+              <Home className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
+              <LogOut className="w-4 h-4 mr-1" /> Logout
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -137,6 +161,11 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="orders">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => navigate("/order")} className="rounded-full font-sans" size="sm">
+                + New Order
+              </Button>
+            </div>
             {orders.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
@@ -149,13 +178,18 @@ const Dashboard = () => {
               <div className="space-y-3">
                 {orders.map((order) => (
                   <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                    <Card>
+                    <Card
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                    >
                       <CardContent className="p-4 space-y-2">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
-                            <p className="font-sans font-medium capitalize">{order.order_type} Caricature</p>
-                            <p className="text-xs text-muted-foreground font-sans">{new Date(order.created_at).toLocaleDateString()}</p>
+                            <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
+                            <p className="text-xs text-muted-foreground font-sans">
+                              Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                            </p>
                           </div>
                           <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
                         </div>
@@ -164,9 +198,42 @@ const Dashboard = () => {
                             {STATUS_LABELS[order.status] || order.status}
                           </Badge>
                           <Badge className={`${order.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"} border-none text-xs`}>
+                            <CreditCard className="w-3 h-3 mr-1" />
                             Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
                           </Badge>
                         </div>
+
+                        {/* Expanded details */}
+                        {expandedOrder === order.id && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans"
+                          >
+                            <Row label="Faces" value={String(order.face_count)} />
+                            {order.delivery_address && (
+                              <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />
+                            )}
+                            {order.notes && <Row label="Notes" value={order.notes} />}
+                            {order.artist_name && <Row label="Artist" value={order.artist_name} />}
+                            <Row label="Expected Delivery" value={
+                              order.expected_delivery_date
+                                ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN")
+                                : "25-30 days from order date"
+                            } />
+                            {order.payment_status !== "confirmed" && (
+                              <div className="pt-2">
+                                <Button size="sm" className="rounded-full font-sans w-full" onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Re-initiate payment for unpaid orders
+                                  toast({ title: "Contact Support", description: "Please contact us on WhatsApp for payment assistance." });
+                                }}>
+                                  Complete Payment
+                                </Button>
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -194,14 +261,14 @@ const Dashboard = () => {
                 {editing && editForm ? (
                   <>
                     <div><Label className="font-sans">Full Name</Label><Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} /></div>
-                    <div><Label className="font-sans">Mobile</Label><Input value={editForm.mobile} onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })} /></div>
+                    <div><Label className="font-sans">Mobile</Label><Input value={editForm.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} /></div>
                     <div><Label className="font-sans">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e) => setEditForm({ ...editForm, instagram_id: e.target.value })} /></div>
                     <div><Label className="font-sans">Address</Label><Input value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} /></div>
                     <div className="grid grid-cols-2 gap-3">
                       <div><Label className="font-sans">City</Label><Input value={editForm.city || ""} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} /></div>
                       <div><Label className="font-sans">State</Label><Input value={editForm.state || ""} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} /></div>
                     </div>
-                    <div><Label className="font-sans">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })} /></div>
+                    <div><Label className="font-sans">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} /></div>
                   </>
                 ) : profile ? (
                   <div className="space-y-2 font-sans text-sm">
@@ -222,23 +289,15 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Support buttons */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        {/* Support */}
+        <div className="mt-6">
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I need help with my order.`}
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-[#25D366] text-white rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity"
           >
             <MessageCircle className="w-4 h-4" /> WhatsApp Support
-          </a>
-          <a
-            href={INSTAGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] text-white rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity"
-          >
-            Instagram
           </a>
         </div>
       </div>
@@ -249,7 +308,7 @@ const Dashboard = () => {
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between">
     <span className="text-muted-foreground">{label}</span>
-    <span className="font-medium">{value}</span>
+    <span className="font-medium text-right max-w-[60%]">{value}</span>
   </div>
 );
 
