@@ -103,7 +103,7 @@ const StepSummary = ({ data, amount, onComplete }: Props) => {
           <Row label="Order" value={`${data.orderType}${data.orderType === "group" ? ` (${data.faceCount} faces)` : ""}`} />
           <Row label="Style" value={styleName} />
           <Row label="Customer" value={data.customerName} />
-          <Row label="Mobile" value={data.customerMobile} />
+          <Row label="Mobile" value={`+91 ${data.customerMobile}`} />
           <Row label="Email" value={data.customerEmail} />
           {data.instagramId && <Row label="Instagram" value={data.instagramId} />}
           {data.notes && <Row label="Notes" value={data.notes} />}
@@ -182,7 +182,7 @@ const StepSummary = ({ data, amount, onComplete }: Props) => {
       </Button>
 
       <p className="text-xs text-center text-muted-foreground font-sans">
-        100% advance payment required. After payment confirmation on WhatsApp, you'll receive order updates.
+        After payment verification on WhatsApp, you'll receive order updates and tracking details.
       </p>
     </div>
   );

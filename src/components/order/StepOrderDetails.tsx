@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STYLES, calculatePrice, formatPrice } from "@/lib/pricing";
+import { STYLES, calculatePrice, formatPrice, PRICING, GROUP_MIN_FACES, GROUP_MAX_FACES } from "@/lib/pricing";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface Props {
@@ -15,6 +15,17 @@ interface Props {
 
 const StepOrderDetails = ({ data, update, onNext }: Props) => {
   const amount = calculatePrice(data.orderType, data.faceCount);
+
+  const handleFaceCountChange = (val: string) => {
+    const num = parseInt(val) || 0;
+    if (val === "" || num === 0) {
+      update({ faceCount: 0 });
+    } else {
+      update({ faceCount: Math.min(num, GROUP_MAX_FACES) });
+    }
+  };
+
+  const canProceed = data.orderType !== "group" || data.faceCount >= GROUP_MIN_FACES;
 
   return (
     <div className="space-y-6">
@@ -32,14 +43,14 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
               key={type}
               className={`cursor-pointer border-2 transition-all ${data.orderType === type ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"}`}
               onClick={() => {
-                const fc = type === "single" ? 1 : type === "couple" ? 2 : Math.max(data.faceCount, 3);
+                const fc = type === "single" ? 1 : type === "couple" ? 2 : Math.max(data.faceCount, GROUP_MIN_FACES);
                 update({ orderType: type, faceCount: fc });
               }}
             >
               <CardContent className="p-3 text-center">
                 <p className="font-sans font-semibold text-sm capitalize">{type}</p>
                 <p className="text-xs text-muted-foreground font-sans">
-                  {type === "group" ? `${formatPrice(3000)}/face` :
+                  {type === "group" ? `${formatPrice(PRICING.groupPerFace)}/face` :
                     formatPrice(calculatePrice(type, type === "couple" ? 2 : 1))}
                 </p>
               </CardContent>
@@ -51,13 +62,18 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
       {/* Face count for group */}
       {data.orderType === "group" && (
         <div>
-          <Label className="font-sans">Number of Faces</Label>
+          <Label className="font-sans">Number of Faces (min {GROUP_MIN_FACES}, max {GROUP_MAX_FACES})</Label>
           <Input
             type="number"
-            min={3}
-            value={data.faceCount}
-            onChange={(e) => update({ faceCount: Math.max(3, parseInt(e.target.value) || 3) })}
+            min={GROUP_MIN_FACES}
+            max={GROUP_MAX_FACES}
+            value={data.faceCount || ""}
+            onChange={(e) => handleFaceCountChange(e.target.value)}
+            placeholder={`${GROUP_MIN_FACES}`}
           />
+          {data.faceCount > 0 && data.faceCount < GROUP_MIN_FACES && (
+            <p className="text-xs text-destructive font-sans mt-1">Minimum {GROUP_MIN_FACES} faces required for group orders</p>
+          )}
         </div>
       )}
 
@@ -88,14 +104,16 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
       </div>
 
       {/* Price display */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="p-4 flex justify-between items-center">
-          <span className="font-sans font-medium">Estimated Price</span>
-          <span className="font-display text-2xl font-bold text-primary">{formatPrice(amount)}</span>
-        </CardContent>
-      </Card>
+      {canProceed && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4 flex justify-between items-center">
+            <span className="font-sans font-medium">Estimated Price</span>
+            <span className="font-display text-2xl font-bold text-primary">{formatPrice(amount)}</span>
+          </CardContent>
+        </Card>
+      )}
 
-      <Button onClick={onNext} className="w-full rounded-full font-sans" size="lg">
+      <Button onClick={onNext} disabled={!canProceed} className="w-full rounded-full font-sans" size="lg">
         Continue
       </Button>
     </div>

@@ -20,7 +20,16 @@ const Login = () => {
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      navigate("/admin");
+      // Check if admin or regular user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+        if (roles && roles.length > 0) {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
+      }
     }
     setLoading(false);
   };
@@ -29,8 +38,9 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center">
-          <CardTitle className="font-display text-2xl">Admin Login</CardTitle>
-          <CardDescription className="font-sans">Creative Caricature Club</CardDescription>
+          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
+          <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
+          <CardDescription className="font-sans">Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -46,6 +56,11 @@ const Login = () => {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          <div className="mt-4 text-center space-y-2">
+            <a href="/register" className="text-sm text-primary font-sans hover:underline">Create an account</a>
+            <span className="text-muted-foreground mx-2">•</span>
+            <a href="/forgot-password" className="text-sm text-primary font-sans hover:underline">Forgot password?</a>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -24,15 +24,15 @@ const StepLocation = ({ data, update, onNext }: Props) => {
       <div className="space-y-4">
         <div>
           <Label className="font-sans">Country</Label>
-          <Input value={data.country} onChange={(e) => update({ country: e.target.value })} placeholder="India" />
+          <Input value="India" disabled className="bg-muted" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="font-sans">State</Label>
+            <Label className="font-sans">State *</Label>
             <Input value={data.state} onChange={(e) => update({ state: e.target.value })} placeholder="Maharashtra" />
           </div>
           <div>
-            <Label className="font-sans">City</Label>
+            <Label className="font-sans">City *</Label>
             <Input value={data.city} onChange={(e) => update({ city: e.target.value })} placeholder="Mumbai" />
           </div>
         </div>

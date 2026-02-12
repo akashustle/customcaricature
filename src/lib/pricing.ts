@@ -1,8 +1,11 @@
 export const PRICING = {
-  single: 5000,
-  couple: 9000,
-  groupPerFace: 3000,
+  single: 3499,
+  couple: 9499,
+  groupPerFace: 3499,
 } as const;
+
+export const GROUP_MIN_FACES = 3;
+export const GROUP_MAX_FACES = 6;
 
 export const STYLES = [
   { value: "cute", label: "Cute" },
@@ -19,7 +22,7 @@ export function calculatePrice(
 ): number {
   if (orderType === "single") return PRICING.single;
   if (orderType === "couple") return PRICING.couple;
-  return PRICING.groupPerFace * faceCount;
+  return PRICING.groupPerFace * Math.max(faceCount, GROUP_MIN_FACES);
 }
 
 export function formatPrice(amount: number): string {

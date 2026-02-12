@@ -2,7 +2,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle } from "lucide-react";
+import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight } from "lucide-react";
+
+import gallery1 from "@/assets/gallery/gallery-1.jpeg";
+import gallery2 from "@/assets/gallery/gallery-2.jpeg";
+import gallery3 from "@/assets/gallery/gallery-3.jpeg";
+import gallery4 from "@/assets/gallery/gallery-4.jpeg";
+import gallery5 from "@/assets/gallery/gallery-5.jpeg";
+import gallery6 from "@/assets/gallery/gallery-6.jpeg";
+import gallery7 from "@/assets/gallery/gallery-7.jpeg";
+import gallery8 from "@/assets/gallery/gallery-8.jpeg";
+import gallery9 from "@/assets/gallery/gallery-9.jpeg";
+import gallery10 from "@/assets/gallery/gallery-10.jpeg";
+
+const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6, gallery7, gallery8, gallery9, gallery10];
 
 const styles = [
   { icon: Palette, name: "Cute", desc: "Adorable & charming portraits" },
@@ -15,6 +28,30 @@ const styles = [
 
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
+
+const InfiniteScrollGallery = () => {
+  const doubled = [...galleryImages, ...galleryImages];
+  return (
+    <div className="overflow-hidden py-8">
+      <motion.div
+        className="flex gap-4"
+        animate={{ x: [0, -(galleryImages.length * 280)] }}
+        transition={{ x: { repeat: Infinity, repeatType: "loop", duration: 30, ease: "linear" } }}
+      >
+        {doubled.map((img, i) => (
+          <motion.div
+            key={i}
+            className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden shadow-lg"
+            whileHover={{ scale: 1.05, y: -8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <img src={img} alt={`Caricature ${(i % galleryImages.length) + 1}`} className="w-full h-full object-cover" />
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
+  );
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -34,9 +71,9 @@ const Index = () => {
               src="/logo.png"
               alt="Creative Caricature Club"
               className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
+              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+              transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
             />
             <h1 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
               Creative Caricature
@@ -45,14 +82,19 @@ const Index = () => {
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto font-sans">
               Custom hand-crafted caricatures that capture personality in every stroke. Delivered to your doorstep.
             </p>
-            <Button
-              size="lg"
-              onClick={() => navigate("/order")}
-              className="text-base md:text-lg px-8 md:px-10 py-6 rounded-full font-sans font-semibold shadow-lg hover:shadow-xl transition-all"
-              style={{ boxShadow: "var(--shadow-warm)" }}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Order Your Custom Caricature
-            </Button>
+              <Button
+                size="lg"
+                onClick={() => navigate("/order")}
+                className="text-base md:text-lg px-8 md:px-10 py-6 rounded-full font-sans font-semibold shadow-lg hover:shadow-xl transition-all"
+                style={{ boxShadow: "var(--shadow-warm)" }}
+              >
+                Order Your Custom Caricature <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
 
@@ -64,6 +106,22 @@ const Index = () => {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Gallery Showcase */}
+      <section className="py-12 md:py-16 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-6"
+          >
+            <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">Our Recent Work</h2>
+            <p className="text-muted-foreground font-sans">Every stroke tells a story — see what we've created</p>
+          </motion.div>
+        </div>
+        <InfiniteScrollGallery />
       </section>
 
       {/* How It Works */}
@@ -90,6 +148,7 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
+              whileHover={{ y: -8, scale: 1.02 }}
             >
               <Card className="text-center border-none bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
                 <CardContent className="pt-8 pb-6 px-6">
@@ -127,6 +186,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
+                whileHover={{ scale: 1.05, rotateZ: 1 }}
               >
                 <Card className="group cursor-pointer border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg bg-card">
                   <CardContent className="p-4 md:p-6 text-center">
@@ -143,54 +203,28 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* CTA Section - replaces pricing */}
       <section className="container mx-auto px-4 py-16 md:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10 md:mb-14"
+          className="text-center max-w-2xl mx-auto"
         >
-          <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-3">Pricing</h2>
-          <p className="text-muted-foreground font-sans">Transparent pricing, no hidden charges</p>
+          <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-4">Ready to Get Your Caricature?</h2>
+          <p className="text-muted-foreground font-sans mb-8 text-lg">
+            Turn your favorite photos into stunning hand-crafted caricatures. Perfect for gifts, events & memories!
+          </p>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              size="lg"
+              onClick={() => navigate("/order")}
+              className="rounded-full px-10 py-6 text-base md:text-lg font-sans font-semibold"
+            >
+              Start Your Order <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </motion.div>
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-md mx-auto"
-        >
-          <Card className="border border-border/50" style={{ boxShadow: "var(--shadow-card)" }}>
-            <CardContent className="p-6 md:p-8">
-              <div className="flex items-center gap-3 mb-5">
-                <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
-                <h3 className="font-display text-2xl font-bold">Custom Caricature</h3>
-              </div>
-              <ul className="space-y-2 mb-4 font-sans">
-                <li className="text-foreground/80 text-sm">• Single: ₹5,000</li>
-                <li className="text-foreground/80 text-sm">• Couple: ₹9,000</li>
-                <li className="text-foreground/80 text-sm">• Group: ₹3,000/face</li>
-              </ul>
-              <p className="text-xs text-muted-foreground font-sans flex items-center gap-1 mb-1">
-                <Clock className="w-3 h-3" /> Delivery: 25–30 days
-              </p>
-              <p className="text-xs text-muted-foreground font-sans">
-                🖼️ Mumbai orders include premium frame at no extra cost
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <div className="text-center mt-10">
-          <Button
-            size="lg"
-            onClick={() => navigate("/order")}
-            className="rounded-full px-10 py-6 text-base md:text-lg font-sans font-semibold"
-          >
-            Start Your Order
-          </Button>
-        </div>
       </section>
 
       {/* Contact / Support */}
