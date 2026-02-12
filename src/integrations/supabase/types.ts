@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      caricature_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          max_faces: number
+          min_faces: number
+          name: string
+          per_face: boolean
+          price: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_faces?: number
+          min_faces?: number
+          name: string
+          per_face?: boolean
+          price?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_faces?: number
+          min_faces?: number
+          name?: string
+          per_face?: boolean
+          price?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           created_at: string
@@ -85,6 +127,7 @@ export type Database = {
           id: string
           instagram_id: string | null
           is_framed: boolean | null
+          negotiated_amount: number | null
           notes: string | null
           order_type: Database["public"]["Enums"]["order_type"]
           payment_status: string | null
@@ -118,6 +161,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           is_framed?: boolean | null
+          negotiated_amount?: number | null
           notes?: string | null
           order_type: Database["public"]["Enums"]["order_type"]
           payment_status?: string | null
@@ -151,6 +195,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           is_framed?: boolean | null
+          negotiated_amount?: number | null
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]
           payment_status?: string | null
