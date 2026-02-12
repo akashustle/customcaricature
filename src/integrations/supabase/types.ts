@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      countries: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       order_images: {
         Row: {
           created_at: string
@@ -49,6 +67,7 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          artist_name: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city: string | null
           country: string | null
@@ -61,22 +80,27 @@ export type Database = {
           delivery_pincode: string | null
           delivery_state: string | null
           district: string | null
+          expected_delivery_date: string | null
           face_count: number
           id: string
           instagram_id: string | null
           is_framed: boolean | null
           notes: string | null
           order_type: Database["public"]["Enums"]["order_type"]
+          payment_status: string | null
           payment_verified: boolean | null
+          priority: number | null
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           state: string | null
           status: Database["public"]["Enums"]["order_status"]
           style: Database["public"]["Enums"]["caricature_style"]
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount: number
+          artist_name?: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city?: string | null
           country?: string | null
@@ -89,22 +113,27 @@ export type Database = {
           delivery_pincode?: string | null
           delivery_state?: string | null
           district?: string | null
+          expected_delivery_date?: string | null
           face_count?: number
           id?: string
           instagram_id?: string | null
           is_framed?: boolean | null
           notes?: string | null
           order_type: Database["public"]["Enums"]["order_type"]
+          payment_status?: string | null
           payment_verified?: boolean | null
+          priority?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           style?: Database["public"]["Enums"]["caricature_style"]
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
+          artist_name?: string | null
           caricature_type?: Database["public"]["Enums"]["caricature_type"]
           city?: string | null
           country?: string | null
@@ -117,19 +146,71 @@ export type Database = {
           delivery_pincode?: string | null
           delivery_state?: string | null
           district?: string | null
+          expected_delivery_date?: string | null
           face_count?: number
           id?: string
           instagram_id?: string | null
           is_framed?: boolean | null
           notes?: string | null
           order_type?: Database["public"]["Enums"]["order_type"]
+          payment_status?: string | null
           payment_verified?: boolean | null
+          priority?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           style?: Database["public"]["Enums"]["caricature_style"]
           updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          instagram_id: string | null
+          mobile: string
+          pincode: string | null
+          secret_code: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          instagram_id?: string | null
+          mobile: string
+          pincode?: string | null
+          secret_code?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          instagram_id?: string | null
+          mobile?: string
+          pincode?: string | null
+          secret_code?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

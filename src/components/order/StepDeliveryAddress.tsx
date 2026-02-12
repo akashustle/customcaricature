@@ -10,7 +10,13 @@ interface Props {
 }
 
 const StepDeliveryAddress = ({ data, update, onNext }: Props) => {
-  const canProceed = data.deliveryAddress.trim() && data.deliveryCity.trim() && data.deliveryState.trim() && data.deliveryPincode.trim();
+  const validatePincode = (val: string) => {
+    const digits = val.replace(/\D/g, "");
+    if (digits.length > 6) return;
+    update({ deliveryPincode: digits });
+  };
+
+  const canProceed = data.deliveryAddress.trim() && data.deliveryCity.trim() && data.deliveryState.trim() && data.deliveryPincode.trim().length === 6;
 
   return (
     <div className="space-y-6">
@@ -21,22 +27,30 @@ const StepDeliveryAddress = ({ data, update, onNext }: Props) => {
 
       <div className="space-y-4">
         <div>
-          <Label className="font-sans">Full Address</Label>
+          <Label className="font-sans">Full Address *</Label>
           <Input value={data.deliveryAddress} onChange={(e) => update({ deliveryAddress: e.target.value })} placeholder="House no, Street, Area" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="font-sans">City</Label>
+            <Label className="font-sans">City *</Label>
             <Input value={data.deliveryCity} onChange={(e) => update({ deliveryCity: e.target.value })} placeholder="City" />
           </div>
           <div>
-            <Label className="font-sans">State</Label>
+            <Label className="font-sans">State *</Label>
             <Input value={data.deliveryState} onChange={(e) => update({ deliveryState: e.target.value })} placeholder="State" />
           </div>
         </div>
         <div>
-          <Label className="font-sans">Pincode</Label>
-          <Input value={data.deliveryPincode} onChange={(e) => update({ deliveryPincode: e.target.value })} placeholder="400001" />
+          <Label className="font-sans">Pincode * (6 digits)</Label>
+          <Input 
+            value={data.deliveryPincode} 
+            onChange={(e) => validatePincode(e.target.value)} 
+            placeholder="400001" 
+            maxLength={6}
+          />
+          {data.deliveryPincode && data.deliveryPincode.length < 6 && (
+            <p className="text-xs text-destructive font-sans mt-1">Enter 6-digit pincode</p>
+          )}
         </div>
       </div>
 

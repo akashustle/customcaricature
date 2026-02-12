@@ -2,6 +2,7 @@ import { OrderFormData } from "@/lib/order-types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface Props {
   data: OrderFormData;
@@ -10,7 +11,19 @@ interface Props {
 }
 
 const StepCustomerDetails = ({ data, update, onNext }: Props) => {
-  const canProceed = data.customerName.trim() && data.customerMobile.trim() && data.customerEmail.trim();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateMobile = (val: string) => {
+    const digits = val.replace(/\D/g, "");
+    if (digits.length > 10) return;
+    update({ customerMobile: digits });
+  };
+
+  const canProceed = 
+    data.customerName.trim() && 
+    data.customerMobile.replace(/\D/g, "").length === 10 && 
+    data.customerEmail.trim() &&
+    data.customerEmail.includes("@");
 
   return (
     <div className="space-y-6">
@@ -21,15 +34,27 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
 
       <div className="space-y-4">
         <div>
-          <Label className="font-sans">Full Name</Label>
+          <Label className="font-sans">Full Name *</Label>
           <Input value={data.customerName} onChange={(e) => update({ customerName: e.target.value })} placeholder="Your full name" />
         </div>
         <div>
-          <Label className="font-sans">Mobile Number</Label>
-          <Input value={data.customerMobile} onChange={(e) => update({ customerMobile: e.target.value })} placeholder="+91 98765 43210" type="tel" />
+          <Label className="font-sans">Mobile Number * (10 digits)</Label>
+          <div className="flex gap-2">
+            <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-sans">+91</div>
+            <Input 
+              value={data.customerMobile} 
+              onChange={(e) => validateMobile(e.target.value)} 
+              placeholder="9876543210" 
+              type="tel" 
+              maxLength={10}
+            />
+          </div>
+          {data.customerMobile && data.customerMobile.length < 10 && (
+            <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit Indian mobile number</p>
+          )}
         </div>
         <div>
-          <Label className="font-sans">Email Address</Label>
+          <Label className="font-sans">Email Address *</Label>
           <Input value={data.customerEmail} onChange={(e) => update({ customerEmail: e.target.value })} placeholder="you@email.com" type="email" />
         </div>
         <div>
