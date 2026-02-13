@@ -1,9 +1,15 @@
 import { MessageCircle } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
 
 const FloatingButtons = () => {
+  const isMobile = useIsMobile();
+
+  // Hide on mobile to avoid overlapping bottom nav
+  if (isMobile) return null;
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
       <a

@@ -8,68 +8,37 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
 declare global {
-  interface Window {
-    Razorpay: any;
-  }
+  interface Window { Razorpay: any; }
 }
 
 type Profile = {
-  full_name: string;
-  mobile: string;
-  email: string;
-  instagram_id: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  pincode: string | null;
+  full_name: string; mobile: string; email: string; instagram_id: string | null;
+  address: string | null; city: string | null; state: string | null; pincode: string | null;
 };
 
 type Order = {
-  id: string;
-  order_type: string;
-  style: string;
-  face_count: number;
-  amount: number;
-  status: string;
-  payment_status: string | null;
-  payment_verified: boolean | null;
-  created_at: string;
-  customer_name: string;
-  customer_email: string;
-  customer_mobile: string;
-  delivery_address: string | null;
-  delivery_city: string | null;
-  delivery_state: string | null;
-  delivery_pincode: string | null;
-  notes: string | null;
-  expected_delivery_date: string | null;
-  artist_name: string | null;
+  id: string; order_type: string; style: string; face_count: number; amount: number;
+  status: string; payment_status: string | null; payment_verified: boolean | null;
+  created_at: string; customer_name: string; customer_email: string; customer_mobile: string;
+  delivery_address: string | null; delivery_city: string | null; delivery_state: string | null;
+  delivery_pincode: string | null; notes: string | null; expected_delivery_date: string | null; artist_name: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  new: "New Order",
-  in_progress: "In Progress",
-  artwork_ready: "Artwork Ready",
-  dispatched: "Dispatched",
-  delivered: "Delivered",
-  completed: "Completed",
+  new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
+  dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
 };
-
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  in_progress: "bg-yellow-100 text-yellow-800",
-  artwork_ready: "bg-purple-100 text-purple-800",
-  dispatched: "bg-orange-100 text-orange-800",
-  delivered: "bg-green-100 text-green-800",
-  completed: "bg-green-200 text-green-900",
+  new: "bg-blue-100 text-blue-800", in_progress: "bg-yellow-100 text-yellow-800",
+  artwork_ready: "bg-purple-100 text-purple-800", dispatched: "bg-orange-100 text-orange-800",
+  delivered: "bg-green-100 text-green-800", completed: "bg-green-200 text-green-900",
 };
-
 const WHATSAPP_NUMBER = "918369594271";
 
 const Dashboard = () => {
@@ -83,46 +52,33 @@ const Dashboard = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("orders");
+  // Secret code & password
+  const [newSecretCode, setNewSecretCode] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [changingSecret, setChangingSecret] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/login");
-      return;
-    }
+    if (!authLoading && !user) { navigate("/login"); return; }
     if (user) {
       fetchProfile(user.id);
       fetchOrders(user.id);
       const channel = supabase
         .channel("user-dashboard")
-        .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
-          fetchOrders(user.id);
-        })
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
-          fetchProfile(user.id);
-        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
         .subscribe();
       return () => { supabase.removeChannel(channel); };
     }
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode").eq("user_id", userId).maybeSingle();
-    if (error) {
-      console.error("Error fetching profile:", error);
-    }
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode").eq("user_id", userId).maybeSingle();
     if (data) {
-      const profileData: Profile = {
-        full_name: data.full_name || "",
-        mobile: data.mobile || "",
-        email: data.email || "",
-        instagram_id: data.instagram_id || null,
-        address: data.address || null,
-        city: data.city || null,
-        state: data.state || null,
-        pincode: data.pincode || null,
-      };
-      setProfile(profileData);
-      setEditForm(profileData);
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null };
+      setProfile(p); setEditForm(p);
     }
     setLoading(false);
   };
@@ -130,107 +86,82 @@ const Dashboard = () => {
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
       .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("user_id", userId).order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
 
   const saveProfile = async () => {
     if (!editForm || !user) return;
     const { error } = await supabase.from("profiles").update({
-      full_name: editForm.full_name,
-      mobile: editForm.mobile,
-      instagram_id: editForm.instagram_id,
-      address: editForm.address,
-      city: editForm.city,
-      state: editForm.state,
-      pincode: editForm.pincode,
+      full_name: editForm.full_name, mobile: editForm.mobile, instagram_id: editForm.instagram_id,
+      address: editForm.address, city: editForm.city, state: editForm.state, pincode: editForm.pincode,
     }).eq("user_id", user.id);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setProfile(editForm);
-      setEditing(false);
-      toast({ title: "Profile Updated Successfully!" });
-    }
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+    else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
+  };
+
+  const changeSecretCode = async () => {
+    if (!user || newSecretCode.length !== 4) return;
+    setChangingSecret(true);
+    const { error } = await supabase.from("profiles").update({ secret_code: newSecretCode } as any).eq("user_id", user.id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Secret Code Updated!" }); setNewSecretCode(""); }
+    setChangingSecret(false);
+  };
+
+  const changePassword = async () => {
+    if (newPassword !== confirmNewPassword) { toast({ title: "Error", description: "Passwords don't match", variant: "destructive" }); return; }
+    if (newPassword.length < 6) { toast({ title: "Error", description: "Password must be at least 6 chars", variant: "destructive" }); return; }
+    setChangingPassword(true);
+    // Re-authenticate with current password first
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: profile?.email || "", password: currentPassword });
+    if (signInError) { toast({ title: "Error", description: "Current password is incorrect", variant: "destructive" }); setChangingPassword(false); return; }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Password Changed!" }); setCurrentPassword(""); setNewPassword(""); setConfirmNewPassword(""); }
+    setChangingPassword(false);
   };
 
   const handlePayNow = async (order: Order) => {
     setPayingOrderId(order.id);
     try {
       const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: {
-          amount: order.amount,
-          order_id: order.id,
-          customer_name: order.customer_name,
-          customer_email: order.customer_email,
-          customer_mobile: order.customer_mobile,
-        },
+        body: { amount: order.amount, order_id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_mobile: order.customer_mobile },
       });
-
-      if (rzpError || !rzpData?.razorpay_order_id) {
-        throw new Error(rzpError?.message || "Failed to create payment order");
-      }
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
 
       const options = {
-        key: rzpData.razorpay_key_id,
-        amount: rzpData.amount,
-        currency: rzpData.currency,
-        name: "Creative Caricature Club",
-        description: `${order.order_type} Caricature - ${order.style}`,
-        image: "/logo.png",
-        order_id: rzpData.razorpay_order_id,
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club", description: `${order.order_type} Caricature - ${order.style}`,
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: order.id,
-              },
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id },
             });
-            if (verifyError || !verifyData?.verified) {
-              throw new Error("Payment verification failed");
-            }
-            toast({ title: "Payment Successful!", description: "Your payment has been confirmed." });
+            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
+            toast({ title: "Payment Successful!" });
             if (user) fetchOrders(user.id);
-          } catch (err: any) {
-            toast({ title: "Payment Verification Failed", description: "Contact support with order ID: " + order.id.slice(0, 8).toUpperCase(), variant: "destructive" });
-          }
+          } catch { toast({ title: "Verification Failed", description: "Contact support: " + order.id.slice(0, 8).toUpperCase(), variant: "destructive" }); }
           setPayingOrderId(null);
         },
-        prefill: {
-          name: order.customer_name,
-          email: order.customer_email,
-          contact: `+91${order.customer_mobile}`,
-        },
+        prefill: { name: order.customer_name, email: order.customer_email, contact: `+91${order.customer_mobile}` },
         theme: { color: "#E8633B" },
-        modal: {
-          ondismiss: () => {
-            setPayingOrderId(null);
-          },
-        },
+        modal: { ondismiss: () => setPayingOrderId(null) },
       };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      new window.Razorpay(options).open();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to initiate payment", variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingOrderId(null);
     }
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/");
-  };
+  const handleLogout = async () => { await signOut(); navigate("/"); };
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
@@ -238,54 +169,58 @@ const Dashboard = () => {
             <h1 className="font-display text-lg font-bold">My Dashboard</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans">
-              <Home className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex">
-              <LogOut className="w-4 h-4 mr-1" /> Logout
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans"><Home className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-        {/* Desktop Tabs */}
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full mb-6">
               <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />My Orders</TabsTrigger>
               <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
+              <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} /></TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
+            <TabsContent value="settings">
+              <SettingsSection
+                newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
+                currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
+                confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
+              />
+            </TabsContent>
           </Tabs>
         </div>
 
-        {/* Mobile Content */}
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
+          {activeTab === "settings" && (
+            <SettingsSection
+              newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
+              currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
+              confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
+            />
+          )}
         </div>
 
-        {/* WhatsApp Support */}
         <div className="mt-6">
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#25D366] text-white rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity"
-          >
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 bg-[#25D366] text-white rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity">
             <MessageCircle className="w-4 h-4" /> WhatsApp Support
           </a>
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
         <div className="flex items-center justify-around py-2">
           <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+          <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <BottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
         </div>
       </div>
@@ -300,84 +235,79 @@ const BottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; labe
   </button>
 );
 
+const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, changingSecret, currentPassword, setCurrentPassword, newPassword, setNewPassword, confirmNewPassword, setConfirmNewPassword, changePassword, changingPassword }: any) => (
+  <div className="space-y-4">
+    <Card>
+      <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><KeyRound className="w-5 h-5 text-primary" />Change Secret Code</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <div>
+          <Label className="font-sans">New 4-digit Secret Code</Label>
+          <Input value={newSecretCode} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setNewSecretCode(d); }} maxLength={4} type="password" placeholder="Enter new code" />
+        </div>
+        <Button onClick={changeSecretCode} disabled={newSecretCode.length !== 4 || changingSecret} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+          {changingSecret ? "Updating..." : "Update Secret Code"}
+        </Button>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Change Password</CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <div><Label className="font-sans">Current Password</Label><Input type="password" value={currentPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)} /></div>
+        <div><Label className="font-sans">New Password (min 6 chars)</Label><Input type="password" value={newPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)} /></div>
+        <div><Label className="font-sans">Confirm New Password</Label><Input type="password" value={confirmNewPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(e.target.value)} /></div>
+        {newPassword && confirmNewPassword && newPassword !== confirmNewPassword && <p className="text-xs text-destructive font-sans">Passwords don't match</p>}
+        <Button onClick={changePassword} disabled={!currentPassword || newPassword.length < 6 || newPassword !== confirmNewPassword || changingPassword} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+          {changingPassword ? "Changing..." : "Change Password"}
+        </Button>
+      </CardContent>
+    </Card>
+  </div>
+);
+
 const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate }: any) => (
   <>
     <div className="flex justify-between items-center mb-4">
       <h2 className="font-display text-xl font-bold">My Orders</h2>
-      <Button onClick={() => navigate("/order")} className="rounded-full font-sans" size="sm">
-        + New Order
-      </Button>
+      <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ New Order</Button>
     </div>
     {orders.length === 0 ? (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="font-sans text-muted-foreground mb-4">No orders yet</p>
-          <Button onClick={() => navigate("/order")} className="rounded-full font-sans">Order Your Caricature</Button>
-        </CardContent>
-      </Card>
+      <Card><CardContent className="p-8 text-center">
+        <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <p className="font-sans text-muted-foreground mb-4">No orders yet</p>
+        <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Order Your Caricature</Button>
+      </CardContent></Card>
     ) : (
       <div className="space-y-3">
         {orders.map((order: any) => (
           <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-            >
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}>
               <CardContent className="p-4 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
                     <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
-                    <p className="text-xs text-muted-foreground font-sans">
-                      Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                    </p>
+                    <p className="text-xs text-muted-foreground font-sans">Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
                   </div>
                   <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>
-                    {STATUS_LABELS[order.status] || order.status}
-                  </Badge>
+                  <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status] || order.status}</Badge>
                   <Badge className={`${order.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"} border-none text-xs`}>
-                    <CreditCard className="w-3 h-3 mr-1" />
-                    Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
+                    <CreditCard className="w-3 h-3 mr-1" />Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
                   </Badge>
                 </div>
-
                 {expandedOrder === order.id && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans"
-                  >
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans">
                     <Row label="Faces" value={String(order.face_count)} />
-                    {order.delivery_address && (
-                      <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />
-                    )}
+                    {order.delivery_address && <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />}
                     {order.notes && <Row label="Notes" value={order.notes} />}
                     {order.artist_name && <Row label="Artist" value={order.artist_name} />}
-                    <Row label="Expected Delivery" value={
-                      order.expected_delivery_date
-                        ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN")
-                        : "25-30 days from order date"
-                    } />
+                    <Row label="Expected Delivery" value={order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN") : "25-30 days from order date"} />
                     {order.payment_status !== "confirmed" && (
                       <div className="pt-2">
-                        <Button
-                          size="sm"
-                          className="rounded-full font-sans w-full"
-                          disabled={payingOrderId === order.id}
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            handlePayNow(order);
-                          }}
-                        >
-                          {payingOrderId === order.id ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                          ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(order.amount)} Now</>
-                          )}
+                        <Button size="sm" className="rounded-full font-sans w-full bg-primary hover:bg-primary/90" disabled={payingOrderId === order.id}
+                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); handlePayNow(order); }}>
+                          {payingOrderId === order.id ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</> : <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(order.amount)} Now</>}
                         </Button>
                       </div>
                     )}
@@ -392,17 +322,15 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   </>
 );
 
-const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile, setProfile }: any) => (
+const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between">
       <CardTitle className="font-display text-lg">My Profile</CardTitle>
       {!editing ? (
-        <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans">
-          <Edit2 className="w-4 h-4 mr-1" /> Edit
-        </Button>
+        <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans"><Edit2 className="w-4 h-4 mr-1" /> Edit</Button>
       ) : (
         <div className="flex gap-2">
-          <Button size="sm" onClick={saveProfile} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+          <Button size="sm" onClick={saveProfile} className="font-sans bg-primary hover:bg-primary/90"><Save className="w-4 h-4 mr-1" />Save</Button>
           <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans"><X className="w-4 h-4" /></Button>
         </div>
       )}
@@ -433,7 +361,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           <Row label="Pincode" value={profile.pincode || "—"} />
         </div>
       ) : (
-        <p className="text-muted-foreground font-sans">No profile data found. Please contact support.</p>
+        <p className="text-muted-foreground font-sans">No profile data found.</p>
       )}
     </CardContent>
   </Card>
