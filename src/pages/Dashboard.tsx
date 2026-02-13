@@ -92,9 +92,12 @@ const Dashboard = () => {
       fetchProfile(user.id);
       fetchOrders(user.id);
       const channel = supabase
-        .channel("user-orders")
+        .channel("user-dashboard")
         .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => {
           fetchOrders(user.id);
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
+          fetchProfile(user.id);
         })
         .subscribe();
       return () => { supabase.removeChannel(channel); };
