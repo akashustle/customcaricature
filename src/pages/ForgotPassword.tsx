@@ -22,33 +22,6 @@ const ForgotPassword = () => {
     if (digits.length <= 4) setSecretCode(digits);
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("secret_code, user_id")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (error || !profiles) {
-        toast({ title: "Error", description: "Email not found", variant: "destructive" });
-        return;
-      }
-      if (profiles.secret_code !== secretCode) {
-        toast({ title: "Error", description: "Invalid secret code", variant: "destructive" });
-        return;
-      }
-      setVerified(true);
-      toast({ title: "Verified!", description: "Enter your new password" });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
@@ -84,42 +57,34 @@ const ForgotPassword = () => {
           <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
           <CardTitle className="font-display text-2xl">Reset Password</CardTitle>
           <CardDescription className="font-sans">
-            {verified ? "Create your new password" : "Enter your email and 4-digit secret code"}
+            Enter your email, secret code, and new password
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!verified ? (
-            <form onSubmit={handleVerify} className="space-y-4">
-              <div>
-                <Label className="font-sans">Email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-              <div>
-                <Label className="font-sans">4-digit Secret Code</Label>
-                <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required placeholder="Enter your secret code" />
-              </div>
-              <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full rounded-full font-sans">
-                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify"}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div>
-                <Label className="font-sans">New Password (min 6 characters)</Label>
-                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} />
-              </div>
-              <div>
-                <Label className="font-sans">Confirm Password</Label>
-                <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-              </div>
-              {newPassword && confirmPassword && newPassword !== confirmPassword && (
-                <p className="text-xs text-destructive font-sans">Passwords don't match</p>
-              )}
-              <Button type="submit" disabled={loading || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans">
-                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
-              </Button>
-            </form>
-          )}
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <Label className="font-sans">Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+            <div>
+              <Label className="font-sans">4-digit Secret Code</Label>
+              <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required placeholder="Enter your secret code" />
+            </div>
+            <div>
+              <Label className="font-sans">New Password (min 6 characters)</Label>
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} />
+            </div>
+            <div>
+              <Label className="font-sans">Confirm Password</Label>
+              <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            </div>
+            {newPassword && confirmPassword && newPassword !== confirmPassword && (
+              <p className="text-xs text-destructive font-sans">Passwords don't match</p>
+            )}
+            <Button type="submit" disabled={loading || !email || secretCode.length !== 4 || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans">
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
+            </Button>
+          </form>
           <p className="text-center text-sm font-sans mt-4">
             <a href="/login" className="text-primary hover:underline">Back to Login</a>
           </p>
