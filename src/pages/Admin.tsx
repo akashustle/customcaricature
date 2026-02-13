@@ -217,7 +217,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -405,30 +405,16 @@ const Admin = () => {
     return true;
   });
 
-  // Determine if customer was manually added (has orders with no user-initiated sign-up pattern)
-  // Manual = added by admin via admin-create-user, Registered = self-registered
-  // We distinguish by checking if the user has any orders - manual customers are typically added by admin
   const getFilteredCustomers = () => {
     let list = customers.filter((c) => {
       if (!customerSearch) return true;
       const q = customerSearch.toLowerCase();
       return c.full_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.mobile.includes(q);
     });
-    // Check if user has a role (admin) - exclude admins from customer list
-    // For Manual vs Registered: manual users typically have orders created same day as profile
-    // Simple heuristic: if customer was created by admin-create-user, they won't have self-registered
-    // We'll use a simpler approach: check if they have an associated order created within 1 min of profile
     if (customerTab === "registered") {
-      // Registered users self-signed up - they have orders linked to them placed by themselves
-      list = list.filter(c => {
-        const hasOrders = orders.some(o => o.customer_email === c.email);
-        return hasOrders || !orders.some(o => o.customer_name === c.full_name);
-      });
+      list = list.filter(c => !(c as any).is_manual);
     } else if (customerTab === "manual") {
-      // Manual = admin-added customers who have orders placed by admin
-      list = list.filter(c => {
-        return orders.some(o => o.customer_name === c.full_name && o.customer_email === c.email);
-      });
+      list = list.filter(c => (c as any).is_manual);
     }
     return list;
   };
