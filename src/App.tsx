@@ -18,6 +18,7 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <FloatingButtons />
+        <MobileBottomNav />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/order" element={<Order />} />
