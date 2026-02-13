@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
@@ -132,6 +134,7 @@ const Admin = () => {
   const [adminProfile, setAdminProfile] = useState<Profile | null>(null);
   const [editingAdminProfile, setEditingAdminProfile] = useState(false);
   const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
+  const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -398,10 +401,21 @@ const Admin = () => {
     }
   };
 
+  const formatDateTime = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString("en-IN", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+    });
+  };
+
   const filtered = orders.filter((o) => {
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
     if (paymentFilter !== "all" && (o.payment_status || "pending") !== paymentFilter) return false;
     if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase()) && !o.id.toLowerCase().includes(search.toLowerCase())) return false;
+    if (calendarDate) {
+      const orderDate = new Date(o.created_at);
+      if (orderDate.toDateString() !== calendarDate.toDateString()) return false;
+    }
     return true;
   });
 
@@ -589,6 +603,25 @@ const Admin = () => {
                   </Button>
                 ))}
               </div>
+              {/* Calendar Date Filter */}
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs font-sans h-7 rounded-full">
+                      <CalendarIcon className="w-3 h-3 mr-1" />
+                      {calendarDate ? calendarDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Pick Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={calendarDate} onSelect={setCalendarDate} initialFocus />
+                  </PopoverContent>
+                </Popover>
+                {calendarDate && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => setCalendarDate(undefined)}>
+                    <X className="w-3 h-3 mr-1" />Clear
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Mobile Cards */}
@@ -603,6 +636,7 @@ const Admin = () => {
                           <div>
                             <p className="font-sans font-semibold">{order.customer_name}</p>
                             <p className="font-mono text-xs text-muted-foreground">{order.id.slice(0, 8).toUpperCase()}</p>
+                            <p className="text-[10px] text-muted-foreground font-sans">{formatDateTime(order.created_at)}</p>
                           </div>
                           <div className="text-right">
                             <p className="font-sans font-medium text-primary">{formatPrice(order.negotiated_amount || order.amount)}</p>
@@ -662,6 +696,7 @@ const Admin = () => {
                     <TableRow>
                       <TableHead className="font-sans">ID</TableHead>
                       <TableHead className="font-sans">Customer</TableHead>
+                      <TableHead className="font-sans">Date</TableHead>
                       <TableHead className="font-sans">City</TableHead>
                       <TableHead className="font-sans">Amount</TableHead>
                       <TableHead className="font-sans">Due</TableHead>
@@ -672,9 +707,9 @@ const Admin = () => {
                   </TableHeader>
                   <TableBody>
                     {loading ? (
-                      <TableRow><TableCell colSpan={8} className="text-center py-10">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={9} className="text-center py-10">Loading...</TableCell></TableRow>
                     ) : filtered.length === 0 ? (
-                      <TableRow><TableCell colSpan={8} className="text-center py-10">No orders</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={9} className="text-center py-10">No orders</TableCell></TableRow>
                     ) : (
                       filtered.map((order) => {
                         const daysLeft = getDaysRemaining(order);
@@ -682,6 +717,7 @@ const Admin = () => {
                           <TableRow key={order.id} className={daysLeft <= 10 && !["delivered", "completed"].includes(order.status) ? "bg-red-50/50" : ""}>
                             <TableCell className="font-mono text-xs">{order.id.slice(0, 8).toUpperCase()}</TableCell>
                             <TableCell className="font-sans">{order.customer_name}</TableCell>
+                            <TableCell className="font-sans text-xs">{formatDateTime(order.created_at)}</TableCell>
                             <TableCell className="font-sans">{order.city || "—"}</TableCell>
                             <TableCell className="font-sans">
                               <span className="font-medium">{formatPrice(order.negotiated_amount || order.amount)}</span>
