@@ -68,6 +68,15 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
+      user_metadata: {
+        full_name,
+        mobile,
+        instagram_id: instagram_id || null,
+        address: address || null,
+        city: city || null,
+        state: state || null,
+        pincode: pincode || null,
+      },
     });
     if (createError) {
       console.error("Auth creation error:", createError);
