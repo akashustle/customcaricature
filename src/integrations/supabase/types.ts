@@ -220,6 +220,7 @@ export type Database = {
           full_name: string
           id: string
           instagram_id: string | null
+          is_manual: boolean
           mobile: string
           pincode: string | null
           secret_code: string | null
@@ -235,6 +236,7 @@ export type Database = {
           full_name: string
           id?: string
           instagram_id?: string | null
+          is_manual?: boolean
           mobile: string
           pincode?: string | null
           secret_code?: string | null
@@ -250,6 +252,7 @@ export type Database = {
           full_name?: string
           id?: string
           instagram_id?: string | null
+          is_manual?: boolean
           mobile?: string
           pincode?: string | null
           secret_code?: string | null
