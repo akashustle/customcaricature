@@ -15,13 +15,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-const STEPS = ["location", "customer", "details", "photos", "address", "summary"] as const;
+// New order: location → caricature details → photos → customer details → address → summary
+const STEPS = ["location", "details", "photos", "customer", "address", "summary"] as const;
 
 const STEP_LABELS: Record<string, string> = {
   location: "Location",
-  customer: "Your Details",
-  details: "Order Details",
+  details: "Caricature Selection",
   photos: "Upload Photos",
+  customer: "Your Details",
   address: "Delivery Address",
   summary: "Payment & Summary",
 };
@@ -136,9 +137,9 @@ const Order = () => {
             transition={{ duration: 0.3 }}
           >
             {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
-            {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
             {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} />}
             {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
+            {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
             {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
             {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
           </motion.div>

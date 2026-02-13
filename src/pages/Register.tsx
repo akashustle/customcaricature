@@ -15,8 +15,18 @@ const Register = () => {
     password: "", confirmPassword: "", secretCode: "",
   });
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
-  const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
+  const update = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (field === "email") {
+      if (value.trim() && !value.includes("@")) {
+        setEmailError("Please enter a valid email with @ included");
+      } else {
+        setEmailError("");
+      }
+    }
+  };
 
   const validateMobile = (val: string) => {
     const digits = val.replace(/\D/g, "");
@@ -44,12 +54,27 @@ const Register = () => {
     setLoading(true);
 
     try {
+      // Check if email already exists in profiles
+      const { data: existing } = await supabase.from("profiles").select("email").eq("email", form.email).maybeSingle();
+      if (existing) {
+        toast({ title: "Email Already Registered", description: "This email is already in use. Please login or use a different email.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: { emailRedirectTo: window.location.origin },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message?.toLowerCase().includes("already registered")) {
+          toast({ title: "Email Already Registered", description: "This email is already in use. Please login or use a different email.", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
       if (!data.user) throw new Error("Registration failed");
 
       const { error: profileError } = await supabase.from("profiles").insert({
@@ -99,6 +124,7 @@ const Register = () => {
             <div>
               <Label className="font-sans">Email *</Label>
               <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@email.com" />
+              {emailError && <p className="text-xs text-destructive font-sans mt-1">{emailError}</p>}
             </div>
             <div>
               <Label className="font-sans">Instagram ID</Label>

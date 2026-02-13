@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/pricing";
-import { Package, PenTool, Clock, DollarSign, MapPin, AlertTriangle } from "lucide-react";
+import { Package, PenTool, Clock, DollarSign, MapPin, AlertTriangle, Users, CreditCard } from "lucide-react";
 
 type Order = {
   id: string;
@@ -13,11 +13,20 @@ type Order = {
   priority?: number | null;
 };
 
+type Profile = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  created_at: string;
+};
+
 interface Props {
   orders: Order[];
+  customers: Profile[];
 }
 
-const AdminAnalytics = ({ orders }: Props) => {
+const AdminAnalytics = ({ orders, customers }: Props) => {
   const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
   const pending = orders.filter((o) => !["delivered", "completed"].includes(o.status));
   const paymentConfirmed = orders.filter((o) => (o as any).payment_status === "confirmed");
@@ -35,7 +44,6 @@ const AdminAnalytics = ({ orders }: Props) => {
 
   // Location breakdown
   const cityMap: Record<string, number> = {};
-  const stateMap: Record<string, number> = {};
   orders.forEach((o) => {
     const city = o.city || "Unknown";
     cityMap[city] = (cityMap[city] || 0) + 1;
@@ -45,10 +53,12 @@ const AdminAnalytics = ({ orders }: Props) => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard icon={Users} label="Total Users" value={String(customers.length)} />
         <StatCard icon={Package} label="Total Orders" value={String(orders.length)} />
         <StatCard icon={DollarSign} label="Revenue" value={formatPrice(totalRevenue)} />
-        <StatCard icon={Clock} label="Pending" value={String(pending.length)} />
+        <StatCard icon={CreditCard} label="Payment Confirmed" value={String(paymentConfirmed.length)} color="text-green-600" />
+        <StatCard icon={Clock} label="Payment Pending" value={String(paymentPending.length)} color="text-amber-600" />
         <StatCard icon={PenTool} label="Delivered" value={String(delivered.length)} />
       </div>
 
@@ -122,7 +132,7 @@ const AdminAnalytics = ({ orders }: Props) => {
   );
 };
 
-const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; value: string }) => (
+const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color?: string }) => (
   <Card>
     <CardContent className="p-4">
       <div className="flex items-center gap-3">
@@ -130,7 +140,7 @@ const StatCard = ({ icon: Icon, label, value }: { icon: any; label: string; valu
           <Icon className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <p className="text-xl md:text-2xl font-display font-bold">{value}</p>
+          <p className={`text-xl md:text-2xl font-display font-bold ${color || ""}`}>{value}</p>
           <p className="text-xs text-muted-foreground font-sans">{label}</p>
         </div>
       </div>
