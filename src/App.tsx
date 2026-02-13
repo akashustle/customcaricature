@@ -15,6 +15,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import RefundPolicy from "./pages/RefundPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
+import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/shipping" element={<ShippingPolicy />} />
+          <Route path="/track-order" element={<TrackOrder />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -291,7 +291,7 @@ const Admin = () => {
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
             <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
           </div>

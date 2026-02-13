@@ -12,7 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { email, secret_code, new_password } = await req.json();
+    const body = await req.json();
+    const email = (body.email || "").trim().toLowerCase();
+    const secret_code = body.secret_code;
+    const new_password = body.new_password;
 
     if (!email || !secret_code || !new_password) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {

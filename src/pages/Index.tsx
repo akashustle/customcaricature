@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut } from "lucide-react";
+import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -78,11 +78,14 @@ const Index = () => {
       {/* Top Nav */}
       <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
             <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate("/track-order")} className="rounded-full font-sans gap-1 hidden sm:flex">
+              <Package className="w-4 h-4" /> Track Order
+            </Button>
             {!loading && (
               user ? (
                 <DropdownMenu>
@@ -319,6 +322,8 @@ const Index = () => {
             </div>
             <p className="text-sm text-muted-foreground font-sans text-center">Custom caricatures crafted with love ✨</p>
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground font-sans">
+              <Link to="/track-order" className="hover:text-foreground transition-colors">Track Order</Link>
+              <span>•</span>
               <Link to="/about" className="hover:text-foreground transition-colors">About Us</Link>
               <span>•</span>
               <Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link>
