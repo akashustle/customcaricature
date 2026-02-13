@@ -5,7 +5,9 @@ import { Package, PenTool, Clock, DollarSign, MapPin, AlertTriangle, Users, Cred
 type Order = {
   id: string;
   caricature_type: string;
+  order_type?: string;
   amount: number;
+  negotiated_amount?: number | null;
   status: string;
   city: string | null;
   payment_status?: string | null;
@@ -28,16 +30,21 @@ interface Props {
 }
 
 const AdminAnalytics = ({ orders, customers }: Props) => {
-  const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
-  const confirmedRevenue = orders.filter(o => o.payment_status === "confirmed").reduce((sum, o) => sum + o.amount, 0);
+  const confirmedOrders = orders.filter(o => o.payment_status === "confirmed");
+  const totalRevenue = confirmedOrders.reduce((sum, o) => sum + o.amount, 0);
+  const confirmedRevenue = totalRevenue;
   const pendingRevenue = orders.filter(o => o.payment_status !== "confirmed").reduce((sum, o) => sum + o.amount, 0);
   const pending = orders.filter((o) => !["delivered", "completed"].includes(o.status));
-  const paymentConfirmed = orders.filter((o) => o.payment_status === "confirmed");
+  const paymentConfirmed = confirmedOrders;
   const paymentPending = orders.filter((o) => o.payment_status !== "confirmed");
   const delivered = orders.filter((o) => ["delivered", "completed"].includes(o.status));
   const newOrders = orders.filter(o => o.status === "new");
   const inProgress = orders.filter(o => o.status === "in_progress");
-  const avgOrderValue = orders.length > 0 ? Math.round(totalRevenue / orders.length) : 0;
+  const avgOrderValue = confirmedOrders.length > 0 ? Math.round(totalRevenue / confirmedOrders.length) : 0;
+
+  // Negotiation stats
+  const negotiatedOrders = orders.filter(o => o.negotiated_amount && o.negotiated_amount !== o.amount);
+  const totalNegotiatedAmount = negotiatedOrders.reduce((sum, o) => sum + (o.negotiated_amount || 0), 0);
 
   // Repeat customers
   const emailCounts: Record<string, number> = {};
@@ -53,13 +60,21 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
   const recentOrders = orders.filter(o => new Date(o.created_at) > thirtyDaysAgo);
   const activeUsers = new Set(recentOrders.map(o => (o as any).customer_email)).size;
 
-  // Revenue by period
+  // Revenue by period (only confirmed payments)
   const now = new Date();
-  const todayRevenue = orders.filter(o => o.payment_status === "confirmed" && new Date(o.created_at).toDateString() === now.toDateString()).reduce((s, o) => s + o.amount, 0);
+  const todayRevenue = confirmedOrders.filter(o => new Date(o.created_at).toDateString() === now.toDateString()).reduce((s, o) => s + o.amount, 0);
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-  const weeklyRevenue = orders.filter(o => o.payment_status === "confirmed" && new Date(o.created_at) > weekAgo).reduce((s, o) => s + o.amount, 0);
+  const weeklyRevenue = confirmedOrders.filter(o => new Date(o.created_at) > weekAgo).reduce((s, o) => s + o.amount, 0);
   const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth() - 1);
-  const monthlyRevenue = orders.filter(o => o.payment_status === "confirmed" && new Date(o.created_at) > monthAgo).reduce((s, o) => s + o.amount, 0);
+  const monthlyRevenue = confirmedOrders.filter(o => new Date(o.created_at) > monthAgo).reduce((s, o) => s + o.amount, 0);
+
+  // Most popular order type
+  const typeCounts: Record<string, number> = {};
+  orders.forEach(o => {
+    const type = (o as any).order_type || o.caricature_type || "unknown";
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  });
+  const mostPopularType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0];
 
   // Due date warnings
   const urgentOrders = pending.filter((o) => {
@@ -101,10 +116,18 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
 
       {/* Financial Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard icon={DollarSign} label="Total Revenue" value={formatPrice(totalRevenue)} />
-        <StatCard icon={CreditCard} label="Confirmed Payments" value={`${paymentConfirmed.length} (${formatPrice(confirmedRevenue)})`} color="text-green-600" />
+        <StatCard icon={DollarSign} label="Confirmed Revenue" value={formatPrice(totalRevenue)} color="text-green-600" />
+        <StatCard icon={CreditCard} label="Confirmed Payments" value={`${paymentConfirmed.length} orders`} color="text-green-600" />
         <StatCard icon={Clock} label="Pending Payments" value={`${paymentPending.length} (${formatPrice(pendingRevenue)})`} color="text-amber-600" />
         <StatCard icon={BarChart3} label="Avg Order Value" value={formatPrice(avgOrderValue)} />
+      </div>
+
+      {/* Negotiation & Insights */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard icon={RefreshCw} label="Negotiated Orders" value={String(negotiatedOrders.length)} />
+        <StatCard icon={DollarSign} label="Negotiated Amount" value={formatPrice(totalNegotiatedAmount)} />
+        <StatCard icon={ShoppingCart} label="Most Popular Type" value={mostPopularType ? `${mostPopularType[0]} (${mostPopularType[1]})` : "N/A"} />
+        <StatCard icon={RefreshCw} label="Repeat Customers" value={String(repeatCustomers)} />
       </div>
 
       {/* Revenue Breakdown & Repeat Customers */}

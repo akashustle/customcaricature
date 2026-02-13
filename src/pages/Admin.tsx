@@ -92,6 +92,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentFilter, setPaymentFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
@@ -266,6 +267,7 @@ const Admin = () => {
 
   const filtered = orders.filter((o) => {
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
+    if (paymentFilter !== "all" && (o.payment_status || "pending") !== paymentFilter) return false;
     if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase()) && !o.id.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -312,18 +314,53 @@ const Admin = () => {
 
           {/* Orders Tab */}
           <TabsContent value="orders">
-            <div className="flex flex-col md:flex-row gap-3 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
+            <div className="flex flex-col gap-3 mb-4">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
+                </div>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-40 font-sans"><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  {Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              {/* Status Filter Tabs */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { value: "all", label: `All (${orders.length})` },
+                  { value: "new", label: `New (${orders.filter(o => o.status === "new").length})` },
+                  { value: "in_progress", label: `In Progress (${orders.filter(o => o.status === "in_progress").length})` },
+                  { value: "artwork_ready", label: `Art Ready (${orders.filter(o => o.status === "artwork_ready").length})` },
+                  { value: "dispatched", label: `Dispatched (${orders.filter(o => o.status === "dispatched").length})` },
+                  { value: "delivered", label: `Delivered (${orders.filter(o => o.status === "delivered").length})` },
+                  { value: "completed", label: `Completed (${orders.filter(o => o.status === "completed").length})` },
+                ].map((tab) => (
+                  <Button
+                    key={tab.value}
+                    variant={statusFilter === tab.value ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs font-sans h-7 rounded-full"
+                    onClick={() => setStatusFilter(tab.value)}
+                  >
+                    {tab.label}
+                  </Button>
+                ))}
+              </div>
+              {/* Payment Filter */}
+              <div className="flex gap-1.5">
+                {[
+                  { value: "all", label: "All Payments" },
+                  { value: "confirmed", label: `Confirmed (${orders.filter(o => o.payment_status === "confirmed").length})` },
+                  { value: "pending", label: `Pending (${orders.filter(o => o.payment_status !== "confirmed").length})` },
+                ].map((tab) => (
+                  <Button
+                    key={tab.value}
+                    variant={paymentFilter === tab.value ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs font-sans h-7 rounded-full"
+                    onClick={() => setPaymentFilter(tab.value)}
+                  >
+                    {tab.label}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {/* Mobile Cards */}
