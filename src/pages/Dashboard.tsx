@@ -294,7 +294,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
                     <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
-                    <p className="text-xs text-muted-foreground font-sans">Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                    <p className="text-xs text-muted-foreground font-sans">Ordered: {new Date(order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
                   </div>
                   <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
                 </div>
