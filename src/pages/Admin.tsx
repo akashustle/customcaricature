@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw } from "lucide-react";
 import { validateEmailFormat } from "@/lib/email-validation";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
@@ -97,6 +97,7 @@ const Admin = () => {
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
+  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual">("all");
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
   const [negotiateOrderId, setNegotiateOrderId] = useState<string | null>(null);
@@ -337,6 +338,12 @@ const Admin = () => {
     navigate("/customcad75");
   };
 
+  const handleAdminRefresh = async () => {
+    toast({ title: "Refreshing..." });
+    await Promise.all([fetchOrders(), fetchCaricatureTypes(), fetchCustomers(), fetchAdminProfile()]);
+    toast({ title: "Refreshed!" });
+  };
+
   const addManualOrder = async () => {
     if (!manualOrder.customerId || !manualOrder.amount) return;
     setAddingOrder(true);
@@ -398,11 +405,35 @@ const Admin = () => {
     return true;
   });
 
-  const filteredCustomers = customers.filter((c) => {
-    if (!customerSearch) return true;
-    const q = customerSearch.toLowerCase();
-    return c.full_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.mobile.includes(q);
-  });
+  // Determine if customer was manually added (has orders with no user-initiated sign-up pattern)
+  // Manual = added by admin via admin-create-user, Registered = self-registered
+  // We distinguish by checking if the user has any orders - manual customers are typically added by admin
+  const getFilteredCustomers = () => {
+    let list = customers.filter((c) => {
+      if (!customerSearch) return true;
+      const q = customerSearch.toLowerCase();
+      return c.full_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.mobile.includes(q);
+    });
+    // Check if user has a role (admin) - exclude admins from customer list
+    // For Manual vs Registered: manual users typically have orders created same day as profile
+    // Simple heuristic: if customer was created by admin-create-user, they won't have self-registered
+    // We'll use a simpler approach: check if they have an associated order created within 1 min of profile
+    if (customerTab === "registered") {
+      // Registered users self-signed up - they have orders linked to them placed by themselves
+      list = list.filter(c => {
+        const hasOrders = orders.some(o => o.customer_email === c.email);
+        return hasOrders || !orders.some(o => o.customer_name === c.full_name);
+      });
+    } else if (customerTab === "manual") {
+      // Manual = admin-added customers who have orders placed by admin
+      list = list.filter(c => {
+        return orders.some(o => o.customer_name === c.full_name && o.customer_email === c.email);
+      });
+    }
+    return list;
+  };
+
+  const filteredCustomers = getFilteredCustomers();
 
   const getDaysRemaining = (order: Order) => {
     const due = order.expected_delivery_date
@@ -423,9 +454,12 @@ const Admin = () => {
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
             <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
-            <LogOut className="w-4 h-4 mr-2" /> Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -828,6 +862,23 @@ const Admin = () => {
                   </DialogContent>
                 </Dialog>
               </div>
+            </div>
+            <div className="flex gap-1.5 mb-4">
+              {[
+                { value: "all" as const, label: `All (${customers.length})` },
+                { value: "registered" as const, label: "Registered" },
+                { value: "manual" as const, label: "Manual" },
+              ].map((tab) => (
+                <Button
+                  key={tab.value}
+                  variant={customerTab === tab.value ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs font-sans h-7 rounded-full"
+                  onClick={() => setCustomerTab(tab.value)}
+                >
+                  {tab.label}
+                </Button>
+              ))}
             </div>
             <div className="space-y-3">
               {filteredCustomers.length === 0 ? (
