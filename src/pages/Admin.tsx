@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image } from "lucide-react";
 import { validateEmailFormat } from "@/lib/email-validation";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
@@ -109,6 +109,15 @@ const Admin = () => {
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
+  const [showAddOrder, setShowAddOrder] = useState(false);
+  const [manualOrder, setManualOrder] = useState({
+    customerId: "", orderType: "single" as string, style: "artists_choice" as string,
+    faceCount: 1, amount: 0, notes: "", negotiated: false, negotiatedAmount: 0,
+    deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "",
+  });
+  const [manualPhotos, setManualPhotos] = useState<File[]>([]);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [addingOrder, setAddingOrder] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -265,6 +274,60 @@ const Admin = () => {
     navigate("/customcad75");
   };
 
+  const addManualOrder = async () => {
+    if (!manualOrder.customerId || !manualOrder.amount) return;
+    setAddingOrder(true);
+    try {
+      const customer = customers.find(c => c.user_id === manualOrder.customerId);
+      if (!customer) throw new Error("Customer not found");
+
+      const finalAmount = manualOrder.negotiated ? manualOrder.negotiatedAmount : manualOrder.amount;
+
+      const { data: orderData, error: orderErr } = await supabase.from("orders").insert({
+        user_id: customer.user_id,
+        customer_name: customer.full_name,
+        customer_email: customer.email,
+        customer_mobile: customer.mobile,
+        order_type: manualOrder.orderType as any,
+        caricature_type: "physical" as any,
+        style: manualOrder.style as any,
+        face_count: manualOrder.faceCount,
+        amount: finalAmount,
+        negotiated_amount: manualOrder.negotiated ? manualOrder.negotiatedAmount : null,
+        notes: manualOrder.notes || null,
+        delivery_address: manualOrder.deliveryAddress || customer.address || null,
+        delivery_city: manualOrder.deliveryCity || customer.city || null,
+        delivery_state: manualOrder.deliveryState || customer.state || null,
+        delivery_pincode: manualOrder.deliveryPincode || customer.pincode || null,
+        status: "new" as any,
+        payment_status: "pending",
+      } as any).select("id").single();
+
+      if (orderErr || !orderData) throw new Error(orderErr?.message || "Failed to create order");
+
+      // Upload photos
+      const allFiles = [...manualPhotos, ...(paymentScreenshot ? [paymentScreenshot] : [])];
+      for (const file of allFiles) {
+        const path = `${orderData.id}/${Date.now()}_${file.name}`;
+        const { error: upErr } = await supabase.storage.from("order-photos").upload(path, file);
+        if (!upErr) {
+          await supabase.from("order_images").insert({ order_id: orderData.id, storage_path: path, file_name: file.name } as any);
+        }
+      }
+
+      toast({ title: "Manual Order Created!", description: `Order for ${customer.full_name} added successfully` });
+      setShowAddOrder(false);
+      setManualOrder({ customerId: "", orderType: "single", style: "artists_choice", faceCount: 1, amount: 0, notes: "", negotiated: false, negotiatedAmount: 0, deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "" });
+      setManualPhotos([]);
+      setPaymentScreenshot(null);
+      fetchOrders();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingOrder(false);
+    }
+  };
+
   const filtered = orders.filter((o) => {
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
     if (paymentFilter !== "all" && (o.payment_status || "pending") !== paymentFilter) return false;
@@ -320,6 +383,87 @@ const Admin = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
                 </div>
+                <Dialog open={showAddOrder} onOpenChange={setShowAddOrder}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Order</Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg">
+                    <DialogHeader><DialogTitle className="font-display">Add Manual Order</DialogTitle></DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>Select Customer *</Label>
+                        <Select value={manualOrder.customerId} onValueChange={(v) => setManualOrder({ ...manualOrder, customerId: v })}>
+                          <SelectTrigger><SelectValue placeholder="Choose customer..." /></SelectTrigger>
+                          <SelectContent>
+                            {customers.map((c) => (
+                              <SelectItem key={c.user_id} value={c.user_id}>{c.full_name} ({c.email})</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Order Type *</Label>
+                          <Select value={manualOrder.orderType} onValueChange={(v) => setManualOrder({ ...manualOrder, orderType: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="single">Single</SelectItem>
+                              <SelectItem value="couple">Couple</SelectItem>
+                              <SelectItem value="group">Group</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Style</Label>
+                          <Select value={manualOrder.style} onValueChange={(v) => setManualOrder({ ...manualOrder, style: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cute">Cute</SelectItem>
+                              <SelectItem value="romantic">Romantic</SelectItem>
+                              <SelectItem value="fun">Fun</SelectItem>
+                              <SelectItem value="royal">Royal</SelectItem>
+                              <SelectItem value="minimal">Minimal</SelectItem>
+                              <SelectItem value="artists_choice">Artist's Choice</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>Face Count</Label><Input type="number" min={1} value={manualOrder.faceCount} onChange={(e) => setManualOrder({ ...manualOrder, faceCount: parseInt(e.target.value) || 1 })} /></div>
+                        <div><Label>Amount (₹) *</Label><Input type="number" value={manualOrder.amount} onChange={(e) => setManualOrder({ ...manualOrder, amount: parseInt(e.target.value) || 0 })} /></div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={manualOrder.negotiated} onChange={(e) => setManualOrder({ ...manualOrder, negotiated: e.target.checked })} />
+                        <Label>Negotiated Price</Label>
+                      </div>
+                      {manualOrder.negotiated && (
+                        <div><Label>Negotiated Amount (₹)</Label><Input type="number" value={manualOrder.negotiatedAmount} onChange={(e) => setManualOrder({ ...manualOrder, negotiatedAmount: parseInt(e.target.value) || 0 })} /></div>
+                      )}
+                      <div><Label>Notes</Label><Textarea value={manualOrder.notes} onChange={(e) => setManualOrder({ ...manualOrder, notes: e.target.value })} placeholder="Special instructions..." /></div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>Delivery Address</Label><Input value={manualOrder.deliveryAddress} onChange={(e) => setManualOrder({ ...manualOrder, deliveryAddress: e.target.value })} /></div>
+                        <div><Label>City</Label><Input value={manualOrder.deliveryCity} onChange={(e) => setManualOrder({ ...manualOrder, deliveryCity: e.target.value })} /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>State</Label><Input value={manualOrder.deliveryState} onChange={(e) => setManualOrder({ ...manualOrder, deliveryState: e.target.value })} /></div>
+                        <div><Label>Pincode</Label><Input value={manualOrder.deliveryPincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setManualOrder({ ...manualOrder, deliveryPincode: d }); }} maxLength={6} /></div>
+                      </div>
+                      <div>
+                        <Label className="flex items-center gap-1"><Image className="w-4 h-4" />Upload Photos</Label>
+                        <Input type="file" multiple accept="image/*" onChange={(e) => setManualPhotos(Array.from(e.target.files || []))} />
+                        {manualPhotos.length > 0 && <p className="text-xs text-muted-foreground mt-1">{manualPhotos.length} photo(s) selected</p>}
+                      </div>
+                      <div>
+                        <Label className="flex items-center gap-1"><Upload className="w-4 h-4" />Payment Screenshot (optional)</Label>
+                        <Input type="file" accept="image/*" onChange={(e) => setPaymentScreenshot(e.target.files?.[0] || null)} />
+                        {paymentScreenshot && <p className="text-xs text-muted-foreground mt-1">{paymentScreenshot.name}</p>}
+                      </div>
+                      <Button onClick={addManualOrder} disabled={!manualOrder.customerId || !manualOrder.amount || addingOrder} className="w-full font-sans">
+                        {addingOrder ? "Creating Order..." : "Create Order"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               {/* Status Filter Tabs */}
               <div className="flex flex-wrap gap-1.5">

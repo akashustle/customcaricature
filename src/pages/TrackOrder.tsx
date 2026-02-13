@@ -50,8 +50,8 @@ const TrackOrder = () => {
 
     const searchId = orderId.trim().toLowerCase();
     
-    // Use secure RPC function for tracking
-    const { data, error } = await supabase.rpc("track_order", { order_uuid: searchId });
+    // Use secure RPC function for tracking - supports short ID or full UUID
+    const { data, error } = await supabase.rpc("track_order", { order_id_input: searchId });
 
     if (error || !data || (Array.isArray(data) && data.length === 0)) {
       toast({ title: "Order Not Found", description: "Please check your Order ID and try again.", variant: "destructive" });
