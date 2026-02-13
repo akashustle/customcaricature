@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2 } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +82,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -105,8 +106,24 @@ const Dashboard = () => {
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
-    if (data) { setProfile(data as any); setEditForm(data as any); }
+    const { data, error } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode").eq("user_id", userId).maybeSingle();
+    if (error) {
+      console.error("Error fetching profile:", error);
+    }
+    if (data) {
+      const profileData: Profile = {
+        full_name: data.full_name || "",
+        mobile: data.mobile || "",
+        email: data.email || "",
+        instagram_id: data.instagram_id || null,
+        address: data.address || null,
+        city: data.city || null,
+        state: data.state || null,
+        pincode: data.pincode || null,
+      };
+      setProfile(profileData);
+      setEditForm(profileData);
+    }
     setLoading(false);
   };
 
@@ -134,7 +151,7 @@ const Dashboard = () => {
     } else {
       setProfile(editForm);
       setEditing(false);
-      toast({ title: "Profile Updated" });
+      toast({ title: "Profile Updated Successfully!" });
     }
   };
 
@@ -212,7 +229,8 @@ const Dashboard = () => {
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -223,7 +241,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans">
               <Home className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex">
               <LogOut className="w-4 h-4 mr-1" /> Logout
             </Button>
           </div>
@@ -231,148 +249,25 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <Tabs defaultValue="orders">
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />My Orders</TabsTrigger>
-            <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
-          </TabsList>
+        {/* Desktop Tabs */}
+        <div className="hidden md:block">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full mb-6">
+              <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />My Orders</TabsTrigger>
+              <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
+            </TabsList>
+            <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} /></TabsContent>
+            <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
+          </Tabs>
+        </div>
 
-          <TabsContent value="orders">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => navigate("/order")} className="rounded-full font-sans" size="sm">
-                + New Order
-              </Button>
-            </div>
-            {orders.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="font-sans text-muted-foreground mb-4">No orders yet</p>
-                  <Button onClick={() => navigate("/order")} className="rounded-full font-sans">Order Your Caricature</Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {orders.map((order) => (
-                  <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                    <Card
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-                    >
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
-                            <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
-                            <p className="text-xs text-muted-foreground font-sans">
-                              Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                            </p>
-                          </div>
-                          <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>
-                            {STATUS_LABELS[order.status] || order.status}
-                          </Badge>
-                          <Badge className={`${order.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"} border-none text-xs`}>
-                            <CreditCard className="w-3 h-3 mr-1" />
-                            Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
-                          </Badge>
-                        </div>
+        {/* Mobile Content */}
+        <div className="md:hidden">
+          {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} />}
+          {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
+        </div>
 
-                        {expandedOrder === order.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans"
-                          >
-                            <Row label="Faces" value={String(order.face_count)} />
-                            {order.delivery_address && (
-                              <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />
-                            )}
-                            {order.notes && <Row label="Notes" value={order.notes} />}
-                            {order.artist_name && <Row label="Artist" value={order.artist_name} />}
-                            <Row label="Expected Delivery" value={
-                              order.expected_delivery_date
-                                ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN")
-                                : "25-30 days from order date"
-                            } />
-                            {order.payment_status !== "confirmed" && (
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  className="rounded-full font-sans w-full"
-                                  disabled={payingOrderId === order.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePayNow(order);
-                                  }}
-                                >
-                                  {payingOrderId === order.id ? (
-                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                                  ) : (
-                                    <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(order.amount)} Now</>
-                                  )}
-                                </Button>
-                              </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-display text-lg">My Details</CardTitle>
-                {!editing ? (
-                  <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="font-sans">
-                    <Edit2 className="w-4 h-4 mr-1" /> Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={saveProfile} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
-                    <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans"><X className="w-4 h-4" /></Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {editing && editForm ? (
-                  <>
-                    <div><Label className="font-sans">Full Name</Label><Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} /></div>
-                    <div><Label className="font-sans">Mobile</Label><Input value={editForm.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} /></div>
-                    <div><Label className="font-sans">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e) => setEditForm({ ...editForm, instagram_id: e.target.value })} /></div>
-                    <div><Label className="font-sans">Address</Label><Input value={editForm.address || ""} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} /></div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><Label className="font-sans">City</Label><Input value={editForm.city || ""} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} /></div>
-                      <div><Label className="font-sans">State</Label><Input value={editForm.state || ""} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} /></div>
-                    </div>
-                    <div><Label className="font-sans">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} /></div>
-                  </>
-                ) : profile ? (
-                  <div className="space-y-2 font-sans text-sm">
-                    <Row label="Name" value={profile.full_name} />
-                    <Row label="Mobile" value={`+91 ${profile.mobile}`} />
-                    <Row label="Email" value={profile.email} />
-                    {profile.instagram_id && <Row label="Instagram" value={profile.instagram_id} />}
-                    {profile.address && <Row label="Address" value={profile.address} />}
-                    {profile.city && <Row label="City" value={profile.city} />}
-                    {profile.state && <Row label="State" value={profile.state} />}
-                    {profile.pincode && <Row label="Pincode" value={profile.pincode} />}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground font-sans">No profile data</p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
+        {/* WhatsApp Support */}
         <div className="mt-6">
           <a
             href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`}
@@ -384,12 +279,168 @@ const Dashboard = () => {
           </a>
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
+        <div className="flex items-center justify-around py-2">
+          <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
+          <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
+          <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+          <BottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
+        </div>
+      </div>
     </div>
   );
 };
 
+const BottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+    <Icon className="w-5 h-5" />
+    <span className="text-[10px] font-sans font-medium">{label}</span>
+  </button>
+);
+
+const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate }: any) => (
+  <>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="font-display text-xl font-bold">My Orders</h2>
+      <Button onClick={() => navigate("/order")} className="rounded-full font-sans" size="sm">
+        + New Order
+      </Button>
+    </div>
+    {orders.length === 0 ? (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="font-sans text-muted-foreground mb-4">No orders yet</p>
+          <Button onClick={() => navigate("/order")} className="rounded-full font-sans">Order Your Caricature</Button>
+        </CardContent>
+      </Card>
+    ) : (
+      <div className="space-y-3">
+        {orders.map((order: any) => (
+          <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+            >
+              <CardContent className="p-4 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
+                    <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
+                    <p className="text-xs text-muted-foreground font-sans">
+                      Ordered: {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
+                  <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>
+                    {STATUS_LABELS[order.status] || order.status}
+                  </Badge>
+                  <Badge className={`${order.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"} border-none text-xs`}>
+                    <CreditCard className="w-3 h-3 mr-1" />
+                    Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
+                  </Badge>
+                </div>
+
+                {expandedOrder === order.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans"
+                  >
+                    <Row label="Faces" value={String(order.face_count)} />
+                    {order.delivery_address && (
+                      <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />
+                    )}
+                    {order.notes && <Row label="Notes" value={order.notes} />}
+                    {order.artist_name && <Row label="Artist" value={order.artist_name} />}
+                    <Row label="Expected Delivery" value={
+                      order.expected_delivery_date
+                        ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN")
+                        : "25-30 days from order date"
+                    } />
+                    {order.payment_status !== "confirmed" && (
+                      <div className="pt-2">
+                        <Button
+                          size="sm"
+                          className="rounded-full font-sans w-full"
+                          disabled={payingOrderId === order.id}
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            handlePayNow(order);
+                          }}
+                        >
+                          {payingOrderId === order.id ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                          ) : (
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(order.amount)} Now</>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </>
+);
+
+const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile, setProfile }: any) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between">
+      <CardTitle className="font-display text-lg">My Profile</CardTitle>
+      {!editing ? (
+        <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans">
+          <Edit2 className="w-4 h-4 mr-1" /> Edit
+        </Button>
+      ) : (
+        <div className="flex gap-2">
+          <Button size="sm" onClick={saveProfile} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+          <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans"><X className="w-4 h-4" /></Button>
+        </div>
+      )}
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {editing && editForm ? (
+        <>
+          <div><Label className="font-sans">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} /></div>
+          <div><Label className="font-sans">Email (cannot be changed)</Label><Input value={editForm.email || ""} disabled className="opacity-60" /></div>
+          <div><Label className="font-sans">Mobile (10 digits)</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} /></div>
+          <div><Label className="font-sans">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} /></div>
+          <div><Label className="font-sans">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="font-sans">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} /></div>
+            <div><Label className="font-sans">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} /></div>
+          </div>
+          <div><Label className="font-sans">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} /></div>
+        </>
+      ) : profile ? (
+        <div className="space-y-3 font-sans text-sm">
+          <Row label="Name" value={profile.full_name || "—"} />
+          <Row label="Email" value={profile.email || "—"} />
+          <Row label="Mobile" value={profile.mobile ? `+91 ${profile.mobile}` : "—"} />
+          <Row label="Instagram" value={profile.instagram_id || "—"} />
+          <Row label="Address" value={profile.address || "—"} />
+          <Row label="City" value={profile.city || "—"} />
+          <Row label="State" value={profile.state || "—"} />
+          <Row label="Pincode" value={profile.pincode || "—"} />
+        </div>
+      ) : (
+        <p className="text-muted-foreground font-sans">No profile data found. Please contact support.</p>
+      )}
+    </CardContent>
+  </Card>
+);
+
 const Row = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between">
+  <div className="flex justify-between py-1">
     <span className="text-muted-foreground">{label}</span>
     <span className="font-medium text-right max-w-[60%]">{value}</span>
   </div>

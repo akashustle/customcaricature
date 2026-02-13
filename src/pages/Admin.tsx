@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2 } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings } from "lucide-react";
+import { validateEmailFormat } from "@/lib/email-validation";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { toast } from "@/hooks/use-toast";
@@ -106,6 +107,7 @@ const Admin = () => {
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
+  const [activeTab, setActiveTab] = useState("orders");
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -286,7 +288,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -300,7 +302,7 @@ const Admin = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="orders">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full overflow-x-auto flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
@@ -558,7 +560,13 @@ const Admin = () => {
                     <DialogHeader><DialogTitle className="font-display">Add Customer Manually</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div><Label>Full Name *</Label><Input value={newCustomer.full_name} onChange={(e) => setNewCustomer({ ...newCustomer, full_name: e.target.value })} /></div>
-                      <div><Label>Email *</Label><Input type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} /></div>
+                      <div>
+                        <Label>Email *</Label>
+                        <Input type="email" value={newCustomer.email} onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })} />
+                        {newCustomer.email && validateEmailFormat(newCustomer.email) && (
+                          <p className="text-xs text-destructive font-sans mt-1">{validateEmailFormat(newCustomer.email)}</p>
+                        )}
+                      </div>
                       <div><Label>Mobile * (10 digits)</Label><Input value={newCustomer.mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewCustomer({ ...newCustomer, mobile: d }); }} maxLength={10} /></div>
                       <div><Label>Password *</Label><Input type="password" value={newCustomer.password} onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })} /></div>
                       <div><Label>Instagram</Label><Input value={newCustomer.instagram_id} onChange={(e) => setNewCustomer({ ...newCustomer, instagram_id: e.target.value })} /></div>
@@ -568,7 +576,7 @@ const Admin = () => {
                         <div><Label>State</Label><Input value={newCustomer.state} onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })} /></div>
                       </div>
                       <div><Label>Pincode</Label><Input value={newCustomer.pincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setNewCustomer({ ...newCustomer, pincode: d }); }} maxLength={6} /></div>
-                      <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password || addingCustomer} className="w-full font-sans">
+                      <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password || addingCustomer || !!validateEmailFormat(newCustomer.email)} className="w-full font-sans">
                         {addingCustomer ? "Creating..." : "Add Customer"}
                       </Button>
                     </div>
@@ -674,8 +682,26 @@ const Admin = () => {
           </Card>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
+        <div className="flex items-center justify-around py-2">
+          <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
+          <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
+          <AdminBottomNavItem icon={BarChart3} label="Analytics" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
+          <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
+          <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
+        </div>
+      </div>
     </div>
   );
 };
+
+const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+    <Icon className="w-5 h-5" />
+    <span className="text-[10px] font-sans font-medium">{label}</span>
+  </button>
+);
 
 export default Admin;
