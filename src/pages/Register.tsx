@@ -69,7 +69,19 @@ const Register = () => {
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { emailRedirectTo: window.location.origin },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            full_name: form.fullName,
+            mobile: form.mobile,
+            instagram_id: form.instagramId || null,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            pincode: form.pincode,
+            secret_code: form.secretCode,
+          },
+        },
       });
       if (error) {
         if (error.message?.toLowerCase().includes("already registered")) {
@@ -80,20 +92,6 @@ const Register = () => {
         throw error;
       }
       if (!data.user) throw new Error("Registration failed");
-
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        full_name: form.fullName,
-        mobile: form.mobile,
-        email: form.email,
-        instagram_id: form.instagramId || null,
-        address: form.address,
-        city: form.city,
-        state: form.state,
-        pincode: form.pincode,
-        secret_code: form.secretCode,
-      });
-      if (profileError) console.error("Profile creation error:", profileError);
 
       toast({ title: "Registration Successful!", description: "Please check your email to verify your account, then login." });
       navigate("/login");
