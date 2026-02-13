@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound } from "lucide-react";
 import { validateEmailFormat } from "@/lib/email-validation";
 import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
@@ -118,6 +118,19 @@ const Admin = () => {
   const [manualPhotos, setManualPhotos] = useState<File[]>([]);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [addingOrder, setAddingOrder] = useState(false);
+  // Admin settings state
+  const [adminCurrentPassword, setAdminCurrentPassword] = useState("");
+  const [adminNewPassword, setAdminNewPassword] = useState("");
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState("");
+  const [changingAdminPassword, setChangingAdminPassword] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [newAdminName, setNewAdminName] = useState("");
+  const [newAdminMobile, setNewAdminMobile] = useState("");
+  const [addingAdmin, setAddingAdmin] = useState(false);
+  const [adminProfile, setAdminProfile] = useState<Profile | null>(null);
+  const [editingAdminProfile, setEditingAdminProfile] = useState(false);
+  const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -125,10 +138,60 @@ const Admin = () => {
       fetchOrders();
       fetchCaricatureTypes();
       fetchCustomers();
+      fetchAdminProfile();
     } else if (!authLoading && !user) {
       navigate("/customcad75");
     }
   }, [user, authLoading]);
+
+  const fetchAdminProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
+    if (data) { setAdminProfile(data as any); setAdminEditData(data as any); }
+  };
+
+  const saveAdminProfile = async () => {
+    if (!user) return;
+    await supabase.from("profiles").update({
+      full_name: adminEditData.full_name, mobile: adminEditData.mobile,
+      instagram_id: adminEditData.instagram_id, address: adminEditData.address,
+      city: adminEditData.city, state: adminEditData.state, pincode: adminEditData.pincode,
+    } as any).eq("user_id", user.id);
+    toast({ title: "Profile Updated" });
+    setEditingAdminProfile(false);
+    fetchAdminProfile();
+  };
+
+  const changeAdminPassword = async () => {
+    if (adminNewPassword !== adminConfirmPassword) { toast({ title: "Passwords don't match", variant: "destructive" }); return; }
+    if (adminNewPassword.length < 6) { toast({ title: "Min 6 characters", variant: "destructive" }); return; }
+    setChangingAdminPassword(true);
+    const adminEmail = user?.email || adminProfile?.email || "";
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email: adminEmail, password: adminCurrentPassword });
+    if (signInErr) { toast({ title: "Current password is incorrect", variant: "destructive" }); setChangingAdminPassword(false); return; }
+    const { error } = await supabase.auth.updateUser({ password: adminNewPassword });
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Password Changed!" }); setAdminCurrentPassword(""); setAdminNewPassword(""); setAdminConfirmPassword(""); }
+    setChangingAdminPassword(false);
+  };
+
+  const addNewAdmin = async () => {
+    if (!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile) return;
+    setAddingAdmin(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-create-user", {
+        body: { email: newAdminEmail, password: newAdminPassword, full_name: newAdminName, mobile: newAdminMobile, make_admin: true },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "New Admin Added!", description: `${newAdminName} can now login as admin` });
+      setNewAdminEmail(""); setNewAdminPassword(""); setNewAdminName(""); setNewAdminMobile("");
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
 
   const checkAdmin = async () => {
     if (!user) return;
@@ -373,6 +436,7 @@ const Admin = () => {
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
+            <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -842,6 +906,69 @@ const Admin = () => {
           <TabsContent value="analytics">
             <AdminAnalytics orders={orders as any} customers={customers} />
           </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="space-y-6 max-w-lg">
+              {/* Admin Profile */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="font-display text-lg">Admin Profile</CardTitle>
+                  {!editingAdminProfile ? (
+                    <Button variant="outline" size="sm" onClick={() => { setAdminEditData(adminProfile || {}); setEditingAdminProfile(true); }} className="font-sans"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveAdminProfile} className="font-sans bg-primary hover:bg-primary/90"><Save className="w-4 h-4 mr-1" />Save</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setEditingAdminProfile(false)}><X className="w-4 h-4" /></Button>
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {editingAdminProfile ? (
+                    <>
+                      <div><Label>Name</Label><Input value={adminEditData.full_name || ""} onChange={(e) => setAdminEditData({ ...adminEditData, full_name: e.target.value })} /></div>
+                      <div><Label>Email (read-only)</Label><Input value={adminProfile?.email || ""} disabled className="opacity-60" /></div>
+                      <div><Label>Mobile</Label><Input value={adminEditData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setAdminEditData({ ...adminEditData, mobile: d }); }} maxLength={10} /></div>
+                    </>
+                  ) : adminProfile ? (
+                    <div className="space-y-2 font-sans text-sm">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{adminProfile.full_name}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{adminProfile.email}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Mobile</span><span className="font-medium">{adminProfile.mobile}</span></div>
+                    </div>
+                  ) : <p className="text-muted-foreground font-sans text-sm">Loading...</p>}
+                </CardContent>
+              </Card>
+
+              {/* Change Password */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Change Password</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div><Label>Current Password</Label><Input type="password" value={adminCurrentPassword} onChange={(e) => setAdminCurrentPassword(e.target.value)} /></div>
+                  <div><Label>New Password (min 6)</Label><Input type="password" value={adminNewPassword} onChange={(e) => setAdminNewPassword(e.target.value)} /></div>
+                  <div><Label>Confirm New Password</Label><Input type="password" value={adminConfirmPassword} onChange={(e) => setAdminConfirmPassword(e.target.value)} /></div>
+                  {adminNewPassword && adminConfirmPassword && adminNewPassword !== adminConfirmPassword && <p className="text-xs text-destructive font-sans">Passwords don't match</p>}
+                  <Button onClick={changeAdminPassword} disabled={!adminCurrentPassword || adminNewPassword.length < 6 || adminNewPassword !== adminConfirmPassword || changingAdminPassword} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+                    {changingAdminPassword ? "Changing..." : "Change Password"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Add New Admin */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><UserPlus className="w-5 h-5 text-primary" />Add New Admin</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div><Label>Full Name *</Label><Input value={newAdminName} onChange={(e) => setNewAdminName(e.target.value)} placeholder="Admin name" /></div>
+                  <div><Label>Email *</Label><Input type="email" value={newAdminEmail} onChange={(e) => setNewAdminEmail(e.target.value)} placeholder="admin@email.com" /></div>
+                  <div><Label>Mobile *</Label><Input value={newAdminMobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewAdminMobile(d); }} maxLength={10} placeholder="10 digits" /></div>
+                  <div><Label>Password *</Label><Input type="password" value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="Min 6 characters" /></div>
+                  <Button onClick={addNewAdmin} disabled={!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile || addingAdmin} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+                    {addingAdmin ? "Adding Admin..." : "Add Admin"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -869,9 +996,9 @@ const Admin = () => {
         <div className="flex items-center justify-around py-2">
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
-          <AdminBottomNavItem icon={BarChart3} label="Analytics" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
+          <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
-          <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
+          <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
     </div>

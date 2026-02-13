@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -15,11 +15,12 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [verified, setVerified] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const validateSecretCode = (val: string) => {
     const digits = val.replace(/\D/g, "");
     if (digits.length <= 4) setSecretCode(digits);
+    setErrorMsg("");
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -33,18 +34,35 @@ const ForgotPassword = () => {
       return;
     }
     setLoading(true);
+    setErrorMsg("");
     try {
       const { data, error } = await supabase.functions.invoke("reset-password", {
-        body: { email, secret_code: secretCode, new_password: newPassword },
+        body: { email: email.trim().toLowerCase(), secret_code: secretCode, new_password: newPassword },
       });
 
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (data?.error) {
+        if (data.error.toLowerCase().includes("secret code") || data.error.toLowerCase().includes("invalid")) {
+          setErrorMsg("⚠️ The secret code you entered is incorrect. Please check and try again.");
+          toast({ title: "Wrong Secret Code", description: "The secret code entered is incorrect.", variant: "destructive" });
+        } else {
+          throw new Error(data.error);
+        }
+        return;
+      }
 
       toast({ title: "Password Reset Successful!", description: "You can now login with your new password" });
       navigate("/login");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to reset password", variant: "destructive" });
+      const msg = err.message || "Failed to reset password";
+      if (msg.toLowerCase().includes("secret") || msg.toLowerCase().includes("invalid")) {
+        setErrorMsg("⚠️ The secret code you entered is incorrect. Please check and try again.");
+      } else if (msg.toLowerCase().includes("not found")) {
+        setErrorMsg("⚠️ No account found with this email address.");
+      } else {
+        setErrorMsg(msg);
+      }
+      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -54,7 +72,7 @@ const ForgotPassword = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
+          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
           <CardTitle className="font-display text-2xl">Reset Password</CardTitle>
           <CardDescription className="font-sans">
             Enter your email, secret code, and new password
@@ -64,7 +82,7 @@ const ForgotPassword = () => {
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <Label className="font-sans">Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); }} required />
             </div>
             <div>
               <Label className="font-sans">4-digit Secret Code</Label>
@@ -81,7 +99,13 @@ const ForgotPassword = () => {
             {newPassword && confirmPassword && newPassword !== confirmPassword && (
               <p className="text-xs text-destructive font-sans">Passwords don't match</p>
             )}
-            <Button type="submit" disabled={loading || !email || secretCode.length !== 4 || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans">
+            {errorMsg && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-destructive font-sans font-medium">{errorMsg}</p>
+              </div>
+            )}
+            <Button type="submit" disabled={loading || !email || secretCode.length !== 4 || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
               {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
             </Button>
           </form>

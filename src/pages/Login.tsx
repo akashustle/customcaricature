@@ -20,7 +20,6 @@ const Login = () => {
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     } else {
-      // Check if admin or regular user
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
@@ -38,7 +37,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
+          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
           <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
           <CardDescription className="font-sans">Sign in to your account</CardDescription>
         </CardHeader>
@@ -52,7 +51,7 @@ const Login = () => {
               <Label className="font-sans">Password</Label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button type="submit" disabled={loading} className="w-full rounded-full font-sans">
+            <Button type="submit" disabled={loading} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>

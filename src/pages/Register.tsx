@@ -51,17 +51,13 @@ const Register = () => {
     if (!canSubmit) return;
     
     const emailErr = validateEmailFormat(form.email);
-    if (emailErr) {
-      setEmailError(emailErr);
-      return;
-    }
+    if (emailErr) { setEmailError(emailErr); return; }
     
     setLoading(true);
-
     try {
       const { data: existing } = await supabase.from("profiles").select("email").eq("email", form.email).maybeSingle();
       if (existing) {
-        toast({ title: "Email Already Registered", description: "This email is already in use. Please login or use a different email.", variant: "destructive" });
+        toast({ title: "Email Already Registered", description: "This email is already in use.", variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -72,22 +68,17 @@ const Register = () => {
         options: {
           emailRedirectTo: window.location.origin,
           data: {
-            full_name: form.fullName,
-            mobile: form.mobile,
-            instagram_id: form.instagramId || null,
-            address: form.address,
-            city: form.city,
-            state: form.state,
-            pincode: form.pincode,
+            full_name: form.fullName, mobile: form.mobile,
+            instagram_id: form.instagramId || null, address: form.address,
+            city: form.city, state: form.state, pincode: form.pincode,
             secret_code: form.secretCode,
           },
         },
       });
       if (error) {
         if (error.message?.toLowerCase().includes("already registered")) {
-          toast({ title: "Email Already Registered", description: "This email is already in use. Please login or use a different email.", variant: "destructive" });
-          setLoading(false);
-          return;
+          toast({ title: "Email Already Registered", description: "Please login or use a different email.", variant: "destructive" });
+          setLoading(false); return;
         }
         throw error;
       }
@@ -106,16 +97,13 @@ const Register = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl" />
+          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
           <CardTitle className="font-display text-2xl">Create Account</CardTitle>
           <CardDescription className="font-sans">Register to track your caricature orders</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <Label className="font-sans">Full Name *</Label>
-              <Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" />
-            </div>
+            <div><Label className="font-sans">Full Name *</Label><Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" /></div>
             <div>
               <Label className="font-sans">Mobile Number * (10 digits)</Label>
               <div className="flex gap-2">
@@ -129,37 +117,16 @@ const Register = () => {
               {emailError && <p className="text-xs text-destructive font-sans mt-1">{emailError}</p>}
               <p className="text-xs text-muted-foreground font-sans mt-1">Allowed: Gmail, Hotmail, Outlook, Yahoo, Zohomail</p>
             </div>
-            <div>
-              <Label className="font-sans">Instagram ID</Label>
-              <Input value={form.instagramId} onChange={(e) => update("instagramId", e.target.value)} placeholder="@yourusername" />
-            </div>
-            <div>
-              <Label className="font-sans">Full Address *</Label>
-              <Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" />
-            </div>
+            <div><Label className="font-sans">Instagram ID</Label><Input value={form.instagramId} onChange={(e) => update("instagramId", e.target.value)} placeholder="@yourusername" /></div>
+            <div><Label className="font-sans">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="font-sans">City *</Label>
-                <Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="Mumbai" />
-              </div>
-              <div>
-                <Label className="font-sans">State *</Label>
-                <Input value={form.state} onChange={(e) => update("state", e.target.value)} placeholder="Maharashtra" />
-              </div>
+              <div><Label className="font-sans">City *</Label><Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="Mumbai" /></div>
+              <div><Label className="font-sans">State *</Label><Input value={form.state} onChange={(e) => update("state", e.target.value)} placeholder="Maharashtra" /></div>
             </div>
-            <div>
-              <Label className="font-sans">Pincode * (6 digits)</Label>
-              <Input value={form.pincode} onChange={(e) => validatePincode(e.target.value)} placeholder="400001" maxLength={6} />
-            </div>
+            <div><Label className="font-sans">Pincode * (6 digits)</Label><Input value={form.pincode} onChange={(e) => validatePincode(e.target.value)} placeholder="400001" maxLength={6} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="font-sans">Password *</Label>
-                <Input type="password" value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Min 6 chars" />
-              </div>
-              <div>
-                <Label className="font-sans">Confirm Password *</Label>
-                <Input type="password" value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} placeholder="Re-enter" />
-              </div>
+              <div><Label className="font-sans">Password *</Label><Input type="password" value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Min 6 chars" /></div>
+              <div><Label className="font-sans">Confirm *</Label><Input type="password" value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} placeholder="Re-enter" /></div>
             </div>
             {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
               <p className="text-xs text-destructive font-sans">Passwords don't match</p>
@@ -167,9 +134,9 @@ const Register = () => {
             <div>
               <Label className="font-sans">Secret Code * (4 digits for password recovery)</Label>
               <Input value={form.secretCode} onChange={(e) => validateSecretCode(e.target.value)} placeholder="1234" maxLength={4} type="password" />
-              <p className="text-xs text-muted-foreground font-sans mt-1">Remember this code — you'll need it to reset your password</p>
+              <p className="text-xs text-muted-foreground font-sans mt-1">Remember this — you'll need it to reset your password</p>
             </div>
-            <Button type="submit" disabled={!canSubmit || loading} className="w-full rounded-full font-sans">
+            <Button type="submit" disabled={!canSubmit || loading} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
               {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
