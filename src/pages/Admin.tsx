@@ -105,6 +105,7 @@ const Admin = () => {
   const [editCustomerData, setEditCustomerData] = useState<Partial<Profile>>({});
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
+  const [addingCustomer, setAddingCustomer] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -140,7 +141,10 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at");
+    if (error) {
+      console.error("Error fetching customers:", error);
+    }
     if (data) setCustomers(data as any);
   };
 
@@ -197,37 +201,36 @@ const Admin = () => {
 
   const addCustomerManual = async () => {
     if (!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password) return;
+    setAddingCustomer(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: newCustomer.email,
-        password: newCustomer.password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (error) throw error;
-      if (data.user) {
-        await supabase.from("profiles").insert({
-          user_id: data.user.id,
+      // Use edge function to create user without affecting admin session
+      const { data, error } = await supabase.functions.invoke("admin-create-user", {
+        body: {
+          email: newCustomer.email,
+          password: newCustomer.password,
           full_name: newCustomer.full_name,
           mobile: newCustomer.mobile,
-          email: newCustomer.email,
           instagram_id: newCustomer.instagram_id || null,
           address: newCustomer.address || null,
           city: newCustomer.city || null,
           state: newCustomer.state || null,
           pincode: newCustomer.pincode || null,
-        });
-      }
-      toast({ title: "Customer Added" });
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Customer Added Successfully" });
       setShowAddCustomer(false);
       setNewCustomer({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
       fetchCustomers();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingCustomer(false);
     }
   };
 
   const deleteCustomer = async (userId: string) => {
-    // Delete profile and associated orders
     await supabase.from("orders").delete().eq("user_id", userId);
     await supabase.from("profiles").delete().eq("user_id", userId);
     toast({ title: "Customer & their orders deleted" });
@@ -565,79 +568,90 @@ const Admin = () => {
                         <div><Label>State</Label><Input value={newCustomer.state} onChange={(e) => setNewCustomer({ ...newCustomer, state: e.target.value })} /></div>
                       </div>
                       <div><Label>Pincode</Label><Input value={newCustomer.pincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setNewCustomer({ ...newCustomer, pincode: d }); }} maxLength={6} /></div>
-                      <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password} className="w-full font-sans">Add Customer</Button>
+                      <Button onClick={addCustomerManual} disabled={!newCustomer.full_name || !newCustomer.email || !newCustomer.mobile || !newCustomer.password || addingCustomer} className="w-full font-sans">
+                        {addingCustomer ? "Creating..." : "Add Customer"}
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
             </div>
             <div className="space-y-3">
-              {filteredCustomers.map((c) => (
-                <Card key={c.id}>
-                  <CardContent className="p-4">
-                    {editingCustomer === c.user_id ? (
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div><Label className="text-xs">Full Name</Label><Input value={editCustomerData.full_name || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, full_name: e.target.value })} /></div>
-                          <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
-                        </div>
-                        <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
-                        <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
-                        <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div><Label className="text-xs">City</Label><Input value={editCustomerData.city || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, city: e.target.value })} /></div>
-                          <div><Label className="text-xs">State</Label><Input value={editCustomerData.state || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, state: e.target.value })} /></div>
-                          <div><Label className="text-xs">Pincode</Label><Input value={editCustomerData.pincode || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditCustomerData({ ...editCustomerData, pincode: d }); }} maxLength={6} /></div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => saveCustomerEdit(c.user_id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingCustomer(null)}><X className="w-4 h-4" /></Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <p className="font-sans font-semibold">{c.full_name}</p>
-                          <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
-                          {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
-                          {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
-                          {(c.city || c.state || c.pincode) && (
-                            <p className="text-xs text-muted-foreground font-sans">
-                              {[c.city, c.state, c.pincode].filter(Boolean).join(", ")}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground font-sans">
-                            Registered: {new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
-                                <AlertDialogDescription>This will delete the customer profile and all their orders permanently.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </div>
-                    )}
+              {filteredCustomers.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="font-sans text-muted-foreground">No customers found</p>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                filteredCustomers.map((c) => (
+                  <Card key={c.id}>
+                    <CardContent className="p-4">
+                      {editingCustomer === c.user_id ? (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div><Label className="text-xs">Full Name</Label><Input value={editCustomerData.full_name || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, full_name: e.target.value })} /></div>
+                            <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
+                          </div>
+                          <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                          <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
+                          <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div><Label className="text-xs">City</Label><Input value={editCustomerData.city || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, city: e.target.value })} /></div>
+                            <div><Label className="text-xs">State</Label><Input value={editCustomerData.state || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, state: e.target.value })} /></div>
+                            <div><Label className="text-xs">Pincode</Label><Input value={editCustomerData.pincode || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditCustomerData({ ...editCustomerData, pincode: d }); }} maxLength={6} /></div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={() => saveCustomerEdit(c.user_id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingCustomer(null)}><X className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <p className="font-sans font-semibold">{c.full_name}</p>
+                            <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
+                            {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
+                            {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
+                            {(c.city || c.state || c.pincode) && (
+                              <p className="text-xs text-muted-foreground font-sans">
+                                {[c.city, c.state, c.pincode].filter(Boolean).join(", ")}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground font-sans">
+                              Registered: {new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                            </p>
+                          </div>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
+                                  <AlertDialogDescription>This will delete the customer profile and all their orders permanently.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="analytics">
-            <AdminAnalytics orders={orders as any} />
+            <AdminAnalytics orders={orders as any} customers={customers} />
           </TabsContent>
         </Tabs>
       </div>
