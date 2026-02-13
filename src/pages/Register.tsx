@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { validateEmailFormat } from "@/lib/email-validation";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -20,11 +21,8 @@ const Register = () => {
   const update = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (field === "email") {
-      if (value.trim() && !value.includes("@")) {
-        setEmailError("Please enter a valid email with @ included");
-      } else {
-        setEmailError("");
-      }
+      const error = validateEmailFormat(value);
+      setEmailError(error || "");
     }
   };
 
@@ -44,17 +42,23 @@ const Register = () => {
   };
 
   const canSubmit = form.fullName.trim() && form.mobile.length === 10 &&
-    form.email.includes("@") && form.address.trim() && form.city.trim() &&
+    !emailError && form.email.includes("@") && form.address.trim() && form.city.trim() &&
     form.state.trim() && form.pincode.length === 6 && form.password.length >= 6 &&
     form.password === form.confirmPassword && form.secretCode.length === 4;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
+    
+    const emailErr = validateEmailFormat(form.email);
+    if (emailErr) {
+      setEmailError(emailErr);
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      // Check if email already exists in profiles
       const { data: existing } = await supabase.from("profiles").select("email").eq("email", form.email).maybeSingle();
       if (existing) {
         toast({ title: "Email Already Registered", description: "This email is already in use. Please login or use a different email.", variant: "destructive" });
@@ -123,8 +127,9 @@ const Register = () => {
             </div>
             <div>
               <Label className="font-sans">Email *</Label>
-              <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@email.com" />
+              <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@gmail.com" />
               {emailError && <p className="text-xs text-destructive font-sans mt-1">{emailError}</p>}
+              <p className="text-xs text-muted-foreground font-sans mt-1">Allowed: Gmail, Hotmail, Outlook, Yahoo, Zohomail</p>
             </div>
             <div>
               <Label className="font-sans">Instagram ID</Label>
