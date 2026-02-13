@@ -49,26 +49,15 @@ const TrackOrder = () => {
     setOrder(null);
 
     const searchId = orderId.trim().toLowerCase();
-    const { data, error } = await supabase
-      .from("orders")
-      .select("id, order_type, style, amount, status, payment_status, created_at, expected_delivery_date, customer_name, face_count")
-      .or(`id.eq.${searchId}`)
-      .maybeSingle();
+    
+    // Use secure RPC function for tracking
+    const { data, error } = await supabase.rpc("track_order", { order_uuid: searchId });
 
-    if (!data) {
-      // Try partial match on first 8 chars
-      const { data: partialData } = await supabase
-        .from("orders")
-        .select("id, order_type, style, amount, status, payment_status, created_at, expected_delivery_date, customer_name, face_count")
-        .ilike("id", `${searchId}%`)
-        .maybeSingle();
-      if (partialData) {
-        setOrder(partialData as any);
-      } else {
-        toast({ title: "Order Not Found", description: "Please check your Order ID and try again.", variant: "destructive" });
-      }
+    if (error || !data || (Array.isArray(data) && data.length === 0)) {
+      toast({ title: "Order Not Found", description: "Please check your Order ID and try again.", variant: "destructive" });
     } else {
-      setOrder(data as any);
+      const orderData = Array.isArray(data) ? data[0] : data;
+      setOrder(orderData as any);
     }
     setLoading(false);
   };

@@ -289,6 +289,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      track_order: {
+        Args: { order_uuid: string }
+        Returns: {
+          amount: number
+          created_at: string
+          customer_name: string
+          expected_delivery_date: string
+          face_count: number
+          id: string
+          order_type: string
+          payment_status: string
+          status: string
+          style: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator"
