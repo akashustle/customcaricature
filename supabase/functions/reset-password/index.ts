@@ -19,14 +19,14 @@ serve(async (req) => {
 
     if (!email || !secret_code || !new_password) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (new_password.length < 6) {
       return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), {
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -43,15 +43,15 @@ serve(async (req) => {
       .maybeSingle();
 
     if (profileError || !profile) {
-      return new Response(JSON.stringify({ error: "Email not found" }), {
-        status: 404,
+      return new Response(JSON.stringify({ error: "No account found with this email address" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (profile.secret_code !== secret_code) {
-      return new Response(JSON.stringify({ error: "Invalid secret code" }), {
-        status: 403,
+      return new Response(JSON.stringify({ error: "wrong_secret_code" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -64,7 +64,7 @@ serve(async (req) => {
 
     if (updateError) {
       return new Response(JSON.stringify({ error: updateError.message }), {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -76,7 +76,7 @@ serve(async (req) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: message }), {
-      status: 500,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
