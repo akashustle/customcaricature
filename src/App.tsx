@@ -16,6 +16,7 @@ import Privacy from "./pages/Privacy";
 import RefundPolicy from "./pages/RefundPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
+import BookEvent from "./pages/BookEvent";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/shipping" element={<ShippingPolicy />} />
           <Route path="/track-order" element={<TrackOrder />} />
+          <Route path="/book-event" element={<BookEvent />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -26,6 +26,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import AdminEvents from "@/components/admin/AdminEvents";
 
 type Order = {
   id: string;
@@ -467,6 +468,7 @@ const Admin = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full overflow-x-auto flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
+            <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
@@ -769,6 +771,11 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
+          {/* Events Tab */}
+          <TabsContent value="events">
+            <AdminEvents customers={customers as any} />
+          </TabsContent>
+
           {/* Pricing Tab */}
           <TabsContent value="pricing">
             <div className="flex justify-between items-center mb-4">
@@ -946,7 +953,7 @@ const Admin = () => {
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground font-sans">
-                              Registered: {new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                              Registered: {formatDateTime(c.created_at)}
                             </p>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
@@ -1068,10 +1075,10 @@ const Admin = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
         <div className="flex items-center justify-around py-2">
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
+          <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
-          <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
-          <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+          <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "pricing" || activeTab === "settings"} onClick={() => setActiveTab("pricing")} />
         </div>
       </div>
     </div>
