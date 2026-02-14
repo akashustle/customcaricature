@@ -323,6 +323,8 @@ const Index = () => {
               <Link to="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link>
               <span>•</span>
               <Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</Link>
+              <span>•</span>
+              <Link to="/book-event" className="hover:text-foreground transition-colors">Book an Event</Link>
             </div>
             <p className="text-xs text-muted-foreground font-sans">© 2025 Creative Caricature Club. All rights reserved.</p>
           </div>

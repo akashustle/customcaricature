@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_blocked_dates: {
+        Row: {
+          blocked_date: string
+          city: string | null
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_date: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_date?: string
+          city?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       caricature_types: {
         Row: {
           created_at: string
@@ -71,6 +95,114 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      event_bookings: {
+        Row: {
+          accommodation_confirmed: boolean
+          advance_amount: number
+          artist_count: number
+          city: string
+          client_email: string
+          client_instagram: string | null
+          client_mobile: string
+          client_name: string
+          created_at: string
+          event_date: string
+          event_end_time: string
+          event_start_time: string
+          event_type: string
+          extra_hours: number
+          full_address: string
+          id: string
+          is_mumbai: boolean
+          negotiated: boolean
+          negotiated_advance: number | null
+          negotiated_total: number | null
+          notes: string | null
+          payment_status: string
+          pincode: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          remaining_amount: number | null
+          state: string
+          status: string
+          total_price: number
+          travel_confirmed: boolean
+          updated_at: string
+          user_id: string | null
+          venue_name: string
+        }
+        Insert: {
+          accommodation_confirmed?: boolean
+          advance_amount: number
+          artist_count?: number
+          city: string
+          client_email: string
+          client_instagram?: string | null
+          client_mobile: string
+          client_name: string
+          created_at?: string
+          event_date: string
+          event_end_time: string
+          event_start_time: string
+          event_type: string
+          extra_hours?: number
+          full_address: string
+          id?: string
+          is_mumbai?: boolean
+          negotiated?: boolean
+          negotiated_advance?: number | null
+          negotiated_total?: number | null
+          notes?: string | null
+          payment_status?: string
+          pincode: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          remaining_amount?: number | null
+          state: string
+          status?: string
+          total_price: number
+          travel_confirmed?: boolean
+          updated_at?: string
+          user_id?: string | null
+          venue_name: string
+        }
+        Update: {
+          accommodation_confirmed?: boolean
+          advance_amount?: number
+          artist_count?: number
+          city?: string
+          client_email?: string
+          client_instagram?: string | null
+          client_mobile?: string
+          client_name?: string
+          created_at?: string
+          event_date?: string
+          event_end_time?: string
+          event_start_time?: string
+          event_type?: string
+          extra_hours?: number
+          full_address?: string
+          id?: string
+          is_mumbai?: boolean
+          negotiated?: boolean
+          negotiated_advance?: number | null
+          negotiated_total?: number | null
+          notes?: string | null
+          payment_status?: string
+          pincode?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          remaining_amount?: number | null
+          state?: string
+          status?: string
+          total_price?: number
+          travel_confirmed?: boolean
+          updated_at?: string
+          user_id?: string | null
+          venue_name?: string
         }
         Relationships: []
       }
