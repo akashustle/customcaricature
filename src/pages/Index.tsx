@@ -6,6 +6,8 @@ import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useState, useCallback } from "react";
+import SEOHead from "@/components/SEOHead";
+import JsonLd from "@/components/JsonLd";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -112,7 +114,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      {/* Lightbox */}
+      <SEOHead canonical="/" />
+      <JsonLd />
       {lightboxOpen && (
         <Lightbox
           images={galleryImages}
@@ -124,6 +127,7 @@ const Index = () => {
       )}
 
       {/* Top Nav */}
+      <header>
       <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
@@ -160,8 +164,10 @@ const Index = () => {
           </div>
         </div>
       </nav>
+      </header>
 
       {/* Hero Section */}
+      <main>
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <div className="container mx-auto px-4 py-16 md:py-28">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
@@ -201,8 +207,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Gallery */}
-      <section className="py-12 md:py-16 bg-secondary/30">
+      <section className="py-12 md:py-16 bg-secondary/30" aria-label="Gallery of recent caricature work">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
             <h2 className="font-display text-2xl md:text-4xl font-bold text-foreground mb-2">Our Recent Work</h2>
@@ -305,6 +310,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      </main>
 
       {/* Footer */}
       <footer className="bg-foreground/5 py-8 border-t border-border">
