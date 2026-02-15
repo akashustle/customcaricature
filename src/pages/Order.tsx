@@ -138,7 +138,7 @@ const Order = () => {
             transition={{ duration: 0.3 }}
           >
             {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
-            {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} />}
+            {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} getPrice={getPrice} />}
             {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
             {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
             {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}

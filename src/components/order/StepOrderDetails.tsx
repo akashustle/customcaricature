@@ -13,11 +13,13 @@ interface Props {
   data: OrderFormData;
   update: (partial: Partial<OrderFormData>) => void;
   onNext: () => void;
+  getPrice?: (orderType: string, faceCount: number) => number;
 }
 
-const StepOrderDetails = ({ data, update, onNext }: Props) => {
-  const { types, loading: pricingLoading, getPrice, getType } = usePricing();
+const StepOrderDetails = ({ data, update, onNext, getPrice: externalGetPrice }: Props) => {
+  const { types, loading: pricingLoading, getPrice: hookGetPrice, getType } = usePricing();
 
+  const getPrice = externalGetPrice || hookGetPrice;
   const amount = getPrice(data.orderType, data.faceCount);
   const groupType = getType("group");
   const GROUP_MIN_FACES = groupType?.min_faces ?? 3;
@@ -55,7 +57,6 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
         <div className="grid grid-cols-3 gap-3">
           {(["single", "couple", "group"] as const).map((type) => {
             const typeData = getType(type);
-            const price = typeData ? (typeData.per_face ? typeData.price : typeData.price) : 0;
             return (
               <Card
                 key={type}
@@ -68,7 +69,8 @@ const StepOrderDetails = ({ data, update, onNext }: Props) => {
                 <CardContent className="p-3 text-center">
                   <p className="font-sans font-semibold text-sm capitalize">{type}</p>
                   <p className="text-xs text-muted-foreground font-sans">
-                    {typeData?.per_face ? `${formatPrice(price)}/face` : formatPrice(getPrice(type, type === "couple" ? 2 : 1))}
+                    {formatPrice(getPrice(type, type === "single" ? 1 : type === "couple" ? 2 : (typeData?.min_faces ?? 3)))}
+                    {typeData?.per_face ? "/face" : ""}
                   </p>
                 </CardContent>
               </Card>

@@ -404,6 +404,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 
 const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => {
   const [artists, setArtists] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
+  const [payingEventId, setPayingEventId] = useState<string | null>(null);
 
   useEffect(() => {
     const artistIds = events.map(e => e.assigned_artist_id).filter(Boolean);
@@ -418,6 +419,44 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
         });
     }
   }, [events]);
+
+  const handlePayRemaining = async (ev: any) => {
+    const totalAmount = ev.total_price;
+    const advanceAmount = ev.advance_amount;
+    const remaining = totalAmount - advanceAmount;
+    if (remaining <= 0) return;
+
+    setPayingEventId(ev.id);
+    try {
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: remaining, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile },
+      });
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
+
+      const options = {
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club", description: `Event Remaining Payment`,
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true },
+            });
+            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
+            toast({ title: "Payment Successful!", description: "Remaining amount has been paid." });
+          } catch { toast({ title: "Verification Failed", description: "Contact support with your booking ID.", variant: "destructive" }); }
+          setPayingEventId(null);
+        },
+        prefill: { name: ev.client_name, email: ev.client_email, contact: `+91${ev.client_mobile}` },
+        theme: { color: "#E8633B" },
+        modal: { ondismiss: () => setPayingEventId(null) },
+      };
+      new window.Razorpay(options).open();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPayingEventId(null);
+    }
+  };
 
   return (
     <>
@@ -450,8 +489,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
         <div className="space-y-3">
           {events.map((ev: any) => {
             const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "partial";
-            const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
-            const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
+            const totalAmount = ev.total_price;
+            const advanceAmount = ev.advance_amount;
             const remaining = totalAmount - advanceAmount;
             const artist = ev.assigned_artist_id ? artists[ev.assigned_artist_id] : null;
 
@@ -480,11 +519,13 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
 
                     {/* Artist Info */}
                     {artist && (
-                      <div className="bg-primary/5 rounded-lg p-3 text-sm font-sans">
+                      <div className="bg-primary/5 rounded-lg p-3 text-sm font-sans space-y-2">
                         <p className="font-medium">🎨 Your Artist: {artist.name}</p>
                         {artist.portfolio_url && (
-                          <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline mt-1 inline-block">
-                            View Artist Portfolio →
+                          <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer">
+                            <Button size="sm" variant="outline" className="rounded-full text-xs font-sans">
+                              📄 See Your Artist Portfolio
+                            </Button>
                           </a>
                         )}
                       </div>
@@ -492,12 +533,26 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
 
                     <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
                       <div className="flex justify-between"><span className="text-muted-foreground">Advance Paid</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Remaining at Event</span><span className="font-medium">{formatPrice(remaining)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice(remaining)}</span></div>
                     </div>
                     {remaining > 0 && advancePaid && (
-                      <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
-                        💡 Remaining ₹{remaining.toLocaleString("en-IN")} is payable at the event. You can also pay in advance from here if you wish.
-                      </p>
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
+                          💡 Remaining {formatPrice(remaining)} is payable at the event. You can also pay now if you wish.
+                        </p>
+                        <Button
+                          size="sm"
+                          className="rounded-full font-sans w-full bg-primary hover:bg-primary/90"
+                          disabled={payingEventId === ev.id}
+                          onClick={() => handlePayRemaining(ev)}
+                        >
+                          {payingEventId === ev.id ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                          ) : (
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(remaining)} Now</>
+                          )}
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
