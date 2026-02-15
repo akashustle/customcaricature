@@ -498,6 +498,31 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
               <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <Card>
                   <CardContent className="p-4 space-y-2">
+                    {/* Event Countdown */}
+                    {ev.status === "upcoming" && (() => {
+                      const eventDate = new Date(ev.event_date);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const daysLeft = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      if (daysLeft > 0) {
+                        return (
+                          <div className="bg-primary/10 rounded-xl p-3 text-center">
+                            <p className="font-display text-2xl font-bold text-primary">{daysLeft}</p>
+                            <p className="text-xs font-sans text-muted-foreground">
+                              {daysLeft === 1 ? "✨ Tomorrow is the big day!" : daysLeft <= 7 ? `🎉 Just ${daysLeft} days to go! Get ready!` : `📅 Days until your special event`}
+                            </p>
+                          </div>
+                        );
+                      } else if (daysLeft === 0) {
+                        return (
+                          <div className="bg-green-100 rounded-xl p-3 text-center">
+                            <p className="font-display text-lg font-bold text-green-800">🎊 Today is the Day!</p>
+                            <p className="text-xs font-sans text-green-700">Enjoy your event! Have an amazing time!</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-sans font-medium capitalize">{EVENT_TYPES.find((t: any) => t.value === ev.event_type)?.label || ev.event_type}</p>

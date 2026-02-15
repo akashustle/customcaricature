@@ -22,7 +22,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3,
+  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2,
 } from "lucide-react";
 
 type EventBooking = {
@@ -52,6 +52,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [negAdvance, setNegAdvance] = useState("");
   const [showPricing, setShowPricing] = useState(false);
   const { pricing: dbPricing, refetch: refetchPricing } = useEventPricing();
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [editEventData, setEditEventData] = useState<Partial<EventBooking>>({});
 
   // Pricing edit state
   const [pricingEdits, setPricingEdits] = useState<Record<string, { total_price: string; advance_amount: string; extra_hour_rate: string; valid_until: string }>>({});
@@ -134,6 +136,32 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const updateEventStatus = async (id: string, status: string) => { await supabase.from("event_bookings").update({ status } as any).eq("id", id); toast({ title: "Status Updated" }); fetchEvents(); };
   const updatePaymentStatus = async (id: string, ps: string) => { await supabase.from("event_bookings").update({ payment_status: ps } as any).eq("id", id); toast({ title: "Payment Status Updated" }); fetchEvents(); };
   const deleteEvent = async (id: string) => { await supabase.from("event_bookings").delete().eq("id", id); toast({ title: "Event Deleted" }); fetchEvents(); };
+
+  const saveEventEdit = async () => {
+    if (!editingEventId) return;
+    const { error } = await supabase.from("event_bookings").update({
+      client_name: editEventData.client_name,
+      client_mobile: editEventData.client_mobile,
+      client_email: editEventData.client_email,
+      client_instagram: editEventData.client_instagram || null,
+      event_type: editEventData.event_type,
+      event_date: editEventData.event_date,
+      event_start_time: editEventData.event_start_time,
+      event_end_time: editEventData.event_end_time,
+      state: editEventData.state,
+      city: editEventData.city,
+      full_address: editEventData.full_address,
+      venue_name: editEventData.venue_name,
+      pincode: editEventData.pincode,
+      artist_count: editEventData.artist_count,
+      total_price: editEventData.total_price,
+      advance_amount: editEventData.advance_amount,
+      extra_hours: editEventData.extra_hours,
+      notes: editEventData.notes || null,
+    } as any).eq("id", editingEventId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+    else { toast({ title: "Event Updated!" }); setEditingEventId(null); fetchEvents(); }
+  };
 
   const saveNegotiation = async () => {
     if (!negotiateId) return;
@@ -481,7 +509,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   </Select>
                   <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
                     <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="partial">Partial</SelectItem></SelectContent>
+                    <SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="partial">Partial</SelectItem><SelectItem value="refunded">Refunded</SelectItem></SelectContent>
                   </Select>
                   <Select value={(ev as any).assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
                     <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
@@ -490,6 +518,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setEditingEventId(ev.id); setEditEventData(ev); }}>
+                    <Edit2 className="w-3 h-3 mr-1" />Edit
+                  </Button>
                   <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
                     <DollarSign className="w-3 h-3 mr-1" />Negotiate
                   </Button>
@@ -518,6 +549,53 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
               <div className="flex gap-2">
                 <Button onClick={saveNegotiation} className="flex-1 font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
                 <Button variant="ghost" onClick={() => setNegotiateId(null)}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Event Dialog */}
+      {editingEventId && (
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setEditingEventId(null)}>
+          <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <CardHeader><CardTitle className="font-display text-lg">Edit Event Details</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Client Name</Label><Input value={editEventData.client_name || ""} onChange={e => setEditEventData({...editEventData, client_name: e.target.value})} /></div>
+                <div><Label className="text-xs">Mobile</Label><Input value={editEventData.client_mobile || ""} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setEditEventData({...editEventData, client_mobile: d}); }} maxLength={10} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Email</Label><Input type="email" value={editEventData.client_email || ""} onChange={e => setEditEventData({...editEventData, client_email: e.target.value})} /></div>
+                <div><Label className="text-xs">Instagram</Label><Input value={editEventData.client_instagram || ""} onChange={e => setEditEventData({...editEventData, client_instagram: e.target.value})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Event Type</Label><Input value={editEventData.event_type || ""} onChange={e => setEditEventData({...editEventData, event_type: e.target.value})} /></div>
+                <div><Label className="text-xs">Event Date</Label><Input type="date" value={editEventData.event_date || ""} onChange={e => setEditEventData({...editEventData, event_date: e.target.value})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Start Time</Label><Input type="time" value={editEventData.event_start_time || ""} onChange={e => setEditEventData({...editEventData, event_start_time: e.target.value})} /></div>
+                <div><Label className="text-xs">End Time</Label><Input type="time" value={editEventData.event_end_time || ""} onChange={e => setEditEventData({...editEventData, event_end_time: e.target.value})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">State</Label><Input value={editEventData.state || ""} onChange={e => setEditEventData({...editEventData, state: e.target.value})} /></div>
+                <div><Label className="text-xs">City</Label><Input value={editEventData.city || ""} onChange={e => setEditEventData({...editEventData, city: e.target.value})} /></div>
+              </div>
+              <div><Label className="text-xs">Venue Name</Label><Input value={editEventData.venue_name || ""} onChange={e => setEditEventData({...editEventData, venue_name: e.target.value})} /></div>
+              <div><Label className="text-xs">Full Address</Label><Input value={editEventData.full_address || ""} onChange={e => setEditEventData({...editEventData, full_address: e.target.value})} /></div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><Label className="text-xs">Pincode</Label><Input value={editEventData.pincode || ""} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=6) setEditEventData({...editEventData, pincode: d}); }} maxLength={6} /></div>
+                <div><Label className="text-xs">Artists</Label><Input type="number" min={1} max={5} value={editEventData.artist_count || 1} onChange={e => setEditEventData({...editEventData, artist_count: parseInt(e.target.value)||1})} /></div>
+                <div><Label className="text-xs">Extra Hrs</Label><Input type="number" min={0} value={editEventData.extra_hours || 0} onChange={e => setEditEventData({...editEventData, extra_hours: parseInt(e.target.value)||0})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Total Price (₹)</Label><Input type="number" value={editEventData.total_price || 0} onChange={e => setEditEventData({...editEventData, total_price: parseInt(e.target.value)||0})} /></div>
+                <div><Label className="text-xs">Advance (₹)</Label><Input type="number" value={editEventData.advance_amount || 0} onChange={e => setEditEventData({...editEventData, advance_amount: parseInt(e.target.value)||0})} /></div>
+              </div>
+              <div><Label className="text-xs">Notes</Label><Textarea value={editEventData.notes || ""} onChange={e => setEditEventData({...editEventData, notes: e.target.value})} /></div>
+              <div className="flex gap-2">
+                <Button onClick={saveEventEdit} className="flex-1 font-sans"><Save className="w-4 h-4 mr-1" />Save Changes</Button>
+                <Button variant="ghost" onClick={() => setEditingEventId(null)}>Cancel</Button>
               </div>
             </CardContent>
           </Card>

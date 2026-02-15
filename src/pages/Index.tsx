@@ -166,7 +166,9 @@ const Index = () => {
         <div className="container mx-auto px-4 py-16 md:py-28">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
             <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl"
-              initial={{ scale: 0.8, opacity: 0, rotateY: 180 }} animate={{ scale: 1, opacity: 1, rotateY: 0 }} transition={{ delay: 0.2, duration: 0.8, type: "spring" }} />
+              initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
+              animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0], y: [0, -6, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
             <h1 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
               Creative Caricature<span className="block text-primary">Club</span>
             </h1>

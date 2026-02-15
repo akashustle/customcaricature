@@ -1199,6 +1199,8 @@ const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any;
 const EventUsersTab = () => {
   const [eventUsers, setEventUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>({});
 
   useEffect(() => {
     fetchEventUsers();
@@ -1209,7 +1211,6 @@ const EventUsersTab = () => {
       .select("id, client_name, client_email, client_mobile, client_instagram, event_type, event_date, city, state, total_price, advance_amount, payment_status, status, created_at")
       .order("created_at", { ascending: false });
     if (data) {
-      // Group by unique email
       const uniqueUsers = new Map<string, any>();
       data.forEach((ev: any) => {
         if (!uniqueUsers.has(ev.client_email)) {
@@ -1221,6 +1222,18 @@ const EventUsersTab = () => {
       setEventUsers(Array.from(uniqueUsers.values()));
     }
     setLoading(false);
+  };
+
+  const saveEventUserEdit = async () => {
+    if (!editingId) return;
+    await supabase.from("event_bookings").update({
+      client_name: editData.client_name,
+      client_mobile: editData.client_mobile,
+      client_instagram: editData.client_instagram || null,
+    } as any).eq("id", editingId);
+    toast({ title: "Event User Updated!" });
+    setEditingId(null);
+    fetchEventUsers();
   };
 
   if (loading) return <p className="text-center text-muted-foreground py-10 font-sans">Loading...</p>;
@@ -1235,21 +1248,41 @@ const EventUsersTab = () => {
           {eventUsers.map((u: any) => (
             <Card key={u.client_email}>
               <CardContent className="p-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <p className="font-sans font-semibold">{u.client_name}</p>
-                    <p className="text-xs text-muted-foreground font-sans">{u.client_email} · +91{u.client_mobile}</p>
-                    {u.client_instagram && <p className="text-xs text-muted-foreground font-sans">IG: {u.client_instagram}</p>}
-                    <p className="text-xs text-muted-foreground font-sans">{u.city}, {u.state}</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-[10px]">{u.event_count} Event{u.event_count > 1 ? "s" : ""}</Badge>
-                      <Badge className={`border-none text-[10px] ${u.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                        Last: {u.payment_status}
-                      </Badge>
+                {editingId === u.id ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label className="text-xs">Name</Label><Input value={editData.client_name || ""} onChange={e => setEditData({...editData, client_name: e.target.value})} /></div>
+                      <div><Label className="text-xs">Mobile</Label><Input value={editData.client_mobile || ""} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setEditData({...editData, client_mobile: d}); }} maxLength={10} /></div>
+                    </div>
+                    <div><Label className="text-xs">Email (read-only)</Label><Input value={u.client_email} disabled className="opacity-60" /></div>
+                    <div><Label className="text-xs">Instagram</Label><Input value={editData.client_instagram || ""} onChange={e => setEditData({...editData, client_instagram: e.target.value})} /></div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveEventUserEdit} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}><X className="w-4 h-4" /></Button>
                     </div>
                   </div>
-                  <p className="font-display font-bold text-primary">{formatPrice(u.total_price)}</p>
-                </div>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <p className="font-sans font-semibold">{u.client_name}</p>
+                      <p className="text-xs text-muted-foreground font-sans">{u.client_email} · +91{u.client_mobile}</p>
+                      {u.client_instagram && <p className="text-xs text-muted-foreground font-sans">IG: {u.client_instagram}</p>}
+                      <p className="text-xs text-muted-foreground font-sans">{u.city}, {u.state}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        <Badge variant="outline" className="text-[10px]">{u.event_count} Event{u.event_count > 1 ? "s" : ""}</Badge>
+                        <Badge className={`border-none text-[10px] ${u.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                          Last: {u.payment_status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <p className="font-display font-bold text-primary">{formatPrice(u.total_price)}</p>
+                      <Button variant="ghost" size="sm" onClick={() => { setEditingId(u.id); setEditData(u); }}>
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
