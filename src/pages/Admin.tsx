@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import AdminEvents from "@/components/admin/AdminEvents";
+import AdminArtists from "@/components/admin/AdminArtists";
+import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 
 type Order = {
   id: string;
@@ -117,6 +119,8 @@ const Admin = () => {
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
+  const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
+  const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [showAddOrder, setShowAddOrder] = useState(false);
   const [manualOrder, setManualOrder] = useState({
     customerId: "", orderType: "single" as string, style: "artists_choice" as string,
@@ -476,6 +480,7 @@ const Admin = () => {
             <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
+            <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
@@ -974,6 +979,14 @@ const Admin = () => {
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
                               {(c as any).event_booking_allowed && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Allowed</Badge>}
                             </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs font-sans mt-1"
+                              onClick={() => { setCustomerPricingUserId(c.user_id); setCustomerPricingUserName(c.full_name); }}
+                            >
+                              <DollarSign className="w-3 h-3 mr-1" />Custom Pricing
+                            </Button>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
                             <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
@@ -995,11 +1008,25 @@ const Admin = () => {
                           </div>
                         </div>
                       )}
+                      {customerPricingUserId === c.user_id && (
+                        <div className="mt-3">
+                          <AdminCustomerPricing
+                            userId={c.user_id}
+                            userName={c.full_name}
+                            onClose={() => setCustomerPricingUserId(null)}
+                            caricatureTypes={caricatureTypes.map(ct => ({ slug: ct.slug, name: ct.name, price: ct.price, per_face: ct.per_face }))}
+                          />
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="artists">
+            <AdminArtists />
           </TabsContent>
 
           <TabsContent value="analytics">
@@ -1141,12 +1168,14 @@ const Admin = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
+          <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
-          <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "pricing" || activeTab === "settings"} onClick={() => setActiveTab("pricing")} />
+          <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
     </div>

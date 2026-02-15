@@ -39,6 +39,7 @@ type Profile = { user_id: string; full_name: string; email: string; mobile: stri
 
 const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [events, setEvents] = useState<EventBooking[]>([]);
+  const [artists, setArtists] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -77,6 +78,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   useEffect(() => {
     fetchEvents();
     fetchBlockedDates();
+    fetchArtists();
     const ch = supabase.channel("admin-events").on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents()).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -105,6 +107,15 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const fetchBlockedDates = async () => {
     const { data } = await supabase.from("artist_blocked_dates").select("*").order("blocked_date", { ascending: false });
     if (data) setBlockedDates(data);
+  };
+  const fetchArtists = async () => {
+    const { data } = await supabase.from("artists").select("id, name");
+    if (data) setArtists(data as any);
+  };
+  const assignArtist = async (eventId: string, artistId: string | null) => {
+    await supabase.from("event_bookings").update({ assigned_artist_id: artistId } as any).eq("id", eventId);
+    toast({ title: artistId ? "Artist Assigned" : "Artist Removed" });
+    fetchEvents();
   };
 
   const addBlockedDate = async () => {
@@ -471,6 +482,13 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
                     <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="partial">Partial</SelectItem></SelectContent>
+                  </Select>
+                  <Select value={(ev as any).assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
+                    <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">No Artist</SelectItem>
+                      {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                   <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
                     <DollarSign className="w-3 h-3 mr-1" />Negotiate

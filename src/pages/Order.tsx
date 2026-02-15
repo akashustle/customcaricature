@@ -30,7 +30,7 @@ const STEP_LABELS: Record<string, string> = {
 const Order = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { getPrice } = usePricing();
+  const { getPrice, fetchCustomerPricing } = usePricing();
   const [formData, setFormData] = useState<OrderFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -44,10 +44,11 @@ const Order = () => {
     }
   }, [authLoading, user, navigate]);
 
-  // Auto-fill from profile
+  // Auto-fill from profile & fetch custom pricing
   useEffect(() => {
     if (user && !profileLoaded) {
       loadProfile(user.id);
+      fetchCustomerPricing(user.id);
     }
   }, [user, profileLoaded]);
 

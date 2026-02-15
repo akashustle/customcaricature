@@ -62,6 +62,33 @@ export type Database = {
         }
         Relationships: []
       }
+      artists: {
+        Row: {
+          created_at: string
+          experience: string | null
+          id: string
+          name: string
+          portfolio_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          experience?: string | null
+          id?: string
+          name: string
+          portfolio_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          experience?: string | null
+          id?: string
+          name?: string
+          portfolio_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       caricature_types: {
         Row: {
           created_at: string
@@ -122,11 +149,39 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_pricing: {
+        Row: {
+          caricature_type_slug: string
+          created_at: string
+          custom_price: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          caricature_type_slug: string
+          created_at?: string
+          custom_price: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          caricature_type_slug?: string
+          created_at?: string
+          custom_price?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       event_bookings: {
         Row: {
           accommodation_confirmed: boolean
           advance_amount: number
           artist_count: number
+          assigned_artist_id: string | null
           city: string
           client_email: string
           client_instagram: string | null
@@ -165,6 +220,7 @@ export type Database = {
           accommodation_confirmed?: boolean
           advance_amount: number
           artist_count?: number
+          assigned_artist_id?: string | null
           city: string
           client_email: string
           client_instagram?: string | null
@@ -203,6 +259,7 @@ export type Database = {
           accommodation_confirmed?: boolean
           advance_amount?: number
           artist_count?: number
+          assigned_artist_id?: string | null
           city?: string
           client_email?: string
           client_instagram?: string | null
@@ -237,7 +294,15 @@ export type Database = {
           user_id?: string | null
           venue_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "event_bookings_assigned_artist_id_fkey"
+            columns: ["assigned_artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_pricing: {
         Row: {

@@ -41,7 +41,7 @@ export const useSiteSettings = () => {
   }, []);
 
   const updateSetting = async (id: string, value: any) => {
-    await supabase.from("admin_site_settings").update({ value, updated_at: new Date().toISOString() } as any).eq("id", id);
+    await supabase.from("admin_site_settings").upsert({ id, value, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
     fetchSettings();
   };
 

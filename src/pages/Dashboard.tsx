@@ -402,70 +402,113 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
   </Card>
 );
 
-const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => (
-  <>
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="font-display text-xl font-bold">My Events</h2>
-      <Button onClick={handleBookEvent} className={`rounded-full font-sans ${canBookEvent ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`} size="sm">
-        {canBookEvent ? "+ Book Event" : <><Sparkles className="w-3 h-3 mr-1" />Book Event</>}
-      </Button>
-    </div>
-    {!canBookEvent && (
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Card className="mb-4 border-primary/20 bg-primary/5">
-          <CardContent className="p-4 text-center">
-            <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
-            <p className="font-display text-lg font-bold text-foreground">Event Booking — Coming Soon! 🚀</p>
-            <p className="text-sm text-muted-foreground font-sans mt-1">We're working on bringing live caricature event booking to you. Stay tuned!</p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    )}
-    {events.length === 0 ? (
-      <Card><CardContent className="p-8 text-center">
-        <CalIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <p className="font-sans text-muted-foreground mb-4">No events booked yet</p>
-        {canBookEvent && (
-          <Button onClick={handleBookEvent} className="rounded-full font-sans bg-primary hover:bg-primary/90">Book an Event</Button>
-        )}
-      </CardContent></Card>
-    ) : (
-      <div className="space-y-3">
-        {events.map((ev: any) => (
-          <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-sans font-medium capitalize">{EVENT_TYPES.find((t: any) => t.value === ev.event_type)?.label || ev.event_type}</p>
-                    <p className="text-xs text-muted-foreground font-sans">
-                      {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}
-                    </p>
-                    <p className="text-xs text-muted-foreground font-sans">{ev.venue_name}, {ev.city}, {ev.state}</p>
-                    <p className="text-xs text-muted-foreground font-sans mt-1">Booked: {new Date(ev.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
-                  </div>
-                  <p className="font-display text-lg font-bold text-primary">{formatPrice(ev.negotiated_total || ev.total_price)}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                  <Badge className={`border-none text-xs ${ev.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                    <CreditCard className="w-3 h-3 mr-1" />Pay: {ev.payment_status}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
-                </div>
-                <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Advance Paid</span><span className="font-medium">{formatPrice(ev.negotiated_advance || ev.advance_amount)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice((ev.negotiated_total || ev.total_price) - (ev.negotiated_advance || ev.advance_amount))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Negotiated</span><span className="font-medium">{ev.negotiated ? "Yes" : "No"}</span></div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => {
+  const [artists, setArtists] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
+
+  useEffect(() => {
+    const artistIds = events.map(e => e.assigned_artist_id).filter(Boolean);
+    if (artistIds.length > 0) {
+      supabase.from("artists").select("id, name, portfolio_url").in("id", artistIds)
+        .then(({ data }) => {
+          if (data) {
+            const map: typeof artists = {};
+            data.forEach((a: any) => { map[a.id] = { name: a.name, portfolio_url: a.portfolio_url }; });
+            setArtists(map);
+          }
+        });
+    }
+  }, [events]);
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-display text-xl font-bold">My Events</h2>
+        <Button onClick={handleBookEvent} className={`rounded-full font-sans ${canBookEvent ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`} size="sm">
+          {canBookEvent ? "+ Book Event" : <><Sparkles className="w-3 h-3 mr-1" />Book Event</>}
+        </Button>
       </div>
-    )}
-  </>
-);
+      {!canBookEvent && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="mb-4 border-primary/20 bg-primary/5">
+            <CardContent className="p-4 text-center">
+              <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
+              <p className="font-display text-lg font-bold text-foreground">Event Booking — Coming Soon! 🚀</p>
+              <p className="text-sm text-muted-foreground font-sans mt-1">We're working on bringing live caricature event booking to you. Stay tuned!</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+      {events.length === 0 ? (
+        <Card><CardContent className="p-8 text-center">
+          <CalIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="font-sans text-muted-foreground mb-4">No events booked yet</p>
+          {canBookEvent && (
+            <Button onClick={handleBookEvent} className="rounded-full font-sans bg-primary hover:bg-primary/90">Book an Event</Button>
+          )}
+        </CardContent></Card>
+      ) : (
+        <div className="space-y-3">
+          {events.map((ev: any) => {
+            const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "partial";
+            const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
+            const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
+            const remaining = totalAmount - advanceAmount;
+            const artist = ev.assigned_artist_id ? artists[ev.assigned_artist_id] : null;
+
+            return (
+              <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <Card>
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-sans font-medium capitalize">{EVENT_TYPES.find((t: any) => t.value === ev.event_type)?.label || ev.event_type}</p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">{ev.venue_name}, {ev.city}, {ev.state}</p>
+                        <p className="text-xs text-muted-foreground font-sans mt-1">Booked: {new Date(ev.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
+                      </div>
+                      <p className="font-display text-lg font-bold text-primary">{formatPrice(totalAmount)}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
+                      <Badge className={`border-none text-xs ${advancePaid ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                        <CreditCard className="w-3 h-3 mr-1" />{advancePaid ? "Advance Paid ✅" : "Payment Pending"}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
+                    </div>
+
+                    {/* Artist Info */}
+                    {artist && (
+                      <div className="bg-primary/5 rounded-lg p-3 text-sm font-sans">
+                        <p className="font-medium">🎨 Your Artist: {artist.name}</p>
+                        {artist.portfolio_url && (
+                          <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline mt-1 inline-block">
+                            View Artist Portfolio →
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Advance Paid</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Remaining at Event</span><span className="font-medium">{formatPrice(remaining)}</span></div>
+                    </div>
+                    {remaining > 0 && advancePaid && (
+                      <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
+                        💡 Remaining ₹{remaining.toLocaleString("en-IN")} is payable at the event. You can also pay in advance from here if you wish.
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+};
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between py-1">
