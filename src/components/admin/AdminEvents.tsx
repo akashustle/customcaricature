@@ -310,7 +310,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   <div><Label>Full Address</Label><Input value={mf.fullAddress} onChange={e => setMf({...mf, fullAddress: e.target.value})} /></div>
                   <div><Label>Pincode</Label><Input value={mf.pincode} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=6) setMf({...mf, pincode: d}); }} maxLength={6} /></div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><Label>Artist Count</Label><Select value={String(mf.artistCount)} onValueChange={v => setMf({...mf, artistCount: parseInt(v)})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="1">1 Artist</SelectItem><SelectItem value="2">2 Artists</SelectItem></SelectContent></Select></div>
+                    <div><Label>Artist Count</Label><Select value={String(mf.artistCount)} onValueChange={v => setMf({...mf, artistCount: parseInt(v)})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>{n} Artist{n > 1 ? "s" : ""}</SelectItem>)}</SelectContent></Select></div>
                     <div><Label>Extra Hours</Label><Input type="number" min={0} value={mf.extraHours} onChange={e => setMf({...mf, extraHours: parseInt(e.target.value)||0})} /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">

@@ -478,6 +478,7 @@ const Admin = () => {
           <TabsList className="mb-6 w-full overflow-x-auto flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
             <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
+            <TabsTrigger value="event-users" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
@@ -784,6 +785,11 @@ const Admin = () => {
           {/* Events Tab */}
           <TabsContent value="events">
             <AdminEvents customers={customers as any} />
+          </TabsContent>
+
+          {/* Event Users Tab */}
+          <TabsContent value="event-users">
+            <EventUsersTab />
           </TabsContent>
 
           {/* Pricing Tab */}
@@ -1171,6 +1177,7 @@ const Admin = () => {
         <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
           <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
@@ -1183,10 +1190,73 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors flex-shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}>
     <Icon className="w-5 h-5" />
-    <span className="text-[10px] font-sans font-medium">{label}</span>
+    <span className="text-[10px] font-sans font-medium whitespace-nowrap">{label}</span>
   </button>
 );
+
+const EventUsersTab = () => {
+  const [eventUsers, setEventUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEventUsers();
+  }, []);
+
+  const fetchEventUsers = async () => {
+    const { data } = await supabase.from("event_bookings")
+      .select("id, client_name, client_email, client_mobile, client_instagram, event_type, event_date, city, state, total_price, advance_amount, payment_status, status, created_at")
+      .order("created_at", { ascending: false });
+    if (data) {
+      // Group by unique email
+      const uniqueUsers = new Map<string, any>();
+      data.forEach((ev: any) => {
+        if (!uniqueUsers.has(ev.client_email)) {
+          uniqueUsers.set(ev.client_email, { ...ev, event_count: 1 });
+        } else {
+          uniqueUsers.get(ev.client_email).event_count++;
+        }
+      });
+      setEventUsers(Array.from(uniqueUsers.values()));
+    }
+    setLoading(false);
+  };
+
+  if (loading) return <p className="text-center text-muted-foreground py-10 font-sans">Loading...</p>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="font-display text-xl font-bold">Event Customers ({eventUsers.length})</h2>
+      {eventUsers.length === 0 ? (
+        <Card><CardContent className="p-8 text-center"><p className="text-muted-foreground font-sans">No event customers yet</p></CardContent></Card>
+      ) : (
+        <div className="space-y-3">
+          {eventUsers.map((u: any) => (
+            <Card key={u.client_email}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <p className="font-sans font-semibold">{u.client_name}</p>
+                    <p className="text-xs text-muted-foreground font-sans">{u.client_email} · +91{u.client_mobile}</p>
+                    {u.client_instagram && <p className="text-xs text-muted-foreground font-sans">IG: {u.client_instagram}</p>}
+                    <p className="text-xs text-muted-foreground font-sans">{u.city}, {u.state}</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-[10px]">{u.event_count} Event{u.event_count > 1 ? "s" : ""}</Badge>
+                      <Badge className={`border-none text-[10px] ${u.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                        Last: {u.payment_status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="font-display font-bold text-primary">{formatPrice(u.total_price)}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default Admin;
