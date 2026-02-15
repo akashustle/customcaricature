@@ -8,10 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
 
 declare global {
@@ -21,6 +23,7 @@ declare global {
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
+  event_booking_allowed?: boolean;
 };
 
 type Order = {
@@ -45,6 +48,7 @@ const WHATSAPP_NUMBER = "918369594271";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
+  const { settings } = useSiteSettings();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [events, setEvents] = useState<any[]>([]);
@@ -54,7 +58,6 @@ const Dashboard = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("orders");
-  // Secret code & password
   const [newSecretCode, setNewSecretCode] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -79,9 +82,9 @@ const Dashboard = () => {
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -122,7 +125,6 @@ const Dashboard = () => {
     if (newPassword !== confirmNewPassword) { toast({ title: "Error", description: "Passwords don't match", variant: "destructive" }); return; }
     if (newPassword.length < 6) { toast({ title: "Error", description: "Password must be at least 6 chars", variant: "destructive" }); return; }
     setChangingPassword(true);
-    // Re-authenticate with current password first
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: profile?.email || "", password: currentPassword });
     if (signInError) { toast({ title: "Error", description: "Current password is incorrect", variant: "destructive" }); setChangingPassword(false); return; }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
@@ -174,6 +176,16 @@ const Dashboard = () => {
     toast({ title: "Refreshed!" });
   }, [user]);
 
+  const canBookEvent = profile?.event_booking_allowed || settings.event_booking_global.enabled;
+
+  const handleBookEvent = () => {
+    if (canBookEvent) {
+      navigate("/book-event");
+    } else {
+      toast({ title: "🚀 Coming Soon!", description: "Event booking feature is coming soon. Stay tuned!" });
+    }
+  };
+
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
@@ -193,6 +205,8 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <LiveGreeting name={profile?.full_name} />
+
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full mb-6">
@@ -202,7 +216,7 @@ const Dashboard = () => {
               <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} /></TabsContent>
-            <TabsContent value="events"><EventsList events={events} navigate={navigate} /></TabsContent>
+            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} /></TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
               <SettingsSection
@@ -216,7 +230,7 @@ const Dashboard = () => {
 
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} />}
-          {activeTab === "events" && <EventsList events={events} navigate={navigate} />}
+          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
             <SettingsSection
@@ -388,17 +402,32 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
   </Card>
 );
 
-const EventsList = ({ events, navigate }: { events: any[]; navigate: any }) => (
+const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => (
   <>
     <div className="flex justify-between items-center mb-4">
       <h2 className="font-display text-xl font-bold">My Events</h2>
-      <Button onClick={() => navigate("/book-event")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ Book Event</Button>
+      <Button onClick={handleBookEvent} className={`rounded-full font-sans ${canBookEvent ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`} size="sm">
+        {canBookEvent ? "+ Book Event" : <><Sparkles className="w-3 h-3 mr-1" />Book Event</>}
+      </Button>
     </div>
+    {!canBookEvent && (
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="mb-4 border-primary/20 bg-primary/5">
+          <CardContent className="p-4 text-center">
+            <Sparkles className="w-8 h-8 text-primary mx-auto mb-2" />
+            <p className="font-display text-lg font-bold text-foreground">Event Booking — Coming Soon! 🚀</p>
+            <p className="text-sm text-muted-foreground font-sans mt-1">We're working on bringing live caricature event booking to you. Stay tuned!</p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    )}
     {events.length === 0 ? (
       <Card><CardContent className="p-8 text-center">
         <CalIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <p className="font-sans text-muted-foreground mb-4">No events booked yet</p>
-        <Button onClick={() => navigate("/book-event")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Book an Event</Button>
+        {canBookEvent && (
+          <Button onClick={handleBookEvent} className="rounded-full font-sans bg-primary hover:bg-primary/90">Book an Event</Button>
+        )}
       </CardContent></Card>
     ) : (
       <div className="space-y-3">
