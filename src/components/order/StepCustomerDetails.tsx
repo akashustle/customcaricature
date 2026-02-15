@@ -17,6 +17,7 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
     const digits = val.replace(/\D/g, "");
     if (digits.length > 10) return;
     update({ customerMobile: digits });
+    if (digits === "" && val === "") update({ customerMobile: "" });
   };
 
   const canProceed = 

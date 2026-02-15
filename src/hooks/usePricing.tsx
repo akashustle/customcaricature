@@ -13,9 +13,15 @@ export type PricingType = {
   sort_order: number;
 };
 
+export type CustomerPricing = {
+  caricature_type_slug: string;
+  custom_price: number;
+};
+
 export const usePricing = () => {
   const [types, setTypes] = useState<PricingType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [customerPricing, setCustomerPricing] = useState<CustomerPricing[]>([]);
 
   const fetchTypes = async () => {
     const { data } = await supabase
@@ -27,10 +33,17 @@ export const usePricing = () => {
     setLoading(false);
   };
 
+  const fetchCustomerPricing = async (userId: string) => {
+    const { data } = await supabase
+      .from("customer_pricing")
+      .select("caricature_type_slug, custom_price")
+      .eq("user_id", userId);
+    if (data) setCustomerPricing(data as CustomerPricing[]);
+  };
+
   useEffect(() => {
     fetchTypes();
 
-    // Real-time subscription for pricing changes
     const channel = supabase
       .channel("pricing-changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => {
@@ -42,9 +55,16 @@ export const usePricing = () => {
   }, []);
 
   const getPrice = (orderType: string, faceCount: number): number => {
+    // Check customer-specific pricing first
+    const custom = customerPricing.find((cp) => cp.caricature_type_slug === orderType);
+    if (custom) {
+      const type = types.find((t) => t.slug === orderType);
+      if (type?.per_face) return custom.custom_price * Math.max(faceCount, type.min_faces);
+      return custom.custom_price;
+    }
+
     const type = types.find((t) => t.slug === orderType);
     if (!type) {
-      // Fallback to hardcoded
       if (orderType === "single") return 3499;
       if (orderType === "couple") return 9499;
       return 3499 * Math.max(faceCount, 3);
@@ -54,5 +74,5 @@ export const usePricing = () => {
 
   const getType = (slug: string) => types.find((t) => t.slug === slug);
 
-  return { types, loading, getPrice, getType, refetch: fetchTypes };
+  return { types, loading, getPrice, getType, refetch: fetchTypes, fetchCustomerPricing, customerPricing };
 };
