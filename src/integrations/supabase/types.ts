@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_site_settings: {
+        Row: {
+          id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       artist_blocked_dates: {
         Row: {
           blocked_date: string
@@ -131,6 +149,9 @@ export type Database = {
           pincode: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
+          registration_lat: number | null
+          registration_lng: number | null
+          registration_location_name: string | null
           remaining_amount: number | null
           state: string
           status: string
@@ -166,6 +187,9 @@ export type Database = {
           pincode: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          registration_lat?: number | null
+          registration_lng?: number | null
+          registration_location_name?: string | null
           remaining_amount?: number | null
           state: string
           status?: string
@@ -201,6 +225,9 @@ export type Database = {
           pincode?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          registration_lat?: number | null
+          registration_lng?: number | null
+          registration_location_name?: string | null
           remaining_amount?: number | null
           state?: string
           status?: string
@@ -391,12 +418,16 @@ export type Database = {
           city: string | null
           created_at: string
           email: string
+          event_booking_allowed: boolean
           full_name: string
           id: string
           instagram_id: string | null
           is_manual: boolean
           mobile: string
           pincode: string | null
+          registration_lat: number | null
+          registration_lng: number | null
+          registration_location_name: string | null
           secret_code: string | null
           state: string | null
           updated_at: string
@@ -407,12 +438,16 @@ export type Database = {
           city?: string | null
           created_at?: string
           email: string
+          event_booking_allowed?: boolean
           full_name: string
           id?: string
           instagram_id?: string | null
           is_manual?: boolean
           mobile: string
           pincode?: string | null
+          registration_lat?: number | null
+          registration_lng?: number | null
+          registration_location_name?: string | null
           secret_code?: string | null
           state?: string | null
           updated_at?: string
@@ -423,12 +458,16 @@ export type Database = {
           city?: string | null
           created_at?: string
           email?: string
+          event_booking_allowed?: boolean
           full_name?: string
           id?: string
           instagram_id?: string | null
           is_manual?: boolean
           mobile?: string
           pincode?: string | null
+          registration_lat?: number | null
+          registration_lng?: number | null
+          registration_location_name?: string | null
           secret_code?: string | null
           state?: string | null
           updated_at?: string

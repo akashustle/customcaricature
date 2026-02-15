@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Order from "./pages/Order";
 import Login from "./pages/Login";
@@ -17,6 +18,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
 import BookEvent from "./pages/BookEvent";
+import EventPolicy from "./pages/EventPolicy";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -29,6 +31,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <FloatingButtons />
         <MobileBottomNav />
         <Routes>
@@ -47,6 +50,7 @@ const App = () => (
           <Route path="/shipping" element={<ShippingPolicy />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/book-event" element={<BookEvent />} />
+          <Route path="/event-policy" element={<EventPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

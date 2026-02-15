@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useState, useCallback } from "react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -98,6 +99,7 @@ const InfiniteScrollGallery = ({ onImageClick }: { onImageClick: (idx: number) =
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
+  const { settings } = useSiteSettings();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -324,7 +326,13 @@ const Index = () => {
               <span>•</span>
               <Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</Link>
               <span>•</span>
-              <Link to="/book-event" className="hover:text-foreground transition-colors">Book an Event</Link>
+              <Link to="/event-policy" className="hover:text-foreground transition-colors">Event Policy</Link>
+              {settings.workshop_button.enabled && (
+                <>
+                  <span>•</span>
+                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{settings.workshop_button.label}</a>
+                </>
+              )}
             </div>
             <p className="text-xs text-muted-foreground font-sans">© 2025 Creative Caricature Club. All rights reserved.</p>
           </div>

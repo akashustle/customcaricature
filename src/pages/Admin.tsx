@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -18,6 +19,8 @@ import OrderDetail from "@/components/admin/OrderDetail";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import LiveGreeting from "@/components/LiveGreeting";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -91,6 +94,7 @@ const PAYMENT_COLORS: Record<string, string> = { pending: "bg-amber-100 text-amb
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { settings, updateSetting } = useSiteSettings();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -221,7 +225,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -465,6 +469,7 @@ const Admin = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
+        <LiveGreeting name={adminProfile?.full_name} />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full overflow-x-auto flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
@@ -955,6 +960,20 @@ const Admin = () => {
                             <p className="text-xs text-muted-foreground font-sans">
                               Registered: {formatDateTime(c.created_at)}
                             </p>
+                            {/* Event Booking Access Toggle */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <Switch
+                                checked={(c as any).event_booking_allowed || false}
+                                onCheckedChange={async (checked) => {
+                                  if (!confirm(`${checked ? "Allow" : "Revoke"} event booking access for ${c.full_name}?`)) return;
+                                  await supabase.from("profiles").update({ event_booking_allowed: checked } as any).eq("user_id", c.user_id);
+                                  toast({ title: checked ? "Event booking enabled" : "Event booking disabled", description: `for ${c.full_name}` });
+                                  fetchCustomers();
+                                }}
+                              />
+                              <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
+                              {(c as any).event_booking_allowed && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Allowed</Badge>}
+                            </div>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
                             <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
@@ -990,6 +1009,69 @@ const Admin = () => {
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
+              {/* Site Controls */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Globe className="w-5 h-5 text-primary" />Site Controls</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Global Event Booking Toggle */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Event Booking for All Users</p>
+                      <p className="text-xs text-muted-foreground font-sans">Allow all registered users to book events</p>
+                    </div>
+                    <Switch
+                      checked={settings.event_booking_global.enabled}
+                      onCheckedChange={async (checked) => {
+                        if (!confirm(`${checked ? "Enable" : "Disable"} event booking for ALL users?`)) return;
+                        await updateSetting("event_booking_global", { enabled: checked });
+                        toast({ title: checked ? "Event booking enabled for everyone" : "Event booking restricted to approved users" });
+                      }}
+                    />
+                  </div>
+                  {/* Workshop Button */}
+                  <div className="border-t border-border pt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans font-medium text-sm">Workshop Button</p>
+                        <p className="text-xs text-muted-foreground font-sans">Show/hide workshop button on website</p>
+                      </div>
+                      <Switch
+                        checked={settings.workshop_button.enabled}
+                        onCheckedChange={async (checked) => {
+                          if (!confirm(`${checked ? "Show" : "Hide"} workshop button on website?`)) return;
+                          await updateSetting("workshop_button", { ...settings.workshop_button, enabled: checked });
+                          toast({ title: checked ? "Workshop button visible" : "Workshop button hidden" });
+                        }}
+                      />
+                    </div>
+                    {settings.workshop_button.enabled && (
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs">Button Label</Label>
+                          <Input
+                            value={settings.workshop_button.label}
+                            onChange={async (e) => {
+                              await updateSetting("workshop_button", { ...settings.workshop_button, label: e.target.value });
+                            }}
+                            placeholder="Workshop"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Button URL</Label>
+                          <Input
+                            value={settings.workshop_button.url}
+                            onChange={async (e) => {
+                              await updateSetting("workshop_button", { ...settings.workshop_button, url: e.target.value });
+                            }}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Admin Profile */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -1017,20 +1099,6 @@ const Admin = () => {
                       <div className="flex justify-between"><span className="text-muted-foreground">Mobile</span><span className="font-medium">{adminProfile.mobile}</span></div>
                     </div>
                   ) : <p className="text-muted-foreground font-sans text-sm">Loading...</p>}
-                </CardContent>
-              </Card>
-
-              {/* Change Password */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Change Password</CardTitle></CardHeader>
-                <CardContent className="space-y-3">
-                  <div><Label>Current Password</Label><Input type="password" value={adminCurrentPassword} onChange={(e) => setAdminCurrentPassword(e.target.value)} /></div>
-                  <div><Label>New Password (min 6)</Label><Input type="password" value={adminNewPassword} onChange={(e) => setAdminNewPassword(e.target.value)} /></div>
-                  <div><Label>Confirm New Password</Label><Input type="password" value={adminConfirmPassword} onChange={(e) => setAdminConfirmPassword(e.target.value)} /></div>
-                  {adminNewPassword && adminConfirmPassword && adminNewPassword !== adminConfirmPassword && <p className="text-xs text-destructive font-sans">Passwords don't match</p>}
-                  <Button onClick={changeAdminPassword} disabled={!adminCurrentPassword || adminNewPassword.length < 6 || adminNewPassword !== adminConfirmPassword || changingAdminPassword} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
-                    {changingAdminPassword ? "Changing..." : "Change Password"}
-                  </Button>
                 </CardContent>
               </Card>
 
