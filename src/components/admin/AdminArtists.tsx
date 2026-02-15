@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Save, X, FileText, Upload } from "lucide-react";
+import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
 type Artist = {
   id: string;
   name: string;
   experience: string | null;
   portfolio_url: string | null;
+  email: string | null;
+  mobile: string | null;
+  auth_user_id: string | null;
   created_at: string;
 };
 
@@ -25,7 +29,7 @@ const AdminArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [newArtist, setNewArtist] = useState({ name: "", experience: "" });
+  const [newArtist, setNewArtist] = useState({ name: "", experience: "", email: "", mobile: "", password: "" });
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -33,6 +37,8 @@ const AdminArtists = () => {
 
   useEffect(() => {
     fetchArtists();
+    const ch = supabase.channel("admin-artists-rt").on("postgres_changes", { event: "*", schema: "public", table: "artists" }, () => fetchArtists()).subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
 
   const fetchArtists = async () => {
@@ -54,15 +60,40 @@ const AdminArtists = () => {
         portfolioUrl = urlData.publicUrl;
       }
 
-      await supabase.from("artists").insert({
-        name: newArtist.name,
-        experience: newArtist.experience || null,
-        portfolio_url: portfolioUrl,
-      } as any);
+      // If email & password provided, create artist account
+      if (newArtist.email && newArtist.password) {
+        const { data, error } = await supabase.functions.invoke("admin-create-user", {
+          body: {
+            email: newArtist.email,
+            password: newArtist.password,
+            full_name: newArtist.name,
+            mobile: newArtist.mobile || "0000000000",
+            make_artist: true,
+            artist_name: newArtist.name,
+            experience: newArtist.experience || null,
+          },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        
+        // Update portfolio if uploaded
+        if (portfolioUrl && data?.user_id) {
+          await (supabase.from("artists").update({ portfolio_url: portfolioUrl } as any) as any).eq("auth_user_id", data.user_id);
+        }
+      } else {
+        // Create artist without login
+        await (supabase.from("artists") as any).insert({
+          name: newArtist.name,
+          experience: newArtist.experience || null,
+          portfolio_url: portfolioUrl,
+          email: newArtist.email || null,
+          mobile: newArtist.mobile || null,
+        });
+      }
 
       toast({ title: "Artist Added!" });
       setShowAdd(false);
-      setNewArtist({ name: "", experience: "" });
+      setNewArtist({ name: "", experience: "", email: "", mobile: "", password: "" });
       setPortfolioFile(null);
       fetchArtists();
     } catch (err: any) {
@@ -104,20 +135,28 @@ const AdminArtists = () => {
         <h2 className="font-display text-xl font-bold">Artists ({artists.length})</h2>
         <Dialog open={showAdd} onOpenChange={setShowAdd}>
           <DialogTrigger asChild>
-            <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Artist</Button>
+            <Button size="sm" className="font-sans rounded-full btn-3d"><Plus className="w-4 h-4 mr-1" />Add Artist</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle className="font-display">Add New Artist</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>Name *</Label><Input value={newArtist.name} onChange={e => setNewArtist({ ...newArtist, name: e.target.value })} placeholder="Artist name" /></div>
-              <div><Label>Experience</Label><Textarea value={newArtist.experience} onChange={e => setNewArtist({ ...newArtist, experience: e.target.value })} placeholder="e.g. 5 years of caricature art..." /></div>
+              <div><Label>Experience</Label><Textarea value={newArtist.experience} onChange={e => setNewArtist({ ...newArtist, experience: e.target.value })} placeholder="e.g. 5 years..." /></div>
+              <div className="border-t border-border pt-3">
+                <p className="text-xs font-sans text-muted-foreground mb-2 flex items-center gap-1"><UserPlus className="w-3 h-3" /> Artist Login Credentials (optional)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Email</Label><Input type="email" value={newArtist.email} onChange={e => setNewArtist({ ...newArtist, email: e.target.value })} placeholder="artist@email.com" /></div>
+                  <div><Label>Mobile</Label><Input value={newArtist.mobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewArtist({ ...newArtist, mobile: d }); }} placeholder="9876543210" maxLength={10} /></div>
+                </div>
+                <div className="mt-2"><Label>Password</Label><Input type="password" value={newArtist.password} onChange={e => setNewArtist({ ...newArtist, password: e.target.value })} placeholder="Min 6 chars" /></div>
+              </div>
               <div>
                 <Label className="flex items-center gap-1"><FileText className="w-4 h-4" />Portfolio (PDF)</Label>
                 <Input type="file" accept=".pdf" onChange={e => setPortfolioFile(e.target.files?.[0] || null)} />
                 {portfolioFile && <p className="text-xs text-muted-foreground mt-1">{portfolioFile.name}</p>}
               </div>
-              <Button onClick={addArtist} disabled={!newArtist.name || adding} className="w-full font-sans">
-                {adding ? "Adding..." : "Add Artist"}
+              <Button onClick={addArtist} disabled={!newArtist.name || adding} className="w-full font-sans btn-3d">
+                {adding ? "Adding..." : newArtist.email ? "Create Artist with Login" : "Add Artist"}
               </Button>
             </div>
           </DialogContent>
@@ -129,7 +168,7 @@ const AdminArtists = () => {
       ) : (
         <div className="space-y-3">
           {artists.map(artist => (
-            <Card key={artist.id}>
+            <Card key={artist.id} className="card-3d">
               <CardContent className="p-4">
                 {editingId === artist.id ? (
                   <div className="space-y-3">
@@ -143,7 +182,11 @@ const AdminArtists = () => {
                 ) : (
                   <div className="flex justify-between items-start">
                     <div className="space-y-1 flex-1 min-w-0">
-                      <p className="font-sans font-semibold">{artist.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-sans font-semibold">{artist.name}</p>
+                        {artist.auth_user_id && <Badge className="text-[10px] bg-primary/10 text-primary border-none">Has Login</Badge>}
+                      </div>
+                      {artist.email && <p className="text-xs text-muted-foreground font-sans">{artist.email}</p>}
                       {artist.experience && <p className="text-xs text-muted-foreground font-sans">{artist.experience}</p>}
                       {artist.portfolio_url && (
                         <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-sans underline flex items-center gap-1">

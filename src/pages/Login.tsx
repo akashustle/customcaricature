@@ -28,7 +28,13 @@ const Login = () => {
         if (roles && roles.length > 0) {
           navigate("/admin");
         } else {
-          navigate("/dashboard");
+          // Check if user is an artist
+          const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
+          if (artistData) {
+            navigate("/artist-dashboard");
+          } else {
+            navigate("/dashboard");
+          }
         }
       }
     }

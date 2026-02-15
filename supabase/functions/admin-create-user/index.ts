@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { email, password, full_name, mobile, instagram_id, address, city, state, pincode, make_admin } = body;
+    const { email, password, full_name, mobile, instagram_id, address, city, state, pincode, make_admin, make_artist, artist_name, experience } = body;
 
     if (!email || !password || !full_name || !mobile) {
       return new Response(JSON.stringify({ error: "Missing required fields: email, password, full_name, mobile" }), {
@@ -90,6 +90,38 @@ Deno.serve(async (req) => {
       });
       if (roleError) {
         console.error("Role assignment error:", roleError);
+      }
+    }
+
+    // If make_artist flag is set, add artist role and link to artists table
+    if (make_artist) {
+      const { error: roleError } = await adminClient.from("user_roles").insert({
+        user_id: authData.user.id,
+        role: "artist",
+      });
+      if (roleError) {
+        console.error("Artist role assignment error:", roleError);
+      }
+
+      // Update artist record with auth_user_id
+      if (artist_name) {
+        // Check if artist already exists by name
+        const { data: existingArtist } = await adminClient.from("artists").select("id").eq("name", artist_name).maybeSingle();
+        if (existingArtist) {
+          await adminClient.from("artists").update({ 
+            auth_user_id: authData.user.id,
+            email: email,
+            mobile: mobile,
+          }).eq("id", existingArtist.id);
+        } else {
+          await adminClient.from("artists").insert({
+            name: artist_name || full_name,
+            email: email,
+            mobile: mobile,
+            experience: experience || null,
+            auth_user_id: authData.user.id,
+          });
+        }
       }
     }
 
