@@ -19,6 +19,7 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
 import BookEvent from "./pages/BookEvent";
 import EventPolicy from "./pages/EventPolicy";
+import ArtistDashboard from "./pages/ArtistDashboard";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/book-event" element={<BookEvent />} />
           <Route path="/event-policy" element={<EventPolicy />} />
+          <Route path="/artist-dashboard" element={<ArtistDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

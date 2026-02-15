@@ -152,6 +152,15 @@ const Admin = () => {
       fetchCaricatureTypes();
       fetchCustomers();
       fetchAdminProfile();
+
+      // Real-time subscriptions
+      const ch = supabase
+        .channel("admin-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => fetchOrders())
+        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
+        .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
+        .subscribe();
+      return () => { supabase.removeChannel(ch); };
     } else if (!authLoading && !user) {
       navigate("/customcad75");
     }
