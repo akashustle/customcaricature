@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useEventPricing } from "@/hooks/useEventPricing";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, FileText } from "lucide-react";
+import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { INDIA_STATES_CITIES, EVENT_TYPES, getEventPrice } from "@/lib/event-data";
+import { INDIA_STATES_CITIES, EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event-data";
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
 
@@ -26,6 +27,7 @@ declare global {
 const BookEvent = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { pricing: dbPricing } = useEventPricing();
 
   // Form state
   const [clientName, setClientName] = useState("");
@@ -33,11 +35,13 @@ const BookEvent = () => {
   const [clientEmail, setClientEmail] = useState("");
   const [clientInstagram, setClientInstagram] = useState("");
   const [eventType, setEventType] = useState("");
+  const [customEventType, setCustomEventType] = useState("");
   const [eventDate, setEventDate] = useState<Date>();
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
+  const [customCity, setCustomCity] = useState("");
   const [fullAddress, setFullAddress] = useState("");
   const [venueName, setVenueName] = useState("");
   const [pincode, setPincode] = useState("");
@@ -53,11 +57,13 @@ const BookEvent = () => {
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
-  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
-  const isMumbai = state === "Maharashtra" && city === "Mumbai";
-  const isOutsideMumbai = state && city && !isMumbai;
-  const pricing = getEventPrice(isMumbai, artistCount, addExtraHours ? extraHours : 0);
+  const actualCity = city === "__other__" ? customCity : city;
+  const isMumbai = state === "Maharashtra" && actualCity === "Mumbai";
+  const isOutsideMumbai = state && actualCity && !isMumbai;
+  const pricing = getEventPrice(isMumbai, artistCount, addExtraHours ? extraHours : 0, dbPricing);
+  const gatewayCharges = calculateGatewayCharges(pricing.advance);
+  const totalPayable = pricing.advance + gatewayCharges;
 
   // Pre-fill from profile
   useEffect(() => {
@@ -74,38 +80,26 @@ const BookEvent = () => {
     }
   }, [user]);
 
-  // Fetch blocked dates
-  useEffect(() => {
-    supabase.from("artist_blocked_dates").select("blocked_date, city").then(({ data }) => {
-      if (data) setBlockedDates(data.map(d => new Date(d.blocked_date)));
-    });
-  }, []);
-
   // Reset availability when date/city changes
   useEffect(() => {
     setAvailabilityChecked(false);
     setIsAvailable(false);
-  }, [eventDate, city]);
+  }, [eventDate, actualCity]);
 
   const checkAvailability = async () => {
-    if (!eventDate || !city) return;
+    if (!eventDate || !actualCity) return;
     setCheckingAvailability(true);
-    
-    // Check blocked dates
     const dateStr = format(eventDate, "yyyy-MM-dd");
     const { data: blocked } = await supabase
       .from("artist_blocked_dates")
       .select("id")
       .eq("blocked_date", dateStr);
-    
-    // Check existing bookings on same date & city
     const { data: existing } = await supabase
       .from("event_bookings")
       .select("id")
       .eq("event_date", dateStr)
-      .eq("city", city)
+      .eq("city", actualCity)
       .neq("status", "cancelled");
-
     const available = (!blocked || blocked.length === 0) && (!existing || existing.length < 2);
     setIsAvailable(available);
     setAvailabilityChecked(true);
@@ -113,8 +107,10 @@ const BookEvent = () => {
   };
 
   const canProceed = () => {
-    if (!clientName || !clientMobile || !clientEmail || !eventType || !eventDate || !startTime || !endTime) return false;
-    if (!state || !city || !fullAddress || !venueName || !pincode) return false;
+    if (!clientName || !clientMobile || !clientEmail) return false;
+    const finalEventType = eventType === "other" ? customEventType : eventType;
+    if (!finalEventType || !eventDate || !startTime || !endTime) return false;
+    if (!state || !actualCity || !fullAddress || !venueName || !pincode) return false;
     if (!availabilityChecked || !isAvailable) return false;
     if (isOutsideMumbai && (!travelConfirmed || !accommodationConfirmed)) return false;
     return true;
@@ -123,50 +119,37 @@ const BookEvent = () => {
   const handleBooking = async () => {
     if (!canProceed()) return;
     setSubmitting(true);
-
     try {
       const dateStr = format(eventDate!, "yyyy-MM-dd");
-      const totalPrice = pricing.total;
-      const advanceAmount = pricing.advance;
-
-      // Insert event booking
+      const finalEventType = eventType === "other" ? customEventType : eventType;
       const { data: booking, error } = await supabase.from("event_bookings").insert({
         user_id: user?.id || null,
         client_name: clientName,
         client_mobile: clientMobile,
         client_email: clientEmail,
         client_instagram: clientInstagram || null,
-        event_type: eventType,
+        event_type: finalEventType,
         event_date: dateStr,
         event_start_time: startTime,
         event_end_time: endTime,
         state,
-        city,
+        city: actualCity,
         full_address: fullAddress,
         venue_name: venueName,
         pincode,
         artist_count: artistCount,
         is_mumbai: isMumbai,
-        total_price: totalPrice,
-        advance_amount: advanceAmount,
+        total_price: pricing.total,
+        advance_amount: pricing.advance,
         extra_hours: addExtraHours ? extraHours : 0,
         travel_confirmed: isOutsideMumbai ? travelConfirmed : true,
         accommodation_confirmed: isOutsideMumbai ? accommodationConfirmed : true,
       } as any).select("id").single();
-
       if (error || !booking) throw new Error(error?.message || "Failed to create booking");
 
-      // Create Razorpay order for advance payment
       const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: {
-          amount: advanceAmount,
-          order_id: booking.id,
-          customer_name: clientName,
-          customer_email: clientEmail,
-          customer_mobile: clientMobile,
-        },
+        body: { amount: totalPayable, order_id: booking.id, customer_name: clientName, customer_email: clientEmail, customer_mobile: clientMobile },
       });
-
       if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment order");
 
       const options = {
@@ -174,27 +157,19 @@ const BookEvent = () => {
         amount: rzpData.amount,
         currency: rzpData.currency,
         name: "Creative Caricature Club",
-        description: `Event Booking - ${EVENT_TYPES.find(t => t.value === eventType)?.label}`,
+        description: `Event Booking – ${finalEventType}`,
         image: "/logo.png",
         order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: booking.id,
-              },
+            await supabase.functions.invoke("verify-razorpay-payment", {
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: booking.id },
             });
-
-            // Update event booking with payment info
             await supabase.from("event_bookings").update({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               payment_status: "confirmed",
             } as any).eq("id", booking.id);
-
             setBookingConfirmed(true);
             toast({ title: "Event Booked Successfully! 🎉" });
           } catch {
@@ -227,7 +202,7 @@ const BookEvent = () => {
             <CardContent className="p-8 space-y-4">
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
               <h2 className="font-display text-2xl font-bold">Event Booking Confirmed!</h2>
-              <p className="text-muted-foreground font-sans">We'll reach out to you soon with more details. Check your dashboard for updates.</p>
+              <p className="text-muted-foreground font-sans">We'll reach out to you soon with more details.</p>
               <div className="flex flex-col gap-2">
                 <Button onClick={() => navigate("/dashboard")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Go to Dashboard</Button>
                 <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-sans">Back to Home</Button>
@@ -240,7 +215,7 @@ const BookEvent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}><ArrowLeft className="w-4 h-4" /></Button>
@@ -271,13 +246,16 @@ const BookEvent = () => {
           <CardContent className="space-y-3">
             <div>
               <Label className="font-sans">Event Type *</Label>
-              <Select value={eventType} onValueChange={setEventType}>
+              <Select value={eventType} onValueChange={v => { setEventType(v); if (v !== "other") setCustomEventType(""); }}>
                 <SelectTrigger><SelectValue placeholder="Select event type" /></SelectTrigger>
                 <SelectContent>
                   {EVENT_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
+            {eventType === "other" && (
+              <div><Label className="font-sans">Please specify event type *</Label><Input value={customEventType} onChange={e => setCustomEventType(e.target.value)} placeholder="e.g. Engagement, Anniversary..." /></div>
+            )}
             <div>
               <Label className="font-sans">Event Date *</Label>
               <Popover>
@@ -288,12 +266,7 @@ const BookEvent = () => {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single" selected={eventDate} onSelect={setEventDate}
-                    disabled={(date) => date < new Date()}
-                    className={cn("p-3 pointer-events-auto")}
-                    initialFocus
-                  />
+                  <Calendar mode="single" selected={eventDate} onSelect={setEventDate} disabled={(date) => date < new Date()} className={cn("p-3 pointer-events-auto")} initialFocus />
                 </PopoverContent>
               </Popover>
             </div>
@@ -310,18 +283,24 @@ const BookEvent = () => {
           <CardContent className="space-y-3">
             <div>
               <Label className="font-sans">State *</Label>
-              <Select value={state} onValueChange={v => { setState(v); setCity(""); }}>
+              <Select value={state} onValueChange={v => { setState(v); setCity(""); setCustomCity(""); }}>
                 <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
                 <SelectContent>{Object.keys(INDIA_STATES_CITIES).sort().map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div>
               <Label className="font-sans">City *</Label>
-              <Select value={city} onValueChange={setCity} disabled={!state}>
+              <Select value={city} onValueChange={v => { setCity(v); if (v !== "__other__") setCustomCity(""); }} disabled={!state}>
                 <SelectTrigger><SelectValue placeholder={state ? "Select city" : "Select state first"} /></SelectTrigger>
-                <SelectContent>{(INDIA_STATES_CITIES[state] || []).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {(INDIA_STATES_CITIES[state] || []).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {state && <SelectItem value="__other__">Other (Enter manually)</SelectItem>}
+                </SelectContent>
               </Select>
             </div>
+            {city === "__other__" && (
+              <div><Label className="font-sans">Enter City Name *</Label><Input value={customCity} onChange={e => setCustomCity(e.target.value)} placeholder="Type your city name" /></div>
+            )}
             <div><Label className="font-sans">Venue Name *</Label><Input value={venueName} onChange={e => setVenueName(e.target.value)} placeholder="Hotel / Hall name" /></div>
             <div><Label className="font-sans">Full Address *</Label><Input value={fullAddress} onChange={e => setFullAddress(e.target.value)} placeholder="Complete address" /></div>
             <div><Label className="font-sans">Pin Code *</Label><Input value={pincode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setPincode(d); }} maxLength={6} placeholder="6 digit pincode" /></div>
@@ -329,7 +308,7 @@ const BookEvent = () => {
         </Card>
 
         {/* Availability Check */}
-        {eventDate && city && (
+        {eventDate && actualCity && (
           <Card>
             <CardContent className="p-4">
               {!availabilityChecked ? (
@@ -338,7 +317,7 @@ const BookEvent = () => {
                 </Button>
               ) : isAvailable ? (
                 <div className="flex items-center gap-2 text-green-600 font-sans font-medium">
-                  <CheckCircle className="w-5 h-5" /> We are available on {format(eventDate, "PPP")} in {city}! 🎉
+                  <CheckCircle className="w-5 h-5" /> We are available on {format(eventDate, "PPP")} in {actualCity}! 🎉
                 </div>
               ) : (
                 <div className="text-center space-y-2">
@@ -350,7 +329,7 @@ const BookEvent = () => {
           </Card>
         )}
 
-        {/* Artist Selection & Pricing - only show after availability confirmed */}
+        {/* Artist Selection & Pricing */}
         {isAvailable && (
           <>
             <Card>
@@ -360,15 +339,19 @@ const BookEvent = () => {
                   <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
                     <RadioGroupItem value="1" id="artist-1" />
                     <Label htmlFor="artist-1" className="font-sans flex-1 cursor-pointer">
-                      <span className="font-medium">1 Professional Caricature Artist</span>
-                      <span className="block text-sm text-muted-foreground">Total: {formatPrice(getEventPrice(isMumbai, 1, 0).total)} · Advance: {formatPrice(getEventPrice(isMumbai, 1, 0).advance)}</span>
+                      <span className="font-medium">🔴 1 Professional Caricature Artist</span>
+                      <span className="block text-sm text-muted-foreground">
+                        Total: {formatPrice(getEventPrice(isMumbai, 1, 0, dbPricing).total)} (All Materials Included) · Advance: {formatPrice(getEventPrice(isMumbai, 1, 0, dbPricing).advance)}
+                      </span>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
                     <RadioGroupItem value="2" id="artist-2" />
                     <Label htmlFor="artist-2" className="font-sans flex-1 cursor-pointer">
-                      <span className="font-medium">2 Professional Caricature Artists</span>
-                      <span className="block text-sm text-muted-foreground">Total: {formatPrice(getEventPrice(isMumbai, 2, 0).total)} · Advance: {formatPrice(getEventPrice(isMumbai, 2, 0).advance)}</span>
+                      <span className="font-medium">🔴 2 Professional Caricature Artists</span>
+                      <span className="block text-sm text-muted-foreground">
+                        Total: {formatPrice(getEventPrice(isMumbai, 2, 0, dbPricing).total)} (All Materials Included) · Advance: {formatPrice(getEventPrice(isMumbai, 2, 0, dbPricing).advance)}
+                      </span>
                     </Label>
                   </div>
                 </RadioGroup>
@@ -377,7 +360,7 @@ const BookEvent = () => {
                 <div className="border-t border-border pt-4">
                   <div className="flex items-center gap-3 mb-3">
                     <Checkbox checked={addExtraHours} onCheckedChange={(c) => { setAddExtraHours(!!c); if (!c) setExtraHours(0); }} id="extra-hours" />
-                    <Label htmlFor="extra-hours" className="font-sans cursor-pointer">Add Extra Hours (₹5,000/hour)</Label>
+                    <Label htmlFor="extra-hours" className="font-sans cursor-pointer">Add Extra Hours ({formatPrice(pricing.extraHourRate)}/hour)</Label>
                   </div>
                   {addExtraHours && (
                     <div className="ml-7">
@@ -389,37 +372,50 @@ const BookEvent = () => {
               </CardContent>
             </Card>
 
-            {/* What Guests Receive */}
+            {/* Caricature Highlights */}
             <Card>
-              <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Palette className="w-5 h-5 text-primary" />What Guests Receive</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="font-display text-lg flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-primary" />
+                  🎨 Live Caricature Session – 3 to 4 Hours {isMumbai ? "in Mumbai" : "Outside Mumbai"}
+                </CardTitle>
+              </CardHeader>
               <CardContent>
+                <p className="font-sans text-sm font-semibold mb-3">✏️ Caricature Highlights:</p>
                 <ul className="space-y-2 font-sans text-sm">
                   {[
-                    "Live hand-drawn caricatures at your event",
-                    "Black & white sketches in 3 minutes",
-                    "Color caricatures in 6 minutes",
-                    "Premium 1×15 inch sheets",
-                    "Transparent sleeves for each drawing",
-                    "Fun & memorable keepsake for guests",
+                    "✅ Black & White Caricatures – Quick sketches in just 3 minutes!",
+                    "✅ Color Caricatures – Vibrant, full-of-life portraits in 6 minutes!",
+                    "✅ Premium 11×15-inch sheets, neatly packed in envelopes.",
+                    "✅ Custom Branding! Your logo or event branding on every sheet – a perfect keepsake!",
                   ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
+                    <li key={i} className="flex items-start gap-2"><span>{item}</span></li>
                   ))}
                 </ul>
+                <div className="mt-4 pt-3 border-t border-border space-y-1 font-sans text-sm">
+                  <p className="font-semibold">📌 Additional Charges:</p>
+                  <p>🔹 Extra Time? – {formatPrice(pricing.extraHourRate)} per additional hour.</p>
+                  {isOutsideMumbai && (
+                    <p>🔹 Outside Mumbai? – Travel & accommodation charges apply. ✈️🚆</p>
+                  )}
+                </div>
+                {dbPricing.length > 0 && dbPricing[0]?.valid_until && (
+                  <p className="mt-3 text-xs text-muted-foreground font-sans">
+                    Above cost valid till {new Date(dbPricing[0].valid_until).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                )}
               </CardContent>
             </Card>
 
             {/* Travel Confirmation */}
             {isOutsideMumbai && (
               <Card className="border-amber-200 bg-amber-50/50">
-                <CardHeader><CardTitle className="font-display text-lg">Travel & Accommodation</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Plane className="w-5 h-5 text-amber-600" />Travel & Accommodation</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground font-sans">Since the event is outside Mumbai, you need to confirm the following:</p>
+                  <p className="text-sm text-muted-foreground font-sans">Since the event is outside Mumbai, please confirm the following. <span className="font-semibold text-foreground">Preferred mode of transport: ✈️ Flight</span></p>
                   <div className="flex items-start gap-3">
                     <Checkbox checked={travelConfirmed} onCheckedChange={c => setTravelConfirmed(!!c)} id="travel" />
-                    <Label htmlFor="travel" className="font-sans cursor-pointer text-sm">✅ I agree to arrange travel for the artist(s)</Label>
+                    <Label htmlFor="travel" className="font-sans cursor-pointer text-sm">✅ I agree to arrange travel (Flight preferred) for the artist(s)</Label>
                   </div>
                   <div className="flex items-start gap-3">
                     <Checkbox checked={accommodationConfirmed} onCheckedChange={c => setAccommodationConfirmed(!!c)} id="accommodation" />
@@ -431,17 +427,24 @@ const BookEvent = () => {
 
             {/* Price Summary */}
             <Card className="border-primary/30">
-              <CardContent className="p-4 space-y-2 font-sans">
-                <div className="flex justify-between"><span className="text-muted-foreground">Region</span><span className="font-medium">{isMumbai ? "Mumbai" : "Outside Mumbai (Pan India)"}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Artists</span><span className="font-medium">{artistCount}</span></div>
+              <CardHeader><CardTitle className="font-display text-lg">💰 Price Summary</CardTitle></CardHeader>
+              <CardContent className="space-y-2 font-sans">
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Region</span><span className="font-medium">{isMumbai ? "Mumbai" : "Outside Mumbai (Pan India)"}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Artists</span><span className="font-medium">{artistCount} Professional Artist{artistCount > 1 ? "s" : ""}</span></div>
                 {addExtraHours && extraHours > 0 && (
-                  <div className="flex justify-between"><span className="text-muted-foreground">Extra Hours</span><span className="font-medium">{extraHours} × ₹5,000 = {formatPrice(extraHours * 5000)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Extra Hours</span><span className="font-medium">{extraHours} × {formatPrice(pricing.extraHourRate)} = {formatPrice(extraHours * pricing.extraHourRate)}</span></div>
                 )}
                 <div className="border-t border-border pt-2 flex justify-between text-lg font-bold">
-                  <span>Total</span><span className="text-primary">{formatPrice(pricing.total)}</span>
+                  <span>Total Event Cost</span><span className="text-primary">{formatPrice(pricing.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Advance Payable Now</span><span className="font-semibold text-primary">{formatPrice(pricing.advance)}</span>
+                  <span className="text-muted-foreground">Advance Payment</span><span className="font-semibold">{formatPrice(pricing.advance)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Payment Gateway Charges (2.6%)</span><span>{formatPrice(gatewayCharges)}</span>
+                </div>
+                <div className="border-t border-border pt-2 flex justify-between font-bold text-primary">
+                  <span>You Pay Now (Satisfaction Guaranteed)</span><span>{formatPrice(totalPayable)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Remaining (at event)</span><span>{formatPrice(pricing.total - pricing.advance)}</span>
@@ -449,13 +452,22 @@ const BookEvent = () => {
               </CardContent>
             </Card>
 
-            {/* Submit */}
+            {/* Book Now */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4 text-center space-y-2 font-sans text-sm">
+                <p className="font-semibold">📅 Book Your Slot Before It's Gone!</p>
+                <p>🔹 Step 1: Secure your date with advance payment</p>
+                <p>🔹 Step 2: We'll confirm details via WhatsApp: 8369594271</p>
+                <p className="text-xs text-muted-foreground">🎊 Spots fill up quickly! Reserve now.</p>
+              </CardContent>
+            </Card>
+
             <Button
               onClick={handleBooking}
               disabled={!canProceed() || submitting}
-              className="w-full py-6 text-lg rounded-full font-sans font-semibold bg-primary hover:bg-primary/90"
+              className="w-full py-6 text-base md:text-lg rounded-full font-sans font-semibold bg-primary hover:bg-primary/90"
             >
-              {submitting ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Processing...</> : `Pay ${formatPrice(pricing.advance)} Advance & Book Event`}
+              {submitting ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Processing...</> : `Pay ${formatPrice(totalPayable)} & Book Event`}
             </Button>
           </>
         )}

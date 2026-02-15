@@ -17,6 +17,8 @@ export type Database = {
       artist_blocked_dates: {
         Row: {
           blocked_date: string
+          blocked_end_time: string | null
+          blocked_start_time: string | null
           city: string | null
           created_at: string
           id: string
@@ -24,6 +26,8 @@ export type Database = {
         }
         Insert: {
           blocked_date: string
+          blocked_end_time?: string | null
+          blocked_start_time?: string | null
           city?: string | null
           created_at?: string
           id?: string
@@ -31,6 +35,8 @@ export type Database = {
         }
         Update: {
           blocked_date?: string
+          blocked_end_time?: string | null
+          blocked_start_time?: string | null
           city?: string | null
           created_at?: string
           id?: string
@@ -203,6 +209,42 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           venue_name?: string
+        }
+        Relationships: []
+      }
+      event_pricing: {
+        Row: {
+          advance_amount: number
+          artist_count: number
+          created_at: string
+          extra_hour_rate: number
+          id: string
+          region: string
+          total_price: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          advance_amount?: number
+          artist_count?: number
+          created_at?: string
+          extra_hour_rate?: number
+          id?: string
+          region: string
+          total_price?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          advance_amount?: number
+          artist_count?: number
+          created_at?: string
+          extra_hour_rate?: number
+          id?: string
+          region?: string
+          total_price?: number
+          updated_at?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
