@@ -64,25 +64,34 @@ export type Database = {
       }
       artists: {
         Row: {
+          auth_user_id: string | null
           created_at: string
+          email: string | null
           experience: string | null
           id: string
+          mobile: string | null
           name: string
           portfolio_url: string | null
           updated_at: string
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
+          email?: string | null
           experience?: string | null
           id?: string
+          mobile?: string | null
           name: string
           portfolio_url?: string | null
           updated_at?: string
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
+          email?: string | null
           experience?: string | null
           id?: string
+          mobile?: string | null
           name?: string
           portfolio_url?: string | null
           updated_at?: string
@@ -659,7 +668,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator"
+      app_role: "admin" | "moderator" | "artist"
       caricature_style:
         | "cute"
         | "romantic"
@@ -803,7 +812,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator"],
+      app_role: ["admin", "moderator", "artist"],
       caricature_style: [
         "cute",
         "romantic",
