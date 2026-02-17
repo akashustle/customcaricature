@@ -13,15 +13,54 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
+
+    // --- Authentication: require a valid JWT ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const callerClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller }, error: authError } = await callerClient.auth.getUser();
+    if (authError || !caller) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const body = await req.json();
     const { type, data } = body;
 
+    // Validate notification type
+    const allowedTypes = ["order_placed", "event_booked", "event_updated", "event_cancelled", "event_refunded"];
+    if (!type || !allowedTypes.includes(type)) {
+      return new Response(JSON.stringify({ error: "Invalid notification type" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!data) {
+      return new Response(JSON.stringify({ error: "Missing data" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const recipientEmail = data?.email || data?.client_email || data?.customer_email;
+    if (!recipientEmail || typeof recipientEmail !== "string" || !recipientEmail.includes("@")) {
+      return new Response(JSON.stringify({ error: "Invalid recipient email" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Generate email content using AI
     let prompt = "";
     let subject = "";
-    let recipientEmail = data?.email || data?.client_email || data?.customer_email;
 
     switch (type) {
       case "order_placed":
@@ -44,10 +83,6 @@ Deno.serve(async (req) => {
         subject = `Event Refund Processed | Creative Caricature Club`;
         prompt = `Write a brief refund confirmation email. Client: ${data.client_name}, Event: ${data.event_type} on ${data.event_date}. Keep under 100 words. Sign off as Creative Caricature Club.`;
         break;
-      default:
-        return new Response(JSON.stringify({ error: "Unknown notification type" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
     }
 
     // Generate email body using AI
@@ -67,13 +102,10 @@ Deno.serve(async (req) => {
     const aiData = await aiResponse.json();
     const emailBody = aiData.choices?.[0]?.message?.content || "Thank you for choosing Creative Caricature Club!";
 
-    // Send via Supabase Auth's built-in email (or log for now)
-    // Since we don't have a dedicated email service, we'll use the admin API to send
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     
     // Log the notification
     console.log(`[EMAIL] To: ${recipientEmail}, Subject: ${subject}`);
-    console.log(`[EMAIL] Body: ${emailBody}`);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -85,7 +117,7 @@ Deno.serve(async (req) => {
     });
   } catch (err: any) {
     console.error("Notification error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
