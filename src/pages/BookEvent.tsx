@@ -172,6 +172,26 @@ const BookEvent = () => {
             } as any).eq("id", booking.id);
             setBookingConfirmed(true);
             toast({ title: "Event Booked Successfully! 🎉" });
+
+            // Send confirmation email (fire-and-forget)
+            const finalEventType = eventType === "other" ? customEventType : eventType;
+            supabase.functions.invoke("send-notification-email", {
+              body: {
+                type: "event_booked",
+                data: {
+                  client_name: clientName,
+                  client_email: clientEmail,
+                  event_type: finalEventType,
+                  event_date: format(eventDate!, "dd MMM yyyy"),
+                  event_start_time: startTime,
+                  event_end_time: endTime,
+                  venue_name: venueName,
+                  city: actualCity,
+                  artist_count: artistCount,
+                  total_price: pricing.total,
+                },
+              },
+            }).catch(() => {});
           } catch {
             toast({ title: "Payment verification failed", description: "Contact support", variant: "destructive" });
           }

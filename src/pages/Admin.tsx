@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Moon, Sun } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -32,7 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
-import AdminBlog from "@/components/admin/AdminBlog";
+import { useTheme } from "next-themes";
 
 type Order = {
   id: string;
@@ -98,6 +98,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
+  const { theme, setTheme } = useTheme();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -470,10 +471,13 @@ const Admin = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
             <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="font-sans">
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
               <LogOut className="w-4 h-4 mr-2" /> Logout
@@ -492,7 +496,6 @@ const Admin = () => {
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
-            <TabsTrigger value="blog" className="font-sans flex-1">📝 Blog</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
@@ -1047,9 +1050,7 @@ const Admin = () => {
             <AdminArtists />
           </TabsContent>
 
-          <TabsContent value="blog">
-            <AdminBlog />
-          </TabsContent>
+          {/* Blog tab removed */}
 
           <TabsContent value="analytics">
             <AdminAnalytics orders={orders as any} customers={customers} />

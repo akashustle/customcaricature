@@ -116,6 +116,21 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
             }
 
             onComplete(orderId);
+
+            // Send confirmation email (fire-and-forget)
+            supabase.functions.invoke("send-notification-email", {
+              body: {
+                type: "order_placed",
+                data: {
+                  customer_name: data.customerName,
+                  customer_email: data.customerEmail,
+                  order_type: data.orderType,
+                  style: data.style,
+                  amount,
+                  order_id: orderId.slice(0, 8).toUpperCase(),
+                },
+              },
+            }).catch(() => {});
           } catch (err: any) {
             toast({
               title: "Payment Verification Failed",
