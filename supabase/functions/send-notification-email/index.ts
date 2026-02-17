@@ -34,6 +34,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Verify admin or moderator role
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const { data: roles } = await adminClient.from("user_roles").select("role").eq("user_id", caller.id);
+    if (!roles || !roles.some((r: any) => ["admin", "moderator"].includes(r.role))) {
+      return new Response(JSON.stringify({ error: "Forbidden - admin access required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
     const { type, data } = body;
 
