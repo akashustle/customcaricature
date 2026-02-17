@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
+import PaymentHistory from "@/components/PaymentHistory";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -218,11 +219,13 @@ const Dashboard = () => {
             <TabsList className="w-full mb-6">
               <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
               <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>
+              <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
               <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} /></TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} /></TabsContent>
+            <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
               <SettingsSection
@@ -237,6 +240,7 @@ const Dashboard = () => {
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} />}
+          {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
             <SettingsSection
@@ -260,6 +264,7 @@ const Dashboard = () => {
           <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
           <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <BottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />

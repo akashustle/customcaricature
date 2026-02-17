@@ -576,6 +576,48 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_history: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          payment_type: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          payment_type?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          payment_type?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
