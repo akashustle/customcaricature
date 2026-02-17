@@ -83,7 +83,7 @@ const BookEvent = () => {
   const gatewayCharges = calculateGatewayCharges(pricing.advance);
   const totalPayable = pricing.advance + gatewayCharges;
 
-  // Pre-fill from profile & fetch customer event pricing
+  // Pre-fill from profile & fetch customer event pricing with real-time sync
   useEffect(() => {
     if (user) {
       supabase.from("profiles").select("full_name, mobile, email, instagram_id").eq("user_id", user.id).maybeSingle()
@@ -96,10 +96,24 @@ const BookEvent = () => {
           }
         });
       // Fetch customer-specific event pricing
-      supabase.from("customer_event_pricing").select("*").eq("user_id", user.id)
-        .then(({ data }) => {
-          if (data) setCustomerEventPricing(data as any);
-        });
+      const fetchCustomerPricing = () => {
+        supabase.from("customer_event_pricing").select("*").eq("user_id", user.id)
+          .then(({ data }) => {
+            if (data) setCustomerEventPricing(data as any);
+          });
+      };
+      fetchCustomerPricing();
+      // Real-time listener for customer event pricing changes
+      const channel = supabase
+        .channel("customer-event-pricing-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "customer_event_pricing", filter: `user_id=eq.${user.id}` }, () => {
+          fetchCustomerPricing();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "event_pricing" }, () => {
+          // Also refresh when global event pricing changes
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
     }
   }, [user]);
 
@@ -245,7 +259,14 @@ const BookEvent = () => {
             <CardContent className="p-8 space-y-4">
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
               <h2 className="font-display text-2xl font-bold">Event Booking Confirmed!</h2>
-              <p className="text-muted-foreground font-sans">We'll reach out to you soon with more details.</p>
+              <p className="text-muted-foreground font-sans">Your advance payment has been received successfully!</p>
+              <div className="text-left bg-muted/50 rounded-lg p-3 space-y-1 text-sm font-sans">
+                <p><span className="text-muted-foreground">Event:</span> <span className="font-medium capitalize">{eventType === "other" ? customEventType : eventType}</span></p>
+                {eventDate && <p><span className="text-muted-foreground">Date:</span> <span className="font-medium">{format(eventDate, "PPP")}</span></p>}
+                <p><span className="text-muted-foreground">Venue:</span> <span className="font-medium">{venueName}, {actualCity}</span></p>
+                <p><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{artistCount}</span></p>
+                <p><span className="text-muted-foreground">Advance Paid:</span> <span className="font-medium text-primary">{formatPrice(totalPayable)}</span></p>
+              </div>
               <div className="flex flex-col gap-2">
                 <Button onClick={() => navigate("/dashboard")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Go to Dashboard</Button>
                 <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-sans">Back to Home</Button>
@@ -381,10 +402,10 @@ const BookEvent = () => {
                 <RadioGroup value={String(artistCount)} onValueChange={v => setArtistCount(Number(v) as 1 | 2)}>
                   <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
                     <RadioGroupItem value="1" id="artist-1" />
-                    <Label htmlFor="artist-1" className="font-sans flex-1 cursor-pointer">
+                     <Label htmlFor="artist-1" className="font-sans flex-1 cursor-pointer">
                       <span className="font-medium">🔴 1 Professional Caricature Artist</span>
                       <span className="block text-sm text-muted-foreground">
-                        Total: {formatPrice(getEventPrice(isMumbai, 1, 0, dbPricing).total)} (All Materials Included) · Advance: {formatPrice(getEventPrice(isMumbai, 1, 0, dbPricing).advance)}
+                        Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 1); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 1, 0, dbPricing).total; })())} (All Materials Included) · Advance: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 1); return cp ? cp.custom_advance_amount : getEventPrice(isMumbai, 1, 0, dbPricing).advance; })())}
                       </span>
                     </Label>
                   </div>
@@ -393,7 +414,7 @@ const BookEvent = () => {
                     <Label htmlFor="artist-2" className="font-sans flex-1 cursor-pointer">
                       <span className="font-medium">🔴 2 Professional Caricature Artists</span>
                       <span className="block text-sm text-muted-foreground">
-                        Total: {formatPrice(getEventPrice(isMumbai, 2, 0, dbPricing).total)} (All Materials Included) · Advance: {formatPrice(getEventPrice(isMumbai, 2, 0, dbPricing).advance)}
+                        Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 2); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 2, 0, dbPricing).total; })())} (All Materials Included) · Advance: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 2); return cp ? cp.custom_advance_amount : getEventPrice(isMumbai, 2, 0, dbPricing).advance; })())}
                       </span>
                     </Label>
                   </div>
@@ -408,7 +429,7 @@ const BookEvent = () => {
                   {addExtraHours && (
                     <div className="ml-7">
                       <Label className="font-sans text-sm">Number of extra hours</Label>
-                      <Input type="number" min={1} max={8} value={extraHours} onChange={e => setExtraHours(Math.max(0, parseInt(e.target.value) || 0))} className="w-32 mt-1" />
+                      <Input type="number" min={1} max={8} value={extraHours || ""} onChange={e => { const v = e.target.value; if (v === "") { setExtraHours(0); } else { setExtraHours(Math.min(8, Math.max(0, parseInt(v) || 0))); } }} className="w-32 mt-1" />
                     </div>
                   )}
                 </div>
@@ -500,7 +521,7 @@ const BookEvent = () => {
               <CardContent className="p-4 text-center space-y-2 font-sans text-sm">
                 <p className="font-semibold">📅 Book Your Slot Before It's Gone!</p>
                 <p>🔹 Step 1: Secure your date with advance payment</p>
-                <p>🔹 Step 2: We'll confirm details via WhatsApp: 8369594271</p>
+                <p>🔹 Step 2: If you need any help, contact us at <a href="tel:+918369594271" className="text-primary font-semibold underline">8369594271</a></p>
                 <p className="text-xs text-muted-foreground">🎊 Spots fill up quickly! Reserve now.</p>
               </CardContent>
             </Card>
