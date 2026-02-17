@@ -594,6 +594,24 @@ export type Database = {
         }
         Relationships: []
       }
+      reset_attempts: {
+        Row: {
+          attempted_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

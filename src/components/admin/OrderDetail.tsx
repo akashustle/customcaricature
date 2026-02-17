@@ -67,13 +67,24 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
 
   const fetchImages = async () => {
     const { data } = await supabase.from("order_images").select("id, storage_path, file_name").eq("order_id", orderId);
-    if (data) setImages(data);
+    if (data) {
+      setImages(data);
+      loadSignedUrls(data);
+    }
   };
 
-  const getImageUrl = (path: string) => {
-    const { data } = supabase.storage.from("order-photos").getPublicUrl(path);
-    return data.publicUrl;
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+
+  const loadSignedUrls = async (imgs: OrderImage[]) => {
+    const urls: Record<string, string> = {};
+    for (const img of imgs) {
+      const { data } = await supabase.storage.from("order-photos").createSignedUrl(img.storage_path, 3600);
+      if (data?.signedUrl) urls[img.storage_path] = data.signedUrl;
+    }
+    setImageUrls(urls);
   };
+
+  const getImageUrl = (path: string) => imageUrls[path] || "";
 
   const saveChanges = async () => {
     const { error } = await supabase.from("orders").update({
