@@ -17,6 +17,7 @@ import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
 import PaymentHistory from "@/components/PaymentHistory";
 import useLocationTracker from "@/hooks/useLocationTracker";
+import CelebrationBanner from "@/components/CelebrationBanner";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -429,6 +430,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => {
   const [artists, setArtists] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
+  const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
 
   useEffect(() => {
     const artistIds = events.map(e => e.assigned_artist_id).filter(Boolean);
@@ -467,7 +469,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
               body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true },
             });
             if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
-            toast({ title: "Payment Successful!", description: "Remaining amount has been paid." });
+            setShowPaymentCelebration(true);
+            toast({ title: "🎉 Payment Successful!", description: "Thank you! Your remaining balance has been paid." });
+            setTimeout(() => setShowPaymentCelebration(false), 8000);
           } catch { toast({ title: "Verification Failed", description: "Contact support with your booking ID.", variant: "destructive" }); }
           setPayingEventId(null);
         },
@@ -484,6 +488,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
 
   return (
     <>
+      {showPaymentCelebration && (
+        <div className="mb-4">
+          <CelebrationBanner message="🙏 Thank you for your payment! You're all set! 🎉" onDismiss={() => setShowPaymentCelebration(false)} />
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-display text-xl font-bold">My Events</h2>
         <Button onClick={handleBookEvent} className={`rounded-full font-sans ${canBookEvent ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground hover:bg-muted"}`} size="sm">
@@ -525,10 +534,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                   <CardContent className="p-4 space-y-2">
                     {/* Event Countdown */}
                     {ev.status === "upcoming" && (() => {
-                      const eventDate = new Date(ev.event_date);
+                      const [year, month, day] = ev.event_date.split("-").map(Number);
                       const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const daysLeft = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                      const eventDate = new Date(year, month - 1, day);
+                      const daysLeft = Math.round((eventDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
                       if (daysLeft > 0) {
                         return (
                           <div className="bg-primary/10 rounded-xl p-3 text-center">
@@ -548,6 +558,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                       }
                       return null;
                     })()}
+                    {/* Completed Event Celebration */}
+                    {ev.status === "completed" && <CelebrationBanner message="🎉 Congratulations on a successful event! 🎊" />}
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-sans font-medium capitalize">{EVENT_TYPES.find((t: any) => t.value === ev.event_type)?.label || ev.event_type}</p>
