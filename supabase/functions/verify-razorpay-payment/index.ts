@@ -17,6 +17,7 @@ serve(async (req) => {
       razorpay_payment_id,
       razorpay_signature,
       order_id,
+      is_event_remaining,
     } = await req.json();
 
     const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -47,23 +48,39 @@ serve(async (req) => {
       });
     }
 
-    // Update order with payment details
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { error: updateError } = await supabase
-      .from("orders")
-      .update({
-        razorpay_order_id,
-        razorpay_payment_id,
-        payment_status: "confirmed",
-        payment_verified: true,
-      })
-      .eq("id", order_id);
+    if (is_event_remaining) {
+      // Update event booking - mark as fully paid
+      const { error: updateError } = await supabase
+        .from("event_bookings")
+        .update({
+          razorpay_order_id,
+          razorpay_payment_id,
+          payment_status: "fully_paid",
+        })
+        .eq("id", order_id);
 
-    if (updateError) {
-      throw new Error(`Failed to update order: ${updateError.message}`);
+      if (updateError) {
+        throw new Error(`Failed to update event booking: ${updateError.message}`);
+      }
+    } else {
+      // Update order with payment details
+      const { error: updateError } = await supabase
+        .from("orders")
+        .update({
+          razorpay_order_id,
+          razorpay_payment_id,
+          payment_status: "confirmed",
+          payment_verified: true,
+        })
+        .eq("id", order_id);
+
+      if (updateError) {
+        throw new Error(`Failed to update order: ${updateError.message}`);
+      }
     }
 
     return new Response(JSON.stringify({ success: true, verified: true }), {

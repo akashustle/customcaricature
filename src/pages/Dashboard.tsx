@@ -32,6 +32,7 @@ type Order = {
   created_at: string; customer_name: string; customer_email: string; customer_mobile: string;
   delivery_address: string | null; delivery_city: string | null; delivery_state: string | null;
   delivery_pincode: string | null; notes: string | null; expected_delivery_date: string | null; artist_name: string | null;
+  razorpay_payment_id: string | null; razorpay_order_id: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -92,7 +93,7 @@ const Dashboard = () => {
 
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id")
       .eq("user_id", userId).order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
@@ -338,6 +339,14 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                     {order.notes && <Row label="Notes" value={order.notes} />}
                     {order.artist_name && <Row label="Artist" value={order.artist_name} />}
                     <Row label="Expected Delivery" value={order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN") : "25-30 days from order date"} />
+                    {/* Payment Details */}
+                    {order.payment_status === "confirmed" && (
+                      <div className="bg-green-50 rounded-lg p-3 space-y-1">
+                        <p className="font-semibold text-green-800 text-xs">✅ Payment Confirmed</p>
+                        {order.razorpay_payment_id && <Row label="Payment ID" value={order.razorpay_payment_id} />}
+                        {order.razorpay_order_id && <Row label="Order Ref" value={order.razorpay_order_id} />}
+                      </div>
+                    )}
                     {order.payment_status !== "confirmed" && (
                       <div className="pt-2">
                         <Button size="sm" className="rounded-full font-sans w-full bg-primary hover:bg-primary/90" disabled={payingOrderId === order.id}
@@ -489,9 +498,10 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
         <div className="space-y-3">
           {events.map((ev: any) => {
             const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "partial";
+            const fullyPaid = ev.payment_status === "fully_paid";
             const totalAmount = ev.total_price;
             const advanceAmount = ev.advance_amount;
-            const remaining = totalAmount - advanceAmount;
+            const remaining = fullyPaid ? 0 : totalAmount - advanceAmount;
             const artist = ev.assigned_artist_id ? artists[ev.assigned_artist_id] : null;
 
             return (
@@ -536,8 +546,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                      <Badge className={`border-none text-xs ${advancePaid ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                        <CreditCard className="w-3 h-3 mr-1" />{advancePaid ? "Advance Paid ✅" : "Payment Pending"}
+                      <Badge className={`border-none text-xs ${fullyPaid ? "bg-green-100 text-green-800" : advancePaid ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"}`}>
+                        <CreditCard className="w-3 h-3 mr-1" />{fullyPaid ? "Fully Paid ✅" : advancePaid ? "Advance Paid" : "Payment Pending"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
                     </div>
@@ -560,7 +570,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                       <div className="flex justify-between"><span className="text-muted-foreground">Advance Paid</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice(remaining)}</span></div>
                     </div>
-                    {remaining > 0 && advancePaid && (
+                    {remaining > 0 && advancePaid && !fullyPaid && (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
                           💡 Remaining {formatPrice(remaining)} is payable at the event. You can also pay now if you wish.
