@@ -44,11 +44,24 @@ const Order = () => {
     }
   }, [authLoading, user, navigate]);
 
-  // Auto-fill from profile & fetch custom pricing
+  // Auto-fill from profile & fetch custom pricing with real-time sync
   useEffect(() => {
     if (user && !profileLoaded) {
       loadProfile(user.id);
       fetchCustomerPricing(user.id);
+    }
+    if (user) {
+      // Real-time sync for caricature pricing changes
+      const channel = supabase
+        .channel("order-pricing-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "customer_pricing", filter: `user_id=eq.${user.id}` }, () => {
+          fetchCustomerPricing(user.id);
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => {
+          // usePricing hook already handles this via its own realtime channel
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
     }
   }, [user, profileLoaded]);
 

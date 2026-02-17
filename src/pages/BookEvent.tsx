@@ -110,7 +110,8 @@ const BookEvent = () => {
           fetchCustomerPricing();
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "event_pricing" }, () => {
-          // Also refresh when global event pricing changes
+          // Refresh global pricing too — useEventPricing handles this but force re-render
+          fetchCustomerPricing();
         })
         .subscribe();
       return () => { supabase.removeChannel(channel); };
