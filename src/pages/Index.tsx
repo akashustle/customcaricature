@@ -135,6 +135,9 @@ const Index = () => {
             <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/blog")} className="rounded-full font-sans gap-1 hidden sm:flex">
+              📝 Blog
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/track-order")} className="rounded-full font-sans gap-1 hidden sm:flex">
               <Search className="w-4 h-4" /> Track Order
             </Button>
