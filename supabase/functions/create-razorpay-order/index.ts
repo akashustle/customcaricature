@@ -104,16 +104,17 @@ serve(async (req) => {
       .eq("id", order_id)
       .maybeSingle();
 
-    const record = order || booking;
-    if (!record) {
+    if (!order && !booking) {
       return new Response(JSON.stringify({ error: "Order not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const record = order || booking;
+
     // Verify ownership (allow if user owns it)
-    if (record.user_id && record.user_id !== user.id) {
+    if (record!.user_id && record!.user_id !== user.id) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -121,7 +122,13 @@ serve(async (req) => {
     }
 
     // Check if already fully paid
-    if (record.payment_status === "confirmed" || record.payment_status === "fully_paid") {
+    // For orders: "confirmed" means fully paid
+    // For event bookings: "confirmed" means advance paid (still has remaining), "fully_paid" means done
+    const isFullyPaid = order
+      ? (order.payment_status === "confirmed")
+      : (booking!.payment_status === "fully_paid");
+
+    if (isFullyPaid) {
       return new Response(JSON.stringify({ error: "Already paid" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

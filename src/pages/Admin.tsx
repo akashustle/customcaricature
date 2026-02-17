@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Moon, Sun, Receipt } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Moon, Sun, Receipt, MapPin } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -35,6 +35,7 @@ import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
 import { useTheme } from "next-themes";
 import AdminPayments from "@/components/admin/AdminPayments";
+import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 
 type Order = {
   id: string;
@@ -503,6 +504,7 @@ const Admin = () => {
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
+            <TabsTrigger value="locations" className="font-sans flex-1"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
             <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
 
@@ -1086,6 +1088,11 @@ const Admin = () => {
             <AdminAnalytics orders={orders as any} customers={customers} />
           </TabsContent>
 
+          {/* Live Locations Tab */}
+          <TabsContent value="locations">
+            <AdminLiveLocations />
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
@@ -1230,6 +1237,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
           <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
+          <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
