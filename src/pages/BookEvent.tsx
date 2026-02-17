@@ -208,6 +208,19 @@ const BookEvent = () => {
               razorpay_payment_id: response.razorpay_payment_id,
               payment_status: "confirmed",
             } as any).eq("id", booking.id);
+
+            // Record advance payment in payment history
+            await supabase.from("payment_history").insert({
+              user_id: user?.id,
+              booking_id: booking.id,
+              payment_type: "event_advance",
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              amount: totalPayable,
+              status: "confirmed",
+              description: `Event advance – ${eventType === "other" ? customEventType : eventType}`,
+            } as any);
+
             setBookingConfirmed(true);
             toast({ title: "Event Booked Successfully! 🎉" });
 

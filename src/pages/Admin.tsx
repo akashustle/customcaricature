@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Moon, Sun } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Moon, Sun, Receipt } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -34,6 +34,7 @@ import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
 import { useTheme } from "next-themes";
+import AdminPayments from "@/components/admin/AdminPayments";
 
 type Order = {
   id: string;
@@ -496,6 +497,7 @@ const Admin = () => {
           <TabsList className="mb-6 w-full overflow-x-auto hidden md:flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
             <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
+            <TabsTrigger value="payments" className="font-sans flex-1"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
             <TabsTrigger value="event-users" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
@@ -803,6 +805,11 @@ const Admin = () => {
           {/* Events Tab */}
           <TabsContent value="events">
             <AdminEvents customers={customers as any} />
+          </TabsContent>
+
+          {/* Payments Tab */}
+          <TabsContent value="payments">
+            <AdminPayments />
           </TabsContent>
 
           {/* Event Users Tab */}
@@ -1217,6 +1224,7 @@ const Admin = () => {
         <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
