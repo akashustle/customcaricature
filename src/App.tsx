@@ -20,8 +20,6 @@ import TrackOrder from "./pages/TrackOrder";
 import BookEvent from "./pages/BookEvent";
 import EventPolicy from "./pages/EventPolicy";
 import ArtistDashboard from "./pages/ArtistDashboard";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
@@ -55,8 +53,6 @@ const App = () => (
           <Route path="/book-event" element={<BookEvent />} />
           <Route path="/event-policy" element={<EventPolicy />} />
           <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

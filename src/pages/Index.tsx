@@ -131,13 +131,10 @@ const Index = () => {
       <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
             <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/blog")} className="rounded-full font-sans gap-1 hidden sm:flex">
-              📝 Blog
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/track-order")} className="rounded-full font-sans gap-1 hidden sm:flex">
               <Search className="w-4 h-4" /> Track Order
             </Button>
@@ -174,7 +171,7 @@ const Index = () => {
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <div className="container mx-auto px-4 py-16 md:py-28">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl border-2 border-primary/30 shadow-lg"
+            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl border-3 border-primary/50 shadow-[0_8px_32px_rgba(232,99,59,0.3)]"
               initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
               animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0], y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
@@ -323,7 +320,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
+              <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
               <p className="font-display text-lg font-semibold text-foreground">Creative Caricature Club</p>
             </div>
             <p className="text-sm text-muted-foreground font-sans text-center">Custom caricatures crafted with love ✨</p>
