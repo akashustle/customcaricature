@@ -30,7 +30,6 @@ type TrackedOrder = {
   payment_status: string | null;
   created_at: string;
   expected_delivery_date: string | null;
-  customer_name: string;
   face_count: number;
 };
 
