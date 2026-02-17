@@ -699,6 +699,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_live_locations: {
+        Row: {
+          city: string | null
+          id: string
+          is_online: boolean
+          last_seen_at: string
+          latitude: number
+          location_name: string | null
+          longitude: number
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+          latitude: number
+          location_name?: string | null
+          longitude: number
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+          latitude?: number
+          location_name?: string | null
+          longitude?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

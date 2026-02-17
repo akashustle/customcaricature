@@ -16,6 +16,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
 import PaymentHistory from "@/components/PaymentHistory";
+import useLocationTracker from "@/hooks/useLocationTracker";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -66,6 +67,9 @@ const Dashboard = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
+
+  // Track user location in real-time
+  useLocationTracker(user?.id ?? null);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate("/login"); return; }
@@ -568,7 +572,12 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                       <div className="bg-primary/5 rounded-lg p-3 text-sm font-sans space-y-2">
                         <p className="font-medium">🎨 Your Artist: {artist.name}</p>
                         {artist.portfolio_url && (
-                          <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer">
+                          <a
+                            href={artist.portfolio_url.startsWith("http") ? artist.portfolio_url : `https://${artist.portfolio_url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button size="sm" variant="outline" className="rounded-full text-xs font-sans">
                               📄 See Your Artist Portfolio
                             </Button>
