@@ -212,6 +212,42 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_event_pricing: {
+        Row: {
+          artist_count: number
+          created_at: string
+          custom_advance_amount: number
+          custom_extra_hour_rate: number
+          custom_total_price: number
+          id: string
+          region: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_count?: number
+          created_at?: string
+          custom_advance_amount: number
+          custom_extra_hour_rate?: number
+          custom_total_price: number
+          id?: string
+          region: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_count?: number
+          created_at?: string
+          custom_advance_amount?: number
+          custom_extra_hour_rate?: number
+          custom_total_price?: number
+          id?: string
+          region?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customer_pricing: {
         Row: {
           caricature_type_slug: string
