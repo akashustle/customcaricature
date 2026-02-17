@@ -76,6 +76,11 @@ const Dashboard = () => {
         .channel("user-dashboard")
         .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
+        .on("postgres_changes", { event: "DELETE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
+          // Account was deleted by admin
+          toast({ title: "Account Deleted", description: "Your account has been deleted. Please register or login again.", variant: "destructive" });
+          supabase.auth.signOut().then(() => navigate("/register"));
+        })
         .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
         .subscribe();
       return () => { supabase.removeChannel(channel); };

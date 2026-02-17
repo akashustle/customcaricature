@@ -28,7 +28,7 @@ const BookEvent = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { pricing: dbPricing } = useEventPricing();
-
+  const [customerEventPricing, setCustomerEventPricing] = useState<any[]>([]);
   // Form state
   const [clientName, setClientName] = useState("");
   const [clientMobile, setClientMobile] = useState("");
@@ -61,11 +61,29 @@ const BookEvent = () => {
   const actualCity = city === "__other__" ? customCity : city;
   const isMumbai = state === "Maharashtra" && actualCity === "Mumbai";
   const isOutsideMumbai = state && actualCity && !isMumbai;
-  const pricing = getEventPrice(isMumbai, artistCount, addExtraHours ? extraHours : 0, dbPricing);
+
+  // Check for customer-specific event pricing first
+  const getCustomerEventPrice = () => {
+    if (customerEventPricing.length > 0) {
+      const region = isMumbai ? "mumbai" : "outside";
+      const row = customerEventPricing.find((p: any) => p.region === region && p.artist_count === artistCount);
+      if (row) {
+        const extraCost = (addExtraHours ? extraHours : 0) * row.custom_extra_hour_rate;
+        return {
+          total: row.custom_total_price + extraCost,
+          advance: row.custom_advance_amount,
+          extraHourRate: row.custom_extra_hour_rate,
+        };
+      }
+    }
+    return getEventPrice(isMumbai, artistCount, addExtraHours ? extraHours : 0, dbPricing);
+  };
+
+  const pricing = getCustomerEventPrice();
   const gatewayCharges = calculateGatewayCharges(pricing.advance);
   const totalPayable = pricing.advance + gatewayCharges;
 
-  // Pre-fill from profile
+  // Pre-fill from profile & fetch customer event pricing
   useEffect(() => {
     if (user) {
       supabase.from("profiles").select("full_name, mobile, email, instagram_id").eq("user_id", user.id).maybeSingle()
@@ -76,6 +94,11 @@ const BookEvent = () => {
             setClientEmail(data.email || "");
             setClientInstagram(data.instagram_id || "");
           }
+        });
+      // Fetch customer-specific event pricing
+      supabase.from("customer_event_pricing").select("*").eq("user_id", user.id)
+        .then(({ data }) => {
+          if (data) setCustomerEventPricing(data as any);
         });
     }
   }, [user]);

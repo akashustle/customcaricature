@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
+import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
 import { useTheme } from "next-themes";
 
 type Order = {
@@ -123,6 +124,8 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
+  const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
+  const [customerEventPricingUserName, setCustomerEventPricingUserName] = useState("");
   const [showAddOrder, setShowAddOrder] = useState(false);
   const [manualOrder, setManualOrder] = useState({
     customerId: "", orderType: "single" as string, style: "artists_choice" as string,
@@ -1001,14 +1004,24 @@ const Admin = () => {
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
                               {(c as any).event_booking_allowed && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Allowed</Badge>}
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs font-sans mt-1"
-                              onClick={() => { setCustomerPricingUserId(c.user_id); setCustomerPricingUserName(c.full_name); }}
-                            >
-                              <DollarSign className="w-3 h-3 mr-1" />Custom Pricing
-                            </Button>
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs font-sans"
+                                onClick={() => { setCustomerPricingUserId(c.user_id); setCustomerPricingUserName(c.full_name); }}
+                              >
+                                <DollarSign className="w-3 h-3 mr-1" />Custom Pricing
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs font-sans"
+                                onClick={() => { setCustomerEventPricingUserId(c.user_id); setCustomerEventPricingUserName(c.full_name); }}
+                              >
+                                <CalIcon className="w-3 h-3 mr-1" />Event Pricing
+                              </Button>
+                            </div>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
                             <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
@@ -1037,6 +1050,15 @@ const Admin = () => {
                             userName={c.full_name}
                             onClose={() => setCustomerPricingUserId(null)}
                             caricatureTypes={caricatureTypes.map(ct => ({ slug: ct.slug, name: ct.name, price: ct.price, per_face: ct.per_face }))}
+                          />
+                        </div>
+                      )}
+                      {customerEventPricingUserId === c.user_id && (
+                        <div className="mt-3">
+                          <AdminCustomerEventPricing
+                            userId={c.user_id}
+                            userName={c.full_name}
+                            onClose={() => setCustomerEventPricingUserId(null)}
                           />
                         </div>
                       )}
