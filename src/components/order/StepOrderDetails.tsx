@@ -26,8 +26,12 @@ const StepOrderDetails = ({ data, update, onNext, getPrice: externalGetPrice }: 
   const GROUP_MAX_FACES = groupType?.max_faces ?? 6;
 
   const handleFaceCountChange = (val: string) => {
+    if (val === "") {
+      update({ faceCount: 0 });
+      return;
+    }
     const num = parseInt(val) || 0;
-    if (val === "" || num === 0) {
+    if (num === 0) {
       update({ faceCount: 0 });
     } else {
       update({ faceCount: Math.min(num, GROUP_MAX_FACES) });
@@ -87,7 +91,7 @@ const StepOrderDetails = ({ data, update, onNext, getPrice: externalGetPrice }: 
             type="number"
             min={GROUP_MIN_FACES}
             max={GROUP_MAX_FACES}
-            value={data.faceCount || ""}
+            value={data.faceCount === 0 ? "" : data.faceCount}
             onChange={(e) => handleFaceCountChange(e.target.value)}
             placeholder={`${GROUP_MIN_FACES}`}
           />
