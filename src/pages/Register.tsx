@@ -7,15 +7,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { validateEmailFormat } from "@/lib/email-validation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
+
+const generateSecretCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     fullName: "", mobile: "", email: "", instagramId: "",
     address: "", city: "", state: "", pincode: "",
-    password: "", confirmPassword: "", secretCode: "",
+    password: "", confirmPassword: "",
   });
+  const [secretCode] = useState(generateSecretCode());
+  const [copiedCode, setCopiedCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -39,15 +43,17 @@ const Register = () => {
     if (digits.length <= 6) update("pincode", digits);
   };
 
-  const validateSecretCode = (val: string) => {
-    const digits = val.replace(/\D/g, "");
-    if (digits.length <= 4) update("secretCode", digits);
+  const copySecretCode = () => {
+    navigator.clipboard.writeText(secretCode);
+    setCopiedCode(true);
+    toast({ title: "Secret Code Copied!", description: "Save it somewhere safe for password recovery." });
+    setTimeout(() => setCopiedCode(false), 3000);
   };
 
   const canSubmit = form.fullName.trim() && form.mobile.length === 10 &&
     !emailError && form.email.includes("@") && form.address.trim() && form.city.trim() &&
     form.state.trim() && form.pincode.length === 6 && form.password.length >= 6 &&
-    form.password === form.confirmPassword && form.secretCode.length === 4;
+    form.password === form.confirmPassword;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +80,7 @@ const Register = () => {
             full_name: form.fullName, mobile: form.mobile,
             instagram_id: form.instagramId || null, address: form.address,
             city: form.city, state: form.state, pincode: form.pincode,
-            secret_code: form.secretCode,
+            secret_code: secretCode,
           },
         },
       });
@@ -150,10 +156,19 @@ const Register = () => {
             {form.password && form.confirmPassword && form.password !== form.confirmPassword && (
               <p className="text-xs text-destructive font-sans">Passwords don't match</p>
             )}
-            <div>
-              <Label className="font-sans">Secret Code * (4 digits for password recovery)</Label>
-              <Input value={form.secretCode} onChange={(e) => validateSecretCode(e.target.value)} placeholder="1234" maxLength={4} type="password" />
-              <p className="text-xs text-muted-foreground font-sans mt-1">Remember this — you'll need it to reset your password</p>
+            {/* Auto-generated Secret Code */}
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
+              <Label className="font-sans font-semibold text-sm">🔑 Your Secret Code (Auto-Generated)</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-card border border-border rounded-lg px-4 py-2.5 font-mono text-lg tracking-[0.3em] text-center font-bold text-primary">
+                  {secretCode}
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={copySecretCode} className="font-sans gap-1">
+                  {copiedCode ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                  {copiedCode ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground font-sans">⚠️ Save this code! You'll need it to reset your password. It cannot be changed later.</p>
             </div>
             <Button type="submit" disabled={!canSubmit || loading} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
               {loading ? "Creating Account..." : "Create Account"}

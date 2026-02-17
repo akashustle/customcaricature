@@ -229,7 +229,8 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love." },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days." },
           ].map((item, i) => (
-            <motion.div key={item.step} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -8, scale: 1.02 }}>
+            <motion.div key={item.step} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -8, scale: 1.02 }}
+              className="cursor-pointer" onClick={handleOrderClick}>
               <Card className="text-center border-none bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
                 <CardContent className="pt-8 pb-6 px-6">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -254,7 +255,8 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div key={style.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.08 }} whileHover={{ scale: 1.05, rotateZ: 1 }}>
+              <motion.div key={style.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.08 }} whileHover={{ scale: 1.05, rotateZ: 1 }}
+                onClick={handleOrderClick}>
                 <Card className="group cursor-pointer border border-border/50 hover:border-primary/30 transition-all hover:shadow-lg bg-card">
                   <CardContent className="p-4 md:p-6 text-center">
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors">

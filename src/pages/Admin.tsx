@@ -484,7 +484,7 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-6">
         <LiveGreeting name={adminProfile?.full_name} />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 w-full overflow-x-auto flex">
+          <TabsList className="mb-6 w-full overflow-x-auto hidden md:flex">
             <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
             <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
             <TabsTrigger value="event-users" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
@@ -971,6 +971,7 @@ const Admin = () => {
                             <p className="font-sans font-semibold">{c.full_name}</p>
                             <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
                             {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
+                            {c.secret_code && <p className="text-xs font-sans text-primary/80">🔑 Secret: <span className="font-mono font-bold">{c.secret_code}</span></p>}
                             {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
                             {(c.city || c.state || c.pincode) && (
                               <p className="text-xs text-muted-foreground font-sans">
