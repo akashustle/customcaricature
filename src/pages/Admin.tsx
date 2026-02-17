@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
+import AdminBlog from "@/components/admin/AdminBlog";
 
 type Order = {
   id: string;
@@ -491,6 +492,7 @@ const Admin = () => {
             <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
+            <TabsTrigger value="blog" className="font-sans flex-1">📝 Blog</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
@@ -1043,6 +1045,10 @@ const Admin = () => {
 
           <TabsContent value="artists">
             <AdminArtists />
+          </TabsContent>
+
+          <TabsContent value="blog">
+            <AdminBlog />
           </TabsContent>
 
           <TabsContent value="analytics">
