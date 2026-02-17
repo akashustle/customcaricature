@@ -82,13 +82,14 @@ const AdminArtists = () => {
         }
       } else {
         // Create artist without login
-        await (supabase.from("artists") as any).insert({
+        const { error: insertError } = await (supabase.from("artists") as any).insert({
           name: newArtist.name,
           experience: newArtist.experience || null,
           portfolio_url: portfolioUrl,
           email: newArtist.email || null,
           mobile: newArtist.mobile || null,
         });
+        if (insertError) throw insertError;
       }
 
       toast({ title: "Artist Added!" });

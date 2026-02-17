@@ -23,7 +23,7 @@ declare global {
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
-  event_booking_allowed?: boolean;
+  event_booking_allowed?: boolean; secret_code?: string | null;
 };
 
 type Order = {
@@ -83,9 +83,9 @@ const Dashboard = () => {
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false, secret_code: (data as any).secret_code || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -403,6 +403,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           <Row label="City" value={profile.city || "—"} />
           <Row label="State" value={profile.state || "—"} />
           <Row label="Pincode" value={profile.pincode || "—"} />
+          <Row label="Secret Code" value={profile.secret_code || "Not set"} />
         </div>
       ) : (
         <p className="text-muted-foreground font-sans">No profile data found.</p>
