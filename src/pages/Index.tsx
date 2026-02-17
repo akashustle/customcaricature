@@ -131,7 +131,7 @@ const Index = () => {
       <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary shadow-[0_2px_12px_rgba(0,0,0,0.2)] ring-2 ring-primary/20" />
             <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
@@ -171,7 +171,7 @@ const Index = () => {
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
         <div className="container mx-auto px-4 py-16 md:py-28">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl border-3 border-primary/50 shadow-[0_8px_32px_rgba(232,99,59,0.3)]"
+            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-6 rounded-2xl border-4 border-primary shadow-[0_8px_40px_rgba(0,0,0,0.25),0_0_20px_hsl(38,50%,42%,0.4)] ring-4 ring-primary/20"
               initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
               animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0], y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
@@ -225,12 +225,12 @@ const Index = () => {
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { icon: Camera, step: "1", title: "Upload & Customize", desc: "Upload clear photos, pick your style, and share your preferences." },
-            { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love." },
-            { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days." },
+            { icon: Camera, step: "1", title: "Upload & Customize", desc: "Upload clear photos, pick your style, and share your preferences.", route: user ? "/order" : "/register" },
+            { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
+            { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
             <motion.div key={item.step} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -8, scale: 1.02 }}
-              className="cursor-pointer" onClick={handleOrderClick}>
+              className="cursor-pointer" onClick={() => navigate(item.route)}>
               <Card className="text-center border-none bg-card" style={{ boxShadow: "var(--shadow-card)" }}>
                 <CardContent className="pt-8 pb-6 px-6">
                   <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -239,6 +239,9 @@ const Index = () => {
                   <span className="text-xs font-sans font-semibold text-primary uppercase tracking-wider">Step {item.step}</span>
                   <h3 className="font-display text-xl font-semibold mt-2 mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground font-sans">{item.desc}</p>
+                  <span className="inline-flex items-center gap-1 mt-3 text-xs font-sans font-medium text-primary hover:underline">
+                    Learn more <ArrowRight className="w-3 h-3" />
+                  </span>
                 </CardContent>
               </Card>
             </motion.div>
@@ -320,7 +323,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
+              <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary shadow-[0_2px_12px_rgba(0,0,0,0.2)] ring-2 ring-primary/20" />
               <p className="font-display text-lg font-semibold text-foreground">Creative Caricature Club</p>
             </div>
             <p className="text-sm text-muted-foreground font-sans text-center">Custom caricatures crafted with love ✨</p>
