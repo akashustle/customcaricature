@@ -175,7 +175,7 @@ const Dashboard = () => {
           setPayingOrderId(null);
         },
         prefill: { name: order.customer_name, email: order.customer_email, contact: `+91${order.customer_mobile}` },
-        theme: { color: "#A37B2F" },
+        theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingOrderId(null) },
       };
       new window.Razorpay(options).open();
@@ -588,7 +588,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
           setPayingEventId(null);
         },
         prefill: { name: ev.client_name, email: ev.client_email, contact: `+91${ev.client_mobile}` },
-        theme: { color: "#A37B2F" },
+        theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingEventId(null) },
       };
       new window.Razorpay(options).open();

@@ -257,7 +257,7 @@ const BookEvent = () => {
           setSubmitting(false);
         },
         prefill: { name: clientName, email: clientEmail, contact: `+91${clientMobile}` },
-        theme: { color: "#A37B2F" },
+        theme: { color: "#E3DED3" },
         modal: {
           ondismiss: () => {
             toast({ title: "Payment cancelled", description: "Your booking is saved. Complete payment from dashboard." });
