@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,11 +83,14 @@ const Dashboard = () => {
         .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
         .on("postgres_changes", { event: "DELETE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
-          // Account was deleted by admin
           toast({ title: "Account Deleted", description: "Your account has been deleted. Please register or login again.", variant: "destructive" });
           supabase.auth.signOut().then(() => navigate("/register"));
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
+        .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `user_id=eq.${user.id}` }, () => {
+          fetchOrders(user.id);
+          fetchEvents(user.id);
+        })
         .subscribe();
       return () => { supabase.removeChannel(channel); };
     }
@@ -354,7 +357,6 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                     {order.notes && <Row label="Notes" value={order.notes} />}
                     {order.artist_name && <Row label="Artist" value={order.artist_name} />}
                     <Row label="Expected Delivery" value={order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN") : "25-30 days from order date"} />
-                    {/* Payment Details */}
                     {order.payment_status === "confirmed" && (
                       <div className="bg-green-50 rounded-lg p-3 space-y-1">
                         <p className="font-semibold text-green-800 text-xs">✅ Payment Confirmed</p>
@@ -431,6 +433,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
   const [artists, setArtists] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
   useEffect(() => {
     const artistIds = events.map(e => e.assigned_artist_id).filter(Boolean);
@@ -447,8 +450,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
   }, [events]);
 
   const handlePayRemaining = async (ev: any) => {
-    const totalAmount = ev.total_price;
-    const advanceAmount = ev.advance_amount;
+    const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
+    const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
     const remaining = totalAmount - advanceAmount;
     if (remaining <= 0) return;
 
@@ -468,11 +471,18 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
               body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true },
             });
-            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
-            setShowPaymentCelebration(true);
-            toast({ title: "🎉 Payment Successful!", description: "Thank you! Your remaining balance has been paid." });
-            setTimeout(() => setShowPaymentCelebration(false), 8000);
-          } catch { toast({ title: "Verification Failed", description: "Contact support with your booking ID.", variant: "destructive" }); }
+            if (verifyError) throw new Error("Verification failed");
+            if (verifyData?.verified || verifyData?.success) {
+              setShowPaymentCelebration(true);
+              toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
+              setTimeout(() => setShowPaymentCelebration(false), 8000);
+            } else {
+              throw new Error("Verification failed");
+            }
+          } catch (err: any) {
+            console.error("Remaining payment verification error:", err);
+            toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });
+          }
           setPayingEventId(null);
         },
         prefill: { name: ev.client_name, email: ev.client_email, contact: `+91${ev.client_mobile}` },
@@ -486,11 +496,31 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
     }
   };
 
+  // Get payment history for an event
+  const [paymentDates, setPaymentDates] = useState<Record<string, { advance_date?: string; full_date?: string }>>({});
+  useEffect(() => {
+    const bookingIds = events.map(e => e.id);
+    if (bookingIds.length > 0) {
+      supabase.from("payment_history").select("booking_id, payment_type, created_at").in("booking_id", bookingIds)
+        .then(({ data }) => {
+          if (data) {
+            const map: Record<string, { advance_date?: string; full_date?: string }> = {};
+            data.forEach((p: any) => {
+              if (!map[p.booking_id]) map[p.booking_id] = {};
+              if (p.payment_type === "event_advance") map[p.booking_id].advance_date = p.created_at;
+              if (p.payment_type === "event_remaining") map[p.booking_id].full_date = p.created_at;
+            });
+            setPaymentDates(map);
+          }
+        });
+    }
+  }, [events]);
+
   return (
     <>
       {showPaymentCelebration && (
         <div className="mb-4">
-          <CelebrationBanner message="🙏 Thank you for your payment! You're all set! 🎉" onDismiss={() => setShowPaymentCelebration(false)} />
+          <CelebrationBanner message="🎉 Full Payment Received! You're all set! ✅" onDismiss={() => setShowPaymentCelebration(false)} />
         </div>
       )}
       <div className="flex justify-between items-center mb-4">
@@ -521,12 +551,14 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
       ) : (
         <div className="space-y-3">
           {events.map((ev: any) => {
-            const advancePaid = ev.payment_status === "confirmed";
+            const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "fully_paid";
             const fullyPaid = ev.payment_status === "fully_paid";
-            const totalAmount = ev.total_price;
-            const advanceAmount = ev.advance_amount;
+            const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
+            const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
             const remaining = fullyPaid ? 0 : totalAmount - advanceAmount;
             const artist = ev.assigned_artist_id ? artists[ev.assigned_artist_id] : null;
+            const isExpanded = expandedEventId === ev.id;
+            const dates = paymentDates[ev.id] || {};
 
             return (
               <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -559,7 +591,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                       return null;
                     })()}
                     {/* Completed Event Celebration */}
-                    {ev.status === "completed" && <CelebrationBanner message="🎉 Congratulations on a successful event! 🎊" />}
+                    {ev.status === "completed" && (
+                      <CelebrationBanner message="🎉 Congratulations on a successful event! 🎊" />
+                    )}
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-sans font-medium capitalize">{EVENT_TYPES.find((t: any) => t.value === ev.event_type)?.label || ev.event_type}</p>
@@ -573,9 +607,19 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                      <Badge className={`border-none text-xs ${fullyPaid ? "bg-green-100 text-green-800" : advancePaid ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"}`}>
-                        <CreditCard className="w-3 h-3 mr-1" />{fullyPaid ? "Fully Paid ✅" : advancePaid ? "Advance Received" : "Payment Pending"}
-                      </Badge>
+                      {fullyPaid ? (
+                        <Badge className="border-none text-xs bg-green-100 text-green-800">
+                          <CreditCard className="w-3 h-3 mr-1" />Fully Paid ✅
+                        </Badge>
+                      ) : advancePaid ? (
+                        <Badge className="border-none text-xs bg-blue-100 text-blue-800">
+                          <CreditCard className="w-3 h-3 mr-1" />Advance Received
+                        </Badge>
+                      ) : (
+                        <Badge className="border-none text-xs bg-amber-100 text-amber-800">
+                          <CreditCard className="w-3 h-3 mr-1" />Payment Pending
+                        </Badge>
+                      )}
                       <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
                     </div>
 
@@ -598,10 +642,20 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                       </div>
                     )}
 
-                    <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Advance Paid</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice(remaining)}</span></div>
-                    </div>
+                    {/* Payment Summary */}
+                    {fullyPaid ? (
+                      <div className="bg-green-50 rounded-lg p-3 text-center">
+                        <p className="font-display text-lg font-bold text-green-800">✅ Payment Fully Paid</p>
+                        <p className="text-xs text-green-700 font-sans">Total: {formatPrice(totalAmount)}</p>
+                      </div>
+                    ) : (
+                      <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
+                        <div className="flex justify-between"><span className="text-muted-foreground">Advance {advancePaid ? "✅ Paid" : ""}</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice(remaining)}</span></div>
+                      </div>
+                    )}
+
+                    {/* Pay remaining button */}
                     {remaining > 0 && advancePaid && !fullyPaid && (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
@@ -620,6 +674,33 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                           )}
                         </Button>
                       </div>
+                    )}
+
+                    {/* Show Event Details toggle (for completed/fully paid) */}
+                    {(ev.status === "completed" || fullyPaid) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full rounded-full font-sans text-xs"
+                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
+                      >
+                        {isExpanded ? <><ChevronUp className="w-3 h-3 mr-1" />Hide Details</> : <><ChevronDown className="w-3 h-3 mr-1" />Show Event Details</>}
+                      </Button>
+                    )}
+
+                    {isExpanded && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="border-t border-border pt-3 space-y-2 text-sm font-sans">
+                        <Row label="Booking ID" value={ev.id.slice(0, 8).toUpperCase()} />
+                        <Row label="Booked On" value={new Date(ev.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />
+                        <Row label="Event Date" value={new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />
+                        <Row label="Time" value={`${ev.event_start_time} - ${ev.event_end_time}`} />
+                        <Row label="Venue" value={`${ev.venue_name}, ${ev.city}`} />
+                        <Row label="Artists" value={String(ev.artist_count)} />
+                        {artist && <Row label="Assigned Artist" value={artist.name} />}
+                        {dates.advance_date && <Row label="Advance Paid On" value={new Date(dates.advance_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
+                        {dates.full_date && <Row label="Full Payment On" value={new Date(dates.full_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
+                        <Row label="Total Amount" value={formatPrice(totalAmount)} />
+                      </motion.div>
                     )}
                   </CardContent>
                 </Card>
