@@ -87,13 +87,12 @@ const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-100 text-blue-800",
   in_progress: "bg-yellow-100 text-yellow-800",
   artwork_ready: "bg-purple-100 text-purple-800",
-  dispatched: "bg-orange-100 text-orange-800",
+  dispatched: "bg-primary/10 text-primary",
   delivered: "bg-green-100 text-green-800",
-  completed: "bg-green-200 text-green-900",
 };
 const STATUS_LABELS: Record<string, string> = {
   new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
-  dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
+  dispatched: "Dispatched", delivered: "Delivered",
 };
 const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
 const PAYMENT_COLORS: Record<string, string> = { pending: "bg-amber-100 text-amber-800", confirmed: "bg-green-100 text-green-800" };
@@ -606,7 +605,7 @@ const Admin = () => {
                   { value: "artwork_ready", label: `Art Ready (${orders.filter(o => o.status === "artwork_ready").length})` },
                   { value: "dispatched", label: `Dispatched (${orders.filter(o => o.status === "dispatched").length})` },
                   { value: "delivered", label: `Delivered (${orders.filter(o => o.status === "delivered").length})` },
-                  { value: "completed", label: `Completed (${orders.filter(o => o.status === "completed").length})` },
+                  
                 ].map((tab) => (
                   <Button
                     key={tab.value}

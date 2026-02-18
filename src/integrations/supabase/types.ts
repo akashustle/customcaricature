@@ -867,6 +867,7 @@ export type Database = {
           payment_status: string
           status: string
           style: string
+          updated_at: string
         }[]
       }
     }
