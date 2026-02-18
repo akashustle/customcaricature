@@ -275,6 +275,42 @@ export type Database = {
         }
         Relationships: []
       }
+      event_artist_assignments: {
+        Row: {
+          artist_id: string
+          created_at: string
+          event_id: string
+          id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_artist_assignments_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_artist_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_bookings: {
         Row: {
           accommodation_confirmed: boolean
