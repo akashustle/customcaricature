@@ -113,13 +113,18 @@ const Register = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
-            <div><Label className="font-sans">Full Name *</Label><Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" /></div>
+            <div>
+              <Label className="font-sans">Full Name *</Label>
+              <Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" />
+              {!form.fullName.trim() && form.email.trim() && <p className="text-xs text-destructive font-sans mt-1">Please fill your name</p>}
+            </div>
             <div>
               <Label className="font-sans">Mobile Number * (10 digits)</Label>
               <div className="flex gap-2">
                 <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-sans">+91</div>
                 <Input value={form.mobile} onChange={(e) => validateMobile(e.target.value)} placeholder="9876543210" maxLength={10} />
               </div>
+              {form.mobile && form.mobile.length < 10 && <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit mobile number</p>}
             </div>
             <div>
               <Label className="font-sans">Email *</Label>
@@ -128,7 +133,11 @@ const Register = () => {
               <p className="text-xs text-muted-foreground font-sans mt-1">Allowed: Gmail, Hotmail, Outlook, Yahoo, Zohomail</p>
             </div>
             <div><Label className="font-sans">Instagram ID</Label><Input value={form.instagramId} onChange={(e) => update("instagramId", e.target.value)} placeholder="@yourusername" /></div>
-            <div><Label className="font-sans">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" /></div>
+            <div>
+              <Label className="font-sans">Full Address *</Label>
+              <Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" />
+              {!form.address.trim() && form.fullName.trim() && form.mobile.length === 10 && <p className="text-xs text-destructive font-sans mt-1">Please fill your address</p>}
+            </div>
             
             {/* Location Dropdowns */}
             <LocationDropdowns
