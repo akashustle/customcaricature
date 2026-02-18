@@ -16,9 +16,10 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { INDIA_STATES_CITIES, EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event-data";
+import { EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event-data";
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
+import LocationDropdowns from "@/components/LocationDropdowns";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -40,6 +41,7 @@ const BookEvent = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [customCity, setCustomCity] = useState("");
   const [fullAddress, setFullAddress] = useState("");
@@ -59,7 +61,8 @@ const BookEvent = () => {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
   const actualCity = city === "__other__" ? customCity : city;
-  const isMumbai = state === "Maharashtra" && actualCity === "Mumbai";
+  const MUMBAI_DISTRICTS = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
+  const isMumbai = state === "Maharashtra" && MUMBAI_DISTRICTS.includes(district);
   const isOutsideMumbai = state && actualCity && !isMumbai;
 
   // Check for customer-specific event pricing first
@@ -86,13 +89,17 @@ const BookEvent = () => {
   // Pre-fill from profile & fetch customer event pricing with real-time sync
   useEffect(() => {
     if (user) {
-      supabase.from("profiles").select("full_name, mobile, email, instagram_id").eq("user_id", user.id).maybeSingle()
+      supabase.from("profiles").select("full_name, mobile, email, instagram_id, state, city, address, pincode").eq("user_id", user.id).maybeSingle()
         .then(({ data }) => {
           if (data) {
             setClientName(data.full_name || "");
             setClientMobile(data.mobile || "");
             setClientEmail(data.email || "");
             setClientInstagram(data.instagram_id || "");
+            if (data.state) setState(data.state);
+            if (data.city) setCity(data.city);
+            if (data.address) setFullAddress(data.address);
+            if (data.pincode) setPincode(data.pincode);
           }
         });
       // Fetch customer-specific event pricing
@@ -148,7 +155,7 @@ const BookEvent = () => {
     if (!clientName || !clientMobile || !clientEmail) return false;
     const finalEventType = eventType === "other" ? customEventType : eventType;
     if (!finalEventType || !eventDate || !startTime || !endTime) return false;
-    if (!state || !actualCity || !fullAddress || !venueName || !pincode) return false;
+    if (!state || !district || !actualCity || !fullAddress || !venueName || !pincode) return false;
     if (!availabilityChecked || !isAvailable) return false;
     if (isOutsideMumbai && (!travelConfirmed || !accommodationConfirmed)) return false;
     return true;
@@ -207,6 +214,7 @@ const BookEvent = () => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               payment_status: "confirmed",
+              remaining_amount: pricing.total - pricing.advance,
             } as any).eq("id", booking.id);
 
             // Record advance payment in payment history
@@ -309,10 +317,22 @@ const BookEvent = () => {
         <Card>
           <CardHeader><CardTitle className="font-display text-lg">Client Details</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div><Label className="font-sans">Full Name *</Label><Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Your full name" /></div>
+            <div>
+              <Label className="font-sans">Full Name *</Label>
+              <Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Your full name" />
+              {!clientName.trim() && clientEmail.trim() && <p className="text-xs text-destructive font-sans mt-1">Please fill your name</p>}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div><Label className="font-sans">Contact Number *</Label><Input value={clientMobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setClientMobile(d); }} maxLength={10} placeholder="10 digit number" /></div>
-              <div><Label className="font-sans">Email Address *</Label><Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="your@email.com" /></div>
+              <div>
+                <Label className="font-sans">Contact Number *</Label>
+                <Input value={clientMobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setClientMobile(d); }} maxLength={10} placeholder="10 digit number" />
+                {clientMobile && clientMobile.length < 10 && <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit mobile number</p>}
+              </div>
+              <div>
+                <Label className="font-sans">Email Address *</Label>
+                <Input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="your@email.com" />
+                {clientEmail && !clientEmail.includes("@") && <p className="text-xs text-destructive font-sans mt-1">Enter a valid email</p>}
+              </div>
             </div>
             <div><Label className="font-sans">Instagram ID</Label><Input value={clientInstagram} onChange={e => setClientInstagram(e.target.value)} placeholder="@username (optional)" /></div>
           </CardContent>
@@ -359,26 +379,14 @@ const BookEvent = () => {
         <Card>
           <CardHeader><CardTitle className="font-display text-lg">Location Details</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div>
-              <Label className="font-sans">State *</Label>
-              <Select value={state} onValueChange={v => { setState(v); setCity(""); setCustomCity(""); }}>
-                <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
-                <SelectContent>{Object.keys(INDIA_STATES_CITIES).sort().map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="font-sans">City *</Label>
-              <Select value={city} onValueChange={v => { setCity(v); if (v !== "__other__") setCustomCity(""); }} disabled={!state}>
-                <SelectTrigger><SelectValue placeholder={state ? "Select city" : "Select state first"} /></SelectTrigger>
-                <SelectContent>
-                  {(INDIA_STATES_CITIES[state] || []).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  {state && <SelectItem value="__other__">Other (Enter manually)</SelectItem>}
-                </SelectContent>
-              </Select>
-            </div>
-            {city === "__other__" && (
-              <div><Label className="font-sans">Enter City Name *</Label><Input value={customCity} onChange={e => setCustomCity(e.target.value)} placeholder="Type your city name" /></div>
-            )}
+            <LocationDropdowns
+              state={state}
+              district={district}
+              city={city}
+              onStateChange={(v) => { setState(v); setDistrict(""); setCity(""); setCustomCity(""); }}
+              onDistrictChange={(v) => { setDistrict(v); setCity(""); setCustomCity(""); }}
+              onCityChange={(v) => { setCity(v); if (v !== "__other__") setCustomCity(""); }}
+            />
             <div><Label className="font-sans">Venue Name *</Label><Input value={venueName} onChange={e => setVenueName(e.target.value)} placeholder="Hotel / Hall name" /></div>
             <div><Label className="font-sans">Full Address *</Label><Input value={fullAddress} onChange={e => setFullAddress(e.target.value)} placeholder="Complete address" /></div>
             <div><Label className="font-sans">Pin Code *</Label><Input value={pincode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setPincode(d); }} maxLength={6} placeholder="6 digit pincode" /></div>
@@ -455,7 +463,7 @@ const BookEvent = () => {
               <CardHeader>
                 <CardTitle className="font-display text-lg flex items-center gap-2">
                   <Palette className="w-5 h-5 text-primary" />
-                  🎨 Live Caricature Session – 3 to 4 Hours {isMumbai ? "in Mumbai" : "Outside Mumbai"}
+                  🎨 Live Caricature Session – 3 to 4 Hours {isMumbai ? "in Mumbai" : "Pan India"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -474,7 +482,7 @@ const BookEvent = () => {
                   <p className="font-semibold">📌 Additional Charges:</p>
                   <p>🔹 Extra Time? – {formatPrice(pricing.extraHourRate)} per additional hour.</p>
                   {isOutsideMumbai && (
-                    <p>🔹 Outside Mumbai? – Travel & accommodation charges apply. ✈️🚆</p>
+                    <p>🔹 Pan India? – Travel & accommodation charges apply. ✈️🚆</p>
                   )}
                 </div>
                 {dbPricing.length > 0 && dbPricing[0]?.valid_until && (
@@ -490,7 +498,7 @@ const BookEvent = () => {
               <Card className="border-amber-200 bg-amber-50/50">
                 <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Plane className="w-5 h-5 text-amber-600" />Travel & Accommodation</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground font-sans">Since the event is outside Mumbai, please confirm the following. <span className="font-semibold text-foreground">Preferred mode of transport: ✈️ Flight</span></p>
+                  <p className="text-sm text-muted-foreground font-sans">Since the event is not in Mumbai region, please confirm the following. <span className="font-semibold text-foreground">Preferred mode of transport: ✈️ Flight</span></p>
                   <div className="flex items-start gap-3">
                     <Checkbox checked={travelConfirmed} onCheckedChange={c => setTravelConfirmed(!!c)} id="travel" />
                     <Label htmlFor="travel" className="font-sans cursor-pointer text-sm">✅ I agree to arrange travel (Flight preferred) for the artist(s)</Label>
@@ -507,7 +515,7 @@ const BookEvent = () => {
             <Card className="border-primary/30">
               <CardHeader><CardTitle className="font-display text-lg">💰 Price Summary</CardTitle></CardHeader>
               <CardContent className="space-y-2 font-sans">
-                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Region</span><span className="font-medium">{isMumbai ? "Mumbai" : "Outside Mumbai (Pan India)"}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Region</span><span className="font-medium">{isMumbai ? "Mumbai" : "Pan India"}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Artists</span><span className="font-medium">{artistCount} Professional Artist{artistCount > 1 ? "s" : ""}</span></div>
                 {addExtraHours && extraHours > 0 && (
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Extra Hours</span><span className="font-medium">{extraHours} × {formatPrice(pricing.extraHourRate)} = {formatPrice(extraHours * pricing.extraHourRate)}</span></div>

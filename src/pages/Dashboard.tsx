@@ -35,7 +35,7 @@ type Profile = {
 type Order = {
   id: string; order_type: string; style: string; face_count: number; amount: number;
   status: string; payment_status: string | null; payment_verified: boolean | null;
-  created_at: string; customer_name: string; customer_email: string; customer_mobile: string;
+  created_at: string; updated_at: string; customer_name: string; customer_email: string; customer_mobile: string;
   delivery_address: string | null; delivery_city: string | null; delivery_state: string | null;
   delivery_pincode: string | null; notes: string | null; expected_delivery_date: string | null; artist_name: string | null;
   razorpay_payment_id: string | null; razorpay_order_id: string | null;
@@ -110,7 +110,7 @@ const Dashboard = () => {
 
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id")
       .eq("user_id", userId).order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
@@ -368,10 +368,10 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                 {order.status === "delivered" && (
                   <CelebrationBanner message="🎉 Congratulations! Your caricature has been delivered! 🎊" />
                 )}
-                {order.status === "delivered" && order.expected_delivery_date && (
+                {order.status === "delivered" && (
                   <div className="bg-green-50 rounded-lg p-3 text-center">
                     <p className="font-sans text-sm text-green-700 font-medium">
-                      Delivered on: {new Date(order.expected_delivery_date).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                      Delivered on: {new Date(order.updated_at || order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
                     </p>
                   </div>
                 )}
