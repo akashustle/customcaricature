@@ -2,6 +2,8 @@ import { OrderFormData } from "@/lib/order-types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import LocationDropdowns from "@/components/LocationDropdowns";
+import { useState } from "react";
 
 interface Props {
   data: OrderFormData;
@@ -30,16 +32,15 @@ const StepDeliveryAddress = ({ data, update, onNext }: Props) => {
           <Label className="font-sans">Full Address *</Label>
           <Input value={data.deliveryAddress} onChange={(e) => update({ deliveryAddress: e.target.value })} placeholder="House no, Street, Area" />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label className="font-sans">City *</Label>
-            <Input value={data.deliveryCity} onChange={(e) => update({ deliveryCity: e.target.value })} placeholder="City" />
-          </div>
-          <div>
-            <Label className="font-sans">State *</Label>
-            <Input value={data.deliveryState} onChange={(e) => update({ deliveryState: e.target.value })} placeholder="State" />
-          </div>
-        </div>
+        <LocationDropdowns
+          state={data.deliveryState}
+          district={data.district || ""}
+          city={data.deliveryCity}
+          onStateChange={(v) => update({ deliveryState: v, deliveryCity: "" })}
+          onDistrictChange={() => {}}
+          onCityChange={(v) => update({ deliveryCity: v })}
+          showLabels={true}
+        />
         <div>
           <Label className="font-sans">Pincode * (6 digits)</Label>
           <Input 
