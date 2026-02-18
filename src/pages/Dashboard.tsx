@@ -19,6 +19,8 @@ import PaymentHistory from "@/components/PaymentHistory";
 import useLocationTracker from "@/hooks/useLocationTracker";
 import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
+import EventCompletionNotice from "@/components/EventCompletionNotice";
+import PaymentStatusTracker from "@/components/PaymentStatusTracker";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -684,9 +686,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       }
                       return null;
                     })()}
-                    {/* Completed Event Celebration */}
+                    {/* Completed Event - Completion Notice with shareable summary */}
                     {ev.status === "completed" && (
-                      <CelebrationBanner message="🎉 Congratulations on a successful event! 🎊" />
+                      <EventCompletionNotice event={ev} assignedArtists={assignedArtists} />
                     )}
                     <div className="flex justify-between items-start">
                       <div>
@@ -741,17 +743,15 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       </div>
                     )}
 
-                    {/* Payment Summary */}
-                    {fullyPaid ? (
-                      <div className="bg-green-50 rounded-lg p-3 text-center">
-                        <p className="font-display text-lg font-bold text-green-800">✅ Payment Fully Paid</p>
-                        <p className="text-xs text-green-700 font-sans">Total: {formatPrice(totalAmount)}</p>
-                      </div>
-                    ) : (
-                      <div className="text-sm font-sans space-y-1 border-t border-border pt-2 mt-2">
-                        <div className="flex justify-between"><span className="text-muted-foreground">Advance {advancePaid ? "✅ Paid" : ""}</span><span className="font-medium">{formatPrice(advanceAmount)}</span></div>
-                        <div className="flex justify-between"><span className="text-muted-foreground">Remaining</span><span className="font-medium">{formatPrice(remaining)}</span></div>
-                      </div>
+                    {/* Real-time Payment Status Tracker */}
+                    {userId && (
+                      <PaymentStatusTracker
+                        bookingId={ev.id}
+                        totalAmount={totalAmount}
+                        advanceAmount={advanceAmount}
+                        paymentStatus={ev.payment_status}
+                        userId={userId}
+                      />
                     )}
 
                     {/* Pay remaining button */}
