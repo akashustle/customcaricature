@@ -248,20 +248,18 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
 };
 
 const StatCard = ({ icon: Icon, label, value, color, subtitle }: { icon: any; label: string; value: string; color?: string; subtitle?: string }) => (
-  <Card>
-    <CardContent className="p-3 md:p-4">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-        </div>
-        <div className="min-w-0">
-          <p className={`text-base md:text-xl font-display font-bold truncate ${color || ""}`}>{value}</p>
-          <p className="text-[10px] md:text-xs text-muted-foreground font-sans">{label}</p>
-          {subtitle && <p className="text-[9px] text-muted-foreground/70 font-sans">{subtitle}</p>}
-        </div>
+  <div className="admin-stat-card p-3 md:p-4">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0 shadow-sm">
+        <Icon className="w-4 h-4 md:w-5 md:h-5 text-primary" />
       </div>
-    </CardContent>
-  </Card>
+      <div className="min-w-0">
+        <p className={`text-base md:text-xl font-display font-bold truncate ${color || ""}`}>{value}</p>
+        <p className="text-[10px] md:text-xs text-muted-foreground font-sans">{label}</p>
+        {subtitle && <p className="text-[9px] text-muted-foreground/70 font-sans">{subtitle}</p>}
+      </div>
+    </div>
+  </div>
 );
 
 export default AdminAnalytics;

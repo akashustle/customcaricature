@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "@/hooks/use-toast";
 import { validateEmailFormat } from "@/lib/email-validation";
 import { Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
+import LocationDropdowns from "@/components/LocationDropdowns";
 
 const generateSecretCode = () => String(Math.floor(1000 + Math.random() * 9000));
 
@@ -15,7 +16,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     fullName: "", mobile: "", email: "", instagramId: "",
-    address: "", city: "", state: "", pincode: "",
+    address: "", city: "", state: "", district: "", pincode: "",
     password: "", confirmPassword: "",
   });
   const [secretCode] = useState(generateSecretCode());
@@ -52,7 +53,7 @@ const Register = () => {
 
   const canSubmit = form.fullName.trim() && form.mobile.length === 10 &&
     !emailError && form.email.includes("@") && form.address.trim() && form.city.trim() &&
-    form.state.trim() && form.pincode.length === 6 && form.password.length >= 6 &&
+    form.state.trim() && form.district.trim() && form.pincode.length === 6 && form.password.length >= 6 &&
     form.password === form.confirmPassword;
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -128,10 +129,17 @@ const Register = () => {
             </div>
             <div><Label className="font-sans">Instagram ID</Label><Input value={form.instagramId} onChange={(e) => update("instagramId", e.target.value)} placeholder="@yourusername" /></div>
             <div><Label className="font-sans">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label className="font-sans">City *</Label><Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="Mumbai" /></div>
-              <div><Label className="font-sans">State *</Label><Input value={form.state} onChange={(e) => update("state", e.target.value)} placeholder="Maharashtra" /></div>
-            </div>
+            
+            {/* Location Dropdowns */}
+            <LocationDropdowns
+              state={form.state}
+              district={form.district}
+              city={form.city}
+              onStateChange={(v) => setForm(prev => ({ ...prev, state: v, district: "", city: "" }))}
+              onDistrictChange={(v) => setForm(prev => ({ ...prev, district: v, city: "" }))}
+              onCityChange={(v) => setForm(prev => ({ ...prev, city: v }))}
+            />
+            
             <div><Label className="font-sans">Pincode * (6 digits)</Label><Input value={form.pincode} onChange={(e) => validatePincode(e.target.value)} placeholder="400001" maxLength={6} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div>

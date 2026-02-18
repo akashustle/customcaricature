@@ -474,10 +474,10 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 admin-header backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-primary/40 shadow-md" />
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-full border-[3px] border-primary/50 shadow-lg" />
             <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -492,17 +492,17 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-6">
         <LiveGreeting name={adminProfile?.full_name} />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 w-full overflow-x-auto hidden md:flex">
-            <TabsTrigger value="orders" className="font-sans flex-1"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
-            <TabsTrigger value="events" className="font-sans flex-1"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
-            <TabsTrigger value="payments" className="font-sans flex-1"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
-            <TabsTrigger value="event-users" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
-            <TabsTrigger value="pricing" className="font-sans flex-1"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
-            <TabsTrigger value="customers" className="font-sans flex-1"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
-            <TabsTrigger value="artists" className="font-sans flex-1">🎨 Artists</TabsTrigger>
-            <TabsTrigger value="analytics" className="font-sans flex-1"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
-            <TabsTrigger value="locations" className="font-sans flex-1"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
-            <TabsTrigger value="settings" className="font-sans flex-1"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
+          <TabsList className="mb-6 w-full overflow-x-auto hidden md:flex bg-card/80 p-1.5 rounded-2xl border border-border shadow-md">
+            <TabsTrigger value="orders" className="font-sans flex-1 rounded-full transition-all"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
+            <TabsTrigger value="events" className="font-sans flex-1 rounded-full transition-all"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
+            <TabsTrigger value="payments" className="font-sans flex-1 rounded-full transition-all"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
+            <TabsTrigger value="event-users" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
+            <TabsTrigger value="pricing" className="font-sans flex-1 rounded-full transition-all"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
+            <TabsTrigger value="customers" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
+            <TabsTrigger value="artists" className="font-sans flex-1 rounded-full transition-all">🎨 Artists</TabsTrigger>
+            <TabsTrigger value="analytics" className="font-sans flex-1 rounded-full transition-all"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
+            <TabsTrigger value="locations" className="font-sans flex-1 rounded-full transition-all"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
+            <TabsTrigger value="settings" className="font-sans flex-1 rounded-full transition-all"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -1243,7 +1243,7 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors flex-shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
     <Icon className="w-5 h-5" />
     <span className="text-[10px] font-sans font-medium whitespace-nowrap">{label}</span>
   </button>
