@@ -36,11 +36,13 @@ type EventBooking = {
   payment_status: string; status: string; notes: string | null; created_at: string;
   assigned_artist_id: string | null;
 };
+type ArtistAssignment = { event_id: string; artist_id: string };
 type Profile = { user_id: string; full_name: string; email: string; mobile: string; };
 
 const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [events, setEvents] = useState<EventBooking[]>([]);
   const [artists, setArtists] = useState<{ id: string; name: string }[]>([]);
+  const [artistAssignments, setArtistAssignments] = useState<ArtistAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -79,9 +81,11 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchEvents();
     fetchBlockedDates();
     fetchArtists();
+    fetchArtistAssignments();
     const ch = supabase.channel("admin-events")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents())
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchArtistAssignments())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -134,6 +138,24 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     const { data } = await supabase.from("artists").select("id, name");
     if (data) setArtists(data as any);
   };
+  const fetchArtistAssignments = async () => {
+    const { data } = await supabase.from("event_artist_assignments").select("event_id, artist_id") as any;
+    if (data) setArtistAssignments(data);
+  };
+  const getEventArtists = (eventId: string): string[] => {
+    return artistAssignments.filter(a => a.event_id === eventId).map(a => a.artist_id);
+  };
+  const toggleArtistAssignment = async (eventId: string, artistId: string, assigned: boolean) => {
+    if (assigned) {
+      await supabase.from("event_artist_assignments").delete().eq("event_id", eventId).eq("artist_id", artistId);
+      toast({ title: "Artist Removed" });
+    } else {
+      await supabase.from("event_artist_assignments").insert({ event_id: eventId, artist_id: artistId } as any);
+      toast({ title: "Artist Assigned" });
+    }
+    fetchArtistAssignments();
+  };
+  // Legacy single-artist compat
   const assignArtist = async (eventId: string, artistId: string | null) => {
     await supabase.from("event_bookings").update({ assigned_artist_id: artistId } as any).eq("id", eventId);
     toast({ title: artistId ? "Artist Assigned" : "Artist Removed" });
@@ -568,24 +590,29 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <SelectItem value="refunded">Refunded</SelectItem>
                     </SelectContent>
                   </Select>
-                  {/* Multi-artist selection: show multiple dropdowns based on artist_count */}
-                  {ev.artist_count <= 1 ? (
-                    <Select value={ev.assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
-                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">No Artist</SelectItem>
-                        {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Select value={ev.assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
-                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Artist 1" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">No Artist</SelectItem>
-                        {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  )}
+                  {/* Multi-artist assignment using event_artist_assignments table */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground font-sans">Assign Artists ({ev.artist_count} needed):</p>
+                    <div className="flex flex-wrap gap-1">
+                      {artists.map(a => {
+                        const assigned = getEventArtists(ev.id).includes(a.id);
+                        return (
+                          <Button
+                            key={a.id}
+                            size="sm"
+                            variant={assigned ? "default" : "outline"}
+                            className={`text-xs h-7 rounded-full ${assigned ? "bg-primary" : ""}`}
+                            onClick={() => toggleArtistAssignment(ev.id, a.id, assigned)}
+                          >
+                            {a.name} {assigned ? "✓" : "+"}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {getEventArtists(ev.id).length > 0 && (
+                      <p className="text-xs text-green-600 font-sans">{getEventArtists(ev.id).length}/{ev.artist_count} artists assigned</p>
+                    )}
+                  </div>
                   <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setEditingEventId(ev.id); setEditEventData(ev); }}>
                     <Edit2 className="w-3 h-3 mr-1" />Edit
                   </Button>

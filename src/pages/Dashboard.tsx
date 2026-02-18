@@ -430,23 +430,42 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 );
 
 const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => {
-  const [artists, setArtists] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
+  const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
+  const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({}); // eventId -> artistIds
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
+  // Fetch all artists & assignments
   useEffect(() => {
-    const artistIds = events.map(e => e.assigned_artist_id).filter(Boolean);
-    if (artistIds.length > 0) {
-      supabase.from("artists").select("id, name, portfolio_url").in("id", artistIds)
-        .then(({ data }) => {
-          if (data) {
-            const map: typeof artists = {};
-            data.forEach((a: any) => { map[a.id] = { name: a.name, portfolio_url: a.portfolio_url }; });
-            setArtists(map);
-          }
-        });
-    }
+    const fetchArtistData = async () => {
+      // Fetch all artists
+      const { data: allArtists } = await supabase.from("artists").select("id, name, portfolio_url");
+      if (allArtists) {
+        const map: typeof artistMap = {};
+        allArtists.forEach((a: any) => { map[a.id] = { name: a.name, portfolio_url: a.portfolio_url }; });
+        setArtistMap(map);
+      }
+      // Fetch assignments from event_artist_assignments
+      const eventIds = events.map(e => e.id);
+      if (eventIds.length > 0) {
+        const { data: assignments } = await supabase.from("event_artist_assignments").select("event_id, artist_id").in("event_id", eventIds) as any;
+        if (assignments) {
+          const map: Record<string, string[]> = {};
+          assignments.forEach((a: any) => {
+            if (!map[a.event_id]) map[a.event_id] = [];
+            map[a.event_id].push(a.artist_id);
+          });
+          setEventArtists(map);
+        }
+      }
+    };
+    fetchArtistData();
+    // Real-time for assignments
+    const ch = supabase.channel("user-artist-assignments")
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchArtistData())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [events]);
 
   const handlePayRemaining = async (ev: any) => {
@@ -556,7 +575,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
             const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
             const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
             const remaining = fullyPaid ? 0 : totalAmount - advanceAmount;
-            const artist = ev.assigned_artist_id ? artists[ev.assigned_artist_id] : null;
+            const assignedArtistIds = eventArtists[ev.id] || (ev.assigned_artist_id ? [ev.assigned_artist_id] : []);
+            const assignedArtists = assignedArtistIds.map((id: string) => artistMap[id]).filter(Boolean);
             const isExpanded = expandedEventId === ev.id;
             const dates = paymentDates[ev.id] || {};
 
@@ -624,21 +644,26 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                     </div>
 
                     {/* Artist Info */}
-                    {artist && (
+                    {assignedArtists.length > 0 && (
                       <div className="bg-primary/5 rounded-lg p-3 text-sm font-sans space-y-2">
-                        <p className="font-medium">🎨 Your Artist: {artist.name}</p>
-                        {artist.portfolio_url && (
-                          <a
-                            href={artist.portfolio_url.startsWith("http") ? artist.portfolio_url : `https://${artist.portfolio_url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Button size="sm" variant="outline" className="rounded-full text-xs font-sans">
-                              📄 See Your Artist Portfolio
-                            </Button>
-                          </a>
-                        )}
+                        <p className="font-medium">🎨 Your Artist{assignedArtists.length > 1 ? "s" : ""}:</p>
+                        {assignedArtists.map((a: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between">
+                            <span>{a.name}</span>
+                            {a.portfolio_url && (
+                              <a
+                                href={a.portfolio_url.startsWith("http") ? a.portfolio_url : `https://${a.portfolio_url}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                              >
+                                <Button size="sm" variant="outline" className="rounded-full text-xs font-sans">
+                                  📄 Portfolio
+                                </Button>
+                              </a>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
 
@@ -696,7 +721,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                         <Row label="Time" value={`${ev.event_start_time} - ${ev.event_end_time}`} />
                         <Row label="Venue" value={`${ev.venue_name}, ${ev.city}`} />
                         <Row label="Artists" value={String(ev.artist_count)} />
-                        {artist && <Row label="Assigned Artist" value={artist.name} />}
+                        {assignedArtists.length > 0 && <Row label="Assigned Artist(s)" value={assignedArtists.map((a: any) => a.name).join(", ")} />}
                         {dates.advance_date && <Row label="Advance Paid On" value={new Date(dates.advance_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
                         {dates.full_date && <Row label="Full Payment On" value={new Date(dates.full_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
                         <Row label="Total Amount" value={formatPrice(totalAmount)} />
