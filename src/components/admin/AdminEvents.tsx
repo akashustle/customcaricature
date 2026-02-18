@@ -24,6 +24,8 @@ import {
 import {
   CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2,
 } from "lucide-react";
+import EventRevenueWidget from "@/components/EventRevenueWidget";
+import EventCompletionNotice from "@/components/EventCompletionNotice";
 
 type EventBooking = {
   id: string; user_id: string | null; client_name: string; client_mobile: string;
@@ -77,14 +79,17 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [blockReason, setBlockReason] = useState("");
   const [blockedDates, setBlockedDates] = useState<any[]>([]);
 
+  const [paymentDates, setPaymentDates] = useState<Record<string, { advance_date?: string; full_date?: string }>>({});
+
   useEffect(() => {
     fetchEvents();
     fetchBlockedDates();
     fetchArtists();
     fetchArtistAssignments();
+    fetchPaymentDates();
     const ch = supabase.channel("admin-events")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents())
-      .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => { fetchEvents(); fetchPaymentDates(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchArtistAssignments())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -141,6 +146,19 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const fetchArtistAssignments = async () => {
     const { data } = await supabase.from("event_artist_assignments").select("event_id, artist_id") as any;
     if (data) setArtistAssignments(data);
+  };
+  const fetchPaymentDates = async () => {
+    const { data } = await supabase.from("payment_history").select("booking_id, payment_type, created_at").not("booking_id", "is", null);
+    if (data) {
+      const map: Record<string, { advance_date?: string; full_date?: string }> = {};
+      data.forEach((p: any) => {
+        if (!p.booking_id) return;
+        if (!map[p.booking_id]) map[p.booking_id] = {};
+        if (p.payment_type === "event_advance") map[p.booking_id].advance_date = p.created_at;
+        if (p.payment_type === "event_remaining") map[p.booking_id].full_date = p.created_at;
+      });
+      setPaymentDates(map);
+    }
   };
   const getEventArtists = (eventId: string): string[] => {
     return artistAssignments.filter(a => a.event_id === eventId).map(a => a.artist_id);
@@ -576,6 +594,24 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   {ev.extra_hours > 0 && <p><span className="text-muted-foreground">Extra Hours:</span> {ev.extra_hours}</p>}
                   {ev.notes && <p><span className="text-muted-foreground">Notes:</span> {ev.notes}</p>}
                 </div>
+                {/* Per-event Revenue Impact Widget */}
+                <EventRevenueWidget
+                  totalAmount={ev.total_price}
+                  advanceAmount={ev.advance_amount}
+                  paymentStatus={ev.payment_status}
+                  negotiated={ev.negotiated}
+                  negotiatedTotal={ev.negotiated_total}
+                  negotiatedAdvance={ev.negotiated_advance}
+                  advanceDate={paymentDates[ev.id]?.advance_date}
+                  fullPaymentDate={paymentDates[ev.id]?.full_date}
+                />
+                {/* Completion Notice for completed events */}
+                {ev.status === "completed" && (
+                  <EventCompletionNotice
+                    event={ev}
+                    assignedArtists={getEventArtists(ev.id).map(aid => ({ name: artists.find(a => a.id === aid)?.name || "Unknown" }))}
+                  />
+                )}
                 <div className="flex flex-wrap gap-2">
                   <Select value={ev.status} onValueChange={v => updateEventStatus(ev.id, v)}>
                     <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
