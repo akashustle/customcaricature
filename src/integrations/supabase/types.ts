@@ -34,6 +34,7 @@ export type Database = {
       }
       artist_blocked_dates: {
         Row: {
+          artist_id: string | null
           blocked_date: string
           blocked_end_time: string | null
           blocked_start_time: string | null
@@ -43,6 +44,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
+          artist_id?: string | null
           blocked_date: string
           blocked_end_time?: string | null
           blocked_start_time?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
+          artist_id?: string | null
           blocked_date?: string
           blocked_end_time?: string | null
           blocked_start_time?: string | null
@@ -60,7 +63,15 @@ export type Database = {
           id?: string
           reason?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "artist_blocked_dates_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       artists: {
         Row: {
