@@ -43,12 +43,12 @@ type Order = {
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
-  dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
+  dispatched: "Dispatched", delivered: "Delivered",
 };
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-100 text-blue-800", in_progress: "bg-yellow-100 text-yellow-800",
-  artwork_ready: "bg-purple-100 text-purple-800", dispatched: "bg-orange-100 text-orange-800",
-  delivered: "bg-green-100 text-green-800", completed: "bg-green-200 text-green-900",
+  artwork_ready: "bg-purple-100 text-purple-800", dispatched: "bg-primary/10 text-primary",
+  delivered: "bg-green-100 text-green-800",
 };
 const WHATSAPP_NUMBER = "918369594271";
 
@@ -175,7 +175,7 @@ const Dashboard = () => {
           setPayingOrderId(null);
         },
         prefill: { name: order.customer_name, email: order.customer_email, contact: `+91${order.customer_mobile}` },
-        theme: { color: "#E8633B" },
+        theme: { color: "#A37B2F" },
         modal: { ondismiss: () => setPayingOrderId(null) },
       };
       new window.Razorpay(options).open();
@@ -367,6 +367,13 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                 {/* Congratulations on delivery */}
                 {order.status === "delivered" && (
                   <CelebrationBanner message="🎉 Congratulations! Your caricature has been delivered! 🎊" />
+                )}
+                {order.status === "delivered" && order.expected_delivery_date && (
+                  <div className="bg-green-50 rounded-lg p-3 text-center">
+                    <p className="font-sans text-sm text-green-700 font-medium">
+                      Delivered on: {new Date(order.expected_delivery_date).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
                 )}
                 <div className="flex justify-between items-start">
                   <div>
@@ -581,7 +588,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
           setPayingEventId(null);
         },
         prefill: { name: ev.client_name, email: ev.client_email, contact: `+91${ev.client_mobile}` },
-        theme: { color: "#E8633B" },
+        theme: { color: "#A37B2F" },
         modal: { ondismiss: () => setPayingEventId(null) },
       };
       new window.Razorpay(options).open();

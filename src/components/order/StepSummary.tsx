@@ -145,7 +145,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
           contact: `+91${data.customerMobile}`,
         },
         theme: {
-          color: "#E8633B",
+          color: "#A37B2F",
         },
         modal: {
           ondismiss: () => {

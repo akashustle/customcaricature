@@ -31,6 +31,7 @@ type TrackedOrder = {
   created_at: string;
   expected_delivery_date: string | null;
   face_count: number;
+  updated_at: string;
 };
 
 const TrackOrder = () => {
@@ -56,7 +57,7 @@ const TrackOrder = () => {
       toast({ title: "Order Not Found", description: "Please check your Order ID and try again.", variant: "destructive" });
     } else {
       const orderData = Array.isArray(data) ? data[0] : data;
-      setOrder(orderData as any);
+      setOrder(orderData as TrackedOrder);
     }
     setLoading(false);
   };
@@ -149,18 +150,25 @@ const TrackOrder = () => {
                 </div>
               </div>
 
-              {/* Delivery Info */}
-              <div className="border-t border-border pt-4">
-                <p className="font-sans text-sm text-muted-foreground">Expected Delivery</p>
-                <p className="font-sans font-semibold">
-                  {getDeliveryDate(order).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
-                </p>
-                {!["delivered", "completed"].includes(order.status) && (
+              {/* Delivered Message or Delivery Info */}
+              {["delivered", "completed"].includes(order.status) ? (
+                <div className="border-t border-border pt-4 bg-green-50 rounded-lg p-4">
+                  <p className="font-display text-lg font-bold text-green-800 mb-1">🎉 Your Caricature is Delivered!</p>
+                  <p className="font-sans text-sm text-green-700">
+                    Delivered on: {new Date(order.updated_at).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                  </p>
+                </div>
+              ) : (
+                <div className="border-t border-border pt-4">
+                  <p className="font-sans text-sm text-muted-foreground">Expected Delivery</p>
+                  <p className="font-sans font-semibold">
+                    {getDeliveryDate(order).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
+                  </p>
                   <p className="text-xs text-muted-foreground font-sans mt-1">
                     {Math.max(0, Math.ceil((getDeliveryDate(order).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days remaining
                   </p>
-                )}
-              </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
