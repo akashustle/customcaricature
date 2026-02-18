@@ -21,38 +21,57 @@ const LocationDropdowns = ({
   onStateChange, onDistrictChange, onCityChange,
   required = true, compact = false, showLabels = true,
 }: LocationDropdownsProps) => {
+  const [customDistrict, setCustomDistrict] = useState("");
   const [customCity, setCustomCity] = useState("");
+  const [isOtherDistrict, setIsOtherDistrict] = useState(false);
+  const [isOtherCity, setIsOtherCity] = useState(false);
+
   const states = getStates();
   const districts = state ? getDistricts(state) : [];
-  const cities = district ? getCities(state, district) : [];
+  const cities = district && !isOtherDistrict ? getCities(state, district) : [];
 
   const handleStateChange = (val: string) => {
     onStateChange(val);
     onDistrictChange("");
     onCityChange("");
+    setCustomDistrict("");
     setCustomCity("");
+    setIsOtherDistrict(false);
+    setIsOtherCity(false);
   };
 
   const handleDistrictChange = (val: string) => {
-    onDistrictChange(val);
-    onCityChange("");
-    setCustomCity("");
+    if (val === "__other__") {
+      setIsOtherDistrict(true);
+      onDistrictChange("");
+      setCustomDistrict("");
+      onCityChange("");
+      setCustomCity("");
+      setIsOtherCity(true); // If district is other, city must also be typed
+    } else {
+      setIsOtherDistrict(false);
+      onDistrictChange(val);
+      onCityChange("");
+      setCustomCity("");
+      setIsOtherCity(false);
+    }
   };
 
   const handleCityChange = (val: string) => {
     if (val === "__other__") {
+      setIsOtherCity(true);
       onCityChange("");
       setCustomCity("");
     } else {
+      setIsOtherCity(false);
       onCityChange(val);
     }
   };
 
-  const isOtherCity = city === "__other__" || (district && !cities.includes(city) && city !== "" && customCity !== "");
-
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
       <div className={compact ? "grid grid-cols-3 gap-2" : "grid grid-cols-1 md:grid-cols-3 gap-3"}>
+        {/* State */}
         <div>
           {showLabels && <Label className="font-sans text-xs">State {required && "*"}</Label>}
           <Select value={state} onValueChange={handleStateChange}>
@@ -66,51 +85,69 @@ const LocationDropdowns = ({
             </SelectContent>
           </Select>
         </div>
+
+        {/* District */}
         <div>
           {showLabels && <Label className="font-sans text-xs">District {required && "*"}</Label>}
-          <Select value={district} onValueChange={handleDistrictChange} disabled={!state}>
-            <SelectTrigger className={compact ? "h-8 text-xs" : ""}>
-              <SelectValue placeholder="Select District" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60 z-[100] bg-popover">
-              {districts.map(d => (
-                <SelectItem key={d} value={d}>{d}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {isOtherDistrict ? (
+            <Input
+              value={customDistrict}
+              onChange={(e) => {
+                setCustomDistrict(e.target.value);
+                onDistrictChange(e.target.value);
+              }}
+              placeholder="Enter district name"
+              className={compact ? "h-8 text-xs" : ""}
+            />
+          ) : (
+            <Select value={district} onValueChange={handleDistrictChange} disabled={!state}>
+              <SelectTrigger className={compact ? "h-8 text-xs" : ""}>
+                <SelectValue placeholder="Select District" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60 z-[100] bg-popover">
+                {districts.map(d => (
+                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                ))}
+                <SelectItem value="__other__">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          {isOtherDistrict && (
+            <button onClick={() => { setIsOtherDistrict(false); onDistrictChange(""); setCustomDistrict(""); }} className="text-[10px] text-primary font-sans mt-1 hover:underline">← Back to list</button>
+          )}
         </div>
+
+        {/* City */}
         <div>
           {showLabels && <Label className="font-sans text-xs">City {required && "*"}</Label>}
-          <Select value={cities.includes(city) ? city : city ? "__other__" : ""} onValueChange={handleCityChange} disabled={!district}>
-            <SelectTrigger className={compact ? "h-8 text-xs" : ""}>
-              <SelectValue placeholder="Select City" />
-            </SelectTrigger>
-            <SelectContent className="max-h-60 z-[100] bg-popover">
-              {cities.map(c => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-              <SelectItem value="__other__">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          {isOtherCity || isOtherDistrict ? (
+            <Input
+              value={customCity}
+              onChange={(e) => {
+                setCustomCity(e.target.value);
+                onCityChange(e.target.value);
+              }}
+              placeholder="Enter city name"
+              className={compact ? "h-8 text-xs" : ""}
+            />
+          ) : (
+            <Select value={cities.includes(city) ? city : ""} onValueChange={handleCityChange} disabled={!district}>
+              <SelectTrigger className={compact ? "h-8 text-xs" : ""}>
+                <SelectValue placeholder="Select City" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60 z-[100] bg-popover">
+                {cities.map(c => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+                <SelectItem value="__other__">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          {isOtherCity && !isOtherDistrict && (
+            <button onClick={() => { setIsOtherCity(false); onCityChange(""); setCustomCity(""); }} className="text-[10px] text-primary font-sans mt-1 hover:underline">← Back to list</button>
+          )}
         </div>
       </div>
-      {(city === "__other__" || (!cities.includes(city) && city === "" && district)) && city === "__other__" ? null : null}
-      {/* Show custom city input when "Other" selected */}
-      {(!cities.includes(city) && district && city === "") ? null : null}
-      {city === "__other__" && (
-        <div>
-          {showLabels && <Label className="font-sans text-xs">Enter City Name *</Label>}
-          <Input
-            value={customCity}
-            onChange={(e) => {
-              setCustomCity(e.target.value);
-              onCityChange(e.target.value);
-            }}
-            placeholder="Enter your city"
-            className={compact ? "h-8 text-xs" : ""}
-          />
-        </div>
-      )}
     </div>
   );
 };

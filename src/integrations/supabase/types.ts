@@ -735,6 +735,63 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          admin_replied_at: string | null
+          admin_reply: string | null
+          booking_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          rating: number
+          review_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_replied_at?: string | null
+          admin_reply?: string | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating: number
+          review_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_replied_at?: string | null
+          admin_reply?: string | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating?: number
+          review_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_live_locations: {
         Row: {
           city: string | null

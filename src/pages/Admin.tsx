@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -36,6 +36,7 @@ import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPric
 
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
+import AdminReviews from "@/components/admin/AdminReviews";
 
 type Order = {
   id: string;
@@ -500,6 +501,7 @@ const Admin = () => {
             <TabsTrigger value="pricing" className="font-sans flex-1 rounded-full transition-all"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
             <TabsTrigger value="artists" className="font-sans flex-1 rounded-full transition-all">🎨 Artists</TabsTrigger>
+            <TabsTrigger value="reviews" className="font-sans flex-1 rounded-full transition-all"><Star className="w-4 h-4 mr-1" />Reviews</TabsTrigger>
             <TabsTrigger value="analytics" className="font-sans flex-1 rounded-full transition-all"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
             <TabsTrigger value="locations" className="font-sans flex-1 rounded-full transition-all"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
             <TabsTrigger value="settings" className="font-sans flex-1 rounded-full transition-all"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
@@ -1081,6 +1083,10 @@ const Admin = () => {
 
           {/* Blog tab removed */}
 
+          <TabsContent value="reviews">
+            <AdminReviews />
+          </TabsContent>
+
           <TabsContent value="analytics">
             <AdminAnalytics orders={orders as any} customers={customers} />
           </TabsContent>
@@ -1234,6 +1240,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
           <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
+          <AdminBottomNavItem icon={Star} label="Reviews" active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} />
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
