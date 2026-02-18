@@ -423,9 +423,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {["all", "pending", "confirmed", "partial"].map(s => (
+          {["all", "pending", "confirmed", "fully_paid"].map(s => (
             <Button key={s} variant={paymentFilter === s ? "default" : "outline"} size="sm" className="text-xs font-sans h-7 rounded-full" onClick={() => setPaymentFilter(s)}>
-              {s === "all" ? "All Payments" : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === "all" ? "All Payments" : s === "confirmed" ? "Advance Paid" : s === "fully_paid" ? "Fully Paid" : "Pending"}
             </Button>
           ))}
           {["all", "mumbai", "outside"].map(s => (
@@ -490,7 +490,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="border-none text-xs bg-purple-100 text-purple-800">{EVENT_TYPES.find(t => t.value === ev.event_type)?.label || ev.event_type}</Badge>
                   <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                  <Badge className={`border-none text-xs ${ev.payment_status === "confirmed" ? "bg-green-100 text-green-800" : ev.payment_status === "partial" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>Pay: {ev.payment_status}</Badge>
+                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}>
+                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : "Payment Pending"}
+                  </Badge>
                   {ev.negotiated && <Badge className="border-none text-xs bg-indigo-100 text-indigo-800">Negotiated</Badge>}
                   <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
                   <Badge variant="outline" className="text-xs">{ev.is_mumbai ? "Mumbai" : "Pan India"}</Badge>
@@ -498,7 +500,24 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                 <div className="text-sm font-sans space-y-1">
                   <p><span className="text-muted-foreground">Event:</span> {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}</p>
                   <p><span className="text-muted-foreground">Location:</span> {ev.venue_name}, {ev.city}, {ev.state} - {ev.pincode}</p>
-                  <p><span className="text-muted-foreground">Advance:</span> {formatPrice(ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount)} · <span className="text-muted-foreground">Remaining:</span> {formatPrice((ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price) - (ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount))}</p>
+                  {ev.payment_status === "fully_paid" ? (
+                    <p className="text-green-700 font-semibold">✅ Payment Fully Paid</p>
+                  ) : (
+                    <>
+                      <p>
+                        <span className="text-muted-foreground">Advance:</span>{" "}
+                        {formatPrice(ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount)}{" "}
+                        <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : "text-red-600"}`}>
+                          ({ev.payment_status === "confirmed" ? "Paid ✅" : "Unpaid"})
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-muted-foreground">Remaining:</span>{" "}
+                        {formatPrice((ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price) - (ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount))}{" "}
+                        <span className="text-xs font-semibold text-red-600">(Unpaid)</span>
+                      </p>
+                    </>
+                  )}
                   {ev.extra_hours > 0 && <p><span className="text-muted-foreground">Extra Hours:</span> {ev.extra_hours}</p>}
                   {ev.notes && <p><span className="text-muted-foreground">Notes:</span> {ev.notes}</p>}
                 </div>
@@ -508,8 +527,13 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <SelectContent>{Object.entries(EVENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                   </Select>
                   <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
-                    <SelectTrigger className="h-8 w-28 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="partial">Partial</SelectItem><SelectItem value="refunded">Refunded</SelectItem></SelectContent>
+                    <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="confirmed">Advance Received</SelectItem>
+                      <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                      <SelectItem value="refunded">Refunded</SelectItem>
+                    </SelectContent>
                   </Select>
                   <Select value={(ev as any).assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
                     <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
