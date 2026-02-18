@@ -34,6 +34,7 @@ type EventBooking = {
   remaining_amount: number; extra_hours: number; negotiated: boolean;
   negotiated_total: number | null; negotiated_advance: number | null;
   payment_status: string; status: string; notes: string | null; created_at: string;
+  assigned_artist_id: string | null;
 };
 type Profile = { user_id: string; full_name: string; email: string; mobile: string; };
 
@@ -55,10 +56,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [editEventData, setEditEventData] = useState<Partial<EventBooking>>({});
 
-  // Pricing edit state
   const [pricingEdits, setPricingEdits] = useState<Record<string, { total_price: string; advance_amount: string; extra_hour_rate: string; valid_until: string }>>({});
 
-  // Manual event form
   const [mf, setMf] = useState({
     clientName: "", clientMobile: "", clientEmail: "", clientInstagram: "",
     eventType: "wedding", customEventType: "", eventDate: "", startTime: "10:00", endTime: "18:00",
@@ -69,7 +68,6 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   });
   const [addingEvent, setAddingEvent] = useState(false);
 
-  // Blocked dates
   const [showBlockDate, setShowBlockDate] = useState(false);
   const [blockDate, setBlockDate] = useState<Date>();
   const [blockStartTime, setBlockStartTime] = useState("");
@@ -81,11 +79,33 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchEvents();
     fetchBlockedDates();
     fetchArtists();
-    const ch = supabase.channel("admin-events").on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents()).subscribe();
+    const ch = supabase.channel("admin-events")
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents())
+      .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // Init pricing edits when dbPricing loads
+  // Auto-complete events whose date+time has passed
+  useEffect(() => {
+    const checkAutoComplete = () => {
+      const now = new Date();
+      events.forEach(async (ev) => {
+        if (ev.status !== "upcoming") return;
+        const [year, month, day] = ev.event_date.split("-").map(Number);
+        const [endH, endM] = ev.event_end_time.split(":").map(Number);
+        const eventEnd = new Date(year, month - 1, day, endH, endM);
+        if (now > eventEnd) {
+          await supabase.from("event_bookings").update({ status: "completed" } as any).eq("id", ev.id);
+          toast({ title: `Event auto-completed: ${ev.client_name}` });
+        }
+      });
+    };
+    checkAutoComplete();
+    const interval = setInterval(checkAutoComplete, 60000); // check every minute
+    return () => clearInterval(interval);
+  }, [events]);
+
   useEffect(() => {
     if (dbPricing.length > 0) {
       const edits: typeof pricingEdits = {};
@@ -218,21 +238,28 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     return true;
   });
 
-  // Analytics
+  // Analytics - Updated logic
   const upcoming = events.filter(e => e.status === "upcoming").length;
   const completed = events.filter(e => e.status === "completed").length;
   const cancelled = events.filter(e => e.status === "cancelled").length;
   const mumbaiEvents = events.filter(e => e.is_mumbai).length;
   const outsideEvents = events.filter(e => !e.is_mumbai).length;
-  const confirmedPayments = events.filter(e => e.payment_status === "confirmed");
-  const totalRevenue = confirmedPayments.reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0);
-  const totalAdvanceCollected = confirmedPayments.reduce((s, e) => s + (e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount), 0);
-  const pendingPayments = events.filter(e => e.payment_status !== "confirmed").length;
-  const avgEventValue = confirmedPayments.length > 0 ? Math.round(totalRevenue / confirmedPayments.length) : 0;
+
+  // Fully paid events count toward revenue
+  const fullyPaidEvents = events.filter(e => e.payment_status === "fully_paid");
+  const advancePaidEvents = events.filter(e => e.payment_status === "confirmed");
+
+  // Revenue = total from fully paid events
+  const totalRevenue = fullyPaidEvents.reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0);
+  // Advance collected = advance from events that only have advance paid (not fully paid yet)
+  const totalAdvanceCollected = advancePaidEvents.reduce((s, e) => s + (e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount), 0);
+  const pendingPayments = events.filter(e => e.payment_status === "pending").length;
+  const allPaidEvents = [...fullyPaidEvents, ...advancePaidEvents];
+  const avgEventValue = allPaidEvents.length > 0 ? Math.round((totalRevenue + totalAdvanceCollected) / allPaidEvents.length) : 0;
   const negotiatedEvents = events.filter(e => e.negotiated).length;
-  const now = new Date();
   const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth() - 1);
-  const monthlyRevenue = confirmedPayments.filter(e => new Date(e.created_at) > monthAgo).reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0);
+  const monthlyRevenue = fullyPaidEvents.filter(e => new Date(e.created_at) > monthAgo).reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0)
+    + advancePaidEvents.filter(e => new Date(e.created_at) > monthAgo).reduce((s, e) => s + (e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount), 0);
 
   return (
     <div className="space-y-4">
@@ -246,7 +273,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           { label: "Mumbai", value: mumbaiEvents, color: "text-purple-600" },
           { label: "Outside Mumbai", value: outsideEvents, color: "text-orange-600" },
         ].map(w => (
-          <Card key={w.label}><CardContent className="p-3 text-center"><p className={`text-2xl font-bold font-display ${w.color}`}>{w.value}</p><p className="text-[10px] text-muted-foreground font-sans">{w.label}</p></CardContent></Card>
+          <div key={w.label} className="admin-stat-card p-3 text-center"><p className={`text-2xl font-bold font-display ${w.color}`}>{w.value}</p><p className="text-[10px] text-muted-foreground font-sans">{w.label}</p></div>
         ))}
       </div>
 
@@ -260,19 +287,17 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), color: "text-amber-600" },
           { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), color: "text-indigo-600" },
         ].map(w => (
-          <Card key={w.label}>
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <w.icon className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className={`text-sm md:text-base font-display font-bold truncate ${w.color}`}>{w.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-sans">{w.label}</p>
-                </div>
+          <div key={w.label} className="admin-stat-card p-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <w.icon className="w-4 h-4 text-primary" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0">
+                <p className={`text-sm md:text-base font-display font-bold truncate ${w.color}`}>{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans">{w.label}</p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
@@ -349,7 +374,11 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <Label>Payment Status</Label>
                     <Select value={mf.paymentStatus} onValueChange={v => setMf({...mf, paymentStatus: v})}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent><SelectItem value="pending">Pending</SelectItem><SelectItem value="confirmed">Confirmed</SelectItem><SelectItem value="partial">Partial</SelectItem></SelectContent>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Advance Received</SelectItem>
+                        <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                      </SelectContent>
                     </Select>
                   </div>
                   <div className="flex items-center gap-2"><Checkbox checked={mf.negotiated} onCheckedChange={c => setMf({...mf, negotiated: !!c})} /><Label>Negotiated</Label></div>
@@ -417,19 +446,19 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
         {/* Filters */}
         <div className="flex flex-wrap gap-1.5">
           {["all", "upcoming", "completed", "cancelled"].map(s => (
-            <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" className="text-xs font-sans h-7 rounded-full" onClick={() => setStatusFilter(s)}>
+            <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" className={`text-xs font-sans h-7 rounded-full ${statusFilter === s ? "admin-tab-active" : ""}`} onClick={() => setStatusFilter(s)}>
               {s === "all" ? `All (${events.length})` : `${EVENT_STATUS_LABELS[s]} (${events.filter(e => e.status === s).length})`}
             </Button>
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {["all", "pending", "confirmed", "fully_paid"].map(s => (
-            <Button key={s} variant={paymentFilter === s ? "default" : "outline"} size="sm" className="text-xs font-sans h-7 rounded-full" onClick={() => setPaymentFilter(s)}>
+            <Button key={s} variant={paymentFilter === s ? "default" : "outline"} size="sm" className={`text-xs font-sans h-7 rounded-full ${paymentFilter === s ? "admin-tab-active" : ""}`} onClick={() => setPaymentFilter(s)}>
               {s === "all" ? "All Payments" : s === "confirmed" ? "Advance Paid" : s === "fully_paid" ? "Fully Paid" : "Pending"}
             </Button>
           ))}
           {["all", "mumbai", "outside"].map(s => (
-            <Button key={s} variant={regionFilter === s ? "default" : "outline"} size="sm" className="text-xs font-sans h-7 rounded-full" onClick={() => setRegionFilter(s)}>
+            <Button key={s} variant={regionFilter === s ? "default" : "outline"} size="sm" className={`text-xs font-sans h-7 rounded-full ${regionFilter === s ? "admin-tab-active" : ""}`} onClick={() => setRegionFilter(s)}>
               {s === "all" ? "All Regions" : s === "mumbai" ? "Mumbai" : "Outside"}
             </Button>
           ))}
@@ -470,9 +499,13 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
       {/* Event List */}
       {loading ? <p className="text-center text-muted-foreground py-10">Loading...</p> : filtered.length === 0 ? <p className="text-center text-muted-foreground py-10">No events found</p> : (
         <div className="space-y-3">
-          {filtered.map(ev => (
-            <Card key={ev.id}>
-              <CardContent className="p-4 space-y-3">
+          {filtered.map(ev => {
+            const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
+            const advanceAmt = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
+            const remainingAmt = totalAmount - advanceAmt;
+
+            return (
+              <div key={ev.id} className="admin-card p-4 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-sans font-semibold">{ev.client_name}</p>
@@ -481,7 +514,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <p className="text-xs text-muted-foreground font-sans mt-1">Booked: {new Date(ev.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-sans font-medium text-primary">{formatPrice(ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price)}</p>
+                    <p className="font-sans font-medium text-primary">{formatPrice(totalAmount)}</p>
                     {ev.negotiated && ev.negotiated_total && ev.negotiated_total !== ev.total_price && (
                       <p className="text-xs text-muted-foreground line-through">{formatPrice(ev.total_price)}</p>
                     )}
@@ -501,19 +534,19 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   <p><span className="text-muted-foreground">Event:</span> {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}</p>
                   <p><span className="text-muted-foreground">Location:</span> {ev.venue_name}, {ev.city}, {ev.state} - {ev.pincode}</p>
                   {ev.payment_status === "fully_paid" ? (
-                    <p className="text-green-700 font-semibold">✅ Payment Fully Paid</p>
+                    <p className="text-green-700 font-semibold">✅ Payment Fully Paid — {formatPrice(totalAmount)}</p>
                   ) : (
                     <>
                       <p>
                         <span className="text-muted-foreground">Advance:</span>{" "}
-                        {formatPrice(ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount)}{" "}
+                        {formatPrice(advanceAmt)}{" "}
                         <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : "text-red-600"}`}>
                           ({ev.payment_status === "confirmed" ? "Paid ✅" : "Unpaid"})
                         </span>
                       </p>
                       <p>
                         <span className="text-muted-foreground">Remaining:</span>{" "}
-                        {formatPrice((ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price) - (ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount))}{" "}
+                        {formatPrice(remainingAmt)}{" "}
                         <span className="text-xs font-semibold text-red-600">(Unpaid)</span>
                       </p>
                     </>
@@ -535,13 +568,24 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <SelectItem value="refunded">Refunded</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={(ev as any).assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
-                    <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">No Artist</SelectItem>
-                      {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  {/* Multi-artist selection: show multiple dropdowns based on artist_count */}
+                  {ev.artist_count <= 1 ? (
+                    <Select value={ev.assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
+                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Assign Artist" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">No Artist</SelectItem>
+                        {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Select value={ev.assigned_artist_id || "__none__"} onValueChange={v => assignArtist(ev.id, v === "__none__" ? null : v)}>
+                      <SelectTrigger className="h-8 w-36 text-xs"><SelectValue placeholder="Artist 1" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">No Artist</SelectItem>
+                        {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setEditingEventId(ev.id); setEditEventData(ev); }}>
                     <Edit2 className="w-3 h-3 mr-1" />Edit
                   </Button>
@@ -556,9 +600,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
 
