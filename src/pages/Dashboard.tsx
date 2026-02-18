@@ -521,7 +521,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
       ) : (
         <div className="space-y-3">
           {events.map((ev: any) => {
-            const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "partial";
+            const advancePaid = ev.payment_status === "confirmed";
             const fullyPaid = ev.payment_status === "fully_paid";
             const totalAmount = ev.total_price;
             const advanceAmount = ev.advance_amount;
@@ -574,7 +574,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                     <div className="flex flex-wrap gap-2">
                       <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
                       <Badge className={`border-none text-xs ${fullyPaid ? "bg-green-100 text-green-800" : advancePaid ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"}`}>
-                        <CreditCard className="w-3 h-3 mr-1" />{fullyPaid ? "Fully Paid ✅" : advancePaid ? "Advance Paid" : "Payment Pending"}
+                        <CreditCard className="w-3 h-3 mr-1" />{fullyPaid ? "Fully Paid ✅" : advancePaid ? "Advance Received" : "Payment Pending"}
                       </Badge>
                       <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
                     </div>
