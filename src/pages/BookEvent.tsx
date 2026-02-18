@@ -207,27 +207,17 @@ const BookEvent = () => {
         order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: booking.id },
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: booking.id,
+                is_event_advance: true,
+                advance_amount: totalPayable,
+              },
             });
-            await supabase.from("event_bookings").update({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              payment_status: "confirmed",
-              remaining_amount: pricing.total - pricing.advance,
-            } as any).eq("id", booking.id);
-
-            // Record advance payment in payment history
-            await supabase.from("payment_history").insert({
-              user_id: user?.id,
-              booking_id: booking.id,
-              payment_type: "event_advance",
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              amount: totalPayable,
-              status: "confirmed",
-              description: `Event advance – ${eventType === "other" ? customEventType : eventType}`,
-            } as any);
+            if (verifyError) throw verifyError;
 
             setBookingConfirmed(true);
             toast({ title: "Event Booked Successfully! 🎉" });
