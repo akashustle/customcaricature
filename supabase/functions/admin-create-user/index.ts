@@ -49,6 +49,35 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Input validation
+    const emailStr = String(email).trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr) || emailStr.length > 255) {
+      return new Response(JSON.stringify({ error: "Invalid email format" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const passwordStr = String(password);
+    if (passwordStr.length < 6 || passwordStr.length > 128) {
+      return new Response(JSON.stringify({ error: "Password must be between 6 and 128 characters" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const nameStr = String(full_name).trim();
+    if (nameStr.length < 1 || nameStr.length > 200) {
+      return new Response(JSON.stringify({ error: "Name must be between 1 and 200 characters" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const mobileStr = String(mobile).replace(/\D/g, "");
+    if (!/^\d{10}$/.test(mobileStr)) {
+      return new Response(JSON.stringify({ error: "Mobile must be a 10-digit number" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Check if email already exists
     const { data: existingProfiles } = await adminClient.from("profiles").select("email").eq("email", email);
     if (existingProfiles && existingProfiles.length > 0) {
@@ -130,7 +159,7 @@ Deno.serve(async (req) => {
     });
   } catch (err: any) {
     console.error("Unexpected error:", err);
-    return new Response(JSON.stringify({ error: err.message || "Internal server error" }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

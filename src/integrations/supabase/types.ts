@@ -860,7 +860,6 @@ export type Database = {
         Returns: {
           amount: number
           created_at: string
-          customer_name: string
           expected_delivery_date: string
           face_count: number
           id: string
