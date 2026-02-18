@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +18,7 @@ import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/eve
 import PaymentHistory from "@/components/PaymentHistory";
 import useLocationTracker from "@/hooks/useLocationTracker";
 import CelebrationBanner from "@/components/CelebrationBanner";
+import ReviewForm from "@/components/ReviewForm";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -231,8 +232,8 @@ const Dashboard = () => {
               <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
-            <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} /></TabsContent>
-            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} /></TabsContent>
+            <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>
+            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
@@ -246,8 +247,8 @@ const Dashboard = () => {
         </div>
 
         <div className="md:hidden">
-          {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} />}
-          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} />}
+          {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
+          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
@@ -318,7 +319,32 @@ const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, ch
   </div>
 );
 
-const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate }: any) => (
+const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate, userId }: any) => {
+  const [reviews, setReviews] = useState<Record<string, any>>({});
+  const [adminReplies, setAdminReplies] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    if (!userId) return;
+    const fetchReviews = async () => {
+      const { data } = await supabase.from("reviews").select("*").eq("user_id", userId).eq("review_type", "order");
+      if (data) {
+        const map: Record<string, any> = {};
+        data.forEach((r: any) => { if (r.order_id) map[r.order_id] = r; });
+        setReviews(map);
+        // Check for new admin replies
+        const replied: Record<string, any> = {};
+        data.forEach((r: any) => { if (r.admin_reply && r.order_id) replied[r.order_id] = r; });
+        setAdminReplies(replied);
+      }
+    };
+    fetchReviews();
+    const ch = supabase.channel("user-order-reviews")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, () => fetchReviews())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
+
+  return (
   <>
     <div className="flex justify-between items-center mb-4">
       <h2 className="font-display text-xl font-bold">My Orders</h2>
@@ -336,6 +362,10 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
           <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}>
               <CardContent className="p-4 space-y-2">
+                {/* Congratulations on delivery */}
+                {order.status === "delivered" && (
+                  <CelebrationBanner message="🎉 Congratulations! Your caricature has been delivered! 🎊" />
+                )}
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
@@ -351,7 +381,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                   </Badge>
                 </div>
                 {expandedOrder === order.id && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans">
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="border-t border-border pt-3 mt-2 space-y-2 text-sm font-sans" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                     <Row label="Faces" value={String(order.face_count)} />
                     {order.delivery_address && <Row label="Delivery" value={`${order.delivery_address}, ${order.delivery_city} - ${order.delivery_pincode}`} />}
                     {order.notes && <Row label="Notes" value={order.notes} />}
@@ -372,6 +402,30 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         </Button>
                       </div>
                     )}
+                    {/* Review section for delivered orders */}
+                    {order.status === "delivered" && !reviews[order.id] && userId && (
+                      <div className="mt-3">
+                        <ReviewForm userId={userId} orderId={order.id} reviewType="order" />
+                      </div>
+                    )}
+                    {/* Show existing review */}
+                    {reviews[order.id] && (
+                      <div className="mt-3 bg-primary/5 rounded-xl p-3 space-y-2">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-semibold">Your Review:</p>
+                          <div className="flex gap-0.5">
+                            {[1,2,3,4,5].map(i => <Star key={i} className={`w-3 h-3 ${i <= reviews[order.id].rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`} />)}
+                          </div>
+                        </div>
+                        {reviews[order.id].comment && <p className="text-xs">{reviews[order.id].comment}</p>}
+                        {adminReplies[order.id]?.admin_reply && (
+                          <div className="bg-card rounded-lg p-2 mt-1">
+                            <p className="text-[10px] font-semibold text-primary">Admin Reply:</p>
+                            <p className="text-xs">{adminReplies[order.id].admin_reply}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </CardContent>
@@ -381,7 +435,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
       </div>
     )}
   </>
-);
+  );
+};
 
 const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => (
   <Card>
@@ -429,12 +484,13 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
   </Card>
 );
 
-const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void }) => {
+const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
   const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
   const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({}); // eventId -> artistIds
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
 
   // Fetch all artists & assignments
   useEffect(() => {
@@ -467,6 +523,24 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [events]);
+
+  // Fetch event reviews
+  useEffect(() => {
+    if (!userId) return;
+    const fetchEventReviews = async () => {
+      const { data } = await supabase.from("reviews").select("*").eq("user_id", userId).eq("review_type", "event");
+      if (data) {
+        const map: Record<string, any> = {};
+        data.forEach((r: any) => { if (r.booking_id) map[r.booking_id] = r; });
+        setEventReviews(map);
+      }
+    };
+    fetchEventReviews();
+    const ch2 = supabase.channel("user-event-reviews")
+      .on("postgres_changes", { event: "*", schema: "public", table: "reviews" }, () => fetchEventReviews())
+      .subscribe();
+    return () => { supabase.removeChannel(ch2); };
+  }, [userId]);
 
   const handlePayRemaining = async (ev: any) => {
     const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
@@ -725,6 +799,29 @@ const EventsList = ({ events, canBookEvent, handleBookEvent }: { events: any[]; 
                         {dates.advance_date && <Row label="Advance Paid On" value={new Date(dates.advance_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
                         {dates.full_date && <Row label="Full Payment On" value={new Date(dates.full_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />}
                         <Row label="Total Amount" value={formatPrice(totalAmount)} />
+                        {/* Review for completed events */}
+                        {ev.status === "completed" && !eventReviews[ev.id] && userId && (
+                          <div className="mt-3">
+                            <ReviewForm userId={userId} bookingId={ev.id} reviewType="event" />
+                          </div>
+                        )}
+                        {eventReviews[ev.id] && (
+                          <div className="mt-3 bg-primary/5 rounded-xl p-3 space-y-2">
+                            <div className="flex items-center gap-1">
+                              <p className="text-xs font-semibold">Your Review:</p>
+                              <div className="flex gap-0.5">
+                                {[1,2,3,4,5].map(i => <Star key={i} className={`w-3 h-3 ${i <= eventReviews[ev.id].rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`} />)}
+                              </div>
+                            </div>
+                            {eventReviews[ev.id].comment && <p className="text-xs">{eventReviews[ev.id].comment}</p>}
+                            {eventReviews[ev.id].admin_reply && (
+                              <div className="bg-card rounded-lg p-2 mt-1">
+                                <p className="text-[10px] font-semibold text-primary">Admin Reply:</p>
+                                <p className="text-xs">{eventReviews[ev.id].admin_reply}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </motion.div>
                     )}
                   </CardContent>
