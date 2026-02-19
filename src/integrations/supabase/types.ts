@@ -837,6 +837,7 @@ export type Database = {
           registration_lng: number | null
           registration_location_name: string | null
           secret_code: string | null
+          secret_code_login_enabled: boolean
           state: string | null
           updated_at: string
           user_id: string
@@ -858,6 +859,7 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           secret_code?: string | null
+          secret_code_login_enabled?: boolean
           state?: string | null
           updated_at?: string
           user_id: string
@@ -879,6 +881,7 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           secret_code?: string | null
+          secret_code_login_enabled?: boolean
           state?: string | null
           updated_at?: string
           user_id?: string
