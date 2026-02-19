@@ -279,7 +279,7 @@ const Dashboard = () => {
 
         <div className="mt-6">
           <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`} target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#25D366] text-white rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity">
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity">
             <MessageCircle className="w-4 h-4" /> WhatsApp Support
           </a>
         </div>

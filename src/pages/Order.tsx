@@ -76,6 +76,7 @@ const Order = () => {
         instagramId: data.instagram_id || prev.instagramId,
         state: data.state || prev.state,
         city: data.city || prev.city,
+        // Only set delivery address from physical address, not email
         deliveryAddress: data.address || prev.deliveryAddress,
         deliveryCity: data.city || prev.deliveryCity,
         deliveryState: data.state || prev.deliveryState,

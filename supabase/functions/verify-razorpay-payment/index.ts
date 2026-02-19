@@ -67,13 +67,20 @@ serve(async (req) => {
       // EVENT ADVANCE PAYMENT
       const { data: booking } = await supabase
         .from("event_bookings")
-        .select("user_id, total_price, advance_amount, negotiated, negotiated_total, negotiated_advance")
+        .select("user_id, total_price, advance_amount, negotiated, negotiated_total, negotiated_advance, payment_status, razorpay_payment_id")
         .eq("id", order_id)
         .single();
 
       if (!booking) {
         return new Response(JSON.stringify({ error: "Booking not found" }), {
           status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Idempotency: if already confirmed with same payment_id, return success
+      if (booking.payment_status === "confirmed" && booking.razorpay_payment_id === razorpay_payment_id) {
+        return new Response(JSON.stringify({ success: true, verified: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
@@ -115,13 +122,20 @@ serve(async (req) => {
       // EVENT REMAINING PAYMENT
       const { data: booking } = await supabase
         .from("event_bookings")
-        .select("user_id, total_price, advance_amount, remaining_amount, negotiated, negotiated_total, negotiated_advance")
+        .select("user_id, total_price, advance_amount, remaining_amount, negotiated, negotiated_total, negotiated_advance, payment_status, razorpay_payment_id")
         .eq("id", order_id)
         .single();
 
       if (!booking) {
         return new Response(JSON.stringify({ error: "Booking not found" }), {
           status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Idempotency: if already fully paid with same payment_id, return success
+      if (booking.payment_status === "fully_paid" && booking.razorpay_payment_id === razorpay_payment_id) {
+        return new Response(JSON.stringify({ success: true, verified: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
@@ -162,13 +176,20 @@ serve(async (req) => {
       // ORDER PAYMENT
       const { data: order } = await supabase
         .from("orders")
-        .select("user_id, amount, order_type, style")
+        .select("user_id, amount, order_type, style, payment_status, razorpay_payment_id")
         .eq("id", order_id)
         .single();
 
       if (!order) {
         return new Response(JSON.stringify({ error: "Order not found" }), {
           status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Idempotency: if already confirmed with same payment_id, return success
+      if (order.payment_status === "confirmed" && order.razorpay_payment_id === razorpay_payment_id) {
+        return new Response(JSON.stringify({ success: true, verified: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
