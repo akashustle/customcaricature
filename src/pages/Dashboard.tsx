@@ -21,6 +21,7 @@ import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
+import ChatWidget from "@/components/ChatWidget";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -261,6 +262,11 @@ const Dashboard = () => {
             />
           )}
         </div>
+
+        {/* Chat Widget */}
+        {user && profile && (
+          <ChatWidget userId={user.id} userName={profile.full_name} />
+        )}
 
         <div className="mt-6">
           <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`} target="_blank" rel="noopener noreferrer"

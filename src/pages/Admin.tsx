@@ -37,6 +37,8 @@ import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPric
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
+import AdminChat from "@/components/admin/AdminChat";
+import { MessageCircle } from "lucide-react";
 
 type Order = {
   id: string;
@@ -496,6 +498,7 @@ const Admin = () => {
             <TabsTrigger value="orders" className="font-sans flex-1 rounded-full transition-all"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
             <TabsTrigger value="events" className="font-sans flex-1 rounded-full transition-all"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
             <TabsTrigger value="payments" className="font-sans flex-1 rounded-full transition-all"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
+            <TabsTrigger value="chat" className="font-sans flex-1 rounded-full transition-all"><MessageCircle className="w-4 h-4 mr-1" />Chat</TabsTrigger>
             <TabsTrigger value="event-users" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1 rounded-full transition-all"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
@@ -1080,7 +1083,9 @@ const Admin = () => {
             <AdminArtists />
           </TabsContent>
 
-          {/* Blog tab removed */}
+          <TabsContent value="chat">
+            {user && <AdminChat adminUserId={user.id} />}
+          </TabsContent>
 
           <TabsContent value="reviews">
             <AdminReviews />
