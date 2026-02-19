@@ -49,6 +49,10 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // Clean up old attempts (older than 24 hours) to prevent data accumulation
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    await supabase.from("reset_attempts").delete().lt("attempted_at", dayAgo);
+
     // Rate limiting: check recent attempts for this email
     const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
     const { count } = await supabase
