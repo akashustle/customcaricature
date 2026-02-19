@@ -250,7 +250,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, gateway_charges_enabled, secret_code_login_enabled");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -1013,7 +1013,10 @@ const Admin = () => {
                       ) : (
                         <div className="flex justify-between items-start">
                           <div className="space-y-1 flex-1 min-w-0">
-                            <p className="font-sans font-semibold">{c.full_name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-sans font-semibold">{c.full_name}</p>
+                              {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
+                            </div>
                             <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
                             {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
                             {c.secret_code && <p className="text-xs font-sans text-primary/80">🔑 Secret: <span className="font-mono font-bold">{c.secret_code}</span></p>}

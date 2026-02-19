@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
@@ -45,12 +45,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!profile.secret_code_login_enabled) {
-      return new Response(JSON.stringify({ success: false, error: "Secret code login is not enabled for this account. Please use password." }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Secret code login is available for all users who have a secret code
+    // No need to check secret_code_login_enabled flag anymore
 
     if (!profile.secret_code || profile.secret_code !== secret_code.trim()) {
       return new Response(JSON.stringify({ success: false, error: "Invalid credentials" }), {

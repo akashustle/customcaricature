@@ -274,17 +274,10 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Chat Widget */}
+        {/* Chat Widget - only visible component for messaging */}
         {user && profile && (
           <ChatWidget userId={user.id} userName={profile.full_name} />
         )}
-
-        <div className="mt-6">
-          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I need help with my order.")}`} target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full py-3 px-4 font-sans font-medium text-sm hover:opacity-90 transition-opacity">
-            <MessageCircle className="w-4 h-4" /> WhatsApp Support
-          </a>
-        </div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
