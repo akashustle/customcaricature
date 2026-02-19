@@ -252,7 +252,7 @@ const Admin = () => {
 
   const fetchOrders = async () => {
     const { data } = await supabase.from("orders")
-      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status")
+      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
     setLoading(false);
@@ -758,6 +758,29 @@ const Admin = () => {
                           </Select>
                         </div>
                         <ArtworkUploadFlow orderId={order.id} orderStatus={order.status} artConfirmationStatus={(order as any).art_confirmation_status} onStatusChange={fetchOrders} />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-sans text-muted-foreground">Ask User Delivered:</span>
+                            <Switch
+                              checked={(order as any).ask_user_delivered || false}
+                              onCheckedChange={async (checked) => {
+                                await supabase.from("orders").update({ ask_user_delivered: checked } as any).eq("id", order.id);
+                                toast({ title: checked ? "User will be asked to mark delivered" : "Delivery prompt disabled" });
+                                fetchOrders();
+                              }}
+                            />
+                          </div>
+                          {(order as any).art_confirmation_status && (
+                            <Badge className={`border-none text-[10px] ${
+                              (order as any).art_confirmation_status === "confirmed" ? "bg-primary/30 text-foreground" :
+                              (order as any).art_confirmation_status === "chat" ? "bg-primary/15 text-foreground" :
+                              "bg-primary/10 text-foreground"
+                            }`}>
+                              {(order as any).art_confirmation_status === "confirmed" ? "✅ Confirmed" :
+                               (order as any).art_confirmation_status === "chat" ? "💬 Chat" : "⏳ Pending"}
+                            </Badge>
+                          )}
+                        </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedOrder(order.id)}><Eye className="w-4 h-4 mr-1" />View</Button>
                           <Button variant="outline" size="sm" onClick={() => { setNegotiateOrderId(order.id); setNegotiatedAmount(String(order.negotiated_amount || order.amount)); }}>
@@ -799,14 +822,15 @@ const Admin = () => {
                       <TableHead className="font-sans">Status</TableHead>
                       <TableHead className="font-sans">Art Upload</TableHead>
                       <TableHead className="font-sans">User Status</TableHead>
+                      <TableHead className="font-sans">Ask Delivered</TableHead>
                       <TableHead className="font-sans">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
-                      <TableRow><TableCell colSpan={10} className="text-center py-10">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={11} className="text-center py-10">Loading...</TableCell></TableRow>
                     ) : filtered.length === 0 ? (
-                      <TableRow><TableCell colSpan={10} className="text-center py-10">No orders</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={11} className="text-center py-10">No orders</TableCell></TableRow>
                     ) : (
                       filtered.map((order) => {
                         const daysLeft = getDaysRemaining(order);
@@ -853,6 +877,16 @@ const Admin = () => {
                               ) : (
                                 <span className="text-xs text-muted-foreground">—</span>
                               )}
+                            </TableCell>
+                            <TableCell>
+                              <Switch
+                                checked={(order as any).ask_user_delivered || false}
+                                onCheckedChange={async (checked) => {
+                                  await supabase.from("orders").update({ ask_user_delivered: checked } as any).eq("id", order.id);
+                                  toast({ title: checked ? "User will be asked to mark delivered" : "Delivery prompt disabled" });
+                                  fetchOrders();
+                                }}
+                              />
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1">

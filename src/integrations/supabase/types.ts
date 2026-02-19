@@ -770,6 +770,7 @@ export type Database = {
           amount: number
           art_confirmation_status: string | null
           artist_name: string | null
+          ask_user_delivered: boolean | null
           assigned_artist_id: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city: string | null
@@ -806,6 +807,7 @@ export type Database = {
           amount: number
           art_confirmation_status?: string | null
           artist_name?: string | null
+          ask_user_delivered?: boolean | null
           assigned_artist_id?: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city?: string | null
@@ -842,6 +844,7 @@ export type Database = {
           amount?: number
           art_confirmation_status?: string | null
           artist_name?: string | null
+          ask_user_delivered?: boolean | null
           assigned_artist_id?: string | null
           caricature_type?: Database["public"]["Enums"]["caricature_type"]
           city?: string | null

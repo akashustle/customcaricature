@@ -43,6 +43,7 @@ type Order = {
   delivery_address: string | null; delivery_city: string | null; delivery_state: string | null;
   delivery_pincode: string | null; notes: string | null; expected_delivery_date: string | null; artist_name: string | null;
   razorpay_payment_id: string | null; razorpay_order_id: string | null; art_confirmation_status: string | null;
+  ask_user_delivered: boolean | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -125,7 +126,7 @@ const Dashboard = () => {
 
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id, art_confirmation_status")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id, art_confirmation_status, ask_user_delivered")
       .eq("user_id", userId).order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
@@ -342,6 +343,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   const [artworkUrls, setArtworkUrls] = useState<Record<string, string>>({});
   const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
   const [artPreviewUrl, setArtPreviewUrl] = useState<string | null>(null);
+  const [artZoom, setArtZoom] = useState(1);
+  const [markingDelivered, setMarkingDelivered] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -392,7 +395,23 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 
   const handleRaiseChat = async (orderId: string) => {
     await supabase.from("orders").update({ art_confirmation_status: "chat" } as any).eq("id", orderId);
-    toast({ title: "💬 Query raised", description: "Admin will respond to your query soon." });
+    // Auto-send a chat message about artwork query
+    if (userId) {
+      await supabase.from("chat_messages").insert({
+        sender_id: userId,
+        message: `I have a query regarding my artwork ready caricature (Order #${orderId.slice(0, 8).toUpperCase()}). Please assist.`,
+        is_admin: false,
+        is_artist_chat: false,
+      } as any);
+    }
+    toast({ title: "💬 Query raised", description: "Chat opened — admin will respond soon." });
+  };
+
+  const handleMarkDelivered = async (orderId: string) => {
+    setMarkingDelivered(orderId);
+    await supabase.from("orders").update({ status: "delivered" as any } as any).eq("id", orderId);
+    toast({ title: "📦 Marked as Delivered!", description: "Thank you for confirming delivery." });
+    setMarkingDelivered(null);
   };
 
   return (
@@ -430,7 +449,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                     <p className="font-sans font-medium capitalize">{order.order_type} Caricature — {order.style}</p>
                     <p className="text-xs text-muted-foreground font-sans">Ordered: {new Date(order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
                   </div>
-                  <p className="font-display text-lg font-bold text-primary">{formatPrice(order.amount)}</p>
+                  <p className="font-sans text-lg font-bold text-foreground">{formatPrice(order.amount)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status] || order.status}</Badge>
@@ -460,7 +479,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         </Button>
                       </div>
                     )}
-                    {/* Art Ready Confirmation Section */}
+                    {/* Art Ready Confirmation Section - only show if pending */}
                     {order.status === "artwork_ready" && order.art_confirmation_status === "pending" && (
                       <div className="mt-3 bg-primary/5 rounded-xl p-4 space-y-3 border border-primary/20">
                         <p className="font-display text-sm font-bold text-primary">🎨 Your Artwork is Ready!</p>
@@ -469,7 +488,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         {artworkPhotos[order.id] && artworkPhotos[order.id].length > 0 && (
                           <div className="flex gap-2 flex-wrap">
                             {artworkPhotos[order.id].map((p: any) => (
-                              <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); }}>
+                              <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); setArtZoom(1); }}>
                                 {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
                               </div>
                             ))}
@@ -493,6 +512,19 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         </div>
                       </div>
                     )}
+                    {/* Show artwork photos even after confirmation for viewing */}
+                    {order.art_confirmation_status && order.art_confirmation_status !== "pending" && artworkPhotos[order.id] && artworkPhotos[order.id].length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs font-sans font-medium text-muted-foreground mb-2">🎨 Your Artwork:</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {artworkPhotos[order.id].map((p: any) => (
+                            <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); setArtZoom(1); }}>
+                              {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {order.art_confirmation_status === "confirmed" && (
                       <div className="mt-3 bg-primary/10 rounded-lg p-3">
                         <p className="text-xs font-sans font-medium text-primary">✅ You confirmed artwork. Dispatch in progress!</p>
@@ -500,7 +532,18 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                     )}
                     {order.art_confirmation_status === "chat" && (
                       <div className="mt-3 bg-yellow-50 rounded-lg p-3">
-                        <p className="text-xs font-sans font-medium text-yellow-800">💬 Query raised. Admin will respond soon.</p>
+                        <p className="text-xs font-sans font-medium text-yellow-800">💬 Query raised. Admin will respond soon via chat.</p>
+                      </div>
+                    )}
+                    {/* Mark as Delivered button */}
+                    {order.ask_user_delivered && order.status === "dispatched" && (
+                      <div className="mt-3 bg-primary/5 rounded-xl p-4 space-y-2 border border-primary/20">
+                        <p className="font-sans text-sm font-medium">📦 Have you received your caricature?</p>
+                        <Button size="sm" className="w-full rounded-full font-sans bg-primary hover:bg-primary/90" disabled={markingDelivered === order.id}
+                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleMarkDelivered(order.id); }}>
+                          {markingDelivered === order.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <></>}
+                          ✅ Yes, Mark as Delivered
+                        </Button>
                       </div>
                     )}
                     {/* Review section for delivered orders */}
@@ -535,10 +578,17 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
         ))}
       </div>
     )}
-  {/* Art Preview Dialog */}
+  {/* Art Preview Dialog with Zoom */}
   {artPreviewUrl && (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setArtPreviewUrl(null)}>
-      <img src={artPreviewUrl} alt="Artwork Preview" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl" />
+    <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-4" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>
+      <div className="flex gap-3 mb-4" onClick={(e) => e.stopPropagation()}>
+        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.max(0.5, z - 0.25))}>− Zoom Out</Button>
+        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.min(3, z + 0.25))}>+ Zoom In</Button>
+        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>✕ Close</Button>
+      </div>
+      <div className="overflow-auto max-w-full max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
+        <img src={artPreviewUrl} alt="Artwork Preview" className="rounded-xl shadow-2xl transition-transform duration-200" style={{ transform: `scale(${artZoom})`, transformOrigin: "center center" }} />
+      </div>
     </div>
   )}
   </>
