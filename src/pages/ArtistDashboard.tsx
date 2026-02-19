@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette, MessageCircle, Send, X } from "lucide-react";
+import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette, MessageCircle, Send, X, Paperclip, Upload } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
@@ -16,6 +16,7 @@ import NotificationBell from "@/components/NotificationBell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePermissions } from "@/hooks/usePermissions";
+import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 
 type ArtistEvent = {
   id: string; client_name: string; event_type: string; event_date: string;
@@ -28,7 +29,7 @@ type ArtistEvent = {
 type ArtistOrder = {
   id: string; order_type: string; style: string; face_count: number;
   status: string; customer_name: string; created_at: string;
-  expected_delivery_date: string | null;
+  expected_delivery_date: string | null; art_confirmation_status: string | null;
 };
 
 type BlockedDate = {
@@ -73,6 +74,8 @@ const ArtistDashboard = () => {
   const [chatSending, setChatSending] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const chatFileRef = useRef<HTMLInputElement>(null);
+  const [chatUploading, setChatUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate("/artistlogin"); return; }
@@ -130,7 +133,7 @@ const ArtistDashboard = () => {
   const fetchOrders = async (artistId: string) => {
     const { data } = await supabase
       .from("orders")
-      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date")
+      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date, art_confirmation_status")
       .eq("assigned_artist_id", artistId)
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
@@ -210,6 +213,31 @@ const ArtistDashboard = () => {
     } as any);
     setChatMsg("");
     setChatSending(false);
+  };
+
+  const handleChatFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setChatUploading(true);
+    const path = `chat-files/${user.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabase.storage.from("order-photos").upload(path, file);
+    if (upErr) {
+      toast({ title: "Upload failed", variant: "destructive" });
+      setChatUploading(false);
+      return;
+    }
+    const { data: signed } = await supabase.storage.from("order-photos").createSignedUrl(path, 86400);
+    await supabase.from("chat_messages").insert({
+      sender_id: user.id,
+      receiver_id: null,
+      message: `📎 ${file.name}`,
+      is_admin: false,
+      is_artist_chat: true,
+      file_url: signed?.signedUrl || path,
+      file_name: file.name,
+    } as any);
+    setChatUploading(false);
+    e.target.value = "";
   };
 
   useEffect(() => {
@@ -442,6 +470,7 @@ const ArtistDashboard = () => {
                             </SelectContent>
                           </Select>
                         </div>
+                        <ArtworkUploadFlow orderId={order.id} orderStatus={order.status} artConfirmationStatus={order.art_confirmation_status} onStatusChange={() => { if (artist) fetchOrders(artist.id); }} isArtist />
                       </CardContent>
                     </Card>
                   ))}
@@ -480,6 +509,10 @@ const ArtistDashboard = () => {
                   ))}
                 </div>
                 <div className="flex items-center gap-2 p-3 border-t border-border">
+                  <input type="file" ref={chatFileRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleChatFileUpload} />
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => chatFileRef.current?.click()} disabled={chatUploading}>
+                    {chatUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Paperclip className="w-3 h-3" />}
+                  </Button>
                   <Input
                     value={chatMsg}
                     onChange={e => setChatMsg(e.target.value)}

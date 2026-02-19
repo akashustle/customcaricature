@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_media_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          details: string | null
+          id: string
+          target_order_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          target_order_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          target_order_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_site_settings: {
         Row: {
           id: string
@@ -108,6 +138,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      artwork_ready_photos: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          order_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          order_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          order_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artwork_ready_photos_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blog_posts: {
         Row: {
@@ -703,6 +768,7 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          art_confirmation_status: string | null
           artist_name: string | null
           assigned_artist_id: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
@@ -738,6 +804,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          art_confirmation_status?: string | null
           artist_name?: string | null
           assigned_artist_id?: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
@@ -773,6 +840,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          art_confirmation_status?: string | null
           artist_name?: string | null
           assigned_artist_id?: string | null
           caricature_type?: Database["public"]["Enums"]["caricature_type"]
