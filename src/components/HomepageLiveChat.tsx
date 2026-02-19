@@ -73,6 +73,13 @@ const HomepageLiveChat = () => {
     }
   }, [messages]);
 
+  // Listen for external open event from FloatingButtons
+  useEffect(() => {
+    const handler = () => handleOpen();
+    window.addEventListener("open-live-chat", handler);
+    return () => window.removeEventListener("open-live-chat", handler);
+  }, [messages.length]);
+
   // Fetch pricing data
   useEffect(() => {
     const fetchPricing = async () => {
@@ -452,20 +459,7 @@ const HomepageLiveChat = () => {
 
   return (
     <>
-      {/* Chat Button - Always visible */}
-      {!open && (
-        <button
-          onClick={handleOpen}
-          className="fixed bottom-20 right-4 md:bottom-44 md:right-6 z-[60] bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition-transform animate-bounce"
-          aria-label="Live Chat"
-          style={{ animationDuration: "2s", animationIterationCount: 3 }}
-        >
-          <MessageCircle className="w-6 h-6" />
-          <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[8px] font-bold rounded-full px-1.5 py-0.5">CHAT</span>
-        </button>
-      )}
-
-      {/* Chat Window */}
+      {/* Chat Window - opened via FloatingButtons or mobile bottom nav */}
       {open && (
         <div
           className="fixed bottom-20 right-4 md:bottom-6 md:right-24 z-[60] w-[340px] max-h-[75vh] shadow-2xl rounded-2xl overflow-hidden"

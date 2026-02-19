@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, User, Search } from "lucide-react";
+import { Home, Package, User, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -13,12 +13,17 @@ const MobileBottomNav = () => {
   const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event"];
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
+  const openLiveChat = () => {
+    window.dispatchEvent(new CustomEvent("open-live-chat"));
+  };
+
   const items = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Package, label: "Track", path: "/track-order" },
+    { icon: Home, label: "Home", path: "/", action: () => navigate("/") },
+    { icon: Package, label: "Track", path: "/track-order", action: () => navigate("/track-order") },
+    { icon: MessageCircle, label: "Chat", path: "__chat__", action: openLiveChat },
     ...(user
-      ? [{ icon: User, label: "Dashboard", path: "/dashboard" }]
-      : [{ icon: User, label: "Login", path: "/login" }]),
+      ? [{ icon: User, label: "Dashboard", path: "/dashboard", action: () => navigate("/dashboard") }]
+      : [{ icon: User, label: "Login", path: "/login", action: () => navigate("/login") }]),
   ];
 
   return (
@@ -29,7 +34,7 @@ const MobileBottomNav = () => {
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={item.action}
               className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
             >
               <item.icon className="w-5 h-5" />
