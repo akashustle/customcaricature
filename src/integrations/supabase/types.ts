@@ -519,6 +519,116 @@ export type Database = {
         }
         Relationships: []
       }
+      live_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          options: Json | null
+          sender_name: string | null
+          sender_type: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          message_type?: string
+          options?: Json | null
+          sender_name?: string | null
+          sender_type?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          options?: Json | null
+          sender_name?: string | null
+          sender_type?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_chat_sessions: {
+        Row: {
+          admin_name: string | null
+          admin_user_id: string | null
+          browser_session_id: string
+          caricature_type: string | null
+          ended_at: string | null
+          estimated_price: number | null
+          event_city: string | null
+          event_date: string | null
+          event_district: string | null
+          event_state: string | null
+          event_time: string | null
+          face_count: number | null
+          id: string
+          service_type: string
+          started_at: string
+          status: string
+          user_address: string | null
+          user_email: string | null
+          user_name: string
+          user_phone: string | null
+        }
+        Insert: {
+          admin_name?: string | null
+          admin_user_id?: string | null
+          browser_session_id: string
+          caricature_type?: string | null
+          ended_at?: string | null
+          estimated_price?: number | null
+          event_city?: string | null
+          event_date?: string | null
+          event_district?: string | null
+          event_state?: string | null
+          event_time?: string | null
+          face_count?: number | null
+          id?: string
+          service_type?: string
+          started_at?: string
+          status?: string
+          user_address?: string | null
+          user_email?: string | null
+          user_name: string
+          user_phone?: string | null
+        }
+        Update: {
+          admin_name?: string | null
+          admin_user_id?: string | null
+          browser_session_id?: string
+          caricature_type?: string | null
+          ended_at?: string | null
+          estimated_price?: number | null
+          event_city?: string | null
+          event_date?: string | null
+          event_district?: string | null
+          event_state?: string | null
+          event_time?: string | null
+          face_count?: number | null
+          id?: string
+          service_type?: string
+          started_at?: string
+          status?: string
+          user_address?: string | null
+          user_email?: string | null
+          user_name?: string
+          user_phone?: string | null
+        }
+        Relationships: []
+      }
       order_images: {
         Row: {
           created_at: string

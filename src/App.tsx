@@ -26,6 +26,7 @@ import ArtistLogin from "./pages/ArtistLogin";
 import NotFound from "./pages/NotFound";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
+import HomepageLiveChat from "./components/HomepageLiveChat";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => {
           <ScrollToTop />
           <FloatingButtons />
           <MobileBottomNav />
+          <HomepageLiveChat />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/order" element={<Order />} />
