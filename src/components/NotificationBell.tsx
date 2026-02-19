@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Bell, X, Check } from "lucide-react";
@@ -17,11 +17,44 @@ type Notification = {
   created_at: string;
 };
 
+// Notification ding sound
+const playNotificationDing = () => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 1046.5; // C6
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+    // Second tone for ding-dong
+    setTimeout(() => {
+      try {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.value = 784; // G5
+        osc2.type = "sine";
+        gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc2.start(ctx.currentTime);
+        osc2.stop(ctx.currentTime + 0.8);
+      } catch {}
+    }, 150);
+  } catch {}
+};
+
 const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const prevCountRef = useRef(0);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -40,6 +73,11 @@ const NotificationBell = () => {
 
     fetchNotifications();
 
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     const ch = supabase
       .channel("user-notifications")
       .on("postgres_changes", {
@@ -48,7 +86,14 @@ const NotificationBell = () => {
         table: "notifications",
         filter: `user_id=eq.${user.id}`,
       }, (payload) => {
-        setNotifications(prev => [payload.new as any, ...prev]);
+        const newNotif = payload.new as any;
+        setNotifications(prev => [newNotif, ...prev]);
+        // Play sound
+        playNotificationDing();
+        // Browser notification
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(newNotif.title, { body: newNotif.message, icon: "/logo.png" });
+        }
       })
       .subscribe();
 
@@ -96,7 +141,7 @@ const NotificationBell = () => {
       >
         <Bell className="w-5 h-5 text-foreground" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

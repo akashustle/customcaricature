@@ -208,6 +208,8 @@ export type Database = {
       chat_messages: {
         Row: {
           created_at: string
+          file_name: string | null
+          file_url: string | null
           id: string
           is_admin: boolean
           is_artist_chat: boolean
@@ -218,6 +220,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           is_admin?: boolean
           is_artist_chat?: boolean
@@ -228,6 +232,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          file_name?: string | null
+          file_url?: string | null
           id?: string
           is_admin?: boolean
           is_artist_chat?: boolean
@@ -857,6 +863,7 @@ export type Database = {
           address: string | null
           city: string | null
           created_at: string
+          display_id: string | null
           email: string
           event_booking_allowed: boolean
           full_name: string
@@ -879,6 +886,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string
+          display_id?: string | null
           email: string
           event_booking_allowed?: boolean
           full_name: string
@@ -901,6 +909,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           created_at?: string
+          display_id?: string | null
           email?: string
           event_booking_allowed?: boolean
           full_name?: string
