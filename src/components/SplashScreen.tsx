@@ -20,7 +20,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-          style={{ backgroundColor: "#E3DED3" }}
+          style={{ backgroundColor: "#F6F1EB" }}
         >
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
@@ -42,14 +42,14 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
               transition={{ delay: 0.4 }}
               className="text-center"
             >
-              <h1 className="font-display text-2xl font-bold text-[#5A4632]">Creative Caricature Club</h1>
-              <p className="text-sm text-[#8C6B3E] font-sans mt-1">Custom Caricatures • Live Events</p>
+              <h1 className="font-display text-2xl font-bold text-[#3F3A36]">Creative Caricature Club</h1>
+              <p className="text-sm text-[#5A4E44] font-sans mt-1">Custom Caricatures • Live Events</p>
             </motion.div>
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.7, duration: 1.2 }}
-              className="w-32 h-1 rounded-full bg-[#9C7C3A]/40 origin-left"
+              className="w-32 h-1 rounded-full bg-[#B08A3E]/40 origin-left"
             />
           </motion.div>
         </motion.div>
