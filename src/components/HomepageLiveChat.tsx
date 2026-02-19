@@ -462,7 +462,7 @@ const HomepageLiveChat = () => {
       {/* Chat Window - full screen on mobile, popup on desktop */}
       {open && (
         <div
-          className="fixed inset-0 md:inset-auto md:bottom-6 md:right-24 z-[60] md:w-[380px] md:max-h-[75vh] md:rounded-2xl shadow-2xl overflow-hidden"
+          className="fixed top-14 bottom-14 left-0 right-0 md:inset-auto md:bottom-6 md:right-24 z-[60] md:w-[380px] md:max-h-[75vh] md:rounded-2xl shadow-2xl overflow-hidden"
         >
             <Card className="border-0 shadow-none h-full flex flex-col md:rounded-2xl">
               <CardHeader className="py-3 px-4 bg-primary text-primary-foreground flex flex-row items-center justify-between">

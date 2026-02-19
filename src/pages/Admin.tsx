@@ -41,6 +41,7 @@ import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import { MessageCircle } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
+import LocationDropdowns from "@/components/LocationDropdowns";
 
 type Order = {
   id: string;
@@ -136,7 +137,7 @@ const Admin = () => {
   const [manualOrder, setManualOrder] = useState({
     customerId: "", orderType: "single" as string, style: "artists_choice" as string,
     faceCount: 1, amount: 0, notes: "", negotiated: false, negotiatedAmount: 0,
-    deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "",
+    deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "", deliveryDistrict: "",
   });
   const [manualPhotos, setManualPhotos] = useState<File[]>([]);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
@@ -398,6 +399,7 @@ const Admin = () => {
         amount: finalAmount,
         negotiated_amount: manualOrder.negotiated ? manualOrder.negotiatedAmount : null,
         notes: manualOrder.notes || null,
+        district: manualOrder.deliveryDistrict || null,
         delivery_address: manualOrder.deliveryAddress || customer.address || null,
         delivery_city: manualOrder.deliveryCity || customer.city || null,
         delivery_state: manualOrder.deliveryState || customer.state || null,
@@ -420,7 +422,7 @@ const Admin = () => {
 
       toast({ title: "Manual Order Created!", description: `Order for ${customer.full_name} added successfully` });
       setShowAddOrder(false);
-      setManualOrder({ customerId: "", orderType: "single", style: "artists_choice", faceCount: 1, amount: 0, notes: "", negotiated: false, negotiatedAmount: 0, deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "" });
+      setManualOrder({ customerId: "", orderType: "single", style: "artists_choice", faceCount: 1, amount: 0, notes: "", negotiated: false, negotiatedAmount: 0, deliveryAddress: "", deliveryCity: "", deliveryState: "", deliveryPincode: "", deliveryDistrict: "" });
       setManualPhotos([]);
       setPaymentScreenshot(null);
       fetchOrders();
@@ -580,13 +582,25 @@ const Admin = () => {
                         <div><Label>Negotiated Amount (₹)</Label><Input type="number" value={manualOrder.negotiatedAmount} onChange={(e) => setManualOrder({ ...manualOrder, negotiatedAmount: parseInt(e.target.value) || 0 })} /></div>
                       )}
                       <div><Label>Notes</Label><Textarea value={manualOrder.notes} onChange={(e) => setManualOrder({ ...manualOrder, notes: e.target.value })} placeholder="Special instructions..." /></div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div><Label>Delivery Address</Label><Input value={manualOrder.deliveryAddress} onChange={(e) => setManualOrder({ ...manualOrder, deliveryAddress: e.target.value })} /></div>
-                        <div><Label>City</Label><Input value={manualOrder.deliveryCity} onChange={(e) => setManualOrder({ ...manualOrder, deliveryCity: e.target.value })} /></div>
+                      <div>
+                        <Label>Delivery Address</Label>
+                        <Input value={manualOrder.deliveryAddress} onChange={(e) => setManualOrder({ ...manualOrder, deliveryAddress: e.target.value })} placeholder="House no, Street, Area" />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div><Label>State</Label><Input value={manualOrder.deliveryState} onChange={(e) => setManualOrder({ ...manualOrder, deliveryState: e.target.value })} /></div>
-                        <div><Label>Pincode</Label><Input value={manualOrder.deliveryPincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setManualOrder({ ...manualOrder, deliveryPincode: d }); }} maxLength={6} /></div>
+                      <div>
+                        <Label className="mb-1 block">State / District / City</Label>
+                        <LocationDropdowns
+                          state={manualOrder.deliveryState}
+                          district={manualOrder.deliveryDistrict}
+                          city={manualOrder.deliveryCity}
+                          onStateChange={(v) => setManualOrder({ ...manualOrder, deliveryState: v, deliveryDistrict: "", deliveryCity: "" })}
+                          onDistrictChange={(v) => setManualOrder({ ...manualOrder, deliveryDistrict: v, deliveryCity: "" })}
+                          onCityChange={(v) => setManualOrder({ ...manualOrder, deliveryCity: v })}
+                          compact
+                        />
+                      </div>
+                      <div>
+                        <Label>Pincode</Label>
+                        <Input value={manualOrder.deliveryPincode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setManualOrder({ ...manualOrder, deliveryPincode: d }); }} maxLength={6} placeholder="400001" />
                       </div>
                       <div>
                         <Label className="flex items-center gap-1"><Image className="w-4 h-4" />Upload Photos</Label>

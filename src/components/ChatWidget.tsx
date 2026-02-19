@@ -133,7 +133,7 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-0 md:inset-auto md:top-16 md:right-4 z-50 md:w-80 md:max-h-[70vh] md:rounded-2xl overflow-hidden md:border md:border-border"
+            className="fixed top-14 bottom-14 left-0 right-0 md:inset-auto md:top-16 md:right-4 md:bottom-auto z-50 md:w-80 md:max-h-[70vh] md:rounded-2xl overflow-hidden md:border md:border-border"
             style={{ boxShadow: "0 4px 20px hsl(28 27% 72% / 0.15)" }}
           >
             <Card className="border-0 shadow-none h-full flex flex-col rounded-none md:rounded-2xl bg-card">
