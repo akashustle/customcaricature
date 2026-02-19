@@ -41,6 +41,8 @@ import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import AdminVoiceMonitor from "@/components/admin/AdminVoiceMonitor";
 import { MessageCircle, Radio } from "lucide-react";
+import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
+import AdminMediaAuditLog from "@/components/admin/AdminMediaAuditLog";
 import NotificationBell from "@/components/NotificationBell";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
@@ -250,7 +252,7 @@ const Admin = () => {
 
   const fetchOrders = async () => {
     const { data } = await supabase.from("orders")
-      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date")
+      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status")
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
     setLoading(false);
@@ -398,6 +400,9 @@ const Admin = () => {
 
       const finalAmount = manualOrder.negotiated ? manualOrder.negotiatedAmount : manualOrder.amount;
 
+      // Auto-assign to artist Ritesh
+      const RITESH_ARTIST_ID = "0f579821-ed74-4bb2-9e19-e3785abf9083";
+
       const { data: orderData, error: orderErr } = await supabase.from("orders").insert({
         user_id: customer.user_id,
         customer_name: customer.full_name,
@@ -415,6 +420,7 @@ const Admin = () => {
         delivery_city: manualOrder.deliveryCity || customer.city || null,
         delivery_state: manualOrder.deliveryState || customer.state || null,
         delivery_pincode: manualOrder.deliveryPincode || customer.pincode || null,
+        assigned_artist_id: RITESH_ARTIST_ID,
         status: "new" as any,
         payment_status: "pending",
       } as any).select("id").single();
@@ -751,6 +757,7 @@ const Admin = () => {
                             <SelectContent>{Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
+                        <ArtworkUploadFlow orderId={order.id} orderStatus={order.status} artConfirmationStatus={(order as any).art_confirmation_status} onStatusChange={fetchOrders} />
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedOrder(order.id)}><Eye className="w-4 h-4 mr-1" />View</Button>
                           <Button variant="outline" size="sm" onClick={() => { setNegotiateOrderId(order.id); setNegotiatedAmount(String(order.negotiated_amount || order.amount)); }}>
@@ -1211,6 +1218,9 @@ const Admin = () => {
           {/* Live Locations Tab */}
           <TabsContent value="locations">
             <AdminLiveLocations />
+            <div className="mt-6">
+              <AdminMediaAuditLog />
+            </div>
           </TabsContent>
 
           {/* Settings Tab */}

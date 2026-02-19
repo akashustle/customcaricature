@@ -42,7 +42,7 @@ type Order = {
   created_at: string; updated_at: string; customer_name: string; customer_email: string; customer_mobile: string;
   delivery_address: string | null; delivery_city: string | null; delivery_state: string | null;
   delivery_pincode: string | null; notes: string | null; expected_delivery_date: string | null; artist_name: string | null;
-  razorpay_payment_id: string | null; razorpay_order_id: string | null;
+  razorpay_payment_id: string | null; razorpay_order_id: string | null; art_confirmation_status: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -125,7 +125,7 @@ const Dashboard = () => {
 
   const fetchOrders = async (userId: string) => {
     const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id")
+      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id, art_confirmation_status")
       .eq("user_id", userId).order("created_at", { ascending: false });
     if (data) setOrders(data as any);
   };
@@ -338,6 +338,10 @@ const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, ch
 const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate, userId }: any) => {
   const [reviews, setReviews] = useState<Record<string, any>>({});
   const [adminReplies, setAdminReplies] = useState<Record<string, any>>({});
+  const [artworkPhotos, setArtworkPhotos] = useState<Record<string, any[]>>({});
+  const [artworkUrls, setArtworkUrls] = useState<Record<string, string>>({});
+  const [confirmingOrderId, setConfirmingOrderId] = useState<string | null>(null);
+  const [artPreviewUrl, setArtPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -347,7 +351,6 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
         const map: Record<string, any> = {};
         data.forEach((r: any) => { if (r.order_id) map[r.order_id] = r; });
         setReviews(map);
-        // Check for new admin replies
         const replied: Record<string, any> = {};
         data.forEach((r: any) => { if (r.admin_reply && r.order_id) replied[r.order_id] = r; });
         setAdminReplies(replied);
@@ -359,6 +362,38 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [userId]);
+
+  // Fetch artwork photos for artwork_ready orders
+  useEffect(() => {
+    if (!userId) return;
+    const artReadyOrders = orders.filter((o: any) => o.status === "artwork_ready" || o.art_confirmation_status);
+    if (artReadyOrders.length === 0) return;
+    const fetchArtwork = async () => {
+      for (const order of artReadyOrders) {
+        const { data } = await supabase.from("artwork_ready_photos").select("*").eq("order_id", order.id) as any;
+        if (data && data.length > 0) {
+          setArtworkPhotos(prev => ({ ...prev, [order.id]: data }));
+          for (const p of data) {
+            const { data: signed } = await supabase.storage.from("order-photos").createSignedUrl(p.storage_path, 3600);
+            if (signed?.signedUrl) setArtworkUrls(prev => ({ ...prev, [p.id]: signed.signedUrl }));
+          }
+        }
+      }
+    };
+    fetchArtwork();
+  }, [orders, userId]);
+
+  const handleConfirmDispatch = async (orderId: string) => {
+    setConfirmingOrderId(orderId);
+    await supabase.from("orders").update({ art_confirmation_status: "confirmed" } as any).eq("id", orderId);
+    toast({ title: "✅ Dispatch confirmed!", description: "Your artwork will be dispatched soon." });
+    setConfirmingOrderId(null);
+  };
+
+  const handleRaiseChat = async (orderId: string) => {
+    await supabase.from("orders").update({ art_confirmation_status: "chat" } as any).eq("id", orderId);
+    toast({ title: "💬 Query raised", description: "Admin will respond to your query soon." });
+  };
 
   return (
   <>
@@ -425,6 +460,49 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         </Button>
                       </div>
                     )}
+                    {/* Art Ready Confirmation Section */}
+                    {order.status === "artwork_ready" && order.art_confirmation_status === "pending" && (
+                      <div className="mt-3 bg-primary/5 rounded-xl p-4 space-y-3 border border-primary/20">
+                        <p className="font-display text-sm font-bold text-primary">🎨 Your Artwork is Ready!</p>
+                        <p className="text-xs font-sans text-muted-foreground">Please review your artwork and confirm to proceed with dispatch.</p>
+                        {/* Show artwork photos */}
+                        {artworkPhotos[order.id] && artworkPhotos[order.id].length > 0 && (
+                          <div className="flex gap-2 flex-wrap">
+                            {artworkPhotos[order.id].map((p: any) => (
+                              <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); }}>
+                                {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {order.delivery_state && !["maharashtra"].includes(order.delivery_state?.toLowerCase()) && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                            <p className="text-[10px] text-yellow-800 font-sans">⚠️ Since your order is outside Mumbai, we do not provide a frame to prevent damage in transit (glass breakage).</p>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <Button size="sm" className="flex-1 rounded-full font-sans bg-primary hover:bg-primary/90 text-xs" disabled={confirmingOrderId === order.id}
+                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleConfirmDispatch(order.id); }}>
+                            {confirmingOrderId === order.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <></>}
+                            ✅ Confirm Dispatch
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 rounded-full font-sans text-xs"
+                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleRaiseChat(order.id); }}>
+                            💬 Raise Query
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {order.art_confirmation_status === "confirmed" && (
+                      <div className="mt-3 bg-primary/10 rounded-lg p-3">
+                        <p className="text-xs font-sans font-medium text-primary">✅ You confirmed artwork. Dispatch in progress!</p>
+                      </div>
+                    )}
+                    {order.art_confirmation_status === "chat" && (
+                      <div className="mt-3 bg-yellow-50 rounded-lg p-3">
+                        <p className="text-xs font-sans font-medium text-yellow-800">💬 Query raised. Admin will respond soon.</p>
+                      </div>
+                    )}
                     {/* Review section for delivered orders */}
                     {order.status === "delivered" && !reviews[order.id] && userId && (
                       <div className="mt-3">
@@ -457,6 +535,12 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
         ))}
       </div>
     )}
+  {/* Art Preview Dialog */}
+  {artPreviewUrl && (
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setArtPreviewUrl(null)}>
+      <img src={artPreviewUrl} alt="Artwork Preview" className="max-w-full max-h-[80vh] rounded-xl shadow-2xl" />
+    </div>
+  )}
   </>
   );
 };
