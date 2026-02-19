@@ -168,14 +168,16 @@ const Index = () => {
       {/* Hero Section */}
       <main>
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="container mx-auto px-4 py-16 md:py-28">
+        <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 80% 20%, hsl(42 70% 50% / 0.15), transparent 50%), radial-gradient(circle at 20% 80%, hsl(20 40% 88% / 0.2), transparent 50%)" }} />
+        <div className="container mx-auto px-4 py-16 md:py-28 relative z-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 rounded-2xl border-4 border-primary bg-card p-1 shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_30px_hsl(38,50%,42%,0.5)] ring-4 ring-primary/30"
+            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 rounded-2xl border-4 border-primary bg-card p-1 ring-4 ring-primary/30"
+              style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.3), 0 0 40px hsl(38 50% 42% / 0.4)" }}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: [1, 1.05, 1], y: [0, -4, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
             <h1 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
-              Creative Caricature<span className="block text-primary">Club</span>
+              Creative Caricature<span className="block text-gradient">Club</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-xl mx-auto font-sans">
               Custom hand-crafted caricatures that capture personality in every stroke. Delivered to your doorstep.
