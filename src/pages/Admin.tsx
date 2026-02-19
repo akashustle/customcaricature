@@ -793,19 +793,20 @@ const Admin = () => {
                       <TableHead className="font-sans">ID</TableHead>
                       <TableHead className="font-sans">Customer</TableHead>
                       <TableHead className="font-sans">Date</TableHead>
-                      <TableHead className="font-sans">City</TableHead>
                       <TableHead className="font-sans">Amount</TableHead>
                       <TableHead className="font-sans">Due</TableHead>
                       <TableHead className="font-sans">Payment</TableHead>
                       <TableHead className="font-sans">Status</TableHead>
+                      <TableHead className="font-sans">Art Upload</TableHead>
+                      <TableHead className="font-sans">User Status</TableHead>
                       <TableHead className="font-sans">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
-                      <TableRow><TableCell colSpan={9} className="text-center py-10">Loading...</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={10} className="text-center py-10">Loading...</TableCell></TableRow>
                     ) : filtered.length === 0 ? (
-                      <TableRow><TableCell colSpan={9} className="text-center py-10">No orders</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={10} className="text-center py-10">No orders</TableCell></TableRow>
                     ) : (
                       filtered.map((order) => {
                         const daysLeft = getDaysRemaining(order);
@@ -814,7 +815,6 @@ const Admin = () => {
                             <TableCell className="font-mono text-xs">{order.id.slice(0, 8).toUpperCase()}</TableCell>
                             <TableCell className="font-sans">{order.customer_name}</TableCell>
                             <TableCell className="font-sans text-xs">{formatDateTime(order.created_at)}</TableCell>
-                            <TableCell className="font-sans">{order.city || "—"}</TableCell>
                             <TableCell className="font-sans">
                               <span className="font-medium">{formatPrice(order.negotiated_amount || order.amount)}</span>
                               {order.negotiated_amount && order.negotiated_amount !== order.amount && (
@@ -839,6 +839,20 @@ const Admin = () => {
                                 </SelectTrigger>
                                 <SelectContent>{Object.entries(STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
                               </Select>
+                            </TableCell>
+                            <TableCell>
+                              <ArtworkUploadFlow orderId={order.id} orderStatus={order.status} artConfirmationStatus={(order as any).art_confirmation_status} onStatusChange={fetchOrders} />
+                            </TableCell>
+                            <TableCell>
+                              {(order as any).art_confirmation_status === "confirmed" ? (
+                                <Badge className="bg-green-100 text-green-800 border-none text-[10px]">✅ Confirmed</Badge>
+                              ) : (order as any).art_confirmation_status === "chat" ? (
+                                <Badge className="bg-yellow-100 text-yellow-800 border-none text-[10px]">💬 Chat</Badge>
+                              ) : (order as any).art_confirmation_status === "pending" ? (
+                                <Badge className="bg-orange-100 text-orange-800 border-none text-[10px]">⏳ Pending</Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1">
