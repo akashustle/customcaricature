@@ -452,30 +452,24 @@ const HomepageLiveChat = () => {
 
   return (
     <>
-      {/* Chat Button */}
-      <AnimatePresence>
-        {!open && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            onClick={handleOpen}
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-24 z-50 bg-primary text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition-transform btn-3d"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Chat Button - Always visible */}
+      {!open && (
+        <button
+          onClick={handleOpen}
+          className="fixed bottom-20 right-4 md:bottom-44 md:right-6 z-[60] bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-110 transition-transform animate-bounce"
+          aria-label="Live Chat"
+          style={{ animationDuration: "2s", animationIterationCount: 3 }}
+        >
+          <MessageCircle className="w-6 h-6" />
+          <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[8px] font-bold rounded-full px-1.5 py-0.5">CHAT</span>
+        </button>
+      )}
 
       {/* Chat Window */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 right-4 md:bottom-6 md:right-24 z-50 w-[340px] max-h-[75vh] shadow-2xl rounded-2xl overflow-hidden"
-          >
+      {open && (
+        <div
+          className="fixed bottom-20 right-4 md:bottom-6 md:right-24 z-[60] w-[340px] max-h-[75vh] shadow-2xl rounded-2xl overflow-hidden"
+        >
             <Card className="border-0 shadow-none h-full flex flex-col">
               <CardHeader className="py-3 px-4 bg-primary text-primary-foreground flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-sans font-medium flex items-center gap-2">
@@ -546,10 +540,9 @@ const HomepageLiveChat = () => {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </Card>
+        </div>
+      )}
     </>
   );
 };
