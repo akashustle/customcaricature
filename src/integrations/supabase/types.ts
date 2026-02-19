@@ -210,6 +210,7 @@ export type Database = {
           created_at: string
           id: string
           is_admin: boolean
+          is_artist_chat: boolean
           message: string
           read: boolean
           receiver_id: string | null
@@ -219,6 +220,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_admin?: boolean
+          is_artist_chat?: boolean
           message: string
           read?: boolean
           receiver_id?: string | null
@@ -228,6 +230,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_admin?: boolean
+          is_artist_chat?: boolean
           message?: string
           read?: boolean
           receiver_id?: string | null
@@ -714,6 +717,7 @@ export type Database = {
           email: string
           event_booking_allowed: boolean
           full_name: string
+          gateway_charges_enabled: boolean
           id: string
           instagram_id: string | null
           is_manual: boolean
@@ -734,6 +738,7 @@ export type Database = {
           email: string
           event_booking_allowed?: boolean
           full_name: string
+          gateway_charges_enabled?: boolean
           id?: string
           instagram_id?: string | null
           is_manual?: boolean
@@ -754,6 +759,7 @@ export type Database = {
           email?: string
           event_booking_allowed?: boolean
           full_name?: string
+          gateway_charges_enabled?: boolean
           id?: string
           instagram_id?: string | null
           is_manual?: boolean

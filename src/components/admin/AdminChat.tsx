@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Send, Loader2, MessageCircle, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Send, Loader2, MessageCircle, User, Palette } from "lucide-react";
 
 type ChatUser = {
   user_id: string;
@@ -13,6 +14,7 @@ type ChatUser = {
   last_message: string;
   last_time: string;
   unread: number;
+  is_artist: boolean;
 };
 
 type Message = {
@@ -23,6 +25,7 @@ type Message = {
   is_admin: boolean;
   read: boolean;
   created_at: string;
+  is_artist_chat: boolean;
 };
 
 const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
@@ -32,10 +35,10 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
+  const [chatTab, setChatTab] = useState<"customers" | "artists">("customers");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchChatUsers = async () => {
-    // Get all messages, group by user
     const { data: allMsgs } = await supabase
       .from("chat_messages")
       .select("*")
@@ -43,13 +46,16 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
 
     if (!allMsgs) return;
 
-    // Get unique user IDs (non-admin senders)
-    const userMsgMap = new Map<string, { last_message: string; last_time: string; unread: number }>();
+    // Get all artist user IDs
+    const { data: artists } = await supabase.from("artists").select("auth_user_id");
+    const artistUserIds = new Set((artists || []).map((a: any) => a.auth_user_id).filter(Boolean));
+
+    const userMsgMap = new Map<string, { last_message: string; last_time: string; unread: number; is_artist_chat: boolean }>();
     (allMsgs as any[]).forEach((m: any) => {
       const userId = m.is_admin ? m.receiver_id : m.sender_id;
       if (!userId) return;
       if (!userMsgMap.has(userId)) {
-        userMsgMap.set(userId, { last_message: m.message, last_time: m.created_at, unread: 0 });
+        userMsgMap.set(userId, { last_message: m.message, last_time: m.created_at, unread: 0, is_artist_chat: m.is_artist_chat || false });
       }
       if (!m.is_admin && !m.read) {
         const entry = userMsgMap.get(userId)!;
@@ -57,7 +63,6 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
       }
     });
 
-    // Fetch profiles
     const userIds = Array.from(userMsgMap.keys());
     if (userIds.length === 0) { setChatUsers([]); return; }
 
@@ -67,8 +72,12 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
       .in("user_id", userIds);
 
     const users: ChatUser[] = (profiles || []).map((p: any) => {
-      const info = userMsgMap.get(p.user_id) || { last_message: "", last_time: "", unread: 0 };
-      return { user_id: p.user_id, full_name: p.full_name, email: p.email, ...info };
+      const info = userMsgMap.get(p.user_id) || { last_message: "", last_time: "", unread: 0, is_artist_chat: false };
+      return {
+        user_id: p.user_id, full_name: p.full_name, email: p.email,
+        last_message: info.last_message, last_time: info.last_time, unread: info.unread,
+        is_artist: artistUserIds.has(p.user_id) || info.is_artist_chat,
+      };
     }).sort((a, b) => new Date(b.last_time).getTime() - new Date(a.last_time).getTime());
 
     setChatUsers(users);
@@ -83,7 +92,6 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
       .limit(200);
     if (data) {
       setMessages(data as any);
-      // Mark unread messages as read
       const unreadIds = (data as any[]).filter((m: any) => !m.is_admin && !m.read).map(m => m.id);
       if (unreadIds.length > 0) {
         await supabase.from("chat_messages").update({ read: true } as any).in("id", unreadIds);
@@ -114,17 +122,52 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
   const sendMessage = async () => {
     if (!newMsg.trim() || !selectedUser) return;
     setSending(true);
+    const selectedChatUser = chatUsers.find(u => u.user_id === selectedUser);
     await supabase.from("chat_messages").insert({
       sender_id: adminUserId,
       receiver_id: selectedUser,
       message: newMsg.trim(),
       is_admin: true,
+      is_artist_chat: selectedChatUser?.is_artist || false,
     } as any);
     setNewMsg("");
     setSending(false);
   };
 
+  const customerChats = chatUsers.filter(u => !u.is_artist);
+  const artistChats = chatUsers.filter(u => u.is_artist);
   const totalUnread = chatUsers.reduce((s, u) => s + u.unread, 0);
+  const customerUnread = customerChats.reduce((s, u) => s + u.unread, 0);
+  const artistUnread = artistChats.reduce((s, u) => s + u.unread, 0);
+
+  const renderUserList = (users: ChatUser[]) => (
+    <div className="space-y-2 overflow-y-auto" style={{ maxHeight: 500 }}>
+      {users.length === 0 ? (
+        <Card><CardContent className="p-8 text-center"><p className="text-muted-foreground font-sans text-sm">No chat messages yet</p></CardContent></Card>
+      ) : users.map(u => (
+        <Card
+          key={u.user_id}
+          className={`cursor-pointer transition-colors ${selectedUser === u.user_id ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}
+          onClick={() => { setSelectedUser(u.user_id); setSelectedUserName(u.full_name); }}
+        >
+          <CardContent className="p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                {u.is_artist ? <Palette className="w-4 h-4 text-primary" /> : <User className="w-4 h-4 text-primary" />}
+              </div>
+              <div className="min-w-0">
+                <p className="font-sans font-medium text-sm truncate">{u.full_name}</p>
+                <p className="text-[10px] text-muted-foreground font-sans truncate">{u.last_message}</p>
+              </div>
+            </div>
+            {u.unread > 0 && (
+              <Badge className="bg-destructive text-destructive-foreground text-[10px] h-5 min-w-5 flex items-center justify-center">{u.unread}</Badge>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -134,32 +177,20 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ minHeight: 400 }}>
-        {/* User List */}
-        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: 500 }}>
-          {chatUsers.length === 0 ? (
-            <Card><CardContent className="p-8 text-center"><p className="text-muted-foreground font-sans text-sm">No chat messages yet</p></CardContent></Card>
-          ) : chatUsers.map(u => (
-            <Card
-              key={u.user_id}
-              className={`cursor-pointer transition-colors ${selectedUser === u.user_id ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}
-              onClick={() => { setSelectedUser(u.user_id); setSelectedUserName(u.full_name); }}
-            >
-              <CardContent className="p-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-sans font-medium text-sm truncate">{u.full_name}</p>
-                    <p className="text-[10px] text-muted-foreground font-sans truncate">{u.last_message}</p>
-                  </div>
-                </div>
-                {u.unread > 0 && (
-                  <Badge className="bg-destructive text-destructive-foreground text-[10px] h-5 min-w-5 flex items-center justify-center">{u.unread}</Badge>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+        {/* User List with sub-tabs */}
+        <div>
+          <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as any)}>
+            <TabsList className="w-full mb-2">
+              <TabsTrigger value="customers" className="flex-1 font-sans text-xs">
+                Customers {customerUnread > 0 && <Badge className="ml-1 bg-destructive text-destructive-foreground text-[9px] h-4 min-w-4">{customerUnread}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="artists" className="flex-1 font-sans text-xs">
+                Artists {artistUnread > 0 && <Badge className="ml-1 bg-destructive text-destructive-foreground text-[9px] h-4 min-w-4">{artistUnread}</Badge>}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="customers">{renderUserList(customerChats)}</TabsContent>
+            <TabsContent value="artists">{renderUserList(artistChats)}</TabsContent>
+          </Tabs>
         </div>
 
         {/* Chat Area */}

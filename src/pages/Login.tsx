@@ -24,18 +24,22 @@ const Login = () => {
     } else {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        // Check admin role first
         const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
         if (roles && roles.length > 0) {
           navigate("/admin");
-        } else {
-          // Check if user is an artist
-          const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
-          if (artistData) {
-            navigate("/artist-dashboard");
-          } else {
-            navigate("/dashboard");
-          }
+          setLoading(false);
+          return;
         }
+        // Check if artist
+        const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
+        if (artistData) {
+          navigate("/artist-dashboard");
+          setLoading(false);
+          return;
+        }
+        // Regular user
+        navigate("/dashboard");
       }
     }
     setLoading(false);
