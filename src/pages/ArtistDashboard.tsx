@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette } from "lucide-react";
+import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette, MessageCircle, Send, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
 import { toast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -36,7 +36,12 @@ type BlockedDate = {
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New", in_progress: "In Progress", artwork_ready: "Art Ready",
-  dispatched: "Dispatched", delivered: "Delivered",
+  dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
+};
+
+type ChatMessage = {
+  id: string; sender_id: string; receiver_id: string | null;
+  message: string; is_admin: boolean; read: boolean; created_at: string;
 };
 
 const ArtistDashboard = () => {
@@ -49,6 +54,7 @@ const ArtistDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isRitesh, setIsRitesh] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
+  const [orderFilter, setOrderFilter] = useState("all");
 
   // Block date form
   const [blockDate, setBlockDate] = useState("");
@@ -56,6 +62,14 @@ const ArtistDashboard = () => {
   const [blockEndTime, setBlockEndTime] = useState("");
   const [blockReason, setBlockReason] = useState("");
   const [addingBlock, setAddingBlock] = useState(false);
+
+  // Chat state
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatMsg, setChatMsg] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate("/artistlogin"); return; }
@@ -164,6 +178,65 @@ const ArtistDashboard = () => {
     toast({ title: "Refreshed!" });
   };
 
+  // Chat functions
+  const fetchChatMessages = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("chat_messages")
+      .select("*")
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .eq("is_artist_chat", true)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (data) {
+      setChatMessages(data as any);
+      const unreadCount = (data as any[]).filter((m: any) => m.receiver_id === user.id && !m.read).length;
+      setChatUnread(unreadCount);
+    }
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatMsg.trim() || !user) return;
+    setChatSending(true);
+    await supabase.from("chat_messages").insert({
+      sender_id: user.id,
+      receiver_id: null,
+      message: chatMsg.trim(),
+      is_admin: false,
+      is_artist_chat: true,
+    } as any);
+    setChatMsg("");
+    setChatSending(false);
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchChatMessages();
+    const ch = supabase
+      .channel(`artist-chat-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchChatMessages())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
+
+  useEffect(() => {
+    if (chatOpen && chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+      // Mark messages as read
+      const unreadIds = chatMessages.filter(m => m.receiver_id === user?.id && !m.read).map(m => m.id);
+      if (unreadIds.length > 0) {
+        supabase.from("chat_messages").update({ read: true } as any).in("id", unreadIds).then(() => fetchChatMessages());
+      }
+    }
+  }, [chatOpen, chatMessages]);
+
+  const filteredOrders = orders.filter(o => {
+    if (orderFilter === "all") return true;
+    if (orderFilter === "upcoming") return ["new", "in_progress"].includes(o.status);
+    if (orderFilter === "completed") return ["delivered", "completed", "artwork_ready", "dispatched"].includes(o.status);
+    return true;
+  });
+
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   const upcoming = events.filter(e => e.status === "upcoming");
@@ -223,6 +296,7 @@ const ArtistDashboard = () => {
           <TabsList className="w-full mb-4">
             <TabsTrigger value="events" className="flex-1 font-sans"><CalendarDays className="w-4 h-4 mr-1" />Events</TabsTrigger>
             {isRitesh && <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Orders</TabsTrigger>}
+            <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-1" />Chat {chatUnread > 0 && <Badge className="ml-1 bg-destructive text-destructive-foreground text-[9px] h-4 min-w-4">{chatUnread}</Badge>}</TabsTrigger>
             <TabsTrigger value="blocked" className="flex-1 font-sans"><CalendarOff className="w-4 h-4 mr-1" />Block Dates</TabsTrigger>
           </TabsList>
 
@@ -315,14 +389,26 @@ const ArtistDashboard = () => {
               <h2 className="font-display text-xl font-bold mb-3 flex items-center gap-2">
                 <Palette className="w-5 h-5 text-primary" /> Assigned Custom Caricatures
               </h2>
-              {orders.length === 0 ? (
+              {/* Filter tabs */}
+              <div className="flex gap-1.5 mb-4">
+                {[
+                  { value: "all", label: `All (${orders.length})` },
+                  { value: "upcoming", label: `Active (${orders.filter(o => ["new","in_progress"].includes(o.status)).length})` },
+                  { value: "completed", label: `Completed (${orders.filter(o => ["delivered","completed","artwork_ready","dispatched"].includes(o.status)).length})` },
+                ].map(tab => (
+                  <Button key={tab.value} variant={orderFilter === tab.value ? "default" : "outline"} size="sm" className="text-xs font-sans h-7 rounded-full" onClick={() => setOrderFilter(tab.value)}>
+                    {tab.label}
+                  </Button>
+                ))}
+              </div>
+              {filteredOrders.length === 0 ? (
                 <Card><CardContent className="p-8 text-center">
                   <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="font-sans text-muted-foreground">No orders assigned yet</p>
+                  <p className="font-sans text-muted-foreground">No orders in this category</p>
                 </CardContent></Card>
               ) : (
                 <div className="space-y-3">
-                  {orders.map(order => (
+                  {filteredOrders.map(order => (
                     <Card key={order.id} className="card-3d">
                       <CardContent className="p-4 space-y-2">
                         <div className="flex justify-between items-start">
@@ -333,6 +419,9 @@ const ArtistDashboard = () => {
                             <p className="text-xs text-muted-foreground font-sans">
                               {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                             </p>
+                            {order.expected_delivery_date && (
+                              <p className="text-xs text-muted-foreground font-sans">Due: {new Date(order.expected_delivery_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
+                            )}
                           </div>
                           <Badge className="border-none text-xs">{STATUS_LABELS[order.status] || order.status}</Badge>
                         </div>
@@ -356,6 +445,51 @@ const ArtistDashboard = () => {
               )}
             </TabsContent>
           )}
+
+          {/* Chat Tab */}
+          <TabsContent value="chat">
+            <Card className="flex flex-col" style={{ minHeight: 400 }}>
+              <CardHeader className="py-3 px-4 bg-primary text-primary-foreground rounded-t-xl">
+                <CardTitle className="text-sm font-sans font-medium">💬 Chat with Admin</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 flex flex-col flex-1">
+                <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 250, maxHeight: 400 }}>
+                  {chatMessages.length === 0 && (
+                    <p className="text-center text-xs text-muted-foreground py-8 font-sans">
+                      👋 Hi {artist?.name}! Send a message to the admin.
+                    </p>
+                  )}
+                  {chatMessages.map(msg => (
+                    <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs font-sans ${
+                        msg.sender_id === user?.id
+                          ? "bg-primary text-primary-foreground rounded-br-sm"
+                          : "bg-muted rounded-bl-sm"
+                      }`}>
+                        {msg.is_admin && <p className="text-[9px] font-bold mb-0.5 opacity-70">Admin</p>}
+                        <p>{msg.message}</p>
+                        <p className={`text-[9px] mt-0.5 ${msg.sender_id === user?.id ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                          {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 p-3 border-t border-border">
+                  <Input
+                    value={chatMsg}
+                    onChange={e => setChatMsg(e.target.value)}
+                    placeholder="Type a message..."
+                    className="text-xs h-8 font-sans"
+                    onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }}
+                  />
+                  <Button size="sm" onClick={sendChatMessage} disabled={!chatMsg.trim() || chatSending} className="h-8 w-8 p-0">
+                    {chatSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="blocked">
             <Card className="mb-6">

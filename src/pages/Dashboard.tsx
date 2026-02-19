@@ -30,7 +30,7 @@ declare global {
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
-  event_booking_allowed?: boolean; secret_code?: string | null;
+  event_booking_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
 };
 
 type Order = {
@@ -79,6 +79,15 @@ const Dashboard = () => {
   useEffect(() => {
     if (!authLoading && !user) { navigate("/login"); return; }
     if (user) {
+      // Role-based redirect: admins and artists should not be here
+      const checkRole = async () => {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+        if (roles && roles.length > 0) { navigate("/admin"); return; }
+        const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", user.id).maybeSingle();
+        if (artistData) { navigate("/artist-dashboard"); return; }
+      };
+      checkRole();
+
       fetchProfile(user.id);
       fetchOrders(user.id);
       fetchEvents(user.id);
@@ -101,9 +110,9 @@ const Dashboard = () => {
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false, secret_code: (data as any).secret_code || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);

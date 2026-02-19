@@ -1014,6 +1014,20 @@ const Admin = () => {
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
                               {(c as any).event_booking_allowed && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Allowed</Badge>}
                             </div>
+                            {/* Gateway Charges Toggle */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <Switch
+                                checked={(c as any).gateway_charges_enabled !== false}
+                                onCheckedChange={async (checked) => {
+                                  if (!confirm(`${checked ? "Enable" : "Disable"} payment gateway charges for ${c.full_name}?`)) return;
+                                  await supabase.from("profiles").update({ gateway_charges_enabled: checked } as any).eq("user_id", c.user_id);
+                                  toast({ title: checked ? "Gateway charges enabled" : "Gateway charges disabled", description: `for ${c.full_name}` });
+                                  fetchCustomers();
+                                }}
+                              />
+                              <span className="text-xs font-sans text-muted-foreground">Gateway Charges</span>
+                              {(c as any).gateway_charges_enabled === false && <Badge className="bg-amber-100 text-amber-800 border-none text-[10px]">Waived</Badge>}
+                            </div>
                             <div className="flex gap-2 mt-1 flex-wrap">
                               <Button
                                 variant="outline"
@@ -1245,6 +1259,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
           <AdminBottomNavItem icon={Star} label="Reviews" active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} />
+          <AdminBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
