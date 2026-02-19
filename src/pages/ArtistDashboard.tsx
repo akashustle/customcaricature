@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "@/components/NotificationBell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type ArtistEvent = {
   id: string; client_name: string; event_type: string; event_date: string;
@@ -47,6 +48,7 @@ type ChatMessage = {
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
+  usePermissions(true);
   const { user, loading: authLoading, signOut } = useAuth();
   const [artist, setArtist] = useState<{ id: string; name: string; portfolio_url: string | null } | null>(null);
   const [events, setEvents] = useState<ArtistEvent[]>([]);
