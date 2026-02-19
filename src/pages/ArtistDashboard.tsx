@@ -30,6 +30,10 @@ type ArtistOrder = {
   id: string; order_type: string; style: string; face_count: number;
   status: string; customer_name: string; created_at: string;
   expected_delivery_date: string | null; art_confirmation_status: string | null;
+  notes: string | null; delivery_address: string | null; delivery_city: string | null;
+  delivery_state: string | null; delivery_pincode: string | null;
+  amount: number; customer_mobile: string; customer_email: string;
+  instagram_id: string | null;
 };
 
 type BlockedDate = {
@@ -40,6 +44,49 @@ type BlockedDate = {
 const STATUS_LABELS: Record<string, string> = {
   new: "New", in_progress: "In Progress", artwork_ready: "Art Ready",
   dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
+};
+
+// Component to show order images for artist
+const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
+  const [images, setImages] = useState<{ id: string; storage_path: string; file_name: string }[]>([]);
+  const [urls, setUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const { data } = await supabase.from("order_images").select("id, storage_path, file_name").eq("order_id", orderId);
+      if (data && data.length > 0) {
+        setImages(data);
+        const u: Record<string, string> = {};
+        for (const img of data) {
+          const { data: signed } = await supabase.storage.from("order-photos").createSignedUrl(img.storage_path, 3600);
+          if (signed?.signedUrl) u[img.id] = signed.signedUrl;
+        }
+        setUrls(u);
+      }
+    };
+    fetchImages();
+  }, [orderId]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div>
+      <p className="text-xs font-sans text-muted-foreground mb-1">📸 Customer Photos:</p>
+      <div className="flex gap-1 flex-wrap">
+        {images.map(img => (
+          <div key={img.id} className="w-14 h-14 rounded border border-border overflow-hidden">
+            {urls[img.id] ? (
+              <a href={urls[img.id]} target="_blank" rel="noopener noreferrer">
+                <img src={urls[img.id]} alt={img.file_name} className="w-full h-full object-cover" />
+              </a>
+            ) : (
+              <div className="w-full h-full bg-muted" />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 type ChatMessage = {
@@ -133,7 +180,7 @@ const ArtistDashboard = () => {
   const fetchOrders = async (artistId: string) => {
     const { data } = await supabase
       .from("orders")
-      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
+      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered, notes, delivery_address, delivery_city, delivery_state, delivery_pincode, amount, customer_mobile, customer_email, instagram_id")
       .eq("assigned_artist_id", artistId)
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);
@@ -455,8 +502,24 @@ const ArtistDashboard = () => {
                               <p className="text-xs text-muted-foreground font-sans">Due: {new Date(order.expected_delivery_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
                             )}
                           </div>
-                          <Badge className="border-none text-xs">{STATUS_LABELS[order.status] || order.status}</Badge>
+                          <div className="text-right">
+                            <Badge className="border-none text-xs">{STATUS_LABELS[order.status] || order.status}</Badge>
+                            <p className="font-sans text-sm font-bold text-primary mt-1">₹{order.amount}</p>
+                          </div>
                         </div>
+                        {/* Order Details */}
+                        <div className="bg-muted/30 rounded-lg p-3 space-y-1 text-xs font-sans">
+                          <p><span className="text-muted-foreground">Faces:</span> {order.face_count}</p>
+                          <p><span className="text-muted-foreground">Mobile:</span> {order.customer_mobile}</p>
+                          <p><span className="text-muted-foreground">Email:</span> {order.customer_email}</p>
+                          {order.instagram_id && <p><span className="text-muted-foreground">Instagram:</span> {order.instagram_id}</p>}
+                          {order.notes && <p><span className="text-muted-foreground">Notes:</span> {order.notes}</p>}
+                          {order.delivery_address && (
+                            <p><span className="text-muted-foreground">Delivery:</span> {order.delivery_address}, {order.delivery_city}, {order.delivery_state} - {order.delivery_pincode}</p>
+                          )}
+                        </div>
+                        {/* Order Images */}
+                        <ArtistOrderImages orderId={order.id} />
                         <div className="flex items-center gap-2">
                           <Label className="text-xs font-sans">Update Status:</Label>
                           <Select value={order.status} onValueChange={v => updateOrderStatus(order.id, v)}>

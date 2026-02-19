@@ -99,17 +99,25 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     }
   };
 
+  // Use ref so realtime callback always has latest selectedUser
+  const selectedUserRef = useRef<string | null>(null);
+  useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
+
   useEffect(() => {
     fetchChatUsers();
     const ch = supabase
-      .channel("admin-chat-all")
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => {
+      .channel("admin-chat-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, () => {
         fetchChatUsers();
-        if (selectedUser) fetchMessages(selectedUser);
+        if (selectedUserRef.current) fetchMessages(selectedUserRef.current);
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_messages" }, () => {
+        fetchChatUsers();
+        if (selectedUserRef.current) fetchMessages(selectedUserRef.current);
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [selectedUser]);
+  }, []);
 
   useEffect(() => {
     if (selectedUser) fetchMessages(selectedUser);

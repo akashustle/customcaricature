@@ -77,7 +77,7 @@ const Order = () => {
         state: data.state || prev.state,
         city: data.city || prev.city,
         // Only set delivery address from physical address, not email
-        deliveryAddress: data.address || prev.deliveryAddress,
+        deliveryAddress: prev.deliveryAddress || data.address || "",
         deliveryCity: data.city || prev.deliveryCity,
         deliveryState: data.state || prev.deliveryState,
         deliveryPincode: data.pincode || prev.deliveryPincode,

@@ -100,6 +100,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
       artist_name: editData.artist_name as any,
       priority: editData.priority as any,
       expected_delivery_date: editData.expected_delivery_date as any,
+      created_at: editData.created_at as any,
     }).eq("id", orderId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -186,6 +187,10 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
                 <div className="flex justify-between items-center">
                   <Label className="text-muted-foreground text-sm">Expected Delivery</Label>
                   <Input type="date" className="w-40 h-8" value={editData.expected_delivery_date || ""} onChange={(e) => setEditData({ ...editData, expected_delivery_date: e.target.value })} />
+                </div>
+                <div className="flex justify-between items-center">
+                  <Label className="text-muted-foreground text-sm">Order Date & Time</Label>
+                  <Input type="datetime-local" step="1" className="w-56 h-8" value={editData.created_at ? new Date(editData.created_at).toISOString().slice(0, 19) : ""} onChange={(e) => setEditData({ ...editData, created_at: new Date(e.target.value).toISOString() })} />
                 </div>
               </>
             ) : (
