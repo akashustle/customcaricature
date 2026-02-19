@@ -69,6 +69,20 @@
 }
 
 @layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(36 20% 80%) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(36 20% 80%);
+    border-radius: 4px;
+  }
   .btn-3d {
     @apply relative transition-all duration-200;
     box-shadow: 0 4px 0 hsl(38 50% 32%), 0 6px 12px hsl(25 20% 20% / 0.15);

@@ -495,21 +495,23 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-6">
         <LiveGreeting name={adminProfile?.full_name} />
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 w-full overflow-x-auto hidden md:flex bg-card/80 p-1.5 rounded-2xl border border-border shadow-md">
-            <TabsTrigger value="orders" className="font-sans flex-1 rounded-full transition-all"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
-            <TabsTrigger value="events" className="font-sans flex-1 rounded-full transition-all"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
-            <TabsTrigger value="payments" className="font-sans flex-1 rounded-full transition-all"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
-            <TabsTrigger value="chat" className="font-sans flex-1 rounded-full transition-all"><MessageCircle className="w-4 h-4 mr-1" />Chat</TabsTrigger>
-            <TabsTrigger value="live-leads" className="font-sans flex-1 rounded-full transition-all">💬 Live Leads</TabsTrigger>
-            <TabsTrigger value="event-users" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
-            <TabsTrigger value="pricing" className="font-sans flex-1 rounded-full transition-all"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
-            <TabsTrigger value="customers" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
-            <TabsTrigger value="artists" className="font-sans flex-1 rounded-full transition-all">🎨 Artists</TabsTrigger>
-            <TabsTrigger value="reviews" className="font-sans flex-1 rounded-full transition-all"><Star className="w-4 h-4 mr-1" />Reviews</TabsTrigger>
-            <TabsTrigger value="analytics" className="font-sans flex-1 rounded-full transition-all"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
-            <TabsTrigger value="locations" className="font-sans flex-1 rounded-full transition-all"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
-            <TabsTrigger value="settings" className="font-sans flex-1 rounded-full transition-all"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
-          </TabsList>
+          <div className="mb-6 hidden md:block overflow-x-auto scrollbar-thin">
+            <TabsList className="w-max min-w-full bg-card/80 p-1.5 rounded-2xl border border-border shadow-md inline-flex gap-0.5">
+              <TabsTrigger value="orders" className="font-sans rounded-full transition-all whitespace-nowrap"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
+              <TabsTrigger value="events" className="font-sans rounded-full transition-all whitespace-nowrap"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
+              <TabsTrigger value="payments" className="font-sans rounded-full transition-all whitespace-nowrap"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
+              <TabsTrigger value="chat" className="font-sans rounded-full transition-all whitespace-nowrap"><MessageCircle className="w-4 h-4 mr-1" />Chat</TabsTrigger>
+              <TabsTrigger value="live-leads" className="font-sans rounded-full transition-all whitespace-nowrap">💬 Live Leads</TabsTrigger>
+              <TabsTrigger value="event-users" className="font-sans rounded-full transition-all whitespace-nowrap"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
+              <TabsTrigger value="pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
+              <TabsTrigger value="customers" className="font-sans rounded-full transition-all whitespace-nowrap"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
+              <TabsTrigger value="artists" className="font-sans rounded-full transition-all whitespace-nowrap">🎨 Artists</TabsTrigger>
+              <TabsTrigger value="reviews" className="font-sans rounded-full transition-all whitespace-nowrap"><Star className="w-4 h-4 mr-1" />Reviews</TabsTrigger>
+              <TabsTrigger value="analytics" className="font-sans rounded-full transition-all whitespace-nowrap"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
+              <TabsTrigger value="locations" className="font-sans rounded-full transition-all whitespace-nowrap"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
+              <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Orders Tab */}
           <TabsContent value="orders">
@@ -727,7 +729,7 @@ const Admin = () => {
             </div>
 
             {/* Desktop Table */}
-            <Card className="hidden md:block">
+            <Card className="hidden md:block overflow-x-auto">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
