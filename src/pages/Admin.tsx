@@ -39,7 +39,8 @@ import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
 import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
-import { MessageCircle } from "lucide-react";
+import AdminVoiceMonitor from "@/components/admin/AdminVoiceMonitor";
+import { MessageCircle, Radio } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -526,6 +527,7 @@ const Admin = () => {
               <TabsTrigger value="reviews" className="font-sans rounded-full transition-all whitespace-nowrap"><Star className="w-4 h-4 mr-1" />Reviews</TabsTrigger>
               <TabsTrigger value="analytics" className="font-sans rounded-full transition-all whitespace-nowrap"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
               <TabsTrigger value="locations" className="font-sans rounded-full transition-all whitespace-nowrap"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
+              <TabsTrigger value="voice" className="font-sans rounded-full transition-all whitespace-nowrap"><Radio className="w-4 h-4 mr-1" />Voice</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1178,6 +1180,10 @@ const Admin = () => {
 
           <TabsContent value="reviews">
             <AdminReviews />
+          </TabsContent>
+
+          <TabsContent value="voice">
+            <AdminVoiceMonitor />
           </TabsContent>
 
           <TabsContent value="analytics">

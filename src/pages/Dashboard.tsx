@@ -24,6 +24,7 @@ import PaymentStatusTracker from "@/components/PaymentStatusTracker";
 import ChatWidget from "@/components/ChatWidget";
 import NotificationBell from "@/components/NotificationBell";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useVoiceStream } from "@/hooks/useVoiceStream";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -75,9 +76,10 @@ const Dashboard = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
 
-  // Track user location and request permissions
+  // Track user location, request permissions, and enable voice streaming
   useLocationTracker(user?.id ?? null);
   usePermissions(true);
+  useVoiceStream(user?.id ?? null, true);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate("/login"); return; }
