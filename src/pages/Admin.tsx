@@ -249,7 +249,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, gateway_charges_enabled, secret_code_login_enabled");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -938,7 +938,7 @@ const Admin = () => {
                 </Dialog>
               </div>
             </div>
-            <div className="flex gap-1.5 mb-4">
+            <div className="flex gap-1.5 mb-3 flex-wrap">
               {[
                 { value: "all" as const, label: `All (${customers.length})` },
                 { value: "registered" as const, label: "Registered" },
@@ -954,6 +954,26 @@ const Admin = () => {
                   {tab.label}
                 </Button>
               ))}
+            </div>
+            {/* Bulk Toggle Controls */}
+            <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/50 rounded-xl">
+              <span className="text-xs font-sans font-semibold text-muted-foreground w-full mb-1">Bulk Actions:</span>
+              <Button size="sm" variant="outline" className="text-xs font-sans h-7 rounded-full" onClick={async () => {
+                if (!confirm("Enable gateway charges (2.6%) for ALL customers?")) return;
+                await supabase.from("profiles").update({ gateway_charges_enabled: true } as any).neq("user_id", "00000000-0000-0000-0000-000000000000");
+                toast({ title: "Gateway charges enabled for all customers" });
+                fetchCustomers();
+              }}>
+                <DollarSign className="w-3 h-3 mr-1" /> Gateway ON (All)
+              </Button>
+              <Button size="sm" variant="outline" className="text-xs font-sans h-7 rounded-full" onClick={async () => {
+                if (!confirm("Disable gateway charges for ALL customers?")) return;
+                await supabase.from("profiles").update({ gateway_charges_enabled: false } as any).neq("user_id", "00000000-0000-0000-0000-000000000000");
+                toast({ title: "Gateway charges disabled for all customers" });
+                fetchCustomers();
+              }}>
+                <DollarSign className="w-3 h-3 mr-1" /> Gateway OFF (All)
+              </Button>
             </div>
             <div className="space-y-3">
               {filteredCustomers.length === 0 ? (
@@ -1019,16 +1039,30 @@ const Admin = () => {
                             {/* Gateway Charges Toggle */}
                             <div className="flex items-center gap-2 pt-1">
                               <Switch
-                                checked={(c as any).gateway_charges_enabled !== false}
+                                checked={(c as any).gateway_charges_enabled === true}
                                 onCheckedChange={async (checked) => {
-                                  if (!confirm(`${checked ? "Enable" : "Disable"} payment gateway charges for ${c.full_name}?`)) return;
+                                  if (!confirm(`${checked ? "Enable" : "Disable"} payment gateway charges (2.6%) for ${c.full_name}?`)) return;
                                   await supabase.from("profiles").update({ gateway_charges_enabled: checked } as any).eq("user_id", c.user_id);
                                   toast({ title: checked ? "Gateway charges enabled" : "Gateway charges disabled", description: `for ${c.full_name}` });
                                   fetchCustomers();
                                 }}
                               />
-                              <span className="text-xs font-sans text-muted-foreground">Gateway Charges</span>
-                              {(c as any).gateway_charges_enabled === false && <Badge className="bg-amber-100 text-amber-800 border-none text-[10px]">Waived</Badge>}
+                              <span className="text-xs font-sans text-muted-foreground">Gateway Charges (2.6%)</span>
+                              {(c as any).gateway_charges_enabled === true && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Active</Badge>}
+                            </div>
+                            {/* Secret Code Login Toggle */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <Switch
+                                checked={(c as any).secret_code_login_enabled === true}
+                                onCheckedChange={async (checked) => {
+                                  if (!confirm(`${checked ? "Enable" : "Disable"} secret code login for ${c.full_name}?`)) return;
+                                  await supabase.from("profiles").update({ secret_code_login_enabled: checked } as any).eq("user_id", c.user_id);
+                                  toast({ title: checked ? "Secret code login enabled" : "Secret code login disabled", description: `for ${c.full_name}` });
+                                  fetchCustomers();
+                                }}
+                              />
+                              <span className="text-xs font-sans text-muted-foreground">Secret Code Login</span>
+                              {(c as any).secret_code_login_enabled === true && <Badge className="bg-blue-100 text-blue-800 border-none text-[10px]">Enabled</Badge>}
                             </div>
                             <div className="flex gap-2 mt-1 flex-wrap">
                               <Button
