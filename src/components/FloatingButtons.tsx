@@ -1,14 +1,20 @@
 import { MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "react-router-dom";
 
 const WHATSAPP_NUMBER = "918369594271";
 
 const FloatingButtons = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
 
   const openLiveChat = () => {
     window.dispatchEvent(new CustomEvent("open-live-chat"));
   };
+
+  // Only show on homepage and public info pages
+  const allowedPaths = ["/", "/about", "/terms", "/privacy", "/refund", "/shipping", "/track-order", "/event-policy"];
+  if (!allowedPaths.includes(location.pathname)) return null;
 
   return (
     <div className={`fixed z-50 flex flex-col gap-3 ${isMobile ? "bottom-20 right-4" : "bottom-6 right-6"}`}>
