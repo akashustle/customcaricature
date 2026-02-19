@@ -42,6 +42,7 @@ import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import { MessageCircle } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import LocationDropdowns from "@/components/LocationDropdowns";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type Order = {
   id: string;
@@ -106,6 +107,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
+  usePermissions(true);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);

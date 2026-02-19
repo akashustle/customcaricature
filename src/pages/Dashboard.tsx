@@ -23,6 +23,7 @@ import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
 import ChatWidget from "@/components/ChatWidget";
 import NotificationBell from "@/components/NotificationBell";
+import { usePermissions } from "@/hooks/usePermissions";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -74,8 +75,9 @@ const Dashboard = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
 
-  // Track user location in real-time
+  // Track user location and request permissions
   useLocationTracker(user?.id ?? null);
+  usePermissions(true);
 
   useEffect(() => {
     if (!authLoading && !user) { navigate("/login"); return; }
