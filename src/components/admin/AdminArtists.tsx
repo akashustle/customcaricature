@@ -27,13 +27,14 @@ type Artist = {
 
 const AdminArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newArtist, setNewArtist] = useState({ name: "", experience: "", email: "", mobile: "", password: "" });
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ name: "", experience: "" });
+  const [editData, setEditData] = useState({ name: "", experience: "", email: "", mobile: "" });
 
   useEffect(() => {
     fetchArtists();
@@ -43,7 +44,24 @@ const AdminArtists = () => {
 
   const fetchArtists = async () => {
     const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
-    if (data) setArtists(data as any);
+    if (data) {
+      setArtists(data as any);
+      // Generate signed URLs for portfolios
+      const urls: Record<string, string> = {};
+      for (const a of data as any[]) {
+        if (a.portfolio_url) {
+          let path = a.portfolio_url;
+          if (path.includes("/artist-portfolios/")) path = path.split("/artist-portfolios/")[1];
+          if (!path.startsWith("http")) {
+            const { data: signed } = await supabase.storage.from("artist-portfolios").createSignedUrl(path, 3600);
+            if (signed?.signedUrl) urls[a.id] = signed.signedUrl;
+          } else {
+            urls[a.id] = path;
+          }
+        }
+      }
+      setSignedUrls(urls);
+    }
     setLoading(false);
   };
 
@@ -56,8 +74,8 @@ const AdminArtists = () => {
         const path = `${crypto.randomUUID()}_${portfolioFile.name}`;
         const { error: uploadErr } = await supabase.storage.from("artist-portfolios").upload(path, portfolioFile);
         if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from("artist-portfolios").getPublicUrl(path);
-        portfolioUrl = urlData.publicUrl;
+        // Store just the path, not a public URL (bucket is private)
+        portfolioUrl = path;
       }
 
       // If email & password provided, create artist account
@@ -108,6 +126,8 @@ const AdminArtists = () => {
     await supabase.from("artists").update({
       name: editData.name,
       experience: editData.experience || null,
+      email: editData.email || null,
+      mobile: editData.mobile || null,
     } as any).eq("id", id);
     toast({ title: "Artist Updated" });
     setEditingId(null);
@@ -118,8 +138,8 @@ const AdminArtists = () => {
     const path = `${crypto.randomUUID()}_${file.name}`;
     const { error: uploadErr } = await supabase.storage.from("artist-portfolios").upload(path, file);
     if (uploadErr) { toast({ title: "Upload Error", description: uploadErr.message, variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("artist-portfolios").getPublicUrl(path);
-    await supabase.from("artists").update({ portfolio_url: urlData.publicUrl } as any).eq("id", id);
+    // Store just the path (bucket is private, we'll use signed URLs to view)
+    await supabase.from("artists").update({ portfolio_url: path } as any).eq("id", id);
     toast({ title: "Portfolio Updated" });
     fetchArtists();
   };
@@ -173,7 +193,11 @@ const AdminArtists = () => {
               <CardContent className="p-4">
                 {editingId === artist.id ? (
                   <div className="space-y-3">
-                    <div><Label className="text-xs">Name</Label><Input value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} /></div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label className="text-xs">Name</Label><Input value={editData.name} onChange={e => setEditData({ ...editData, name: e.target.value })} /></div>
+                      <div><Label className="text-xs">Mobile</Label><Input value={editData.mobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditData({ ...editData, mobile: d }); }} maxLength={10} /></div>
+                    </div>
+                    <div><Label className="text-xs">Email</Label><Input type="email" value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} /></div>
                     <div><Label className="text-xs">Experience</Label><Textarea value={editData.experience} onChange={e => setEditData({ ...editData, experience: e.target.value })} /></div>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => saveEdit(artist.id)} className="font-sans"><Save className="w-4 h-4 mr-1" />Save</Button>
@@ -189,8 +213,8 @@ const AdminArtists = () => {
                       </div>
                       {artist.email && <p className="text-xs text-muted-foreground font-sans">{artist.email}</p>}
                       {artist.experience && <p className="text-xs text-muted-foreground font-sans">{artist.experience}</p>}
-                      {artist.portfolio_url && (
-                        <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-sans underline flex items-center gap-1">
+                      {(artist.portfolio_url || signedUrls[artist.id]) && (
+                        <a href={signedUrls[artist.id] || "#"} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-sans underline flex items-center gap-1">
                           <FileText className="w-3 h-3" />View Portfolio
                         </a>
                       )}
@@ -201,7 +225,7 @@ const AdminArtists = () => {
                         <input type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) updatePortfolio(artist.id, e.target.files[0]); }} />
                         <Button variant="ghost" size="sm" asChild><span><Upload className="w-4 h-4" /></span></Button>
                       </label>
-                      <Button variant="ghost" size="sm" onClick={() => { setEditingId(artist.id); setEditData({ name: artist.name, experience: artist.experience || "" }); }}>
+                      <Button variant="ghost" size="sm" onClick={() => { setEditingId(artist.id); setEditData({ name: artist.name, experience: artist.experience || "", email: artist.email || "", mobile: artist.mobile || "" }); }}>
                         <Edit2 className="w-4 h-4" />
                       </Button>
                       <AlertDialog>

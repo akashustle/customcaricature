@@ -518,7 +518,22 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
       const { data: allArtists } = await supabase.from("artists").select("id, name, portfolio_url");
       if (allArtists) {
         const map: typeof artistMap = {};
-        allArtists.forEach((a: any) => { map[a.id] = { name: a.name, portfolio_url: a.portfolio_url }; });
+        for (const a of allArtists as any[]) {
+          let portfolioUrl = a.portfolio_url;
+          // If portfolio is stored in our storage, generate a signed URL
+          if (portfolioUrl && !portfolioUrl.startsWith("http")) {
+            const { data: signedData } = await supabase.storage.from("artist-portfolios").createSignedUrl(portfolioUrl, 3600);
+            if (signedData?.signedUrl) portfolioUrl = signedData.signedUrl;
+          } else if (portfolioUrl && portfolioUrl.includes("/storage/v1/object/public/artist-portfolios/")) {
+            // Extract path from public URL and create signed URL
+            const pathMatch = portfolioUrl.split("/artist-portfolios/")[1];
+            if (pathMatch) {
+              const { data: signedData } = await supabase.storage.from("artist-portfolios").createSignedUrl(pathMatch, 3600);
+              if (signedData?.signedUrl) portfolioUrl = signedData.signedUrl;
+            }
+          }
+          map[a.id] = { name: a.name, portfolio_url: portfolioUrl };
+        }
         setArtistMap(map);
       }
       // Fetch assignments from event_artist_assignments

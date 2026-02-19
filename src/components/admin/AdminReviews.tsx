@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Send, MessageCircle } from "lucide-react";
+import { Star, Send, MessageCircle, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -41,6 +45,12 @@ const AdminReviews = () => {
       setReplyText(prev => ({ ...prev, [reviewId]: "" }));
     }
     setReplyingId(null);
+  };
+
+  const deleteReview = async (reviewId: string) => {
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Review Deleted" }); fetchReviews(); }
   };
 
   const filtered = reviews.filter(r => r.review_type === tab);
@@ -85,6 +95,15 @@ const AdminReviews = () => {
                       <Badge className={`border-none text-xs ${review.admin_reply ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
                         {review.admin_reply ? "Replied" : "Pending Reply"}
                       </Badge>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-destructive h-6 w-6 p-0"><Trash2 className="w-3 h-3" /></Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader><AlertDialogTitle>Delete Review?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this review.</AlertDialogDescription></AlertDialogHeader>
+                          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteReview(review.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                     {review.comment && <p className="text-sm font-sans bg-muted/50 rounded-lg p-3">{review.comment}</p>}
                     {review.admin_reply && (
