@@ -10,7 +10,7 @@ const MobileBottomNav = () => {
   const isMobile = useIsMobile();
 
   // Don't show on admin, dashboard (they have their own), or non-mobile
-  const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin"];
+  const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event"];
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
   const items = [

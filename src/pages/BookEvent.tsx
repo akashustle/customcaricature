@@ -83,13 +83,15 @@ const BookEvent = () => {
   };
 
   const pricing = getCustomerEventPrice();
-  const gatewayCharges = calculateGatewayCharges(pricing.advance);
+  // Gateway charges toggle - check user profile
+  const [gatewayEnabled, setGatewayEnabled] = useState(true);
+  const gatewayCharges = gatewayEnabled ? calculateGatewayCharges(pricing.advance) : 0;
   const totalPayable = pricing.advance + gatewayCharges;
 
   // Pre-fill from profile & fetch customer event pricing with real-time sync
   useEffect(() => {
     if (user) {
-      supabase.from("profiles").select("full_name, mobile, email, instagram_id, state, city, address, pincode").eq("user_id", user.id).maybeSingle()
+      supabase.from("profiles").select("full_name, mobile, email, instagram_id, state, city, address, pincode, gateway_charges_enabled").eq("user_id", user.id).maybeSingle()
         .then(({ data }) => {
           if (data) {
             setClientName(data.full_name || "");
@@ -98,8 +100,9 @@ const BookEvent = () => {
             setClientInstagram(data.instagram_id || "");
             if (data.state) setState(data.state);
             if (data.city) setCity(data.city);
-            if (data.address) setFullAddress(data.address);
+            // Don't auto-fill full address with email - only use physical address
             if (data.pincode) setPincode(data.pincode);
+            setGatewayEnabled((data as any).gateway_charges_enabled !== false);
           }
         });
       // Fetch customer-specific event pricing
@@ -516,9 +519,11 @@ const BookEvent = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Advance Payment</span><span className="font-semibold">{formatPrice(pricing.advance)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Payment Gateway Charges (2.6%)</span><span>{formatPrice(gatewayCharges)}</span>
-                </div>
+                {gatewayEnabled && (
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Payment Gateway Charges (2.6%)</span><span>{formatPrice(gatewayCharges)}</span>
+                  </div>
+                )}
                 <div className="border-t border-border pt-2 flex justify-between font-bold text-primary">
                   <span>You Pay Now (Satisfaction Guaranteed)</span><span>{formatPrice(totalPayable)}</span>
                 </div>

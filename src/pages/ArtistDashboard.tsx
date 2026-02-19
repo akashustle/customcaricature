@@ -252,8 +252,8 @@ const ArtistDashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans"><Home className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans hidden md:flex"><Home className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
           </div>
         </div>
       </header>
@@ -291,9 +291,9 @@ const ArtistDashboard = () => {
           </a>
         )}
 
-        {/* Tabs - Ritesh gets extra tab */}
+        {/* Tabs - Desktop only, mobile uses bottom nav */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full mb-4">
+          <TabsList className="w-full mb-4 hidden md:flex">
             <TabsTrigger value="events" className="flex-1 font-sans"><CalendarDays className="w-4 h-4 mr-1" />Events</TabsTrigger>
             {isRitesh && <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Orders</TabsTrigger>}
             <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-1" />Chat {chatUnread > 0 && <Badge className="ml-1 bg-destructive text-destructive-foreground text-[9px] h-4 min-w-4">{chatUnread}</Badge>}</TabsTrigger>
@@ -535,8 +535,29 @@ const ArtistDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {/* Mobile Bottom Nav for Artist Dashboard */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
+        <div className="flex items-center justify-around py-2">
+          <ArtistBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
+          <ArtistBottomNavItem icon={CalendarDays} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          {isRitesh && <ArtistBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />}
+          <ArtistBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} badge={chatUnread > 0 ? chatUnread : undefined} />
+          <ArtistBottomNavItem icon={CalendarOff} label="Block" active={activeTab === "blocked"} onClick={() => setActiveTab("blocked")} />
+          <ArtistBottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
+        </div>
+      </div>
     </div>
   );
 };
+
+const ArtistBottomNavItem = ({ icon: Icon, label, active, onClick, badge }: { icon: any; label: string; active: boolean; onClick: () => void; badge?: number }) => (
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg transition-colors relative ${active ? "text-primary" : "text-muted-foreground"}`}>
+    <Icon className="w-5 h-5" />
+    <span className="text-[10px] font-sans font-medium">{label}</span>
+    {badge && badge > 0 && (
+      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[8px] rounded-full w-4 h-4 flex items-center justify-center">{badge}</span>
+    )}
+  </button>
+);
 
 export default ArtistDashboard;
