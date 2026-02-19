@@ -40,6 +40,7 @@ import AdminReviews from "@/components/admin/AdminReviews";
 import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import { MessageCircle } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 
 type Order = {
   id: string;
@@ -483,7 +484,8 @@ const Admin = () => {
             <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-full border-[3px] border-primary/50 shadow-lg" />
             <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
               <LogOut className="w-4 h-4 mr-2" /> Logout
