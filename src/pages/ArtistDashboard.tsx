@@ -133,7 +133,7 @@ const ArtistDashboard = () => {
   const fetchOrders = async (artistId: string) => {
     const { data } = await supabase
       .from("orders")
-      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date, art_confirmation_status")
+      .select("id, order_type, style, face_count, status, customer_name, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
       .eq("assigned_artist_id", artistId)
       .order("created_at", { ascending: false });
     if (data) setOrders(data as any);

@@ -68,6 +68,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Nunito', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Calligraphy font for headings */
@@ -79,6 +81,17 @@
   h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
     font-weight: 700;
+  }
+
+  /* Make numbers clearly visible everywhere */
+  .font-mono, [class*="font-mono"] {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /* Improve number readability in prices, amounts, counts */
+  p, span, td, th, div {
+    font-variant-numeric: tabular-nums;
   }
 }
 
