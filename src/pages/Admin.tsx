@@ -43,6 +43,7 @@ import AdminVoiceMonitor from "@/components/admin/AdminVoiceMonitor";
 import { MessageCircle, Radio } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import LocationDropdowns from "@/components/LocationDropdowns";
+import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 
 type Order = {
@@ -540,18 +541,18 @@ const Admin = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
                 </div>
-                <Dialog open={showAddOrder} onOpenChange={setShowAddOrder} modal={false}>
+                <Dialog open={showAddOrder} onOpenChange={setShowAddOrder}>
                   <DialogTrigger asChild>
                     <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Order</Button>
                   </DialogTrigger>
-                   <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg" onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
+                   <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg z-50" onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
                     <DialogHeader><DialogTitle className="font-display">Add Manual Order</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div>
                         <Label>Select Customer *</Label>
                         <Select value={manualOrder.customerId} onValueChange={(v) => setManualOrder({ ...manualOrder, customerId: v })}>
                           <SelectTrigger><SelectValue placeholder="Choose customer..." /></SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-[200]">
                             {customers.map((c) => (
                               <SelectItem key={c.user_id} value={c.user_id}>{c.full_name} ({c.email})</SelectItem>
                             ))}
@@ -563,7 +564,7 @@ const Admin = () => {
                           <Label>Order Type *</Label>
                           <Select value={manualOrder.orderType} onValueChange={(v) => setManualOrder({ ...manualOrder, orderType: v })}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[200]">
                               <SelectItem value="single">Single</SelectItem>
                               <SelectItem value="couple">Couple</SelectItem>
                               <SelectItem value="group">Group</SelectItem>
@@ -574,7 +575,7 @@ const Admin = () => {
                           <Label>Style</Label>
                           <Select value={manualOrder.style} onValueChange={(v) => setManualOrder({ ...manualOrder, style: v })}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[200]">
                               <SelectItem value="cute">Cute</SelectItem>
                               <SelectItem value="romantic">Romantic</SelectItem>
                               <SelectItem value="fun">Fun</SelectItem>
@@ -603,15 +604,32 @@ const Admin = () => {
                       </div>
                       <div>
                         <Label className="mb-1 block">State / District / City</Label>
-                        <LocationDropdowns
-                          state={manualOrder.deliveryState}
-                          district={manualOrder.deliveryDistrict}
-                          city={manualOrder.deliveryCity}
-                          onStateChange={(v) => setManualOrder({ ...manualOrder, deliveryState: v, deliveryDistrict: "", deliveryCity: "" })}
-                          onDistrictChange={(v) => setManualOrder({ ...manualOrder, deliveryDistrict: v, deliveryCity: "" })}
-                          onCityChange={(v) => setManualOrder({ ...manualOrder, deliveryCity: v })}
-                          compact
-                        />
+                        <div className="grid grid-cols-3 gap-2">
+                          <Select value={manualOrder.deliveryState} onValueChange={(v) => setManualOrder({ ...manualOrder, deliveryState: v, deliveryDistrict: "", deliveryCity: "" })}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="State" /></SelectTrigger>
+                            <SelectContent className="max-h-60 z-[200]">
+                              {getStates().map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <Select value={manualOrder.deliveryDistrict} onValueChange={(v) => setManualOrder({ ...manualOrder, deliveryDistrict: v, deliveryCity: "" })} disabled={!manualOrder.deliveryState}>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="District" /></SelectTrigger>
+                            <SelectContent className="max-h-60 z-[200]">
+                              {manualOrder.deliveryState && getDistricts(manualOrder.deliveryState).map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                              <SelectItem value="__other__">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {manualOrder.deliveryDistrict === "__other__" ? (
+                            <Input className="h-8 text-xs" placeholder="City" value={manualOrder.deliveryCity} onChange={(e) => setManualOrder({ ...manualOrder, deliveryCity: e.target.value })} />
+                          ) : (
+                            <Select value={manualOrder.deliveryCity} onValueChange={(v) => setManualOrder({ ...manualOrder, deliveryCity: v })} disabled={!manualOrder.deliveryDistrict}>
+                              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="City" /></SelectTrigger>
+                              <SelectContent className="max-h-60 z-[200]">
+                                {manualOrder.deliveryDistrict && manualOrder.deliveryState && getCities(manualOrder.deliveryState, manualOrder.deliveryDistrict).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                <SelectItem value="__other__">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <Label>Pincode</Label>
