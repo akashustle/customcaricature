@@ -384,9 +384,15 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
       }
     };
     fetchArtwork();
+    // Listen for artwork_ready_photos changes
+    const ch = supabase.channel("user-artwork-photos")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "artwork_ready_photos" }, () => fetchArtwork())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [orders, userId]);
 
   const handleConfirmDispatch = async (orderId: string) => {
+    if (!confirm("⚠️ Are you sure you want to confirm dispatch? This action cannot be undone.")) return;
     setConfirmingOrderId(orderId);
     await supabase.from("orders").update({ art_confirmation_status: "confirmed" } as any).eq("id", orderId);
     toast({ title: "✅ Dispatch confirmed!", description: "Your artwork will be dispatched soon." });
@@ -480,7 +486,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                       </div>
                     )}
                     {/* Art Ready Confirmation Section - only show if pending */}
-                    {order.status === "artwork_ready" && order.art_confirmation_status === "pending" && (
+                    {order.status === "artwork_ready" && (!order.art_confirmation_status || order.art_confirmation_status === "pending") && (
                       <div className="mt-3 bg-primary/5 rounded-xl p-4 space-y-3 border border-primary/20">
                         <p className="font-display text-sm font-bold text-primary">🎨 Your Artwork is Ready!</p>
                         <p className="text-xs font-sans text-muted-foreground">Please review your artwork and confirm to proceed with dispatch.</p>
@@ -628,7 +634,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           <Row label="Email" value={profile.email || "—"} />
           <Row label="Mobile" value={profile.mobile ? `+91 ${profile.mobile}` : "—"} />
           <Row label="Instagram" value={profile.instagram_id || "—"} />
-          <Row label="Address" value={profile.address || "—"} />
+          <Row label="Full Address" value={[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(", ") || "—"} />
           <Row label="City" value={profile.city || "—"} />
           <Row label="State" value={profile.state || "—"} />
           <Row label="Pincode" value={profile.pincode || "—"} />
