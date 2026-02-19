@@ -17,35 +17,126 @@ type Notification = {
   created_at: string;
 };
 
-// Notification ding sound
-const playNotificationDing = () => {
+// Different sounds for different notification types
+const playNotificationSound = (type: string) => {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 1046.5; // C6
-    osc.type = "sine";
-    gain.gain.setValueAtTime(0.4, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.6);
-    // Second tone for ding-dong
-    setTimeout(() => {
-      try {
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.frequency.value = 784; // G5
-        osc2.type = "sine";
-        gain2.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-        osc2.start(ctx.currentTime);
-        osc2.stop(ctx.currentTime + 0.8);
-      } catch {}
-    }, 150);
+    
+    if (type === "order") {
+      // Cash register ding - two bright tones
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 1318.5; // E6
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+      setTimeout(() => {
+        try {
+          const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+          o2.connect(g2); g2.connect(ctx.destination);
+          o2.frequency.value = 1567.98; // G6
+          o2.type = "sine";
+          g2.gain.setValueAtTime(0.35, ctx.currentTime);
+          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.4);
+        } catch {}
+      }, 100);
+    } else if (type === "event") {
+      // Celebration fanfare - ascending three notes
+      [0, 150, 300].forEach((delay, i) => {
+        setTimeout(() => {
+          try {
+            const o = ctx.createOscillator(); const g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value = [523.25, 659.25, 783.99][i]; // C5, E5, G5
+            o.type = "triangle";
+            g.gain.setValueAtTime(0.3, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.4);
+          } catch {}
+        }, delay);
+      });
+    } else if (type === "chat") {
+      // Soft bubble pop
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880; // A5
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.15);
+      setTimeout(() => {
+        try {
+          const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+          o2.connect(g2); g2.connect(ctx.destination);
+          o2.frequency.value = 1174.66; // D6
+          o2.type = "sine";
+          g2.gain.setValueAtTime(0.25, ctx.currentTime);
+          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.2);
+        } catch {}
+      }, 80);
+    } else if (type === "agent_request") {
+      // Urgent attention - rapid beeping
+      [0, 200, 400].forEach((delay) => {
+        setTimeout(() => {
+          try {
+            const o = ctx.createOscillator(); const g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value = 1046.5; // C6
+            o.type = "square";
+            g.gain.setValueAtTime(0.2, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.12);
+          } catch {}
+        }, delay);
+      });
+    } else if (type === "payment") {
+      // Success chime
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 783.99; // G5
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+      setTimeout(() => {
+        try {
+          const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+          o2.connect(g2); g2.connect(ctx.destination);
+          o2.frequency.value = 1046.5; // C6
+          o2.type = "sine";
+          g2.gain.setValueAtTime(0.3, ctx.currentTime);
+          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+          o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.6);
+        } catch {}
+      }, 200);
+    } else {
+      // Default ding-dong
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 1046.5;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.6);
+      setTimeout(() => {
+        try {
+          const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+          o2.connect(g2); g2.connect(ctx.destination);
+          o2.frequency.value = 784;
+          o2.type = "sine";
+          g2.gain.setValueAtTime(0.3, ctx.currentTime);
+          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+          o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.8);
+        } catch {}
+      }, 150);
+    }
   } catch {}
 };
 
@@ -54,7 +145,6 @@ const NotificationBell = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
-  const prevCountRef = useRef(0);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -73,7 +163,6 @@ const NotificationBell = () => {
 
     fetchNotifications();
 
-    // Request notification permission
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
@@ -88,9 +177,7 @@ const NotificationBell = () => {
       }, (payload) => {
         const newNotif = payload.new as any;
         setNotifications(prev => [newNotif, ...prev]);
-        // Play sound
-        playNotificationDing();
-        // Browser notification
+        playNotificationSound(newNotif.type);
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification(newNotif.title, { body: newNotif.message, icon: "/logo.png" });
         }
@@ -114,10 +201,7 @@ const NotificationBell = () => {
 
   const handleClick = (n: Notification) => {
     if (!n.read) markAsRead(n.id);
-    if (n.link) {
-      navigate(n.link);
-      setOpen(false);
-    }
+    if (n.link) { navigate(n.link); setOpen(false); }
   };
 
   const getTypeIcon = (type: string) => {
@@ -126,6 +210,7 @@ const NotificationBell = () => {
       case "event": return "🎉";
       case "payment": return "💰";
       case "chat": return "💬";
+      case "agent_request": return "🆘";
       default: return "🔔";
     }
   };
@@ -134,11 +219,7 @@ const NotificationBell = () => {
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-full hover:bg-muted transition-colors"
-        aria-label="Notifications"
-      >
+      <button onClick={() => setOpen(!open)} className="relative p-2 rounded-full hover:bg-muted transition-colors" aria-label="Notifications">
         <Bell className="w-5 h-5 text-foreground" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
@@ -181,9 +262,7 @@ const NotificationBell = () => {
                   <div
                     key={n.id}
                     onClick={() => handleClick(n)}
-                    className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50 ${
-                      !n.read ? "bg-primary/5" : ""
-                    }`}
+                    className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50 ${!n.read ? "bg-primary/5" : ""}`}
                   >
                     <span className="text-base mt-0.5">{getTypeIcon(n.type)}</span>
                     <div className="flex-1 min-w-0">

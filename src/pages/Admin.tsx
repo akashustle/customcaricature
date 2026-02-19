@@ -116,7 +116,8 @@ const Admin = () => {
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual">("all");
+  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual" | "artist">("all");
+  const [artistProfiles, setArtistProfiles] = useState<any[]>([]);
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
   const [negotiateOrderId, setNegotiateOrderId] = useState<string | null>(null);
@@ -164,6 +165,7 @@ const Admin = () => {
       fetchCaricatureTypes();
       fetchCustomers();
       fetchAdminProfile();
+      fetchArtistProfiles();
 
       // Real-time subscriptions
       const ch = supabase
@@ -178,6 +180,11 @@ const Admin = () => {
       navigate("/customcad75");
     }
   }, [user, authLoading]);
+
+  const fetchArtistProfiles = async () => {
+    const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
+    if (data) setArtistProfiles(data as any);
+  };
 
   const fetchAdminProfile = async () => {
     if (!user) return;
@@ -461,6 +468,10 @@ const Admin = () => {
       list = list.filter(c => !(c as any).is_manual);
     } else if (customerTab === "manual") {
       list = list.filter(c => (c as any).is_manual);
+    } else if (customerTab === "artist") {
+      // Show artists with auth credentials from artist profiles
+      const artistUserIds = artistProfiles.filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id);
+      list = list.filter(c => artistUserIds.includes(c.user_id));
     }
     return list;
   };
@@ -529,7 +540,7 @@ const Admin = () => {
                   <DialogTrigger asChild>
                     <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Order</Button>
                   </DialogTrigger>
-                  <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg">
+                   <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
                     <DialogHeader><DialogTitle className="font-display">Add Manual Order</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div>
@@ -961,6 +972,7 @@ const Admin = () => {
                 { value: "all" as const, label: `All (${customers.length})` },
                 { value: "registered" as const, label: "Registered" },
                 { value: "manual" as const, label: "Manual" },
+                { value: "artist" as const, label: `Artists (${artistProfiles.filter((a: any) => a.auth_user_id).length})` },
               ].map((tab) => (
                 <Button
                   key={tab.value}
