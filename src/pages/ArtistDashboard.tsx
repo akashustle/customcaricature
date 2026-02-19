@@ -245,11 +245,11 @@ const ArtistDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-            <h1 className="font-display text-lg font-bold">Artist Dashboard</h1>
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full border border-border" />
+            <h1 className="font-calligraphy text-xl font-bold">Artist Dashboard</h1>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />

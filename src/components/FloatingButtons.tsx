@@ -12,7 +12,6 @@ const FloatingButtons = () => {
     window.dispatchEvent(new CustomEvent("open-live-chat"));
   };
 
-  // Only show on homepage and public info pages
   const allowedPaths = ["/", "/about", "/terms", "/privacy", "/refund", "/shipping", "/track-order", "/event-policy"];
   if (!allowedPaths.includes(location.pathname)) return null;
 
@@ -22,19 +21,20 @@ const FloatingButtons = () => {
         href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I need help with my caricature order.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform btn-3d"
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity"
         aria-label="WhatsApp Support"
-        style={{ boxShadow: "0 4px 0 #1da851, 0 6px 12px rgba(0,0,0,0.15)" }}
+        style={{ boxShadow: "0 2px 10px hsl(28 27% 72% / 0.3)" }}
       >
         <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
       </a>
       <button
         onClick={openLiveChat}
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform relative btn-3d"
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-card border border-border text-foreground flex items-center justify-center hover:opacity-90 transition-opacity relative"
         aria-label="Live Chat"
+        style={{ boxShadow: "0 2px 10px hsl(28 27% 72% / 0.2)" }}
       >
         <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
-        <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[8px] font-bold rounded-full px-1.5 py-0.5 animate-pulse">LIVE</span>
+        <span className="absolute -top-1 -right-1 text-[8px] font-bold rounded-full px-1.5 py-0.5 bg-primary text-primary-foreground">LIVE</span>
       </button>
     </div>
   );
