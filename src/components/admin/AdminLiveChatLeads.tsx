@@ -162,7 +162,7 @@ const AdminLiveChatLeads = ({ adminUserId }: { adminUserId: string }) => {
   };
 
   const selectedSessionData = sessions.find(s => s.id === selectedSession);
-  const waitingCount = sessions.filter(s => s.status === "waiting").length;
+  const waitingCount = sessions.filter(s => s.status === "waiting" || s.status === "flow").length;
 
   return (
     <div className="space-y-4">
@@ -214,7 +214,7 @@ const AdminLiveChatLeads = ({ adminUserId }: { adminUserId: string }) => {
                   <span>·</span>
                   <span>{new Date(s.started_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                 </div>
-                {s.status === "waiting" && (
+                {(s.status === "waiting" || s.status === "flow") && (
                   <Button size="sm" className="w-full mt-1 rounded-full font-sans text-xs btn-3d" onClick={(e) => { e.stopPropagation(); handleJoinChat(s.id); }}>
                     <LogIn className="w-3 h-3 mr-1" /> Join Chat
                   </Button>
@@ -244,7 +244,7 @@ const AdminLiveChatLeads = ({ adminUserId }: { adminUserId: string }) => {
                   </p>
                 </div>
                 <div className="flex gap-1">
-                  {selectedSessionData?.status === "waiting" && (
+                  {(selectedSessionData?.status === "waiting" || selectedSessionData?.status === "flow") && (
                     <Button size="sm" className="rounded-full text-xs font-sans" onClick={() => handleJoinChat(selectedSession)}>
                       <LogIn className="w-3 h-3 mr-1" /> Join
                     </Button>

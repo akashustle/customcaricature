@@ -55,11 +55,15 @@ const Login = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-        body: { email, secret_code: secretCode },
+        body: { email: email.trim().toLowerCase(), secret_code: secretCode },
       });
-      if (error) throw error;
-      if (data?.error) {
-        toast({ title: "Login failed", description: data.error, variant: "destructive" });
+      if (error) {
+        toast({ title: "Login failed", description: "Could not connect. Please try again.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+      if (!data?.success) {
+        toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" });
         setLoading(false);
         return;
       }
