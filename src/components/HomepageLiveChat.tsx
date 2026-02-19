@@ -459,12 +459,12 @@ const HomepageLiveChat = () => {
 
   return (
     <>
-      {/* Chat Window - opened via FloatingButtons or mobile bottom nav */}
+      {/* Chat Window - full screen on mobile, popup on desktop */}
       {open && (
         <div
-          className="fixed bottom-20 right-4 md:bottom-6 md:right-24 z-[60] w-[340px] max-h-[75vh] shadow-2xl rounded-2xl overflow-hidden"
+          className="fixed inset-0 md:inset-auto md:bottom-6 md:right-24 z-[60] md:w-[380px] md:max-h-[75vh] md:rounded-2xl shadow-2xl overflow-hidden"
         >
-            <Card className="border-0 shadow-none h-full flex flex-col">
+            <Card className="border-0 shadow-none h-full flex flex-col md:rounded-2xl">
               <CardHeader className="py-3 px-4 bg-primary text-primary-foreground flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-sans font-medium flex items-center gap-2">
                   <MessageCircle className="w-4 h-4" /> Live Chat
@@ -473,7 +473,7 @@ const HomepageLiveChat = () => {
                   <X className="w-4 h-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="p-0 flex flex-col flex-1" style={{ maxHeight: "55vh" }}>
+              <CardContent className="p-0 flex flex-col flex-1" style={{ maxHeight: "calc(100vh - 60px)" }}>
                 <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 250 }}>
                   {messages.length === 0 && (
                     <p className="text-center text-xs text-muted-foreground py-8 font-sans">

@@ -6,31 +6,29 @@ const WHATSAPP_NUMBER = "918369594271";
 const FloatingButtons = () => {
   const isMobile = useIsMobile();
 
-  // Hide on mobile to avoid overlapping bottom nav
-  if (isMobile) return null;
-
   const openLiveChat = () => {
     window.dispatchEvent(new CustomEvent("open-live-chat"));
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+    <div className={`fixed z-50 flex flex-col gap-3 ${isMobile ? "bottom-20 right-4" : "bottom-6 right-6"}`}>
       <a
         href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I need help with my caricature order.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform btn-3d"
         aria-label="WhatsApp Support"
+        style={{ boxShadow: "0 4px 0 #1da851, 0 6px 12px rgba(0,0,0,0.15)" }}
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
       </a>
       <button
         onClick={openLiveChat}
-        className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform relative"
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform relative btn-3d"
         aria-label="Live Chat"
       >
-        <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[8px] font-bold rounded-full px-1.5 py-0.5">LIVE</span>
+        <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+        <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[8px] font-bold rounded-full px-1.5 py-0.5 animate-pulse">LIVE</span>
       </button>
     </div>
   );
