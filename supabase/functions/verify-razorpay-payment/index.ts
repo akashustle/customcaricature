@@ -137,6 +137,7 @@ serve(async (req) => {
           razorpay_order_id,
           razorpay_payment_id,
           payment_status: "fully_paid",
+          remaining_amount: 0,
         })
         .eq("id", order_id);
 

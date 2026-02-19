@@ -205,6 +205,36 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          message: string
+          read: boolean
+          receiver_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message: string
+          read?: boolean
+          receiver_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message?: string
+          read?: boolean
+          receiver_id?: string | null
+          sender_id?: string
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           created_at: string
@@ -522,6 +552,7 @@ export type Database = {
         Row: {
           amount: number
           artist_name: string | null
+          assigned_artist_id: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city: string | null
           country: string | null
@@ -556,6 +587,7 @@ export type Database = {
         Insert: {
           amount: number
           artist_name?: string | null
+          assigned_artist_id?: string | null
           caricature_type: Database["public"]["Enums"]["caricature_type"]
           city?: string | null
           country?: string | null
@@ -590,6 +622,7 @@ export type Database = {
         Update: {
           amount?: number
           artist_name?: string | null
+          assigned_artist_id?: string | null
           caricature_type?: Database["public"]["Enums"]["caricature_type"]
           city?: string | null
           country?: string | null
@@ -621,7 +654,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_assigned_artist_id_fkey"
+            columns: ["assigned_artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payment_history: {
         Row: {
