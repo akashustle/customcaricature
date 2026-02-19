@@ -38,6 +38,7 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
 import AdminChat from "@/components/admin/AdminChat";
+import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import { MessageCircle } from "lucide-react";
 
 type Order = {
@@ -499,6 +500,7 @@ const Admin = () => {
             <TabsTrigger value="events" className="font-sans flex-1 rounded-full transition-all"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
             <TabsTrigger value="payments" className="font-sans flex-1 rounded-full transition-all"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
             <TabsTrigger value="chat" className="font-sans flex-1 rounded-full transition-all"><MessageCircle className="w-4 h-4 mr-1" />Chat</TabsTrigger>
+            <TabsTrigger value="live-leads" className="font-sans flex-1 rounded-full transition-all">💬 Live Leads</TabsTrigger>
             <TabsTrigger value="event-users" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
             <TabsTrigger value="pricing" className="font-sans flex-1 rounded-full transition-all"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
             <TabsTrigger value="customers" className="font-sans flex-1 rounded-full transition-all"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
@@ -1101,6 +1103,10 @@ const Admin = () => {
             {user && <AdminChat adminUserId={user.id} />}
           </TabsContent>
 
+          <TabsContent value="live-leads">
+            {user && <AdminLiveChatLeads adminUserId={user.id} />}
+          </TabsContent>
+
           <TabsContent value="reviews">
             <AdminReviews />
           </TabsContent>
@@ -1260,6 +1266,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
           <AdminBottomNavItem icon={Star} label="Reviews" active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} />
           <AdminBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
+          <AdminBottomNavItem icon={MessageCircle} label="Leads" active={activeTab === "live-leads"} onClick={() => setActiveTab("live-leads")} />
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
