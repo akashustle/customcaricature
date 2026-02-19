@@ -540,11 +540,11 @@ const Admin = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
                 </div>
-                <Dialog open={showAddOrder} onOpenChange={setShowAddOrder}>
+                <Dialog open={showAddOrder} onOpenChange={setShowAddOrder} modal={false}>
                   <DialogTrigger asChild>
                     <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Order</Button>
                   </DialogTrigger>
-                   <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
+                   <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg" onInteractOutside={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()}>
                     <DialogHeader><DialogTitle className="font-display">Add Manual Order</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div>

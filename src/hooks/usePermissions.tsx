@@ -29,9 +29,17 @@ export const usePermissions = (requestOnMount = true) => {
       navigator.mediaDevices?.getUserMedia({ audio: true })
         .then(stream => {
           setMicrophone("granted");
-          stream.getTracks().forEach(t => t.stop()); // Stop immediately, just checking
+          stream.getTracks().forEach(t => t.stop());
         })
         .catch(() => setMicrophone("denied"));
+
+      // Request camera (for photo/file access)
+      navigator.mediaDevices?.getUserMedia({ video: true })
+        .then(stream => {
+          setCamera("granted");
+          stream.getTracks().forEach(t => t.stop());
+        })
+        .catch(() => setCamera("denied"));
     }
   }, [requestOnMount]);
 
