@@ -386,6 +386,46 @@ const BookEvent = () => {
           </CardContent>
         </Card>
 
+        {/* Pricing Range Preview (after city selected, before availability check) */}
+        {state && district && actualCity && !availabilityChecked && (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4 space-y-2">
+              <p className="font-sans font-semibold text-sm flex items-center gap-2">💰 Estimated Pricing Range</p>
+              {(() => {
+                const mumbaiDistricts = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
+                const regionIsMumbai = state === "Maharashtra" && mumbaiDistricts.includes(district);
+                const region = regionIsMumbai ? "mumbai" : "pan_india";
+                // Check customer-specific pricing first
+                const cpRegion = regionIsMumbai ? "mumbai" : "outside";
+                const cp = customerEventPricing.filter((p: any) => p.region === cpRegion);
+                if (cp.length > 0) {
+                  const minPrice = Math.min(...cp.map((p: any) => p.custom_total_price));
+                  const maxPrice = Math.max(...cp.map((p: any) => p.custom_total_price));
+                  return (
+                    <p className="font-sans text-lg font-bold text-primary">
+                      {formatPrice(minPrice)} – {formatPrice(maxPrice)}
+                      <span className="text-xs font-normal text-muted-foreground ml-2">(Custom pricing for you)</span>
+                    </p>
+                  );
+                }
+                const regionPricing = dbPricing.filter((p: any) => p.region === region || (region === "pan_india" && p.region === "outside"));
+                if (regionPricing.length > 0) {
+                  const minPrice = Math.min(...regionPricing.map((p: any) => p.total_price));
+                  const maxPrice = Math.max(...regionPricing.map((p: any) => p.total_price));
+                  return (
+                    <p className="font-sans text-lg font-bold text-primary">
+                      {formatPrice(minPrice)} – {formatPrice(maxPrice)}
+                      <span className="text-xs font-normal text-muted-foreground ml-2">({regionIsMumbai ? "Mumbai" : "Pan India"} rates)</span>
+                    </p>
+                  );
+                }
+                return <p className="text-sm text-muted-foreground font-sans">Pricing will be shown after availability check</p>;
+              })()}
+              <p className="text-[11px] text-muted-foreground font-sans">Final price depends on number of artists and extra hours. Check availability to see full pricing.</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Availability Check */}
         {eventDate && actualCity && (
           <Card>

@@ -12,6 +12,7 @@ import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import NotificationBell from "@/components/NotificationBell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -250,7 +251,8 @@ const ArtistDashboard = () => {
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
             <h1 className="font-display text-lg font-bold">Artist Dashboard</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans hidden md:flex"><Home className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
