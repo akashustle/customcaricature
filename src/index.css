@@ -2,75 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* #F6F1EB - Ivory Canvas */
+    /* #F6F1EB - Ivory Canvas (Base Background) */
     --background: 30 31% 94%;
-    /* #3F3A36 - Caricature Charcoal */
+    /* #3F3A36 - Soft charcoal for text (not black) */
     --foreground: 27 7% 23%;
 
-    /* #EFE7DC - Warm Parchment */
-    --card: 34 35% 90%;
+    /* #EFE7DC - Warm Parchment (Cards) */
+    --card: 30 30% 90%;
     --card-foreground: 27 7% 23%;
 
-    --popover: 34 35% 90%;
+    --popover: 30 30% 90%;
     --popover-foreground: 27 7% 23%;
 
-    /* #B08A3E - Sketch Gold */
-    --primary: 40 48% 47%;
-    --primary-foreground: 30 31% 94%;
+    /* #CBB9A4 - Soft Mocha (Primary accent) */
+    --primary: 28 27% 72%;
+    --primary-foreground: 27 7% 23%;
 
-    /* #CBB9A4 - Soft Mocha */
-    --secondary: 31 27% 72%;
+    /* #EFE7DC - Same warm parchment for secondary */
+    --secondary: 30 30% 90%;
     --secondary-foreground: 27 7% 23%;
 
-    /* #EFE7DC lighter */
-    --muted: 34 35% 90%;
-    /* #5A4E44 - Ink Brown */
-    --muted-foreground: 27 13% 31%;
+    /* #EFE7DC for muted */
+    --muted: 30 30% 90%;
+    /* Soft dark gray for muted text */
+    --muted-foreground: 27 10% 40%;
 
-    /* #8C6B3E - Brush Bronze */
-    --accent: 34 39% 40%;
-    --accent-foreground: 30 31% 94%;
+    /* #CBB9A4 - Mocha for accent */
+    --accent: 28 27% 72%;
+    --accent-foreground: 27 7% 23%;
 
-    /* Muted brown for errors instead of red */
-    --destructive: 15 40% 42%;
+    /* Muted warm tone for destructive (no red) */
+    --destructive: 20 25% 50%;
     --destructive-foreground: 30 31% 94%;
 
-    --border: 31 27% 72%;
-    --input: 31 27% 72%;
-    --ring: 40 48% 47%;
+    /* #CBB9A4 for borders */
+    --border: 28 27% 78%;
+    --input: 28 27% 78%;
+    --ring: 28 27% 72%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 30 31% 94%;
     --sidebar-foreground: 27 7% 23%;
-    --sidebar-primary: 40 48% 47%;
-    --sidebar-primary-foreground: 30 31% 94%;
-    --sidebar-accent: 34 35% 90%;
+    --sidebar-primary: 28 27% 72%;
+    --sidebar-primary-foreground: 27 7% 23%;
+    --sidebar-accent: 30 30% 90%;
     --sidebar-accent-foreground: 27 7% 23%;
-    --sidebar-border: 31 27% 72%;
-    --sidebar-ring: 40 48% 47%;
+    --sidebar-border: 28 27% 78%;
+    --sidebar-ring: 28 27% 72%;
 
-    /* Extended palette */
-    --warm-gold: 40 48% 47%;
-    --deep-bronze: 34 39% 40%;
-    --soft-peach: 34 35% 90%;
-    --rich-mocha: 31 27% 72%;
-    --highlight-amber: 40 48% 52%;
+    /* Success olive - used sparingly */
     --success: 83 16% 42%;
-
-    --gradient-warm: linear-gradient(135deg, hsl(40, 48%, 47%), hsl(40, 48%, 52%));
-    --gradient-hero: linear-gradient(160deg, hsl(30, 31%, 94%), hsl(34, 35%, 90%), hsl(30, 31%, 94%));
-    --gradient-accent: linear-gradient(135deg, hsl(40, 48%, 47%), hsl(34, 39%, 40%));
-    --shadow-warm: 0 10px 40px -10px hsl(40 48% 47% / 0.15);
-    --shadow-card: 0 4px 24px -4px hsl(27 7% 23% / 0.06), 0 1px 0 hsl(31 27% 72% / 0.5);
-    --shadow-3d: 0 4px 0 hsl(34 39% 35%), 0 8px 16px hsl(27 7% 23% / 0.08);
-    --shadow-glow: 0 0 16px hsl(40 48% 47% / 0.08);
   }
-
 }
 
 @layer base {
@@ -79,18 +66,35 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Nunito', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+  /* Calligraphy font for headings */
+  h1, h2, h3 {
+    font-family: 'Caveat', cursive;
+    font-weight: 600;
+  }
+
+  h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
   }
 }
 
 @layer utilities {
+  /* Calligraphy class for intentional calligraphy use */
+  .font-calligraphy {
+    font-family: 'Caveat', cursive;
+  }
+
+  .font-body {
+    font-family: 'Nunito', sans-serif;
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(31 27% 72%) transparent;
+    scrollbar-color: hsl(28 27% 78%) transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
     height: 4px;
@@ -99,106 +103,103 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(31 27% 72%);
+    background: hsl(28 27% 78%);
     border-radius: 4px;
   }
-  .btn-3d {
-    @apply relative transition-all duration-200;
-    box-shadow: 0 3px 0 hsl(34 39% 35%), 0 5px 10px hsl(27 7% 23% / 0.1);
-    transform: translateY(0);
-    background-image: linear-gradient(180deg, hsl(40 48% 50%) 0%, hsl(40 48% 44%) 100%);
+
+  /* Soft button style - no 3D, just gentle hover */
+  .btn-soft {
+    @apply relative transition-all duration-200 rounded-full;
+    background: hsl(28 27% 72%);
+    color: hsl(27 7% 23%);
   }
-  .btn-3d:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 0 hsl(34 39% 35%), 0 8px 20px hsl(27 7% 23% / 0.14);
-    background-image: linear-gradient(180deg, hsl(40 48% 54%) 0%, hsl(40 48% 47%) 100%);
-  }
-  .btn-3d:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 hsl(34 39% 35%), 0 2px 4px hsl(27 7% 23% / 0.06);
+  .btn-soft:hover {
+    opacity: 0.88;
+    transform: scale(1.015);
   }
 
+  /* Legacy btn-3d mapped to soft style */
+  .btn-3d {
+    @apply relative transition-all duration-200;
+    box-shadow: none;
+  }
+  .btn-3d:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  /* Soft card - no heavy shadows */
   .card-3d {
-    box-shadow: 0 6px 24px -6px hsl(27 7% 23% / 0.08), 0 1px 0 hsl(31 27% 72% / 0.5), inset 0 1px 0 hsl(30 31% 96%);
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid hsl(31 27% 72% / 0.6);
+    background: hsl(30 30% 90%);
+    border: 1px solid hsl(28 27% 78% / 0.6);
+    box-shadow: 0 2px 8px hsl(27 7% 23% / 0.04);
+    transition: all 0.3s ease;
+    border-radius: 1rem;
   }
   .card-3d:hover {
-    transform: translateY(-4px) scale(1.005);
-    box-shadow: 0 16px 40px -10px hsl(27 7% 23% / 0.12), 0 2px 0 hsl(31 27% 72% / 0.5), inset 0 1px 0 hsl(30 31% 96%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px hsl(27 7% 23% / 0.06);
   }
 
   .admin-card {
-    background: linear-gradient(145deg, hsl(34 35% 91%), hsl(34 35% 88%));
-    border: 1px solid hsl(31 27% 72% / 0.6);
-    box-shadow: 0 6px 20px -4px hsl(27 7% 23% / 0.08), 0 2px 0 hsl(31 27% 72% / 0.4), inset 0 1px 0 hsl(30 31% 96%);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: hsl(30 30% 90%);
+    border: 1px solid hsl(28 27% 78% / 0.6);
+    box-shadow: 0 2px 8px hsl(27 7% 23% / 0.04);
+    transition: all 0.3s ease;
     border-radius: 1rem;
   }
   .admin-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px -6px hsl(27 7% 23% / 0.12), 0 3px 0 hsl(31 27% 72% / 0.4), inset 0 1px 0 hsl(30 31% 96%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(27 7% 23% / 0.06);
   }
 
   .admin-stat-card {
-    background: linear-gradient(145deg, hsl(34 35% 91%), hsl(34 35% 87%));
-    border: 1px solid hsl(31 27% 72% / 0.6);
-    box-shadow: 0 4px 12px -2px hsl(27 7% 23% / 0.06), 0 1px 0 hsl(31 27% 72% / 0.4), inset 0 1px 0 hsl(30 31% 96%);
+    background: hsl(30 30% 90%);
+    border: 1px solid hsl(28 27% 78% / 0.6);
+    box-shadow: 0 2px 6px hsl(27 7% 23% / 0.03);
     border-radius: 1rem;
     transition: all 0.25s ease;
   }
   .admin-stat-card:hover {
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 10px 24px -4px hsl(40 48% 47% / 0.12), 0 2px 0 hsl(31 27% 72% / 0.4);
+    transform: translateY(-1px);
   }
 
   .admin-header {
-    background: linear-gradient(135deg, hsl(30 31% 94%), hsl(34 35% 90%));
-    border-bottom: 2px solid hsl(40 48% 47% / 0.2);
-    box-shadow: 0 2px 12px hsl(27 7% 23% / 0.05);
+    background: hsl(30 31% 94%);
+    border-bottom: 1px solid hsl(28 27% 78%);
   }
 
   .admin-tab-active {
-    background: linear-gradient(135deg, hsl(40 48% 47%), hsl(40 48% 52%));
-    color: hsl(30 31% 94%);
-    box-shadow: 0 2px 0 hsl(34 39% 35%), 0 4px 10px hsl(40 48% 47% / 0.2);
+    background: hsl(28 27% 72%);
+    color: hsl(27 7% 23%);
     border-radius: 9999px;
     font-weight: 600;
   }
 
   .admin-badge {
-    box-shadow: 0 1px 3px hsl(27 7% 23% / 0.08);
     border-radius: 9999px;
     font-weight: 600;
   }
 
   .glass {
-    background: hsl(34 35% 90% / 0.7);
+    background: hsl(30 30% 90% / 0.7);
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(31 27% 72% / 0.4);
+    border: 1px solid hsl(28 27% 78% / 0.4);
   }
 
+  /* Text gradient removed - use solid text colors only */
   .text-gradient {
-    background: linear-gradient(135deg, hsl(40 48% 47%), hsl(40 48% 54%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: hsl(27 7% 23%);
   }
 
+  /* No sparkle animations - keep calm */
   .sparkle {
-    background: linear-gradient(135deg, hsl(40, 48%, 47%), hsl(40, 48%, 54%), hsl(40, 48%, 47%));
-    background-size: 200% 200%;
-    animation: sparkle-shift 3s ease-in-out infinite;
-  }
-
-  @keyframes sparkle-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    background: none;
   }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-4px); }
   }
   .animate-float {
     animation: float 4s ease-in-out infinite;

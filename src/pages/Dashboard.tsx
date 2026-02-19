@@ -48,9 +48,9 @@ const STATUS_LABELS: Record<string, string> = {
   dispatched: "Dispatched", delivered: "Delivered",
 };
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800", in_progress: "bg-yellow-100 text-yellow-800",
-  artwork_ready: "bg-purple-100 text-purple-800", dispatched: "bg-primary/10 text-primary",
-  delivered: "bg-green-100 text-green-800",
+  new: "bg-card text-foreground", in_progress: "bg-primary/20 text-foreground",
+  artwork_ready: "bg-primary/30 text-foreground", dispatched: "bg-primary/15 text-foreground",
+  delivered: "bg-primary/40 text-foreground",
 };
 const WHATSAPP_NUMBER = "918369594271";
 
@@ -219,11 +219,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-            <h1 className="font-display text-lg font-bold">My Dashboard</h1>
+            <h1 className="font-calligraphy text-xl font-bold">My Dashboard</h1>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />
@@ -280,7 +280,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border">
         <div className="flex items-center justify-around py-2">
           <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
@@ -379,8 +379,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                   <CelebrationBanner message="🎉 Congratulations! Your caricature has been delivered! 🎊" />
                 )}
                 {order.status === "delivered" && (
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <p className="font-sans text-sm text-green-700 font-medium">
+                  <div className="bg-card rounded-lg p-3 text-center border border-border">
+                    <p className="font-body text-sm text-foreground font-medium">
                       Delivered on: {new Date(order.updated_at || order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
                     </p>
                   </div>
@@ -395,7 +395,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status] || order.status}</Badge>
-                  <Badge className={`${order.payment_status === "confirmed" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"} border-none text-xs`}>
+                  <Badge className={`${order.payment_status === "confirmed" ? "bg-primary/30 text-foreground" : "bg-primary/10 text-foreground"} border-none text-xs`}>
                     <CreditCard className="w-3 h-3 mr-1" />Payment: {order.payment_status === "confirmed" ? "Confirmed ✅" : "Pending"}
                   </Badge>
                 </div>

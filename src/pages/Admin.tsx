@@ -88,18 +88,18 @@ type Profile = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800",
-  in_progress: "bg-yellow-100 text-yellow-800",
-  artwork_ready: "bg-purple-100 text-purple-800",
-  dispatched: "bg-primary/10 text-primary",
-  delivered: "bg-green-100 text-green-800",
+  new: "bg-card text-foreground",
+  in_progress: "bg-primary/20 text-foreground",
+  artwork_ready: "bg-primary/30 text-foreground",
+  dispatched: "bg-primary/15 text-foreground",
+  delivered: "bg-primary/40 text-foreground",
 };
 const STATUS_LABELS: Record<string, string> = {
   new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
   dispatched: "Dispatched", delivered: "Delivered",
 };
 const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
-const PAYMENT_COLORS: Record<string, string> = { pending: "bg-amber-100 text-amber-800", confirmed: "bg-green-100 text-green-800" };
+const PAYMENT_COLORS: Record<string, string> = { pending: "bg-primary/15 text-foreground", confirmed: "bg-primary/30 text-foreground" };
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -691,7 +691,7 @@ const Admin = () => {
                           <Badge className={`${STATUS_COLORS[order.status] || ""} border-none text-xs`}>{STATUS_LABELS[order.status]}</Badge>
                           <Badge className={`${PAYMENT_COLORS[order.payment_status || "pending"]} border-none text-xs`}>Pay: {PAYMENT_STATUS_LABELS[order.payment_status || "pending"]}</Badge>
                           {daysLeft <= 10 && !["delivered", "completed"].includes(order.status) && (
-                            <Badge className="bg-red-100 text-red-800 border-none text-xs"><AlertTriangle className="w-3 h-3 mr-1" />{daysLeft}d left</Badge>
+                            <Badge className="bg-primary/20 text-foreground border-none text-xs"><AlertTriangle className="w-3 h-3 mr-1" />{daysLeft}d left</Badge>
                           )}
                         </div>
                         <div className="flex gap-2">
@@ -1041,7 +1041,7 @@ const Admin = () => {
                                 }}
                               />
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
-                              {(c as any).event_booking_allowed && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Allowed</Badge>}
+                              {(c as any).event_booking_allowed && <Badge className="bg-primary/20 text-foreground border-none text-[10px]">Allowed</Badge>}
                             </div>
                             {/* Gateway Charges Toggle */}
                             <div className="flex items-center gap-2 pt-1">
@@ -1055,7 +1055,7 @@ const Admin = () => {
                                 }}
                               />
                               <span className="text-xs font-sans text-muted-foreground">Gateway Charges (2.6%)</span>
-                              {(c as any).gateway_charges_enabled === true && <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Active</Badge>}
+                              {(c as any).gateway_charges_enabled === true && <Badge className="bg-primary/20 text-foreground border-none text-[10px]">Active</Badge>}
                             </div>
                             {/* Secret Code Login Toggle */}
                             <div className="flex items-center gap-2 pt-1">
@@ -1069,7 +1069,7 @@ const Admin = () => {
                                 }}
                               />
                               <span className="text-xs font-sans text-muted-foreground">Secret Code Login</span>
-                              {(c as any).secret_code_login_enabled === true && <Badge className="bg-blue-100 text-blue-800 border-none text-[10px]">Enabled</Badge>}
+                              {(c as any).secret_code_login_enabled === true && <Badge className="bg-primary/20 text-foreground border-none text-[10px]">Enabled</Badge>}
                             </div>
                             <div className="flex gap-2 mt-1 flex-wrap">
                               <Button

@@ -14,10 +14,10 @@ const LiveGreeting = ({ name }: { name?: string }) => {
 
   return (
     <div className="mb-4">
-      <p className="font-display text-lg md:text-xl font-bold text-foreground">
+      <p className="font-calligraphy text-2xl md:text-3xl font-bold text-foreground">
         {emoji} {greeting}{name ? `, ${name.split(" ")[0]}` : ""}!
       </p>
-      <p className="text-xs text-muted-foreground font-mono">
+      <p className="text-xs text-muted-foreground font-body">
         {now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" })} · {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}
       </p>
     </div>
