@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -33,7 +33,7 @@ import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
-
+import AdminPartialAdvanceConfig from "@/components/admin/AdminPartialAdvanceConfig";
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
@@ -140,6 +140,8 @@ const Admin = () => {
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
   const [customerEventPricingUserName, setCustomerEventPricingUserName] = useState("");
+  const [partialAdvanceUserId, setPartialAdvanceUserId] = useState<string | null>(null);
+  const [partialAdvanceUserName, setPartialAdvanceUserName] = useState("");
   const [showAddOrder, setShowAddOrder] = useState(false);
   const [manualOrder, setManualOrder] = useState({
     customerId: "", orderType: "single" as string, style: "artists_choice" as string,
@@ -1191,6 +1193,14 @@ const Admin = () => {
                               >
                                 <CalIcon className="w-3 h-3 mr-1" />Event Pricing
                               </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs font-sans"
+                                onClick={() => { setPartialAdvanceUserId(c.user_id); setPartialAdvanceUserName(c.full_name); }}
+                              >
+                                <SplitSquareHorizontal className="w-3 h-3 mr-1" />Partial Advance
+                              </Button>
                             </div>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
@@ -1229,6 +1239,15 @@ const Admin = () => {
                             userId={c.user_id}
                             userName={c.full_name}
                             onClose={() => setCustomerEventPricingUserId(null)}
+                          />
+                        </div>
+                      )}
+                      {partialAdvanceUserId === c.user_id && (
+                        <div className="mt-3">
+                          <AdminPartialAdvanceConfig
+                            userId={c.user_id}
+                            userName={c.full_name}
+                            onClose={() => setPartialAdvanceUserId(null)}
                           />
                         </div>
                       )}
