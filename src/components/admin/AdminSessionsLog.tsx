@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Monitor, Clock, MapPin, Activity } from "lucide-react";
+import { Monitor, Clock, MapPin, Activity, Globe, Smartphone, Laptop } from "lucide-react";
 
 type AdminSession = {
   id: string;
@@ -52,24 +52,36 @@ const AdminSessionsLog = () => {
     day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
   });
 
+  const isMobile = (info: string | null) => info ? /Mobile/i.test(info) : false;
+
   return (
     <div className="space-y-6">
+      <h2 className="font-display text-xl font-bold flex items-center gap-2">
+        <Monitor className="w-5 h-5 text-primary" /> Admin Sessions & Activity
+      </h2>
+
       {/* Active Sessions */}
       <Card>
-        <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Monitor className="w-5 h-5 text-primary" /> Active Sessions</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Globe className="w-5 h-5 text-green-600" /> Active Sessions</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {sessions.filter(s => s.is_active).length === 0 ? (
             <p className="text-sm text-muted-foreground font-sans">No active sessions</p>
           ) : sessions.filter(s => s.is_active).map(s => (
-            <div key={s.id} className="flex items-start justify-between bg-primary/5 rounded-lg p-3 border border-primary/20">
-              <div className="space-y-1">
-                <p className="font-sans font-medium text-sm">{s.admin_name || "Admin"}</p>
-                {s.device_info && <p className="text-[11px] text-muted-foreground font-sans flex items-center gap-1"><Monitor className="w-3 h-3" /> {s.device_info}</p>}
-                {s.ip_address && <p className="text-[11px] text-muted-foreground font-sans">IP: {s.ip_address}</p>}
+            <div key={s.id} className="bg-primary/5 rounded-lg p-3 border border-primary/20 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <p className="font-sans font-semibold text-sm">{s.admin_name || "Admin"}</p>
+                <Badge className="bg-green-100 text-green-800 border-none text-[10px]">🟢 Active</Badge>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                {s.device_info && (
+                  <p className="text-[11px] text-muted-foreground font-sans flex items-center gap-1">
+                    {isMobile(s.device_info) ? <Smartphone className="w-3 h-3" /> : <Laptop className="w-3 h-3" />} {s.device_info}
+                  </p>
+                )}
+                {s.ip_address && <p className="text-[11px] text-muted-foreground font-sans flex items-center gap-1"><Globe className="w-3 h-3" /> IP: {s.ip_address}</p>}
                 {s.location_info && <p className="text-[11px] text-muted-foreground font-sans flex items-center gap-1"><MapPin className="w-3 h-3" /> {s.location_info}</p>}
                 <p className="text-[10px] text-muted-foreground font-sans flex items-center gap-1"><Clock className="w-3 h-3" /> Login: {formatDate(s.login_at)}</p>
               </div>
-              <Badge className="bg-green-100 text-green-800 border-none text-[10px]">Active</Badge>
             </div>
           ))}
         </CardContent>
@@ -78,15 +90,22 @@ const AdminSessionsLog = () => {
       {/* Session History */}
       <Card>
         <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> Login History</CardTitle></CardHeader>
-        <CardContent className="space-y-2 max-h-[300px] overflow-y-auto">
+        <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
           {sessions.map(s => (
-            <div key={s.id} className="flex items-start justify-between bg-muted/30 rounded-lg p-2 text-sm font-sans">
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-xs">{s.admin_name || "Admin"}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{s.device_info || "Unknown device"} · {s.ip_address || "Unknown IP"}</p>
-                <p className="text-[10px] text-muted-foreground">{formatDate(s.login_at)}</p>
+            <div key={s.id} className="bg-muted/30 rounded-lg p-3 text-sm font-sans space-y-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-xs">{s.admin_name || "Admin"}</p>
+                <Badge variant={s.is_active ? "default" : "outline"} className="text-[9px]">{s.is_active ? "🟢 Active" : "⚪ Ended"}</Badge>
               </div>
-              <Badge variant={s.is_active ? "default" : "outline"} className="text-[9px]">{s.is_active ? "Active" : "Ended"}</Badge>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-0.5">
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  {isMobile(s.device_info) ? <Smartphone className="w-3 h-3" /> : <Laptop className="w-3 h-3" />}
+                  {s.device_info || "Unknown device"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">{s.ip_address || "No IP"}</p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" />{s.location_info || "Unknown"}</p>
+              </div>
+              <p className="text-[10px] text-muted-foreground">{formatDate(s.login_at)}</p>
             </div>
           ))}
         </CardContent>

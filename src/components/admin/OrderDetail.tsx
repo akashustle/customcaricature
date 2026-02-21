@@ -131,7 +131,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
           <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
           <div className="flex-1">
             <h1 className="font-display text-lg md:text-xl font-bold">Order {order.id.slice(0, 8).toUpperCase()}</h1>
-            <p className="text-xs text-muted-foreground font-sans">Placed {orderDate.toLocaleDateString()}</p>
+            <p className="text-xs text-muted-foreground font-sans">Placed {orderDate.toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
           </div>
           {!editing ? (
             <Button variant="outline" size="sm" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
