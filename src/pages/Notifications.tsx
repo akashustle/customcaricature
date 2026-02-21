@@ -75,6 +75,8 @@ const Notifications = () => {
 
   const handleClick = (n: Notification) => {
     if (!n.read) markAsRead(n.id);
+    // Track click for analytics
+    supabase.from("notifications").update({ clicked: true } as any).eq("id", n.id);
     if (n.link) navigate(n.link);
   };
 

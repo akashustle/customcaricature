@@ -24,12 +24,10 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate the caller
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -42,62 +40,52 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await callerClient.auth.getUser();
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const body = await req.json();
     const { amount, order_id, customer_name, customer_email, customer_mobile } = body;
 
-    // Input validation
     if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0 || amount > 10000000) {
       return new Response(JSON.stringify({ error: "Invalid amount" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (typeof order_id !== "string" || !isValidUUID(order_id)) {
       return new Response(JSON.stringify({ error: "Invalid order ID" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (typeof customer_name !== "string" || customer_name.trim().length === 0 || customer_name.length > 100) {
       return new Response(JSON.stringify({ error: "Invalid customer name" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (typeof customer_email !== "string" || !isValidEmail(customer_email)) {
       return new Response(JSON.stringify({ error: "Invalid email" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (typeof customer_mobile !== "string" || !isValidMobile(customer_mobile)) {
       return new Response(JSON.stringify({ error: "Invalid mobile number" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Verify order exists and ownership using service role
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Check orders table first
     const { data: order } = await supabase
       .from("orders")
       .select("id, user_id, amount, payment_status")
       .eq("id", order_id)
       .maybeSingle();
 
-    // Check event_bookings table
     const { data: booking } = await supabase
       .from("event_bookings")
       .select("id, user_id, total_price, advance_amount, remaining_amount, payment_status")
@@ -106,32 +94,31 @@ serve(async (req) => {
 
     if (!order && !booking) {
       return new Response(JSON.stringify({ error: "Order not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const record = order || booking;
 
-    // Verify ownership (allow if user owns it)
     if (record!.user_id && record!.user_id !== user.id) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Check if already fully paid
     // For orders: "confirmed" means fully paid
-    // For event bookings: "confirmed" means advance paid (still has remaining), "fully_paid" means done
+    // For event bookings: "fully_paid" means done
+    // IMPORTANT: "confirmed" for events means advance paid (NOT fully paid)
+    // "partial_1_paid" means only partial 1 is paid (allow partial 2 or remaining)
+    // "pending" means nothing paid yet (allow any payment)
     const isFullyPaid = order
       ? (order.payment_status === "confirmed")
       : (booking!.payment_status === "fully_paid");
 
     if (isFullyPaid) {
       return new Response(JSON.stringify({ error: "Already paid" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

@@ -438,6 +438,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                        <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
                         <SelectItem value="confirmed">Advance Received</SelectItem>
                         <SelectItem value="fully_paid">Fully Paid</SelectItem>
                       </SelectContent>
@@ -514,9 +516,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {["all", "pending", "confirmed", "fully_paid"].map(s => (
+          {["all", "pending", "partial_1_paid", "partial_2_paid", "confirmed", "fully_paid"].map(s => (
             <Button key={s} variant={paymentFilter === s ? "default" : "outline"} size="sm" className={`text-xs font-sans h-7 rounded-full ${paymentFilter === s ? "admin-tab-active" : ""}`} onClick={() => setPaymentFilter(s)}>
-              {s === "all" ? "All Payments" : s === "confirmed" ? "Advance Paid" : s === "fully_paid" ? "Fully Paid" : "Pending"}
+              {s === "all" ? "All Payments" : s === "partial_1_paid" ? "Partial 1" : s === "partial_2_paid" ? "Partial 2" : s === "confirmed" ? "Advance Paid" : s === "fully_paid" ? "Fully Paid" : "Pending"}
             </Button>
           ))}
           {["all", "mumbai", "outside"].map(s => (
@@ -585,8 +587,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="border-none text-xs bg-purple-100 text-purple-800">{EVENT_TYPES.find(t => t.value === ev.event_type)?.label || ev.event_type}</Badge>
                   <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : ev.payment_status === "partial_1_paid" ? "bg-orange-100 text-orange-800" : "bg-red-100 text-red-800"}`}>
-                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : ev.payment_status === "partial_1_paid" ? "Partial 1 Paid" : "Payment Pending"}
+                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : ev.payment_status === "partial_1_paid" ? "bg-orange-100 text-orange-800" : ev.payment_status === "partial_2_paid" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>
+                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : ev.payment_status === "partial_1_paid" ? "Partial 1 Paid" : ev.payment_status === "partial_2_paid" ? "Partial 2 Paid" : "Payment Pending"}
                   </Badge>
                   {ev.negotiated && <Badge className="border-none text-xs bg-indigo-100 text-indigo-800">Negotiated</Badge>}
                   <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
@@ -643,6 +645,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                      <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
                       <SelectItem value="confirmed">Advance Received</SelectItem>
                       <SelectItem value="fully_paid">Fully Paid</SelectItem>
                       <SelectItem value="refunded">Refunded</SelectItem>
