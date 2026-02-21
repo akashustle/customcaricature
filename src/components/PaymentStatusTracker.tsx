@@ -206,8 +206,8 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
                   <div>
                     <span className="font-medium">
                       {p.payment_type === "event_advance" ? "Advance"
-                        : p.payment_type === "event_partial_1" ? "Partial 1"
-                        : p.payment_type === "event_partial_2" ? "Partial 2"
+                        : p.payment_type === "event_partial_1" || p.payment_type === "event_advance_partial_1" ? "Partial 1"
+                        : p.payment_type === "event_partial_2" || p.payment_type === "event_advance_partial_2" ? "Partial 2"
                         : p.payment_type === "event_remaining" ? "Remaining"
                         : p.payment_type}
                     </span>
