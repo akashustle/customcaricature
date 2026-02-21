@@ -52,6 +52,30 @@ export type Database = {
           },
         ]
       }
+      admin_blocked_ips: {
+        Row: {
+          blocked_by: string
+          created_at: string
+          id: string
+          ip_address: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_by: string
+          created_at?: string
+          id?: string
+          ip_address: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_by?: string
+          created_at?: string
+          id?: string
+          ip_address?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       admin_media_audit_log: {
         Row: {
           action: string
@@ -774,8 +798,46 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_batches: {
+        Row: {
+          clicked_count: number
+          created_at: string
+          delivered_count: number
+          id: string
+          link: string | null
+          message: string
+          sent_by: string
+          sent_to_count: number
+          title: string
+        }
+        Insert: {
+          clicked_count?: number
+          created_at?: string
+          delivered_count?: number
+          id?: string
+          link?: string | null
+          message: string
+          sent_by: string
+          sent_to_count?: number
+          title: string
+        }
+        Update: {
+          clicked_count?: number
+          created_at?: string
+          delivered_count?: number
+          id?: string
+          link?: string | null
+          message?: string
+          sent_by?: string
+          sent_to_count?: number
+          title?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
+          batch_id: string | null
+          clicked: boolean
           created_at: string
           id: string
           link: string | null
@@ -786,6 +848,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          batch_id?: string | null
+          clicked?: boolean
           created_at?: string
           id?: string
           link?: string | null
@@ -796,6 +860,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          batch_id?: string | null
+          clicked?: boolean
           created_at?: string
           id?: string
           link?: string | null
@@ -805,7 +871,15 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "notification_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_images: {
         Row: {

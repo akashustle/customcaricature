@@ -179,7 +179,12 @@ const NotificationBell = () => {
         setNotifications(prev => [newNotif, ...prev]);
         playNotificationSound(newNotif.type);
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(newNotif.title, { body: newNotif.message, icon: "/logo.png" });
+          new Notification(newNotif.title, { 
+            body: newNotif.message, 
+            icon: "/logo.png",
+            badge: "/logo.png",
+            tag: `ccc-${newNotif.id}`,
+          });
         }
       })
       .subscribe();
@@ -201,6 +206,8 @@ const NotificationBell = () => {
 
   const handleClick = (n: Notification) => {
     if (!n.read) markAsRead(n.id);
+    // Track click for analytics
+    supabase.from("notifications").update({ clicked: true } as any).eq("id", n.id);
     if (n.link) { navigate(n.link); setOpen(false); }
   };
 
