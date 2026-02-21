@@ -66,6 +66,9 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
   const paidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
   const progressPercent = totalAmount > 0 ? Math.min(100, Math.round((paidTotal / totalAmount) * 100)) : 0;
   const remaining = Math.max(0, totalAmount - paidTotal);
+  
+  // Once advance is paid, hide partial steps - show simplified view
+  const showPartialSteps = isPartialEnabled && !advancePaid;
 
   const handlePayPartial2 = async () => {
     if (!partialConfig) return;
@@ -122,8 +125,8 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
     </div>
   );
 
-  // Build steps based on partial config
-  const steps = isPartialEnabled
+  // Build steps - once advance is paid, always show simplified view (no partial steps)
+  const steps = showPartialSteps
     ? [
         { label: "Booking Created", done: true },
         { label: "Partial Payment 1", done: isPartial1Paid || advancePaid },
@@ -133,7 +136,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
       ]
     : [
         { label: "Booking Created", done: true },
-        { label: "Advance Payment", done: advancePaid },
+        { label: "Advance Paid", done: advancePaid },
         { label: "Remaining Payment", done: fullyPaid },
         { label: "Fully Settled", done: fullyPaid },
       ];
@@ -156,16 +159,21 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
           </div>
         </div>
 
-        {/* Partial Payment 2 Button */}
+        {/* Partial Payment 2 Button - red themed */}
         {isPartialEnabled && isPartial1Paid && !advancePaid && (
-          <Button
-            onClick={handlePayPartial2}
-            disabled={paying}
-            className="w-full rounded-full font-sans bg-primary hover:bg-primary/90 text-sm"
-            size="sm"
-          >
-            {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : `Pay Remaining Advance – ${formatPrice(partialConfig.partial_2_amount)}`}
-          </Button>
+          <div className="space-y-2">
+            <p className="text-xs font-sans bg-red-50 text-red-700 rounded-lg p-3 font-medium border border-red-200">
+              🔒 Your event date is blocked. To fully confirm your booking, pay Partial 2 to complete advance payment.
+            </p>
+            <Button
+              onClick={handlePayPartial2}
+              disabled={paying}
+              className="w-full rounded-full font-sans bg-red-600 hover:bg-red-700 text-white text-sm"
+              size="sm"
+            >
+              {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="w-4 h-4 mr-2" />Pay Partial 2 — Complete Advance {formatPrice(partialConfig.partial_2_amount)}</>}
+            </Button>
+          </div>
         )}
 
         {/* Steps */}

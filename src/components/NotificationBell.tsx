@@ -163,8 +163,13 @@ const NotificationBell = () => {
 
     fetchNotifications();
 
+    // Request notification permission and show native notifications
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("Notification permission granted");
+        }
+      });
     }
 
     const ch = supabase

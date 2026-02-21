@@ -996,26 +996,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       />
                     )}
 
-                    {/* Pay partial 2 to complete advance when partial_1_paid */}
-                    {isPartial1Paid && !advancePaid && !fullyPaid && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-sans bg-red-50 text-red-700 rounded-lg p-3 font-medium border border-red-200">
-                          🔒 Your event date is blocked. To fully confirm your booking, pay Partial 2 to complete advance payment.
-                        </p>
-                        <Button
-                          size="sm"
-                          className="rounded-full font-sans w-full bg-red-600 hover:bg-red-700 text-white"
-                          disabled={payingEventId === ev.id}
-                          onClick={() => handlePayPartial2(ev)}
-                        >
-                          {payingEventId === ev.id ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                          ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Partial 2 — Complete Advance</>
-                          )}
-                        </Button>
-                      </div>
-                    )}
+                    {/* Pay partial 2 to complete advance - ONLY if PaymentStatusTracker not handling it */}
 
                     {/* Pay remaining balance button (green) */}
                     {remaining > 0 && advancePaid && !fullyPaid && (
