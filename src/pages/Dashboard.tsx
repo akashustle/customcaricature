@@ -287,9 +287,9 @@ const Dashboard = () => {
 
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border">
         <div className="flex items-center justify-around py-2">
-          <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <BottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
           <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
@@ -947,6 +947,27 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                         paymentStatus={ev.payment_status}
                         userId={userId}
                       />
+                    )}
+
+                    {/* Pay full advance button when partial_1_paid */}
+                    {isPartial1Paid && !advancePaid && !fullyPaid && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground font-sans bg-orange-50 rounded-lg p-2">
+                          ⚡ Partial 1 paid. Complete your full advance to confirm the booking.
+                        </p>
+                        <Button
+                          size="sm"
+                          className="rounded-full font-sans w-full bg-orange-500 hover:bg-orange-600 text-white"
+                          disabled={payingEventId === ev.id}
+                          onClick={() => handlePayRemaining(ev)}
+                        >
+                          {payingEventId === ev.id ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                          ) : (
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Remaining Advance Now</>
+                          )}
+                        </Button>
+                      </div>
                     )}
 
                     {/* Pay remaining button */}
