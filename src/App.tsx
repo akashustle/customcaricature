@@ -24,6 +24,7 @@ import EventPolicy from "./pages/EventPolicy";
 import ArtistDashboard from "./pages/ArtistDashboard";
 import ArtistLogin from "./pages/ArtistLogin";
 import NotFound from "./pages/NotFound";
+import Notifications from "./pages/Notifications";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HomepageLiveChat from "./components/HomepageLiveChat";
@@ -63,6 +64,7 @@ const App = () => {
             <Route path="/event-policy" element={<EventPolicy />} />
             <Route path="/artist-dashboard" element={<ArtistDashboard />} />
             <Route path="/artistlogin" element={<ArtistLogin />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

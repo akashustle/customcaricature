@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -44,6 +44,7 @@ import { MessageCircle, Radio } from "lucide-react";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import AdminMediaAuditLog from "@/components/admin/AdminMediaAuditLog";
 import NotificationBell from "@/components/NotificationBell";
+import AdminNotificationSender from "@/components/admin/AdminNotificationSender";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -537,6 +538,7 @@ const Admin = () => {
               <TabsTrigger value="analytics" className="font-sans rounded-full transition-all whitespace-nowrap"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
               <TabsTrigger value="locations" className="font-sans rounded-full transition-all whitespace-nowrap"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
               <TabsTrigger value="voice" className="font-sans rounded-full transition-all whitespace-nowrap"><Radio className="w-4 h-4 mr-1" />Voice</TabsTrigger>
+              <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1290,6 +1292,10 @@ const Admin = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="notify">
+            <AdminNotificationSender />
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
@@ -1438,6 +1444,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
           <AdminBottomNavItem icon={MessageCircle} label="Leads" active={activeTab === "live-leads"} onClick={() => setActiveTab("live-leads")} />
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
+          <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
