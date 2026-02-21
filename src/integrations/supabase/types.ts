@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_action_log: {
+        Row: {
+          action: string
+          admin_name: string
+          created_at: string
+          details: string | null
+          id: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          admin_name?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          admin_name?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_action_log_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "admin_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_media_audit_log: {
         Row: {
           action: string
@@ -41,6 +79,42 @@ export type Database = {
           id?: string
           target_order_id?: string | null
           target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          admin_name: string
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          last_active_at: string
+          location_info: string | null
+          login_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_name?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_active_at?: string
+          location_info?: string | null
+          login_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_name?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          last_active_at?: string
+          location_info?: string | null
+          login_at?: string
+          user_id?: string
         }
         Relationships: []
       }

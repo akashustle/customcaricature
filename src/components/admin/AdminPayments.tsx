@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatPrice } from "@/lib/pricing";
 import { Search, CreditCard } from "lucide-react";
+import ExportButton from "@/components/admin/ExportButton";
 
 type Payment = {
   id: string;
@@ -83,13 +84,28 @@ const AdminPayments = () => {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-3 justify-between">
         <h2 className="font-display text-xl font-bold">All Payments ({payments.length})</h2>
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="p-3 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            <span className="font-sans text-sm">Total Revenue:</span>
-            <span className="font-display font-bold text-primary">{formatPrice(totalRevenue)}</span>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-2">
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-3 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-primary" />
+              <span className="font-sans text-sm">Total Revenue:</span>
+              <span className="font-display font-bold text-primary">{formatPrice(totalRevenue)}</span>
+            </CardContent>
+          </Card>
+          <ExportButton
+            data={filtered.map(p => ({
+              "Customer": p.user_id ? (profiles[p.user_id] || "Unknown") : "—",
+              "Type": PAYMENT_TYPE_LABELS[p.payment_type] || p.payment_type,
+              "Description": p.description || "—",
+              "Payment ID": p.razorpay_payment_id || "—",
+              "Amount": p.amount,
+              "Date": new Date(p.created_at).toLocaleString("en-IN"),
+              "Status": p.status,
+            }))}
+            sheetName="Payments"
+            fileName="CCC_Payments"
+          />
+        </div>
       </div>
 
       <div className="relative">

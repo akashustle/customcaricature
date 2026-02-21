@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -45,6 +45,8 @@ import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import AdminMediaAuditLog from "@/components/admin/AdminMediaAuditLog";
 import NotificationBell from "@/components/NotificationBell";
 import AdminNotificationSender from "@/components/admin/AdminNotificationSender";
+import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
+import ExportButton from "@/components/admin/ExportButton";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -167,6 +169,36 @@ const Admin = () => {
   const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
 
+  // Log admin session on mount
+  const logAdminSession = async (userId: string) => {
+    const deviceInfo = `${navigator.userAgent.substring(0, 80)}`;
+    try {
+      // Get admin name
+      const { data: prof } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
+      const adminName = prof?.full_name || "Admin";
+      await supabase.from("admin_sessions").insert({
+        user_id: userId,
+        admin_name: adminName,
+        device_info: deviceInfo,
+        ip_address: null,
+        location_info: null,
+        is_active: true,
+      } as any);
+    } catch {}
+  };
+
+  const logAdminAction = async (action: string, details?: string) => {
+    if (!user) return;
+    try {
+      await supabase.from("admin_action_log").insert({
+        user_id: user.id,
+        admin_name: adminProfile?.full_name || "Admin",
+        action,
+        details: details || null,
+      } as any);
+    } catch {}
+  };
+
   useEffect(() => {
     if (!authLoading && user) {
       checkAdmin();
@@ -175,6 +207,7 @@ const Admin = () => {
       fetchCustomers();
       fetchAdminProfile();
       fetchArtistProfiles();
+      logAdminSession(user.id);
 
       // Real-time subscriptions
       const ch = supabase
@@ -278,6 +311,7 @@ const Admin = () => {
     if (!confirm(`Change order status to "${STATUS_LABELS[status]}"?`)) return;
     await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
     toast({ title: "Status Updated" });
+    logAdminAction("Order Status Changed", `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`);
     fetchOrders();
   };
 
@@ -285,12 +319,14 @@ const Admin = () => {
     if (!confirm(`Change payment to "${PAYMENT_STATUS_LABELS[paymentStatus]}"?`)) return;
     await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
     toast({ title: "Payment Updated" });
+    logAdminAction("Payment Status Changed", `Order ${orderId.slice(0, 8)} → ${PAYMENT_STATUS_LABELS[paymentStatus]}`);
     fetchOrders();
   };
 
   const deleteOrder = async (orderId: string) => {
     await supabase.from("orders").delete().eq("id", orderId);
     toast({ title: "Deleted" });
+    logAdminAction("Order Deleted", `Order ${orderId.slice(0, 8)}`);
     fetchOrders();
   };
 
@@ -539,6 +575,7 @@ const Admin = () => {
               <TabsTrigger value="locations" className="font-sans rounded-full transition-all whitespace-nowrap"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
               <TabsTrigger value="voice" className="font-sans rounded-full transition-all whitespace-nowrap"><Radio className="w-4 h-4 mr-1" />Voice</TabsTrigger>
               <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
+              <TabsTrigger value="sessions" className="font-sans rounded-full transition-all whitespace-nowrap"><Monitor className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -546,11 +583,31 @@ const Admin = () => {
           {/* Orders Tab */}
           <TabsContent value="orders">
             <div className="flex flex-col gap-3 mb-4">
-              <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex flex-col md:flex-row gap-3 items-center">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search by name or ID..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
                 </div>
+                <ExportButton
+                  data={filtered.map(o => ({
+                    "Order ID": o.id.slice(0, 8).toUpperCase(),
+                    "Customer": o.customer_name,
+                    "Email": o.customer_email,
+                    "Mobile": o.customer_mobile,
+                    "Type": o.caricature_type,
+                    "Order Type": o.order_type,
+                    "Amount": o.negotiated_amount || o.amount,
+                    "Status": STATUS_LABELS[o.status] || o.status,
+                    "Payment": PAYMENT_STATUS_LABELS[o.payment_status || "pending"],
+                    "City": o.city || "",
+                    "Created": new Date(o.created_at).toLocaleString("en-IN"),
+                    "Delivery Date": o.expected_delivery_date || "",
+                  }))}
+                  sheetName="Orders"
+                  fileName="CCC_Orders"
+                />
+              </div>
+              <div className="flex flex-col md:flex-row gap-3">
                 <Dialog open={showAddOrder} onOpenChange={setShowAddOrder}>
                   <DialogTrigger asChild>
                     <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Order</Button>
@@ -1013,7 +1070,22 @@ const Admin = () => {
           <TabsContent value="customers">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
               <h2 className="font-display text-xl font-bold">Customers ({customers.length})</h2>
-              <div className="flex gap-2 w-full md:w-auto">
+              <div className="flex gap-2 w-full md:w-auto items-center">
+                <ExportButton
+                  data={filteredCustomers.map(c => ({
+                    "Name": c.full_name,
+                    "Email": c.email,
+                    "Mobile": c.mobile,
+                    "Instagram": c.instagram_id || "",
+                    "Address": c.address || "",
+                    "City": c.city || "",
+                    "State": c.state || "",
+                    "Pincode": c.pincode || "",
+                    "Registered": new Date(c.created_at).toLocaleString("en-IN"),
+                  }))}
+                  sheetName="Customers"
+                  fileName="CCC_Customers"
+                />
                 <div className="relative flex-1 md:w-60">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input placeholder="Search customers..." value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} className="pl-10 font-sans" />
@@ -1296,6 +1368,10 @@ const Admin = () => {
             <AdminNotificationSender />
           </TabsContent>
 
+          <TabsContent value="sessions">
+            <AdminSessionsLog />
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
@@ -1445,6 +1521,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={MessageCircle} label="Leads" active={activeTab === "live-leads"} onClick={() => setActiveTab("live-leads")} />
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
+          <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>

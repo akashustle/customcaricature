@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ExportButton from "@/components/admin/ExportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEventPricing } from "@/hooks/useEventPricing";
 import { Button } from "@/components/ui/button";
@@ -303,6 +304,27 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-2">
+        <ExportButton
+          data={filtered.map(e => ({
+            "Client": e.client_name,
+            "Email": e.client_email,
+            "Mobile": e.client_mobile,
+            "Event Type": e.event_type,
+            "Date": e.event_date,
+            "Time": `${e.event_start_time} - ${e.event_end_time}`,
+            "Venue": e.venue_name,
+            "City": e.city,
+            "State": e.state,
+            "Total Price": e.negotiated_total || e.total_price,
+            "Advance": e.negotiated_advance || e.advance_amount,
+            "Payment": e.payment_status,
+            "Status": e.status,
+          }))}
+          sheetName="Events"
+          fileName="CCC_Events"
+        />
+      </div>
       {/* Stats Widgets */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
