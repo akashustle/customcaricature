@@ -35,6 +35,7 @@ serve(async (req) => {
     const {
       razorpay_order_id, razorpay_payment_id, razorpay_signature,
       order_id, is_event_remaining, is_event_advance, advance_amount,
+      is_partial_advance, partial_number,
     } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
@@ -63,8 +64,8 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    if (is_event_advance) {
-      // EVENT ADVANCE PAYMENT
+    if (is_partial_advance && partial_number) {
+      // PARTIAL ADVANCE PAYMENT
       const { data: booking } = await supabase
         .from("event_bookings")
         .select("user_id, total_price, advance_amount, negotiated, negotiated_total, negotiated_advance, payment_status, razorpay_payment_id")
@@ -77,7 +78,72 @@ serve(async (req) => {
         });
       }
 
-      // Idempotency: if already confirmed with same payment_id, return success
+      // Idempotency check
+      const expectedStatus = partial_number === 1 ? "partial_1_paid" : "confirmed";
+      if (booking.payment_status === expectedStatus && booking.razorpay_payment_id === razorpay_payment_id) {
+        return new Response(JSON.stringify({ success: true, verified: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (booking.user_id && booking.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const totalPrice = booking.negotiated && booking.negotiated_total ? booking.negotiated_total : booking.total_price;
+      const advAmt = booking.negotiated && booking.negotiated_advance ? booking.negotiated_advance : booking.advance_amount;
+
+      // For partial 1: set status to partial_1_paid
+      // For partial 2: set status to confirmed (full advance paid)
+      const newPaymentStatus = partial_number === 1 ? "partial_1_paid" : "confirmed";
+      
+      // Calculate remaining after this partial
+      let remainingAmt = totalPrice - advAmt;
+      if (partial_number === 2) {
+        // Full advance is now paid, remaining is total - advance
+        remainingAmt = totalPrice - advAmt;
+      }
+
+      const { error: updateError } = await supabase
+        .from("event_bookings")
+        .update({
+          razorpay_order_id,
+          razorpay_payment_id,
+          payment_status: newPaymentStatus,
+          remaining_amount: remainingAmt,
+        })
+        .eq("id", order_id);
+
+      if (updateError) throw new Error(`Failed to update event booking: ${updateError.message}`);
+
+      await supabase.from("payment_history").insert({
+        user_id: booking.user_id || user.id,
+        booking_id: order_id,
+        payment_type: `event_advance_partial_${partial_number}`,
+        razorpay_payment_id,
+        razorpay_order_id,
+        amount: advance_amount,
+        status: "confirmed",
+        description: `Advance partial payment ${partial_number} of 2`,
+      });
+
+    } else if (is_event_advance) {
+      // EVENT ADVANCE PAYMENT (full advance)
+      const { data: booking } = await supabase
+        .from("event_bookings")
+        .select("user_id, total_price, advance_amount, negotiated, negotiated_total, negotiated_advance, payment_status, razorpay_payment_id")
+        .eq("id", order_id)
+        .single();
+
+      if (!booking) {
+        return new Response(JSON.stringify({ error: "Booking not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Idempotency
       if (booking.payment_status === "confirmed" && booking.razorpay_payment_id === razorpay_payment_id) {
         return new Response(JSON.stringify({ success: true, verified: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -106,7 +172,6 @@ serve(async (req) => {
 
       if (updateError) throw new Error(`Failed to update event booking: ${updateError.message}`);
 
-      // Record advance payment in payment_history
       await supabase.from("payment_history").insert({
         user_id: booking.user_id || user.id,
         booking_id: order_id,

@@ -1109,6 +1109,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_partial_advance_config: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          partial_1_amount: number
+          partial_2_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          partial_1_amount?: number
+          partial_2_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          partial_1_amount?: number
+          partial_2_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -1132,6 +1162,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      artist_assigned_to_event: {
+        Args: { _auth_user_id: string; _event_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1156,6 +1190,10 @@ export type Database = {
       }
       user_has_event_with_artist: {
         Args: { _artist_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_owns_event_booking: {
+        Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
     }

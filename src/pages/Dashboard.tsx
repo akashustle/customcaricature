@@ -654,6 +654,21 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
+  const [partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
+
+  // Fetch partial advance config for this user
+  useEffect(() => {
+    if (!userId) return;
+    const fetchPartialConfig = async () => {
+      const { data } = await supabase.from("user_partial_advance_config").select("*").eq("user_id", userId).maybeSingle() as any;
+      if (data) setPartialConfig(data);
+    };
+    fetchPartialConfig();
+    const ch = supabase.channel("user-partial-config")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_partial_advance_config", filter: `user_id=eq.${userId}` }, () => fetchPartialConfig())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
 
   // Fetch all artists & assignments
   useEffect(() => {
