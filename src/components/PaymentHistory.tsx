@@ -22,6 +22,8 @@ const PAYMENT_TYPE_LABELS: Record<string, string> = {
   order: "Caricature Order",
   event_advance: "Event Advance",
   event_remaining: "Event Remaining",
+  event_advance_partial_1: "Partial Advance 1",
+  event_advance_partial_2: "Partial Advance 2",
 };
 
 const PaymentHistory = ({ userId }: { userId: string }) => {

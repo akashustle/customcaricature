@@ -836,6 +836,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
       ) : (
         <div className="space-y-3">
           {events.map((ev: any) => {
+            const isPartial1Paid = ev.payment_status === "partial_1_paid";
             const advancePaid = ev.payment_status === "confirmed" || ev.payment_status === "fully_paid";
             const fullyPaid = ev.payment_status === "fully_paid";
             const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
@@ -900,6 +901,10 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       ) : advancePaid ? (
                         <Badge className="border-none text-xs bg-blue-100 text-blue-800">
                           <CreditCard className="w-3 h-3 mr-1" />Advance Received
+                        </Badge>
+                      ) : isPartial1Paid ? (
+                        <Badge className="border-none text-xs bg-orange-100 text-orange-800">
+                          <CreditCard className="w-3 h-3 mr-1" />Partial 1 Paid
                         </Badge>
                       ) : (
                         <Badge className="border-none text-xs bg-amber-100 text-amber-800">

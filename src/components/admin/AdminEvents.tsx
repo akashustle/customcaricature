@@ -585,8 +585,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                 <div className="flex flex-wrap gap-2">
                   <Badge className="border-none text-xs bg-purple-100 text-purple-800">{EVENT_TYPES.find(t => t.value === ev.event_type)?.label || ev.event_type}</Badge>
                   <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}>
-                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : "Payment Pending"}
+                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : ev.payment_status === "partial_1_paid" ? "bg-orange-100 text-orange-800" : "bg-red-100 text-red-800"}`}>
+                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : ev.payment_status === "partial_1_paid" ? "Partial 1 Paid" : "Payment Pending"}
                   </Badge>
                   {ev.negotiated && <Badge className="border-none text-xs bg-indigo-100 text-indigo-800">Negotiated</Badge>}
                   <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
@@ -602,8 +602,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <p>
                         <span className="text-muted-foreground">Advance:</span>{" "}
                         {formatPrice(advanceAmt)}{" "}
-                        <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : "text-red-600"}`}>
-                          ({ev.payment_status === "confirmed" ? "Paid ✅" : "Unpaid"})
+                        <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : ev.payment_status === "partial_1_paid" ? "text-orange-600" : "text-red-600"}`}>
+                          ({ev.payment_status === "confirmed" ? "Paid ✅" : ev.payment_status === "partial_1_paid" ? "Partial 1 ✅" : "Unpaid"})
                         </span>
                       </p>
                       <p>
