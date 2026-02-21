@@ -2,9 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/pricing";
 import { CheckCircle2, Circle, CreditCard, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
+
+declare global {
+  interface Window { Razorpay: any; }
+}
 
 interface PaymentStatusTrackerProps {
   bookingId: string;
@@ -26,6 +32,8 @@ type PaymentRecord = {
 const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentStatus, userId }: PaymentStatusTrackerProps) => {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [partialConfig, setPartialConfig] = useState<any>(null);
+  const [paying, setPaying] = useState(false);
 
   const fetchPayments = async () => {
     const { data } = await supabase
@@ -39,18 +47,74 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
 
   useEffect(() => {
     fetchPayments();
+    // Fetch partial config
+    supabase.from("user_partial_advance_config").select("*").eq("user_id", userId).maybeSingle()
+      .then(({ data }) => { if (data) setPartialConfig(data); });
+
     const ch = supabase
       .channel(`payment-tracker-${bookingId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `booking_id=eq.${bookingId}` }, () => fetchPayments())
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `id=eq.${bookingId}` }, () => fetchPayments())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [bookingId]);
+  }, [bookingId, userId]);
 
+  const isPartialEnabled = partialConfig?.enabled && partialConfig?.partial_1_amount > 0;
+  const isPartial1Paid = paymentStatus === "partial_1_paid";
   const fullyPaid = paymentStatus === "fully_paid";
   const advancePaid = paymentStatus === "confirmed" || fullyPaid;
   const paidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
   const progressPercent = totalAmount > 0 ? Math.min(100, Math.round((paidTotal / totalAmount) * 100)) : 0;
   const remaining = Math.max(0, totalAmount - paidTotal);
+
+  const handlePayPartial2 = async () => {
+    if (!partialConfig) return;
+    setPaying(true);
+    try {
+      const { data: booking } = await supabase.from("event_bookings").select("client_name, client_email, client_mobile").eq("id", bookingId).single();
+      if (!booking) throw new Error("Booking not found");
+
+      const amount = partialConfig.partial_2_amount;
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile },
+      });
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Payment creation failed");
+
+      const options = {
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club", description: "Remaining Advance Payment",
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            await supabase.functions.invoke("verify-razorpay-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: bookingId,
+                is_event_advance: true,
+                advance_amount: amount,
+                is_partial_advance: true,
+                partial_number: 2,
+              },
+            });
+            toast({ title: "✅ Advance Payment Completed!" });
+            fetchPayments();
+          } catch {
+            toast({ title: "Verification failed", variant: "destructive" });
+          }
+          setPaying(false);
+        },
+        prefill: { name: booking.client_name, email: booking.client_email, contact: `+91${booking.client_mobile}` },
+        theme: { color: "#E3DED3" },
+        modal: { ondismiss: () => setPaying(false) },
+      };
+      new window.Razorpay(options).open();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPaying(false);
+    }
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center py-3">
@@ -58,12 +122,21 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
     </div>
   );
 
-  const steps = [
-    { label: "Booking Created", done: true },
-    { label: "Advance Payment", done: advancePaid },
-    { label: "Remaining Payment", done: fullyPaid },
-    { label: "Fully Settled", done: fullyPaid },
-  ];
+  // Build steps based on partial config
+  const steps = isPartialEnabled
+    ? [
+        { label: "Booking Created", done: true },
+        { label: "Partial Payment 1", done: isPartial1Paid || advancePaid },
+        { label: "Partial Payment 2", done: advancePaid },
+        { label: "Remaining Payment", done: fullyPaid },
+        { label: "Fully Settled", done: fullyPaid },
+      ]
+    : [
+        { label: "Booking Created", done: true },
+        { label: "Advance Payment", done: advancePaid },
+        { label: "Remaining Payment", done: fullyPaid },
+        { label: "Fully Settled", done: fullyPaid },
+      ];
 
   return (
     <Card className="border-primary/10">
@@ -82,6 +155,18 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
             {fullyPaid && <span className="text-green-600 font-bold">✅ Fully Paid</span>}
           </div>
         </div>
+
+        {/* Partial Payment 2 Button */}
+        {isPartialEnabled && isPartial1Paid && !advancePaid && (
+          <Button
+            onClick={handlePayPartial2}
+            disabled={paying}
+            className="w-full rounded-full font-sans bg-primary hover:bg-primary/90 text-sm"
+            size="sm"
+          >
+            {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : `Pay Remaining Advance – ${formatPrice(partialConfig.partial_2_amount)}`}
+          </Button>
+        )}
 
         {/* Steps */}
         <div className="flex items-start justify-between relative">
@@ -120,7 +205,11 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
                 >
                   <div>
                     <span className="font-medium">
-                      {p.payment_type === "event_advance" ? "Advance" : p.payment_type === "event_remaining" ? "Remaining" : p.payment_type}
+                      {p.payment_type === "event_advance" ? "Advance"
+                        : p.payment_type === "event_partial_1" ? "Partial 1"
+                        : p.payment_type === "event_partial_2" ? "Partial 2"
+                        : p.payment_type === "event_remaining" ? "Remaining"
+                        : p.payment_type}
                     </span>
                     <span className="text-muted-foreground ml-1">
                       · {new Date(p.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}

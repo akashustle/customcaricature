@@ -30,7 +30,7 @@ const BookEvent = () => {
   const { user, loading: authLoading } = useAuth();
   const { pricing: dbPricing } = useEventPricing();
   const [customerEventPricing, setCustomerEventPricing] = useState<any[]>([]);
-  // Form state
+  const [partialConfig, setPartialConfig] = useState<any>(null);
   const [clientName, setClientName] = useState("");
   const [clientMobile, setClientMobile] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -85,8 +85,10 @@ const BookEvent = () => {
   const pricing = getCustomerEventPrice();
   // Gateway charges toggle - check user profile
   const [gatewayEnabled, setGatewayEnabled] = useState(true);
-  const gatewayCharges = gatewayEnabled ? calculateGatewayCharges(pricing.advance) : 0;
-  const totalPayable = pricing.advance + gatewayCharges;
+  const isPartialEnabled = partialConfig?.enabled && partialConfig?.partial_1_amount > 0;
+  const payableAdvance = isPartialEnabled ? partialConfig.partial_1_amount : pricing.advance;
+  const gatewayCharges = gatewayEnabled ? calculateGatewayCharges(payableAdvance) : 0;
+  const totalPayable = payableAdvance + gatewayCharges;
 
   // Pre-fill from profile & fetch customer event pricing with real-time sync
   useEffect(() => {
@@ -113,6 +115,9 @@ const BookEvent = () => {
           });
       };
       fetchCustomerPricing();
+      // Fetch partial advance config
+      supabase.from("user_partial_advance_config").select("*").eq("user_id", user.id).maybeSingle()
+        .then(({ data }) => { if (data) setPartialConfig(data); });
       // Real-time listener for customer event pricing changes
       const channel = supabase
         .channel("customer-event-pricing-live")
@@ -120,8 +125,10 @@ const BookEvent = () => {
           fetchCustomerPricing();
         })
         .on("postgres_changes", { event: "*", schema: "public", table: "event_pricing" }, () => {
-          // Refresh global pricing too — useEventPricing handles this but force re-render
           fetchCustomerPricing();
+        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "user_partial_advance_config", filter: `user_id=eq.${user.id}` }, (payload) => {
+          setPartialConfig(payload.new || null);
         })
         .subscribe();
       return () => { supabase.removeChannel(channel); };
@@ -218,6 +225,7 @@ const BookEvent = () => {
                 order_id: booking.id,
                 is_event_advance: true,
                 advance_amount: totalPayable,
+                ...(isPartialEnabled ? { is_partial_advance: true, partial_number: 1 } : {}),
               },
             });
             if (verifyError) throw verifyError;
@@ -273,14 +281,15 @@ const BookEvent = () => {
           <Card className="max-w-md w-full text-center">
             <CardContent className="p-8 space-y-4">
               <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-              <h2 className="font-display text-2xl font-bold">Event Booking Confirmed!</h2>
-              <p className="text-muted-foreground font-sans">Your advance payment has been received successfully!</p>
+              <h2 className="font-display text-2xl font-bold">{isPartialEnabled ? "Partial Payment Done!" : "Event Booking Confirmed!"}</h2>
+              <p className="text-muted-foreground font-sans">{isPartialEnabled ? "Your partial advance payment has been received. Complete remaining advance from your dashboard." : "Your advance payment has been received successfully!"}</p>
               <div className="text-left bg-muted/50 rounded-lg p-3 space-y-1 text-sm font-sans">
                 <p><span className="text-muted-foreground">Event:</span> <span className="font-medium capitalize">{eventType === "other" ? customEventType : eventType}</span></p>
                 {eventDate && <p><span className="text-muted-foreground">Date:</span> <span className="font-medium">{format(eventDate, "PPP")}</span></p>}
                 <p><span className="text-muted-foreground">Venue:</span> <span className="font-medium">{venueName}, {actualCity}</span></p>
                 <p><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{artistCount}</span></p>
-                <p><span className="text-muted-foreground">Advance Paid:</span> <span className="font-medium text-primary">{formatPrice(totalPayable)}</span></p>
+                <p><span className="text-muted-foreground">{isPartialEnabled ? "Partial Payment:" : "Advance Paid:"}</span> <span className="font-medium text-primary">{formatPrice(totalPayable)}</span></p>
+                {isPartialEnabled && <p><span className="text-muted-foreground">Remaining Advance:</span> <span className="font-medium text-amber-600">{formatPrice(partialConfig.partial_2_amount)}</span></p>}
               </div>
               <div className="flex flex-col gap-2">
                 <Button onClick={() => navigate("/dashboard")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Go to Dashboard</Button>

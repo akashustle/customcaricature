@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette, MessageCircle, Send, X, Paperclip, Upload } from "lucide-react";
+import { LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2, CalendarOff, Trash2, Package, Palette, MessageCircle, Send, X, Paperclip, Upload, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
 import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/event-data";
@@ -641,8 +641,8 @@ const ArtistDashboard = () => {
           <ArtistBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <ArtistBottomNavItem icon={CalendarDays} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           {isRitesh && <ArtistBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />}
+          <ArtistBottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
           <ArtistBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} badge={chatUnread > 0 ? chatUnread : undefined} />
-          <ArtistBottomNavItem icon={CalendarOff} label="Block" active={activeTab === "blocked"} onClick={() => setActiveTab("blocked")} />
           <ArtistBottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
         </div>
       </div>
