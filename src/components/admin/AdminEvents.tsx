@@ -217,6 +217,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
       artist_count: editEventData.artist_count,
       total_price: editEventData.total_price,
       advance_amount: editEventData.advance_amount,
+      remaining_amount: editEventData.remaining_amount,
+      payment_status: editEventData.payment_status,
       extra_hours: editEventData.extra_hours,
       notes: editEventData.notes || null,
     } as any).eq("id", editingEventId);
@@ -748,6 +750,23 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Total Price (₹)</Label><Input type="number" value={editEventData.total_price || 0} onChange={e => setEditEventData({...editEventData, total_price: parseInt(e.target.value)||0})} /></div>
                 <div><Label className="text-xs">Advance (₹)</Label><Input type="number" value={editEventData.advance_amount || 0} onChange={e => setEditEventData({...editEventData, advance_amount: parseInt(e.target.value)||0})} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Remaining (₹)</Label><Input type="number" value={editEventData.remaining_amount ?? ((editEventData.total_price || 0) - (editEventData.advance_amount || 0))} onChange={e => setEditEventData({...editEventData, remaining_amount: parseInt(e.target.value)||0})} /></div>
+                <div>
+                  <Label className="text-xs">Payment Status</Label>
+                  <Select value={editEventData.payment_status || "pending"} onValueChange={v => setEditEventData({...editEventData, payment_status: v})}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                      <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
+                      <SelectItem value="confirmed">Advance Received</SelectItem>
+                      <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                      <SelectItem value="refunded">Refunded</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div><Label className="text-xs">Notes</Label><Textarea value={editEventData.notes || ""} onChange={e => setEditEventData({...editEventData, notes: e.target.value})} /></div>
               <div className="flex gap-2">
