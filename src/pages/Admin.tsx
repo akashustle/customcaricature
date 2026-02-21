@@ -169,19 +169,37 @@ const Admin = () => {
   const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
 
-  // Log admin session on mount
+  // Log admin session on mount with IP, location, device
   const logAdminSession = async (userId: string) => {
-    const deviceInfo = `${navigator.userAgent.substring(0, 80)}`;
+    const deviceInfo = (() => {
+      const ua = navigator.userAgent;
+      const isMobile = /Mobile|Android|iPhone/i.test(ua);
+      const browser = /Chrome/.test(ua) ? "Chrome" : /Firefox/.test(ua) ? "Firefox" : /Safari/.test(ua) ? "Safari" : /Edge/.test(ua) ? "Edge" : "Other";
+      const os = /Windows/.test(ua) ? "Windows" : /Mac/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : "Unknown";
+      return `${browser} on ${os} (${isMobile ? "Mobile" : "Desktop"})`;
+    })();
     try {
-      // Get admin name
       const { data: prof } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
       const adminName = prof?.full_name || "Admin";
+
+      // Fetch IP & location
+      let ipAddress = null;
+      let locationInfo = null;
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+          const geo = await res.json();
+          ipAddress = geo.ip || null;
+          locationInfo = [geo.city, geo.region, geo.country_name].filter(Boolean).join(", ") || null;
+        }
+      } catch {}
+
       await supabase.from("admin_sessions").insert({
         user_id: userId,
         admin_name: adminName,
         device_info: deviceInfo,
-        ip_address: null,
-        location_info: null,
+        ip_address: ipAddress,
+        location_info: locationInfo,
         is_active: true,
       } as any);
     } catch {}
