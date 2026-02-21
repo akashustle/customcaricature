@@ -234,7 +234,7 @@ const Dashboard = () => {
             <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-sans"><Home className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans"><LogOut className="w-4 h-4 mr-1" /> <span className="hidden md:inline">Logout</span></Button>
           </div>
         </div>
       </header>
@@ -286,7 +286,8 @@ const Dashboard = () => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border">
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
+          <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
@@ -300,7 +301,7 @@ const Dashboard = () => {
 };
 
 const BottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
     <Icon className="w-5 h-5" />
     <span className="text-[10px] font-sans font-medium">{label}</span>
   </button>
@@ -734,6 +735,52 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
     return () => { supabase.removeChannel(ch2); };
   }, [userId]);
 
+  const handlePayPartial2 = async (ev: any) => {
+    // Pay partial 2 to complete advance
+    setPayingEventId(ev.id);
+    try {
+      // Fetch partial advance config to get partial_2_amount
+      const { data: config } = await supabase.from("user_partial_advance_config").select("*").eq("user_id", userId!).maybeSingle();
+      const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
+      const partial2Amount = config?.partial_2_amount || Math.ceil(advanceAmount / 2);
+
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: partial2Amount, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile },
+      });
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
+
+      const options = {
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club", description: `Event Advance - Partial 2`,
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount },
+            });
+            if (verifyError) throw new Error("Verification failed");
+            if (verifyData?.verified || verifyData?.success) {
+              toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
+            } else {
+              throw new Error("Verification failed");
+            }
+          } catch (err: any) {
+            console.error("Partial 2 verification error:", err);
+            toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });
+          }
+          setPayingEventId(null);
+        },
+        prefill: { name: ev.client_name, email: ev.client_email, contact: `+91${ev.client_mobile}` },
+        theme: { color: "#E3DED3" },
+        modal: { ondismiss: () => setPayingEventId(null) },
+      };
+      new window.Razorpay(options).open();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPayingEventId(null);
+    }
+  };
+
   const handlePayRemaining = async (ev: any) => {
     const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
     const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
@@ -949,43 +996,43 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       />
                     )}
 
-                    {/* Pay full advance button when partial_1_paid */}
+                    {/* Pay partial 2 to complete advance when partial_1_paid */}
                     {isPartial1Paid && !advancePaid && !fullyPaid && (
                       <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground font-sans bg-orange-50 rounded-lg p-2">
-                          ⚡ Partial 1 paid. Complete your full advance to confirm the booking.
+                        <p className="text-xs font-sans bg-red-50 text-red-700 rounded-lg p-3 font-medium border border-red-200">
+                          🔒 Your event date is blocked. To fully confirm your booking, pay Partial 2 to complete advance payment.
                         </p>
                         <Button
                           size="sm"
-                          className="rounded-full font-sans w-full bg-orange-500 hover:bg-orange-600 text-white"
+                          className="rounded-full font-sans w-full bg-red-600 hover:bg-red-700 text-white"
                           disabled={payingEventId === ev.id}
-                          onClick={() => handlePayRemaining(ev)}
+                          onClick={() => handlePayPartial2(ev)}
                         >
                           {payingEventId === ev.id ? (
                             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
                           ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Remaining Advance Now</>
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Partial 2 — Complete Advance</>
                           )}
                         </Button>
                       </div>
                     )}
 
-                    {/* Pay remaining button */}
+                    {/* Pay remaining balance button (green) */}
                     {remaining > 0 && advancePaid && !fullyPaid && (
                       <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground font-sans bg-muted/50 rounded-lg p-2">
-                          💡 Remaining {formatPrice(remaining)} is payable at the event. You can also pay now if you wish.
+                        <p className="text-xs font-sans bg-green-50 text-green-700 rounded-lg p-3 font-medium border border-green-200">
+                          ✅ Advance paid! Remaining balance {formatPrice(remaining)} can be paid now or at the event.
                         </p>
                         <Button
                           size="sm"
-                          className="rounded-full font-sans w-full bg-primary hover:bg-primary/90"
+                          className="rounded-full font-sans w-full bg-green-600 hover:bg-green-700 text-white"
                           disabled={payingEventId === ev.id}
                           onClick={() => handlePayRemaining(ev)}
                         >
                           {payingEventId === ev.id ? (
                             <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
                           ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(remaining)} Now</>
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Remaining {formatPrice(remaining)}</>
                           )}
                         </Button>
                       </div>

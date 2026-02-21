@@ -637,10 +637,11 @@ const ArtistDashboard = () => {
       </div>
       {/* Mobile Bottom Nav for Artist Dashboard */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
           <ArtistBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <ArtistBottomNavItem icon={CalendarDays} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           {isRitesh && <ArtistBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />}
+          <ArtistBottomNavItem icon={CalendarOff} label="Block" active={activeTab === "blocked"} onClick={() => setActiveTab("blocked")} />
           <ArtistBottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
           <ArtistBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} badge={chatUnread > 0 ? chatUnread : undefined} />
           <ArtistBottomNavItem icon={LogOut} label="Logout" active={false} onClick={handleLogout} />
@@ -651,7 +652,7 @@ const ArtistDashboard = () => {
 };
 
 const ArtistBottomNavItem = ({ icon: Icon, label, active, onClick, badge }: { icon: any; label: string; active: boolean; onClick: () => void; badge?: number }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg transition-colors relative ${active ? "text-primary" : "text-muted-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 relative ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
     <Icon className="w-5 h-5" />
     <span className="text-[10px] font-sans font-medium">{label}</span>
     {badge && badge > 0 && (

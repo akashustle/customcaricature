@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -1526,6 +1526,7 @@ const Admin = () => {
       {/* Mobile Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
         <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
+          <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
@@ -1541,6 +1542,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+          <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
       </div>
     </div>
