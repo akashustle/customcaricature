@@ -96,10 +96,18 @@ async function encryptPayload(
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
-  // HKDF helper
+  // HKDF helper (RFC 5869)
   async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
-    const key = await crypto.subtle.importKey("raw", ikm, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const prk = new Uint8Array(await crypto.subtle.sign("HMAC", key, salt.length > 0 ? salt : new Uint8Array(32)));
+    // Extract: PRK = HMAC-SHA256(salt, IKM)
+    const saltKey = await crypto.subtle.importKey(
+      "raw",
+      salt.length > 0 ? salt : new Uint8Array(32),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const prk = new Uint8Array(await crypto.subtle.sign("HMAC", saltKey, ikm));
+    // Expand: OKM = HMAC-SHA256(PRK, info || 0x01)
     const prkKey = await crypto.subtle.importKey("raw", prk, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     const infoWithCounter = new Uint8Array([...info, 1]);
     const okm = new Uint8Array(await crypto.subtle.sign("HMAC", prkKey, infoWithCounter));
