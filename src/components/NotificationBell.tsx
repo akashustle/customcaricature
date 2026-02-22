@@ -205,6 +205,30 @@ const registerPushSubscription = async (userId: string) => {
   }
 };
 
+// Send a greeting notification when user first allows push
+const sendGreetingNotification = async (userId: string) => {
+  try {
+    // Check if we already sent a greeting
+    const { data: existing } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("type", "greeting")
+      .maybeSingle();
+    if (existing) return;
+
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      title: "Welcome to CCC! 🎨",
+      message: "Thanks for enabling notifications! You'll now receive updates about your orders, events and messages even when you're away.",
+      type: "greeting",
+      link: "/dashboard",
+    } as any);
+  } catch (err) {
+    console.warn("Greeting notification failed:", err);
+  }
+};
+
 const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -234,6 +258,8 @@ const NotificationBell = () => {
         if (permission === "granted") {
           console.log("Notification permission granted");
           registerPushSubscription(user.id);
+          // Send a welcome greeting notification
+          sendGreetingNotification(user.id);
         }
       });
     } else if ("Notification" in window && Notification.permission === "granted") {

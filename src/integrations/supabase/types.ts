@@ -371,6 +371,8 @@ export type Database = {
       chat_messages: {
         Row: {
           created_at: string
+          deleted: boolean
+          edited_at: string | null
           file_name: string | null
           file_url: string | null
           id: string
@@ -383,6 +385,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted?: boolean
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string
@@ -395,6 +399,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted?: boolean
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string

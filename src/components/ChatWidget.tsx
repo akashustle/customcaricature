@@ -3,13 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, Send, X, Loader2, Paperclip, FileText } from "lucide-react";
+import { MessageCircle, Send, X, Loader2, Paperclip, FileText, Smile, Pencil, Trash2, Check, XCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import EmojiPicker from "emoji-picker-react";
 
 type Message = {
   id: string; sender_id: string; receiver_id: string | null;
   message: string; is_admin: boolean; read: boolean; created_at: string;
   file_url?: string | null; file_name?: string | null;
+  edited_at?: string | null; deleted?: boolean;
 };
 
 const playDing = () => {
@@ -25,7 +27,7 @@ const playDing = () => {
   } catch {}
 };
 
-const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) => {
+const ChatWidget = ({ userId, userName, isArtistChat = false }: { userId: string; userName: string; isArtistChat?: boolean }) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
@@ -33,14 +35,19 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
   const [unread, setUnread] = useState(0);
   const [adminTyping, setAdminTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevMsgCount = useRef(0);
 
   const fetchMessages = async () => {
-    const { data } = await supabase.from("chat_messages").select("*")
+    let query = supabase.from("chat_messages").select("*")
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
       .order("created_at", { ascending: true }).limit(100);
+    if (isArtistChat) query = query.eq("is_artist_chat", true);
+    const { data } = await query;
     if (data) {
       const msgs = data as any as Message[];
       if (msgs.length > prevMsgCount.current && prevMsgCount.current > 0) {
@@ -55,7 +62,7 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
 
   useEffect(() => {
     fetchMessages();
-    const ch = supabase.channel(`chat-${userId}`)
+    const ch = supabase.channel(`chat-${userId}-${isArtistChat ? "artist" : "user"}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchMessages())
       .subscribe();
     const presenceCh = supabase.channel(`typing-${userId}`);
@@ -93,8 +100,11 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
   const sendMessage = async () => {
     if (!newMsg.trim()) return;
     setSending(true);
-    await supabase.from("chat_messages").insert({ sender_id: userId, receiver_id: null, message: newMsg.trim(), is_admin: false } as any);
-    setNewMsg(""); setSending(false);
+    await supabase.from("chat_messages").insert({
+      sender_id: userId, receiver_id: null, message: newMsg.trim(), is_admin: false,
+      is_artist_chat: isArtistChat,
+    } as any);
+    setNewMsg(""); setSending(false); setShowEmoji(false);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,13 +115,35 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
     const { error: upErr } = await supabase.storage.from("order-photos").upload(path, file);
     if (!upErr) {
       const { data: urlData } = supabase.storage.from("order-photos").getPublicUrl(path);
-      await supabase.from("chat_messages").insert({ sender_id: userId, receiver_id: null, message: `📎 ${file.name}`, is_admin: false, file_url: urlData.publicUrl || path, file_name: file.name } as any);
+      await supabase.from("chat_messages").insert({
+        sender_id: userId, receiver_id: null, message: `📎 ${file.name}`, is_admin: false,
+        file_url: urlData.publicUrl || path, file_name: file.name, is_artist_chat: isArtistChat,
+      } as any);
     }
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const startEdit = (msg: Message) => {
+    setEditingId(msg.id);
+    setEditText(msg.message);
+  };
+
+  const saveEdit = async () => {
+    if (!editingId || !editText.trim()) return;
+    await supabase.from("chat_messages").update({ message: editText.trim(), edited_at: new Date().toISOString() } as any).eq("id", editingId);
+    setEditingId(null); setEditText("");
+  };
+
+  const deleteMessage = async (id: string) => {
+    await supabase.from("chat_messages").update({ deleted: true, message: "This message was deleted" } as any).eq("id", id);
+  };
+
   const isImage = (name: string) => /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name);
+
+  const onEmojiClick = (emojiData: any) => {
+    setNewMsg(prev => prev + emojiData.emoji);
+  };
 
   return (
     <>
@@ -151,33 +183,67 @@ const ChatWidget = ({ userId, userName }: { userId: string; userName: string }) 
                       Send us a message and we'll reply soon.
                     </p>
                   )}
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.sender_id === userId ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs font-body ${
-                        msg.sender_id === userId ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card rounded-bl-sm border border-border"
-                      }`}>
-                        {msg.is_admin && <p className="text-[9px] font-bold mb-0.5 opacity-70">Admin</p>}
-                        {msg.file_url && msg.file_name && isImage(msg.file_name) ? (
-                          <img src={msg.file_url} alt={msg.file_name} className="max-w-full rounded-lg mb-1 max-h-48 object-cover" />
-                        ) : msg.file_url && msg.file_name ? (
-                          <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline"><FileText className="w-3 h-3" /> {msg.file_name}</a>
-                        ) : <p>{msg.message}</p>}
-                        <p className={`text-[9px] mt-0.5 ${msg.sender_id === userId ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                          {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
-                        </p>
+                  {messages.map(msg => {
+                    const isMine = msg.sender_id === userId;
+                    const isDeleted = msg.deleted;
+                    return (
+                      <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
+                        <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs font-body relative ${
+                          isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card rounded-bl-sm border border-border"
+                        } ${isDeleted ? "opacity-50 italic" : ""}`}>
+                          {msg.is_admin && <p className="text-[9px] font-bold mb-0.5 opacity-70">Admin</p>}
+                          {editingId === msg.id ? (
+                            <div className="flex items-center gap-1">
+                              <Input value={editText} onChange={e => setEditText(e.target.value)} className="h-6 text-xs bg-background text-foreground" autoFocus
+                                onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingId(null); }} />
+                              <button onClick={saveEdit} className="p-0.5"><Check className="w-3 h-3" /></button>
+                              <button onClick={() => setEditingId(null)} className="p-0.5"><XCircle className="w-3 h-3" /></button>
+                            </div>
+                          ) : (
+                            <>
+                              {msg.file_url && msg.file_name && isImage(msg.file_name) ? (
+                                <img src={msg.file_url} alt={msg.file_name} className="max-w-full rounded-lg mb-1 max-h-48 object-cover" />
+                              ) : msg.file_url && msg.file_name ? (
+                                <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline"><FileText className="w-3 h-3" /> {msg.file_name}</a>
+                              ) : <p>{msg.message}</p>}
+                            </>
+                          )}
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <p className={`text-[9px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                              {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                              {msg.edited_at && " · edited"}
+                            </p>
+                          </div>
+                          {/* Edit/Delete actions for own messages */}
+                          {isMine && !isDeleted && editingId !== msg.id && (
+                            <div className="absolute -top-3 right-0 hidden group-hover:flex gap-0.5 bg-card border border-border rounded-full px-1 py-0.5 shadow-sm">
+                              <button onClick={() => startEdit(msg)} className="p-0.5 hover:bg-muted rounded"><Pencil className="w-2.5 h-2.5 text-muted-foreground" /></button>
+                              <button onClick={() => deleteMessage(msg.id)} className="p-0.5 hover:bg-muted rounded"><Trash2 className="w-2.5 h-2.5 text-destructive" /></button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {adminTyping && (
                     <div className="flex justify-start">
                       <div className="bg-card rounded-2xl px-3 py-2 text-xs font-body text-muted-foreground italic rounded-bl-sm border border-border">Admin is typing...</div>
                     </div>
                   )}
                 </div>
+                {/* Emoji Picker */}
+                {showEmoji && (
+                  <div className="border-t border-border">
+                    <EmojiPicker onEmojiClick={onEmojiClick} width="100%" height={280} searchPlaceholder="Search emoji..." previewConfig={{ showPreview: false }} />
+                  </div>
+                )}
                 <div className="flex items-center gap-2 p-3 border-t border-border flex-shrink-0 bg-card">
                   <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} accept="image/*,.pdf,.doc,.docx" />
                   <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="h-8 w-8 p-0 flex-shrink-0">
                     {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Paperclip className="w-3 h-3" />}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowEmoji(!showEmoji)} className="h-8 w-8 p-0 flex-shrink-0">
+                    <Smile className="w-3 h-3" />
                   </Button>
                   <Input value={newMsg} onChange={e => { setNewMsg(e.target.value); handleTyping(); }} placeholder="Type a message..."
                     className="text-xs h-8 font-body bg-background" onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
