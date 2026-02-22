@@ -63,9 +63,10 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
   const isPartial1Paid = paymentStatus === "partial_1_paid";
   const fullyPaid = paymentStatus === "fully_paid";
   const advancePaid = paymentStatus === "confirmed" || fullyPaid;
-  const paidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
-  const progressPercent = totalAmount > 0 ? Math.min(100, Math.round((paidTotal / totalAmount) * 100)) : 0;
-  const remaining = Math.max(0, totalAmount - paidTotal);
+  const rawPaidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
+  const paidTotal = fullyPaid ? totalAmount : rawPaidTotal;
+  const progressPercent = fullyPaid ? 100 : (totalAmount > 0 ? Math.min(100, Math.round((rawPaidTotal / totalAmount) * 100)) : 0);
+  const remaining = fullyPaid ? 0 : Math.max(0, totalAmount - rawPaidTotal);
   
   // Once advance is paid, hide partial steps - show simplified view
   const showPartialSteps = isPartialEnabled && !advancePaid;
