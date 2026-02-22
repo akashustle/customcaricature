@@ -190,7 +190,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
                 </div>
                 <div className="flex justify-between items-center">
                   <Label className="text-muted-foreground text-sm">Order Date & Time</Label>
-                  <Input type="datetime-local" step="1" className="w-56 h-8" value={editData.created_at ? new Date(editData.created_at).toISOString().slice(0, 19) : ""} onChange={(e) => setEditData({ ...editData, created_at: new Date(e.target.value).toISOString() })} />
+                  <Input type="datetime-local" step="1" className="w-56 h-8" value={editData.created_at ? (() => { const d = new Date(editData.created_at); const offset = d.getTimezoneOffset(); const local = new Date(d.getTime() - offset * 60000); return local.toISOString().slice(0, 19); })() : ""} max={(() => { const now = new Date(); now.setMinutes(now.getMinutes() - 1); const offset = now.getTimezoneOffset(); const local = new Date(now.getTime() - offset * 60000); return local.toISOString().slice(0, 19); })()} onChange={(e) => setEditData({ ...editData, created_at: new Date(e.target.value).toISOString() })} />
                 </div>
               </>
             ) : (

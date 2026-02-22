@@ -46,10 +46,12 @@ const STATUS_LABELS: Record<string, string> = {
   dispatched: "Dispatched", delivered: "Delivered", completed: "Completed",
 };
 
-// Component to show order images for artist
+// Component to show order images for artist with slidable fullscreen viewer
 const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
   const [images, setImages] = useState<{ id: string; storage_path: string; file_name: string }[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -67,24 +69,66 @@ const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
     fetchImages();
   }, [orderId]);
 
+  const openViewer = (index: number) => { setCurrentIndex(index); setViewerOpen(true); };
+  const prevImage = () => setCurrentIndex(i => (i > 0 ? i - 1 : images.length - 1));
+  const nextImage = () => setCurrentIndex(i => (i < images.length - 1 ? i + 1 : 0));
+
   if (images.length === 0) return null;
 
   return (
     <div>
-      <p className="text-xs font-sans text-muted-foreground mb-1">📸 Customer Photos:</p>
+      <p className="text-xs font-sans text-muted-foreground mb-1">📸 Customer Photos ({images.length}):</p>
       <div className="flex gap-1 flex-wrap">
-        {images.map(img => (
-          <div key={img.id} className="w-14 h-14 rounded border border-border overflow-hidden">
+        {images.map((img, idx) => (
+          <div key={img.id} className="w-14 h-14 rounded border border-border overflow-hidden cursor-pointer" onClick={() => openViewer(idx)}>
             {urls[img.id] ? (
-              <a href={urls[img.id]} target="_blank" rel="noopener noreferrer">
-                <img src={urls[img.id]} alt={img.file_name} className="w-full h-full object-cover" />
-              </a>
+              <img src={urls[img.id]} alt={img.file_name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-muted" />
             )}
           </div>
         ))}
       </div>
+      {/* Fullscreen slidable image viewer */}
+      <AnimatePresence>
+        {viewerOpen && images[currentIndex] && urls[images[currentIndex].id] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center"
+            onClick={() => setViewerOpen(false)}
+          >
+            <div className="absolute top-4 right-4 flex gap-2 z-10">
+              <span className="text-white/70 text-sm font-sans">{currentIndex + 1} / {images.length}</span>
+              <button onClick={() => setViewerOpen(false)} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex items-center gap-4 max-w-full px-4" onClick={e => e.stopPropagation()}>
+              {images.length > 1 && (
+                <button onClick={prevImage} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 flex-shrink-0">
+                  ‹
+                </button>
+              )}
+              <motion.img
+                key={currentIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                src={urls[images[currentIndex].id]}
+                alt={images[currentIndex].file_name}
+                className="max-w-[80vw] max-h-[80vh] object-contain rounded-lg"
+              />
+              {images.length > 1 && (
+                <button onClick={nextImage} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 flex-shrink-0">
+                  ›
+                </button>
+              )}
+            </div>
+            <p className="text-white/60 text-xs font-sans mt-3">{images[currentIndex].file_name}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
