@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.change-admin-password]
 verify_jwt = false
+
+[functions.send-web-push]
+verify_jwt = false

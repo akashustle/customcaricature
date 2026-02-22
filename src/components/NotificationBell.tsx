@@ -140,6 +140,71 @@ const playNotificationSound = (type: string) => {
   } catch {}
 };
 
+// Register push subscription for offline notifications
+const registerPushSubscription = async (userId: string) => {
+  try {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    
+    const registration = await navigator.serviceWorker.ready;
+    const pushManager = (registration as any).pushManager;
+    if (!pushManager) return;
+    const existingSub = await pushManager.getSubscription();
+    
+    // Check if we already saved this subscription
+    if (existingSub) {
+      const { data: existing } = await supabase
+        .from("push_subscriptions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("endpoint", existingSub.endpoint)
+        .maybeSingle();
+      if (existing) return; // Already registered
+    }
+
+    // Get VAPID public key - fetch from edge function
+    let vapidKey: string;
+    try {
+      const { data } = await supabase.functions.invoke("send-web-push", {
+        body: { action: "get_vapid_key" },
+      });
+      vapidKey = data?.vapid_public_key;
+      if (!vapidKey) return;
+    } catch {
+      return;
+    }
+
+    // Convert VAPID key to Uint8Array
+    const padding = "=".repeat((4 - (vapidKey.length % 4)) % 4);
+    const base64 = (vapidKey + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+
+    const subscription = existingSub || await pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: outputArray,
+    });
+
+    const key = subscription.getKey("p256dh");
+    const auth = subscription.getKey("auth");
+    if (!key || !auth) return;
+
+    const p256dh = btoa(String.fromCharCode(...new Uint8Array(key)));
+    const authKey = btoa(String.fromCharCode(...new Uint8Array(auth)));
+
+    await supabase.from("push_subscriptions").insert({
+      user_id: userId,
+      endpoint: subscription.endpoint,
+      p256dh: p256dh,
+      auth: authKey,
+    } as any);
+
+    console.log("Push subscription registered");
+  } catch (err) {
+    console.warn("Push subscription registration failed:", err);
+  }
+};
+
 const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -163,13 +228,16 @@ const NotificationBell = () => {
 
     fetchNotifications();
 
-    // Request notification permission and show native notifications
+    // Request notification permission and register push subscription
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
           console.log("Notification permission granted");
+          registerPushSubscription(user.id);
         }
       });
+    } else if ("Notification" in window && Notification.permission === "granted") {
+      registerPushSubscription(user.id);
     }
 
     const ch = supabase
