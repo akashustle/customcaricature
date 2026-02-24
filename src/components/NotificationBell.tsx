@@ -148,20 +148,11 @@ const registerPushSubscription = async (userId: string) => {
     const registration = await navigator.serviceWorker.ready;
     const pushManager = (registration as any).pushManager;
     if (!pushManager) return;
+    
+    // Always check for existing subscription and compare
     const existingSub = await pushManager.getSubscription();
     
-    // Check if we already saved this subscription
-    if (existingSub) {
-      const { data: existing } = await supabase
-        .from("push_subscriptions")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("endpoint", existingSub.endpoint)
-        .maybeSingle();
-      if (existing) return; // Already registered
-    }
-
-    // Get VAPID public key - fetch from edge function
+    // Get VAPID public key from edge function
     let vapidKey: string;
     try {
       const { data } = await supabase.functions.invoke("send-web-push", {
@@ -171,6 +162,17 @@ const registerPushSubscription = async (userId: string) => {
       if (!vapidKey) return;
     } catch {
       return;
+    }
+    
+    // If existing subscription exists, check if it's already saved
+    if (existingSub) {
+      const { data: existing } = await supabase
+        .from("push_subscriptions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("endpoint", existingSub.endpoint)
+        .maybeSingle();
+      if (existing) return; // Already registered
     }
 
     // Convert VAPID key to Uint8Array
@@ -189,8 +191,11 @@ const registerPushSubscription = async (userId: string) => {
     const auth = subscription.getKey("auth");
     if (!key || !auth) return;
 
-    const p256dh = btoa(String.fromCharCode(...new Uint8Array(key)));
-    const authKey = btoa(String.fromCharCode(...new Uint8Array(auth)));
+    // Store as base64url to match Web Push standard
+    const p256dh = btoa(String.fromCharCode(...new Uint8Array(key)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const authKey = btoa(String.fromCharCode(...new Uint8Array(auth)))
+      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 
     await supabase.from("push_subscriptions").insert({
       user_id: userId,

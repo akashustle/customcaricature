@@ -218,9 +218,9 @@ Deno.serve(async (req) => {
 
     for (const sub of subscriptions) {
       try {
-        // Convert stored base64 keys to base64url
-        const p256dhB64url = sub.p256dh.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-        const authB64url = sub.auth.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+        // Keys are stored as base64url already
+        const p256dhB64url = sub.p256dh;
+        const authB64url = sub.auth;
 
         // Encrypt the payload
         const { encrypted } = await encryptPayload(p256dhB64url, authB64url, payloadBytes);
