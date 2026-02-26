@@ -168,13 +168,8 @@ const HomepageLiveChat = () => {
   };
 
   const handleOpen = () => {
-    setOpen(true);
-    if (messages.length === 0) {
-      setTimeout(() => {
-        addLocalMessage("system", "Hi 👋 Please enter your name to continue.");
-        setStep("name_input");
-      }, 300);
-    }
+    // Redirect non-logged-in users to the dedicated AI chat page
+    navigate("/live-chat");
   };
 
   const handleOptionClick = async (option: string) => {

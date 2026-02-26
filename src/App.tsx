@@ -27,6 +27,7 @@ import NotFound from "./pages/NotFound";
 import Notifications from "./pages/Notifications";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import LiveChat from "./pages/LiveChat";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HomepageLiveChat from "./components/HomepageLiveChat";
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/live-chat" element={<LiveChat />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
