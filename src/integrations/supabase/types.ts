@@ -467,6 +467,42 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_international_event_pricing: {
+        Row: {
+          artist_count: number
+          country: string
+          created_at: string
+          custom_advance_amount: number
+          custom_extra_hour_rate: number
+          custom_total_price: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_count?: number
+          country: string
+          created_at?: string
+          custom_advance_amount: number
+          custom_extra_hour_rate?: number
+          custom_total_price: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_count?: number
+          country?: string
+          created_at?: string
+          custom_advance_amount?: number
+          custom_extra_hour_rate?: number
+          custom_total_price?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       customer_pricing: {
         Row: {
           caricature_type_slug: string
@@ -541,6 +577,7 @@ export type Database = {
           client_instagram: string | null
           client_mobile: string
           client_name: string
+          country: string
           created_at: string
           event_date: string
           event_end_time: string
@@ -549,6 +586,7 @@ export type Database = {
           extra_hours: number
           full_address: string
           id: string
+          is_international: boolean
           is_mumbai: boolean
           negotiated: boolean
           negotiated_advance: number | null
@@ -580,6 +618,7 @@ export type Database = {
           client_instagram?: string | null
           client_mobile: string
           client_name: string
+          country?: string
           created_at?: string
           event_date: string
           event_end_time: string
@@ -588,6 +627,7 @@ export type Database = {
           extra_hours?: number
           full_address: string
           id?: string
+          is_international?: boolean
           is_mumbai?: boolean
           negotiated?: boolean
           negotiated_advance?: number | null
@@ -619,6 +659,7 @@ export type Database = {
           client_instagram?: string | null
           client_mobile?: string
           client_name?: string
+          country?: string
           created_at?: string
           event_date?: string
           event_end_time?: string
@@ -627,6 +668,7 @@ export type Database = {
           extra_hours?: number
           full_address?: string
           id?: string
+          is_international?: boolean
           is_mumbai?: boolean
           negotiated?: boolean
           negotiated_advance?: number | null
@@ -691,6 +733,42 @@ export type Database = {
           total_price?: number
           updated_at?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      international_event_pricing: {
+        Row: {
+          advance_amount: number
+          artist_count: number
+          country: string
+          created_at: string
+          currency: string
+          extra_hour_rate: number
+          id: string
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          advance_amount?: number
+          artist_count?: number
+          country: string
+          created_at?: string
+          currency?: string
+          extra_hour_rate?: number
+          id?: string
+          total_price?: number
+          updated_at?: string
+        }
+        Update: {
+          advance_amount?: number
+          artist_count?: number
+          country?: string
+          created_at?: string
+          currency?: string
+          extra_hour_rate?: number
+          id?: string
+          total_price?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1095,6 +1173,7 @@ export type Database = {
           gateway_charges_enabled: boolean
           id: string
           instagram_id: string | null
+          international_booking_allowed: boolean
           is_manual: boolean
           mobile: string
           pincode: string | null
@@ -1118,6 +1197,7 @@ export type Database = {
           gateway_charges_enabled?: boolean
           id?: string
           instagram_id?: string | null
+          international_booking_allowed?: boolean
           is_manual?: boolean
           mobile: string
           pincode?: string | null
@@ -1141,6 +1221,7 @@ export type Database = {
           gateway_charges_enabled?: boolean
           id?: string
           instagram_id?: string | null
+          international_booking_allowed?: boolean
           is_manual?: boolean
           mobile?: string
           pincode?: string | null

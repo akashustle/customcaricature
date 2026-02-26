@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventPricing } from "@/hooks/useEventPricing";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,12 +15,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane } from "lucide-react";
+import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event-data";
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
 import LocationDropdowns from "@/components/LocationDropdowns";
+import { getCountries, getCountryStates, getCountryCities } from "@/lib/countries-data";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -29,7 +31,9 @@ const BookEvent = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { pricing: dbPricing } = useEventPricing();
+  const { settings } = useSiteSettings();
   const [customerEventPricing, setCustomerEventPricing] = useState<any[]>([]);
+  const [intlPricing, setIntlPricing] = useState<any[]>([]);
   const [partialConfig, setPartialConfig] = useState<any>(null);
   const [clientName, setClientName] = useState("");
   const [clientMobile, setClientMobile] = useState("");
@@ -52,6 +56,11 @@ const BookEvent = () => {
   const [addExtraHours, setAddExtraHours] = useState(false);
   const [travelConfirmed, setTravelConfirmed] = useState(false);
   const [accommodationConfirmed, setAccommodationConfirmed] = useState(false);
+  const [isInternational, setIsInternational] = useState(false);
+  const [country, setCountry] = useState("India");
+  const [intlState, setIntlState] = useState("");
+  const [intlCity, setIntlCity] = useState("");
+  const [canBookInternational, setCanBookInternational] = useState(false);
 
   // Status
   const [availabilityChecked, setAvailabilityChecked] = useState(false);
@@ -102,11 +111,15 @@ const BookEvent = () => {
             setClientInstagram(data.instagram_id || "");
             if (data.state) setState(data.state);
             if (data.city) setCity(data.city);
-            // Don't auto-fill full address with email - only use physical address
             if (data.pincode) setPincode(data.pincode);
             setGatewayEnabled((data as any).gateway_charges_enabled !== false);
+            setCanBookInternational((data as any).international_booking_allowed || false);
           }
         });
+      // Fetch international pricing
+      supabase.from("international_event_pricing").select("*").then(({ data }) => {
+        if (data) setIntlPricing(data as any);
+      });
       // Fetch customer-specific event pricing
       const fetchCustomerPricing = () => {
         supabase.from("customer_event_pricing").select("*").eq("user_id", user.id)
