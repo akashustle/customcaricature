@@ -48,6 +48,7 @@ import NotificationBell from "@/components/NotificationBell";
 import AdminNotificationSender from "@/components/admin/AdminNotificationSender";
 import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
+import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -596,6 +597,7 @@ const Admin = () => {
               <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
               <TabsTrigger value="sessions" className="font-sans rounded-full transition-all whitespace-nowrap"><Monitor className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
               <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
+              <TabsTrigger value="chatbot" className="font-sans rounded-full transition-all whitespace-nowrap">🤖 AI Bot</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1424,6 +1426,10 @@ const Admin = () => {
 
           <TabsContent value="intl-pricing">
             <AdminInternationalPricing />
+          </TabsContent>
+
+          <TabsContent value="chatbot">
+            <AdminChatbotTraining />
           </TabsContent>
 
           {/* Settings Tab */}

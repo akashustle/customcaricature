@@ -22,6 +22,7 @@ import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getCountries, getCountryStates, getCountryCities } from "@/lib/countries-data";
+import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -72,10 +73,28 @@ const BookEvent = () => {
   const actualCity = city === "__other__" ? customCity : city;
   const MUMBAI_DISTRICTS = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
   const isMumbai = state === "Maharashtra" && MUMBAI_DISTRICTS.includes(district);
-  const isOutsideMumbai = state && actualCity && !isMumbai;
+  const isOutsideMumbai = !isInternational && state && actualCity && !isMumbai;
+
+  // International pricing helper
+  const getIntlPrice = () => {
+    if (!isInternational) return null;
+    const countryPricing = intlPricing.filter((p: any) => p.country === country && p.artist_count === artistCount);
+    if (countryPricing.length > 0) {
+      const row = countryPricing[0];
+      const extraCost = (addExtraHours ? extraHours : 0) * row.extra_hour_rate;
+      return { total: row.total_price + extraCost, advance: row.advance_amount, extraHourRate: row.extra_hour_rate };
+    }
+    return null; // Quote-based
+  };
 
   // Check for customer-specific event pricing first
   const getCustomerEventPrice = () => {
+    if (isInternational) {
+      const intlPrice = getIntlPrice();
+      if (intlPrice) return intlPrice;
+      // Fallback to default international rate or Pan-India rate
+      return getEventPrice(false, artistCount, addExtraHours ? extraHours : 0, dbPricing);
+    }
     if (customerEventPricing.length > 0) {
       const region = isMumbai ? "mumbai" : "outside";
       const row = customerEventPricing.find((p: any) => p.region === region && p.artist_count === artistCount);
@@ -152,10 +171,11 @@ const BookEvent = () => {
   useEffect(() => {
     setAvailabilityChecked(false);
     setIsAvailable(false);
-  }, [eventDate, actualCity]);
+  }, [eventDate, actualCity, intlCity]);
 
   const checkAvailability = async () => {
-    if (!eventDate || !actualCity) return;
+    const checkCity = isInternational ? intlCity : actualCity;
+    if (!eventDate || !checkCity) return;
     setCheckingAvailability(true);
     const dateStr = format(eventDate, "yyyy-MM-dd");
     const { data: blocked } = await supabase
@@ -166,7 +186,7 @@ const BookEvent = () => {
       .from("event_bookings")
       .select("id")
       .eq("event_date", dateStr)
-      .eq("city", actualCity)
+      .eq("city", checkCity)
       .neq("status", "cancelled");
     const available = (!blocked || blocked.length === 0) && (!existing || existing.length < 2);
     setIsAvailable(available);
@@ -178,9 +198,14 @@ const BookEvent = () => {
     if (!clientName || !clientMobile || !clientEmail) return false;
     const finalEventType = eventType === "other" ? customEventType : eventType;
     if (!finalEventType || !eventDate || !startTime || !endTime) return false;
-    if (!state || !district || !actualCity || !fullAddress || !venueName || !pincode) return false;
+    if (isInternational) {
+      if (!country || !intlState || !intlCity || !fullAddress || !venueName) return false;
+    } else {
+      if (!state || !district || !actualCity || !fullAddress || !venueName || !pincode) return false;
+    }
     if (!availabilityChecked || !isAvailable) return false;
-    if (isOutsideMumbai && (!travelConfirmed || !accommodationConfirmed)) return false;
+    if (!isInternational && isOutsideMumbai && (!travelConfirmed || !accommodationConfirmed)) return false;
+    if (isInternational && (!travelConfirmed || !accommodationConfirmed)) return false;
     return true;
   };
 
@@ -200,18 +225,20 @@ const BookEvent = () => {
         event_date: dateStr,
         event_start_time: startTime,
         event_end_time: endTime,
-        state,
-        city: actualCity,
+        state: isInternational ? intlState : state,
+        city: isInternational ? intlCity : actualCity,
+        country: isInternational ? country : "India",
+        is_international: isInternational,
         full_address: fullAddress,
         venue_name: venueName,
-        pincode,
+        pincode: isInternational ? "000000" : pincode,
         artist_count: artistCount,
-        is_mumbai: isMumbai,
+        is_mumbai: isInternational ? false : isMumbai,
         total_price: pricing.total,
         advance_amount: pricing.advance,
         extra_hours: addExtraHours ? extraHours : 0,
-        travel_confirmed: isOutsideMumbai ? travelConfirmed : true,
-        accommodation_confirmed: isOutsideMumbai ? accommodationConfirmed : true,
+        travel_confirmed: travelConfirmed,
+        accommodation_confirmed: accommodationConfirmed,
       } as any).select("id").single();
       if (error || !booking) throw new Error(error?.message || "Failed to create booking");
 
@@ -392,32 +419,74 @@ const BookEvent = () => {
 
         {/* Location */}
         <Card>
-          <CardHeader><CardTitle className="font-display text-lg">Location Details</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="font-display text-lg flex items-center justify-between">
+              Location Details
+              {(canBookInternational || settings.international_booking_global.enabled) && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  <Label className="font-sans text-sm font-normal cursor-pointer">International</Label>
+                  <input type="checkbox" checked={isInternational} onChange={(e) => {
+                    setIsInternational(e.target.checked);
+                    if (e.target.checked) { setCountry(""); setIntlState(""); setIntlCity(""); }
+                    else { setState(""); setDistrict(""); setCity(""); }
+                    setAvailabilityChecked(false);
+                  }} className="w-4 h-4 accent-primary" />
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
-            <LocationDropdowns
-              state={state}
-              district={district}
-              city={city}
-              onStateChange={(v) => { setState(v); setDistrict(""); setCity(""); setCustomCity(""); }}
-              onDistrictChange={(v) => { setDistrict(v); setCity(""); setCustomCity(""); }}
-              onCityChange={(v) => { setCity(v); if (v !== "__other__") setCustomCity(""); }}
-            />
+            {isInternational ? (
+              <InternationalLocationDropdowns
+                country={country}
+                state={intlState}
+                city={intlCity}
+                onCountryChange={(v) => { setCountry(v); setIntlState(""); setIntlCity(""); setAvailabilityChecked(false); }}
+                onStateChange={(v) => { setIntlState(v); setIntlCity(""); setAvailabilityChecked(false); }}
+                onCityChange={(v) => { setIntlCity(v); setAvailabilityChecked(false); }}
+              />
+            ) : (
+              <LocationDropdowns
+                state={state}
+                district={district}
+                city={city}
+                onStateChange={(v) => { setState(v); setDistrict(""); setCity(""); setCustomCity(""); }}
+                onDistrictChange={(v) => { setDistrict(v); setCity(""); setCustomCity(""); }}
+                onCityChange={(v) => { setCity(v); if (v !== "__other__") setCustomCity(""); }}
+              />
+            )}
             <div><Label className="font-sans">Venue Name *</Label><Input value={venueName} onChange={e => setVenueName(e.target.value)} placeholder="Hotel / Hall name" /></div>
             <div><Label className="font-sans">Full Address *</Label><Input value={fullAddress} onChange={e => setFullAddress(e.target.value)} placeholder="Complete address" /></div>
-            <div><Label className="font-sans">Pin Code *</Label><Input value={pincode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setPincode(d); }} maxLength={6} placeholder="6 digit pincode" /></div>
+            {!isInternational && (
+              <div><Label className="font-sans">Pin Code *</Label><Input value={pincode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setPincode(d); }} maxLength={6} placeholder="6 digit pincode" /></div>
+            )}
           </CardContent>
         </Card>
 
         {/* Pricing Range Preview (after city selected, before availability check) */}
-        {state && district && actualCity && !availabilityChecked && (
+        {((isInternational && country && intlCity) || (!isInternational && state && district && actualCity)) && !availabilityChecked && (
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="p-4 space-y-2">
               <p className="font-sans font-semibold text-sm flex items-center gap-2">💰 Estimated Pricing Range</p>
               {(() => {
+                if (isInternational) {
+                  const countryPricing = intlPricing.filter((p: any) => p.country === country);
+                  if (countryPricing.length > 0) {
+                    const minPrice = Math.min(...countryPricing.map((p: any) => p.total_price));
+                    const maxPrice = Math.max(...countryPricing.map((p: any) => p.total_price));
+                    return (
+                      <p className="font-sans text-lg font-bold text-primary">
+                        {formatPrice(minPrice)} – {formatPrice(maxPrice)}
+                        <span className="text-xs font-normal text-muted-foreground ml-2">(International - {country})</span>
+                      </p>
+                    );
+                  }
+                  return <p className="text-sm text-muted-foreground font-sans">Custom quote will be provided. Check availability to proceed.</p>;
+                }
                 const mumbaiDistricts = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
                 const regionIsMumbai = state === "Maharashtra" && mumbaiDistricts.includes(district);
                 const region = regionIsMumbai ? "mumbai" : "pan_india";
-                // Check customer-specific pricing first
                 const cpRegion = regionIsMumbai ? "mumbai" : "outside";
                 const cp = customerEventPricing.filter((p: any) => p.region === cpRegion);
                 if (cp.length > 0) {
@@ -449,7 +518,7 @@ const BookEvent = () => {
         )}
 
         {/* Availability Check */}
-        {eventDate && actualCity && (
+        {eventDate && (isInternational ? intlCity : actualCity) && (
           <Card>
             <CardContent className="p-4">
               {!availabilityChecked ? (
@@ -458,7 +527,7 @@ const BookEvent = () => {
                 </Button>
               ) : isAvailable ? (
                 <div className="flex items-center gap-2 text-green-600 font-sans font-medium">
-                  <CheckCircle className="w-5 h-5" /> We are available on {format(eventDate, "PPP")} in {actualCity}! 🎉
+                  <CheckCircle className="w-5 h-5" /> We are available on {format(eventDate, "PPP")} in {isInternational ? intlCity : actualCity}! 🎉
                 </div>
               ) : (
                 <div className="text-center space-y-2">
@@ -536,8 +605,8 @@ const BookEvent = () => {
                 <div className="mt-4 pt-3 border-t border-border space-y-1 font-sans text-sm">
                   <p className="font-semibold">📌 Additional Charges:</p>
                   <p>🔹 Extra Time? – {formatPrice(pricing.extraHourRate)} per additional hour.</p>
-                  {isOutsideMumbai && (
-                    <p>🔹 Pan India? – Travel & accommodation charges apply. ✈️🚆</p>
+                  {(isOutsideMumbai || isInternational) && (
+                    <p>🔹 {isInternational ? "International" : "Pan India"}? – Travel & accommodation charges apply. ✈️🚆</p>
                   )}
                 </div>
                 {dbPricing.length > 0 && dbPricing[0]?.valid_until && (
@@ -549,11 +618,11 @@ const BookEvent = () => {
             </Card>
 
             {/* Travel Confirmation */}
-            {isOutsideMumbai && (
+            {(isOutsideMumbai || isInternational) && (
               <Card className="border-amber-200 bg-amber-50/50">
                 <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Plane className="w-5 h-5 text-amber-600" />Travel & Accommodation</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground font-sans">Since the event is not in Mumbai region, please confirm the following. <span className="font-semibold text-foreground">Preferred mode of transport: ✈️ Flight</span></p>
+                  <p className="text-sm text-muted-foreground font-sans">{isInternational ? "For international events" : "Since the event is not in Mumbai region"}, please confirm the following. <span className="font-semibold text-foreground">Preferred mode of transport: ✈️ Flight</span></p>
                   <div className="flex items-start gap-3">
                     <Checkbox checked={travelConfirmed} onCheckedChange={c => setTravelConfirmed(!!c)} id="travel" />
                     <Label htmlFor="travel" className="font-sans cursor-pointer text-sm">✅ I agree to arrange travel (Flight preferred) for the artist(s)</Label>
@@ -570,7 +639,7 @@ const BookEvent = () => {
             <Card className="border-primary/30">
               <CardHeader><CardTitle className="font-display text-lg">💰 Price Summary</CardTitle></CardHeader>
               <CardContent className="space-y-2 font-sans">
-                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Region</span><span className="font-medium">{isMumbai ? "Mumbai" : "Pan India"}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Region</span><span className="font-medium">{isInternational ? `International (${country})` : isMumbai ? "Mumbai" : "Pan India"}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Artists</span><span className="font-medium">{artistCount} Professional Artist{artistCount > 1 ? "s" : ""}</span></div>
                 {addExtraHours && extraHours > 0 && (
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Extra Hours</span><span className="font-medium">{extraHours} × {formatPrice(pricing.extraHourRate)} = {formatPrice(extraHours * pricing.extraHourRate)}</span></div>
