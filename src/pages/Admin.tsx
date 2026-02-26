@@ -33,6 +33,7 @@ import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
+import AdminInternationalPricing from "@/components/admin/AdminInternationalPricing";
 import AdminPartialAdvanceConfig from "@/components/admin/AdminPartialAdvanceConfig";
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
@@ -594,6 +595,7 @@ const Admin = () => {
               <TabsTrigger value="voice" className="font-sans rounded-full transition-all whitespace-nowrap"><Radio className="w-4 h-4 mr-1" />Voice</TabsTrigger>
               <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
               <TabsTrigger value="sessions" className="font-sans rounded-full transition-all whitespace-nowrap"><Monitor className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
+              <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1175,6 +1177,22 @@ const Admin = () => {
               }}>
                 <DollarSign className="w-3 h-3 mr-1" /> Gateway OFF (All)
               </Button>
+              <Button size="sm" variant="outline" className="text-xs font-sans h-7 rounded-full" onClick={async () => {
+                if (!confirm("Enable international booking for ALL customers?")) return;
+                await supabase.from("profiles").update({ international_booking_allowed: true } as any).neq("user_id", "00000000-0000-0000-0000-000000000000");
+                toast({ title: "International booking enabled for all customers" });
+                fetchCustomers();
+              }}>
+                <Globe className="w-3 h-3 mr-1" /> Intl ON (All)
+              </Button>
+              <Button size="sm" variant="outline" className="text-xs font-sans h-7 rounded-full" onClick={async () => {
+                if (!confirm("Disable international booking for ALL customers?")) return;
+                await supabase.from("profiles").update({ international_booking_allowed: false } as any).neq("user_id", "00000000-0000-0000-0000-000000000000");
+                toast({ title: "International booking disabled for all customers" });
+                fetchCustomers();
+              }}>
+                <Globe className="w-3 h-3 mr-1" /> Intl OFF (All)
+              </Button>
             </div>
             <div className="space-y-3">
               {filteredCustomers.length === 0 ? (
@@ -1239,6 +1257,20 @@ const Admin = () => {
                               />
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
                               {(c as any).event_booking_allowed && <Badge className="bg-primary/20 text-foreground border-none text-[10px]">Allowed</Badge>}
+                            </div>
+                            {/* International Booking Toggle */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <Switch
+                                checked={(c as any).international_booking_allowed || false}
+                                onCheckedChange={async (checked) => {
+                                  if (!confirm(`${checked ? "Allow" : "Revoke"} international booking for ${c.full_name}?`)) return;
+                                  await supabase.from("profiles").update({ international_booking_allowed: checked } as any).eq("user_id", c.user_id);
+                                  toast({ title: checked ? "International booking enabled" : "International booking disabled", description: `for ${c.full_name}` });
+                                  fetchCustomers();
+                                }}
+                              />
+                              <span className="text-xs font-sans text-muted-foreground">International Booking</span>
+                              {(c as any).international_booking_allowed && <Badge className="bg-blue-100 text-blue-800 border-none text-[10px]">🌍 Intl</Badge>}
                             </div>
                             {/* Gateway Charges Toggle */}
                             <div className="flex items-center gap-2 pt-1">
@@ -1390,6 +1422,10 @@ const Admin = () => {
             <AdminSessionsLog />
           </TabsContent>
 
+          <TabsContent value="intl-pricing">
+            <AdminInternationalPricing />
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
@@ -1409,6 +1445,21 @@ const Admin = () => {
                         if (!confirm(`${checked ? "Enable" : "Disable"} event booking for ALL users?`)) return;
                         await updateSetting("event_booking_global", { enabled: checked });
                         toast({ title: checked ? "Event booking enabled for everyone" : "Event booking restricted to approved users" });
+                      }}
+                    />
+                  </div>
+                  {/* Global International Booking Toggle */}
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">🌍 International Booking for All</p>
+                      <p className="text-xs text-muted-foreground font-sans">Allow all users to book international events</p>
+                    </div>
+                    <Switch
+                      checked={settings.international_booking_global.enabled}
+                      onCheckedChange={async (checked) => {
+                        if (!confirm(`${checked ? "Enable" : "Disable"} international booking for ALL users?`)) return;
+                        await updateSetting("international_booking_global", { enabled: checked });
+                        toast({ title: checked ? "International booking enabled for everyone" : "International booking restricted" });
                       }}
                     />
                   </div>
@@ -1541,6 +1592,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
+          <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>

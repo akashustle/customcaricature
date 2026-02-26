@@ -5,12 +5,14 @@ type SiteSettings = {
   event_booking_global: { enabled: boolean };
   workshop_button: { enabled: boolean; label: string; url: string };
   event_booking_button: { enabled: boolean };
+  international_booking_global: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
   event_booking_global: { enabled: false },
   workshop_button: { enabled: true, label: "Workshop", url: "https://creativecaricatureclub.com/workshop" },
   event_booking_button: { enabled: true },
+  international_booking_global: { enabled: false },
 };
 
 export const useSiteSettings = () => {
