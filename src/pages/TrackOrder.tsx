@@ -37,21 +37,22 @@ type TrackedOrder = {
 const TrackOrder = () => {
   const navigate = useNavigate();
   const [orderId, setOrderId] = useState("");
+  const [verifyContact, setVerifyContact] = useState("");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orderId.trim()) return;
+    if (!orderId.trim() || !verifyContact.trim()) return;
     setLoading(true);
     setSearched(true);
     setOrder(null);
 
     const searchId = orderId.trim().toLowerCase();
     
-    // Use secure RPC function for tracking - supports short ID or full UUID
-    const { data, error } = await supabase.rpc("track_order", { order_id_input: searchId });
+    // Use secure RPC function for tracking with customer verification
+    const { data, error } = await supabase.rpc("track_order", { order_id_input: searchId, customer_verify: verifyContact.trim() });
 
     if (error || !data || (Array.isArray(data) && data.length === 0)) {
       toast({ title: "Order Not Found", description: "Please check your Order ID and try again.", variant: "destructive" });
@@ -93,15 +94,22 @@ const TrackOrder = () => {
             <CardDescription className="font-sans">Enter your Order ID to check status</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleTrack} className="flex gap-2">
+            <form onSubmit={handleTrack} className="space-y-3">
               <Input
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 placeholder="Enter Order ID (e.g. A1B2C3D4)"
                 className="font-mono"
               />
-              <Button type="submit" disabled={loading || !orderId.trim()}>
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              <Input
+                value={verifyContact}
+                onChange={(e) => setVerifyContact(e.target.value)}
+                placeholder="Your email or mobile number"
+                className="font-sans"
+              />
+              <Button type="submit" className="w-full" disabled={loading || !orderId.trim() || !verifyContact.trim()}>
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Search className="w-4 h-4 mr-2" />}
+                Track Order
               </Button>
             </form>
           </CardContent>
