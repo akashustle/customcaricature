@@ -20,6 +20,21 @@ type IntlPricing = {
   currency: string;
 };
 
+type GlobalIntlPricing = {
+  one_artist_total: number;
+  one_artist_advance: number;
+  two_artist_total: number;
+  two_artist_advance: number;
+  extra_hour_rate: number;
+  apply_to_all: boolean;
+};
+
+const DEFAULT_GLOBAL: GlobalIntlPricing = {
+  one_artist_total: 0, one_artist_advance: 0,
+  two_artist_total: 0, two_artist_advance: 0,
+  extra_hour_rate: 5000, apply_to_all: false,
+};
+
 const AdminInternationalPricing = () => {
   const [pricing, setPricing] = useState<IntlPricing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +44,8 @@ const AdminInternationalPricing = () => {
   const [newPricing, setNewPricing] = useState({
     country: "", artist_count: 1, total_price: 0, advance_amount: 0, extra_hour_rate: 5000, currency: "INR",
   });
+  const [globalPricing, setGlobalPricing] = useState<GlobalIntlPricing>(DEFAULT_GLOBAL);
+  const [savingGlobal, setSavingGlobal] = useState(false);
 
   const countries = getCountries();
 
@@ -38,14 +55,28 @@ const AdminInternationalPricing = () => {
     setLoading(false);
   };
 
+  const fetchGlobalPricing = async () => {
+    const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "global_intl_pricing").maybeSingle();
+    if (data?.value) setGlobalPricing(data.value as any);
+  };
+
   useEffect(() => {
     fetchPricing();
+    fetchGlobalPricing();
     const ch = supabase
       .channel("intl-pricing-admin")
       .on("postgres_changes", { event: "*", schema: "public", table: "international_event_pricing" }, () => fetchPricing())
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, () => fetchGlobalPricing())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  const saveGlobalPricing = async () => {
+    setSavingGlobal(true);
+    await supabase.from("admin_site_settings").upsert({ id: "global_intl_pricing", value: globalPricing as any, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
+    toast({ title: "Global international pricing saved" });
+    setSavingGlobal(false);
+  };
 
   const addPricing = async () => {
     if (!newPricing.country || !newPricing.total_price) return;
@@ -124,6 +155,50 @@ const AdminInternationalPricing = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Global International Pricing */}
+      <Card className="border-primary/20">
+        <CardHeader className="py-3 px-4">
+          <CardTitle className="font-display text-base flex items-center gap-2">🌍 Global International Pricing (Outside India)</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 space-y-3">
+          <p className="text-xs text-muted-foreground font-sans">Set a single rate for all international bookings. If "Apply to All" is enabled, this pricing applies to any country without specific pricing set above.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-[10px] font-sans">1 Artist – Total (₹)</Label>
+              <Input type="number" className="h-8 text-xs" value={globalPricing.one_artist_total || ""} onChange={e => setGlobalPricing({...globalPricing, one_artist_total: parseInt(e.target.value) || 0})} placeholder="e.g. 80000" />
+            </div>
+            <div>
+              <Label className="text-[10px] font-sans">1 Artist – Advance (₹)</Label>
+              <Input type="number" className="h-8 text-xs" value={globalPricing.one_artist_advance || ""} onChange={e => setGlobalPricing({...globalPricing, one_artist_advance: parseInt(e.target.value) || 0})} placeholder="e.g. 50000" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-[10px] font-sans">2 Artists – Total (₹)</Label>
+              <Input type="number" className="h-8 text-xs" value={globalPricing.two_artist_total || ""} onChange={e => setGlobalPricing({...globalPricing, two_artist_total: parseInt(e.target.value) || 0})} placeholder="e.g. 140000" />
+            </div>
+            <div>
+              <Label className="text-[10px] font-sans">2 Artists – Advance (₹)</Label>
+              <Input type="number" className="h-8 text-xs" value={globalPricing.two_artist_advance || ""} onChange={e => setGlobalPricing({...globalPricing, two_artist_advance: parseInt(e.target.value) || 0})} placeholder="e.g. 90000" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-[10px] font-sans">Extra Hour Rate (₹)</Label>
+            <Input type="number" className="h-8 text-xs w-40" value={globalPricing.extra_hour_rate || ""} onChange={e => setGlobalPricing({...globalPricing, extra_hour_rate: parseInt(e.target.value) || 0})} />
+          </div>
+          <div className="flex items-center gap-3 pt-2 border-t border-border">
+            <input type="checkbox" checked={globalPricing.apply_to_all} onChange={e => setGlobalPricing({...globalPricing, apply_to_all: e.target.checked})} className="w-4 h-4 accent-primary" />
+            <div>
+              <p className="text-xs font-sans font-medium">Apply to All International Bookings</p>
+              <p className="text-[10px] text-muted-foreground font-sans">When enabled, all international bookings without country-specific pricing will use these rates</p>
+            </div>
+          </div>
+          <Button size="sm" className="font-sans" onClick={saveGlobalPricing} disabled={savingGlobal}>
+            <Save className="w-3 h-3 mr-1" />{savingGlobal ? "Saving..." : "Save Global Pricing"}
+          </Button>
+        </CardContent>
+      </Card>
 
       {loading ? (
         <p className="text-center text-muted-foreground py-10 font-sans">Loading...</p>
