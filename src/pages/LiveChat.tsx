@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Send, Loader2, ArrowLeft, Bot, User, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 
 type ChatMessage = {
@@ -171,7 +172,13 @@ const LiveChat = () => {
                     {msg.role === "user" ? "You" : "CCC Assistant"}
                   </span>
                 </div>
-                <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                <div className="leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                  {msg.role === "assistant" ? (
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  ) : (
+                    <span className="whitespace-pre-wrap">{msg.content}</span>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))}

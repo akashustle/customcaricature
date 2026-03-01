@@ -17,21 +17,31 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
 
-  const redirectAfterLogin = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-      if (roles && roles.length > 0) {
-        navigate("/admin");
-        return;
+  const redirectAfterLogin = async (retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        try {
+          const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+          if (roles && roles.length > 0) {
+            navigate("/admin", { replace: true });
+            return;
+          }
+          const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
+          if (artistData) {
+            navigate("/artist-dashboard", { replace: true });
+            return;
+          }
+          navigate("/dashboard", { replace: true });
+          return;
+        } catch {
+          if (i < retries - 1) await new Promise(r => setTimeout(r, 500));
+        }
+      } else {
+        if (i < retries - 1) await new Promise(r => setTimeout(r, 300));
       }
-      const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
-      if (artistData) {
-        navigate("/artist-dashboard");
-        return;
-      }
-      navigate("/dashboard");
     }
+    navigate("/dashboard", { replace: true });
   };
 
   const handlePasswordLogin = async (e: React.FormEvent) => {

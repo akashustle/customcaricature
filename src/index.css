@@ -96,7 +96,6 @@
 }
 
 @layer utilities {
-  /* Calligraphy class for intentional calligraphy use */
   .font-calligraphy {
     font-family: 'Caveat', cursive;
   }
@@ -120,7 +119,7 @@
     border-radius: 4px;
   }
 
-  /* Soft button style - no 3D, just gentle hover */
+  /* Vibrant 3D button */
   .btn-soft {
     @apply relative transition-all duration-200 rounded-full;
     background: hsl(28 27% 72%);
@@ -131,54 +130,77 @@
     transform: scale(1.015);
   }
 
-  /* Legacy btn-3d mapped to soft style */
   .btn-3d {
     @apply relative transition-all duration-200;
-    box-shadow: none;
+    box-shadow: 0 3px 0 hsl(28 27% 60%), 0 4px 10px hsl(27 7% 23% / 0.08);
   }
   .btn-3d:hover {
-    transform: translateY(-1px);
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 hsl(28 27% 60%), 0 6px 14px hsl(27 7% 23% / 0.12);
+  }
+  .btn-3d:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 hsl(28 27% 60%), 0 2px 6px hsl(27 7% 23% / 0.06);
   }
 
-  /* Soft card - no heavy shadows */
+  /* Vibrant 3D Card */
   .card-3d {
-    background: hsl(30 30% 90%);
+    background: linear-gradient(145deg, hsl(30 30% 92%), hsl(30 30% 88%));
     border: 1px solid hsl(28 27% 78% / 0.6);
-    box-shadow: 0 2px 8px hsl(27 7% 23% / 0.04);
-    transition: all 0.3s ease;
+    box-shadow:
+      0 4px 6px hsl(27 7% 23% / 0.04),
+      0 8px 24px hsl(27 7% 23% / 0.06),
+      inset 0 1px 0 hsl(30 30% 96%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 1rem;
   }
   .card-3d:hover {
+    transform: translateY(-3px) scale(1.005);
+    box-shadow:
+      0 8px 16px hsl(27 7% 23% / 0.06),
+      0 16px 32px hsl(27 7% 23% / 0.08),
+      inset 0 1px 0 hsl(30 30% 96%);
+  }
+
+  /* Admin stat card with gradient */
+  .admin-stat-card {
+    background: linear-gradient(135deg, hsl(30 30% 91%), hsl(28 27% 86%));
+    border: 1px solid hsl(28 27% 78% / 0.5);
+    box-shadow:
+      0 2px 8px hsl(27 7% 23% / 0.04),
+      0 6px 20px hsl(27 7% 23% / 0.05),
+      inset 0 1px 0 hsl(30 30% 95%);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+  .admin-stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px hsl(27 7% 23% / 0.06);
+    box-shadow:
+      0 4px 12px hsl(27 7% 23% / 0.06),
+      0 8px 28px hsl(27 7% 23% / 0.07),
+      inset 0 1px 0 hsl(30 30% 95%);
   }
 
   .admin-card {
-    background: hsl(30 30% 90%);
-    border: 1px solid hsl(28 27% 78% / 0.6);
-    box-shadow: 0 2px 8px hsl(27 7% 23% / 0.04);
+    background: linear-gradient(145deg, hsl(30 30% 91%), hsl(30 30% 88%));
+    border: 1px solid hsl(28 27% 78% / 0.5);
+    box-shadow:
+      0 3px 10px hsl(27 7% 23% / 0.04),
+      0 6px 20px hsl(27 7% 23% / 0.05),
+      inset 0 1px 0 hsl(30 30% 95%);
     transition: all 0.3s ease;
     border-radius: 1rem;
   }
   .admin-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(27 7% 23% / 0.06);
-  }
-
-  .admin-stat-card {
-    background: hsl(30 30% 90%);
-    border: 1px solid hsl(28 27% 78% / 0.6);
-    box-shadow: 0 2px 6px hsl(27 7% 23% / 0.03);
-    border-radius: 1rem;
-    transition: all 0.25s ease;
-  }
-  .admin-stat-card:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 16px hsl(27 7% 23% / 0.06),
+      0 10px 30px hsl(27 7% 23% / 0.07),
+      inset 0 1px 0 hsl(30 30% 95%);
   }
 
   .admin-header {
-    background: hsl(30 31% 94%);
+    background: linear-gradient(180deg, hsl(30 31% 94%), hsl(30 30% 91%));
     border-bottom: 1px solid hsl(28 27% 78%);
   }
 
@@ -200,14 +222,26 @@
     border: 1px solid hsl(28 27% 78% / 0.4);
   }
 
-  /* Text gradient removed - use solid text colors only */
   .text-gradient {
-    color: hsl(27 7% 23%);
+    background: linear-gradient(135deg, hsl(27 7% 23%), hsl(28 27% 50%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* No sparkle animations - keep calm */
-  .sparkle {
-    background: none;
+  /* Dashboard gradient header */
+  .dashboard-header {
+    background: linear-gradient(135deg, hsl(30 31% 94%), hsl(28 27% 88%));
+    border-bottom: 1px solid hsl(28 27% 78% / 0.6);
+  }
+
+  /* Animated counter */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-count-up {
+    animation: countUp 0.5s ease-out forwards;
   }
 
   @keyframes float {
@@ -216,5 +250,17 @@
   }
   .animate-float {
     animation: float 4s ease-in-out infinite;
+  }
+
+  /* Gradient background for dashboard sections */
+  .dashboard-gradient {
+    background: linear-gradient(180deg, hsl(30 31% 94%) 0%, hsl(30 30% 91%) 100%);
+  }
+
+  /* Mobile bottom nav styling */
+  .mobile-bottom-nav {
+    background: linear-gradient(180deg, hsl(30 30% 91% / 0.95), hsl(30 31% 94% / 0.98));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 }
