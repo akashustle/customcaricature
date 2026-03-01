@@ -157,9 +157,16 @@ const ArtistDashboard = () => {
 
 
 
+  // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
-    if (!authLoading && !user) { navigate("/artistlogin"); return; }
-    if (user) fetchArtistProfile(user.id);
+    const timeout = setTimeout(() => { if (loading) setLoading(false); }, 8000);
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/artistlogin", { replace: true }); return; }
+    fetchArtistProfile(user.id);
   }, [user, authLoading]);
 
   const fetchArtistProfile = async (userId: string) => {

@@ -17,8 +17,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
 
-  const redirectAfterLogin = async (retries = 3) => {
-    for (let i = 0; i < retries; i++) {
+  const redirectAfterLogin = async () => {
+    // Wait for session to be fully established
+    for (let i = 0; i < 5; i++) {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         try {
@@ -35,12 +36,16 @@ const Login = () => {
           navigate("/dashboard", { replace: true });
           return;
         } catch {
-          if (i < retries - 1) await new Promise(r => setTimeout(r, 500));
+          // Query failed, retry after brief wait
+          if (i < 4) await new Promise(r => setTimeout(r, 400));
         }
       } else {
-        if (i < retries - 1) await new Promise(r => setTimeout(r, 300));
+        // Session not ready yet, wait
+        if (i < 4) await new Promise(r => setTimeout(r, 400));
       }
     }
+    // Final fallback - always navigate somewhere
+    toast({ title: "Login successful", description: "Redirecting to dashboard..." });
     navigate("/dashboard", { replace: true });
   };
 

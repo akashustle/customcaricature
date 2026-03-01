@@ -222,28 +222,47 @@ const Admin = () => {
     } catch {}
   };
 
+  // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
-    if (!authLoading && user) {
-      checkAdmin();
+    const timeout = setTimeout(() => { if (loading) setLoading(false); }, 8000);
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/customcad75", { replace: true }); return; }
+
+    let cancelled = false;
+
+    const init = async () => {
+      // Verify admin role first before loading data
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      if (cancelled) return;
+      if (!roles || roles.length === 0) {
+        await supabase.auth.signOut();
+        navigate("/customcad75", { replace: true });
+        return;
+      }
+      // User is confirmed admin, load everything
       fetchOrders();
       fetchCaricatureTypes();
       fetchCustomers();
       fetchAdminProfile();
       fetchArtistProfiles();
       logAdminSession(user.id);
+    };
 
-      // Real-time subscriptions
-      const ch = supabase
-        .channel("admin-realtime")
-        .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => fetchOrders())
-        .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {})
-        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
-        .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
-        .subscribe();
-      return () => { supabase.removeChannel(ch); };
-    } else if (!authLoading && !user) {
-      navigate("/customcad75");
-    }
+    init();
+
+    // Real-time subscriptions
+    const ch = supabase
+      .channel("admin-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => fetchOrders())
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {})
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user, authLoading]);
 
   const fetchArtistProfiles = async () => {
@@ -300,14 +319,7 @@ const Admin = () => {
     }
   };
 
-  const checkAdmin = async () => {
-    if (!user) return;
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-    if (!roles || roles.length === 0) {
-      await supabase.auth.signOut();
-      navigate("/customcad75");
-    }
-  };
+  // checkAdmin is now handled inline in the useEffect above
 
   const fetchOrders = async () => {
     const { data } = await supabase.from("orders")
