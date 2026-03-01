@@ -279,8 +279,8 @@ const ArtistDashboard = () => {
   const completed = events.filter(e => e.status === "completed");
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
+    <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
+      <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full border border-border" />
@@ -546,8 +546,8 @@ const ArtistDashboard = () => {
         </Tabs>
       </div>
       {/* Mobile Bottom Nav for Artist Dashboard */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
           <ArtistBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <ArtistBottomNavItem icon={CalendarDays} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           {isRitesh && <ArtistBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />}
