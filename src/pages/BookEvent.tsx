@@ -34,7 +34,9 @@ const BookEvent = () => {
   const { pricing: dbPricing } = useEventPricing();
   const { settings } = useSiteSettings();
   const [customerEventPricing, setCustomerEventPricing] = useState<any[]>([]);
+  const [customerIntlPricing, setCustomerIntlPricing] = useState<any[]>([]);
   const [intlPricing, setIntlPricing] = useState<any[]>([]);
+  const [globalIntlPricing, setGlobalIntlPricing] = useState<any>(null);
   const [partialConfig, setPartialConfig] = useState<any>(null);
   const [clientName, setClientName] = useState("");
   const [clientMobile, setClientMobile] = useState("");
@@ -75,14 +77,31 @@ const BookEvent = () => {
   const isMumbai = state === "Maharashtra" && MUMBAI_DISTRICTS.includes(district);
   const isOutsideMumbai = !isInternational && state && actualCity && !isMumbai;
 
-  // International pricing helper
+  // International pricing helper - checks: 1) customer-specific intl pricing, 2) country-specific pricing, 3) global intl pricing
   const getIntlPrice = () => {
     if (!isInternational) return null;
+    // 1. Customer-specific international pricing
+    const customerIntl = customerIntlPricing.find((p: any) => p.country === country && p.artist_count === artistCount);
+    if (customerIntl) {
+      const extraCost = (addExtraHours ? extraHours : 0) * customerIntl.custom_extra_hour_rate;
+      return { total: customerIntl.custom_total_price + extraCost, advance: customerIntl.custom_advance_amount, extraHourRate: customerIntl.custom_extra_hour_rate };
+    }
+    // 2. Country-specific pricing
     const countryPricing = intlPricing.filter((p: any) => p.country === country && p.artist_count === artistCount);
     if (countryPricing.length > 0) {
       const row = countryPricing[0];
       const extraCost = (addExtraHours ? extraHours : 0) * row.extra_hour_rate;
       return { total: row.total_price + extraCost, advance: row.advance_amount, extraHourRate: row.extra_hour_rate };
+    }
+    // 3. Global international pricing fallback
+    if (globalIntlPricing?.apply_to_all) {
+      const t = artistCount === 1 ? globalIntlPricing.one_artist_total : globalIntlPricing.two_artist_total;
+      const a = artistCount === 1 ? globalIntlPricing.one_artist_advance : globalIntlPricing.two_artist_advance;
+      const ehr = globalIntlPricing.extra_hour_rate || 5000;
+      if (t > 0 && a > 0) {
+        const extraCost = (addExtraHours ? extraHours : 0) * ehr;
+        return { total: t + extraCost, advance: a, extraHourRate: ehr };
+      }
     }
     return null; // Quote-based
   };
@@ -139,6 +158,16 @@ const BookEvent = () => {
       supabase.from("international_event_pricing").select("*").then(({ data }) => {
         if (data) setIntlPricing(data as any);
       });
+      // Fetch global intl pricing setting
+      supabase.from("admin_site_settings").select("value").eq("id", "global_intl_pricing").maybeSingle().then(({ data }) => {
+        if (data?.value) setGlobalIntlPricing(data.value as any);
+      });
+      // Fetch customer-specific intl pricing
+      const fetchCustomerIntlPricing = () => {
+        supabase.from("customer_international_event_pricing").select("*").eq("user_id", user.id)
+          .then(({ data }) => { if (data) setCustomerIntlPricing(data as any); });
+      };
+      fetchCustomerIntlPricing();
       // Fetch customer-specific event pricing
       const fetchCustomerPricing = () => {
         supabase.from("customer_event_pricing").select("*").eq("user_id", user.id)
@@ -150,15 +179,12 @@ const BookEvent = () => {
       // Fetch partial advance config
       supabase.from("user_partial_advance_config").select("*").eq("user_id", user.id).maybeSingle()
         .then(({ data }) => { if (data) setPartialConfig(data); });
-      // Real-time listener for customer event pricing changes
+      // Real-time listener for pricing changes
       const channel = supabase
         .channel("customer-event-pricing-live")
-        .on("postgres_changes", { event: "*", schema: "public", table: "customer_event_pricing", filter: `user_id=eq.${user.id}` }, () => {
-          fetchCustomerPricing();
-        })
-        .on("postgres_changes", { event: "*", schema: "public", table: "event_pricing" }, () => {
-          fetchCustomerPricing();
-        })
+        .on("postgres_changes", { event: "*", schema: "public", table: "customer_event_pricing", filter: `user_id=eq.${user.id}` }, () => fetchCustomerPricing())
+        .on("postgres_changes", { event: "*", schema: "public", table: "customer_international_event_pricing", filter: `user_id=eq.${user.id}` }, () => fetchCustomerIntlPricing())
+        .on("postgres_changes", { event: "*", schema: "public", table: "event_pricing" }, () => fetchCustomerPricing())
         .on("postgres_changes", { event: "*", schema: "public", table: "user_partial_advance_config", filter: `user_id=eq.${user.id}` }, (payload) => {
           setPartialConfig(payload.new || null);
         })

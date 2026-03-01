@@ -201,6 +201,47 @@ export type Database = {
           },
         ]
       }
+      artist_documents: {
+        Row: {
+          artist_id: string
+          created_at: string
+          document_type: string
+          file_name: string
+          id: string
+          storage_path: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          document_type?: string
+          file_name: string
+          id?: string
+          storage_path: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          id?: string
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_documents_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           auth_user_id: string | null
@@ -726,6 +767,44 @@ export type Database = {
             columns: ["assigned_artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_flight_tickets: {
+        Row: {
+          created_at: string
+          event_id: string
+          file_name: string
+          id: string
+          storage_path: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          file_name: string
+          id?: string
+          storage_path: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          file_name?: string
+          id?: string
+          storage_path?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_flight_tickets_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
             referencedColumns: ["id"]
           },
         ]

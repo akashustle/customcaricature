@@ -33,6 +33,7 @@ import AdminEvents from "@/components/admin/AdminEvents";
 import AdminArtists from "@/components/admin/AdminArtists";
 import AdminCustomerPricing from "@/components/admin/AdminCustomerPricing";
 import AdminCustomerEventPricing from "@/components/admin/AdminCustomerEventPricing";
+import AdminCustomerIntlPricing from "@/components/admin/AdminCustomerIntlPricing";
 import AdminInternationalPricing from "@/components/admin/AdminInternationalPricing";
 import AdminPartialAdvanceConfig from "@/components/admin/AdminPartialAdvanceConfig";
 import AdminPayments from "@/components/admin/AdminPayments";
@@ -147,6 +148,8 @@ const Admin = () => {
   const [customerEventPricingUserName, setCustomerEventPricingUserName] = useState("");
   const [partialAdvanceUserId, setPartialAdvanceUserId] = useState<string | null>(null);
   const [partialAdvanceUserName, setPartialAdvanceUserName] = useState("");
+  const [customerIntlPricingUserId, setCustomerIntlPricingUserId] = useState<string | null>(null);
+  const [customerIntlPricingUserName, setCustomerIntlPricingUserName] = useState("");
   const [showAddOrder, setShowAddOrder] = useState(false);
   const [manualOrder, setManualOrder] = useState({
     customerId: "", orderType: "single" as string, style: "artists_choice" as string,
@@ -1327,6 +1330,14 @@ const Admin = () => {
                               >
                                 <SplitSquareHorizontal className="w-3 h-3 mr-1" />Partial Advance
                               </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs font-sans"
+                                onClick={() => { setCustomerIntlPricingUserId(c.user_id); setCustomerIntlPricingUserName(c.full_name); }}
+                              >
+                                <Globe className="w-3 h-3 mr-1" />Intl Pricing
+                              </Button>
                             </div>
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
@@ -1374,6 +1385,15 @@ const Admin = () => {
                             userId={c.user_id}
                             userName={c.full_name}
                             onClose={() => setPartialAdvanceUserId(null)}
+                          />
+                        </div>
+                      )}
+                      {customerIntlPricingUserId === c.user_id && (
+                        <div className="mt-3">
+                          <AdminCustomerIntlPricing
+                            userId={c.user_id}
+                            userName={c.full_name}
+                            onClose={() => setCustomerIntlPricingUserId(null)}
                           />
                         </div>
                       )}
