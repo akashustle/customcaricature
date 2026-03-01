@@ -25,6 +25,7 @@ import ChatWidget from "@/components/ChatWidget";
 import NotificationBell from "@/components/NotificationBell";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
+import FlightTicketUpload from "@/components/FlightTicketUpload";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -982,6 +983,16 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                           </div>
                         ))}
                       </div>
+                    )}
+
+                    {/* Flight Ticket Upload for outside Mumbai events with advance paid */}
+                    {userId && (advancePaid || fullyPaid) && !ev.is_mumbai && (
+                      <FlightTicketUpload
+                        eventId={ev.id}
+                        userId={userId}
+                        isOutsideMumbai={!ev.is_mumbai}
+                        advancePaid={advancePaid || fullyPaid}
+                      />
                     )}
 
                     {/* Real-time Payment Status Tracker */}

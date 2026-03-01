@@ -13,6 +13,16 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type ArtistDocument = {
+  id: string;
+  artist_id: string;
+  document_type: string;
+  file_name: string;
+  storage_path: string;
+  created_at: string;
+};
 
 type Artist = {
   id: string;
@@ -35,10 +45,16 @@ const AdminArtists = () => {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ name: "", experience: "", email: "", mobile: "" });
+  const [artistDocs, setArtistDocs] = useState<Record<string, ArtistDocument[]>>({});
+  const [docSignedUrls, setDocSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchArtists();
-    const ch = supabase.channel("admin-artists-rt").on("postgres_changes", { event: "*", schema: "public", table: "artists" }, () => fetchArtists()).subscribe();
+    fetchAllDocs();
+    const ch = supabase.channel("admin-artists-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "artists" }, () => fetchArtists())
+      .on("postgres_changes", { event: "*", schema: "public", table: "artist_documents" }, () => fetchAllDocs())
+      .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
@@ -63,6 +79,45 @@ const AdminArtists = () => {
       setSignedUrls(urls);
     }
     setLoading(false);
+  };
+
+  const fetchAllDocs = async () => {
+    const { data } = await supabase.from("artist_documents").select("*").order("created_at", { ascending: false });
+    if (data) {
+      const map: Record<string, ArtistDocument[]> = {};
+      const urls: Record<string, string> = {};
+      for (const doc of data as any[]) {
+        if (!map[doc.artist_id]) map[doc.artist_id] = [];
+        map[doc.artist_id].push(doc);
+        const { data: signed } = await supabase.storage.from("event-documents").createSignedUrl(doc.storage_path, 3600);
+        if (signed?.signedUrl) urls[doc.id] = signed.signedUrl;
+      }
+      setArtistDocs(map);
+      setDocSignedUrls(urls);
+    }
+  };
+
+  const uploadArtistDoc = async (artistId: string, file: File, docType: string) => {
+    const path = `artist-docs/${artistId}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabase.storage.from("event-documents").upload(path, file);
+    if (upErr) { toast({ title: "Upload Error", description: upErr.message, variant: "destructive" }); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("artist_documents").insert({
+      artist_id: artistId,
+      document_type: docType,
+      file_name: file.name,
+      storage_path: path,
+      uploaded_by: user?.id || "",
+    } as any);
+    toast({ title: "Document Uploaded! 📄" });
+    fetchAllDocs();
+  };
+
+  const deleteArtistDoc = async (docId: string, storagePath: string) => {
+    await supabase.storage.from("event-documents").remove([storagePath]);
+    await supabase.from("artist_documents").delete().eq("id", docId);
+    toast({ title: "Document Deleted" });
+    fetchAllDocs();
   };
 
   const addArtist = async () => {
@@ -219,11 +274,36 @@ const AdminArtists = () => {
                         </a>
                       )}
                       <p className="text-[10px] text-muted-foreground font-sans">Added: {new Date(artist.created_at).toLocaleDateString("en-IN")}</p>
+                      {/* Artist Documents */}
+                      {artistDocs[artist.id] && artistDocs[artist.id].length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-[10px] font-semibold text-muted-foreground font-sans">📋 Documents:</p>
+                          {artistDocs[artist.id].map(doc => (
+                            <div key={doc.id} className="flex items-center gap-2 text-xs">
+                              <a href={docSignedUrls[doc.id] || "#"} target="_blank" rel="noopener noreferrer" className="text-primary underline font-sans flex items-center gap-1">
+                                <FileText className="w-3 h-3" />{doc.document_type}: {doc.file_name}
+                              </a>
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive" onClick={() => deleteArtistDoc(doc.id, doc.storage_path)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
-                      <label className="cursor-pointer">
+                      <label className="cursor-pointer" title="Upload Portfolio">
                         <input type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) updatePortfolio(artist.id, e.target.files[0]); }} />
                         <Button variant="ghost" size="sm" asChild><span><Upload className="w-4 h-4" /></span></Button>
+                      </label>
+                      <label className="cursor-pointer" title="Upload Document (Passport/ID)">
+                        <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={e => {
+                          if (e.target.files?.[0]) {
+                            const docType = prompt("Document type? (passport / id / travel_doc)", "passport");
+                            if (docType) uploadArtistDoc(artist.id, e.target.files[0], docType);
+                          }
+                        }} />
+                        <Button variant="ghost" size="sm" asChild><span><FileText className="w-4 h-4 text-primary" /></span></Button>
                       </label>
                       <Button variant="ghost" size="sm" onClick={() => { setEditingId(artist.id); setEditData({ name: artist.name, experience: artist.experience || "", email: artist.email || "", mobile: artist.mobile || "" }); }}>
                         <Edit2 className="w-4 h-4" />
