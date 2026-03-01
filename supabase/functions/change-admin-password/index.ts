@@ -55,15 +55,17 @@ serve(async (req) => {
       password: new_password,
     });
 
-    if (updateError) throw new Error(updateError.message);
+    if (updateError) {
+      console.error("Password update error:", updateError.message);
+      throw new Error("Failed to update password");
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("Change password error:", message);
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("Change password error:", error instanceof Error ? error.message : "Unknown error");
+    return new Response(JSON.stringify({ error: "Failed to change password. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

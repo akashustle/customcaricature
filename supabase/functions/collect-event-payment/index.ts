@@ -86,7 +86,10 @@ serve(async (req) => {
       .update({ payment_status: "fully_paid" })
       .eq("id", event_id);
 
-    if (updateError) throw new Error(`Failed to update: ${updateError.message}`);
+    if (updateError) {
+      console.error("Update error:", updateError.message);
+      throw new Error("Failed to update payment status");
+    }
 
     // Calculate remaining
     const totalAmount = booking.negotiated && booking.negotiated_total ? booking.negotiated_total : booking.total_price;
@@ -107,9 +110,8 @@ serve(async (req) => {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("Collect payment error:", message);
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("Collect payment error:", error instanceof Error ? error.message : "Unknown error");
+    return new Response(JSON.stringify({ error: "Payment collection failed. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
