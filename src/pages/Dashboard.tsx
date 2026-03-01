@@ -83,37 +83,57 @@ const Dashboard = () => {
   usePermissions(true);
   useVoiceStream(user?.id ?? null, true);
 
+  // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
-    if (!authLoading && !user) { navigate("/login"); return; }
-    if (user) {
-      // Role-based redirect: admins and artists should not be here
-      const checkRole = async () => {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-        if (roles && roles.length > 0) { navigate("/admin"); return; }
-        const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", user.id).maybeSingle();
-        if (artistData) { navigate("/artist-dashboard"); return; }
-      };
-      checkRole();
+    const timeout = setTimeout(() => { if (loading) setLoading(false); }, 8000);
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
-      fetchProfile(user.id);
-      fetchOrders(user.id);
-      fetchEvents(user.id);
-      const channel = supabase
-        .channel("user-dashboard")
-        .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
-        .on("postgres_changes", { event: "DELETE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
-          toast({ title: "Account Deleted", description: "Your account has been deleted. Please register or login again.", variant: "destructive" });
-          supabase.auth.signOut().then(() => navigate("/register"));
-        })
-        .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
-        .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `user_id=eq.${user.id}` }, () => {
-          fetchOrders(user.id);
-          fetchEvents(user.id);
-        })
-        .subscribe();
-      return () => { supabase.removeChannel(channel); };
-    }
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth to finish
+    if (!user) { navigate("/login", { replace: true }); return; }
+
+    let cancelled = false;
+
+    const init = async () => {
+      // Role-based redirect: admins and artists should not be here
+      try {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+        if (cancelled) return;
+        if (roles && roles.length > 0) { navigate("/admin", { replace: true }); return; }
+        const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", user.id).maybeSingle();
+        if (cancelled) return;
+        if (artistData) { navigate("/artist-dashboard", { replace: true }); return; }
+      } catch {
+        // If role check fails, continue as regular user
+      }
+
+      // Only fetch data after confirming this is a regular user
+      if (!cancelled) {
+        fetchProfile(user.id);
+        fetchOrders(user.id);
+        fetchEvents(user.id);
+      }
+    };
+
+    init();
+
+    const channel = supabase
+      .channel("user-dashboard")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
+        toast({ title: "Account Deleted", description: "Your account has been deleted. Please register or login again.", variant: "destructive" });
+        supabase.auth.signOut().then(() => navigate("/register"));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `user_id=eq.${user.id}` }, () => {
+        fetchOrders(user.id);
+        fetchEvents(user.id);
+      })
+      .subscribe();
+
+    return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [user, authLoading]);
 
   const fetchProfile = async (userId: string) => {
