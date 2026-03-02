@@ -1544,37 +1544,21 @@ export type Database = {
         }
         Returns: boolean
       }
-      track_order:
-        | {
-            Args: { order_id_input: string }
-            Returns: {
-              amount: number
-              created_at: string
-              expected_delivery_date: string
-              face_count: number
-              id: string
-              order_type: string
-              payment_status: string
-              status: string
-              style: string
-              updated_at: string
-            }[]
-          }
-        | {
-            Args: { customer_verify?: string; order_id_input: string }
-            Returns: {
-              amount: number
-              created_at: string
-              expected_delivery_date: string
-              face_count: number
-              id: string
-              order_type: string
-              payment_status: string
-              status: string
-              style: string
-              updated_at: string
-            }[]
-          }
+      track_order: {
+        Args: { customer_verify: string; order_id_input: string }
+        Returns: {
+          amount: number
+          created_at: string
+          expected_delivery_date: string
+          face_count: number
+          id: string
+          order_type: string
+          payment_status: string
+          status: string
+          style: string
+          updated_at: string
+        }[]
+      }
       user_has_event_with_artist: {
         Args: { _artist_id: string; _user_id: string }
         Returns: boolean
