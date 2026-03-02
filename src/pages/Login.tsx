@@ -17,48 +17,56 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
 
-  const redirectAfterLogin = async () => {
-    // Wait for session to be fully established
-    for (let i = 0; i < 5; i++) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        try {
-          const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
-          if (roles && roles.length > 0) {
-            navigate("/admin", { replace: true });
-            return;
-          }
-          const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", session.user.id).maybeSingle();
-          if (artistData) {
-            navigate("/artist-dashboard", { replace: true });
-            return;
-          }
-          navigate("/dashboard", { replace: true });
-          return;
-        } catch {
-          // Query failed, retry after brief wait
-          if (i < 4) await new Promise(r => setTimeout(r, 400));
-        }
-      } else {
-        // Session not ready yet, wait
-        if (i < 4) await new Promise(r => setTimeout(r, 400));
-      }
+  const withTimeout = async (promise: Promise<any>, ms = 10000) => {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please try again.")), ms)),
+    ]);
+  };
+
+  const finalizeLogin = async () => {
+    const { data: userData, error: userError } = await withTimeout(supabase.auth.getUser());
+    if (userError || !userData.user) throw userError || new Error("Could not validate session");
+
+    const [{ data: roles, error: rolesError }, { data: artistData, error: artistError }] = await Promise.all([
+      withTimeout(supabase.from("user_roles").select("role").eq("user_id", userData.user.id) as any),
+      withTimeout((supabase.from("artists").select("id") as any).eq("auth_user_id", userData.user.id).maybeSingle()),
+    ]);
+
+    if (rolesError || artistError) throw rolesError || artistError;
+
+    if (roles && roles.length > 0) {
+      await supabase.auth.signOut();
+      toast({ title: "Admin account detected", description: "Please use the admin login page.", variant: "destructive" });
+      navigate("/customcad75", { replace: true });
+      return;
     }
-    // Final fallback - always navigate somewhere
-    toast({ title: "Login successful", description: "Redirecting to dashboard..." });
+
+    if (artistData) {
+      await supabase.auth.signOut();
+      toast({ title: "Artist account detected", description: "Please use the artist login page.", variant: "destructive" });
+      navigate("/artistlogin", { replace: true });
+      return;
+    }
+
     navigate("/dashboard", { replace: true });
   };
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
-    } else {
-      await redirectAfterLogin();
+    try {
+      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password }));
+      if (error) {
+        toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      } else {
+        await finalizeLogin();
+      }
+    } catch (err: any) {
+      toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSecretCodeLogin = async (e: React.FormEvent) => {
@@ -93,7 +101,7 @@ const Login = () => {
         toast({ title: "Login failed", description: "Could not verify. Please try again.", variant: "destructive" });
       } else {
         toast({ title: "Login successful!" });
-        await redirectAfterLogin();
+        await finalizeLogin();
       }
     } catch (err: any) {
       toast({ title: "Login failed", description: err.message || "Please try again.", variant: "destructive" });

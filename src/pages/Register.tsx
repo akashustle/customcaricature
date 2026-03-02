@@ -40,7 +40,12 @@ const Register = () => {
     if (digits.length <= 6) update("pincode", digits);
   };
 
-
+  const withTimeout = async (promise: Promise<any>, ms = 10000) => {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please try again.")), ms)),
+    ]);
+  };
   const canSubmit = form.fullName.trim() && form.mobile.length === 10 &&
     !emailError && form.email.includes("@") && form.address.trim() && form.city.trim() &&
     form.state.trim() && form.district.trim() && form.pincode.length === 6 && form.password.length >= 6 &&
@@ -55,15 +60,15 @@ const Register = () => {
     
     setLoading(true);
     try {
-      const { data: existing } = await supabase.from("profiles").select("email").eq("email", form.email).maybeSingle();
+      const { data: existing } = await withTimeout(supabase.from("profiles").select("email").eq("email", form.email).maybeSingle() as any);
       if (existing) {
         toast({ title: "Email Already Registered", description: "This email is already in use.", variant: "destructive" });
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase.auth.signUp({
-        email: form.email,
+      const { data, error } = await withTimeout(supabase.auth.signUp({
+        email: form.email.trim().toLowerCase(),
         password: form.password,
         options: {
           emailRedirectTo: window.location.origin,
@@ -73,7 +78,7 @@ const Register = () => {
             city: form.city, state: form.state, pincode: form.pincode,
           },
         },
-      });
+      }));
       if (error) {
         if (error.message?.toLowerCase().includes("already registered")) {
           toast({ title: "Email Already Registered", description: "Please login or use a different email.", variant: "destructive" });

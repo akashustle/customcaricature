@@ -9,6 +9,7 @@ import SplashScreen from "./components/SplashScreen";
 import Index from "./pages/Index";
 import Order from "./pages/Order";
 import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
@@ -31,7 +32,6 @@ import LiveChat from "./pages/LiveChat";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HomepageLiveChat from "./components/HomepageLiveChat";
-
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -55,7 +55,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/customcad75" element={<Login />} />
+            <Route path="/customcad75" element={<AdminLogin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/about" element={<About />} />
             <Route path="/terms" element={<Terms />} />
