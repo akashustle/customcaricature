@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Palette, Eye, EyeOff } from "lucide-react";
+import { Loader2, Shield, Eye, EyeOff } from "lucide-react";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) => {
   return await Promise.race([
@@ -15,7 +15,7 @@ const withTimeout = async (promise: Promise<any>, ms = 10000) => {
   ]);
 };
 
-const ArtistLogin = () => {
+const AdminLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,38 +36,36 @@ const ArtistLogin = () => {
       );
       if (authError || !authData.user) throw authError || new Error("Login failed");
 
-      // Check if user is an artist
-      const { data: artist } = await withTimeout((supabase
-        .from("artists")
-        .select("id") as any)
-        .eq("auth_user_id", authData.user.id)
-        .maybeSingle());
+      const { data: roles, error: roleError } = await withTimeout(
+        supabase.from("user_roles").select("role").eq("user_id", authData.user.id) as any
+      );
 
-      if (!artist) {
+      if (roleError) throw roleError;
+      if (!roles || roles.length === 0) {
         await supabase.auth.signOut();
-        toast({ title: "Access Denied", description: "This login is only for registered artists.", variant: "destructive" });
-        setLoading(false);
+        toast({ title: "Access Denied", description: "This account is not authorized for admin access.", variant: "destructive" });
         return;
       }
 
-      toast({ title: "Welcome back! 🎨" });
-      navigate("/artist-dashboard");
+      toast({ title: "Welcome back, admin!" });
+      navigate("/admin", { replace: true });
     } catch (err: any) {
-      toast({ title: "Login Failed", description: err.message || "Invalid credentials", variant: "destructive" });
+      toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Palette className="w-8 h-8 text-primary" />
+              <Shield className="w-8 h-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="font-display text-2xl">Artist Login</CardTitle>
+          <CardTitle className="font-display text-2xl">Admin Login</CardTitle>
           <p className="text-sm text-muted-foreground font-sans">Creative Caricature Club</p>
         </CardHeader>
         <CardContent>
@@ -78,7 +76,7 @@ const ArtistLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder="admin@email.com"
                 required
               />
             </div>
@@ -91,6 +89,7 @@ const ArtistLogin = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
+                  className="pr-10"
                 />
                 <button
                   type="button"
@@ -102,7 +101,7 @@ const ArtistLogin = () => {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
-              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : "Sign In"}
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : "Sign In as Admin"}
             </Button>
           </form>
           <div className="mt-4 text-center">
@@ -116,4 +115,4 @@ const ArtistLogin = () => {
   );
 };
 
-export default ArtistLogin;
+export default AdminLogin;
