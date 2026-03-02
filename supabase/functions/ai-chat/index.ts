@@ -6,6 +6,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory rate limiter for guest (unauthenticated) requests
+const guestRateMap = new Map<string, { count: number; windowStart: number }>();
+const GUEST_LIMIT = 10;
+const GUEST_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function getClientIp(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+function isGuestRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = guestRateMap.get(ip);
+  if (!entry || now - entry.windowStart > GUEST_WINDOW_MS) {
+    guestRateMap.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count++;
+  if (entry.count > GUEST_LIMIT) return true;
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -14,10 +39,40 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Fetch training data from database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Check authentication
+    let isAuthenticated = false;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      // Only verify if it's not the anon key itself (which means no user session)
+      if (token !== supabaseAnonKey) {
+        const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data, error } = await userClient.auth.getUser();
+        if (!error && data?.user) {
+          isAuthenticated = true;
+        }
+      }
+    }
+
+    // For unauthenticated (guest) users, apply IP-based rate limiting
+    if (!isAuthenticated) {
+      const clientIp = getClientIp(req);
+      if (isGuestRateLimited(clientIp)) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later or sign in for unlimited access." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Fetch training data from database using service role
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: trainingData } = await supabase
       .from("chatbot_training_data")
@@ -78,8 +133,7 @@ Key guidelines:
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      console.error("AI gateway error:", response.status);
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -91,7 +145,7 @@ Key guidelines:
     });
   } catch (e) {
     console.error("chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Something went wrong. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
