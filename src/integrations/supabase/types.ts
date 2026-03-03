@@ -160,6 +160,83 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          sender_name: string | null
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role?: string
+          sender_name?: string | null
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          sender_name?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ai_chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_chat_sessions: {
+        Row: {
+          admin_joined: boolean
+          admin_user_id: string | null
+          created_at: string
+          guest_city: string | null
+          guest_email: string | null
+          guest_ip: string | null
+          guest_name: string | null
+          id: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_joined?: boolean
+          admin_user_id?: string | null
+          created_at?: string
+          guest_city?: string | null
+          guest_email?: string | null
+          guest_ip?: string | null
+          guest_name?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_joined?: boolean
+          admin_user_id?: string | null
+          created_at?: string
+          guest_city?: string | null
+          guest_email?: string | null
+          guest_ip?: string | null
+          guest_name?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       artist_blocked_dates: {
         Row: {
           artist_id: string | null

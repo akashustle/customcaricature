@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -50,6 +50,7 @@ import AdminNotificationSender from "@/components/admin/AdminNotificationSender"
 import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
+import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -612,6 +613,7 @@ const Admin = () => {
               <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
               <TabsTrigger value="sessions" className="font-sans rounded-full transition-all whitespace-nowrap"><Monitor className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
               <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
+              <TabsTrigger value="ai-conversations" className="font-sans rounded-full transition-all whitespace-nowrap"><Bot className="w-4 h-4 mr-1" />AI Chats</TabsTrigger>
               <TabsTrigger value="chatbot" className="font-sans rounded-full transition-all whitespace-nowrap">🤖 AI Bot</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
@@ -1460,6 +1462,10 @@ const Admin = () => {
             <AdminInternationalPricing />
           </TabsContent>
 
+          <TabsContent value="ai-conversations">
+            <AdminAIChatConversations />
+          </TabsContent>
+
           <TabsContent value="chatbot">
             <AdminChatbotTraining />
           </TabsContent>
@@ -1632,6 +1638,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
+          <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
