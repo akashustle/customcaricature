@@ -414,8 +414,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   const handleConfirmDispatch = async (orderId: string) => {
     if (!confirm("⚠️ Are you sure you want to confirm dispatch? This action cannot be undone.")) return;
     setConfirmingOrderId(orderId);
-    await supabase.from("orders").update({ art_confirmation_status: "confirmed" } as any).eq("id", orderId);
-    toast({ title: "✅ Dispatch confirmed!", description: "Your artwork will be dispatched soon." });
+    await supabase.from("orders").update({ art_confirmation_status: "confirmed", status: "dispatched" as any } as any).eq("id", orderId);
+    toast({ title: "✅ Dispatch confirmed!", description: "Your artwork has been confirmed and will be dispatched soon." });
     setConfirmingOrderId(null);
   };
 

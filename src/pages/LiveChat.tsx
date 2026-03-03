@@ -1,17 +1,18 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Loader2, ArrowLeft, Bot, User, Sparkles } from "lucide-react";
+import { Send, Loader2, ArrowLeft, Bot, User, Sparkles, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 
 type ChatMessage = {
   id: string;
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant" | "admin" | "system";
   content: string;
+  sender_name?: string;
   created_at: string;
 };
 
@@ -19,6 +20,7 @@ const LiveChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -26,8 +28,18 @@ const LiveChat = () => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  // Welcome message
+  // Create session and set welcome message
   useEffect(() => {
+    const initSession = async () => {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.from("ai_chat_sessions").insert({
+        user_id: authSession?.user?.id || null,
+        status: "active",
+      } as any).select("id").single();
+      if (data) setSessionId((data as any).id);
+    };
+    initSession();
+
     setMessages([{
       id: "welcome",
       role: "assistant",
@@ -35,6 +47,45 @@ const LiveChat = () => {
       created_at: new Date().toISOString(),
     }]);
   }, []);
+
+  // Listen for admin messages in real-time
+  useEffect(() => {
+    if (!sessionId) return;
+    const ch = supabase
+      .channel(`ai-chat-${sessionId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "ai_chat_messages",
+        filter: `session_id=eq.${sessionId}`,
+      }, (payload) => {
+        const newMsg = payload.new as any;
+        // Only add admin messages (user & assistant are added locally)
+        if (newMsg.role === "admin") {
+          setMessages(prev => [...prev, {
+            id: newMsg.id,
+            role: "admin",
+            content: newMsg.content,
+            sender_name: newMsg.sender_name,
+            created_at: newMsg.created_at,
+          }]);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [sessionId]);
+
+  const saveMessage = async (role: string, content: string, senderName?: string) => {
+    if (!sessionId) return;
+    await supabase.from("ai_chat_messages").insert({
+      session_id: sessionId,
+      role,
+      content,
+      sender_name: senderName || null,
+    } as any);
+    // Update session timestamp
+    await supabase.from("ai_chat_sessions").update({ updated_at: new Date().toISOString() } as any).eq("id", sessionId);
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -48,13 +99,18 @@ const LiveChat = () => {
     setInput("");
     setLoading(true);
 
+    // Save user message to DB
+    saveMessage("user", userMsg.content);
+
+    // Check if user provided name/email/city info and update session
+    updateSessionInfo(userMsg.content);
+
     try {
-      const chatHistory = [...messages.filter(m => m.id !== "welcome"), userMsg].map(m => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
+      const chatHistory = [...messages.filter(m => m.id !== "welcome" && m.role !== "admin"), userMsg].map(m => ({
+        role: m.role === "admin" ? "user" : m.role as "user" | "assistant",
+        content: m.role === "admin" ? `[Admin message]: ${m.content}` : m.content,
       }));
 
-      // Pass user session token if logged in, otherwise anon key
       const { data: { session } } = await supabase.auth.getSession();
       const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -71,19 +127,22 @@ const LiveChat = () => {
       );
 
       if (resp.status === 429) {
-        setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", content: "I'm getting too many requests right now. Please try again in a moment! 🙏", created_at: new Date().toISOString() }]);
+        const errMsg = "I'm getting too many requests right now. Please try again in a moment! 🙏";
+        setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", content: errMsg, created_at: new Date().toISOString() }]);
+        saveMessage("assistant", errMsg);
         setLoading(false);
         return;
       }
       if (resp.status === 402) {
-        setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", content: "Service temporarily unavailable. Please try again later.", created_at: new Date().toISOString() }]);
+        const errMsg = "Service temporarily unavailable. Please try again later.";
+        setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "assistant", content: errMsg, created_at: new Date().toISOString() }]);
+        saveMessage("assistant", errMsg);
         setLoading(false);
         return;
       }
 
       if (!resp.ok || !resp.body) throw new Error("Failed to get response");
 
-      // Stream the response
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
@@ -117,16 +176,33 @@ const LiveChat = () => {
           } catch { textBuffer = line + "\n" + textBuffer; break; }
         }
       }
+
+      // Save complete assistant response to DB
+      if (assistantContent) saveMessage("assistant", assistantContent);
     } catch (err) {
       console.error("Chat error:", err);
+      const errMsg = "Sorry, I'm having trouble connecting right now. Please try again or contact us at 8369594271. 📞";
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Sorry, I'm having trouble connecting right now. Please try again or contact us at 8369594271. 📞",
+        content: errMsg,
         created_at: new Date().toISOString(),
       }]);
+      saveMessage("assistant", errMsg);
     }
     setLoading(false);
+  };
+
+  const updateSessionInfo = async (content: string) => {
+    if (!sessionId) return;
+    // Try to extract name/email/city from messages
+    const emailMatch = content.match(/[\w.-]+@[\w.-]+\.\w+/);
+    const updates: Record<string, string> = {};
+    if (emailMatch) updates.guest_email = emailMatch[0];
+    // Simple city/name detection - update if present
+    if (Object.keys(updates).length > 0) {
+      await supabase.from("ai_chat_sessions").update(updates as any).eq("id", sessionId);
+    }
   };
 
   return (
@@ -164,20 +240,20 @@ const LiveChat = () => {
               <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 text-sm font-sans ${
                 msg.role === "user"
                   ? "bg-primary text-primary-foreground rounded-br-sm"
+                  : msg.role === "admin"
+                  ? "bg-blue-100 text-blue-900 rounded-bl-sm border border-blue-200"
                   : "bg-card border border-border rounded-bl-sm"
               }`}>
                 <div className="flex items-center gap-1.5 mb-1">
-                  {msg.role === "assistant" ? (
-                    <Bot className="w-3.5 h-3.5 text-primary" />
-                  ) : (
-                    <User className="w-3.5 h-3.5" />
-                  )}
+                  {msg.role === "assistant" && <Bot className="w-3.5 h-3.5 text-primary" />}
+                  {msg.role === "admin" && <MessageCircle className="w-3.5 h-3.5 text-blue-600" />}
+                  {msg.role === "user" && <User className="w-3.5 h-3.5" />}
                   <span className="text-[10px] font-medium opacity-70">
-                    {msg.role === "user" ? "You" : "CCC Assistant"}
+                    {msg.role === "user" ? "You" : msg.role === "admin" ? (msg.sender_name || "Admin") : "CCC Assistant"}
                   </span>
                 </div>
                 <div className="leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                  {msg.role === "assistant" ? (
+                  {msg.role !== "user" ? (
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   ) : (
                     <span className="whitespace-pre-wrap">{msg.content}</span>
