@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2,
+  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2, ChevronDown, Eye,
 } from "lucide-react";
 import EventRevenueWidget from "@/components/EventRevenueWidget";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
@@ -43,6 +44,7 @@ type ArtistAssignment = { event_id: string; artist_id: string };
 type Profile = { user_id: string; full_name: string; email: string; mobile: string; };
 
 const AdminEvents = ({ customers }: { customers: Profile[] }) => {
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [events, setEvents] = useState<EventBooking[]>([]);
   const [artists, setArtists] = useState<{ id: string; name: string }[]>([]);
   const [artistAssignments, setArtistAssignments] = useState<ArtistAssignment[]>([]);
@@ -563,135 +565,184 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
       )}
 
       {/* Event List */}
-      {loading ? <p className="text-center text-muted-foreground py-10">Loading...</p> : filtered.length === 0 ? <p className="text-center text-muted-foreground py-10">No events found</p> : (
-        <div className="space-y-3">
+       {loading ? <p className="text-center text-muted-foreground py-10">Loading...</p> : filtered.length === 0 ? <p className="text-center text-muted-foreground py-10">No events found</p> : (
+        <div className="space-y-2">
           {filtered.map(ev => {
             const totalAmount = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
             const advanceAmt = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
             const remainingAmt = totalAmount - advanceAmt;
+            const isExpanded = expandedEvent === ev.id;
 
             return (
-              <div key={ev.id} className="admin-card p-4 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-sans font-semibold">{ev.client_name}</p>
-                    <p className="text-xs text-muted-foreground font-sans">{ev.client_email} · +91{ev.client_mobile}</p>
-                    {ev.client_instagram && <p className="text-xs text-muted-foreground font-sans">IG: {ev.client_instagram}</p>}
-                    <p className="text-xs text-muted-foreground font-sans mt-1">Booked: {new Date(ev.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-sans font-medium text-primary">{formatPrice(totalAmount)}</p>
-                    {ev.negotiated && ev.negotiated_total && ev.negotiated_total !== ev.total_price && (
-                      <p className="text-xs text-muted-foreground line-through">{formatPrice(ev.total_price)}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="border-none text-xs bg-purple-100 text-purple-800">{EVENT_TYPES.find(t => t.value === ev.event_type)?.label || ev.event_type}</Badge>
-                  <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
-                  <Badge className={`border-none text-xs ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : ev.payment_status === "partial_1_paid" ? "bg-orange-100 text-orange-800" : ev.payment_status === "partial_2_paid" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>
-                    {ev.payment_status === "fully_paid" ? "Fully Paid ✅" : ev.payment_status === "confirmed" ? "Advance Received" : ev.payment_status === "partial_1_paid" ? "Partial 1 Paid" : ev.payment_status === "partial_2_paid" ? "Partial 2 Paid" : "Payment Pending"}
-                  </Badge>
-                  {ev.negotiated && <Badge className="border-none text-xs bg-indigo-100 text-indigo-800">Negotiated</Badge>}
-                  <Badge variant="outline" className="text-xs">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""}</Badge>
-                  <Badge variant="outline" className="text-xs">{ev.is_mumbai ? "Mumbai" : "Pan India"}</Badge>
-                </div>
-                <div className="text-sm font-sans space-y-1">
-                  <p><span className="text-muted-foreground">Event:</span> {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}</p>
-                  <p><span className="text-muted-foreground">Location:</span> {ev.venue_name}, {ev.city}, {ev.state} - {ev.pincode}</p>
-                  {ev.payment_status === "fully_paid" ? (
-                    <p className="text-green-700 font-semibold">✅ Payment Fully Paid — {formatPrice(totalAmount)}</p>
-                  ) : (
-                    <>
-                      <p>
-                        <span className="text-muted-foreground">Advance:</span>{" "}
-                        {formatPrice(advanceAmt)}{" "}
-                        <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : ev.payment_status === "partial_1_paid" ? "text-orange-600" : "text-red-600"}`}>
-                          ({ev.payment_status === "confirmed" ? "Paid ✅" : ev.payment_status === "partial_1_paid" ? "Partial 1 ✅" : "Unpaid"})
-                        </span>
+              <Card key={ev.id} className="overflow-hidden">
+                {/* Compact Summary Row */}
+                <div className="p-3 md:p-4">
+                  <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                    {/* Name & Date */}
+                    <div className="flex-1 min-w-[120px]">
+                      <p className="font-sans font-semibold text-sm truncate">{ev.client_name}</p>
+                      <p className="text-[11px] text-muted-foreground font-sans">
+                        {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time}
                       </p>
-                      <p>
-                        <span className="text-muted-foreground">Remaining:</span>{" "}
-                        {formatPrice(remainingAmt)}{" "}
-                        <span className="text-xs font-semibold text-red-600">(Unpaid)</span>
-                      </p>
-                    </>
-                  )}
-                  {ev.extra_hours > 0 && <p><span className="text-muted-foreground">Extra Hours:</span> {ev.extra_hours}</p>}
-                  {ev.notes && <p><span className="text-muted-foreground">Notes:</span> {ev.notes}</p>}
-                </div>
-                {/* Per-event Revenue Impact Widget */}
-                <EventRevenueWidget
-                  totalAmount={ev.total_price}
-                  advanceAmount={ev.advance_amount}
-                  paymentStatus={ev.payment_status}
-                  negotiated={ev.negotiated}
-                  negotiatedTotal={ev.negotiated_total}
-                  negotiatedAdvance={ev.negotiated_advance}
-                  advanceDate={paymentDates[ev.id]?.advance_date}
-                  fullPaymentDate={paymentDates[ev.id]?.full_date}
-                />
-                {/* Completion Notice for completed events */}
-                {ev.status === "completed" && (
-                  <EventCompletionNotice
-                    event={ev}
-                    assignedArtists={getEventArtists(ev.id).map(aid => ({ name: artists.find(a => a.id === aid)?.name || "Unknown" }))}
-                  />
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <Select value={ev.status} onValueChange={v => updateEventStatus(ev.id, v)}>
-                    <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(EVENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
-                  </Select>
-                  <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
-                    <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
-                      <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
-                      <SelectItem value="confirmed">Advance Received</SelectItem>
-                      <SelectItem value="fully_paid">Fully Paid</SelectItem>
-                      <SelectItem value="refunded">Refunded</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {/* Multi-artist assignment using event_artist_assignments table */}
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground font-sans">Assign Artists ({ev.artist_count} needed):</p>
-                    <div className="flex flex-wrap gap-1">
-                      {artists.map(a => {
-                        const assigned = getEventArtists(ev.id).includes(a.id);
-                        return (
-                          <Button
-                            key={a.id}
-                            size="sm"
-                            variant={assigned ? "default" : "outline"}
-                            className={`text-xs h-7 rounded-full ${assigned ? "bg-primary" : ""}`}
-                            onClick={() => toggleArtistAssignment(ev.id, a.id, assigned)}
-                          >
-                            {a.name} {assigned ? "✓" : "+"}
-                          </Button>
-                        );
-                      })}
                     </div>
-                    {getEventArtists(ev.id).length > 0 && (
-                      <p className="text-xs text-green-600 font-sans">{getEventArtists(ev.id).length}/{ev.artist_count} artists assigned</p>
-                    )}
+                    {/* City */}
+                    <div className="hidden md:block min-w-[80px]">
+                      <p className="text-xs text-muted-foreground font-sans">{ev.city}</p>
+                    </div>
+                    {/* Badges */}
+                    <div className="flex gap-1 flex-wrap">
+                      <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-[10px] h-5`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
+                      <Badge className={`border-none text-[10px] h-5 ${ev.payment_status === "fully_paid" ? "bg-green-100 text-green-800" : ev.payment_status === "confirmed" ? "bg-blue-100 text-blue-800" : ev.payment_status === "partial_1_paid" ? "bg-orange-100 text-orange-800" : "bg-red-100 text-red-800"}`}>
+                        {ev.payment_status === "fully_paid" ? "Paid ✅" : ev.payment_status === "confirmed" ? "Advance ✅" : ev.payment_status === "partial_1_paid" ? "Partial 1" : "Pending"}
+                      </Badge>
+                    </div>
+                    {/* Amount */}
+                    <p className="font-display font-bold text-sm text-primary min-w-[70px] text-right">{formatPrice(totalAmount)}</p>
+                    {/* View Details Button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 gap-1 font-sans"
+                      onClick={() => setExpandedEvent(isExpanded ? null : ev.id)}
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span className="hidden sm:inline">{isExpanded ? "Hide" : "View"}</span>
+                      <ChevronDown className={cn("w-3 h-3 transition-transform", isExpanded && "rotate-180")} />
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setEditingEventId(ev.id); setEditEventData(ev); }}>
-                    <Edit2 className="w-3 h-3 mr-1" />Edit
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
-                    <DollarSign className="w-3 h-3 mr-1" />Negotiate
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="text-xs h-8"><Trash2 className="w-3 h-3" /></Button></AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader><AlertDialogTitle>Delete Event?</AlertDialogTitle><AlertDialogDescription>Permanently delete this event booking.</AlertDialogDescription></AlertDialogHeader>
-                      <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteEvent(ev.id)}>Delete</AlertDialogAction></AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
-              </div>
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <CardContent className="pt-0 pb-4 px-3 md:px-4 border-t border-border space-y-3">
+                    {/* Client Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground font-sans uppercase tracking-wide">Client Info</p>
+                        <p className="text-sm font-sans">{ev.client_name}</p>
+                        <p className="text-xs text-muted-foreground font-sans">{ev.client_email} · +91{ev.client_mobile}</p>
+                        {ev.client_instagram && <p className="text-xs text-muted-foreground font-sans">IG: {ev.client_instagram}</p>}
+                        <p className="text-xs text-muted-foreground font-sans">Booked: {new Date(ev.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground font-sans uppercase tracking-wide">Event Details</p>
+                        <p className="text-sm font-sans capitalize">{EVENT_TYPES.find(t => t.value === ev.event_type)?.label || ev.event_type}</p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time} - {ev.event_end_time}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">{ev.venue_name}, {ev.city}, {ev.state} - {ev.pincode}</p>
+                        <p className="text-xs text-muted-foreground font-sans">{ev.artist_count} Artist{ev.artist_count > 1 ? "s" : ""} · {ev.is_mumbai ? "Mumbai" : "Pan India"}</p>
+                        {ev.extra_hours > 0 && <p className="text-xs text-muted-foreground font-sans">Extra Hours: {ev.extra_hours}</p>}
+                      </div>
+                    </div>
+
+                    {/* Payment Info */}
+                    <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground font-sans uppercase tracking-wide">Payment</p>
+                      {ev.payment_status === "fully_paid" ? (
+                        <p className="text-sm font-semibold text-green-700 font-sans">✅ Payment Fully Paid — {formatPrice(totalAmount)}</p>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2 text-sm font-sans">
+                          <div>
+                            <span className="text-muted-foreground">Advance:</span>{" "}
+                            <span className="font-semibold">{formatPrice(advanceAmt)}</span>{" "}
+                            <span className={`text-xs font-semibold ${ev.payment_status === "confirmed" ? "text-green-600" : ev.payment_status === "partial_1_paid" ? "text-orange-600" : "text-red-600"}`}>
+                              ({ev.payment_status === "confirmed" ? "Paid ✅" : ev.payment_status === "partial_1_paid" ? "Partial 1 ✅" : "Unpaid"})
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Remaining:</span>{" "}
+                            <span className="font-semibold">{formatPrice(remainingAmt)}</span>{" "}
+                            <span className="text-xs font-semibold text-red-600">(Unpaid)</span>
+                          </div>
+                        </div>
+                      )}
+                      {ev.negotiated && ev.negotiated_total && ev.negotiated_total !== ev.total_price && (
+                        <p className="text-xs text-muted-foreground font-sans">Original: <span className="line-through">{formatPrice(ev.total_price)}</span> → Negotiated</p>
+                      )}
+                    </div>
+
+                    {ev.notes && (
+                      <div className="text-xs text-muted-foreground font-sans"><span className="font-semibold">Notes:</span> {ev.notes}</div>
+                    )}
+
+                    {/* Revenue Widget */}
+                    <EventRevenueWidget
+                      totalAmount={ev.total_price}
+                      advanceAmount={ev.advance_amount}
+                      paymentStatus={ev.payment_status}
+                      negotiated={ev.negotiated}
+                      negotiatedTotal={ev.negotiated_total}
+                      negotiatedAdvance={ev.negotiated_advance}
+                      advanceDate={paymentDates[ev.id]?.advance_date}
+                      fullPaymentDate={paymentDates[ev.id]?.full_date}
+                    />
+
+                    {ev.status === "completed" && (
+                      <EventCompletionNotice
+                        event={ev}
+                        assignedArtists={getEventArtists(ev.id).map(aid => ({ name: artists.find(a => a.id === aid)?.name || "Unknown" }))}
+                      />
+                    )}
+
+                    {/* Action Controls */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                      <Select value={ev.status} onValueChange={v => updateEventStatus(ev.id, v)}>
+                        <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>{Object.entries(EVENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                      </Select>
+                      <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
+                        <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                          <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
+                          <SelectItem value="confirmed">Advance Received</SelectItem>
+                          <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                          <SelectItem value="refunded">Refunded</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setEditingEventId(ev.id); setEditEventData(ev); }}>
+                        <Edit2 className="w-3 h-3 mr-1" />Edit
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
+                        <DollarSign className="w-3 h-3 mr-1" />Negotiate
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="text-xs h-8"><Trash2 className="w-3 h-3" /></Button></AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader><AlertDialogTitle>Delete Event?</AlertDialogTitle><AlertDialogDescription>Permanently delete this event booking.</AlertDialogDescription></AlertDialogHeader>
+                          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteEvent(ev.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+
+                    {/* Artist Assignment */}
+                    <div className="space-y-1 pt-2 border-t border-border">
+                      <p className="text-xs text-muted-foreground font-sans">Assign Artists ({ev.artist_count} needed):</p>
+                      <div className="flex flex-wrap gap-1">
+                        {artists.map(a => {
+                          const assigned = getEventArtists(ev.id).includes(a.id);
+                          return (
+                            <Button
+                              key={a.id}
+                              size="sm"
+                              variant={assigned ? "default" : "outline"}
+                              className={`text-xs h-7 rounded-full ${assigned ? "bg-primary" : ""}`}
+                              onClick={() => toggleArtistAssignment(ev.id, a.id, assigned)}
+                            >
+                              {a.name} {assigned ? "✓" : "+"}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      {getEventArtists(ev.id).length > 0 && (
+                        <p className="text-xs text-green-600 font-sans">{getEventArtists(ev.id).length}/{ev.artist_count} artists assigned</p>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
             );
           })}
         </div>
