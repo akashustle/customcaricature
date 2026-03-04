@@ -133,7 +133,9 @@ const BookEvent = () => {
   // Gateway charges toggle - check user profile
   const [gatewayEnabled, setGatewayEnabled] = useState(true);
   const isPartialEnabled = partialConfig?.enabled && partialConfig?.partial_1_amount > 0;
-  const payableAdvance = isPartialEnabled ? partialConfig.partial_1_amount : pricing.advance;
+  const extraHoursCost = addExtraHours && extraHours > 0 ? extraHours * pricing.extraHourRate : 0;
+  const advanceWithExtraHours = pricing.advance + extraHoursCost;
+  const payableAdvance = isPartialEnabled ? partialConfig.partial_1_amount : advanceWithExtraHours;
   const gatewayCharges = gatewayEnabled ? calculateGatewayCharges(payableAdvance) : 0;
   const totalPayable = payableAdvance + gatewayCharges;
 
@@ -261,7 +263,7 @@ const BookEvent = () => {
         artist_count: artistCount,
         is_mumbai: isInternational ? false : isMumbai,
         total_price: pricing.total,
-        advance_amount: pricing.advance,
+        advance_amount: advanceWithExtraHours,
         extra_hours: addExtraHours ? extraHours : 0,
         travel_confirmed: travelConfirmed,
         accommodation_confirmed: accommodationConfirmed,
@@ -674,7 +676,7 @@ const BookEvent = () => {
                   <span>Total Event Cost</span><span className="text-primary">{formatPrice(pricing.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Advance Payment</span><span className="font-semibold">{formatPrice(pricing.advance)}</span>
+                  <span className="text-muted-foreground">Advance Payment {addExtraHours && extraHours > 0 ? "(incl. extra hours)" : ""}</span><span className="font-semibold">{formatPrice(advanceWithExtraHours)}</span>
                 </div>
                 {gatewayEnabled && (
                   <div className="flex justify-between text-sm text-muted-foreground">
@@ -685,7 +687,7 @@ const BookEvent = () => {
                   <span>You Pay Now (Satisfaction Guaranteed)</span><span>{formatPrice(totalPayable)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Remaining (at event)</span><span>{formatPrice(pricing.total - pricing.advance)}</span>
+                  <span className="text-muted-foreground">Remaining (at event)</span><span>{formatPrice(pricing.total - advanceWithExtraHours)}</span>
                 </div>
               </CardContent>
             </Card>
