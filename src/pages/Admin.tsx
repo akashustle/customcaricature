@@ -53,6 +53,7 @@ import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminWorkshop from "@/components/admin/AdminWorkshop";
+import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 
