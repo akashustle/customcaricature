@@ -678,6 +678,84 @@ export type Database = {
         }
         Relationships: []
       }
+      enquiries: {
+        Row: {
+          admin_notes: string | null
+          caricature_type: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          district: string | null
+          enquiry_number: string
+          enquiry_type: string
+          event_date: string | null
+          id: string
+          instagram_id: string | null
+          mobile: string
+          name: string
+          state: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          caricature_type?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          district?: string | null
+          enquiry_number: string
+          enquiry_type?: string
+          event_date?: string | null
+          id?: string
+          instagram_id?: string | null
+          mobile: string
+          name: string
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          caricature_type?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          district?: string | null
+          enquiry_number?: string
+          enquiry_type?: string
+          event_date?: string | null
+          id?: string
+          instagram_id?: string | null
+          mobile?: string
+          name?: string
+          state?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      enquiry_settings: {
+        Row: {
+          id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       event_artist_assignments: {
         Row: {
           artist_id: string
@@ -713,6 +791,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_blocked_dates: {
+        Row: {
+          blocked_by: string
+          blocked_date: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_by: string
+          blocked_date: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_by?: string
+          blocked_date?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
       }
       event_bookings: {
         Row: {
