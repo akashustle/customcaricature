@@ -305,21 +305,47 @@ const ArtistDashboard = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <LiveGreeting name={artist?.name} />
 
-        {/* Stats */}
+        {/* Stats — Enhanced */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary">{events.length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Total Events</p>
-          </CardContent></Card>
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary">{upcoming.length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Upcoming</p>
-          </CardContent></Card>
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary">{completed.length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Completed</p>
-          </CardContent></Card>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
+            <Card className="card-3d overflow-hidden relative"><CardContent className="p-4 text-center">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 to-primary" />
+              <p className="text-3xl font-bold font-display text-primary animate-count-up">{events.length}</p>
+              <p className="text-[10px] text-muted-foreground font-sans mt-1">Total Events</p>
+            </CardContent></Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="card-3d overflow-hidden relative"><CardContent className="p-4 text-center">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-400 to-gold-600" />
+              <p className="text-3xl font-bold font-display text-primary animate-count-up">{upcoming.length}</p>
+              <p className="text-[10px] text-muted-foreground font-sans mt-1">Upcoming</p>
+            </CardContent></Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="card-3d overflow-hidden relative"><CardContent className="p-4 text-center">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-green-600" />
+              <p className="text-3xl font-bold font-display text-primary animate-count-up">{completed.length}</p>
+              <p className="text-[10px] text-muted-foreground font-sans mt-1">Completed</p>
+            </CardContent></Card>
+          </motion.div>
         </div>
+
+        {/* Earnings Summary for Ritesh */}
+        {isRitesh && orders.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="card-3d mb-6 overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-gold-500" />
+              <CardContent className="p-4">
+                <p className="text-xs font-sans text-muted-foreground mb-1">Total Earnings (Orders)</p>
+                <p className="text-2xl font-bold font-display text-foreground">₹{orders.reduce((sum, o) => sum + o.amount, 0).toLocaleString("en-IN")}</p>
+                <div className="flex gap-4 mt-2 text-xs font-sans text-muted-foreground">
+                  <span>{orders.filter(o => ["new", "in_progress"].includes(o.status)).length} Active</span>
+                  <span>{orders.filter(o => o.status === "delivered").length} Delivered</span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {artist?.portfolio_url && (
           <a href={artist.portfolio_url} target="_blank" rel="noopener noreferrer">

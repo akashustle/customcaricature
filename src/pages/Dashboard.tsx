@@ -262,6 +262,22 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <LiveGreeting name={profile?.full_name} />
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <Card className="card-3d"><CardContent className="p-3 text-center">
+            <p className="text-2xl font-bold font-display text-primary animate-count-up">{orders.length}</p>
+            <p className="text-[10px] text-muted-foreground font-sans">Total Orders</p>
+          </CardContent></Card>
+          <Card className="card-3d"><CardContent className="p-3 text-center">
+            <p className="text-2xl font-bold font-display text-primary animate-count-up">{events.length}</p>
+            <p className="text-[10px] text-muted-foreground font-sans">Events</p>
+          </CardContent></Card>
+          <Card className="card-3d"><CardContent className="p-3 text-center">
+            <p className="text-2xl font-bold font-display text-primary animate-count-up">{orders.filter(o => o.status === "delivered").length}</p>
+            <p className="text-[10px] text-muted-foreground font-sans">Delivered</p>
+          </CardContent></Card>
+        </div>
+
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full mb-6">
