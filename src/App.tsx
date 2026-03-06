@@ -76,6 +76,7 @@ const App = () => {
             <Route path="/live-chat" element={<LiveChat />} />
             <Route path="/workshop" element={<Workshop />} />
             <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
+            <Route path="/enquiry" element={<Enquiry />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
