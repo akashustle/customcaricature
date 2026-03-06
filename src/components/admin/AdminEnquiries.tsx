@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Search, Eye, ChevronDown, ChevronUp, Calendar, CalendarOff, Plus, Trash2, Save, X, Settings } from "lucide-react";
+import { Search, Eye, ChevronDown, ChevronUp, Calendar, CalendarOff, Plus, Trash2, Save, X, Settings, IndianRupee, TestTube2, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ExportButton from "./ExportButton";
@@ -17,6 +18,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import LocationDropdowns from "@/components/LocationDropdowns";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const STATUS_OPTIONS = [
   { value: "new", label: "New", color: "bg-blue-100 text-blue-800" },
@@ -47,10 +50,23 @@ const AdminEnquiries = () => {
   const [contactInfo, setContactInfo] = useState<any>({ whatsapp: "", instagram: "" });
   const [maxEvents, setMaxEvents] = useState(2);
 
+  // Event Pricing
+  const [pricingRules, setPricingRules] = useState<any[]>([]);
+  const [pricingForm, setPricingForm] = useState({ state: "", district: "", city: "", price: "", priority: 1, is_active: true });
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  const [showPricingForm, setShowPricingForm] = useState(false);
+
+  // Pricing Preview
+  const [previewState, setPreviewState] = useState("");
+  const [previewDistrict, setPreviewDistrict] = useState("");
+  const [previewCity, setPreviewCity] = useState("");
+  const [previewResult, setPreviewResult] = useState<{ price: number; source: string } | null>(null);
+
   useEffect(() => {
     fetchEnquiries();
     fetchCalendarData();
     fetchSettings();
+    fetchPricingRules();
     const ch = supabase.channel("admin-enquiries")
       .on("postgres_changes", { event: "*", schema: "public", table: "enquiries" }, fetchEnquiries)
       .subscribe();
@@ -83,6 +99,11 @@ const AdminEnquiries = () => {
         if (s.id === "event_max_per_date") setMaxEvents(s.value.max_events || 2);
       });
     }
+  };
+
+  const fetchPricingRules = async () => {
+    const { data } = await supabase.from("enquiry_event_pricing" as any).select("*").order("priority", { ascending: false });
+    if (data) setPricingRules(data as any[]);
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -131,6 +152,86 @@ const AdminEnquiries = () => {
     fetchSettings();
   };
 
+  // Pricing CRUD
+  const savePricingRule = async () => {
+    const price = parseFloat(pricingForm.price);
+    if (!price || price <= 0) {
+      toast({ title: "Enter a valid price", variant: "destructive" });
+      return;
+    }
+
+    const payload: any = {
+      state: pricingForm.state || null,
+      district: pricingForm.district || null,
+      city: pricingForm.city || null,
+      price,
+      priority: pricingForm.priority,
+      is_active: pricingForm.is_active,
+    };
+
+    if (editingPriceId) {
+      await supabase.from("enquiry_event_pricing" as any).update(payload).eq("id", editingPriceId);
+      toast({ title: "Pricing rule updated" });
+    } else {
+      await supabase.from("enquiry_event_pricing" as any).insert(payload);
+      toast({ title: "Pricing rule added" });
+    }
+
+    resetPricingForm();
+    fetchPricingRules();
+  };
+
+  const editPricingRule = (rule: any) => {
+    setPricingForm({
+      state: rule.state || "",
+      district: rule.district || "",
+      city: rule.city || "",
+      price: String(rule.price),
+      priority: rule.priority,
+      is_active: rule.is_active,
+    });
+    setEditingPriceId(rule.id);
+    setShowPricingForm(true);
+  };
+
+  const deletePricingRule = async (id: string) => {
+    await supabase.from("enquiry_event_pricing" as any).delete().eq("id", id);
+    toast({ title: "Pricing rule deleted" });
+    fetchPricingRules();
+  };
+
+  const togglePricingActive = async (id: string, active: boolean) => {
+    await supabase.from("enquiry_event_pricing" as any).update({ is_active: active } as any).eq("id", id);
+    fetchPricingRules();
+  };
+
+  const resetPricingForm = () => {
+    setPricingForm({ state: "", district: "", city: "", price: "", priority: 1, is_active: true });
+    setEditingPriceId(null);
+    setShowPricingForm(false);
+  };
+
+  // Pricing Preview
+  const testPricing = () => {
+    const activeRules = pricingRules.filter((r: any) => r.is_active);
+
+    if (previewCity) {
+      const cityMatch = activeRules.find((r: any) => r.city && r.city.toLowerCase() === previewCity.toLowerCase());
+      if (cityMatch) { setPreviewResult({ price: cityMatch.price, source: "City Pricing" }); return; }
+    }
+    if (previewDistrict) {
+      const distMatch = activeRules.find((r: any) => r.district && r.district.toLowerCase() === previewDistrict.toLowerCase() && !r.city);
+      if (distMatch) { setPreviewResult({ price: distMatch.price, source: "District Pricing" }); return; }
+    }
+    if (previewState) {
+      const stateMatch = activeRules.find((r: any) => r.state && r.state.toLowerCase() === previewState.toLowerCase() && !r.district && !r.city);
+      if (stateMatch) { setPreviewResult({ price: stateMatch.price, source: "State Pricing" }); return; }
+    }
+    const defaultRule = activeRules.find((r: any) => !r.state && !r.district && !r.city);
+    if (defaultRule) { setPreviewResult({ price: defaultRule.price, source: "Default India Pricing" }); return; }
+    setPreviewResult(null);
+  };
+
   const filteredEnquiries = enquiries.filter((e: any) => {
     const matchSearch = !search || e.name?.toLowerCase().includes(search.toLowerCase()) || e.mobile?.includes(search) || e.enquiry_number?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || e.status === statusFilter;
@@ -144,6 +245,7 @@ const AdminEnquiries = () => {
       <TabsList className="mb-4 bg-card border border-border rounded-xl p-1 flex-wrap">
         <TabsTrigger value="enquiries" className="font-sans rounded-full text-xs">📋 Enquiries</TabsTrigger>
         <TabsTrigger value="calendar" className="font-sans rounded-full text-xs">📅 Event Calendar</TabsTrigger>
+        <TabsTrigger value="event-pricing" className="font-sans rounded-full text-xs">💰 Event Pricing</TabsTrigger>
         <TabsTrigger value="caricature-settings" className="font-sans rounded-full text-xs">🎨 Caricature Settings</TabsTrigger>
         <TabsTrigger value="contact-settings" className="font-sans rounded-full text-xs">⚙️ Settings</TabsTrigger>
       </TabsList>
@@ -174,6 +276,8 @@ const AdminEnquiries = () => {
                 "City": e.city || "",
                 "State": e.state || "",
                 "Event Date": e.event_date || "",
+                "Estimated Price": e.estimated_price || "",
+                "Pricing Source": e.pricing_source || "",
                 "Status": e.status,
                 "Notes": e.admin_notes || "",
                 "Created": new Date(e.created_at).toLocaleString("en-IN"),
@@ -206,6 +310,11 @@ const AdminEnquiries = () => {
                           {e.caricature_type && ` · ${e.caricature_type}`}
                         </p>
                         {e.city && <p className="text-xs text-muted-foreground font-sans">📍 {e.city}, {e.state}</p>}
+                        {e.estimated_price && (
+                          <p className="text-xs font-sans text-primary font-medium">
+                            💰 ₹{Number(e.estimated_price).toLocaleString("en-IN")} ({e.pricing_source})
+                          </p>
+                        )}
                         <p className="text-[10px] text-muted-foreground font-sans">{new Date(e.created_at).toLocaleString("en-IN")}</p>
                       </div>
                       <div className="flex items-center gap-1">
@@ -226,7 +335,15 @@ const AdminEnquiries = () => {
                           {e.event_date && <div><span className="text-muted-foreground text-xs">Event Date:</span> <p className="font-medium">{new Date(e.event_date).toLocaleDateString("en-IN")}</p></div>}
                           {e.country && <div><span className="text-muted-foreground text-xs">Country:</span> <p className="font-medium">{e.country}</p></div>}
                           {e.state && <div><span className="text-muted-foreground text-xs">State:</span> <p className="font-medium">{e.state}</p></div>}
+                          {e.district && <div><span className="text-muted-foreground text-xs">District:</span> <p className="font-medium">{e.district}</p></div>}
                           {e.city && <div><span className="text-muted-foreground text-xs">City:</span> <p className="font-medium">{e.city}</p></div>}
+                          {e.estimated_price && (
+                            <div className="col-span-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
+                              <span className="text-muted-foreground text-xs">Estimated Price:</span>
+                              <p className="font-bold text-primary text-lg">₹{Number(e.estimated_price).toLocaleString("en-IN")}</p>
+                              <p className="text-[10px] text-muted-foreground">Source: {e.pricing_source}</p>
+                            </div>
+                          )}
                         </div>
 
                         {/* Status change */}
@@ -354,6 +471,149 @@ const AdminEnquiries = () => {
                     </div>
                   ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
+
+      {/* Event Pricing */}
+      <TabsContent value="event-pricing">
+        <div className="space-y-4">
+          {/* Add/Edit Form */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="font-display text-lg flex items-center gap-2">
+                <IndianRupee className="w-5 h-5 text-primary" /> Event Pricing Rules
+              </CardTitle>
+              {!showPricingForm && (
+                <Button size="sm" onClick={() => setShowPricingForm(true)}>
+                  <Plus className="w-3 h-3 mr-1" /> Add Rule
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground font-sans">
+                Pricing resolves by specificity: City → District → State → Default. Leave fields empty for broader rules.
+              </p>
+
+              {showPricingForm && (
+                <div className="p-4 rounded-xl bg-muted/30 border border-border space-y-3 animate-in fade-in duration-200">
+                  <p className="font-sans font-semibold text-sm">{editingPriceId ? "Edit" : "Add"} Pricing Rule</p>
+                  <LocationDropdowns
+                    state={pricingForm.state}
+                    district={pricingForm.district}
+                    city={pricingForm.city}
+                    onStateChange={(v) => setPricingForm(f => ({ ...f, state: v, district: "", city: "" }))}
+                    onDistrictChange={(v) => setPricingForm(f => ({ ...f, district: v, city: "" }))}
+                    onCityChange={(v) => setPricingForm(f => ({ ...f, city: v }))}
+                  />
+                  <p className="text-[10px] text-muted-foreground font-sans">Leave all location fields empty to create a default India-wide pricing rule.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs font-sans">Price (₹) *</Label>
+                      <Input type="number" value={pricingForm.price} onChange={e => setPricingForm(f => ({ ...f, price: e.target.value }))} placeholder="25000" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-sans">Priority</Label>
+                      <Input type="number" value={pricingForm.priority} onChange={e => setPricingForm(f => ({ ...f, priority: parseInt(e.target.value) || 1 }))} className="mt-1" min={1} />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={pricingForm.is_active} onCheckedChange={(v) => setPricingForm(f => ({ ...f, is_active: v }))} />
+                    <Label className="text-xs font-sans">Active</Label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={savePricingRule}><Save className="w-3 h-3 mr-1" />{editingPriceId ? "Update" : "Save"}</Button>
+                    <Button size="sm" variant="ghost" onClick={resetPricingForm}><X className="w-3 h-3 mr-1" />Cancel</Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Rules Table */}
+              {pricingRules.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6 font-sans">No pricing rules yet. Add one to get started.</p>
+              ) : (
+                <div className="overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs">State</TableHead>
+                        <TableHead className="text-xs">District</TableHead>
+                        <TableHead className="text-xs">City</TableHead>
+                        <TableHead className="text-xs text-right">Price</TableHead>
+                        <TableHead className="text-xs text-center">Priority</TableHead>
+                        <TableHead className="text-xs text-center">Active</TableHead>
+                        <TableHead className="text-xs text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pricingRules.map((r: any) => (
+                        <TableRow key={r.id}>
+                          <TableCell className="text-xs font-sans">{r.state || <span className="text-muted-foreground italic">All</span>}</TableCell>
+                          <TableCell className="text-xs font-sans">{r.district || <span className="text-muted-foreground italic">All</span>}</TableCell>
+                          <TableCell className="text-xs font-sans">{r.city || <span className="text-muted-foreground italic">All</span>}</TableCell>
+                          <TableCell className="text-xs font-sans text-right font-bold">₹{Number(r.price).toLocaleString("en-IN")}</TableCell>
+                          <TableCell className="text-xs font-sans text-center">{r.priority}</TableCell>
+                          <TableCell className="text-center">
+                            <Switch checked={r.is_active} onCheckedChange={(v) => togglePricingActive(r.id, v)} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-1 justify-end">
+                              <Button variant="ghost" size="sm" onClick={() => editPricingRule(r)}><Pencil className="w-3 h-3" /></Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm"><Trash2 className="w-3 h-3 text-destructive" /></Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader><AlertDialogTitle>Delete this pricing rule?</AlertDialogTitle></AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deletePricingRule(r.id)}>Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pricing Preview Tool */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-display text-lg flex items-center gap-2">
+                <TestTube2 className="w-5 h-5 text-primary" /> Pricing Preview Tool
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground font-sans">Test how pricing resolves for a given location.</p>
+              <LocationDropdowns
+                state={previewState}
+                district={previewDistrict}
+                city={previewCity}
+                onStateChange={(v) => { setPreviewState(v); setPreviewDistrict(""); setPreviewCity(""); setPreviewResult(null); }}
+                onDistrictChange={(v) => { setPreviewDistrict(v); setPreviewCity(""); setPreviewResult(null); }}
+                onCityChange={(v) => { setPreviewCity(v); setPreviewResult(null); }}
+              />
+              <Button onClick={testPricing} size="sm" disabled={!previewState && !previewDistrict && !previewCity}>
+                <TestTube2 className="w-3 h-3 mr-1" /> Test Price
+              </Button>
+
+              {previewResult && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-200">
+                  <p className="text-xs text-muted-foreground font-sans">Resolved Price</p>
+                  <p className="font-display text-2xl font-bold text-primary">₹{previewResult.price.toLocaleString("en-IN")}</p>
+                  <p className="text-xs text-muted-foreground font-sans mt-1">Source: {previewResult.source}</p>
+                </div>
+              )}
+              {previewResult === null && (previewState || previewCity) && (
+                <p className="text-xs text-destructive font-sans">No matching pricing rule found. Consider adding a default rule.</p>
               )}
             </CardContent>
           </Card>

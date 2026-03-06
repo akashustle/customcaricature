@@ -688,11 +688,13 @@ export type Database = {
           district: string | null
           enquiry_number: string
           enquiry_type: string
+          estimated_price: number | null
           event_date: string | null
           id: string
           instagram_id: string | null
           mobile: string
           name: string
+          pricing_source: string | null
           state: string | null
           status: string
           updated_at: string
@@ -707,11 +709,13 @@ export type Database = {
           district?: string | null
           enquiry_number: string
           enquiry_type?: string
+          estimated_price?: number | null
           event_date?: string | null
           id?: string
           instagram_id?: string | null
           mobile: string
           name: string
+          pricing_source?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -726,15 +730,56 @@ export type Database = {
           district?: string | null
           enquiry_number?: string
           enquiry_type?: string
+          estimated_price?: number | null
           event_date?: string | null
           id?: string
           instagram_id?: string | null
           mobile?: string
           name?: string
+          pricing_source?: string | null
           state?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      enquiry_event_pricing: {
+        Row: {
+          city: string | null
+          created_at: string
+          currency: string
+          district: string | null
+          id: string
+          is_active: boolean
+          price: number
+          priority: number
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          currency?: string
+          district?: string | null
+          id?: string
+          is_active?: boolean
+          price?: number
+          priority?: number
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          currency?: string
+          district?: string | null
+          id?: string
+          is_active?: boolean
+          price?: number
+          priority?: number
+          state?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
