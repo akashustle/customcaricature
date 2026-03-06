@@ -52,6 +52,7 @@ import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
 import LocationDropdowns from "@/components/LocationDropdowns";
+import AdminWorkshop from "@/components/admin/AdminWorkshop";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -615,6 +616,7 @@ const Admin = () => {
               <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
               <TabsTrigger value="ai-conversations" className="font-sans rounded-full transition-all whitespace-nowrap"><Bot className="w-4 h-4 mr-1" />AI Chats</TabsTrigger>
               <TabsTrigger value="chatbot" className="font-sans rounded-full transition-all whitespace-nowrap">🤖 AI Bot</TabsTrigger>
+              <TabsTrigger value="workshop" className="font-sans rounded-full transition-all whitespace-nowrap">🎓 Workshop</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
@@ -1466,6 +1468,10 @@ const Admin = () => {
             <AdminAIChatConversations />
           </TabsContent>
 
+          <TabsContent value="workshop">
+            <AdminWorkshop />
+          </TabsContent>
+
           <TabsContent value="chatbot">
             <AdminChatbotTraining />
           </TabsContent>
@@ -1640,6 +1646,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
+          <AdminBottomNavItem icon={Users} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
