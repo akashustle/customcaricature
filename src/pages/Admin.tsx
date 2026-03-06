@@ -1646,6 +1646,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
+          <AdminBottomNavItem icon={Users} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>

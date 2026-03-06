@@ -73,6 +73,8 @@ const App = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/live-chat" element={<LiveChat />} />
+            <Route path="/workshop" element={<Workshop />} />
+            <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
