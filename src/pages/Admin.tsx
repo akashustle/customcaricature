@@ -54,6 +54,7 @@ import AdminAIChatConversations from "@/components/admin/AdminAIChatConversation
 import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminWorkshop from "@/components/admin/AdminWorkshop";
 import AdminEnquiries from "@/components/admin/AdminEnquiries";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -577,51 +578,36 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 dashboard-header backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-full border-[3px] border-primary/50 shadow-lg" />
-            <h1 className="font-display text-lg md:text-xl font-bold">Admin Panel</h1>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationBell />
-            <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex w-full">
+      {/* Desktop Sidebar */}
+      <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="container mx-auto px-4 py-6">
-        <LiveGreeting name={adminProfile?.full_name} />
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="mb-6 hidden md:block overflow-x-auto scrollbar-thin">
-            <TabsList className="w-max min-w-full bg-card/80 p-1.5 rounded-2xl border border-border shadow-md inline-flex gap-0.5">
-              <TabsTrigger value="orders" className="font-sans rounded-full transition-all whitespace-nowrap"><Package className="w-4 h-4 mr-1" />Orders</TabsTrigger>
-              <TabsTrigger value="events" className="font-sans rounded-full transition-all whitespace-nowrap"><CalIcon className="w-4 h-4 mr-1" />Events</TabsTrigger>
-              <TabsTrigger value="payments" className="font-sans rounded-full transition-all whitespace-nowrap"><Receipt className="w-4 h-4 mr-1" />Payments</TabsTrigger>
-              <TabsTrigger value="chat" className="font-sans rounded-full transition-all whitespace-nowrap"><MessageCircle className="w-4 h-4 mr-1" />Chat</TabsTrigger>
-              <TabsTrigger value="live-leads" className="font-sans rounded-full transition-all whitespace-nowrap">💬 Live Leads</TabsTrigger>
-              <TabsTrigger value="event-users" className="font-sans rounded-full transition-all whitespace-nowrap"><Users className="w-4 h-4 mr-1" />Event Users</TabsTrigger>
-              <TabsTrigger value="pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><DollarSign className="w-4 h-4 mr-1" />Pricing</TabsTrigger>
-              <TabsTrigger value="customers" className="font-sans rounded-full transition-all whitespace-nowrap"><Users className="w-4 h-4 mr-1" />Customers</TabsTrigger>
-              <TabsTrigger value="artists" className="font-sans rounded-full transition-all whitespace-nowrap">🎨 Artists</TabsTrigger>
-              <TabsTrigger value="reviews" className="font-sans rounded-full transition-all whitespace-nowrap"><Star className="w-4 h-4 mr-1" />Reviews</TabsTrigger>
-              <TabsTrigger value="analytics" className="font-sans rounded-full transition-all whitespace-nowrap"><BarChart3 className="w-4 h-4 mr-1" />Analytics</TabsTrigger>
-              <TabsTrigger value="locations" className="font-sans rounded-full transition-all whitespace-nowrap"><MapPin className="w-4 h-4 mr-1" />Locations</TabsTrigger>
-              <TabsTrigger value="voice" className="font-sans rounded-full transition-all whitespace-nowrap"><Radio className="w-4 h-4 mr-1" />Voice</TabsTrigger>
-              <TabsTrigger value="notify" className="font-sans rounded-full transition-all whitespace-nowrap"><Bell className="w-4 h-4 mr-1" />Notify</TabsTrigger>
-              <TabsTrigger value="sessions" className="font-sans rounded-full transition-all whitespace-nowrap"><Monitor className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
-              <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
-              <TabsTrigger value="ai-conversations" className="font-sans rounded-full transition-all whitespace-nowrap"><Bot className="w-4 h-4 mr-1" />AI Chats</TabsTrigger>
-              <TabsTrigger value="chatbot" className="font-sans rounded-full transition-all whitespace-nowrap">🤖 AI Bot</TabsTrigger>
-              <TabsTrigger value="workshop" className="font-sans rounded-full transition-all whitespace-nowrap">🎓 Workshop</TabsTrigger>
-              <TabsTrigger value="enquiry" className="font-sans rounded-full transition-all whitespace-nowrap">📋 Enquiry</TabsTrigger>
-              <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
-            </TabsList>
+      {/* Main Content */}
+      <div className="flex-1 min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
+        <header className="sticky top-0 z-40 dashboard-header backdrop-blur-md">
+          <div className="px-4 md:px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
+              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm" />
+              <h1 className="font-display text-lg font-bold text-gradient">Admin</h1>
+            </div>
+            <div className="hidden md:block">
+              <LiveGreeting name={adminProfile?.full_name} />
+            </div>
+            <div className="flex items-center gap-1">
+              <NotificationBell />
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex">
+                <LogOut className="w-4 h-4 mr-2" /> Logout
+              </Button>
+            </div>
           </div>
+        </header>
+
+        <div className="px-4 md:px-6 py-6">
+          <div className="md:hidden mb-4">
+            <LiveGreeting name={adminProfile?.full_name} />
+          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
 
           {/* Orders Tab */}
           <TabsContent value="orders">
@@ -1609,7 +1595,7 @@ const Admin = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
 
       {/* Negotiate Price Dialog */}
       {negotiateOrderId && (
@@ -1657,6 +1643,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
+      </div>
       </div>
     </div>
   );
