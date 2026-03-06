@@ -616,6 +616,7 @@ const Admin = () => {
               <TabsTrigger value="intl-pricing" className="font-sans rounded-full transition-all whitespace-nowrap"><Globe className="w-4 h-4 mr-1" />Intl Pricing</TabsTrigger>
               <TabsTrigger value="ai-conversations" className="font-sans rounded-full transition-all whitespace-nowrap"><Bot className="w-4 h-4 mr-1" />AI Chats</TabsTrigger>
               <TabsTrigger value="chatbot" className="font-sans rounded-full transition-all whitespace-nowrap">🤖 AI Bot</TabsTrigger>
+              <TabsTrigger value="workshop" className="font-sans rounded-full transition-all whitespace-nowrap">🎓 Workshop</TabsTrigger>
               <TabsTrigger value="settings" className="font-sans rounded-full transition-all whitespace-nowrap"><Settings className="w-4 h-4 mr-1" />Settings</TabsTrigger>
             </TabsList>
           </div>
