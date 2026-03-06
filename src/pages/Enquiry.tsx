@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
-import { ArrowRight, ArrowLeft, User, Palette, Calendar, MessageCircle, CheckCircle2, Instagram } from "lucide-react";
+import { ArrowRight, ArrowLeft, User, Palette, Calendar, MessageCircle, CheckCircle2, Instagram, IndianRupee } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -45,12 +45,22 @@ const Enquiry = () => {
   // Pricing from DB
   const [pricing, setPricing] = useState<any[]>([]);
 
+  // Event pricing
+  const [eventPricingRules, setEventPricingRules] = useState<any[]>([]);
+  const [resolvedPrice, setResolvedPrice] = useState<{ price: number; source: string; currency: string } | null>(null);
+
   useEffect(() => {
     fetchSettings();
     fetchPricing();
     fetchBookedDates();
     fetchBlockedDates();
+    fetchEventPricingRules();
   }, []);
+
+  // Resolve price when location changes
+  useEffect(() => {
+    resolveEventPrice();
+  }, [state, district, city, eventPricingRules]);
 
   const fetchSettings = async () => {
     const { data } = await supabase.from("enquiry_settings" as any).select("*");
@@ -80,6 +90,57 @@ const Enquiry = () => {
   const fetchBlockedDates = async () => {
     const { data } = await supabase.from("event_blocked_dates" as any).select("blocked_date");
     if (data) setBlockedDates((data as any[]).map((d: any) => d.blocked_date));
+  };
+
+  const fetchEventPricingRules = async () => {
+    const { data } = await supabase.from("enquiry_event_pricing" as any).select("*").eq("is_active", true).order("priority", { ascending: false });
+    if (data) setEventPricingRules(data as any[]);
+  };
+
+  const resolveEventPrice = () => {
+    if (!state && !district && !city) {
+      setResolvedPrice(null);
+      return;
+    }
+
+    const activeRules = eventPricingRules.filter((r: any) => r.is_active);
+
+    // Priority: city > district > state > default (null/null/null)
+    // 1. City match
+    if (city) {
+      const cityMatch = activeRules.find((r: any) => r.city && r.city.toLowerCase() === city.toLowerCase());
+      if (cityMatch) {
+        setResolvedPrice({ price: cityMatch.price, source: "City", currency: cityMatch.currency });
+        return;
+      }
+    }
+
+    // 2. District match
+    if (district) {
+      const distMatch = activeRules.find((r: any) => r.district && r.district.toLowerCase() === district.toLowerCase() && !r.city);
+      if (distMatch) {
+        setResolvedPrice({ price: distMatch.price, source: "District", currency: distMatch.currency });
+        return;
+      }
+    }
+
+    // 3. State match
+    if (state) {
+      const stateMatch = activeRules.find((r: any) => r.state && r.state.toLowerCase() === state.toLowerCase() && !r.district && !r.city);
+      if (stateMatch) {
+        setResolvedPrice({ price: stateMatch.price, source: "State", currency: stateMatch.currency });
+        return;
+      }
+    }
+
+    // 4. Default (all null)
+    const defaultRule = activeRules.find((r: any) => !r.state && !r.district && !r.city);
+    if (defaultRule) {
+      setResolvedPrice({ price: defaultRule.price, source: "Default", currency: defaultRule.currency });
+      return;
+    }
+
+    setResolvedPrice(null);
   };
 
   const stepProgress: Record<Step, number> = {
@@ -114,6 +175,8 @@ const Enquiry = () => {
         city: city || null,
         event_date: eventDate ? format(eventDate, "yyyy-MM-dd") : null,
         user_id: userId,
+        estimated_price: resolvedPrice?.price || null,
+        pricing_source: resolvedPrice?.source || null,
       } as any).select("enquiry_number").single();
 
       if (error) throw error;
@@ -156,6 +219,12 @@ const Enquiry = () => {
               </div>
               <h2 className="font-display text-2xl font-bold">Enquiry Submitted!</h2>
               <p className="text-muted-foreground font-sans">Your enquiry ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
+              {resolvedPrice && enquiryType === "event_booking" && (
+                <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground font-sans">Estimated Event Price</p>
+                  <p className="font-display text-xl font-bold text-primary">₹{resolvedPrice.price.toLocaleString("en-IN")}</p>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground font-sans">Our team will contact you shortly.</p>
               <div className="flex flex-col gap-2 pt-4">
                 <Button onClick={() => window.open(`https://wa.me/${contactInfo.whatsapp}`, "_blank")} className="w-full font-sans bg-green-600 hover:bg-green-700">
@@ -358,6 +427,22 @@ const Enquiry = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Estimated Price Card */}
+                {resolvedPrice && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-300">
+                    <div className="flex items-center gap-2 mb-1">
+                      <IndianRupee className="w-4 h-4 text-primary" />
+                      <p className="text-xs text-muted-foreground font-sans font-medium">Estimated Event Booking Price</p>
+                    </div>
+                    <p className="font-display text-2xl font-bold text-primary">
+                      ₹{resolvedPrice.price.toLocaleString("en-IN")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                      Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary depending on event requirements
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <Button variant="ghost" onClick={() => setStep("type")} className="font-sans">
