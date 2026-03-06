@@ -29,6 +29,8 @@ import Notifications from "./pages/Notifications";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import LiveChat from "./pages/LiveChat";
+import Workshop from "./pages/Workshop";
+import WorkshopDashboard from "./pages/WorkshopDashboard";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import HomepageLiveChat from "./components/HomepageLiveChat";
