@@ -1605,6 +1605,270 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_assignments: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          file_name: string | null
+          graded_at: string | null
+          id: string
+          marks: number | null
+          status: string
+          storage_path: string | null
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          file_name?: string | null
+          graded_at?: string | null
+          id?: string
+          marks?: number | null
+          status?: string
+          storage_path?: string | null
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          file_name?: string | null
+          graded_at?: string | null
+          id?: string
+          marks?: number | null
+          status?: string
+          storage_path?: string | null
+          submitted_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_certificates: {
+        Row: {
+          file_name: string
+          id: string
+          storage_path: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          file_name: string
+          id?: string
+          storage_path: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          file_name?: string
+          id?: string
+          storage_path?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_certificates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_feedback: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_settings: {
+        Row: {
+          id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      workshop_user_video_access: {
+        Row: {
+          access_enabled: boolean
+          created_at: string
+          custom_expiry: string | null
+          download_allowed: boolean
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          access_enabled?: boolean
+          created_at?: string
+          custom_expiry?: string | null
+          download_allowed?: boolean
+          id?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          access_enabled?: boolean
+          created_at?: string
+          custom_expiry?: string | null
+          download_allowed?: boolean
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_user_video_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workshop_user_video_access_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_users: {
+        Row: {
+          age: number | null
+          created_at: string
+          email: string
+          id: string
+          instagram_id: string | null
+          mobile: string
+          name: string
+          occupation: string | null
+          slot: string
+          student_type: string
+          updated_at: string
+          video_access_enabled: boolean
+          video_download_allowed: boolean
+          workshop_date: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          email: string
+          id?: string
+          instagram_id?: string | null
+          mobile: string
+          name: string
+          occupation?: string | null
+          slot: string
+          student_type?: string
+          updated_at?: string
+          video_access_enabled?: boolean
+          video_download_allowed?: boolean
+          workshop_date: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          email?: string
+          id?: string
+          instagram_id?: string | null
+          mobile?: string
+          name?: string
+          occupation?: string | null
+          slot?: string
+          student_type?: string
+          updated_at?: string
+          video_access_enabled?: boolean
+          video_download_allowed?: boolean
+          workshop_date?: string
+        }
+        Relationships: []
+      }
+      workshop_videos: {
+        Row: {
+          created_at: string
+          expiry_date: string | null
+          global_download_allowed: boolean
+          id: string
+          slot: string | null
+          target_type: string
+          title: string
+          updated_at: string
+          video_type: string
+          video_url: string | null
+          workshop_date: string
+        }
+        Insert: {
+          created_at?: string
+          expiry_date?: string | null
+          global_download_allowed?: boolean
+          id?: string
+          slot?: string | null
+          target_type?: string
+          title: string
+          updated_at?: string
+          video_type?: string
+          video_url?: string | null
+          workshop_date: string
+        }
+        Update: {
+          created_at?: string
+          expiry_date?: string | null
+          global_download_allowed?: boolean
+          id?: string
+          slot?: string | null
+          target_type?: string
+          title?: string
+          updated_at?: string
+          video_type?: string
+          video_url?: string | null
+          workshop_date?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
