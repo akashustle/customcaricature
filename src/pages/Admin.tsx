@@ -1595,7 +1595,7 @@ const Admin = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>
 
       {/* Negotiate Price Dialog */}
       {negotiateOrderId && (
@@ -1643,6 +1643,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
+      </div>
       </div>
     </div>
   );
