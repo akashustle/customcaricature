@@ -1474,6 +1474,10 @@ const Admin = () => {
             <AdminWorkshop />
           </TabsContent>
 
+          <TabsContent value="enquiry">
+            <AdminEnquiries />
+          </TabsContent>
+
           <TabsContent value="chatbot">
             <AdminChatbotTraining />
           </TabsContent>
