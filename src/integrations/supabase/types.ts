@@ -1557,6 +1557,7 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          age: number | null
           city: string | null
           created_at: string
           display_id: string | null
@@ -1564,6 +1565,7 @@ export type Database = {
           event_booking_allowed: boolean
           full_name: string
           gateway_charges_enabled: boolean
+          gender: string | null
           id: string
           instagram_id: string | null
           international_booking_allowed: boolean
@@ -1582,6 +1584,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          age?: number | null
           city?: string | null
           created_at?: string
           display_id?: string | null
@@ -1589,6 +1592,7 @@ export type Database = {
           event_booking_allowed?: boolean
           full_name: string
           gateway_charges_enabled?: boolean
+          gender?: string | null
           id?: string
           instagram_id?: string | null
           international_booking_allowed?: boolean
@@ -1607,6 +1611,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          age?: number | null
           city?: string | null
           created_at?: string
           display_id?: string | null
@@ -1614,6 +1619,7 @@ export type Database = {
           event_booking_allowed?: boolean
           full_name?: string
           gateway_charges_enabled?: boolean
+          gender?: string | null
           id?: string
           instagram_id?: string | null
           international_booking_allowed?: boolean
