@@ -377,8 +377,29 @@ const Admin = () => {
   };
 
   const updateStatus = async (orderId: string, status: string) => {
+    // If changing to artwork_ready, check if artwork is uploaded
+    if (status === "artwork_ready") {
+      const { data: artPhotos } = await supabase.from("artwork_ready_photos").select("id").eq("order_id", orderId) as any;
+      // Check admin setting for bypass
+      const { data: bypassSetting } = await supabase.from("admin_site_settings").select("value").eq("id", "allow_artwork_status_without_upload").maybeSingle();
+      const bypassEnabled = bypassSetting?.value?.enabled === true;
+      if ((!artPhotos || artPhotos.length === 0) && !bypassEnabled) {
+        toast({ title: "Upload artwork first", description: "Please upload artwork photos before changing status to Art Ready.", variant: "destructive" });
+        return;
+      }
+    }
     if (!confirm(`Change order status to "${STATUS_LABELS[status]}"?`)) return;
-    await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
+    
+    // If reversing from artwork_ready/dispatched back to earlier status, reset art confirmation
+    const reverseStatuses = ["new", "in_progress"];
+    if (reverseStatuses.includes(status)) {
+      await supabase.from("orders").update({ 
+        status: status as any, 
+        art_confirmation_status: null 
+      } as any).eq("id", orderId);
+    } else {
+      await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
+    }
     toast({ title: "Status Updated" });
     logAdminAction("Order Status Changed", `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`);
     fetchOrders();
