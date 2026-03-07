@@ -111,7 +111,11 @@ const Index = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const handleOrderClick = () => navigate(user ? "/order" : "/register");
+  const handleOrderClick = () => navigate(user ? "/order" : "/login");
+  const handleEventClick = () => {
+    if (!user) { navigate("/login"); return; }
+    navigate("/book-event");
+  };
 
   const openLightbox = useCallback((idx: number) => {
     setLightboxIndex(idx);
