@@ -65,6 +65,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [shopOrders, setShopOrders] = useState<any[]>([]);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
