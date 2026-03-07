@@ -2,27 +2,23 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Package, User, Store } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const [shopEnabled, setShopEnabled] = useState(false);
+  const { settings } = useSiteSettings();
 
-  useEffect(() => {
-    supabase.from("shop_settings").select("value").eq("id", "shop_enabled").maybeSingle()
-      .then(({ data }) => setShopEnabled((data?.value as any)?.enabled || false));
-  }, []);
+  const shopNavVisible = settings.shop_nav_visible?.enabled !== false;
 
   const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event", "/shop-admin", "/CFCAdmin936"];
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
   const items = [
     { icon: Home, label: "Home", path: "/", action: () => navigate("/") },
-    { icon: Store, label: shopEnabled ? "Shop" : "Shop", path: "/shop", action: () => navigate("/shop") },
+    ...(shopNavVisible ? [{ icon: Store, label: "Shop", path: "/shop", action: () => navigate("/shop") }] : []),
     { icon: Package, label: "Track", path: "/track-order", action: () => navigate("/track-order") },
     ...(user
       ? [{ icon: User, label: "Dashboard", path: "/dashboard", action: () => navigate("/dashboard") }]
