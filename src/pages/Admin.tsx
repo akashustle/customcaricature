@@ -382,7 +382,7 @@ const Admin = () => {
       const { data: artPhotos } = await supabase.from("artwork_ready_photos").select("id").eq("order_id", orderId) as any;
       // Check admin setting for bypass
       const { data: bypassSetting } = await supabase.from("admin_site_settings").select("value").eq("id", "allow_artwork_status_without_upload").maybeSingle();
-      const bypassEnabled = bypassSetting?.value?.enabled === true;
+      const bypassEnabled = (bypassSetting?.value as any)?.enabled === true;
       if ((!artPhotos || artPhotos.length === 0) && !bypassEnabled) {
         toast({ title: "Upload artwork first", description: "Please upload artwork photos before changing status to Art Ready.", variant: "destructive" });
         return;
