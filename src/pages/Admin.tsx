@@ -39,7 +39,6 @@ import AdminPartialAdvanceConfig from "@/components/admin/AdminPartialAdvanceCon
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
-import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import AdminVoiceMonitor from "@/components/admin/AdminVoiceMonitor";
 import { MessageCircle, Radio } from "lucide-react";
@@ -52,8 +51,6 @@ import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
 import LocationDropdowns from "@/components/LocationDropdowns";
-import AdminWorkshop from "@/components/admin/AdminWorkshop";
-import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -177,6 +174,22 @@ const Admin = () => {
   const [editingAdminProfile, setEditingAdminProfile] = useState(false);
   const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
+  // Admin permission system
+  const ADMIN_TABS = [
+    { id: "orders", label: "Orders" }, { id: "events", label: "Events" },
+    { id: "payments", label: "Payments" }, { id: "analytics", label: "Analytics" },
+    { id: "ai-conversations", label: "AI Chats" }, { id: "chatbot", label: "AI Bot" },
+    { id: "customers", label: "Customers" }, { id: "event-users", label: "Event Users" },
+    { id: "artists", label: "Artists" }, { id: "reviews", label: "Reviews" },
+    { id: "pricing", label: "Pricing" }, { id: "intl-pricing", label: "Intl Pricing" },
+    { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
+    { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
+    { id: "settings", label: "Settings" },
+  ];
+  const [adminPermAllTabs, setAdminPermAllTabs] = useState(true);
+  const [adminPermissions, setAdminPermissions] = useState<Record<string, string>>(
+    Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"]))
+  );
 
   // Log admin session on mount with IP, location, device
   const logAdminSession = async (userId: string) => {
@@ -314,8 +327,25 @@ const Admin = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Save permissions for the new admin
+      if (!adminPermAllTabs && data?.user_id) {
+        const permRows = Object.entries(adminPermissions)
+          .filter(([_, level]) => level !== "none")
+          .map(([tab_id, access_level]) => ({
+            user_id: data.user_id,
+            tab_id,
+            access_level,
+          }));
+        if (permRows.length > 0) {
+          await supabase.from("admin_permissions").insert(permRows as any);
+        }
+      }
+
       toast({ title: "New Admin Added!", description: `${newAdminName} can now login as admin` });
       setNewAdminEmail(""); setNewAdminPassword(""); setNewAdminName(""); setNewAdminMobile("");
+      setAdminPermAllTabs(true);
+      setAdminPermissions(Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"])));
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -1412,13 +1442,8 @@ const Admin = () => {
             <AdminArtists />
           </TabsContent>
 
-          <TabsContent value="chat">
-            {user && <AdminChat adminUserId={user.id} />}
-          </TabsContent>
 
-          <TabsContent value="live-leads">
-            {user && <AdminLiveChatLeads adminUserId={user.id} />}
-          </TabsContent>
+
 
           <TabsContent value="reviews">
             <AdminReviews />
@@ -1456,13 +1481,8 @@ const Admin = () => {
             <AdminAIChatConversations />
           </TabsContent>
 
-          <TabsContent value="workshop">
-            <AdminWorkshop />
-          </TabsContent>
 
-          <TabsContent value="enquiry">
-            <AdminEnquiries />
-          </TabsContent>
+
 
           <TabsContent value="chatbot">
             <AdminChatbotTraining />
@@ -1587,6 +1607,40 @@ const Admin = () => {
                   <div><Label>Email *</Label><Input type="email" value={newAdminEmail} onChange={(e) => setNewAdminEmail(e.target.value)} placeholder="admin@email.com" /></div>
                   <div><Label>Mobile *</Label><Input value={newAdminMobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewAdminMobile(d); }} maxLength={10} placeholder="10 digits" /></div>
                   <div><Label>Password *</Label><Input type="password" value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="Min 6 characters" /></div>
+
+                  {/* Permission Controls */}
+                  <div className="border-t border-border pt-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans font-medium text-sm">Allow Everything</p>
+                        <p className="text-xs text-muted-foreground font-sans">Full access to all tabs</p>
+                      </div>
+                      <Switch checked={adminPermAllTabs} onCheckedChange={(checked) => {
+                        setAdminPermAllTabs(checked);
+                        if (checked) setAdminPermissions(Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"])));
+                      }} />
+                    </div>
+                    {!adminPermAllTabs && (
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wide">Tab Permissions</p>
+                        {ADMIN_TABS.map(tab => (
+                          <div key={tab.id} className="flex items-center justify-between py-1">
+                            <span className="text-sm font-sans">{tab.label}</span>
+                            <Select value={adminPermissions[tab.id] || "full"} onValueChange={(val) => setAdminPermissions(prev => ({ ...prev, [tab.id]: val }))}>
+                              <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="full">Full Control</SelectItem>
+                                <SelectItem value="edit">Edit Access</SelectItem>
+                                <SelectItem value="view">View Only</SelectItem>
+                                <SelectItem value="none">No Access</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <Button onClick={addNewAdmin} disabled={!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile || addingAdmin} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
                     {addingAdmin ? "Adding Admin..." : "Add Admin"}
                   </Button>
@@ -1623,8 +1677,8 @@ const Admin = () => {
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-          <AdminBottomNavItem icon={MessageCircle} label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
-          <AdminBottomNavItem icon={MessageCircle} label="Leads" active={activeTab === "live-leads"} onClick={() => setActiveTab("live-leads")} />
+
+
           <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
@@ -1638,8 +1692,8 @@ const Admin = () => {
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
-          <AdminBottomNavItem icon={Users} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
-          <AdminBottomNavItem icon={Search} label="Enquiry" active={activeTab === "enquiry"} onClick={() => setActiveTab("enquiry")} />
+
+
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>

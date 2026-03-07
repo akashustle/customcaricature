@@ -106,6 +106,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_permissions: {
+        Row: {
+          access_level: string
+          created_at: string
+          id: string
+          tab_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          tab_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_level?: string
+          created_at?: string
+          id?: string
+          tab_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_sessions: {
         Row: {
           admin_name: string
