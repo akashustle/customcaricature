@@ -174,6 +174,22 @@ const Admin = () => {
   const [editingAdminProfile, setEditingAdminProfile] = useState(false);
   const [adminEditData, setAdminEditData] = useState<Partial<Profile>>({});
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined);
+  // Admin permission system
+  const ADMIN_TABS = [
+    { id: "orders", label: "Orders" }, { id: "events", label: "Events" },
+    { id: "payments", label: "Payments" }, { id: "analytics", label: "Analytics" },
+    { id: "ai-conversations", label: "AI Chats" }, { id: "chatbot", label: "AI Bot" },
+    { id: "customers", label: "Customers" }, { id: "event-users", label: "Event Users" },
+    { id: "artists", label: "Artists" }, { id: "reviews", label: "Reviews" },
+    { id: "pricing", label: "Pricing" }, { id: "intl-pricing", label: "Intl Pricing" },
+    { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
+    { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
+    { id: "settings", label: "Settings" },
+  ];
+  const [adminPermAllTabs, setAdminPermAllTabs] = useState(true);
+  const [adminPermissions, setAdminPermissions] = useState<Record<string, string>>(
+    Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"]))
+  );
 
   // Log admin session on mount with IP, location, device
   const logAdminSession = async (userId: string) => {
