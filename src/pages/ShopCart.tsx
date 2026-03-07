@@ -119,12 +119,9 @@ const ShopCart = () => {
               order_id: order.id, type: "shop",
             },
           });
-          await supabase.from("shop_orders").update({
-            payment_status: "paid", razorpay_payment_id: response.razorpay_payment_id
-          }).eq("id", order.id);
           await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
           toast({ title: "Payment successful! 🎉" });
-          navigate("/dashboard");
+          navigate(`/shop/order-confirmation?order_id=${order.id}`);
         },
       };
       const rzp = new (window as any).Razorpay(options);
