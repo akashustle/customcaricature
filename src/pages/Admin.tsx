@@ -787,7 +787,8 @@ const Admin = () => {
                   { value: "artwork_ready", label: `Art Ready (${orders.filter(o => o.status === "artwork_ready").length})` },
                   { value: "dispatched", label: `Dispatched (${orders.filter(o => o.status === "dispatched").length})` },
                   { value: "delivered", label: `Delivered (${orders.filter(o => o.status === "delivered").length})` },
-                  
+                  { value: "confirmed_art", label: `✅ Confirmed (${orders.filter(o => (o as any).art_confirmation_status === "confirmed").length})` },
+                  { value: "raised_query", label: `💬 Raised Query (${orders.filter(o => (o as any).art_confirmation_status === "chat").length})` },
                 ].map((tab) => (
                   <Button
                     key={tab.value}
