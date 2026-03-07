@@ -299,6 +299,7 @@ const Dashboard = () => {
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
+            <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
