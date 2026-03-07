@@ -31,10 +31,8 @@ import BlogPost from "./pages/BlogPost";
 import LiveChat from "./pages/LiveChat";
 import Workshop from "./pages/Workshop";
 import WorkshopDashboard from "./pages/WorkshopDashboard";
-import Enquiry from "./pages/Enquiry";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
-import HomepageLiveChat from "./components/HomepageLiveChat";
 const queryClient = new QueryClient();
 
 const App = () => {
