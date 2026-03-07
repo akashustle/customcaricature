@@ -98,7 +98,7 @@ const ShopCart = () => {
         // Mark order as created, payment pending
         toast({ title: "Order created! Payment pending.", description: "Complete payment from your dashboard." });
         await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
-        navigate("/dashboard");
+        navigate(`/shop/order-confirmation?order_id=${order.id}`);
         return;
       }
 
