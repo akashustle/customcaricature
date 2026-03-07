@@ -339,7 +339,6 @@ const Dashboard = () => {
           <BottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
           <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
-          <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
     </div>
