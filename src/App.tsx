@@ -31,6 +31,13 @@ import BlogPost from "./pages/BlogPost";
 import LiveChat from "./pages/LiveChat";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
+import Shop from "./pages/Shop";
+import ShopProduct from "./pages/ShopProduct";
+import ShopCart from "./pages/ShopCart";
+import ShopAdminLogin from "./pages/ShopAdminLogin";
+import ShopAdmin from "./pages/ShopAdmin";
+import AICaricature from "./pages/AICaricature";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -69,6 +76,14 @@ const App = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/live-chat" element={<LiveChat />} />
+            {/* Shop Routes */}
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/product/:slug" element={<ShopProduct />} />
+            <Route path="/shop/cart" element={<ShopCart />} />
+            <Route path="/shop/ai-caricature" element={<AICaricature />} />
+            {/* Shop Admin */}
+            <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
+            <Route path="/shop-admin" element={<ShopAdmin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
