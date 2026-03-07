@@ -1613,6 +1613,26 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
+              {/* Shop Nav Toggle */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Navigation Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Shop Tab in Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display Shop link in website navigation bar</p>
+                    </div>
+                    <Switch
+                      checked={settings.shop_nav_visible?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("shop_nav_visible", { enabled: checked });
+                        toast({ title: checked ? "Shop tab visible in nav" : "Shop tab hidden from nav" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Admin Profile */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
