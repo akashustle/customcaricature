@@ -315,10 +315,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Chat Widget - only visible component for messaging */}
-        {user && profile && (
-          <ChatWidget userId={user.id} userName={profile.full_name} />
-        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">
