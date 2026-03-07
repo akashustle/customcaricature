@@ -315,6 +315,7 @@ const Dashboard = () => {
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "shop" && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
