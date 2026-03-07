@@ -293,9 +293,9 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: () => navigate("/book-event"), cta: "Book for Event" },
+              { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: handleEventClick, cta: "Book for Event" },
               { icon: Palette, title: "Custom Digital Caricature", desc: "Hand-crafted digital caricatures from your photos. Perfect for gifts, wall art, and social media.", action: handleOrderClick, cta: "Order Now" },
-              { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: () => navigate("/book-event"), cta: "Enquire Now" },
+              { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now" },
             ].map((service, i) => (
               <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Card className="card-3d h-full flex flex-col">
