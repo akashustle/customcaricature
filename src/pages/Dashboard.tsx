@@ -114,6 +114,7 @@ const Dashboard = () => {
         fetchProfile(user.id);
         fetchOrders(user.id);
         fetchEvents(user.id);
+        fetchShopOrders(user.id);
       }
     };
 
