@@ -1893,6 +1893,54 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_discount_amount: number | null
+          min_order_amount: number
+          updated_at: string
+          usage_limit: number | null
+          used_count: number
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount_amount?: number | null
+          min_order_amount?: number
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount_amount?: number | null
+          min_order_amount?: number
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       shop_order_items: {
         Row: {
           caricature_image_url: string | null
@@ -1953,63 +2001,146 @@ export type Database = {
       }
       shop_orders: {
         Row: {
+          admin_notes: string | null
+          cancelled_at: string | null
+          coupon_code: string | null
           created_at: string
+          delivered_at: string | null
+          discount_amount: number
+          estimated_delivery: string | null
           id: string
           notes: string | null
           order_number: string
           payment_status: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
+          refund_amount: number | null
+          refund_status: string | null
+          shipped_at: string | null
           shipping_address: string
           shipping_city: string
+          shipping_method: string | null
           shipping_mobile: string
           shipping_name: string
           shipping_pincode: string
           shipping_state: string
           status: string
           total_amount: number
+          tracking_number: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
+          cancelled_at?: string | null
+          coupon_code?: string | null
           created_at?: string
+          delivered_at?: string | null
+          discount_amount?: number
+          estimated_delivery?: string | null
           id?: string
           notes?: string | null
           order_number?: string
           payment_status?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          refund_amount?: number | null
+          refund_status?: string | null
+          shipped_at?: string | null
           shipping_address?: string
           shipping_city?: string
+          shipping_method?: string | null
           shipping_mobile?: string
           shipping_name?: string
           shipping_pincode?: string
           shipping_state?: string
           status?: string
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
+          cancelled_at?: string | null
+          coupon_code?: string | null
           created_at?: string
+          delivered_at?: string | null
+          discount_amount?: number
+          estimated_delivery?: string | null
           id?: string
           notes?: string | null
           order_number?: string
           payment_status?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          refund_amount?: number | null
+          refund_status?: string | null
+          shipped_at?: string | null
           shipping_address?: string
           shipping_city?: string
+          shipping_method?: string | null
           shipping_mobile?: string
           shipping_name?: string
           shipping_pincode?: string
           shipping_state?: string
           status?: string
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      shop_product_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          helpful_count: number
+          id: string
+          is_approved: boolean
+          is_verified_purchase: boolean
+          product_id: string
+          rating: number
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_approved?: boolean
+          is_verified_purchase?: boolean
+          product_id: string
+          rating: number
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          helpful_count?: number
+          id?: string
+          is_approved?: boolean
+          is_verified_purchase?: boolean
+          product_id?: string
+          rating?: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shop_product_variations: {
         Row: {
@@ -2054,61 +2185,85 @@ export type Database = {
       }
       shop_products: {
         Row: {
+          avg_rating: number | null
+          brand: string | null
           category_id: string | null
           created_at: string
           description: string
+          dimensions: string | null
           discount_price: number | null
           id: string
           images: string[] | null
           is_active: boolean
+          is_bestseller: boolean
+          is_featured: boolean
           is_pod: boolean
           name: string
           price: number
+          review_count: number
           seo_description: string | null
           seo_title: string | null
           sku: string | null
           slug: string
+          specifications: Json | null
           stock_quantity: number
           tags: string[] | null
           updated_at: string
+          weight: number | null
         }
         Insert: {
+          avg_rating?: number | null
+          brand?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
+          dimensions?: string | null
           discount_price?: number | null
           id?: string
           images?: string[] | null
           is_active?: boolean
+          is_bestseller?: boolean
+          is_featured?: boolean
           is_pod?: boolean
           name: string
           price?: number
+          review_count?: number
           seo_description?: string | null
           seo_title?: string | null
           sku?: string | null
           slug: string
+          specifications?: Json | null
           stock_quantity?: number
           tags?: string[] | null
           updated_at?: string
+          weight?: number | null
         }
         Update: {
+          avg_rating?: number | null
+          brand?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
+          dimensions?: string | null
           discount_price?: number | null
           id?: string
           images?: string[] | null
           is_active?: boolean
+          is_bestseller?: boolean
+          is_featured?: boolean
           is_pod?: boolean
           name?: string
           price?: number
+          review_count?: number
           seo_description?: string | null
           seo_title?: string | null
           sku?: string | null
           slug?: string
+          specifications?: Json | null
           stock_quantity?: number
           tags?: string[] | null
           updated_at?: string
+          weight?: number | null
         }
         Relationships: [
           {
@@ -2137,6 +2292,35 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      shop_wishlist: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_wishlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_live_locations: {
         Row: {
