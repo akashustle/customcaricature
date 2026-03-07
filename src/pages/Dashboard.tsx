@@ -21,7 +21,7 @@ import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
-import ChatWidget from "@/components/ChatWidget";
+
 import NotificationBell from "@/components/NotificationBell";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
@@ -315,10 +315,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Chat Widget - only visible component for messaging */}
-        {user && profile && (
-          <ChatWidget userId={user.id} userName={profile.full_name} />
-        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">

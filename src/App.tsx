@@ -29,8 +29,6 @@ import Notifications from "./pages/Notifications";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import LiveChat from "./pages/LiveChat";
-import Workshop from "./pages/Workshop";
-import WorkshopDashboard from "./pages/WorkshopDashboard";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 const queryClient = new QueryClient();
@@ -71,8 +69,6 @@ const App = () => {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/live-chat" element={<LiveChat />} />
-            <Route path="/workshop" element={<Workshop />} />
-            <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
