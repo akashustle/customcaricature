@@ -299,10 +299,10 @@ const ShopAdmin = () => {
 
   // Export
   const exportProducts = () => {
-    exportToExcel(products.map(p => ({ Name: p.name, SKU: p.sku, Price: p.price, DiscountPrice: p.discount_price, Stock: p.stock_quantity, Category: p.shop_categories?.name, Active: p.is_active, Featured: p.is_featured, POD: p.is_pod, Brand: p.brand })), "shop-products");
+    exportToExcel(products.map(p => ({ Name: p.name, SKU: p.sku, Price: p.price, DiscountPrice: p.discount_price, Stock: p.stock_quantity, Category: p.shop_categories?.name, Active: p.is_active, Featured: p.is_featured, POD: p.is_pod, Brand: p.brand })), "Products", "shop-products");
   };
   const exportOrders = () => {
-    exportToExcel(orders.map(o => ({ OrderNumber: o.order_number, CustomerName: o.shipping_name, Mobile: o.shipping_mobile, Amount: o.total_amount, Status: o.status, Payment: o.payment_status, City: o.shipping_city, State: o.shipping_state, TrackingNumber: o.tracking_number, Date: new Date(o.created_at).toLocaleDateString() })), "shop-orders");
+    exportToExcel(orders.map(o => ({ OrderNumber: o.order_number, CustomerName: o.shipping_name, Mobile: o.shipping_mobile, Amount: o.total_amount, Status: o.status, Payment: o.payment_status, City: o.shipping_city, State: o.shipping_state, TrackingNumber: o.tracking_number, Date: new Date(o.created_at).toLocaleDateString() })), "Orders", "shop-orders");
   };
 
   if (checking || authLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
