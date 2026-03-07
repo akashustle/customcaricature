@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,79 +6,79 @@
 
 @layer base {
   :root {
-    /* Brand: Ivory Canvas — #EFE6D4 base */
-    --background: 36 38% 91%;
-    /* Soft Charcoal — #5C4B2D */
-    --foreground: 33 37% 27%;
+    /* Brand: Warm Cream Canvas */
+    --background: 36 38% 93%;
+    /* Warm Medium Brown — lighter, not dark */
+    --foreground: 33 30% 38%;
 
-    /* Warm Parchment Cards — #FAF5EA */
-    --card: 40 56% 95%;
-    --card-foreground: 33 37% 27%;
+    /* Soft Cream Cards */
+    --card: 40 50% 96%;
+    --card-foreground: 33 30% 38%;
 
     /* Popover matches card */
-    --popover: 40 56% 95%;
-    --popover-foreground: 33 37% 27%;
+    --popover: 40 50% 96%;
+    --popover-foreground: 33 30% 38%;
 
-    /* Gold Accent — #A78952 */
-    --primary: 36 35% 49%;
-    --primary-foreground: 40 56% 95%;
+    /* Gold Accent — warm and luxurious */
+    --primary: 36 45% 52%;
+    --primary-foreground: 40 60% 97%;
 
-    /* Parchment for secondary */
-    --secondary: 36 30% 90%;
-    --secondary-foreground: 33 37% 27%;
+    /* Light warm secondary */
+    --secondary: 36 30% 92%;
+    --secondary-foreground: 33 25% 42%;
 
-    /* Muted — warm ivory */
-    --muted: 36 30% 90%;
-    --muted-foreground: 33 18% 45%;
+    /* Muted — soft warm */
+    --muted: 36 25% 91%;
+    --muted-foreground: 33 15% 52%;
 
     /* Gold accent */
-    --accent: 36 35% 49%;
-    --accent-foreground: 40 56% 95%;
+    --accent: 36 45% 52%;
+    --accent-foreground: 40 60% 97%;
 
-    /* Destructive — warm terracotta */
-    --destructive: 12 45% 50%;
-    --destructive-foreground: 40 56% 95%;
+    /* Destructive — soft coral */
+    --destructive: 0 55% 60%;
+    --destructive-foreground: 40 60% 97%;
 
-    /* Borders — Soft Mocha #CBB9A4 */
-    --border: 30 25% 76%;
-    --input: 30 25% 76%;
-    --ring: 36 35% 49%;
+    /* Borders — Light Mocha */
+    --border: 30 22% 82%;
+    --input: 30 22% 82%;
+    --ring: 36 45% 52%;
 
     --radius: 1rem;
 
-    /* Sidebar — slightly deeper ivory */
-    --sidebar-background: 36 32% 93%;
-    --sidebar-foreground: 33 37% 27%;
-    --sidebar-primary: 36 35% 49%;
-    --sidebar-primary-foreground: 40 56% 95%;
-    --sidebar-accent: 36 30% 88%;
-    --sidebar-accent-foreground: 33 37% 27%;
-    --sidebar-border: 30 25% 80%;
-    --sidebar-ring: 36 35% 49%;
+    /* Sidebar — soft cream */
+    --sidebar-background: 36 32% 95%;
+    --sidebar-foreground: 33 25% 42%;
+    --sidebar-primary: 36 45% 52%;
+    --sidebar-primary-foreground: 40 60% 97%;
+    --sidebar-accent: 36 28% 90%;
+    --sidebar-accent-foreground: 33 25% 42%;
+    --sidebar-border: 30 22% 85%;
+    --sidebar-ring: 36 45% 52%;
 
     /* Semantic */
-    --success: 145 40% 42%;
-    --warning: 38 92% 50%;
-    --info: 210 60% 50%;
+    --success: 152 50% 48%;
+    --warning: 38 92% 55%;
+    --info: 210 65% 55%;
 
-    /* Extended gold palette */
-    --gold-50: 40 56% 95%;
-    --gold-100: 38 45% 90%;
-    --gold-200: 36 40% 82%;
-    --gold-300: 34 35% 72%;
-    --gold-400: 36 35% 58%;
-    --gold-500: 36 35% 49%;
-    --gold-600: 34 38% 40%;
-    --gold-700: 33 37% 32%;
-    --gold-800: 33 37% 27%;
-    --gold-900: 30 30% 18%;
+    /* Extended gold palette — all lighter */
+    --gold-50: 40 60% 97%;
+    --gold-100: 38 50% 93%;
+    --gold-200: 36 42% 85%;
+    --gold-300: 34 38% 75%;
+    --gold-400: 36 40% 62%;
+    --gold-500: 36 45% 52%;
+    --gold-600: 34 42% 45%;
+    --gold-700: 33 35% 38%;
+    --gold-800: 33 30% 32%;
+    --gold-900: 30 25% 24%;
 
-    /* Chart colors */
-    --chart-1: 36 35% 49%;
-    --chart-2: 145 40% 42%;
-    --chart-3: 210 60% 50%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 12 45% 50%;
+    /* Chart colors — vibrant */
+    --chart-1: 36 45% 52%;
+    --chart-2: 152 50% 48%;
+    --chart-3: 210 65% 55%;
+    --chart-4: 38 92% 55%;
+    --chart-5: 340 55% 58%;
   }
 }
 
@@ -96,7 +96,7 @@
 
   /* Calligraphy font for headings */
   h1, h2, h3 {
-    font-family: 'Caveat', cursive;
+    font-family: 'Dancing Script', cursive;
     font-weight: 600;
   }
 
@@ -113,7 +113,7 @@
 
 @layer utilities {
   .font-calligraphy {
-    font-family: 'Caveat', cursive;
+    font-family: 'Dancing Script', cursive;
   }
 
   .font-body {

@@ -15,8 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Nunito", "sans-serif"],
-        display: ["Caveat", "cursive"],
-        calligraphy: ["Caveat", "cursive"],
+        display: ["Dancing Script", "cursive"],
+        calligraphy: ["Dancing Script", "cursive"],
         body: ["Nunito", "sans-serif"],
       },
       colors: {
