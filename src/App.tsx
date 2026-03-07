@@ -37,6 +37,7 @@ import ShopCart from "./pages/ShopCart";
 import ShopAdminLogin from "./pages/ShopAdminLogin";
 import ShopAdmin from "./pages/ShopAdmin";
 import AICaricature from "./pages/AICaricature";
+import ShopOrderConfirmation from "./pages/ShopOrderConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/product/:slug" element={<ShopProduct />} />
             <Route path="/shop/cart" element={<ShopCart />} />
+            <Route path="/shop/order-confirmation" element={<ShopOrderConfirmation />} />
             <Route path="/shop/ai-caricature" element={<AICaricature />} />
             {/* Shop Admin */}
             <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />

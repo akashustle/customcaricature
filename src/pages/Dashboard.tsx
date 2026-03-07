@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,6 +65,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [shopOrders, setShopOrders] = useState<any[]>([]);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,6 +114,7 @@ const Dashboard = () => {
         fetchProfile(user.id);
         fetchOrders(user.id);
         fetchEvents(user.id);
+        fetchShopOrders(user.id);
       }
     };
 
@@ -127,9 +129,11 @@ const Dashboard = () => {
         supabase.auth.signOut().then(() => navigate("/register"));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
+      .on("postgres_changes", { event: "*", schema: "public", table: "shop_orders", filter: `user_id=eq.${user.id}` }, () => fetchShopOrders(user.id))
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `user_id=eq.${user.id}` }, () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
+        fetchShopOrders(user.id);
       })
       .subscribe();
 
@@ -155,6 +159,11 @@ const Dashboard = () => {
   const fetchEvents = async (userId: string) => {
     const { data } = await supabase.from("event_bookings").select("*").eq("user_id", userId).order("event_date", { ascending: false });
     if (data) setEvents(data as any);
+  };
+
+  const fetchShopOrders = async (userId: string) => {
+    const { data } = await supabase.from("shop_orders").select("*, shop_order_items(product_name, quantity, unit_price)").eq("user_id", userId).order("created_at", { ascending: false });
+    if (data) setShopOrders(data as any);
   };
 
   const saveProfile = async () => {
@@ -227,7 +236,7 @@ const Dashboard = () => {
   const handleRefresh = useCallback(async () => {
     if (!user) return;
     toast({ title: "Refreshing..." });
-    await Promise.all([fetchProfile(user.id), fetchOrders(user.id), fetchEvents(user.id)]);
+    await Promise.all([fetchProfile(user.id), fetchOrders(user.id), fetchEvents(user.id), fetchShopOrders(user.id)]);
     toast({ title: "Refreshed!" });
   }, [user]);
 
@@ -283,12 +292,14 @@ const Dashboard = () => {
             <TabsList className="w-full mb-6">
               <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
               <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>
+              <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
               <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
               <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
+            <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
@@ -304,6 +315,7 @@ const Dashboard = () => {
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "shop" && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
@@ -322,9 +334,11 @@ const Dashboard = () => {
           <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+          <BottomNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
           <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <BottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+          <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
       </div>
@@ -1165,6 +1179,81 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
     </>
   );
 };
+
+const SHOP_STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  processing: "bg-blue-50 text-blue-700 border border-blue-200",
+  shipped: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  delivered: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  cancelled: "bg-red-50 text-red-700 border border-red-200",
+};
+
+const ShopOrdersList = ({ shopOrders, navigate }: { shopOrders: any[]; navigate: any }) => (
+  <>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="font-display text-xl font-bold">My Shop Orders</h2>
+      <Button onClick={() => navigate("/shop")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">
+        <Store className="w-4 h-4 mr-1" />Shop Now
+      </Button>
+    </div>
+    {shopOrders.length === 0 ? (
+      <Card><CardContent className="p-8 text-center">
+        <Store className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <p className="font-sans text-muted-foreground mb-4">No shop orders yet</p>
+        <Button onClick={() => navigate("/shop")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Browse Shop</Button>
+      </CardContent></Card>
+    ) : (
+      <div className="space-y-3">
+        {shopOrders.map((order: any) => (
+          <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 space-y-3">
+                {order.status === "delivered" && (
+                  <CelebrationBanner message="🎉 Your order has been delivered! 🛍️" />
+                )}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-mono text-xs text-muted-foreground">{order.order_number}</p>
+                    <p className="text-xs text-muted-foreground font-sans">
+                      {new Date(order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
+                  <p className="font-display text-lg font-bold text-primary">{formatPrice(order.total_amount)}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`${SHOP_STATUS_COLORS[order.status] || "bg-muted text-foreground"} border-none text-xs capitalize`}>
+                    {order.status === "shipped" ? <><Truck className="w-3 h-3 mr-1" />Shipped</> : order.status}
+                  </Badge>
+                  <Badge className={`${order.payment_status === "paid" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"} border-none text-xs`}>
+                    <CreditCard className="w-3 h-3 mr-1" />{order.payment_status === "paid" ? "Paid ✅" : "Pending"}
+                  </Badge>
+                </div>
+                {/* Items */}
+                {order.shop_order_items?.length > 0 && (
+                  <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                    {order.shop_order_items.map((item: any, i: number) => (
+                      <div key={i} className="flex justify-between text-xs font-sans">
+                        <span>{item.product_name} × {item.quantity}</span>
+                        <span className="font-medium">{formatPrice(item.unit_price * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Shipping */}
+                <div className="text-xs text-muted-foreground font-sans">
+                  📍 {order.shipping_address}, {order.shipping_city}, {order.shipping_state} - {order.shipping_pincode}
+                </div>
+                {order.razorpay_payment_id && (
+                  <p className="text-[10px] text-muted-foreground font-mono">Payment ID: {order.razorpay_payment_id}</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </>
+);
 
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between py-1">
