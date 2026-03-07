@@ -1607,6 +1607,40 @@ const Admin = () => {
                   <div><Label>Email *</Label><Input type="email" value={newAdminEmail} onChange={(e) => setNewAdminEmail(e.target.value)} placeholder="admin@email.com" /></div>
                   <div><Label>Mobile *</Label><Input value={newAdminMobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewAdminMobile(d); }} maxLength={10} placeholder="10 digits" /></div>
                   <div><Label>Password *</Label><Input type="password" value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="Min 6 characters" /></div>
+
+                  {/* Permission Controls */}
+                  <div className="border-t border-border pt-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans font-medium text-sm">Allow Everything</p>
+                        <p className="text-xs text-muted-foreground font-sans">Full access to all tabs</p>
+                      </div>
+                      <Switch checked={adminPermAllTabs} onCheckedChange={(checked) => {
+                        setAdminPermAllTabs(checked);
+                        if (checked) setAdminPermissions(Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"])));
+                      }} />
+                    </div>
+                    {!adminPermAllTabs && (
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <p className="text-xs font-sans font-semibold text-muted-foreground uppercase tracking-wide">Tab Permissions</p>
+                        {ADMIN_TABS.map(tab => (
+                          <div key={tab.id} className="flex items-center justify-between py-1">
+                            <span className="text-sm font-sans">{tab.label}</span>
+                            <Select value={adminPermissions[tab.id] || "full"} onValueChange={(val) => setAdminPermissions(prev => ({ ...prev, [tab.id]: val }))}>
+                              <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="full">Full Control</SelectItem>
+                                <SelectItem value="edit">Edit Access</SelectItem>
+                                <SelectItem value="view">View Only</SelectItem>
+                                <SelectItem value="none">No Access</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <Button onClick={addNewAdmin} disabled={!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile || addingAdmin} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
                     {addingAdmin ? "Adding Admin..." : "Add Admin"}
                   </Button>
