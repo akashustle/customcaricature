@@ -7,6 +7,7 @@ type SiteSettings = {
   event_booking_button: { enabled: boolean };
   international_booking_global: { enabled: boolean };
   allow_artwork_bypass: { enabled: boolean };
+  shop_nav_visible: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -15,6 +16,7 @@ const defaults: SiteSettings = {
   event_booking_button: { enabled: true },
   international_booking_global: { enabled: false },
   allow_artwork_bypass: { enabled: false },
+  shop_nav_visible: { enabled: true },
 };
 
 export const useSiteSettings = () => {
@@ -26,7 +28,7 @@ export const useSiteSettings = () => {
     if (data) {
       const s = { ...defaults };
       data.forEach((row: any) => {
-        const key = row.id === "allow_artwork_status_without_upload" ? "allow_artwork_bypass" : row.id;
+        const key = row.id === "allow_artwork_status_without_upload" ? "allow_artwork_bypass" : row.id === "shop_nav_visible" ? "shop_nav_visible" : row.id;
         if (key in s) {
           (s as any)[key] = row.value;
         }

@@ -1165,6 +1165,75 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          customer_email: string
+          customer_mobile: string
+          customer_name: string
+          id: string
+          invoice_number: string
+          invoice_type: string
+          items: Json
+          notes: string | null
+          order_id: string | null
+          payment_id: string | null
+          payment_method: string | null
+          shop_order_id: string | null
+          status: string
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string
+          customer_email: string
+          customer_mobile: string
+          customer_name: string
+          id?: string
+          invoice_number?: string
+          invoice_type?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          shop_order_id?: string | null
+          status?: string
+          tax_amount?: number
+          total_amount: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_mobile?: string
+          customer_name?: string
+          id?: string
+          invoice_number?: string
+          invoice_type?: string
+          items?: Json
+          notes?: string | null
+          order_id?: string | null
+          payment_id?: string | null
+          payment_method?: string | null
+          shop_order_id?: string | null
+          status?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       live_chat_messages: {
         Row: {
           created_at: string

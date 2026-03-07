@@ -66,7 +66,7 @@ const TrackOrder = () => {
   const getDeliveryDate = (order: TrackedOrder) => {
     if (order.expected_delivery_date) return new Date(order.expected_delivery_date);
     const created = new Date(order.created_at);
-    created.setDate(created.getDate() + 28);
+    created.setDate(created.getDate() + 30);
     return created;
   };
 
