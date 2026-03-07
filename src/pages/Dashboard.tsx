@@ -161,6 +161,11 @@ const Dashboard = () => {
     if (data) setEvents(data as any);
   };
 
+  const fetchShopOrders = async (userId: string) => {
+    const { data } = await supabase.from("shop_orders").select("*, shop_order_items(product_name, quantity, unit_price)").eq("user_id", userId).order("created_at", { ascending: false });
+    if (data) setShopOrders(data as any);
+  };
+
   const saveProfile = async () => {
     if (!editForm || !user) return;
     const { error } = await supabase.from("profiles").update({
