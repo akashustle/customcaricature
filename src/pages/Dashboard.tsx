@@ -100,7 +100,7 @@ const Dashboard = () => {
       try {
         const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
         if (cancelled) return;
-        if (roles && roles.length > 0) { navigate("/admin", { replace: true }); return; }
+        if (roles && roles.length > 0) { navigate("/admin-panel", { replace: true }); return; }
         const { data: artistData } = await (supabase.from("artists").select("id") as any).eq("auth_user_id", user.id).maybeSingle();
         if (cancelled) return;
         if (artistData) { navigate("/artist-dashboard", { replace: true }); return; }
