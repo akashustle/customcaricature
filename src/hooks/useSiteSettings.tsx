@@ -16,6 +16,7 @@ const defaults: SiteSettings = {
   event_booking_button: { enabled: true },
   international_booking_global: { enabled: false },
   allow_artwork_bypass: { enabled: false },
+  shop_nav_visible: { enabled: true },
 };
 
 export const useSiteSettings = () => {

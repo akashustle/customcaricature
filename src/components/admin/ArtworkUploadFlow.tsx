@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Image, Eye, Check, MessageCircle, Loader2 } from "lucide-react";
+import { Upload, Image, Eye, Check, MessageCircle, Loader2, Trash2, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 
@@ -28,6 +28,7 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
   const [photos, setPhotos] = useState<ArtworkPhoto[]>([]);
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,7 +97,33 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
     onStatusChange?.();
   };
 
-  // Only show upload when status is in_progress or artwork_ready
+  const handleDeletePhoto = async (photo: ArtworkPhoto) => {
+    if (!confirm(`Delete artwork "${photo.file_name}"?`)) return;
+    setDeleting(photo.id);
+    try {
+      // Delete from storage
+      await supabase.storage.from("order-photos").remove([photo.storage_path]);
+      // Delete from DB
+      await supabase.from("artwork_ready_photos").delete().eq("id", photo.id) as any;
+      
+      // If no more photos, reset art status
+      const remaining = photos.filter(p => p.id !== photo.id);
+      if (remaining.length === 0) {
+        await supabase.from("orders").update({
+          status: "in_progress" as any,
+          art_confirmation_status: null,
+        } as any).eq("id", orderId);
+      }
+      
+      toast({ title: "Artwork deleted" });
+      onStatusChange?.();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setDeleting(null);
+  };
+
+  // Only show upload when status allows it
   const canUpload = ["in_progress", "artwork_ready", "new"].includes(orderStatus);
   const showConfirmationStatus = orderStatus === "artwork_ready" || artConfirmationStatus;
 
@@ -109,8 +136,8 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
             <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" />
             <Button size="sm" variant="outline" className="text-xs h-7" asChild disabled={uploading}>
               <span>
-                {uploading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Upload className="w-3 h-3 mr-1" />}
-                Upload Art Ready
+                {uploading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : photos.length > 0 ? <Plus className="w-3 h-3 mr-1" /> : <Upload className="w-3 h-3 mr-1" />}
+                {photos.length > 0 ? "Add More Art" : "Upload Art Ready"}
               </span>
             </Button>
           </label>
@@ -133,16 +160,26 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
         </div>
       )}
 
-      {/* Artwork thumbnails */}
+      {/* Artwork thumbnails with delete */}
       {photos.length > 0 && (
         <div className="flex gap-1 flex-wrap">
           {photos.map(p => (
-            <div key={p.id} className="relative w-12 h-12 rounded border border-border overflow-hidden cursor-pointer" onClick={() => setPreviewUrl(photoUrls[p.id] || null)}>
-              {photoUrls[p.id] ? (
-                <img src={photoUrls[p.id]} alt={p.file_name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center"><Image className="w-4 h-4 text-muted-foreground" /></div>
-              )}
+            <div key={p.id} className="relative group w-12 h-12 rounded border border-border overflow-hidden">
+              <div className="cursor-pointer w-full h-full" onClick={() => setPreviewUrl(photoUrls[p.id] || null)}>
+                {photoUrls[p.id] ? (
+                  <img src={photoUrls[p.id]} alt={p.file_name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center"><Image className="w-4 h-4 text-muted-foreground" /></div>
+                )}
+              </div>
+              {/* Delete button overlay */}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDeletePhoto(p); }}
+                disabled={deleting === p.id}
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              >
+                {deleting === p.id ? <Loader2 className="w-2 h-2 animate-spin" /> : <Trash2 className="w-2 h-2" />}
+              </button>
             </div>
           ))}
         </div>
