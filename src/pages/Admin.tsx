@@ -1456,27 +1456,8 @@ const Admin = () => {
                   </div>
                 )}
                 </CardContent>
-              </Card>
 
-              {/* Artwork Bypass Setting */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Image className="w-5 h-5 text-primary" />Artwork Upload Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Allow Status Change Without Artwork</p>
-                      <p className="text-xs text-muted-foreground font-sans">Skip artwork upload requirement when changing order status to Art Ready</p>
-                    </div>
-                    <Switch
-                      checked={settings.allow_artwork_bypass?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("allow_artwork_status_without_upload", { enabled: checked });
-                        toast({ title: checked ? "Artwork bypass enabled" : "Artwork upload required" });
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+
                 ))
               )}
             </div>
