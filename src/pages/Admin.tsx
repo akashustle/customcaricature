@@ -1412,13 +1412,8 @@ const Admin = () => {
             <AdminArtists />
           </TabsContent>
 
-          <TabsContent value="chat">
-            {user && <AdminChat adminUserId={user.id} />}
-          </TabsContent>
 
-          <TabsContent value="live-leads">
-            {user && <AdminLiveChatLeads adminUserId={user.id} />}
-          </TabsContent>
+
 
           <TabsContent value="reviews">
             <AdminReviews />
