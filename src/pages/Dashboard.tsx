@@ -423,6 +423,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
     return () => { supabase.removeChannel(ch); };
   }, [orders, userId]);
 
+  const [slideIndex, setSlideIndex] = useState(0);
+
   const handleConfirmDispatch = async (orderId: string) => {
     if (!confirm("⚠️ Are you sure you want to confirm dispatch? This action cannot be undone.")) return;
     setConfirmingOrderId(orderId);
@@ -433,16 +435,26 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 
   const handleRaiseChat = async (orderId: string) => {
     await supabase.from("orders").update({ art_confirmation_status: "chat" } as any).eq("id", orderId);
-    // Auto-send a chat message about artwork query
-    if (userId) {
-      await supabase.from("chat_messages").insert({
-        sender_id: userId,
-        message: `I have a query regarding my artwork ready caricature (Order #${orderId.slice(0, 8).toUpperCase()}). Please assist.`,
-        is_admin: false,
-        is_artist_chat: false,
-      } as any);
+    const whatsappMsg = encodeURIComponent(`Hi, I have a query regarding my artwork caricature (Order #${orderId.slice(0, 8).toUpperCase()}). Please assist.`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMsg}`, "_blank");
+    toast({ title: "💬 Query raised on WhatsApp", description: "Admin will respond soon." });
+  };
+
+  const handleDownloadArtwork = async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName || "artwork.jpg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      toast({ title: "📥 Download started!" });
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
     }
-    toast({ title: "💬 Query raised", description: "Chat opened — admin will respond soon." });
   };
 
   const handleMarkDelivered = async (orderId: string) => {
