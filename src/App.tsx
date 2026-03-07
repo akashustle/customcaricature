@@ -48,7 +48,6 @@ const App = () => {
           <ScrollToTop />
           <FloatingButtons />
           <MobileBottomNav />
-          <HomepageLiveChat />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/order" element={<Order />} />
