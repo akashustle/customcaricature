@@ -566,6 +566,8 @@ const Admin = () => {
   };
 
   const filtered = orders.filter((o) => {
+    if (statusFilter === "confirmed_art") return (o as any).art_confirmation_status === "confirmed";
+    if (statusFilter === "raised_query") return (o as any).art_confirmation_status === "chat";
     if (statusFilter !== "all" && o.status !== statusFilter) return false;
     if (paymentFilter !== "all" && (o.payment_status || "pending") !== paymentFilter) return false;
     if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase()) && !o.id.toLowerCase().includes(search.toLowerCase())) return false;
