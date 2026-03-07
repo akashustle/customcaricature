@@ -236,7 +236,7 @@ const Dashboard = () => {
   const handleRefresh = useCallback(async () => {
     if (!user) return;
     toast({ title: "Refreshing..." });
-    await Promise.all([fetchProfile(user.id), fetchOrders(user.id), fetchEvents(user.id)]);
+    await Promise.all([fetchProfile(user.id), fetchOrders(user.id), fetchEvents(user.id), fetchShopOrders(user.id)]);
     toast({ title: "Refreshed!" });
   }, [user]);
 
