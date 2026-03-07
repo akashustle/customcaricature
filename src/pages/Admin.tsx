@@ -327,8 +327,25 @@ const Admin = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // Save permissions for the new admin
+      if (!adminPermAllTabs && data?.user_id) {
+        const permRows = Object.entries(adminPermissions)
+          .filter(([_, level]) => level !== "none")
+          .map(([tab_id, access_level]) => ({
+            user_id: data.user_id,
+            tab_id,
+            access_level,
+          }));
+        if (permRows.length > 0) {
+          await supabase.from("admin_permissions").insert(permRows as any);
+        }
+      }
+
       toast({ title: "New Admin Added!", description: `${newAdminName} can now login as admin` });
       setNewAdminEmail(""); setNewAdminPassword(""); setNewAdminName(""); setNewAdminMobile("");
+      setAdminPermAllTabs(true);
+      setAdminPermissions(Object.fromEntries(ADMIN_TABS.map(t => [t.id, "full"])));
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
