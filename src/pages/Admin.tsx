@@ -1453,11 +1453,10 @@ const Admin = () => {
                             userName={c.full_name}
                             onClose={() => setCustomerIntlPricingUserId(null)}
                           />
-                  </div>
-                )}
-                </CardContent>
-
-
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))
               )}
             </div>
