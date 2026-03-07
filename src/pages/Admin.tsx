@@ -39,7 +39,6 @@ import AdminPartialAdvanceConfig from "@/components/admin/AdminPartialAdvanceCon
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminLiveLocations from "@/components/admin/AdminLiveLocations";
 import AdminReviews from "@/components/admin/AdminReviews";
-import AdminChat from "@/components/admin/AdminChat";
 import AdminLiveChatLeads from "@/components/admin/AdminLiveChatLeads";
 import AdminVoiceMonitor from "@/components/admin/AdminVoiceMonitor";
 import { MessageCircle, Radio } from "lucide-react";
