@@ -37,6 +37,7 @@ import ShopCart from "./pages/ShopCart";
 import ShopAdminLogin from "./pages/ShopAdminLogin";
 import ShopAdmin from "./pages/ShopAdmin";
 import AICaricature from "./pages/AICaricature";
+import ShopOrderConfirmation from "./pages/ShopOrderConfirmation";
 
 const queryClient = new QueryClient();
 
