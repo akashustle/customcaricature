@@ -291,7 +291,7 @@ const Index = () => {
             {[
               { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: () => navigate("/book-event"), cta: "Book for Event" },
               { icon: Palette, title: "Custom Digital Caricature", desc: "Hand-crafted digital caricatures from your photos. Perfect for gifts, wall art, and social media.", action: handleOrderClick, cta: "Order Now" },
-              { icon: Award, title: "Workshops & Training", desc: "Learn caricature art from professional artists. Group sessions, corporate workshops, and private coaching.", action: () => navigate("/workshop"), cta: "Join Workshop" },
+              { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: () => navigate("/book-event"), cta: "Enquire Now" },
             ].map((service, i) => (
               <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Card className="card-3d h-full flex flex-col">
