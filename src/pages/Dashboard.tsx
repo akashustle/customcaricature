@@ -1180,6 +1180,81 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   );
 };
 
+const SHOP_STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  processing: "bg-blue-50 text-blue-700 border border-blue-200",
+  shipped: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  delivered: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  cancelled: "bg-red-50 text-red-700 border border-red-200",
+};
+
+const ShopOrdersList = ({ shopOrders, navigate }: { shopOrders: any[]; navigate: any }) => (
+  <>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="font-display text-xl font-bold">My Shop Orders</h2>
+      <Button onClick={() => navigate("/shop")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">
+        <Store className="w-4 h-4 mr-1" />Shop Now
+      </Button>
+    </div>
+    {shopOrders.length === 0 ? (
+      <Card><CardContent className="p-8 text-center">
+        <Store className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <p className="font-sans text-muted-foreground mb-4">No shop orders yet</p>
+        <Button onClick={() => navigate("/shop")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Browse Shop</Button>
+      </CardContent></Card>
+    ) : (
+      <div className="space-y-3">
+        {shopOrders.map((order: any) => (
+          <motion.div key={order.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 space-y-3">
+                {order.status === "delivered" && (
+                  <CelebrationBanner message="🎉 Your order has been delivered! 🛍️" />
+                )}
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-mono text-xs text-muted-foreground">{order.order_number}</p>
+                    <p className="text-xs text-muted-foreground font-sans">
+                      {new Date(order.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
+                  <p className="font-display text-lg font-bold text-primary">{formatPrice(order.total_amount)}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`${SHOP_STATUS_COLORS[order.status] || "bg-muted text-foreground"} border-none text-xs capitalize`}>
+                    {order.status === "shipped" ? <><Truck className="w-3 h-3 mr-1" />Shipped</> : order.status}
+                  </Badge>
+                  <Badge className={`${order.payment_status === "paid" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"} border-none text-xs`}>
+                    <CreditCard className="w-3 h-3 mr-1" />{order.payment_status === "paid" ? "Paid ✅" : "Pending"}
+                  </Badge>
+                </div>
+                {/* Items */}
+                {order.shop_order_items?.length > 0 && (
+                  <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                    {order.shop_order_items.map((item: any, i: number) => (
+                      <div key={i} className="flex justify-between text-xs font-sans">
+                        <span>{item.product_name} × {item.quantity}</span>
+                        <span className="font-medium">{formatPrice(item.unit_price * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Shipping */}
+                <div className="text-xs text-muted-foreground font-sans">
+                  📍 {order.shipping_address}, {order.shipping_city}, {order.shipping_state} - {order.shipping_pincode}
+                </div>
+                {order.razorpay_payment_id && (
+                  <p className="text-[10px] text-muted-foreground font-mono">Payment ID: {order.razorpay_payment_id}</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </>
+);
+
 const Row = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between py-1">
     <span className="text-muted-foreground">{label}</span>
