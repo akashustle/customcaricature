@@ -1451,13 +1451,8 @@ const Admin = () => {
             <AdminAIChatConversations />
           </TabsContent>
 
-          <TabsContent value="workshop">
-            <AdminWorkshop />
-          </TabsContent>
 
-          <TabsContent value="enquiry">
-            <AdminEnquiries />
-          </TabsContent>
+
 
           <TabsContent value="chatbot">
             <AdminChatbotTraining />
