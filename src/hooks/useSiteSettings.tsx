@@ -26,8 +26,9 @@ export const useSiteSettings = () => {
     if (data) {
       const s = { ...defaults };
       data.forEach((row: any) => {
-        if (row.id in s) {
-          (s as any)[row.id] = row.value;
+        const key = row.id === "allow_artwork_status_without_upload" ? "allow_artwork_bypass" : row.id;
+        if (key in s) {
+          (s as any)[key] = row.value;
         }
       });
       setSettings(s);
