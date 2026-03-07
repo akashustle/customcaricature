@@ -111,7 +111,11 @@ const Index = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const handleOrderClick = () => navigate(user ? "/order" : "/register");
+  const handleOrderClick = () => navigate(user ? "/order" : "/login");
+  const handleEventClick = () => {
+    if (!user) { navigate("/login"); return; }
+    navigate("/book-event");
+  };
 
   const openLightbox = useCallback((idx: number) => {
     setLightboxIndex(idx);
@@ -195,7 +199,7 @@ const Index = () => {
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Button size="xl" variant="outline" onClick={() => navigate("/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                <Button size="xl" variant="outline" onClick={handleEventClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
                   <Zap className="w-5 h-5 mr-2" /> Book for Event
                 </Button>
               </motion.div>
@@ -255,7 +259,7 @@ const Index = () => {
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {[
-            { icon: Camera, step: "1", title: "Upload & Customize", desc: "Upload clear photos, pick your style, and share your preferences.", route: user ? "/order" : "/register" },
+            { icon: Camera, step: "1", title: "Upload & Customize", desc: "Upload clear photos, pick your style, and share your preferences.", route: user ? "/order" : "/login" },
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
@@ -289,9 +293,9 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: () => navigate("/book-event"), cta: "Book for Event" },
+              { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: handleEventClick, cta: "Book for Event" },
               { icon: Palette, title: "Custom Digital Caricature", desc: "Hand-crafted digital caricatures from your photos. Perfect for gifts, wall art, and social media.", action: handleOrderClick, cta: "Order Now" },
-              { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: () => navigate("/book-event"), cta: "Enquire Now" },
+              { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now" },
             ].map((service, i) => (
               <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Card className="card-3d h-full flex flex-col">

@@ -423,6 +423,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
     return () => { supabase.removeChannel(ch); };
   }, [orders, userId]);
 
+  const [slideIndex, setSlideIndex] = useState(0);
+
   const handleConfirmDispatch = async (orderId: string) => {
     if (!confirm("⚠️ Are you sure you want to confirm dispatch? This action cannot be undone.")) return;
     setConfirmingOrderId(orderId);
@@ -433,16 +435,26 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 
   const handleRaiseChat = async (orderId: string) => {
     await supabase.from("orders").update({ art_confirmation_status: "chat" } as any).eq("id", orderId);
-    // Auto-send a chat message about artwork query
-    if (userId) {
-      await supabase.from("chat_messages").insert({
-        sender_id: userId,
-        message: `I have a query regarding my artwork ready caricature (Order #${orderId.slice(0, 8).toUpperCase()}). Please assist.`,
-        is_admin: false,
-        is_artist_chat: false,
-      } as any);
+    const whatsappMsg = encodeURIComponent(`Hi, I have a query regarding my artwork caricature (Order #${orderId.slice(0, 8).toUpperCase()}). Please assist.`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMsg}`, "_blank");
+    toast({ title: "💬 Query raised on WhatsApp", description: "Admin will respond soon." });
+  };
+
+  const handleDownloadArtwork = async (url: string, fileName: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName || "artwork.jpg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      toast({ title: "📥 Download started!" });
+    } catch {
+      toast({ title: "Download failed", variant: "destructive" });
     }
-    toast({ title: "💬 Query raised", description: "Chat opened — admin will respond soon." });
   };
 
   const handleMarkDelivered = async (orderId: string) => {
@@ -616,19 +628,52 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
         ))}
       </div>
     )}
-  {/* Art Preview Dialog with Zoom */}
-  {artPreviewUrl && (
-    <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-4" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>
-      <div className="flex gap-3 mb-4" onClick={(e) => e.stopPropagation()}>
-        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.max(0.5, z - 0.25))}>− Zoom Out</Button>
-        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.min(3, z + 0.25))}>+ Zoom In</Button>
-        <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>✕ Close</Button>
+  {/* Full-screen Artwork Slideshow with Download */}
+  {artPreviewUrl && (() => {
+    // Find the order that this artwork belongs to for slideshow
+    const currentOrderPhotos = Object.entries(artworkPhotos).find(([_, photos]) =>
+      photos.some((p: any) => artworkUrls[p.id] === artPreviewUrl)
+    );
+    const slidePhotos = currentOrderPhotos ? currentOrderPhotos[1] : [];
+    const currentSlideIdx = slidePhotos.findIndex((p: any) => artworkUrls[p.id] === artPreviewUrl);
+
+    return (
+      <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>
+        <div className="flex gap-2 mb-4 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+          <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.max(0.5, z - 0.25))}>− Zoom</Button>
+          <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => setArtZoom(z => Math.min(3, z + 0.25))}>+ Zoom</Button>
+          <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => handleDownloadArtwork(artPreviewUrl, slidePhotos[currentSlideIdx]?.file_name || "artwork.jpg")}>
+            📥 Download
+          </Button>
+          <Button size="sm" variant="secondary" className="rounded-full font-sans" onClick={() => { setArtPreviewUrl(null); setArtZoom(1); }}>✕ Close</Button>
+        </div>
+        <div className="relative flex items-center justify-center w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+          {slidePhotos.length > 1 && currentSlideIdx > 0 && (
+            <button className="absolute left-0 z-10 bg-white/20 hover:bg-white/40 rounded-full p-2 text-white" onClick={() => {
+              const prev = slidePhotos[currentSlideIdx - 1];
+              if (prev && artworkUrls[prev.id]) { setArtPreviewUrl(artworkUrls[prev.id]); setArtZoom(1); }
+            }}>
+              <ChevronUp className="w-6 h-6 rotate-[-90deg]" />
+            </button>
+          )}
+          <div className="overflow-auto max-w-full max-h-[75vh]">
+            <img src={artPreviewUrl} alt="Artwork Preview" className="rounded-xl shadow-2xl transition-transform duration-200" style={{ transform: `scale(${artZoom})`, transformOrigin: "center center" }} />
+          </div>
+          {slidePhotos.length > 1 && currentSlideIdx < slidePhotos.length - 1 && (
+            <button className="absolute right-0 z-10 bg-white/20 hover:bg-white/40 rounded-full p-2 text-white" onClick={() => {
+              const next = slidePhotos[currentSlideIdx + 1];
+              if (next && artworkUrls[next.id]) { setArtPreviewUrl(artworkUrls[next.id]); setArtZoom(1); }
+            }}>
+              <ChevronDown className="w-6 h-6 rotate-[-90deg]" />
+            </button>
+          )}
+        </div>
+        {slidePhotos.length > 1 && (
+          <p className="text-white/60 text-sm mt-3 font-sans">{currentSlideIdx + 1} / {slidePhotos.length}</p>
+        )}
       </div>
-      <div className="overflow-auto max-w-full max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
-        <img src={artPreviewUrl} alt="Artwork Preview" className="rounded-xl shadow-2xl transition-transform duration-200" style={{ transform: `scale(${artZoom})`, transformOrigin: "center center" }} />
-      </div>
-    </div>
-  )}
+    );
+  })()}
   </>
   );
 };
