@@ -129,9 +129,11 @@ const Dashboard = () => {
         supabase.auth.signOut().then(() => navigate("/register"));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings", filter: `user_id=eq.${user.id}` }, () => fetchEvents(user.id))
+      .on("postgres_changes", { event: "*", schema: "public", table: "shop_orders", filter: `user_id=eq.${user.id}` }, () => fetchShopOrders(user.id))
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `user_id=eq.${user.id}` }, () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
+        fetchShopOrders(user.id);
       })
       .subscribe();
 
