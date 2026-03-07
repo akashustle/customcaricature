@@ -101,18 +101,18 @@ type Profile = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-card text-foreground",
-  in_progress: "bg-primary/20 text-foreground",
-  artwork_ready: "bg-primary/30 text-foreground",
-  dispatched: "bg-primary/15 text-foreground",
-  delivered: "bg-primary/40 text-foreground",
+  new: "bg-blue-50 text-blue-700 border border-blue-200",
+  in_progress: "bg-amber-50 text-amber-700 border border-amber-200",
+  artwork_ready: "bg-violet-50 text-violet-700 border border-violet-200",
+  dispatched: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  delivered: "bg-emerald-50 text-emerald-700 border border-emerald-200",
 };
 const STATUS_LABELS: Record<string, string> = {
   new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
   dispatched: "Dispatched", delivered: "Delivered",
 };
 const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
-const PAYMENT_COLORS: Record<string, string> = { pending: "bg-primary/15 text-foreground", confirmed: "bg-primary/30 text-foreground" };
+const PAYMENT_COLORS: Record<string, string> = { pending: "bg-orange-50 text-orange-700 border border-orange-200", confirmed: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
 
 const Admin = () => {
   const navigate = useNavigate();
