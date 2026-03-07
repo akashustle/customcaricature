@@ -101,18 +101,18 @@ type Profile = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-card text-foreground",
-  in_progress: "bg-primary/20 text-foreground",
-  artwork_ready: "bg-primary/30 text-foreground",
-  dispatched: "bg-primary/15 text-foreground",
-  delivered: "bg-primary/40 text-foreground",
+  new: "bg-blue-50 text-blue-700 border border-blue-200",
+  in_progress: "bg-amber-50 text-amber-700 border border-amber-200",
+  artwork_ready: "bg-violet-50 text-violet-700 border border-violet-200",
+  dispatched: "bg-cyan-50 text-cyan-700 border border-cyan-200",
+  delivered: "bg-emerald-50 text-emerald-700 border border-emerald-200",
 };
 const STATUS_LABELS: Record<string, string> = {
   new: "New Order", in_progress: "In Progress", artwork_ready: "Artwork Ready",
   dispatched: "Dispatched", delivered: "Delivered",
 };
 const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
-const PAYMENT_COLORS: Record<string, string> = { pending: "bg-primary/15 text-foreground", confirmed: "bg-primary/30 text-foreground" };
+const PAYMENT_COLORS: Record<string, string> = { pending: "bg-orange-50 text-orange-700 border border-orange-200", confirmed: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -1589,6 +1589,26 @@ const Admin = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Artwork Bypass Setting */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Image className="w-5 h-5 text-primary" />Artwork Upload Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Allow Status Change Without Artwork</p>
+                      <p className="text-xs text-muted-foreground font-sans">Skip artwork upload requirement when changing order status to Art Ready</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).allow_artwork_bypass?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("allow_artwork_status_without_upload", { enabled: checked });
+                        toast({ title: checked ? "Artwork bypass enabled" : "Artwork upload required" });
+                      }}
+                    />
                   </div>
                 </CardContent>
               </Card>

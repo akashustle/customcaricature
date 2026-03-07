@@ -48,7 +48,7 @@ const AdminLogin = () => {
       }
 
       toast({ title: "Welcome back, admin!" });
-      navigate("/admin", { replace: true });
+      navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
     } finally {
