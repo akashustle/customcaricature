@@ -139,18 +139,18 @@
   /* Premium soft button */
   .btn-soft {
     @apply relative transition-all duration-200 rounded-full;
-    background: linear-gradient(135deg, hsl(36 35% 52%), hsl(36 35% 46%));
-    color: hsl(40 56% 95%);
+    background: linear-gradient(135deg, hsl(36 45% 54%), hsl(36 42% 48%));
+    color: hsl(40 60% 97%);
   }
   .btn-soft:hover {
     transform: scale(1.02);
-    box-shadow: 0 4px 16px hsl(36 35% 49% / 0.3);
+    box-shadow: 0 4px 16px hsl(36 40% 52% / 0.3);
   }
 
   /* 3D button */
   .btn-3d {
     @apply relative transition-all duration-200;
-    box-shadow: 0 3px 0 hsl(34 38% 38%), 0 4px 10px hsl(33 37% 27% / 0.08);
+    box-shadow: 0 3px 0 hsl(34 35% 45%), 0 4px 10px hsl(30 20% 40% / 0.06);
   }
   .btn-3d:hover {
     transform: translateY(-2px);
