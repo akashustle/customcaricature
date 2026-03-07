@@ -139,6 +139,11 @@ const BookEvent = () => {
   const gatewayCharges = gatewayEnabled ? calculateGatewayCharges(payableAdvance) : 0;
   const totalPayable = payableAdvance + gatewayCharges;
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) { navigate("/login"); }
+  }, [authLoading, user, navigate]);
+
   // Pre-fill from profile & fetch customer event pricing with real-time sync
   useEffect(() => {
     if (user) {
