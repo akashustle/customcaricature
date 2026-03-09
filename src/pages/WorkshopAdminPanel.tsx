@@ -37,6 +37,7 @@ const sidebarItems = [
   { key: "registered", icon: Users, label: "Registered" },
   { key: "manual", icon: UserPlus, label: "Manual Users" },
   { key: "live", icon: Radio, label: "Live Sessions" },
+  { key: "live-requests", icon: MonitorPlay, label: "Live Requests" },
   { key: "videos", icon: Video, label: "Videos" },
   { key: "assignments", icon: FileText, label: "Assignments" },
   { key: "certificates", icon: Award, label: "Certificates" },
