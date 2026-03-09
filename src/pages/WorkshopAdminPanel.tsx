@@ -1338,6 +1338,30 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
+                  {/* Admin Profile Edit */}
+                  <GlassCard>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className={`${textPrimary} text-sm flex items-center gap-2`}><Lock className="w-4 h-4 text-[#b08d57]" /> My Profile</h3>
+                      {!adminProfileEdit && <Button size="sm" variant="ghost" onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }} className={`${textSecondary} text-xs`}><Edit2 className="w-3 h-3 mr-1" />Edit</Button>}
+                    </div>
+                    {adminProfileEdit ? (
+                      <div className="space-y-3">
+                        <div><Label className={`${textSecondary} text-xs`}>Name</Label><Input value={adminEditData.name} onChange={e => setAdminEditData({...adminEditData, name: e.target.value})} className={inputClass} /></div>
+                        <div><Label className={`${textSecondary} text-xs`}>Email</Label><Input type="email" value={adminEditData.email} onChange={e => setAdminEditData({...adminEditData, email: e.target.value})} className={inputClass} /></div>
+                        <div><Label className={`${textSecondary} text-xs`}>New Password (leave blank to keep)</Label><Input type="password" value={adminEditData.password} onChange={e => setAdminEditData({...adminEditData, password: e.target.value})} className={inputClass} placeholder="••••••" /></div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={updateAdminProfile} className={btnPrimary}><Save className="w-4 h-4 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setAdminProfileEdit(false)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{adminInfo?.name}</span></p>
+                        <p className={`${textSecondary} text-sm`}>Email: <span className={textPrimary}>{adminInfo?.email}</span></p>
+                      </div>
+                    )}
+                  </GlassCard>
+
                   <GlassCard>
                     <h3 className={`${textPrimary} text-sm mb-3`}>🌐 Website Integration</h3>
                     <div className="flex items-center justify-between">
