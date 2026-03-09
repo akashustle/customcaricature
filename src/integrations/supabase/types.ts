@@ -2584,6 +2584,8 @@ export type Database = {
           message: string
           rating: number | null
           user_id: string
+          user_reply: string | null
+          user_reply_at: string | null
         }
         Insert: {
           admin_reply?: string | null
@@ -2593,6 +2595,8 @@ export type Database = {
           message: string
           rating?: number | null
           user_id: string
+          user_reply?: string | null
+          user_reply_at?: string | null
         }
         Update: {
           admin_reply?: string | null
@@ -2602,6 +2606,8 @@ export type Database = {
           message?: string
           rating?: number | null
           user_id?: string
+          user_reply?: string | null
+          user_reply_at?: string | null
         }
         Relationships: [
           {

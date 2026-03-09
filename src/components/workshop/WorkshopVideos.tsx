@@ -4,13 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, SkipForward, SkipBack, Maximize, Lock, Clock, AlertTriangle, Download, ExternalLink } from "lucide-react";
 
-const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`backdrop-blur-xl bg-white/50 border border-purple-100/30 rounded-2xl p-5 shadow-sm ${className}`}>
-    {children}
-  </div>
-);
-
 const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
+  const dm = darkMode;
   const [videos, setVideos] = useState<any[]>([]);
   const [userAccess, setUserAccess] = useState<any[]>([]);
   const [globalSettings, setGlobalSettings] = useState<any>({});
@@ -18,10 +13,19 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
   const [now, setNow] = useState(new Date());
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
+  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
+  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
+
   useEffect(() => {
     fetchVideos(); fetchAccess(); fetchSettings();
     const t = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(t);
+    const ch = supabase.channel("ws-videos-user")
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings" }, fetchSettings)
+      .subscribe();
+    return () => { clearInterval(t); supabase.removeChannel(ch); };
   }, []);
 
   const fetchVideos = async () => {
@@ -40,6 +44,12 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
       setGlobalSettings(map);
     }
   };
+
+  // Filter videos by user's slot
+  const filteredVideos = videos.filter(v => {
+    if (!v.slot) return true; // No slot = visible to all
+    return v.slot === user.slot;
+  });
 
   const getVideoExpiry = (video: any) => {
     const access = userAccess.find((a: any) => a.video_id === video.id);
@@ -105,60 +115,77 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
     }
   };
 
+  const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+    <div className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm ${className}`}>{children}</div>
+  );
+
+  if (!globalSettings.global_video_access?.enabled) {
+    return (
+      <GlassCard>
+        <div className="text-center py-12">
+          <Play className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <p className={textSecondary}>Workshop videos will be available soon</p>
+        </div>
+      </GlassCard>
+    );
+  }
+
   return (
     <GlassCard>
-      <h2 className="text-gray-800 font-bold text-lg flex items-center gap-2 mb-4">
+      <h2 className={`${textPrimary} text-lg flex items-center gap-2 mb-4`}>
         <Play className="w-5 h-5 text-purple-500" /> Workshop Videos
       </h2>
-      {videos.length === 0 ? (
+      {filteredVideos.length === 0 ? (
         <div className="text-center py-12">
-          <Play className="w-16 h-16 text-purple-200 mx-auto mb-3" />
-          <p className="text-gray-400">Workshop recordings will appear here once uploaded.</p>
+          <Play className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <p className={textSecondary}>No videos available for your slot yet</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {videos.map((video: any) => {
+          {filteredVideos.map((video: any) => {
             const accessible = isVideoAccessible(video);
             const expiry = getVideoExpiry(video);
             const countdown = expiry ? getCountdown(expiry) : null;
             const download = canDownload(video);
             const isActive = activeVideo === video.id;
-            const isExternal = video.video_type === "external_link";
+            const isExternal = video.video_type === "external_link" || video.video_type === "link";
             const isEmbeddable = video.video_type === "embed_link" || isYouTube(video.video_url || "");
 
             return (
               <div key={video.id} className={`rounded-xl p-4 border ${
-                accessible ? "bg-purple-50/40 border-purple-100/30" : "bg-gray-50/40 border-gray-200/20 opacity-60"
+                accessible
+                  ? (dm ? "bg-purple-900/20 border-purple-700/30" : "bg-purple-50/40 border-purple-100/30")
+                  : (dm ? "bg-white/5 border-white/10 opacity-60" : "bg-gray-50/40 border-gray-200/20 opacity-60")
               }`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-gray-700 font-medium text-sm">{video.title}</h3>
-                    <p className="text-gray-400 text-xs">
+                    <h3 className={`${textPrimary} text-sm`}>{video.title}</h3>
+                    <p className={`${textMuted} text-xs`}>
                       {new Date(video.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       {video.slot && ` · ${video.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}`}
                     </p>
                   </div>
                   {!accessible ? (
-                    <Badge className="bg-red-100 text-red-500 border-red-200 text-xs"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
+                    <Badge className="bg-red-100 text-red-500 border-red-200 text-xs font-bold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
                   ) : (
-                    <Badge className="bg-green-100 text-green-600 border-green-200 text-xs">Available</Badge>
+                    <Badge className="bg-green-100 text-green-600 border-green-200 text-xs font-bold">Available</Badge>
                   )}
                 </div>
 
                 {accessible && countdown && (
-                  <div className="mt-2 bg-amber-50/80 border border-amber-200/30 rounded-lg p-2 flex items-center gap-2">
+                  <div className={`mt-2 ${dm ? "bg-amber-900/20 border-amber-700/30" : "bg-amber-50/80 border-amber-200/30"} border rounded-lg p-2 flex items-center gap-2`}>
                     <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
                     <div>
-                      <p className="text-[10px] text-amber-500">Video access expires in:</p>
+                      <p className="text-[10px] text-amber-500 font-medium">Video access expires in:</p>
                       <p className="text-xs font-mono font-bold text-amber-600">{countdown}</p>
                     </div>
                   </div>
                 )}
 
                 {!accessible && expiry && now > expiry && (
-                  <div className="mt-2 bg-red-50/80 border border-red-200/30 rounded-lg p-2 flex items-center gap-2">
+                  <div className={`mt-2 ${dm ? "bg-red-900/20 border-red-700/30" : "bg-red-50/80 border-red-200/30"} border rounded-lg p-2 flex items-center gap-2`}>
                     <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                    <p className="text-xs text-red-500">Video access has expired</p>
+                    <p className="text-xs text-red-500 font-medium">Video access has expired</p>
                   </div>
                 )}
 
@@ -166,12 +193,12 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
                   <>
                     {isExternal ? (
                       <Button onClick={() => window.open(video.video_url, "_blank")}
-                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl">
-                        <ExternalLink className="w-4 h-4 mr-2" /> Open External Link
+                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl font-bold">
+                        <ExternalLink className="w-4 h-4 mr-2" /> Open Link
                       </Button>
                     ) : !isActive ? (
                       <Button onClick={() => setActiveVideo(video.id)}
-                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl">
+                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl font-bold">
                         <Play className="w-4 h-4 mr-2" /> Watch Video
                       </Button>
                     ) : (
@@ -190,29 +217,28 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
                         </div>
                         {!isEmbeddable && (
                           <div className="flex items-center justify-center gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => skip(-10)} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 rounded-lg">
+                            <Button variant="ghost" size="sm" onClick={() => skip(-10)} className={`${textMuted} hover:${textSecondary} rounded-lg`}>
                               <SkipBack className="w-4 h-4 mr-1" />10s
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => { if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause(); }}
-                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 rounded-lg">
+                              className={`${textMuted} hover:${textSecondary} rounded-lg`}>
                               <Pause className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => skip(10)} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 rounded-lg">
+                            <Button variant="ghost" size="sm" onClick={() => skip(10)} className={`${textMuted} hover:${textSecondary} rounded-lg`}>
                               10s<SkipForward className="w-4 h-4 ml-1" />
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => { if (videoRef.current) { document.fullscreenElement ? document.exitFullscreen() : videoRef.current.requestFullscreen(); }}}
-                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 rounded-lg">
+                              className={`${textMuted} hover:${textSecondary} rounded-lg`}>
                               <Maximize className="w-4 h-4" />
                             </Button>
                           </div>
                         )}
                         {download && (
                           <Button variant="outline" size="sm" onClick={() => handleDownload(video)}
-                            className="w-full text-purple-500 border-purple-200 hover:bg-purple-50 rounded-lg">
+                            className={`w-full ${dm ? "text-purple-400 border-purple-700/30" : "text-purple-500 border-purple-200"} hover:bg-purple-50 rounded-lg font-bold`}>
                             <Download className="w-4 h-4 mr-1" /> Download Video
                           </Button>
                         )}
-                        {!download && <p className="text-[10px] text-center text-gray-300">Download disabled by admin</p>}
                       </div>
                     )}
                   </>
