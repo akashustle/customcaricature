@@ -2773,6 +2773,7 @@ export type Database = {
           name: string
           occupation: string | null
           payment_screenshot_path: string | null
+          roll_number: number | null
           slot: string
           student_type: string
           updated_at: string
@@ -2793,6 +2794,7 @@ export type Database = {
           name: string
           occupation?: string | null
           payment_screenshot_path?: string | null
+          roll_number?: number | null
           slot: string
           student_type?: string
           updated_at?: string
@@ -2813,6 +2815,7 @@ export type Database = {
           name?: string
           occupation?: string | null
           payment_screenshot_path?: string | null
+          roll_number?: number | null
           slot?: string
           student_type?: string
           updated_at?: string

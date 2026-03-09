@@ -1,0 +1,1 @@
+ALTER TABLE public.workshop_users ADD COLUMN IF NOT EXISTS roll_number integer;
