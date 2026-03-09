@@ -1001,10 +1001,15 @@ const WorkshopAdmin = () => {
                           {f.rating && <div className="flex gap-0.5 my-1">{[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-[#c9a96e] fill-[#c9a96e]" : textMuted}`} />)}</div>}
                           <p className={`${dm ? "text-white/70" : "text-[#5a4a3a]"} text-sm font-medium`}>{f.message}</p>
                           <p className={`${textMuted} text-[10px] mt-1`}>{new Date(f.created_at).toLocaleString("en-IN")}</p>
-                          {f.admin_reply && <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-white/5" : "bg-[#faf5ef]"} border ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}><p className={`${textSecondary} text-xs`}>↩️ Admin: {f.admin_reply}</p></div>}
-                          <div className="mt-2 flex gap-2">
-                            <Input placeholder="Reply..." value={feedbackReply[f.id] || ""} onChange={e => setFeedbackReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-8 text-xs flex-1`} />
-                            <Button size="sm" onClick={() => replyFeedback(f.id)} className={`${btnPrimary} h-8 px-3 text-xs`}>Reply</Button>
+                          {f.admin_reply && (
+                            <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-white/5" : "bg-[#faf5ef]"} border ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
+                              <p className={`${textSecondary} text-xs`}>↩️ Ritesh Replied: {f.admin_reply}</p>
+                              {f.user_reply && <p className={`${textMuted} text-xs mt-1`}>💬 User: {f.user_reply}</p>}
+                            </div>
+                          )}
+                          <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
+                            <Input placeholder={f.admin_reply ? "Edit reply..." : "Reply..."} value={feedbackReply[f.id] ?? (f.admin_reply || "")} onChange={e => setFeedbackReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-8 text-xs flex-1`} autoComplete="off" />
+                            <Button size="sm" onClick={() => replyFeedback(f.id)} className={`${btnPrimary} h-8 px-3 text-xs`}>{f.admin_reply ? "Update" : "Reply"}</Button>
                           </div>
                         </div>
                         <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={async () => { await supabase.from("workshop_feedback" as any).delete().eq("id", f.id); await logAction("delete_feedback", "Deleted"); fetchFeedbacks(); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
