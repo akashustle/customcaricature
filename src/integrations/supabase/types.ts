@@ -746,12 +746,16 @@ export type Database = {
           country: string | null
           created_at: string
           district: string | null
+          email: string | null
           enquiry_number: string
           enquiry_type: string
           estimated_price: number | null
           event_date: string | null
+          event_type: string | null
           id: string
           instagram_id: string | null
+          link_clicked: boolean | null
+          link_clicked_at: string | null
           mobile: string
           name: string
           pricing_source: string | null
@@ -767,12 +771,16 @@ export type Database = {
           country?: string | null
           created_at?: string
           district?: string | null
+          email?: string | null
           enquiry_number: string
           enquiry_type?: string
           estimated_price?: number | null
           event_date?: string | null
+          event_type?: string | null
           id?: string
           instagram_id?: string | null
+          link_clicked?: boolean | null
+          link_clicked_at?: string | null
           mobile: string
           name: string
           pricing_source?: string | null
@@ -788,12 +796,16 @@ export type Database = {
           country?: string | null
           created_at?: string
           district?: string | null
+          email?: string | null
           enquiry_number?: string
           enquiry_type?: string
           estimated_price?: number | null
           event_date?: string | null
+          event_type?: string | null
           id?: string
           instagram_id?: string | null
+          link_clicked?: boolean | null
+          link_clicked_at?: string | null
           mobile?: string
           name?: string
           pricing_source?: string | null
@@ -2321,6 +2333,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_messages: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          mobile: string | null
+          name: string
+          replied_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          mobile?: string | null
+          name: string
+          replied_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          mobile?: string | null
+          name?: string
+          replied_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_live_locations: {
         Row: {
