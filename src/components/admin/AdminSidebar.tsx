@@ -1,12 +1,13 @@
 import { 
   Package, Calendar, Receipt, MessageCircle, Users, DollarSign, 
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
-  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight
+  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -70,22 +71,30 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   return (
     <aside 
       className={cn(
-        "hidden md:flex flex-col h-screen sticky top-0 border-r border-sidebar-border bg-sidebar transition-all duration-300 z-30",
+        "hidden md:flex flex-col h-screen sticky top-0 admin-glass-sidebar transition-all duration-300 z-30",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
       {/* Logo + Collapse */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+      <div className="flex items-center justify-between p-4 border-b border-border/30">
         <div 
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
           <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl border-2 border-primary/30 shadow-sm flex-shrink-0" />
-          {!collapsed && <span className="font-display text-lg font-bold truncate text-gradient">Admin</span>}
+          {!collapsed && (
+            <motion.span 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              className="font-display text-lg font-bold text-gradient"
+            >
+              Admin
+            </motion.span>
+          )}
         </div>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-sidebar-accent transition-colors flex-shrink-0"
+          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors flex-shrink-0"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -96,29 +105,39 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         {NAV_SECTIONS.map((section) => (
           <div key={section.label} className="mb-4">
             {!collapsed && (
-              <p className="text-[10px] font-sans font-bold uppercase tracking-wider text-muted-foreground px-3 mb-1.5">
+              <p className="text-[10px] font-sans font-bold uppercase tracking-wider text-muted-foreground/70 px-3 mb-1.5">
                 {section.label}
               </p>
             )}
             {section.items.map((item) => {
               const isActive = activeTab === item.id;
               return (
-                <button
+                <motion.button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans transition-all duration-200 mb-0.5",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans transition-all duration-200 mb-0.5",
                     isActive
-                      ? "sidebar-item-active"
-                      : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
+                      ? "bg-primary/12 text-primary font-bold shadow-sm border border-primary/15"
+                      : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
-                  <item.icon className={cn("w-[18px] h-[18px] flex-shrink-0", isActive && "text-primary")} />
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                    isActive ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted/50"
+                  )}>
+                    <item.icon className="w-4 h-4" />
+                  </div>
                   {!collapsed && (
                     <span className="truncate">{item.label}</span>
                   )}
-                </button>
+                  {isActive && !collapsed && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary pulse-live" />
+                  )}
+                </motion.button>
               );
             })}
           </div>
@@ -126,10 +145,10 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       </nav>
 
       {/* Bottom actions */}
-      <div className="p-2 border-t border-sidebar-border space-y-1">
+      <div className="p-2 border-t border-border/30 space-y-1">
         <button
           onClick={() => navigate("/")}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all"
           title={collapsed ? "Home" : undefined}
         >
           <Home className="w-[18px] h-[18px] flex-shrink-0" />

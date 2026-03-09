@@ -329,38 +329,50 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           fileName="CCC_Events"
         />
       </div>
-      {/* Stats Widgets */}
+      {/* Stats Widgets - 3D Animated */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Total Events", value: events.length, color: "text-foreground" },
-          { label: "Upcoming", value: upcoming, color: "text-blue-600" },
-          { label: "Completed", value: completed, color: "text-green-600" },
-          { label: "Cancelled", value: cancelled, color: "text-red-600" },
-          { label: "Mumbai", value: mumbaiEvents, color: "text-purple-600" },
-          { label: "Outside Mumbai", value: outsideEvents, color: "text-orange-600" },
-        ].map(w => (
-          <div key={w.label} className="admin-stat-card p-3 text-center"><p className={`text-2xl font-bold font-display ${w.color}`}>{w.value}</p><p className="text-[10px] text-muted-foreground font-sans">{w.label}</p></div>
+          { icon: Calendar, label: "Total Events", value: String(events.length), color: "hsl(36,45%,52%)" },
+          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), color: "hsl(210,65%,55%)" },
+          { icon: Settings, label: "Completed", value: String(completed), color: "hsl(152,50%,48%)" },
+          { icon: X, label: "Cancelled", value: String(cancelled), color: "hsl(0,55%,62%)" },
+          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), color: "hsl(280,50%,55%)" },
+          { icon: MapPin, label: "Outside Mumbai", value: String(outsideEvents), color: "hsl(38,92%,55%)" },
+        ].map((w, i) => (
+          <div key={w.label} className="stat-widget-3d">
+            <div className="absolute top-0 right-0 w-16 h-16 rounded-full opacity-10 -translate-y-4 translate-x-4" style={{ background: w.color }} />
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style={{ background: w.color }}>
+                <w.icon className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg font-body font-bold truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-body">{w.label}</p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Revenue Analytics */}
+      {/* Revenue Analytics - 3D Animated */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), color: "text-green-600" },
-          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), color: "text-blue-600" },
-          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), color: "text-primary" },
-          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), color: "text-foreground" },
-          { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), color: "text-amber-600" },
-          { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), color: "text-indigo-600" },
-        ].map(w => (
-          <div key={w.label} className="admin-stat-card p-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <w.icon className="w-4 h-4 text-primary" />
+          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), color: "hsl(152,50%,48%)" },
+          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), color: "hsl(210,65%,55%)" },
+          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), color: "hsl(36,45%,52%)" },
+          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), color: "hsl(280,50%,55%)" },
+          { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), color: "hsl(38,92%,55%)" },
+          { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), color: "hsl(340,55%,58%)" },
+        ].map((w, i) => (
+          <div key={w.label} className="stat-widget-3d">
+            <div className="absolute top-0 right-0 w-16 h-16 rounded-full opacity-10 -translate-y-4 translate-x-4" style={{ background: w.color }} />
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style={{ background: w.color }}>
+                <w.icon className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
-                <p className={`text-sm md:text-base font-display font-bold truncate ${w.color}`}>{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans">{w.label}</p>
+                <p className="text-sm md:text-base font-body font-bold truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-body">{w.label}</p>
               </div>
             </div>
           </div>

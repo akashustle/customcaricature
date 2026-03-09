@@ -274,8 +274,16 @@ const Admin = () => {
     // Real-time subscriptions
     const ch = supabase
       .channel("admin-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => fetchOrders())
-      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {})
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => [payload.new as any, ...prev]);
+        toast({ title: "🎨 New Order!", description: (payload.new as any).customer_name });
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.map(o => o.id === (payload.new as any).id ? { ...o, ...(payload.new as any) } : o));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "orders" }, (payload) => {
+        setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
       .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
       .subscribe();
