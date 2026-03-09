@@ -38,6 +38,10 @@ import ShopAdminLogin from "./pages/ShopAdminLogin";
 import ShopAdmin from "./pages/ShopAdmin";
 import AICaricature from "./pages/AICaricature";
 import ShopOrderConfirmation from "./pages/ShopOrderConfirmation";
+import Workshop from "./pages/Workshop";
+import WorkshopDashboard from "./pages/WorkshopDashboard";
+import WorkshopAdminLogin from "./pages/WorkshopAdminLogin";
+import WorkshopAdminPanel from "./pages/WorkshopAdminPanel";
 
 const queryClient = new QueryClient();
 
