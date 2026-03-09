@@ -852,8 +852,29 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {videos.map((v: any) => (
+                  {videos.map((v: any) => {
+                    const isEditingV = editingVideo === v.id;
+                    return (
                     <GlassCard key={v.id}>
+                      {isEditingV ? (
+                        <div className="space-y-3">
+                          <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={editVideoData.title || ""} onChange={e => setEditVideoData({...editVideoData, title: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>URL</Label><Input value={editVideoData.video_url || ""} onChange={e => setEditVideoData({...editVideoData, video_url: e.target.value})} className={inputClass} /></div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><Label className={`${textSecondary} text-xs`}>Type</Label><Select value={editVideoData.video_type} onValueChange={val => setEditVideoData({...editVideoData, video_type: val})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="file">File</SelectItem><SelectItem value="embed_link">YouTube/Embed</SelectItem><SelectItem value="link">External</SelectItem></SelectContent></Select></div>
+                            <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editVideoData.slot || ""} onValueChange={val => setEditVideoData({...editVideoData, slot: val})}><SelectTrigger className={inputClass}><SelectValue placeholder="All" /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
+                          </div>
+                          <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editVideoData.workshop_date || ""} onChange={e => setEditVideoData({...editVideoData, workshop_date: e.target.value})} className={inputClass} /></div>
+                          <div className="flex items-center justify-between"><Label className={`${textSecondary} text-xs`}>Allow Download</Label><Switch checked={editVideoData.global_download_allowed ?? false} onCheckedChange={val => setEditVideoData({...editVideoData, global_download_allowed: val})} /></div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={async () => {
+                              await supabase.from("workshop_videos" as any).update({ title: editVideoData.title, video_url: editVideoData.video_url, video_type: editVideoData.video_type, slot: editVideoData.slot || null, workshop_date: editVideoData.workshop_date, global_download_allowed: editVideoData.global_download_allowed } as any).eq("id", v.id);
+                              await logAction("edit_video", `Edited: ${editVideoData.title}`); toast({ title: "Video Updated! ✅" }); setEditingVideo(null); fetchVideos();
+                            }} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold"><Save className="w-4 h-4 mr-1" />Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingVideo(null)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className={`${textPrimary} text-sm`}>{v.title}</p>
@@ -864,12 +885,15 @@ const WorkshopAdmin = () => {
                           </div>
                         </div>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingVideo(v.id); setEditVideoData(v); }} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Edit2 className="w-3 h-3" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => toggleVideoField(v.id, "global_download_allowed", !v.global_download_allowed)} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Download className="w-3 h-3 mr-1" />{v.global_download_allowed ? "Off" : "On"}</Button>
                           <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400 h-7 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteVideo(v.id, v.title)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                         </div>
                       </div>
+                      )}
                     </GlassCard>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
