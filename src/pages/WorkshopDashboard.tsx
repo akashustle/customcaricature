@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
@@ -10,13 +10,15 @@ import WorkshopCertificates from "@/components/workshop/WorkshopCertificates";
 import WorkshopAssignments from "@/components/workshop/WorkshopAssignments";
 import WorkshopVideos from "@/components/workshop/WorkshopVideos";
 import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
+import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 
-const tabs = [
-  { key: "home", icon: Home, label: "Home" },
-  { key: "certificates", icon: Award, label: "Certificates" },
-  { key: "assignments", icon: FileText, label: "Assignments" },
-  { key: "videos", icon: Video, label: "Videos" },
-  { key: "feedback", icon: MessageSquare, label: "Feedback" },
+const allTabs = [
+  { key: "home", icon: Home, label: "Home", settingKey: null },
+  { key: "videos", icon: Video, label: "Videos", settingKey: "global_video_access" },
+  { key: "assignments", icon: FileText, label: "Assignments", settingKey: "assignment_submission_enabled" },
+  { key: "certificates", icon: Award, label: "Certificates", settingKey: "certificate_visibility" },
+  { key: "feedback", icon: MessageSquare, label: "Feedback", settingKey: "feedback_visibility" },
+  { key: "profile", icon: User, label: "Profile", settingKey: null },
 ];
 
 const WorkshopDashboard = () => {
@@ -24,6 +26,7 @@ const WorkshopDashboard = () => {
   const [workshopUser, setWorkshopUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("home");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_user_dark") === "true");
+  const [settings, setSettings] = useState<any>({});
 
   useEffect(() => { localStorage.setItem("ws_user_dark", darkMode.toString()); }, [darkMode]);
 
@@ -33,6 +36,7 @@ const WorkshopDashboard = () => {
     const user = JSON.parse(stored);
     setWorkshopUser(user);
     refreshUser(user.id);
+    fetchSettings();
 
     // Real-time user updates
     const ch = supabase.channel("ws-user-profile")
@@ -47,6 +51,7 @@ const WorkshopDashboard = () => {
         setWorkshopUser(updated);
         localStorage.setItem("workshop_user", JSON.stringify(updated));
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings" }, fetchSettings)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -57,6 +62,15 @@ const WorkshopDashboard = () => {
       const user = data as any;
       if (!user.is_enabled) { localStorage.removeItem("workshop_user"); toast({ title: "Account Disabled", variant: "destructive" }); navigate("/workshop"); return; }
       setWorkshopUser(user); localStorage.setItem("workshop_user", JSON.stringify(user));
+    }
+  };
+
+  const fetchSettings = async () => {
+    const { data } = await supabase.from("workshop_settings" as any).select("*");
+    if (data) {
+      const map: any = {};
+      (data as any[]).forEach((s: any) => { map[s.id] = s.value; });
+      setSettings(map);
     }
   };
 
@@ -74,6 +88,17 @@ const WorkshopDashboard = () => {
   const activeClass = "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 font-bold";
   const inactiveClass = dm ? "text-white/50 font-medium" : "text-[#6a5a4a] font-medium";
 
+  // Filter tabs based on settings - hide tabs whose setting is OFF
+  const visibleTabs = allTabs.filter(tab => {
+    if (!tab.settingKey) return true; // Always show home and profile
+    return settings[tab.settingKey]?.enabled !== false;
+  });
+
+  // If current tab is hidden, switch to home
+  if (!visibleTabs.find(t => t.key === activeTab)) {
+    setActiveTab("home");
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case "home": return <WorkshopHome user={workshopUser} darkMode={darkMode} />;
@@ -81,6 +106,7 @@ const WorkshopDashboard = () => {
       case "assignments": return <WorkshopAssignments user={workshopUser} darkMode={darkMode} />;
       case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
       case "feedback": return <WorkshopFeedback user={workshopUser} darkMode={darkMode} />;
+      case "profile": return <WorkshopProfile user={workshopUser} darkMode={darkMode} />;
       default: return null;
     }
   };
@@ -112,7 +138,7 @@ const WorkshopDashboard = () => {
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
         <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-white/60 border-[#e8ddd0]/40"} border rounded-2xl p-1.5 flex gap-1 shadow-sm`}>
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-white/10`}`}>
               <tab.icon className="w-4 h-4" />{tab.label}
@@ -133,7 +159,7 @@ const WorkshopDashboard = () => {
       {/* Mobile Bottom Nav */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl ${dm ? "bg-[#1a1625]/95 border-white/10" : "bg-white/95 border-[#e8ddd0]"} border-t shadow-xl`}>
         <div className="flex items-center justify-around py-2 px-2 max-w-md mx-auto">
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${activeTab === tab.key ? `${activeClass} scale-105` : inactiveClass}`}>
               <tab.icon className="w-5 h-5" />
