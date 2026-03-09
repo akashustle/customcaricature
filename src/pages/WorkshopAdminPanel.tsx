@@ -85,6 +85,14 @@ const WorkshopAdmin = () => {
   const [certUploadFile, setCertUploadFile] = useState<File | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState("8433843725");
   const [refreshing, setRefreshing] = useState(false);
+  const [liveRequests, setLiveRequests] = useState<any[]>([]);
+  const [editingVideo, setEditingVideo] = useState<string | null>(null);
+  const [editVideoData, setEditVideoData] = useState<any>({});
+  const [countdownTime, setCountdownTime] = useState("");
+  const [countdownLabel, setCountdownLabel] = useState("Session starts in");
+  const [recordedNoteUser, setRecordedNoteUser] = useState<string | null>(null);
+  const [recordedNote, setRecordedNote] = useState("");
+  const [assignmentViewUrl, setAssignmentViewUrl] = useState<string | null>(null);
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
