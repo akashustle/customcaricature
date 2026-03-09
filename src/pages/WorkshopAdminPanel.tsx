@@ -382,8 +382,14 @@ const WorkshopAdmin = () => {
       const { data, error } = await supabase.functions.invoke("admin-create-user", { body: { email: newAdmin.email, password: newAdmin.password, full_name: newAdmin.name, mobile: "0000000000", make_admin: true } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      await logAction("add_admin", `Added: ${newAdmin.name}`);
-      toast({ title: "Admin Added! ✅" }); setShowAddAdmin(false); setNewAdmin({ name: "", email: "", password: "" }); fetchWorkshopAdmins();
+      // Save permissions if any
+      if (newAdmin.permissions.length > 0 && data?.user_id) {
+        for (const perm of newAdmin.permissions) {
+          await supabase.from("admin_permissions").insert({ user_id: data.user_id, tab_id: perm, access_level: "full" });
+        }
+      }
+      await logAction("add_admin", `Added: ${newAdmin.name} with ${newAdmin.permissions.length} permissions`);
+      toast({ title: "Admin Added! ✅" }); setShowAddAdmin(false); setNewAdmin({ name: "", email: "", password: "", permissions: [] }); fetchWorkshopAdmins();
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
   const deleteAdmin = async (userId: string, name: string) => { await supabase.from("user_roles" as any).delete().eq("user_id", userId).eq("role", "admin"); await supabase.from("workshop_admins" as any).delete().eq("user_id", userId); await logAction("delete_admin", `Removed: ${name}`); toast({ title: "Admin Removed" }); fetchWorkshopAdmins(); };
