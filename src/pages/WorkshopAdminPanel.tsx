@@ -1131,7 +1131,7 @@ const WorkshopAdmin = () => {
                     {hardResetStep === 2 && (
                       <div className="mt-3 space-y-3">
                         <p className="text-red-500 text-sm font-bold">Enter reset code:</p>
-                        <Input value={hardResetCode} onChange={e => setHardResetCode(e.target.value)} placeholder="Enter code..." className="border-red-300" maxLength={8} />
+                        <Input value={hardResetCode} onChange={e => setHardResetCode(e.target.value)} placeholder="Enter code..." className="border-red-300" maxLength={8} autoComplete="off" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()} />
                         <div className="flex gap-2"><Button variant="destructive" onClick={handleHardReset}>Execute</Button><Button variant="outline" onClick={() => { setHardResetStep(0); setHardResetCode(""); }}>Cancel</Button></div>
                       </div>
                     )}
