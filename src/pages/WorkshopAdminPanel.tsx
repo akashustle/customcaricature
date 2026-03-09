@@ -111,7 +111,7 @@ const WorkshopAdmin = () => {
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
   const [newSession, setNewSession] = useState({ title: "", session_date: "2026-03-14", slot: "6pm-9pm", artist_name: "", artist_portfolio_link: "", requirements: "", what_students_learn: "", meet_link: "" });
-  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "" });
+  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "", permissions: [] as string[] });
 
   useEffect(() => { localStorage.setItem("ws_dark", darkMode.toString()); }, [darkMode]);
 
