@@ -85,7 +85,7 @@ const WorkshopAdmin = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_admin");
-    if (!stored) { navigate("/cccworkshop2006eturn; }
+    if (!stored) { navigate("/cccworkshop2006"); return; }
     setAdminInfo(JSON.parse(stored));
     fetchAll();
     const ch = supabase.channel("ws-admin")
