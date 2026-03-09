@@ -829,7 +829,19 @@ const WorkshopAdmin = () => {
                               <div><Label>Date</Label><Input type="date" value={newSession.session_date} onChange={e => setNewSession({...newSession, session_date: e.target.value})} /></div>
                               <div><Label>Slot</Label><Select value={newSession.slot} onValueChange={v => setNewSession({...newSession, slot: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
                             </div>
-                            <div><Label>Artist Name</Label><Input value={newSession.artist_name} onChange={e => setNewSession({...newSession, artist_name: e.target.value})} /></div>
+                            <div>
+                              <Label>Artist</Label>
+                              <Select value={newSession.artist_name} onValueChange={v => {
+                                const a = artists.find(a => a.name === v);
+                                setNewSession({...newSession, artist_name: v, artist_portfolio_link: a?.portfolio_url || newSession.artist_portfolio_link});
+                              }}>
+                                <SelectTrigger><SelectValue placeholder="Select artist or type below" /></SelectTrigger>
+                                <SelectContent>
+                                  {artists.map(a => <SelectItem key={a.id} value={a.name}>{a.name} {a.experience ? `(${a.experience})` : ""}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <Input value={newSession.artist_name} onChange={e => setNewSession({...newSession, artist_name: e.target.value})} placeholder="Or type artist name..." className="mt-1" />
+                            </div>
                             <div><Label>Artist Portfolio Link</Label><Input value={newSession.artist_portfolio_link} onChange={e => setNewSession({...newSession, artist_portfolio_link: e.target.value})} /></div>
                             <div><Label>What Students Learn</Label><Textarea value={newSession.what_students_learn} onChange={e => setNewSession({...newSession, what_students_learn: e.target.value})} rows={2} /></div>
                             <div><Label>Requirements</Label><Textarea value={newSession.requirements} onChange={e => setNewSession({...newSession, requirements: e.target.value})} rows={2} /></div>
