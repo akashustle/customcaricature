@@ -45,6 +45,7 @@ const sidebarItems = [
   { key: "attendance", icon: Calendar, label: "Attendance" },
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
+  { key: "notifications", icon: Bell, label: "Notifications" },
   { key: "settings", icon: Settings, label: "Settings" },
 ];
 
