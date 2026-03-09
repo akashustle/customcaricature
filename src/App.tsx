@@ -38,6 +38,10 @@ import ShopAdminLogin from "./pages/ShopAdminLogin";
 import ShopAdmin from "./pages/ShopAdmin";
 import AICaricature from "./pages/AICaricature";
 import ShopOrderConfirmation from "./pages/ShopOrderConfirmation";
+import Workshop from "./pages/Workshop";
+import WorkshopDashboard from "./pages/WorkshopDashboard";
+import WorkshopAdminLogin from "./pages/WorkshopAdminLogin";
+import WorkshopAdminPanel from "./pages/WorkshopAdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +92,11 @@ const App = () => {
             {/* Shop Admin */}
             <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
             <Route path="/shop-admin" element={<ShopAdmin />} />
+            {/* Workshop Routes */}
+            <Route path="/workshop" element={<Workshop />} />
+            <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
+            <Route path="/workshop-admin-login" element={<WorkshopAdminLogin />} />
+            <Route path="/workshop-admin" element={<WorkshopAdminPanel />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

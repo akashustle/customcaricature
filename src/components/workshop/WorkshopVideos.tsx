@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, SkipForward, SkipBack, Maximize, Lock, Clock, AlertTriangle } from "lucide-react";
+
+const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-5 ${className}`}>
+    {children}
+  </div>
+);
 
 const WorkshopVideos = ({ user }: { user: any }) => {
   const [videos, setVideos] = useState<any[]>([]);
@@ -14,9 +19,7 @@ const WorkshopVideos = ({ user }: { user: any }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    fetchVideos();
-    fetchAccess();
-    fetchSettings();
+    fetchVideos(); fetchAccess(); fetchSettings();
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -25,12 +28,10 @@ const WorkshopVideos = ({ user }: { user: any }) => {
     const { data } = await supabase.from("workshop_videos" as any).select("*").order("workshop_date");
     if (data) setVideos(data as any[]);
   };
-
   const fetchAccess = async () => {
     const { data } = await supabase.from("workshop_user_video_access" as any).select("*").eq("user_id", user.id);
     if (data) setUserAccess(data as any[]);
   };
-
   const fetchSettings = async () => {
     const { data } = await supabase.from("workshop_settings" as any).select("*");
     if (data) {
@@ -73,131 +74,109 @@ const WorkshopVideos = ({ user }: { user: any }) => {
     const hours = Math.floor((diff % 86400000) / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
-    return `${days.toString().padStart(2, "0")} Days ${hours.toString().padStart(2, "0")} Hours ${mins.toString().padStart(2, "0")} Minutes ${secs.toString().padStart(2, "0")} Seconds`;
+    return `${days}d ${hours}h ${mins}m ${secs}s`;
   };
 
   const skip = (seconds: number) => {
     if (videoRef.current) videoRef.current.currentTime += seconds;
   };
 
-  const toggleFullscreen = () => {
-    if (videoRef.current) {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else videoRef.current.requestFullscreen();
-    }
-  };
-
   return (
-    <div className="space-y-4">
-      <Card className="border-primary/10">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-display text-xl flex items-center gap-2">
-            <Play className="w-5 h-5 text-primary" /> Workshop Videos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {videos.length === 0 ? (
-            <div className="text-center py-12">
-              <Play className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground font-sans">No videos uploaded yet</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {videos.map((video: any) => {
-                const accessible = isVideoAccessible(video);
-                const expiry = getVideoExpiry(video);
-                const countdown = expiry ? getCountdown(expiry) : null;
-                const download = canDownload(video);
-                const isActive = activeVideo === video.id;
+    <GlassCard>
+      <h2 className="text-white font-bold text-lg flex items-center gap-2 mb-4">
+        <Play className="w-5 h-5 text-purple-400" /> Workshop Videos
+      </h2>
+      {videos.length === 0 ? (
+        <div className="text-center py-12">
+          <Play className="w-16 h-16 text-white/10 mx-auto mb-3" />
+          <p className="text-white/50">Workshop recordings will appear here once uploaded.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {videos.map((video: any) => {
+            const accessible = isVideoAccessible(video);
+            const expiry = getVideoExpiry(video);
+            const countdown = expiry ? getCountdown(expiry) : null;
+            const download = canDownload(video);
+            const isActive = activeVideo === video.id;
 
-                return (
-                  <Card key={video.id} className={`overflow-hidden ${!accessible ? "opacity-60" : ""}`}>
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-sans font-semibold text-foreground">{video.title}</h3>
-                          <p className="text-xs text-muted-foreground font-sans">
-                            {new Date(video.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-                            {video.slot && ` · ${video.slot === "12pm-3pm" ? "12 PM – 3 PM" : "6 PM – 9 PM"}`}
-                          </p>
+            return (
+              <div key={video.id} className={`rounded-xl p-4 border ${
+                accessible ? "bg-white/5 border-white/10" : "bg-white/[0.02] border-white/5 opacity-60"
+              }`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-medium text-sm">{video.title}</h3>
+                    <p className="text-white/40 text-xs">
+                      {new Date(video.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      {video.slot && ` · ${video.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}`}
+                    </p>
+                  </div>
+                  {!accessible ? (
+                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
+                  ) : (
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Available</Badge>
+                  )}
+                </div>
+
+                {accessible && countdown && (
+                  <div className="mt-2 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-amber-400">Video access expires in:</p>
+                      <p className="text-xs font-mono font-bold text-amber-300">{countdown}</p>
+                    </div>
+                  </div>
+                )}
+
+                {!accessible && expiry && now > expiry && (
+                  <div className="mt-2 bg-red-500/10 border border-red-500/20 rounded-lg p-2 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                    <p className="text-xs text-red-400">Video access has expired</p>
+                  </div>
+                )}
+
+                {accessible && (
+                  <>
+                    {!isActive ? (
+                      <Button onClick={() => setActiveVideo(video.id)} className="w-full mt-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl">
+                        <Play className="w-4 h-4 mr-2" /> Watch Video
+                      </Button>
+                    ) : (
+                      <div className="mt-3 space-y-2">
+                        <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
+                          <video ref={videoRef} src={video.video_url} controls
+                            controlsList={download ? "" : "nodownload"}
+                            onContextMenu={download ? undefined : (e) => e.preventDefault()}
+                            className="w-full h-full" playsInline />
                         </div>
-                        {!accessible ? (
-                          <Badge variant="destructive" className="flex items-center gap-1 text-xs">
-                            <Lock className="w-3 h-3" /> Locked
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-primary/20 text-primary border-none text-xs">Available</Badge>
-                        )}
+                        <div className="flex items-center justify-center gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => skip(-10)} className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                            <SkipBack className="w-4 h-4 mr-1" />10s
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause(); }}
+                            className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                            <Pause className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => skip(10)} className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                            10s<SkipForward className="w-4 h-4 ml-1" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => { if (videoRef.current) { document.fullscreenElement ? document.exitFullscreen() : videoRef.current.requestFullscreen(); }}}
+                            className="text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
+                            <Maximize className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {!download && <p className="text-[10px] text-center text-white/30">Download disabled</p>}
                       </div>
-
-                      {/* Countdown Timer */}
-                      {accessible && countdown && (
-                        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                          <div>
-                            <p className="text-[10px] text-amber-600 font-sans font-medium">Video access expires in:</p>
-                            <p className="text-sm font-mono font-bold text-amber-700 dark:text-amber-400">{countdown}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {!accessible && expiry && now > expiry && (
-                        <div className="bg-destructive/10 rounded-xl p-3 flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
-                          <p className="text-xs text-destructive font-sans">Video access has expired</p>
-                        </div>
-                      )}
-
-                      {/* Video Player */}
-                      {accessible && (
-                        <>
-                          {!isActive ? (
-                            <Button onClick={() => setActiveVideo(video.id)} className="w-full font-sans">
-                              <Play className="w-4 h-4 mr-2" /> Watch Video
-                            </Button>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
-                                <video
-                                  ref={videoRef}
-                                  src={video.video_url}
-                                  controls
-                                  controlsList={download ? "" : "nodownload"}
-                                  onContextMenu={download ? undefined : (e) => e.preventDefault()}
-                                  className="w-full h-full"
-                                  playsInline
-                                />
-                              </div>
-                              <div className="flex items-center justify-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => skip(-10)} className="font-sans">
-                                  <SkipBack className="w-4 h-4 mr-1" /> 10s
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={() => { if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause(); }}>
-                                  <Pause className="w-4 h-4" />
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={() => skip(10)} className="font-sans">
-                                  10s <SkipForward className="w-4 h-4 ml-1" />
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={toggleFullscreen}>
-                                  <Maximize className="w-4 h-4" />
-                                </Button>
-                              </div>
-                              {!download && (
-                                <p className="text-[10px] text-center text-muted-foreground font-sans">Download is disabled for this video</p>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </GlassCard>
   );
 };
 
