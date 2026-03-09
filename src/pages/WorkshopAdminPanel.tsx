@@ -823,20 +823,45 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {liveSessions.map((s: any) => (
+                  {liveSessions.map((s: any) => {
+                    const isEditingS = editingSession === s.id;
+                    return (
                     <GlassCard key={s.id}>
+                      {isEditingS ? (
+                        <div className="space-y-3">
+                          <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={editSessionData.title || ""} onChange={e => setEditSessionData({...editSessionData, title: e.target.value})} className={inputClass} /></div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editSessionData.session_date || ""} onChange={e => setEditSessionData({...editSessionData, session_date: e.target.value})} className={inputClass} /></div>
+                            <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editSessionData.slot || "6pm-9pm"} onValueChange={v => setEditSessionData({...editSessionData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
+                          </div>
+                          <div><Label className={`${textSecondary} text-xs`}>Artist Name</Label><Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Artist Portfolio Link</Label><Input value={editSessionData.artist_portfolio_link || ""} onChange={e => setEditSessionData({...editSessionData, artist_portfolio_link: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>What Students Learn</Label><Textarea value={editSessionData.what_students_learn || ""} onChange={e => setEditSessionData({...editSessionData, what_students_learn: e.target.value})} rows={2} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Requirements</Label><Textarea value={editSessionData.requirements || ""} onChange={e => setEditSessionData({...editSessionData, requirements: e.target.value})} rows={2} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Meet Link</Label><Input value={editSessionData.meet_link || ""} onChange={e => setEditSessionData({...editSessionData, meet_link: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Link Expiry</Label><Input type="datetime-local" value={editSessionData.link_expiry ? editSessionData.link_expiry.slice(0, 16) : ""} onChange={e => setEditSessionData({...editSessionData, link_expiry: e.target.value})} className={inputClass} /></div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={saveSessionEdit} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold"><Save className="w-4 h-4 mr-1" />Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingSession(null)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap"><p className={`${textPrimary} text-sm`}>{s.title}</p><Badge className={`text-[10px] ${s.status === "live" ? "bg-red-500/20 text-red-500" : s.status === "completed" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{s.status}</Badge></div>
                           <p className={`${textSecondary} text-xs`}>{new Date(s.session_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {s.slot}</p>
                           {s.artist_name && <p className={`${textSecondary} text-xs mt-1`}>🎨 {s.artist_name} {s.artist_portfolio_link && <a href={s.artist_portfolio_link} target="_blank" rel="noopener noreferrer" className="text-[#b08d57] ml-1">Portfolio ↗</a>}</p>}
+                          {s.what_students_learn && <p className={`${textMuted} text-xs mt-1`}>📚 {s.what_students_learn}</p>}
+                          {s.requirements && <p className={`${textMuted} text-xs mt-0.5`}>📋 {s.requirements}</p>}
                           {s.meet_link && <p className={`${textMuted} text-xs mt-1`}>🔗 {s.meet_link}</p>}
+                          {s.link_expiry && <p className={`${textMuted} text-[10px] mt-0.5`}>⏰ Expires: {new Date(s.link_expiry).toLocaleString("en-IN")}</p>}
                         </div>
                         <div className="flex flex-col gap-1 flex-shrink-0">
                           <div className="flex gap-1">
                             <Select value={s.status} onValueChange={v => updateSessionStatus(s.id, v)}><SelectTrigger className={`h-7 text-[10px] w-24 ${inputClass}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="live">Live</SelectItem><SelectItem value="completed">Done</SelectItem></SelectContent></Select>
                           </div>
                           <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => { setEditingSession(s.id); setEditSessionData(s); }} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Edit2 className="w-3 h-3" /></Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleSessionLink(s.id, !s.link_enabled)} className={`h-7 px-2 text-[10px] ${s.link_enabled ? "text-[#7c9885]" : textMuted}`}><Link2 className="w-3 h-3 mr-0.5" />{s.link_enabled ? "ON" : "OFF"}</Button>
                             <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400 h-7 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete session?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSession(s.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                           </div>
