@@ -770,6 +770,57 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
+              {/* LIVE REQUESTS */}
+              {tab === "live-requests" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary}`}>Live Session Requests ({liveRequests.length})</h1>
+                    <RefreshButton />
+                  </div>
+                  {liveRequests.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>No requests yet</p></GlassCard>}
+                  {liveRequests.map((r: any) => {
+                    const u = users.find(u => u.id === r.user_id);
+                    return (
+                      <GlassCard key={r.id}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className={`${textPrimary} text-sm`}>{u?.name || "User"} {u?.roll_number && <span className={textMuted}>· #{u.roll_number}</span>}</p>
+                            <p className={`${textSecondary} text-xs`}>{u?.mobile} · {u?.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}</p>
+                            <p className={`${textMuted} text-[10px]`}>{new Date(r.created_at).toLocaleString("en-IN")}</p>
+                            <Badge className={`mt-1 text-[10px] ${r.status === "pending" ? "bg-amber-100 text-amber-600" : r.status === "allowed" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#d98c8c]/20 text-[#b06060]"}`}>{r.status}</Badge>
+                            {r.admin_note && <p className={`${textSecondary} text-xs mt-1`}>Note: {r.admin_note}</p>}
+                          </div>
+                          {r.status === "pending" && (
+                            <div className="flex flex-col gap-1">
+                              <Button size="sm" className="bg-[#7c9885] hover:bg-[#6a8a75] text-white h-7 text-xs font-bold" onClick={async () => {
+                                await supabase.from("workshop_live_session_requests" as any).update({ status: "allowed" } as any).eq("id", r.id);
+                                await logAction("approve_live_request", `Approved for ${u?.name}`);
+                                toast({ title: "Approved ✅" }); fetchLiveRequests();
+                              }}>Allow</Button>
+                              <Dialog>
+                                <DialogTrigger asChild><Button size="sm" variant="destructive" className="h-7 text-xs">Deny</Button></DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader><DialogTitle>Deny Request for {u?.name}</DialogTitle></DialogHeader>
+                                  <div className="space-y-3">
+                                    <div><Label>Reason (shown to user)</Label><Textarea id={`deny-note-${r.id}`} rows={2} placeholder="Why not allowed..." /></div>
+                                    <Button variant="destructive" onClick={async () => {
+                                      const note = (document.getElementById(`deny-note-${r.id}`) as HTMLTextAreaElement)?.value || "";
+                                      await supabase.from("workshop_live_session_requests" as any).update({ status: "denied", admin_note: note } as any).eq("id", r.id);
+                                      await logAction("deny_live_request", `Denied for ${u?.name}`);
+                                      toast({ title: "Denied" }); fetchLiveRequests();
+                                    }}>Deny Request</Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          )}
+                        </div>
+                      </GlassCard>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* VIDEOS */}
               {tab === "videos" && (
                 <div className="space-y-4">
