@@ -437,6 +437,16 @@ const ShopAdmin = () => {
           ))}
         </div>
 
+        {/* Real-time status bar */}
+        <div className="flex items-center gap-4 text-xs font-sans text-muted-foreground bg-muted/30 rounded-xl px-4 py-2">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 pulse-live" />Live Sync</span>
+          <span>📦 {processingOrders} processing</span>
+          <span>🚚 {shippedOrders} shipped</span>
+          {lowStockProducts.length > 0 && <span className="text-amber-600 font-medium">⚠️ {lowStockProducts.length} low stock</span>}
+          {outOfStock.length > 0 && <span className="text-destructive font-medium">🚫 {outOfStock.length} out of stock</span>}
+          {refundedOrders.length > 0 && <span>💰 {refundedOrders.length} refunded ({formatPrice(totalRefunds)})</span>}
+        </div>
+
         <Tabs defaultValue="products">
           <TabsList className="w-full overflow-x-auto flex flex-wrap">
             <TabsTrigger value="products" className="flex-1 text-xs">Products</TabsTrigger>
