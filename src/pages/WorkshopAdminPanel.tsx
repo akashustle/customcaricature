@@ -1392,38 +1392,51 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className={`${textPrimary} text-sm`}>{assignment.workshop_users?.name || "User"}</p>
-          <p className={`${textSecondary} text-xs`}>{assignment.file_name}</p>
-          <p className={`${textMuted} text-[10px]`}>{assignment.submitted_at ? new Date(assignment.submitted_at).toLocaleString("en-IN") : "—"}</p>
-          {assignment.graded_by_artist && <p className={`${textSecondary} text-[10px] mt-1`}>Graded by: {assignment.graded_by_artist}</p>}
-        </div>
-        <div className="flex gap-1 items-center">
-          <Badge className={`text-[10px] ${assignment.status === "graded" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{assignment.status}</Badge>
-          <Button variant="ghost" size="sm" onClick={viewFile} className={textSecondary}><Eye className="w-4 h-4" /></Button>
-        </div>
-      </div>
-      {!grading && assignment.status !== "graded" && (
-        <Button size="sm" variant="ghost" onClick={() => setGrading(true)} className="mt-2 text-[#b08d57] text-xs font-bold">Grade Assignment</Button>
+    <>
+      {/* Image Viewer Modal */}
+      {viewingImage && (
+        <Dialog open={!!viewingImage} onOpenChange={() => setViewingImage(null)}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+            <div className="relative w-full h-full flex items-center justify-center overflow-auto">
+              <img src={viewingImage} alt="Assignment" className="max-w-full max-h-[85vh] object-contain cursor-zoom-in" 
+                onClick={(e) => { const img = e.currentTarget; img.style.transform = img.style.transform === "scale(2)" ? "scale(1)" : "scale(2)"; img.style.transition = "transform 0.3s"; }} />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
-      {(grading || assignment.status === "graded") && (
-        <div className={`space-y-2 pt-2 mt-2 border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
-          <div className="grid grid-cols-3 gap-2">
-            <div><Label className={`${textSecondary} text-xs`}>Marks</Label><Input type="number" value={marks} onChange={e => setMarks(e.target.value)} className={inputClass} /></div>
-            <div><Label className={`${textSecondary} text-xs`}>Out of</Label><Input type="number" value={totalMarks} onChange={e => setTotalMarks(e.target.value)} className={inputClass} /></div>
-            <div><Label className={`${textSecondary} text-xs`}>Status</Label><Select value={passStatus} onValueChange={setPassStatus}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="pass">Pass</SelectItem><SelectItem value="fail">Fail</SelectItem></SelectContent></Select></div>
+      <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+        className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm`}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className={`${textPrimary} text-sm`}>{assignment.workshop_users?.name || "User"}</p>
+            <p className={`${textSecondary} text-xs`}>{assignment.file_name}</p>
+            <p className={`${textMuted} text-[10px]`}>{assignment.submitted_at ? new Date(assignment.submitted_at).toLocaleString("en-IN") : "—"}</p>
+            {assignment.graded_by_artist && <p className={`${textSecondary} text-[10px] mt-1`}>Graded by: {assignment.graded_by_artist}</p>}
           </div>
-          <div><Label className={`${textSecondary} text-xs`}>Graded By (Artist)</Label><Input value={gradedBy} onChange={e => setGradedBy(e.target.value)} className={inputClass} placeholder="Artist name" /></div>
-          <div><Label className={`${textSecondary} text-xs`}>Notes / Suggestions</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={inputClass} /></div>
-          <Button size="sm" onClick={() => onGrade(assignment.id, parseInt(marks) || 0, notes, parseInt(totalMarks) || 100, passStatus, gradedBy)} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold">
-            <Save className="w-4 h-4 mr-1" />Save Grade
-          </Button>
+          <div className="flex gap-1 items-center">
+            <Badge className={`text-[10px] ${assignment.status === "graded" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{assignment.status}</Badge>
+            <Button variant="ghost" size="sm" onClick={viewFile} className={textSecondary}><Eye className="w-4 h-4" /></Button>
+          </div>
         </div>
-      )}
-    </motion.div>
+        {!grading && assignment.status !== "graded" && (
+          <Button size="sm" variant="ghost" onClick={() => setGrading(true)} className="mt-2 text-[#b08d57] text-xs font-bold">Grade Assignment</Button>
+        )}
+        {(grading || assignment.status === "graded") && (
+          <div className={`space-y-2 pt-2 mt-2 border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
+            <div className="grid grid-cols-3 gap-2">
+              <div><Label className={`${textSecondary} text-xs`}>Marks</Label><Input type="number" value={marks} onChange={e => setMarks(e.target.value)} className={inputClass} /></div>
+              <div><Label className={`${textSecondary} text-xs`}>Out of</Label><Input type="number" value={totalMarks} onChange={e => setTotalMarks(e.target.value)} className={inputClass} /></div>
+              <div><Label className={`${textSecondary} text-xs`}>Status</Label><Select value={passStatus} onValueChange={setPassStatus}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="pass">Pass</SelectItem><SelectItem value="fail">Fail</SelectItem></SelectContent></Select></div>
+            </div>
+            <div><Label className={`${textSecondary} text-xs`}>Graded By (Artist)</Label><Input value={gradedBy} onChange={e => setGradedBy(e.target.value)} className={inputClass} placeholder="Artist name" /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Notes / Suggestions</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={inputClass} /></div>
+            <Button size="sm" onClick={() => onGrade(assignment.id, parseInt(marks) || 0, notes, parseInt(totalMarks) || 100, passStatus, gradedBy)} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold">
+              <Save className="w-4 h-4 mr-1" />Save Grade
+            </Button>
+          </div>
+        )}
+      </motion.div>
+    </>
   );
 };
 
