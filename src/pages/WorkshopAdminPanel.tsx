@@ -1191,18 +1191,46 @@ const WorkshopAdmin = () => {
                           {f.rating && <div className="flex gap-0.5 my-1">{[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-[#c9a96e] fill-[#c9a96e]" : textMuted}`} />)}</div>}
                           <p className={`${dm ? "text-white/70" : "text-[#5a4a3a]"} text-sm font-medium`}>{f.message}</p>
                           <p className={`${textMuted} text-[10px] mt-1`}>{new Date(f.created_at).toLocaleString("en-IN")}</p>
+                          
+                          {/* Admin reply */}
                           {f.admin_reply && (
                             <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-white/5" : "bg-[#faf5ef]"} border ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
-                              <p className={`${textSecondary} text-xs`}>↩️ Ritesh Replied: {f.admin_reply}</p>
-                              {f.user_reply && <p className={`${textMuted} text-xs mt-1`}>💬 User: {f.user_reply}</p>}
+                              <p className={`${textSecondary} text-xs`}>↩️ <strong>Your Reply:</strong> {f.admin_reply}</p>
                             </div>
                           )}
+
+                          {/* User reply - highlighted prominently */}
+                          {f.user_reply && (
+                            <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-blue-500/10 border-blue-500/30" : "bg-blue-50 border-blue-200"} border`}>
+                              <p className="text-xs font-bold text-blue-600 flex items-center gap-1"><Reply className="w-3 h-3" /> {f.workshop_users?.name || "User"} replied:</p>
+                              <p className={`text-xs mt-0.5 ${dm ? "text-blue-300" : "text-blue-700"} font-medium`}>{f.user_reply}</p>
+                              <p className={`${textMuted} text-[10px] mt-0.5`}>{f.user_reply_at ? new Date(f.user_reply_at).toLocaleString("en-IN") : ""}</p>
+                              
+                              {/* Admin reply to user reply */}
+                              {f.admin_reply_to_user_reply && (
+                                <div className={`mt-1.5 pl-2 border-l-2 ${dm ? "border-[#b08d57]/50" : "border-[#b08d57]/30"}`}>
+                                  <p className={`text-[10px] font-bold text-[#b08d57]`}>↩️ You replied:</p>
+                                  <p className={`${textSecondary} text-xs`}>{f.admin_reply_to_user_reply}</p>
+                                </div>
+                              )}
+                              
+                              {/* Reply to user reply input */}
+                              {!f.admin_reply_to_user_reply && (
+                                <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()}>
+                                  <Input placeholder="Reply to user..." value={feedbackReplyToUserReply[f.id] || ""} onChange={e => setFeedbackReplyToUserReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-7 text-xs flex-1`} autoComplete="off" />
+                                  <Button size="sm" onClick={() => replyToUserReply(f.id)} className="bg-blue-500 hover:bg-blue-400 text-white h-7 px-3 text-xs font-bold"><Send className="w-3 h-3" /></Button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Admin reply / edit input */}
                           <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
                             <Input placeholder={f.admin_reply ? "Edit reply..." : "Reply..."} value={feedbackReply[f.id] ?? (f.admin_reply || "")} onChange={e => setFeedbackReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-8 text-xs flex-1`} autoComplete="off" />
                             <Button size="sm" onClick={() => replyFeedback(f.id)} className={`${btnPrimary} h-8 px-3 text-xs`}>{f.admin_reply ? "Update" : "Reply"}</Button>
                           </div>
                         </div>
-                        <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={async () => { await supabase.from("workshop_feedback" as any).delete().eq("id", f.id); await logAction("delete_feedback", "Deleted"); fetchFeedbacks(); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                        <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this feedback.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={async () => { await supabase.from("workshop_feedback" as any).delete().eq("id", f.id); await logAction("delete_feedback", "Deleted"); fetchFeedbacks(); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                       </div>
                     </GlassCard>
                   ))}
