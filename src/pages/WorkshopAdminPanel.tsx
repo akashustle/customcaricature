@@ -1235,7 +1235,7 @@ const WorkshopAdmin = () => {
 
 /* ─── Sub Components ─── */
 
-const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUser, editData, setEditData, saveUserEdit, deleteUser, toggleUserEnabled, certUserId, setCertUserId, certFile, setCertFile, uploadCertificate, uploading, dm, textPrimary, textSecondary, textMuted, inputClass, cardBg, showType }: any) => {
+const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUser, editData, setEditData, saveUserEdit, deleteUser, toggleUserEnabled, certUserId, setCertUserId, certFile, setCertFile, uploadCertificate, uploading, dm, textPrimary, textSecondary, textMuted, inputClass, cardBg, showType, logAction, fetchUsers }: any) => {
   const isExpanded = expandedUser === u.id;
   const isEditing = editingUser === u.id;
 
