@@ -468,7 +468,7 @@ const WorkshopAdmin = () => {
             certUserId={certUserId} setCertUserId={setCertUserId} certFile={certFile} setCertFile={setCertFile}
             uploadCertificate={uploadCertificate} uploading={uploading}
             dm={dm} textPrimary={textPrimary} textSecondary={textSecondary} textMuted={textMuted}
-            inputClass={inputClass} cardBg={cardBg} showType={showType} />
+            inputClass={inputClass} cardBg={cardBg} showType={showType} logAction={logAction} fetchUsers={fetchUsers} />
         ))}
         {filtered.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>{searchQuery ? "No results found" : "No users found"}</p></GlassCard>}
       </>
