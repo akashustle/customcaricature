@@ -2463,6 +2463,7 @@ export type Database = {
           created_at: string
           file_name: string | null
           graded_at: string | null
+          graded_by_artist: string | null
           id: string
           marks: number | null
           pass_status: string | null
@@ -2477,6 +2478,7 @@ export type Database = {
           created_at?: string
           file_name?: string | null
           graded_at?: string | null
+          graded_by_artist?: string | null
           id?: string
           marks?: number | null
           pass_status?: string | null
@@ -2491,6 +2493,7 @@ export type Database = {
           created_at?: string
           file_name?: string | null
           graded_at?: string | null
+          graded_by_artist?: string | null
           id?: string
           marks?: number | null
           pass_status?: string | null
@@ -2574,6 +2577,7 @@ export type Database = {
       }
       workshop_feedback: {
         Row: {
+          admin_reply: string | null
           created_at: string
           google_review_clicked: boolean
           id: string
@@ -2582,6 +2586,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_reply?: string | null
           created_at?: string
           google_review_clicked?: boolean
           id?: string
@@ -2590,6 +2595,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_reply?: string | null
           created_at?: string
           google_review_clicked?: boolean
           id?: string

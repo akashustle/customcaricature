@@ -55,6 +55,13 @@ const WorkshopDashboard = () => {
     navigate("/workshop");
   };
 
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good Morning ☀️";
+    if (h < 17) return "Good Afternoon 🌤️";
+    return "Good Evening 🌙";
+  };
+
   if (!workshopUser) return null;
 
   const renderContent = () => {
@@ -69,25 +76,25 @@ const WorkshopDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8" style={{ background: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)" }}>
+    <div className="min-h-screen pb-24 md:pb-8" style={{ background: "linear-gradient(135deg, #fdf6f0 0%, #f0e6ff 30%, #e8f4fd 60%, #fff5f5 100%)" }}>
       
       {/* Header */}
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/5 border-b border-white/10">
+      <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/60 border-b border-purple-100/40 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl border border-white/20" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl border border-purple-200/40 shadow-sm" />
             <div>
-              <h1 className="text-white font-bold text-sm md:text-base">
-                Hey, {workshopUser.name?.split(" ")[0]}! 🎨
+              <h1 className="text-gray-800 font-bold text-sm md:text-base">
+                {getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨
               </h1>
-              <p className="text-white/40 text-[10px] md:text-xs">Creative Caricature Club Workshop</p>
+              <p className="text-gray-400 text-[10px] md:text-xs">Creative Caricature Club Workshop</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="text-white/60 hover:text-white hover:bg-white/10 rounded-xl"
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100/60 rounded-xl"
           >
             <LogOut className="w-4 h-4 mr-1" /> Logout
           </Button>
@@ -96,15 +103,15 @@ const WorkshopDashboard = () => {
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-1.5 flex gap-1">
+        <div className="backdrop-blur-xl bg-white/50 border border-purple-100/40 rounded-2xl p-1.5 flex gap-1 shadow-sm">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 activeTab === tab.key
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-300/25"
+                  : "text-gray-400 hover:text-gray-600 hover:bg-white/60"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -130,7 +137,7 @@ const WorkshopDashboard = () => {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-black/60 border-t border-white/10">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-white/70 border-t border-purple-100/40 shadow-lg">
         <div className="flex items-center justify-around py-2 px-1 max-w-md mx-auto">
           {tabs.map((tab) => (
             <button
@@ -138,8 +145,8 @@ const WorkshopDashboard = () => {
               onClick={() => setActiveTab(tab.key)}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${
                 activeTab === tab.key
-                  ? "text-white bg-gradient-to-b from-purple-600/80 to-pink-600/80 shadow-lg scale-105"
-                  : "text-white/40"
+                  ? "text-white bg-gradient-to-b from-purple-500 to-pink-500 shadow-lg scale-105"
+                  : "text-gray-400"
               }`}
             >
               <tab.icon className="w-5 h-5" />

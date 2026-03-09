@@ -95,8 +95,10 @@ const App = () => {
             {/* Workshop Routes */}
             <Route path="/workshop" element={<Workshop />} />
             <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
-            <Route path="/workshop-admin-login" element={<WorkshopAdminLogin />} />
-            <Route path="/workshop-admin" element={<WorkshopAdminPanel />} />
+            <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
+            <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
+            <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
+            <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

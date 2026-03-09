@@ -85,7 +85,7 @@ const WorkshopAdmin = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_admin");
-    if (!stored) { navigate("/workshop-admin-login"); return; }
+    if (!stored) { navigate("/cccworkshop2006"); return; }
     setAdminInfo(JSON.parse(stored));
     fetchAll();
     const ch = supabase.channel("ws-admin")
@@ -124,7 +124,7 @@ const WorkshopAdmin = () => {
   const handleLogout = async () => {
     await logAction("logout", "Logged out of Workshop Admin Panel");
     localStorage.removeItem("workshop_admin");
-    navigate("/workshop-admin-login");
+    navigate("/cccworkshop2006");
   };
 
   // User CRUD
