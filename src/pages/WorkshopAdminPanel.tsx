@@ -1142,6 +1142,26 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
+                  {/* Countdown Timer Settings */}
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3`}>⏱️ Countdown Timer</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div><p className={`${textPrimary} text-sm`}>Enable Countdown</p><p className={`${textMuted} text-xs`}>Show timer on user dashboard</p></div>
+                        <Switch checked={settings.countdown_timer?.enabled ?? false} onCheckedChange={async v => {
+                          await supabase.from("workshop_settings" as any).upsert({ id: "countdown_timer", value: { ...settings.countdown_timer, enabled: v }, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
+                          await logAction("setting", `Countdown → ${v}`); fetchSettings();
+                        }} />
+                      </div>
+                      <div><Label className={`${textSecondary} text-xs`}>Target Date & Time</Label><Input type="datetime-local" value={countdownTime ? countdownTime.slice(0, 16) : ""} onChange={e => setCountdownTime(e.target.value)} className={inputClass} /></div>
+                      <div><Label className={`${textSecondary} text-xs`}>Label Text</Label><Input value={countdownLabel} onChange={e => setCountdownLabel(e.target.value)} className={inputClass} placeholder="Session starts in" /></div>
+                      <Button size="sm" onClick={async () => {
+                        await supabase.from("workshop_settings" as any).upsert({ id: "countdown_timer", value: { enabled: settings.countdown_timer?.enabled ?? false, target_time: countdownTime, label: countdownLabel }, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
+                        await logAction("setting", `Countdown timer saved`); toast({ title: "Countdown settings saved! ✅" }); fetchSettings();
+                      }} className={btnPrimary}>Save Countdown Settings</Button>
+                    </div>
+                  </GlassCard>
+
                   <GlassCard>
                     <h3 className={`${textPrimary} text-sm mb-3`}>🌐 Website Integration</h3>
                     <div className="flex items-center justify-between">
