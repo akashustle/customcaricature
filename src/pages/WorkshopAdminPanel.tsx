@@ -390,7 +390,70 @@ const WorkshopAdmin = () => {
     toast({ title: "Reply sent!" }); setFeedbackReply(prev => ({ ...prev, [feedbackId]: "" })); fetchFeedbacks();
   };
 
-  // Hard Reset
+  // Reply to user reply on feedback
+  const replyToUserReply = async (feedbackId: string) => {
+    const reply = feedbackReplyToUserReply[feedbackId];
+    if (!reply?.trim()) return;
+    await supabase.from("workshop_feedback" as any).update({ admin_reply_to_user_reply: reply, admin_reply_to_user_reply_at: new Date().toISOString() } as any).eq("id", feedbackId);
+    await logAction("reply_to_user_reply", "Replied to user's reply");
+    toast({ title: "Reply sent!" }); setFeedbackReplyToUserReply(prev => ({ ...prev, [feedbackId]: "" })); fetchFeedbacks();
+  };
+
+  // Update live session (full edit)
+  const saveSessionEdit = async () => {
+    if (!editingSession) return;
+    await supabase.from("workshop_live_sessions" as any).update({
+      title: editSessionData.title, session_date: editSessionData.session_date, slot: editSessionData.slot,
+      artist_name: editSessionData.artist_name || null, artist_portfolio_link: editSessionData.artist_portfolio_link || null,
+      requirements: editSessionData.requirements || null, what_students_learn: editSessionData.what_students_learn || null,
+      meet_link: editSessionData.meet_link || null, link_expiry: editSessionData.link_expiry || null,
+    } as any).eq("id", editingSession);
+    await logAction("edit_session", `Edited: ${editSessionData.title}`);
+    toast({ title: "Session Updated! ✅" }); setEditingSession(null); fetchLiveSessions();
+  };
+
+  // Admin profile update
+  const updateAdminProfile = async () => {
+    const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
+    const updates: any = {};
+    if (adminEditData.name.trim()) updates.name = adminEditData.name.trim();
+    if (adminEditData.email.trim()) updates.email = adminEditData.email.trim();
+    if (Object.keys(updates).length > 0) {
+      await supabase.from("workshop_admins" as any).update(updates as any).eq("id", info.id);
+      // Update local storage
+      const updated = { ...info, ...updates };
+      localStorage.setItem("workshop_admin", JSON.stringify(updated));
+      setAdminInfo(updated);
+    }
+    if (adminEditData.password.trim().length >= 6) {
+      // Update auth password via edge function
+      toast({ title: "Password update requires re-login", description: "Contact super admin to change password" });
+    }
+    await logAction("update_profile", `Updated profile`);
+    toast({ title: "Profile Updated! ✅" });
+    setAdminProfileEdit(false); fetchWorkshopAdmins();
+  };
+
+  // Send workshop notification
+  const sendWorkshopNotification = async () => {
+    if (!notifTitle.trim() || !notifMessage.trim()) { toast({ title: "Title and message required", variant: "destructive" }); return; }
+    const targets = notifTarget === "all" ? users : users.filter(u => u.slot === notifTarget);
+    const inserts = targets.map(u => ({ user_id: u.id, title: notifTitle.trim(), message: notifMessage.trim(), type: notifType }));
+    if (inserts.length === 0) { toast({ title: "No users to notify", variant: "destructive" }); return; }
+    // Batch insert
+    for (let i = 0; i < inserts.length; i += 50) {
+      await supabase.from("workshop_notifications" as any).insert(inserts.slice(i, i + 50) as any);
+    }
+    await logAction("send_notification", `Sent "${notifTitle}" to ${inserts.length} users`);
+    toast({ title: `Notification sent to ${inserts.length} users! 🔔` });
+    setNotifTitle(""); setNotifMessage(""); fetchWorkshopNotifications();
+  };
+
+  const deleteWorkshopNotification = async (id: string) => {
+    await supabase.from("workshop_notifications" as any).delete().eq("id", id);
+    toast({ title: "Deleted" }); fetchWorkshopNotifications();
+  };
+
   const handleHardReset = async () => {
     if (hardResetCode !== "01022006") { toast({ title: "Invalid code!", variant: "destructive" }); return; }
     try {
