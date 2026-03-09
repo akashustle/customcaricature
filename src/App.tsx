@@ -92,6 +92,11 @@ const App = () => {
             {/* Shop Admin */}
             <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
             <Route path="/shop-admin" element={<ShopAdmin />} />
+            {/* Workshop Routes */}
+            <Route path="/workshop" element={<Workshop />} />
+            <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
+            <Route path="/workshop-admin-login" element={<WorkshopAdminLogin />} />
+            <Route path="/workshop-admin" element={<WorkshopAdminPanel />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
