@@ -1324,10 +1324,10 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
                     await supabase.from("workshop_users" as any).update({ prefers_recorded: false, prefers_recorded_note: null, prefers_recorded_at: null } as any).eq("id", u.id);
                     await logAction("undo_recorded", `${u.name} → live`); toast({ title: "Reverted to live" }); fetchUsers();
                   }}><MonitorPlay className="w-3 h-3 mr-1" />Undo Recorded</Button>
-                )
+                )}
                 <Button size="sm" variant="ghost" className={`h-7 text-xs ${u.is_enabled ? "text-[#c9a96e]" : "text-[#7c9885]"}`} onClick={() => toggleUserEnabled(u.id, !u.is_enabled, u.name)}>
-                  {u.is_enabled ? <><EyeOff className="w-3 h-3 mr-1" />Disable</> : <><Eye className="w-3 h-3 mr-1" />Enable</>}
-                </Button>
+                   {u.is_enabled ? <><EyeOff className="w-3 h-3 mr-1" />Disable</> : <><Eye className="w-3 h-3 mr-1" />Enable</>}
+                 </Button>
                 <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-red-400 h-7 text-xs"><Trash2 className="w-3 h-3 mr-1" />Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete {u.name}?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteUser(u.id, u.name)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
               </div>
               {certUserId === u.id && (
