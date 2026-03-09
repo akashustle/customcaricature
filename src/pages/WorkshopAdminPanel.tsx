@@ -863,7 +863,19 @@ const WorkshopAdmin = () => {
                             <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editSessionData.session_date || ""} onChange={e => setEditSessionData({...editSessionData, session_date: e.target.value})} className={inputClass} /></div>
                             <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editSessionData.slot || "6pm-9pm"} onValueChange={v => setEditSessionData({...editSessionData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
                           </div>
-                          <div><Label className={`${textSecondary} text-xs`}>Artist Name</Label><Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={inputClass} /></div>
+                          <div>
+                            <Label className={`${textSecondary} text-xs`}>Artist</Label>
+                            <Select value={editSessionData.artist_name || ""} onValueChange={v => {
+                              const a = artists.find(a => a.name === v);
+                              setEditSessionData({...editSessionData, artist_name: v, artist_portfolio_link: a?.portfolio_url || editSessionData.artist_portfolio_link || ""});
+                            }}>
+                              <SelectTrigger className={inputClass}><SelectValue placeholder="Select artist" /></SelectTrigger>
+                              <SelectContent>
+                                {artists.map(a => <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={`${inputClass} mt-1`} placeholder="Or type name..." />
+                          </div>
                           <div><Label className={`${textSecondary} text-xs`}>Artist Portfolio Link</Label><Input value={editSessionData.artist_portfolio_link || ""} onChange={e => setEditSessionData({...editSessionData, artist_portfolio_link: e.target.value})} className={inputClass} /></div>
                           <div><Label className={`${textSecondary} text-xs`}>What Students Learn</Label><Textarea value={editSessionData.what_students_learn || ""} onChange={e => setEditSessionData({...editSessionData, what_students_learn: e.target.value})} rows={2} className={inputClass} /></div>
                           <div><Label className={`${textSecondary} text-xs`}>Requirements</Label><Textarea value={editSessionData.requirements || ""} onChange={e => setEditSessionData({...editSessionData, requirements: e.target.value})} rows={2} className={inputClass} /></div>
