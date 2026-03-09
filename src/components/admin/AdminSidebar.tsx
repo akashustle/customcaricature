@@ -58,6 +58,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "CRM",
+    items: [
+      { id: "enquiries", icon: FileQuestion, label: "Enquiries" },
+      { id: "support", icon: HelpCircle, label: "Support" },
+    ],
+  },
+  {
     label: "System",
     items: [
       { id: "settings", icon: Settings, label: "Settings" },

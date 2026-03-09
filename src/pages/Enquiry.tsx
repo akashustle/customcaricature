@@ -390,7 +390,24 @@ const Enquiry = () => {
                   <Calendar className="w-5 h-5 text-primary" /> Event Details
                 </h3>
 
-                <LocationDropdowns
+                <div>
+                  <Label className="font-sans">Event Type *</Label>
+                  <div className="mt-1">
+                    <Input
+                      value={eventType}
+                      onChange={(e) => setEventType(e.target.value)}
+                      placeholder="e.g. Wedding, Birthday, Corporate, College Fest..."
+                      className="font-sans"
+                      list="event-types-list"
+                    />
+                    <datalist id="event-types-list">
+                      {["Wedding", "Birthday Party", "Corporate Event", "College Fest", "Anniversary", "Baby Shower", "Engagement", "Kitty Party", "New Year Party", "Christmas Party", "Diwali Party", "Holi Party"].map(t => (
+                        <option key={t} value={t} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
                   state={state}
                   district={district}
                   city={city}
