@@ -123,7 +123,11 @@ const WorkshopAdmin = () => {
     const ch = supabase.channel("ws-admin")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_users" }, fetchUsers)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "workshop_feedback" }, (payload) => {
+        setFeedbacks(prev => prev.map(f => f.id === (payload.new as any).id ? { ...f, ...(payload.new as any) } : f));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_assignments" }, fetchAssignments)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_sessions" }, fetchLiveSessions)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, fetchAttendance)
