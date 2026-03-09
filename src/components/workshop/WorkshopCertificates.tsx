@@ -9,7 +9,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode; cl
   </div>
 );
 
-const WorkshopCertificates = ({ user }: { user: any }) => {
+const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
 

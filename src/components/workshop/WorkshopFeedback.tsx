@@ -12,7 +12,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode; cl
   </div>
 );
 
-const WorkshopFeedback = ({ user }: { user: any }) => {
+const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);
