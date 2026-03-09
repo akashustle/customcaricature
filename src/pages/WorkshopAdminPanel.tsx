@@ -138,8 +138,9 @@ const WorkshopAdmin = () => {
   const fetchCertificates = async () => { const { data } = await supabase.from("workshop_certificates" as any).select("*"); if (data) setCertificates(data as any[]); };
   const fetchSettings = async () => {
     const { data } = await supabase.from("workshop_settings" as any).select("*");
-    if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); }
+    if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); if (map.countdown_timer?.target_time) setCountdownTime(map.countdown_timer.target_time); if (map.countdown_timer?.label) setCountdownLabel(map.countdown_timer.label); }
   };
+  const fetchLiveRequests = async () => { const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").order("created_at", { ascending: false }); if (data) setLiveRequests(data as any[]); };
 
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
