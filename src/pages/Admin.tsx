@@ -186,6 +186,7 @@ const Admin = () => {
     { id: "pricing", label: "Pricing" }, { id: "intl-pricing", label: "Intl Pricing" },
     { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
     { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
+    { id: "enquiries", label: "Enquiries" }, { id: "support", label: "Support" },
     { id: "settings", label: "Settings" },
   ];
   const [adminPermAllTabs, setAdminPermAllTabs] = useState(true);
