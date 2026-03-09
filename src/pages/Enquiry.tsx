@@ -168,9 +168,11 @@ const Enquiry = () => {
       const { data, error } = await supabase.from("enquiries" as any).insert({
         name: name.trim(),
         mobile: mobile.trim(),
+        email: email.trim() || null,
         instagram_id: instagramId.trim() || null,
         enquiry_type: enquiryType,
         caricature_type: caricatureType || null,
+        event_type: eventType || null,
         country,
         state: state || null,
         district: district || null,
