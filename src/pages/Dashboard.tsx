@@ -271,21 +271,56 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <LiveGreeting name={profile?.full_name} />
 
-        {/* Quick Stats */}
+        {/* Quick Stats - 3D Animated */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary animate-count-up">{orders.length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Total Orders</p>
-          </CardContent></Card>
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary animate-count-up">{events.length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Events</p>
-          </CardContent></Card>
-          <Card className="card-3d"><CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold font-display text-primary animate-count-up">{orders.filter(o => o.status === "delivered").length}</p>
-            <p className="text-[10px] text-muted-foreground font-sans">Delivered</p>
-          </CardContent></Card>
+          {[
+            { label: "Total Orders", value: orders.length, color: "hsl(36,45%,52%)", icon: Package },
+            { label: "Events", value: events.length, color: "hsl(210,65%,55%)", icon: CalIcon },
+            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, color: "hsl(152,50%,48%)", icon: Truck },
+          ].map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+              className="stat-widget-3d"
+            >
+              <div className="absolute top-0 right-0 w-12 h-12 rounded-full opacity-10 -translate-y-3 translate-x-3" style={{ background: s.color }} />
+              <div className="text-center relative z-10">
+                <div className="w-8 h-8 rounded-lg mx-auto mb-1 flex items-center justify-center shadow-sm" style={{ background: s.color }}>
+                  <s.icon className="w-4 h-4 text-white" />
+                </div>
+                <p className="text-2xl font-bold font-display animate-count-up">{s.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
+
+        {/* Shop Quick Stats */}
+        {shopOrders.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {[
+              { label: "Shop Orders", value: shopOrders.length, color: "hsl(280,50%,55%)", icon: Store },
+              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, color: "hsl(38,92%,55%)", icon: Truck },
+              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, color: "hsl(340,55%,58%)", icon: CreditCard },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.08 }}
+                className="stat-widget-3d"
+              >
+                <div className="absolute top-0 right-0 w-10 h-10 rounded-full opacity-10 -translate-y-2 translate-x-2" style={{ background: s.color }} />
+                <div className="text-center relative z-10">
+                  <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )
 
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>

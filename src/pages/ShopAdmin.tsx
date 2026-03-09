@@ -409,25 +409,31 @@ const ShopAdmin = () => {
       </div>
 
       <div className="p-4 max-w-7xl mx-auto space-y-4">
-        {/* Stats Grid */}
+        {/* Stats Grid - 3D Animated Widgets */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
-            { label: "Products", value: activeProducts.length, icon: Package, sub: `${outOfStock.length} OOS` },
-            { label: "Orders", value: orders.length, icon: ShoppingCart, sub: `${pendingOrders} pending` },
-            { label: "Revenue", value: formatPrice(totalRevenue), icon: DollarSign, sub: "Total" },
-            { label: "Today", value: todayOrders, icon: Calendar, sub: formatPrice(todayRevenue) },
-            { label: "Avg Order", value: formatPrice(avgOrderValue), icon: Target, sub: "Per order" },
-            { label: "Conversion", value: `${conversionRate}%`, icon: Percent, sub: "Paid/Total" },
-            { label: "Low Stock", value: lowStockProducts.length, icon: AlertTriangle, sub: "≤5 items" },
-            { label: "Reviews", value: productReviews.length, icon: Star, sub: `${coupons.length} coupons` },
+            { label: "Products", value: String(activeProducts.length), icon: Package, color: "hsl(36,45%,52%)", sub: `${outOfStock.length} OOS` },
+            { label: "Orders", value: String(orders.length), icon: ShoppingCart, color: "hsl(210,65%,55%)", sub: `${pendingOrders} pending` },
+            { label: "Revenue", value: formatPrice(totalRevenue), icon: DollarSign, color: "hsl(152,50%,48%)", sub: "Total" },
+            { label: "Today", value: String(todayOrders), icon: Calendar, color: "hsl(340,55%,58%)", sub: formatPrice(todayRevenue) },
+            { label: "Avg Order", value: formatPrice(avgOrderValue), icon: Target, color: "hsl(280,50%,55%)", sub: "Per order" },
+            { label: "Conversion", value: `${conversionRate}%`, icon: Percent, color: "hsl(38,92%,55%)", sub: "Paid/Total" },
+            { label: "Low Stock", value: String(lowStockProducts.length), icon: AlertTriangle, color: "hsl(15,65%,55%)", sub: "≤5 items" },
+            { label: "Reviews", value: String(productReviews.length), icon: Star, color: "hsl(180,50%,45%)", sub: `${coupons.length} coupons` },
           ].map((s, i) => (
-            <Card key={i}><CardContent className="p-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center"><s.icon className="w-4 h-4 text-primary" /></div>
-                <div><p className="text-xs text-muted-foreground font-sans">{s.label}</p><p className="text-sm font-bold font-display">{s.value}</p></div>
+            <div key={i} className="stat-widget-3d">
+              <div className="absolute top-0 right-0 w-14 h-14 rounded-full opacity-10 -translate-y-3 translate-x-3" style={{ background: s.color }} />
+              <div className="flex items-center gap-2 relative z-10">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0" style={{ background: s.color }}>
+                  <s.icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground font-sans">{s.label}</p>
+                  <p className="text-sm font-bold font-display truncate">{s.value}</p>
+                </div>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">{s.sub}</p>
-            </CardContent></Card>
+              <p className="text-[10px] text-muted-foreground mt-1 relative z-10">{s.sub}</p>
+            </div>
           ))}
         </div>
 
