@@ -1237,6 +1237,50 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
+              {/* NOTIFICATIONS */}
+              {tab === "notifications" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary} flex items-center gap-2`}><Bell className="w-5 h-5 text-[#b08d57]" /> Notifications</h1>
+                    <RefreshButton />
+                  </div>
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3`}>📢 Send Notification</h3>
+                    <div className="space-y-3">
+                      <div><Label className={`${textSecondary} text-xs`}>Title *</Label><Input value={notifTitle} onChange={e => setNotifTitle(e.target.value)} className={inputClass} placeholder="Notification title..." /></div>
+                      <div><Label className={`${textSecondary} text-xs`}>Message *</Label><Textarea value={notifMessage} onChange={e => setNotifMessage(e.target.value)} className={inputClass} rows={3} placeholder="Write your message..." /></div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div><Label className={`${textSecondary} text-xs`}>Send To</Label><Select value={notifTarget} onValueChange={setNotifTarget}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Users ({users.length})</SelectItem><SelectItem value="12pm-3pm">12–3 PM Slot</SelectItem><SelectItem value="6pm-9pm">6–9 PM Slot</SelectItem></SelectContent></Select></div>
+                        <div><Label className={`${textSecondary} text-xs`}>Type</Label><Select value={notifType} onValueChange={setNotifType}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="announcement">📢 Announcement</SelectItem><SelectItem value="session">🎥 Session</SelectItem><SelectItem value="assignment">📝 Assignment</SelectItem><SelectItem value="certificate">📜 Certificate</SelectItem><SelectItem value="general">🔔 General</SelectItem></SelectContent></Select></div>
+                      </div>
+                      <Button onClick={sendWorkshopNotification} className={`w-full ${btnPrimary}`}><Send className="w-4 h-4 mr-2" />Send Notification</Button>
+                    </div>
+                  </GlassCard>
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3`}>📋 Recent Notifications ({workshopNotifications.length})</h3>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {workshopNotifications.length === 0 && <p className={`${textSecondary} text-sm text-center py-4`}>No notifications sent yet</p>}
+                      {workshopNotifications.slice(0, 50).map((n: any) => {
+                        const u = users.find(u => u.id === n.user_id);
+                        return (
+                          <div key={n.id} className={`flex items-start justify-between ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-xl p-3`}>
+                            <div className="flex-1 min-w-0">
+                              <p className={`${textPrimary} text-xs`}>{n.title}</p>
+                              <p className={`${textSecondary} text-[10px]`}>{n.message}</p>
+                              <p className={`${textMuted} text-[10px] mt-0.5`}>→ {u?.name || "User"} · {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <Badge className={`text-[9px] ${n.read ? "bg-[#7c9885]/20 text-[#5a7a65]" : `${dm ? "bg-white/10 text-white/40" : "bg-[#e8ddd0] text-[#8b7b6a]"}`}`}>{n.read ? "Read" : "Unread"}</Badge>
+                              <Button variant="ghost" size="sm" className="text-red-400 h-6 px-1" onClick={() => deleteWorkshopNotification(n.id)}><Trash2 className="w-3 h-3" /></Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </GlassCard>
+                </div>
+              )}
+
               {/* SETTINGS */}
               {tab === "settings" && (
                 <div className="space-y-4">
