@@ -135,7 +135,7 @@ const WorkshopAdmin = () => {
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications()]);
     setRefreshing(false);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
@@ -153,6 +153,7 @@ const WorkshopAdmin = () => {
     if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); if (map.countdown_timer?.target_time) setCountdownTime(map.countdown_timer.target_time); if (map.countdown_timer?.label) setCountdownLabel(map.countdown_timer.label); }
   };
   const fetchLiveRequests = async () => { const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").order("created_at", { ascending: false }); if (data) setLiveRequests(data as any[]); };
+  const fetchWorkshopNotifications = async () => { const { data } = await supabase.from("workshop_notifications" as any).select("*").order("created_at", { ascending: false }).limit(100); if (data) setWorkshopNotifications(data as any[]); };
 
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
