@@ -54,6 +54,7 @@ const WorkshopAdmin = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("dashboard");
   const [users, setUsers] = useState<any[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
