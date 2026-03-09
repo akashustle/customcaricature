@@ -26,7 +26,9 @@ const Enquiry = () => {
   // Form data
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [instagramId, setInstagramId] = useState("");
+  const [eventType, setEventType] = useState("");
   const [enquiryType, setEnquiryType] = useState<"custom_caricature" | "event_booking" | "">("");
   const [caricatureType, setCaricatureType] = useState("");
   const [country, setCountry] = useState("India");
