@@ -1304,10 +1304,27 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
               <div className="flex flex-wrap gap-2 mt-2">
                 <Button size="sm" variant="ghost" className={`${textSecondary} h-7 text-xs`} onClick={() => { setEditingUser(u.id); setEditData(u); }}><Edit2 className="w-3 h-3 mr-1" />Edit</Button>
                 <Button size="sm" variant="ghost" className="text-[#b08d57] h-7 text-xs font-bold" onClick={() => setCertUserId(u.id)}><Award className="w-3 h-3 mr-1" />Certificate</Button>
-                <Button size="sm" variant="ghost" className={`h-7 text-xs ${u.is_enabled ? "text-[#c9a96e]" : "text-[#7c9885]"}`} onClick={() => toggleUserEnabled(u.id, !u.is_enabled, u.name)}>
-                  {u.is_enabled ? <><EyeOff className="w-3 h-3 mr-1" />Disable</> : <><Eye className="w-3 h-3 mr-1" />Enable</>}
-                </Button>
-                <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-red-400 h-7 text-xs"><Trash2 className="w-3 h-3 mr-1" />Delete</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete {u.name}?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteUser(u.id, u.name)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                {!u.prefers_recorded ? (
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm" variant="ghost" className="text-blue-500 h-7 text-xs font-bold"><MonitorPlay className="w-3 h-3 mr-1" />Prefer Recorded</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Mark {u.name} for Recorded Session</DialogTitle></DialogHeader>
+                      <div className="space-y-3">
+                        <div><Label>Note (why?)</Label><Textarea id={`rec-note-${u.id}`} rows={2} placeholder="Reason..." /></div>
+                        <Button onClick={async () => {
+                          const note = (document.getElementById(`rec-note-${u.id}`) as HTMLTextAreaElement)?.value || "";
+                          await supabase.from("workshop_users" as any).update({ prefers_recorded: true, prefers_recorded_note: note, prefers_recorded_at: new Date().toISOString() } as any).eq("id", u.id);
+                          await logAction("prefer_recorded", `${u.name} → recorded`); toast({ title: "Marked for recorded session" }); fetchUsers();
+                        }} className="bg-blue-500 hover:bg-blue-400 text-white font-bold w-full">Confirm</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button size="sm" variant="ghost" className="text-blue-400 h-7 text-xs" onClick={async () => {
+                    await supabase.from("workshop_users" as any).update({ prefers_recorded: false, prefers_recorded_note: null, prefers_recorded_at: null } as any).eq("id", u.id);
+                    await logAction("undo_recorded", `${u.name} → live`); toast({ title: "Reverted to live" }); fetchUsers();
+                  }}><MonitorPlay className="w-3 h-3 mr-1" />Undo Recorded</Button>
+                )
               </div>
               {certUserId === u.id && (
                 <div className={`mt-2 p-3 ${dm ? "bg-white/5 border-white/10" : "bg-[#faf5ef] border-[#e8ddd0]"} rounded-lg space-y-2 border`}>
