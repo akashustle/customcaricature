@@ -867,8 +867,10 @@ const WorkshopAdmin = () => {
                           </div>
                         </div>
                       </div>
+                      )}
                     </GlassCard>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
