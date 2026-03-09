@@ -95,14 +95,7 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
   );
 
   if (!feedbackEnabled) {
-    return (
-      <GlassCard>
-        <div className="text-center py-12">
-          <MessageSquare className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
-          <p className={`${textSecondary}`}>Feedback will be available soon</p>
-        </div>
-      </GlassCard>
-    );
+    return null;
   }
 
   return (
