@@ -1486,29 +1486,6 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
-                  {/* Activity History */}
-                  <GlassCard>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className={`${textPrimary} text-sm flex items-center gap-2`}><History className="w-4 h-4 text-[#b08d57]" /> Activity History</h3>
-                      <ExportButton data={adminLog.map(l => ({ Admin: l.admin_name, Action: l.action, Details: l.details || "—", Time: new Date(l.created_at).toLocaleString("en-IN") }))} sheetName="ActivityLog" fileName="CCC_AdminLog" />
-                    </div>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {adminLog.map((log: any) => (
-                        <div key={log.id} className={`flex items-start gap-3 ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-lg p-3`}>
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b08d57]/30 to-[#c9a96e]/30 flex items-center justify-center flex-shrink-0"><Activity className="w-4 h-4 text-[#b08d57]" /></div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`${textPrimary} text-xs`}>{log.admin_name}</span>
-                              <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[9px]`}>{log.action}</Badge>
-                            </div>
-                            {log.details && <p className={`${textSecondary} text-xs mt-0.5`}>{log.details}</p>}
-                            <p className={`${textMuted} text-[10px]`}>{new Date(log.created_at).toLocaleString("en-IN")}</p>
-                          </div>
-                          <Button variant="ghost" size="sm" className="text-red-400 h-7 px-1" onClick={() => deleteLogEntry(log.id)}><Trash2 className="w-3 h-3" /></Button>
-                        </div>
-                      ))}
-                    </div>
-                  </GlassCard>
 
                   {/* Hard Reset */}
                   <GlassCard className="border-red-200/30">
