@@ -46,6 +46,7 @@ const sidebarItems = [
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
   { key: "notifications", icon: Bell, label: "Notifications" },
+  { key: "log", icon: History, label: "Activity Log" },
   { key: "settings", icon: Settings, label: "Settings" },
 ];
 
@@ -53,6 +54,7 @@ const WorkshopAdmin = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("dashboard");
   const [users, setUsers] = useState<any[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
@@ -109,7 +111,7 @@ const WorkshopAdmin = () => {
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
   const [newSession, setNewSession] = useState({ title: "", session_date: "2026-03-14", slot: "6pm-9pm", artist_name: "", artist_portfolio_link: "", requirements: "", what_students_learn: "", meet_link: "" });
-  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "" });
+  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "", permissions: [] as string[] });
 
   useEffect(() => { localStorage.setItem("ws_dark", darkMode.toString()); }, [darkMode]);
 
@@ -121,7 +123,11 @@ const WorkshopAdmin = () => {
     const ch = supabase.channel("ws-admin")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_users" }, fetchUsers)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "workshop_feedback" }, (payload) => {
+        setFeedbacks(prev => prev.map(f => f.id === (payload.new as any).id ? { ...f, ...(payload.new as any) } : f));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_assignments" }, fetchAssignments)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_sessions" }, fetchLiveSessions)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, fetchAttendance)
@@ -136,7 +142,7 @@ const WorkshopAdmin = () => {
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications(), fetchArtists()]);
     setRefreshing(false);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
@@ -155,6 +161,7 @@ const WorkshopAdmin = () => {
   };
   const fetchLiveRequests = async () => { const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").order("created_at", { ascending: false }); if (data) setLiveRequests(data as any[]); };
   const fetchWorkshopNotifications = async () => { const { data } = await supabase.from("workshop_notifications" as any).select("*").order("created_at", { ascending: false }).limit(100); if (data) setWorkshopNotifications(data as any[]); };
+  const fetchArtists = async () => { const { data } = await supabase.from("artists").select("*").order("name"); if (data) setArtists(data as any[]); };
 
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
@@ -375,8 +382,14 @@ const WorkshopAdmin = () => {
       const { data, error } = await supabase.functions.invoke("admin-create-user", { body: { email: newAdmin.email, password: newAdmin.password, full_name: newAdmin.name, mobile: "0000000000", make_admin: true } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      await logAction("add_admin", `Added: ${newAdmin.name}`);
-      toast({ title: "Admin Added! ✅" }); setShowAddAdmin(false); setNewAdmin({ name: "", email: "", password: "" }); fetchWorkshopAdmins();
+      // Save permissions if any
+      if (newAdmin.permissions.length > 0 && data?.user_id) {
+        for (const perm of newAdmin.permissions) {
+          await supabase.from("admin_permissions").insert({ user_id: data.user_id, tab_id: perm, access_level: "full" });
+        }
+      }
+      await logAction("add_admin", `Added: ${newAdmin.name} with ${newAdmin.permissions.length} permissions`);
+      toast({ title: "Admin Added! ✅" }); setShowAddAdmin(false); setNewAdmin({ name: "", email: "", password: "", permissions: [] }); fetchWorkshopAdmins();
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
   const deleteAdmin = async (userId: string, name: string) => { await supabase.from("user_roles" as any).delete().eq("user_id", userId).eq("role", "admin"); await supabase.from("workshop_admins" as any).delete().eq("user_id", userId); await logAction("delete_admin", `Removed: ${name}`); toast({ title: "Admin Removed" }); fetchWorkshopAdmins(); };
@@ -426,8 +439,12 @@ const WorkshopAdmin = () => {
       setAdminInfo(updated);
     }
     if (adminEditData.password.trim().length >= 6) {
-      // Update auth password via edge function
-      toast({ title: "Password update requires re-login", description: "Contact super admin to change password" });
+      try {
+        const { data, error } = await supabase.functions.invoke("change-admin-password", { body: { new_password: adminEditData.password.trim(), target_user_id: info.user_id } });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        toast({ title: "Password Updated! 🔐" });
+      } catch (err: any) { toast({ title: "Password Error", description: err.message, variant: "destructive" }); }
     }
     await logAction("update_profile", `Updated profile`);
     toast({ title: "Profile Updated! ✅" });
@@ -812,7 +829,19 @@ const WorkshopAdmin = () => {
                               <div><Label>Date</Label><Input type="date" value={newSession.session_date} onChange={e => setNewSession({...newSession, session_date: e.target.value})} /></div>
                               <div><Label>Slot</Label><Select value={newSession.slot} onValueChange={v => setNewSession({...newSession, slot: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
                             </div>
-                            <div><Label>Artist Name</Label><Input value={newSession.artist_name} onChange={e => setNewSession({...newSession, artist_name: e.target.value})} /></div>
+                            <div>
+                              <Label>Artist</Label>
+                              <Select value={newSession.artist_name} onValueChange={v => {
+                                const a = artists.find(a => a.name === v);
+                                setNewSession({...newSession, artist_name: v, artist_portfolio_link: a?.portfolio_url || newSession.artist_portfolio_link});
+                              }}>
+                                <SelectTrigger><SelectValue placeholder="Select artist or type below" /></SelectTrigger>
+                                <SelectContent>
+                                  {artists.map(a => <SelectItem key={a.id} value={a.name}>{a.name} {a.experience ? `(${a.experience})` : ""}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <Input value={newSession.artist_name} onChange={e => setNewSession({...newSession, artist_name: e.target.value})} placeholder="Or type artist name..." className="mt-1" />
+                            </div>
                             <div><Label>Artist Portfolio Link</Label><Input value={newSession.artist_portfolio_link} onChange={e => setNewSession({...newSession, artist_portfolio_link: e.target.value})} /></div>
                             <div><Label>What Students Learn</Label><Textarea value={newSession.what_students_learn} onChange={e => setNewSession({...newSession, what_students_learn: e.target.value})} rows={2} /></div>
                             <div><Label>Requirements</Label><Textarea value={newSession.requirements} onChange={e => setNewSession({...newSession, requirements: e.target.value})} rows={2} /></div>
@@ -834,7 +863,19 @@ const WorkshopAdmin = () => {
                             <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editSessionData.session_date || ""} onChange={e => setEditSessionData({...editSessionData, session_date: e.target.value})} className={inputClass} /></div>
                             <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editSessionData.slot || "6pm-9pm"} onValueChange={v => setEditSessionData({...editSessionData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
                           </div>
-                          <div><Label className={`${textSecondary} text-xs`}>Artist Name</Label><Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={inputClass} /></div>
+                          <div>
+                            <Label className={`${textSecondary} text-xs`}>Artist</Label>
+                            <Select value={editSessionData.artist_name || ""} onValueChange={v => {
+                              const a = artists.find(a => a.name === v);
+                              setEditSessionData({...editSessionData, artist_name: v, artist_portfolio_link: a?.portfolio_url || editSessionData.artist_portfolio_link || ""});
+                            }}>
+                              <SelectTrigger className={inputClass}><SelectValue placeholder="Select artist" /></SelectTrigger>
+                              <SelectContent>
+                                {artists.map(a => <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                            <Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={`${inputClass} mt-1`} placeholder="Or type name..." />
+                          </div>
                           <div><Label className={`${textSecondary} text-xs`}>Artist Portfolio Link</Label><Input value={editSessionData.artist_portfolio_link || ""} onChange={e => setEditSessionData({...editSessionData, artist_portfolio_link: e.target.value})} className={inputClass} /></div>
                           <div><Label className={`${textSecondary} text-xs`}>What Students Learn</Label><Textarea value={editSessionData.what_students_learn || ""} onChange={e => setEditSessionData({...editSessionData, what_students_learn: e.target.value})} rows={2} className={inputClass} /></div>
                           <div><Label className={`${textSecondary} text-xs`}>Requirements</Label><Textarea value={editSessionData.requirements || ""} onChange={e => setEditSessionData({...editSessionData, requirements: e.target.value})} rows={2} className={inputClass} /></div>
@@ -1281,7 +1322,40 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
-              {/* SETTINGS */}
+              {/* ACTIVITY LOG */}
+              {tab === "log" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary} flex items-center gap-2`}><History className="w-5 h-5 text-[#b08d57]" /> Activity Log</h1>
+                    <div className="flex gap-2">
+                      <RefreshButton />
+                      <ExportButton data={adminLog.map(l => ({ Admin: l.admin_name, Action: l.action, Details: l.details || "—", Time: new Date(l.created_at).toLocaleString("en-IN") }))} sheetName="ActivityLog" fileName="CCC_AdminLog" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <GlassCard className="!p-4"><p className={`${textSecondary} text-xs`}>Total Actions</p><p className={`text-2xl font-bold ${textPrimary}`}>{adminLog.length}</p></GlassCard>
+                    <GlassCard className="!p-4"><p className={`${textSecondary} text-xs`}>Today</p><p className={`text-2xl font-bold ${textPrimary}`}>{adminLog.filter(l => l.created_at?.startsWith(new Date().toISOString().split("T")[0])).length}</p></GlassCard>
+                  </div>
+                  {adminLog.map((log: any) => (
+                    <GlassCard key={log.id} className="!p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b08d57]/30 to-[#c9a96e]/30 flex items-center justify-center flex-shrink-0"><Activity className="w-4 h-4 text-[#b08d57]" /></div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`${textPrimary} text-xs`}>{log.admin_name}</span>
+                            <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[9px]`}>{log.action}</Badge>
+                          </div>
+                          {log.details && <p className={`${textSecondary} text-xs mt-0.5`}>{log.details}</p>}
+                          <p className={`${textMuted} text-[10px]`}>{new Date(log.created_at).toLocaleString("en-IN")}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-red-400 h-7 px-1" onClick={() => deleteLogEntry(log.id)}><Trash2 className="w-3 h-3" /></Button>
+                      </div>
+                    </GlassCard>
+                  ))}
+                  {adminLog.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>No activity yet</p></GlassCard>}
+                </div>
+              )}
+
               {tab === "settings" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1382,6 +1456,19 @@ const WorkshopAdmin = () => {
                             <div><Label>Name *</Label><Input value={newAdmin.name} onChange={e => setNewAdmin({...newAdmin, name: e.target.value})} /></div>
                             <div><Label>Email *</Label><Input type="email" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} /></div>
                             <div><Label>Password *</Label><Input type="password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} /></div>
+                            <div>
+                              <Label className="text-xs">Permissions (optional)</Label>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {["dashboard", "analytics", "all-users", "videos", "assignments", "certificates", "attendance", "feedback", "notifications", "settings"].map(perm => (
+                                  <button key={perm} onClick={() => {
+                                    setNewAdmin(prev => ({ ...prev, permissions: prev.permissions.includes(perm) ? prev.permissions.filter(p => p !== perm) : [...prev.permissions, perm] }));
+                                  }}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-all ${newAdmin.permissions.includes(perm) ? "bg-[#b08d57] text-white border-[#b08d57]" : `${dm ? "bg-white/5 text-white/50 border-white/10" : "bg-[#faf5ef] text-[#6a5a4a] border-[#d4c4b4]"}`}`}>
+                                    {perm.replace(/-/g, " ")}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                             <Button onClick={addAdmin} className={`w-full ${btnPrimary}`}>Create Admin</Button>
                           </div>
                         </DialogContent>
@@ -1399,29 +1486,6 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
-                  {/* Activity History */}
-                  <GlassCard>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className={`${textPrimary} text-sm flex items-center gap-2`}><History className="w-4 h-4 text-[#b08d57]" /> Activity History</h3>
-                      <ExportButton data={adminLog.map(l => ({ Admin: l.admin_name, Action: l.action, Details: l.details || "—", Time: new Date(l.created_at).toLocaleString("en-IN") }))} sheetName="ActivityLog" fileName="CCC_AdminLog" />
-                    </div>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {adminLog.map((log: any) => (
-                        <div key={log.id} className={`flex items-start gap-3 ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-lg p-3`}>
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b08d57]/30 to-[#c9a96e]/30 flex items-center justify-center flex-shrink-0"><Activity className="w-4 h-4 text-[#b08d57]" /></div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`${textPrimary} text-xs`}>{log.admin_name}</span>
-                              <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[9px]`}>{log.action}</Badge>
-                            </div>
-                            {log.details && <p className={`${textSecondary} text-xs mt-0.5`}>{log.details}</p>}
-                            <p className={`${textMuted} text-[10px]`}>{new Date(log.created_at).toLocaleString("en-IN")}</p>
-                          </div>
-                          <Button variant="ghost" size="sm" className="text-red-400 h-7 px-1" onClick={() => deleteLogEntry(log.id)}><Trash2 className="w-3 h-3" /></Button>
-                        </div>
-                      ))}
-                    </div>
-                  </GlassCard>
 
                   {/* Hard Reset */}
                   <GlassCard className="border-red-200/30">
