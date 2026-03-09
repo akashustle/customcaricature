@@ -2,25 +2,35 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { MessageSquare, Send, ExternalLink, Star } from "lucide-react";
+import { MessageSquare, Send, ExternalLink, Star, Reply } from "lucide-react";
 import { motion } from "framer-motion";
 
-const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`backdrop-blur-xl bg-white/50 border border-purple-100/30 rounded-2xl p-5 shadow-sm ${className}`}>
-    {children}
-  </div>
-);
-
 const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
+  const dm = darkMode;
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [settings, setSettings] = useState<any>({});
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [userReplyText, setUserReplyText] = useState<{ [key: string]: string }>({});
 
-  useEffect(() => { fetchFeedbacks(); fetchSettings(); }, []);
+  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
+  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
+  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
+  const inputBg = dm ? "bg-white/10 border-white/20 text-white placeholder:text-white/30" : "bg-white/80 border-purple-100 text-gray-700 placeholder:text-gray-300";
+
+  useEffect(() => {
+    fetchFeedbacks(); fetchSettings();
+    const ch = supabase.channel("ws-feedback-user")
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   const fetchFeedbacks = async () => {
     const { data } = await supabase.from("workshop_feedback" as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
@@ -36,7 +46,7 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     }
   };
 
-  const feedbackEnabled = settings.feedback_enabled?.enabled !== false;
+  const feedbackEnabled = settings.feedback_visibility?.enabled !== false;
 
   const handleSubmit = async () => {
     if (!message.trim() && !rating) return;
@@ -58,6 +68,19 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     }
   };
 
+  const handleUserReply = async (feedbackId: string) => {
+    const reply = userReplyText[feedbackId];
+    if (!reply?.trim()) return;
+    await supabase.from("workshop_feedback" as any).update({
+      user_reply: reply.trim(),
+      user_reply_at: new Date().toISOString(),
+    } as any).eq("id", feedbackId);
+    toast({ title: "Reply sent! ✅" });
+    setUserReplyText(prev => ({ ...prev, [feedbackId]: "" }));
+    setReplyingTo(null);
+    fetchFeedbacks();
+  };
+
   const handleGoogleReview = async () => {
     await supabase.from("workshop_feedback" as any).insert({
       user_id: user.id,
@@ -67,13 +90,16 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     window.open("https://g.page/r/creativecaricatureclub/review", "_blank");
   };
 
+  const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+    <div className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm ${className}`}>{children}</div>
+  );
+
   if (!feedbackEnabled) {
     return (
       <GlassCard>
         <div className="text-center py-12">
-          <MessageSquare className="w-16 h-16 text-purple-200 mx-auto mb-3" />
-          <p className="text-gray-400 font-medium">Feedback is not available yet</p>
-          <p className="text-gray-300 text-xs mt-1">Feedback will be enabled after workshop completion.</p>
+          <MessageSquare className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <p className={`${textSecondary}`}>Feedback will be available soon</p>
         </div>
       </GlassCard>
     );
@@ -82,18 +108,18 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
   return (
     <div className="space-y-4">
       <GlassCard>
-        <h2 className="text-gray-800 font-bold text-lg flex items-center gap-2 mb-4">
+        <h2 className={`${textPrimary} text-lg flex items-center gap-2 mb-4`}>
           <MessageSquare className="w-5 h-5 text-purple-500" /> Feedback & Suggestions
         </h2>
         <div className="space-y-4">
           <div>
-            <p className="text-gray-400 text-xs mb-2">Rate the Workshop</p>
+            <p className={`${textMuted} text-xs mb-2`}>Rate the Workshop</p>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
                 <button key={s} onClick={() => setRating(s)}
                   onMouseEnter={() => setHoveredStar(s)} onMouseLeave={() => setHoveredStar(0)}
                   className="transition-transform hover:scale-110">
-                  <Star className={`w-7 h-7 ${s <= (hoveredStar || rating) ? "text-amber-400 fill-amber-400" : "text-gray-200"}`} />
+                  <Star className={`w-7 h-7 ${s <= (hoveredStar || rating) ? "text-amber-400 fill-amber-400" : dm ? "text-white/20" : "text-gray-200"}`} />
                 </button>
               ))}
             </div>
@@ -102,16 +128,16 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
           <Textarea value={message} onChange={(e) => setMessage(e.target.value)}
             placeholder="Share your feedback, suggestions, or experience..."
             rows={4}
-            className="resize-none bg-white/80 border-purple-100 text-gray-700 placeholder:text-gray-300 rounded-xl focus:border-purple-400" />
+            className={`resize-none ${inputBg} rounded-xl focus:border-purple-400`} />
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button onClick={handleSubmit} disabled={submitting || (!message.trim() && !rating)}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl h-11">
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl h-11 font-bold">
               <Send className="w-4 h-4 mr-2" /> {submitting ? "Submitting..." : "Submit Feedback"}
             </Button>
           </motion.div>
 
           <Button variant="ghost"
-            className="w-full text-gray-500 hover:text-gray-700 border border-purple-100/40 hover:bg-purple-50/60 rounded-xl"
+            className={`w-full ${textSecondary} border ${dm ? "border-white/10 hover:bg-white/5" : "border-purple-100/40 hover:bg-purple-50/60"} rounded-xl`}
             onClick={handleGoogleReview}>
             <ExternalLink className="w-4 h-4 mr-2" /> Review Us On Google ⭐
           </Button>
@@ -120,25 +146,62 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
 
       {feedbacks.filter(f => f.message !== "[Google Review Click]").length > 0 && (
         <GlassCard>
-          <h3 className="text-gray-500 text-sm font-medium mb-3">Your Previous Feedback</h3>
+          <h3 className={`${textSecondary} text-sm mb-3`}>Your Previous Feedback</h3>
           <div className="space-y-2">
             {feedbacks.filter(f => f.message !== "[Google Review Click]").map((f: any) => (
-              <div key={f.id} className="p-3 rounded-xl bg-purple-50/40 border border-purple-100/30">
+              <div key={f.id} className={`p-3 rounded-xl ${dm ? "bg-white/5 border-white/10" : "bg-purple-50/40 border-purple-100/30"} border`}>
                 {f.rating && (
                   <div className="flex gap-0.5 mb-1">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-amber-400 fill-amber-400" : "text-gray-200"}`} />
+                      <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-amber-400 fill-amber-400" : dm ? "text-white/20" : "text-gray-200"}`} />
                     ))}
                   </div>
                 )}
-                <p className="text-gray-600 text-sm">{f.message}</p>
+                <p className={`${dm ? "text-white/80" : "text-gray-600"} text-sm font-medium`}>{f.message}</p>
+                
                 {f.admin_reply && (
-                  <div className="mt-2 pl-3 border-l-2 border-purple-300">
-                    <p className="text-purple-600 text-xs font-medium">Admin Reply:</p>
-                    <p className="text-gray-500 text-xs">{f.admin_reply}</p>
+                  <div className={`mt-2 pl-3 border-l-2 ${dm ? "border-purple-400/50" : "border-purple-300"}`}>
+                    <p className={`${dm ? "text-purple-400" : "text-purple-600"} text-xs font-bold`}>Ritesh Replied:</p>
+                    <p className={`${textSecondary} text-xs`}>{f.admin_reply}</p>
+                    
+                    {/* User reply to admin */}
+                    {f.user_reply && (
+                      <div className={`mt-1.5 pl-3 border-l-2 ${dm ? "border-pink-400/50" : "border-pink-300"}`}>
+                        <p className={`${dm ? "text-pink-400" : "text-pink-600"} text-xs font-bold`}>Your Reply:</p>
+                        <p className={`${textSecondary} text-xs`}>{f.user_reply}</p>
+                      </div>
+                    )}
+                    
+                    {/* Reply button */}
+                    {!f.user_reply && (
+                      <>
+                        {replyingTo === f.id ? (
+                          <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()}>
+                            <Input
+                              value={userReplyText[f.id] || ""}
+                              onChange={e => setUserReplyText(prev => ({ ...prev, [f.id]: e.target.value }))}
+                              placeholder="Reply to Ritesh..."
+                              className={`${inputBg} h-7 text-xs flex-1 rounded-lg`}
+                              autoFocus
+                              onKeyDown={e => { if (e.key === "Enter") handleUserReply(f.id); }}
+                            />
+                            <Button size="sm" onClick={() => handleUserReply(f.id)}
+                              className="bg-purple-500 hover:bg-purple-400 h-7 px-3 text-xs font-bold rounded-lg">
+                              <Send className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setReplyingTo(f.id)}
+                            className={`mt-1 flex items-center gap-1 text-[10px] ${dm ? "text-purple-400 hover:text-purple-300" : "text-purple-500 hover:text-purple-400"} font-bold`}>
+                            <Reply className="w-3 h-3" /> Reply
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
-                <p className="text-gray-300 text-[10px] mt-1">{new Date(f.created_at).toLocaleString("en-IN")}</p>
+                
+                <p className={`${textMuted} text-[10px] mt-1`}>{new Date(f.created_at).toLocaleString("en-IN")}</p>
               </div>
             ))}
           </div>

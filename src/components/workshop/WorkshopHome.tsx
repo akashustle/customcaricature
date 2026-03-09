@@ -24,6 +24,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
     const ch = supabase.channel("workshop-home")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, fetchAttendance)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_sessions" }, fetchLiveSessions)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings" }, fetchSettings)
       .subscribe();
     return () => { clearInterval(t); supabase.removeChannel(ch); };
   }, []);
@@ -49,6 +50,12 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
   const isSessionExpired = (session: any) => session.link_expiry ? now > new Date(session.link_expiry) : false;
   const workshopEnded = settings.workshop_ended?.enabled;
   const whatsappNum = settings.whatsapp_support_number?.number || "8433843725";
+
+  // Filter live sessions by user's slot
+  const filteredSessions = liveSessions.filter(s => {
+    if (!s.slot) return true;
+    return s.slot === user.slot;
+  });
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <div className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm ${className}`}>{children}</div>
@@ -131,14 +138,14 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
         </GlassCard>
       </motion.div>
 
-      {liveSessions.length > 0 && (
+      {filteredSessions.length > 0 && settings.live_session_enabled?.enabled !== false && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <GlassCard>
             <h3 className={`${textPrimary} text-sm uppercase tracking-wider mb-3 flex items-center gap-2`}>
               <VideoIcon className="w-4 h-4 text-purple-500" /> Live Sessions
             </h3>
             <div className="space-y-3">
-              {liveSessions.map((session: any) => {
+              {filteredSessions.map((session: any) => {
                 const expired = isSessionExpired(session);
                 const isLive = session.status === "live" && session.link_enabled && !expired;
                 return (
