@@ -124,7 +124,8 @@ const WorkshopAdmin = () => {
   const handleLogout = async () => {
     await logAction("logout", "Logged out of Workshop Admin Panel");
     localStorage.removeItem("workshop_admin");
-    navigate("/workscccworkshop2006 };
+    navigate("/cccworkshop2006");
+  };
 
   // User CRUD
   const addUser = async () => {
