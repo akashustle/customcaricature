@@ -439,8 +439,12 @@ const WorkshopAdmin = () => {
       setAdminInfo(updated);
     }
     if (adminEditData.password.trim().length >= 6) {
-      // Update auth password via edge function
-      toast({ title: "Password update requires re-login", description: "Contact super admin to change password" });
+      try {
+        const { data, error } = await supabase.functions.invoke("change-admin-password", { body: { new_password: adminEditData.password.trim(), target_user_id: info.user_id } });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        toast({ title: "Password Updated! 🔐" });
+      } catch (err: any) { toast({ title: "Password Error", description: err.message, variant: "destructive" }); }
     }
     await logAction("update_profile", `Updated profile`);
     toast({ title: "Profile Updated! ✅" });
