@@ -1,7 +1,8 @@
 import { 
   Package, Calendar, Receipt, MessageCircle, Users, DollarSign, 
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
-  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun
+  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun,
+  HelpCircle, FileQuestion
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -54,6 +55,13 @@ const NAV_SECTIONS = [
       { id: "voice", icon: Radio, label: "Voice" },
       { id: "notify", icon: Bell, label: "Notifications" },
       { id: "sessions", icon: Monitor, label: "Sessions" },
+    ],
+  },
+  {
+    label: "CRM",
+    items: [
+      { id: "enquiries", icon: FileQuestion, label: "Enquiries" },
+      { id: "support", icon: HelpCircle, label: "Support" },
     ],
   },
   {

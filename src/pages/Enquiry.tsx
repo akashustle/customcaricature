@@ -26,7 +26,9 @@ const Enquiry = () => {
   // Form data
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [instagramId, setInstagramId] = useState("");
+  const [eventType, setEventType] = useState("");
   const [enquiryType, setEnquiryType] = useState<"custom_caricature" | "event_booking" | "">("");
   const [caricatureType, setCaricatureType] = useState("");
   const [country, setCountry] = useState("India");
@@ -166,9 +168,11 @@ const Enquiry = () => {
       const { data, error } = await supabase.from("enquiries" as any).insert({
         name: name.trim(),
         mobile: mobile.trim(),
+        email: email.trim() || null,
         instagram_id: instagramId.trim() || null,
         enquiry_type: enquiryType,
         caricature_type: caricatureType || null,
+        event_type: eventType || null,
         country,
         state: state || null,
         district: district || null,
@@ -272,6 +276,10 @@ const Enquiry = () => {
                 <div>
                   <Label className="font-sans">Mobile Number *</Label>
                   <Input value={mobile} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit mobile number" className="mt-1" maxLength={10} />
+                </div>
+                <div>
+                  <Label className="font-sans">Email Address <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1" />
                 </div>
                 <div>
                   <Label className="font-sans">Instagram ID <span className="text-muted-foreground">(optional)</span></Label>
@@ -381,6 +389,24 @@ const Enquiry = () => {
                 <h3 className="font-display text-lg font-semibold flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-primary" /> Event Details
                 </h3>
+
+                <div>
+                  <Label className="font-sans">Event Type *</Label>
+                  <div className="mt-1">
+                    <Input
+                      value={eventType}
+                      onChange={(e) => setEventType(e.target.value)}
+                      placeholder="e.g. Wedding, Birthday, Corporate, College Fest..."
+                      className="font-sans"
+                      list="event-types-list"
+                    />
+                    <datalist id="event-types-list">
+                      {["Wedding", "Birthday Party", "Corporate Event", "College Fest", "Anniversary", "Baby Shower", "Engagement", "Kitty Party", "New Year Party", "Christmas Party", "Diwali Party", "Holi Party"].map(t => (
+                        <option key={t} value={t} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
 
                 <LocationDropdowns
                   state={state}

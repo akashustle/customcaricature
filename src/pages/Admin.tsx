@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot, ClipboardList, HelpCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -54,6 +54,8 @@ import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
+import AdminEnquiries from "@/components/admin/AdminEnquiries";
+import AdminSupport from "@/components/admin/AdminSupport";
 
 type Order = {
   id: string;
@@ -184,6 +186,7 @@ const Admin = () => {
     { id: "pricing", label: "Pricing" }, { id: "intl-pricing", label: "Intl Pricing" },
     { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
     { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
+    { id: "enquiries", label: "Enquiries" }, { id: "support", label: "Support" },
     { id: "settings", label: "Settings" },
   ];
   const [adminPermAllTabs, setAdminPermAllTabs] = useState(true);
@@ -1520,6 +1523,15 @@ const Admin = () => {
             <AdminChatbotTraining />
           </TabsContent>
 
+          <TabsContent value="enquiries">
+            <AdminEnquiries />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <AdminSupport />
+          </TabsContent>
+
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
@@ -1765,7 +1777,8 @@ const Admin = () => {
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
 
-
+          <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
+          <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
