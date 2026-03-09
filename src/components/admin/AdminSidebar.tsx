@@ -1,7 +1,8 @@
 import { 
   Package, Calendar, Receipt, MessageCircle, Users, DollarSign, 
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
-  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun
+  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun,
+  HelpCircle, FileQuestion
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
