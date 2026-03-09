@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, RefreshCw } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
@@ -24,8 +24,6 @@ const WorkshopDashboard = () => {
   const [workshopUser, setWorkshopUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("home");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_user_dark") === "true");
-  const [refreshing, setRefreshing] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => { localStorage.setItem("ws_user_dark", darkMode.toString()); }, [darkMode]);
 
@@ -35,6 +33,22 @@ const WorkshopDashboard = () => {
     const user = JSON.parse(stored);
     setWorkshopUser(user);
     refreshUser(user.id);
+
+    // Real-time user updates
+    const ch = supabase.channel("ws-user-profile")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "workshop_users", filter: `id=eq.${user.id}` }, (payload: any) => {
+        const updated = payload.new;
+        if (!updated.is_enabled) {
+          localStorage.removeItem("workshop_user");
+          toast({ title: "Account Disabled", variant: "destructive" });
+          navigate("/workshop");
+          return;
+        }
+        setWorkshopUser(updated);
+        localStorage.setItem("workshop_user", JSON.stringify(updated));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
 
   const refreshUser = async (userId: string) => {
@@ -44,15 +58,6 @@ const WorkshopDashboard = () => {
       if (!user.is_enabled) { localStorage.removeItem("workshop_user"); toast({ title: "Account Disabled", variant: "destructive" }); navigate("/workshop"); return; }
       setWorkshopUser(user); localStorage.setItem("workshop_user", JSON.stringify(user));
     }
-  };
-
-  const handleRefresh = async () => {
-    if (!workshopUser) return;
-    setRefreshing(true);
-    await refreshUser(workshopUser.id);
-    setRefreshKey(k => k + 1);
-    setTimeout(() => setRefreshing(false), 500);
-    toast({ title: "Refreshed! ✅" });
   };
 
   const handleLogout = () => { localStorage.removeItem("workshop_user"); navigate("/workshop"); };
@@ -71,11 +76,11 @@ const WorkshopDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "home": return <WorkshopHome key={refreshKey} user={workshopUser} darkMode={darkMode} />;
-      case "certificates": return <WorkshopCertificates key={refreshKey} user={workshopUser} darkMode={darkMode} />;
-      case "assignments": return <WorkshopAssignments key={refreshKey} user={workshopUser} darkMode={darkMode} />;
-      case "videos": return <WorkshopVideos key={refreshKey} user={workshopUser} darkMode={darkMode} />;
-      case "feedback": return <WorkshopFeedback key={refreshKey} user={workshopUser} darkMode={darkMode} />;
+      case "home": return <WorkshopHome user={workshopUser} darkMode={darkMode} />;
+      case "certificates": return <WorkshopCertificates user={workshopUser} darkMode={darkMode} />;
+      case "assignments": return <WorkshopAssignments user={workshopUser} darkMode={darkMode} />;
+      case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
+      case "feedback": return <WorkshopFeedback user={workshopUser} darkMode={darkMode} />;
       default: return null;
     }
   };
@@ -94,9 +99,6 @@ const WorkshopDashboard = () => {
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={handleRefresh} className={`${textSecondary} rounded-xl`}>
-              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            </Button>
             <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className={`${textSecondary} rounded-xl`}>
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
@@ -122,7 +124,7 @@ const WorkshopDashboard = () => {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-4">
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab + refreshKey} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
             {renderContent()}
           </motion.div>
         </AnimatePresence>
