@@ -37,6 +37,7 @@ const sidebarItems = [
   { key: "registered", icon: Users, label: "Registered" },
   { key: "manual", icon: UserPlus, label: "Manual Users" },
   { key: "live", icon: Radio, label: "Live Sessions" },
+  { key: "live-requests", icon: MonitorPlay, label: "Live Requests" },
   { key: "videos", icon: Video, label: "Videos" },
   { key: "assignments", icon: FileText, label: "Assignments" },
   { key: "certificates", icon: Award, label: "Certificates" },
@@ -84,6 +85,14 @@ const WorkshopAdmin = () => {
   const [certUploadFile, setCertUploadFile] = useState<File | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState("8433843725");
   const [refreshing, setRefreshing] = useState(false);
+  const [liveRequests, setLiveRequests] = useState<any[]>([]);
+  const [editingVideo, setEditingVideo] = useState<string | null>(null);
+  const [editVideoData, setEditVideoData] = useState<any>({});
+  const [countdownTime, setCountdownTime] = useState("");
+  const [countdownLabel, setCountdownLabel] = useState("Session starts in");
+  const [recordedNoteUser, setRecordedNoteUser] = useState<string | null>(null);
+  const [recordedNote, setRecordedNote] = useState("");
+  const [assignmentViewUrl, setAssignmentViewUrl] = useState<string | null>(null);
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
@@ -107,13 +116,14 @@ const WorkshopAdmin = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_user_locations" }, fetchLocations)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_admin_log" }, fetchAdminLog)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_certificates" }, fetchCertificates)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_session_requests" }, fetchLiveRequests)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests()]);
     setRefreshing(false);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
@@ -128,8 +138,9 @@ const WorkshopAdmin = () => {
   const fetchCertificates = async () => { const { data } = await supabase.from("workshop_certificates" as any).select("*"); if (data) setCertificates(data as any[]); };
   const fetchSettings = async () => {
     const { data } = await supabase.from("workshop_settings" as any).select("*");
-    if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); }
+    if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); if (map.countdown_timer?.target_time) setCountdownTime(map.countdown_timer.target_time); if (map.countdown_timer?.label) setCountdownLabel(map.countdown_timer.label); }
   };
+  const fetchLiveRequests = async () => { const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").order("created_at", { ascending: false }); if (data) setLiveRequests(data as any[]); };
 
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
@@ -759,6 +770,57 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
+              {/* LIVE REQUESTS */}
+              {tab === "live-requests" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary}`}>Live Session Requests ({liveRequests.length})</h1>
+                    <RefreshButton />
+                  </div>
+                  {liveRequests.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>No requests yet</p></GlassCard>}
+                  {liveRequests.map((r: any) => {
+                    const u = users.find(u => u.id === r.user_id);
+                    return (
+                      <GlassCard key={r.id}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className={`${textPrimary} text-sm`}>{u?.name || "User"} {u?.roll_number && <span className={textMuted}>· #{u.roll_number}</span>}</p>
+                            <p className={`${textSecondary} text-xs`}>{u?.mobile} · {u?.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}</p>
+                            <p className={`${textMuted} text-[10px]`}>{new Date(r.created_at).toLocaleString("en-IN")}</p>
+                            <Badge className={`mt-1 text-[10px] ${r.status === "pending" ? "bg-amber-100 text-amber-600" : r.status === "allowed" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#d98c8c]/20 text-[#b06060]"}`}>{r.status}</Badge>
+                            {r.admin_note && <p className={`${textSecondary} text-xs mt-1`}>Note: {r.admin_note}</p>}
+                          </div>
+                          {r.status === "pending" && (
+                            <div className="flex flex-col gap-1">
+                              <Button size="sm" className="bg-[#7c9885] hover:bg-[#6a8a75] text-white h-7 text-xs font-bold" onClick={async () => {
+                                await supabase.from("workshop_live_session_requests" as any).update({ status: "allowed" } as any).eq("id", r.id);
+                                await logAction("approve_live_request", `Approved for ${u?.name}`);
+                                toast({ title: "Approved ✅" }); fetchLiveRequests();
+                              }}>Allow</Button>
+                              <Dialog>
+                                <DialogTrigger asChild><Button size="sm" variant="destructive" className="h-7 text-xs">Deny</Button></DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader><DialogTitle>Deny Request for {u?.name}</DialogTitle></DialogHeader>
+                                  <div className="space-y-3">
+                                    <div><Label>Reason (shown to user)</Label><Textarea id={`deny-note-${r.id}`} rows={2} placeholder="Why not allowed..." /></div>
+                                    <Button variant="destructive" onClick={async () => {
+                                      const note = (document.getElementById(`deny-note-${r.id}`) as HTMLTextAreaElement)?.value || "";
+                                      await supabase.from("workshop_live_session_requests" as any).update({ status: "denied", admin_note: note } as any).eq("id", r.id);
+                                      await logAction("deny_live_request", `Denied for ${u?.name}`);
+                                      toast({ title: "Denied" }); fetchLiveRequests();
+                                    }}>Deny Request</Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          )}
+                        </div>
+                      </GlassCard>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* VIDEOS */}
               {tab === "videos" && (
                 <div className="space-y-4">
@@ -790,8 +852,29 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {videos.map((v: any) => (
+                  {videos.map((v: any) => {
+                    const isEditingV = editingVideo === v.id;
+                    return (
                     <GlassCard key={v.id}>
+                      {isEditingV ? (
+                        <div className="space-y-3">
+                          <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={editVideoData.title || ""} onChange={e => setEditVideoData({...editVideoData, title: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>URL</Label><Input value={editVideoData.video_url || ""} onChange={e => setEditVideoData({...editVideoData, video_url: e.target.value})} className={inputClass} /></div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><Label className={`${textSecondary} text-xs`}>Type</Label><Select value={editVideoData.video_type} onValueChange={val => setEditVideoData({...editVideoData, video_type: val})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="file">File</SelectItem><SelectItem value="embed_link">YouTube/Embed</SelectItem><SelectItem value="link">External</SelectItem></SelectContent></Select></div>
+                            <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editVideoData.slot || ""} onValueChange={val => setEditVideoData({...editVideoData, slot: val})}><SelectTrigger className={inputClass}><SelectValue placeholder="All" /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
+                          </div>
+                          <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editVideoData.workshop_date || ""} onChange={e => setEditVideoData({...editVideoData, workshop_date: e.target.value})} className={inputClass} /></div>
+                          <div className="flex items-center justify-between"><Label className={`${textSecondary} text-xs`}>Allow Download</Label><Switch checked={editVideoData.global_download_allowed ?? false} onCheckedChange={val => setEditVideoData({...editVideoData, global_download_allowed: val})} /></div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={async () => {
+                              await supabase.from("workshop_videos" as any).update({ title: editVideoData.title, video_url: editVideoData.video_url, video_type: editVideoData.video_type, slot: editVideoData.slot || null, workshop_date: editVideoData.workshop_date, global_download_allowed: editVideoData.global_download_allowed } as any).eq("id", v.id);
+                              await logAction("edit_video", `Edited: ${editVideoData.title}`); toast({ title: "Video Updated! ✅" }); setEditingVideo(null); fetchVideos();
+                            }} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold"><Save className="w-4 h-4 mr-1" />Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingVideo(null)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className={`${textPrimary} text-sm`}>{v.title}</p>
@@ -802,12 +885,15 @@ const WorkshopAdmin = () => {
                           </div>
                         </div>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingVideo(v.id); setEditVideoData(v); }} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Edit2 className="w-3 h-3" /></Button>
                           <Button variant="ghost" size="sm" onClick={() => toggleVideoField(v.id, "global_download_allowed", !v.global_download_allowed)} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Download className="w-3 h-3 mr-1" />{v.global_download_allowed ? "Off" : "On"}</Button>
                           <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400 h-7 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteVideo(v.id, v.title)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                         </div>
                       </div>
+                      )}
                     </GlassCard>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -1218,6 +1304,27 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
               <div className="flex flex-wrap gap-2 mt-2">
                 <Button size="sm" variant="ghost" className={`${textSecondary} h-7 text-xs`} onClick={() => { setEditingUser(u.id); setEditData(u); }}><Edit2 className="w-3 h-3 mr-1" />Edit</Button>
                 <Button size="sm" variant="ghost" className="text-[#b08d57] h-7 text-xs font-bold" onClick={() => setCertUserId(u.id)}><Award className="w-3 h-3 mr-1" />Certificate</Button>
+                {!u.prefers_recorded ? (
+                  <Dialog>
+                    <DialogTrigger asChild><Button size="sm" variant="ghost" className="text-blue-500 h-7 text-xs font-bold"><MonitorPlay className="w-3 h-3 mr-1" />Prefer Recorded</Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader><DialogTitle>Mark {u.name} for Recorded Session</DialogTitle></DialogHeader>
+                      <div className="space-y-3">
+                        <div><Label>Note (why?)</Label><Textarea id={`rec-note-${u.id}`} rows={2} placeholder="Reason..." /></div>
+                        <Button onClick={async () => {
+                          const note = (document.getElementById(`rec-note-${u.id}`) as HTMLTextAreaElement)?.value || "";
+                          await supabase.from("workshop_users" as any).update({ prefers_recorded: true, prefers_recorded_note: note, prefers_recorded_at: new Date().toISOString() } as any).eq("id", u.id);
+                          await logAction("prefer_recorded", `${u.name} → recorded`); toast({ title: "Marked for recorded session" }); fetchUsers();
+                        }} className="bg-blue-500 hover:bg-blue-400 text-white font-bold w-full">Confirm</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <Button size="sm" variant="ghost" className="text-blue-400 h-7 text-xs" onClick={async () => {
+                    await supabase.from("workshop_users" as any).update({ prefers_recorded: false, prefers_recorded_note: null, prefers_recorded_at: null } as any).eq("id", u.id);
+                    await logAction("undo_recorded", `${u.name} → live`); toast({ title: "Reverted to live" }); fetchUsers();
+                  }}><MonitorPlay className="w-3 h-3 mr-1" />Undo Recorded</Button>
+                )
                 <Button size="sm" variant="ghost" className={`h-7 text-xs ${u.is_enabled ? "text-[#c9a96e]" : "text-[#7c9885]"}`} onClick={() => toggleUserEnabled(u.id, !u.is_enabled, u.name)}>
                   {u.is_enabled ? <><EyeOff className="w-3 h-3 mr-1" />Disable</> : <><Eye className="w-3 h-3 mr-1" />Enable</>}
                 </Button>

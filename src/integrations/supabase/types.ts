@@ -2619,6 +2619,33 @@ export type Database = {
           },
         ]
       }
+      workshop_live_session_requests: {
+        Row: {
+          admin_note: string | null
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workshop_live_sessions: {
         Row: {
           artist_name: string | null
@@ -2779,6 +2806,9 @@ export type Database = {
           name: string
           occupation: string | null
           payment_screenshot_path: string | null
+          prefers_recorded: boolean
+          prefers_recorded_at: string | null
+          prefers_recorded_note: string | null
           roll_number: number | null
           slot: string
           student_type: string
@@ -2800,6 +2830,9 @@ export type Database = {
           name: string
           occupation?: string | null
           payment_screenshot_path?: string | null
+          prefers_recorded?: boolean
+          prefers_recorded_at?: string | null
+          prefers_recorded_note?: string | null
           roll_number?: number | null
           slot: string
           student_type?: string
@@ -2821,6 +2854,9 @@ export type Database = {
           name?: string
           occupation?: string | null
           payment_screenshot_path?: string | null
+          prefers_recorded?: boolean
+          prefers_recorded_at?: string | null
+          prefers_recorded_note?: string | null
           roll_number?: number | null
           slot?: string
           student_type?: string
