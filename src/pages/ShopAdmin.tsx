@@ -111,13 +111,28 @@ const ShopAdmin = () => {
   useEffect(() => {
     if (!authorized) return;
     const ch = supabase.channel("shop-admin-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shop_orders" }, () => fetchAll())
-      .on("postgres_changes", { event: "*", schema: "public", table: "shop_products" }, () => fetchAll())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "shop_orders" }, (payload) => {
+        setOrders(prev => [payload.new as any, ...prev]);
+        toast({ title: "🛒 New Order!", description: `Order received` });
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "shop_orders" }, (payload) => {
+        setOrders(prev => prev.map(o => o.id === (payload.new as any).id ? { ...o, ...(payload.new as any) } : o));
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "shop_products" }, () => fetchAll())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "shop_products" }, (payload) => {
+        setProducts(prev => prev.map(p => p.id === (payload.new as any).id ? { ...p, ...(payload.new as any) } : p));
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "shop_settings" }, () => fetchAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "invoices" }, () => fetchAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "shop_product_variations" }, () => fetchAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "shop_coupons" }, () => fetchAll())
-      .on("postgres_changes", { event: "*", schema: "public", table: "shop_product_reviews" }, () => fetchAll())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "shop_product_reviews" }, (payload) => {
+        setProductReviews(prev => [payload.new as any, ...prev]);
+        toast({ title: "⭐ New Review!" });
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "shop_product_reviews" }, (payload) => {
+        setProductReviews(prev => prev.map(r => r.id === (payload.new as any).id ? { ...r, ...(payload.new as any) } : r));
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [authorized]);
