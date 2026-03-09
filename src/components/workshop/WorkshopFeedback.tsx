@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,12 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
   const [settings, setSettings] = useState<any>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [userReplyText, setUserReplyText] = useState<{ [key: string]: string }>({});
+  const messageRef = useRef(message);
+  const ratingRef = useRef(rating);
+
+  // Keep refs in sync without triggering re-renders
+  useEffect(() => { messageRef.current = message; }, [message]);
+  useEffect(() => { ratingRef.current = rating; }, [rating]);
 
   const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
   const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
@@ -24,27 +30,32 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
   const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
   const inputBg = dm ? "bg-white/10 border-white/20 text-white placeholder:text-white/30" : "bg-white/80 border-purple-100 text-gray-700 placeholder:text-gray-300";
 
-  useEffect(() => {
-    fetchFeedbacks(); fetchSettings();
-    const ch = supabase.channel("ws-feedback-user")
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, []);
-
-  const fetchFeedbacks = async () => {
+  const fetchFeedbacks = useCallback(async () => {
     const { data } = await supabase.from("workshop_feedback" as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     if (data) setFeedbacks(data as any[]);
-  };
+  }, [user.id]);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     const { data } = await supabase.from("workshop_settings" as any).select("*");
     if (data) {
       const map: any = {};
       (data as any[]).forEach((s: any) => { map[s.id] = s.value; });
       setSettings(map);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchFeedbacks(); fetchSettings();
+    // Only listen for INSERT events to avoid re-fetching while user is typing
+    const ch = supabase.channel("ws-feedback-user")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "workshop_feedback", filter: `user_id=eq.${user.id}` }, fetchFeedbacks)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "workshop_feedback", filter: `user_id=eq.${user.id}` }, (payload) => {
+        // Only update the specific feedback item, don't refetch all
+        setFeedbacks(prev => prev.map(f => f.id === (payload.new as any).id ? { ...f, ...(payload.new as any) } : f));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user.id, fetchFeedbacks, fetchSettings]);
 
   const feedbackEnabled = settings.feedback_visibility?.enabled !== false;
 
@@ -60,7 +71,6 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
       toast({ title: "Thank you for your feedback! 💛" });
       setMessage("");
       setRating(0);
-      fetchFeedbacks();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -78,7 +88,6 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     toast({ title: "Reply sent! ✅" });
     setUserReplyText(prev => ({ ...prev, [feedbackId]: "" }));
     setReplyingTo(null);
-    fetchFeedbacks();
   };
 
   const handleGoogleReview = async () => {
@@ -94,9 +103,7 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     <div className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm ${className}`}>{children}</div>
   );
 
-  if (!feedbackEnabled) {
-    return null;
-  }
+  if (!feedbackEnabled) return null;
 
   return (
     <div className="space-y-4">
@@ -164,8 +171,16 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
                         <p className={`${textSecondary} text-xs`}>{f.user_reply}</p>
                       </div>
                     )}
+
+                    {/* Admin reply to user reply */}
+                    {f.admin_reply_to_user_reply && (
+                      <div className={`mt-1.5 pl-3 border-l-2 ${dm ? "border-purple-400/50" : "border-purple-300"}`}>
+                        <p className={`${dm ? "text-purple-400" : "text-purple-600"} text-xs font-bold`}>Ritesh:</p>
+                        <p className={`${textSecondary} text-xs`}>{f.admin_reply_to_user_reply}</p>
+                      </div>
+                    )}
                     
-                    {/* Reply button */}
+                    {/* Reply button - only show if no user reply yet */}
                     {!f.user_reply && (
                       <>
                         {replyingTo === f.id ? (

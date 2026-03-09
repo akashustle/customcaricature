@@ -24,6 +24,7 @@ import {
   MapPin, History, Shield, BarChart3, ChevronDown, ChevronUp, TrendingUp,
   PieChart, Activity, Moon, Sun, ChevronLeft, ChevronRight, AlertTriangle,
   ExternalLink, UsersRound, Download, RefreshCw, Search, Hash, MonitorPlay,
+  Bell, Send, Lock, Reply,
 } from "lucide-react";
 import ExportButton from "@/components/admin/ExportButton";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
@@ -44,6 +45,7 @@ const sidebarItems = [
   { key: "attendance", icon: Calendar, label: "Attendance" },
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
+  { key: "notifications", icon: Bell, label: "Notifications" },
   { key: "settings", icon: Settings, label: "Settings" },
 ];
 
@@ -93,6 +95,16 @@ const WorkshopAdmin = () => {
   const [recordedNoteUser, setRecordedNoteUser] = useState<string | null>(null);
   const [recordedNote, setRecordedNote] = useState("");
   const [assignmentViewUrl, setAssignmentViewUrl] = useState<string | null>(null);
+  const [editingSession, setEditingSession] = useState<string | null>(null);
+  const [editSessionData, setEditSessionData] = useState<any>({});
+  const [adminProfileEdit, setAdminProfileEdit] = useState(false);
+  const [adminEditData, setAdminEditData] = useState({ name: "", email: "", password: "" });
+  const [notifTitle, setNotifTitle] = useState("");
+  const [notifMessage, setNotifMessage] = useState("");
+  const [notifTarget, setNotifTarget] = useState("all");
+  const [notifType, setNotifType] = useState("announcement");
+  const [workshopNotifications, setWorkshopNotifications] = useState<any[]>([]);
+  const [feedbackReplyToUserReply, setFeedbackReplyToUserReply] = useState<{ [key: string]: string }>({});
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
@@ -117,13 +129,14 @@ const WorkshopAdmin = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_admin_log" }, fetchAdminLog)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_certificates" }, fetchCertificates)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_session_requests" }, fetchLiveRequests)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_notifications" }, fetchWorkshopNotifications)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications()]);
     setRefreshing(false);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
@@ -141,6 +154,7 @@ const WorkshopAdmin = () => {
     if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); if (map.whatsapp_support_number?.number) setWhatsappNumber(map.whatsapp_support_number.number); if (map.countdown_timer?.target_time) setCountdownTime(map.countdown_timer.target_time); if (map.countdown_timer?.label) setCountdownLabel(map.countdown_timer.label); }
   };
   const fetchLiveRequests = async () => { const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").order("created_at", { ascending: false }); if (data) setLiveRequests(data as any[]); };
+  const fetchWorkshopNotifications = async () => { const { data } = await supabase.from("workshop_notifications" as any).select("*").order("created_at", { ascending: false }).limit(100); if (data) setWorkshopNotifications(data as any[]); };
 
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
@@ -376,7 +390,70 @@ const WorkshopAdmin = () => {
     toast({ title: "Reply sent!" }); setFeedbackReply(prev => ({ ...prev, [feedbackId]: "" })); fetchFeedbacks();
   };
 
-  // Hard Reset
+  // Reply to user reply on feedback
+  const replyToUserReply = async (feedbackId: string) => {
+    const reply = feedbackReplyToUserReply[feedbackId];
+    if (!reply?.trim()) return;
+    await supabase.from("workshop_feedback" as any).update({ admin_reply_to_user_reply: reply, admin_reply_to_user_reply_at: new Date().toISOString() } as any).eq("id", feedbackId);
+    await logAction("reply_to_user_reply", "Replied to user's reply");
+    toast({ title: "Reply sent!" }); setFeedbackReplyToUserReply(prev => ({ ...prev, [feedbackId]: "" })); fetchFeedbacks();
+  };
+
+  // Update live session (full edit)
+  const saveSessionEdit = async () => {
+    if (!editingSession) return;
+    await supabase.from("workshop_live_sessions" as any).update({
+      title: editSessionData.title, session_date: editSessionData.session_date, slot: editSessionData.slot,
+      artist_name: editSessionData.artist_name || null, artist_portfolio_link: editSessionData.artist_portfolio_link || null,
+      requirements: editSessionData.requirements || null, what_students_learn: editSessionData.what_students_learn || null,
+      meet_link: editSessionData.meet_link || null, link_expiry: editSessionData.link_expiry || null,
+    } as any).eq("id", editingSession);
+    await logAction("edit_session", `Edited: ${editSessionData.title}`);
+    toast({ title: "Session Updated! ✅" }); setEditingSession(null); fetchLiveSessions();
+  };
+
+  // Admin profile update
+  const updateAdminProfile = async () => {
+    const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
+    const updates: any = {};
+    if (adminEditData.name.trim()) updates.name = adminEditData.name.trim();
+    if (adminEditData.email.trim()) updates.email = adminEditData.email.trim();
+    if (Object.keys(updates).length > 0) {
+      await supabase.from("workshop_admins" as any).update(updates as any).eq("id", info.id);
+      // Update local storage
+      const updated = { ...info, ...updates };
+      localStorage.setItem("workshop_admin", JSON.stringify(updated));
+      setAdminInfo(updated);
+    }
+    if (adminEditData.password.trim().length >= 6) {
+      // Update auth password via edge function
+      toast({ title: "Password update requires re-login", description: "Contact super admin to change password" });
+    }
+    await logAction("update_profile", `Updated profile`);
+    toast({ title: "Profile Updated! ✅" });
+    setAdminProfileEdit(false); fetchWorkshopAdmins();
+  };
+
+  // Send workshop notification
+  const sendWorkshopNotification = async () => {
+    if (!notifTitle.trim() || !notifMessage.trim()) { toast({ title: "Title and message required", variant: "destructive" }); return; }
+    const targets = notifTarget === "all" ? users : users.filter(u => u.slot === notifTarget);
+    const inserts = targets.map(u => ({ user_id: u.id, title: notifTitle.trim(), message: notifMessage.trim(), type: notifType }));
+    if (inserts.length === 0) { toast({ title: "No users to notify", variant: "destructive" }); return; }
+    // Batch insert
+    for (let i = 0; i < inserts.length; i += 50) {
+      await supabase.from("workshop_notifications" as any).insert(inserts.slice(i, i + 50) as any);
+    }
+    await logAction("send_notification", `Sent "${notifTitle}" to ${inserts.length} users`);
+    toast({ title: `Notification sent to ${inserts.length} users! 🔔` });
+    setNotifTitle(""); setNotifMessage(""); fetchWorkshopNotifications();
+  };
+
+  const deleteWorkshopNotification = async (id: string) => {
+    await supabase.from("workshop_notifications" as any).delete().eq("id", id);
+    toast({ title: "Deleted" }); fetchWorkshopNotifications();
+  };
+
   const handleHardReset = async () => {
     if (hardResetCode !== "01022006") { toast({ title: "Invalid code!", variant: "destructive" }); return; }
     try {
@@ -746,27 +823,54 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {liveSessions.map((s: any) => (
+                  {liveSessions.map((s: any) => {
+                    const isEditingS = editingSession === s.id;
+                    return (
                     <GlassCard key={s.id}>
+                      {isEditingS ? (
+                        <div className="space-y-3">
+                          <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={editSessionData.title || ""} onChange={e => setEditSessionData({...editSessionData, title: e.target.value})} className={inputClass} /></div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><Label className={`${textSecondary} text-xs`}>Date</Label><Input type="date" value={editSessionData.session_date || ""} onChange={e => setEditSessionData({...editSessionData, session_date: e.target.value})} className={inputClass} /></div>
+                            <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editSessionData.slot || "6pm-9pm"} onValueChange={v => setEditSessionData({...editSessionData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3 PM</SelectItem><SelectItem value="6pm-9pm">6–9 PM</SelectItem></SelectContent></Select></div>
+                          </div>
+                          <div><Label className={`${textSecondary} text-xs`}>Artist Name</Label><Input value={editSessionData.artist_name || ""} onChange={e => setEditSessionData({...editSessionData, artist_name: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Artist Portfolio Link</Label><Input value={editSessionData.artist_portfolio_link || ""} onChange={e => setEditSessionData({...editSessionData, artist_portfolio_link: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>What Students Learn</Label><Textarea value={editSessionData.what_students_learn || ""} onChange={e => setEditSessionData({...editSessionData, what_students_learn: e.target.value})} rows={2} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Requirements</Label><Textarea value={editSessionData.requirements || ""} onChange={e => setEditSessionData({...editSessionData, requirements: e.target.value})} rows={2} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Meet Link</Label><Input value={editSessionData.meet_link || ""} onChange={e => setEditSessionData({...editSessionData, meet_link: e.target.value})} className={inputClass} /></div>
+                          <div><Label className={`${textSecondary} text-xs`}>Link Expiry</Label><Input type="datetime-local" value={editSessionData.link_expiry ? editSessionData.link_expiry.slice(0, 16) : ""} onChange={e => setEditSessionData({...editSessionData, link_expiry: e.target.value})} className={inputClass} /></div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={saveSessionEdit} className="bg-[#b08d57] hover:bg-[#9e7d4a] text-white font-bold"><Save className="w-4 h-4 mr-1" />Save</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditingSession(null)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap"><p className={`${textPrimary} text-sm`}>{s.title}</p><Badge className={`text-[10px] ${s.status === "live" ? "bg-red-500/20 text-red-500" : s.status === "completed" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{s.status}</Badge></div>
                           <p className={`${textSecondary} text-xs`}>{new Date(s.session_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {s.slot}</p>
                           {s.artist_name && <p className={`${textSecondary} text-xs mt-1`}>🎨 {s.artist_name} {s.artist_portfolio_link && <a href={s.artist_portfolio_link} target="_blank" rel="noopener noreferrer" className="text-[#b08d57] ml-1">Portfolio ↗</a>}</p>}
+                          {s.what_students_learn && <p className={`${textMuted} text-xs mt-1`}>📚 {s.what_students_learn}</p>}
+                          {s.requirements && <p className={`${textMuted} text-xs mt-0.5`}>📋 {s.requirements}</p>}
                           {s.meet_link && <p className={`${textMuted} text-xs mt-1`}>🔗 {s.meet_link}</p>}
+                          {s.link_expiry && <p className={`${textMuted} text-[10px] mt-0.5`}>⏰ Expires: {new Date(s.link_expiry).toLocaleString("en-IN")}</p>}
                         </div>
                         <div className="flex flex-col gap-1 flex-shrink-0">
                           <div className="flex gap-1">
                             <Select value={s.status} onValueChange={v => updateSessionStatus(s.id, v)}><SelectTrigger className={`h-7 text-[10px] w-24 ${inputClass}`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="live">Live</SelectItem><SelectItem value="completed">Done</SelectItem></SelectContent></Select>
                           </div>
                           <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => { setEditingSession(s.id); setEditSessionData(s); }} className={`h-7 px-2 text-[10px] ${textSecondary}`}><Edit2 className="w-3 h-3" /></Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleSessionLink(s.id, !s.link_enabled)} className={`h-7 px-2 text-[10px] ${s.link_enabled ? "text-[#7c9885]" : textMuted}`}><Link2 className="w-3 h-3 mr-0.5" />{s.link_enabled ? "ON" : "OFF"}</Button>
                             <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400 h-7 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete session?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteSession(s.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                           </div>
                         </div>
                       </div>
+                      )}
                     </GlassCard>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -1087,21 +1191,93 @@ const WorkshopAdmin = () => {
                           {f.rating && <div className="flex gap-0.5 my-1">{[1,2,3,4,5].map(s => <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-[#c9a96e] fill-[#c9a96e]" : textMuted}`} />)}</div>}
                           <p className={`${dm ? "text-white/70" : "text-[#5a4a3a]"} text-sm font-medium`}>{f.message}</p>
                           <p className={`${textMuted} text-[10px] mt-1`}>{new Date(f.created_at).toLocaleString("en-IN")}</p>
+                          
+                          {/* Admin reply */}
                           {f.admin_reply && (
                             <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-white/5" : "bg-[#faf5ef]"} border ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
-                              <p className={`${textSecondary} text-xs`}>↩️ Ritesh Replied: {f.admin_reply}</p>
-                              {f.user_reply && <p className={`${textMuted} text-xs mt-1`}>💬 User: {f.user_reply}</p>}
+                              <p className={`${textSecondary} text-xs`}>↩️ <strong>Your Reply:</strong> {f.admin_reply}</p>
                             </div>
                           )}
+
+                          {/* User reply - highlighted prominently */}
+                          {f.user_reply && (
+                            <div className={`mt-2 p-2 rounded-lg ${dm ? "bg-blue-500/10 border-blue-500/30" : "bg-blue-50 border-blue-200"} border`}>
+                              <p className="text-xs font-bold text-blue-600 flex items-center gap-1"><Reply className="w-3 h-3" /> {f.workshop_users?.name || "User"} replied:</p>
+                              <p className={`text-xs mt-0.5 ${dm ? "text-blue-300" : "text-blue-700"} font-medium`}>{f.user_reply}</p>
+                              <p className={`${textMuted} text-[10px] mt-0.5`}>{f.user_reply_at ? new Date(f.user_reply_at).toLocaleString("en-IN") : ""}</p>
+                              
+                              {/* Admin reply to user reply */}
+                              {f.admin_reply_to_user_reply && (
+                                <div className={`mt-1.5 pl-2 border-l-2 ${dm ? "border-[#b08d57]/50" : "border-[#b08d57]/30"}`}>
+                                  <p className={`text-[10px] font-bold text-[#b08d57]`}>↩️ You replied:</p>
+                                  <p className={`${textSecondary} text-xs`}>{f.admin_reply_to_user_reply}</p>
+                                </div>
+                              )}
+                              
+                              {/* Reply to user reply input */}
+                              {!f.admin_reply_to_user_reply && (
+                                <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()}>
+                                  <Input placeholder="Reply to user..." value={feedbackReplyToUserReply[f.id] || ""} onChange={e => setFeedbackReplyToUserReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-7 text-xs flex-1`} autoComplete="off" />
+                                  <Button size="sm" onClick={() => replyToUserReply(f.id)} className="bg-blue-500 hover:bg-blue-400 text-white h-7 px-3 text-xs font-bold"><Send className="w-3 h-3" /></Button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Admin reply / edit input */}
                           <div className="mt-2 flex gap-2" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
                             <Input placeholder={f.admin_reply ? "Edit reply..." : "Reply..."} value={feedbackReply[f.id] ?? (f.admin_reply || "")} onChange={e => setFeedbackReply(prev => ({ ...prev, [f.id]: e.target.value }))} className={`${inputClass} h-8 text-xs flex-1`} autoComplete="off" />
                             <Button size="sm" onClick={() => replyFeedback(f.id)} className={`${btnPrimary} h-8 px-3 text-xs`}>{f.admin_reply ? "Update" : "Reply"}</Button>
                           </div>
                         </div>
-                        <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={async () => { await supabase.from("workshop_feedback" as any).delete().eq("id", f.id); await logAction("delete_feedback", "Deleted"); fetchFeedbacks(); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                        <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-red-400"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this feedback.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={async () => { await supabase.from("workshop_feedback" as any).delete().eq("id", f.id); await logAction("delete_feedback", "Deleted"); fetchFeedbacks(); }}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                       </div>
                     </GlassCard>
                   ))}
+                </div>
+              )}
+
+              {/* NOTIFICATIONS */}
+              {tab === "notifications" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary} flex items-center gap-2`}><Bell className="w-5 h-5 text-[#b08d57]" /> Notifications</h1>
+                    <RefreshButton />
+                  </div>
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3`}>📢 Send Notification</h3>
+                    <div className="space-y-3">
+                      <div><Label className={`${textSecondary} text-xs`}>Title *</Label><Input value={notifTitle} onChange={e => setNotifTitle(e.target.value)} className={inputClass} placeholder="Notification title..." /></div>
+                      <div><Label className={`${textSecondary} text-xs`}>Message *</Label><Textarea value={notifMessage} onChange={e => setNotifMessage(e.target.value)} className={inputClass} rows={3} placeholder="Write your message..." /></div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div><Label className={`${textSecondary} text-xs`}>Send To</Label><Select value={notifTarget} onValueChange={setNotifTarget}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Users ({users.length})</SelectItem><SelectItem value="12pm-3pm">12–3 PM Slot</SelectItem><SelectItem value="6pm-9pm">6–9 PM Slot</SelectItem></SelectContent></Select></div>
+                        <div><Label className={`${textSecondary} text-xs`}>Type</Label><Select value={notifType} onValueChange={setNotifType}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="announcement">📢 Announcement</SelectItem><SelectItem value="session">🎥 Session</SelectItem><SelectItem value="assignment">📝 Assignment</SelectItem><SelectItem value="certificate">📜 Certificate</SelectItem><SelectItem value="general">🔔 General</SelectItem></SelectContent></Select></div>
+                      </div>
+                      <Button onClick={sendWorkshopNotification} className={`w-full ${btnPrimary}`}><Send className="w-4 h-4 mr-2" />Send Notification</Button>
+                    </div>
+                  </GlassCard>
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3`}>📋 Recent Notifications ({workshopNotifications.length})</h3>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {workshopNotifications.length === 0 && <p className={`${textSecondary} text-sm text-center py-4`}>No notifications sent yet</p>}
+                      {workshopNotifications.slice(0, 50).map((n: any) => {
+                        const u = users.find(u => u.id === n.user_id);
+                        return (
+                          <div key={n.id} className={`flex items-start justify-between ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-xl p-3`}>
+                            <div className="flex-1 min-w-0">
+                              <p className={`${textPrimary} text-xs`}>{n.title}</p>
+                              <p className={`${textSecondary} text-[10px]`}>{n.message}</p>
+                              <p className={`${textMuted} text-[10px] mt-0.5`}>→ {u?.name || "User"} · {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <Badge className={`text-[9px] ${n.read ? "bg-[#7c9885]/20 text-[#5a7a65]" : `${dm ? "bg-white/10 text-white/40" : "bg-[#e8ddd0] text-[#8b7b6a]"}`}`}>{n.read ? "Read" : "Unread"}</Badge>
+                              <Button variant="ghost" size="sm" className="text-red-400 h-6 px-1" onClick={() => deleteWorkshopNotification(n.id)}><Trash2 className="w-3 h-3" /></Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </GlassCard>
                 </div>
               )}
 
@@ -1160,6 +1336,30 @@ const WorkshopAdmin = () => {
                         await logAction("setting", `Countdown timer saved`); toast({ title: "Countdown settings saved! ✅" }); fetchSettings();
                       }} className={btnPrimary}>Save Countdown Settings</Button>
                     </div>
+                  </GlassCard>
+
+                  {/* Admin Profile Edit */}
+                  <GlassCard>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className={`${textPrimary} text-sm flex items-center gap-2`}><Lock className="w-4 h-4 text-[#b08d57]" /> My Profile</h3>
+                      {!adminProfileEdit && <Button size="sm" variant="ghost" onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }} className={`${textSecondary} text-xs`}><Edit2 className="w-3 h-3 mr-1" />Edit</Button>}
+                    </div>
+                    {adminProfileEdit ? (
+                      <div className="space-y-3">
+                        <div><Label className={`${textSecondary} text-xs`}>Name</Label><Input value={adminEditData.name} onChange={e => setAdminEditData({...adminEditData, name: e.target.value})} className={inputClass} /></div>
+                        <div><Label className={`${textSecondary} text-xs`}>Email</Label><Input type="email" value={adminEditData.email} onChange={e => setAdminEditData({...adminEditData, email: e.target.value})} className={inputClass} /></div>
+                        <div><Label className={`${textSecondary} text-xs`}>New Password (leave blank to keep)</Label><Input type="password" value={adminEditData.password} onChange={e => setAdminEditData({...adminEditData, password: e.target.value})} className={inputClass} placeholder="••••••" /></div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={updateAdminProfile} className={btnPrimary}><Save className="w-4 h-4 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setAdminProfileEdit(false)} className={textSecondary}><X className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{adminInfo?.name}</span></p>
+                        <p className={`${textSecondary} text-sm`}>Email: <span className={textPrimary}>{adminInfo?.email}</span></p>
+                      </div>
+                    )}
                   </GlassCard>
 
                   <GlassCard>

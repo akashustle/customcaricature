@@ -2578,6 +2578,8 @@ export type Database = {
       workshop_feedback: {
         Row: {
           admin_reply: string | null
+          admin_reply_to_user_reply: string | null
+          admin_reply_to_user_reply_at: string | null
           created_at: string
           google_review_clicked: boolean
           id: string
@@ -2589,6 +2591,8 @@ export type Database = {
         }
         Insert: {
           admin_reply?: string | null
+          admin_reply_to_user_reply?: string | null
+          admin_reply_to_user_reply_at?: string | null
           created_at?: string
           google_review_clicked?: boolean
           id?: string
@@ -2600,6 +2604,8 @@ export type Database = {
         }
         Update: {
           admin_reply?: string | null
+          admin_reply_to_user_reply?: string | null
+          admin_reply_to_user_reply_at?: string | null
           created_at?: string
           google_review_clicked?: boolean
           id?: string
@@ -2694,6 +2700,39 @@ export type Database = {
           title?: string
           updated_at?: string
           what_students_learn?: string | null
+        }
+        Relationships: []
+      }
+      workshop_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
