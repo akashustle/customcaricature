@@ -10,7 +10,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode; cl
   </div>
 );
 
-const WorkshopVideos = ({ user }: { user: any }) => {
+const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [userAccess, setUserAccess] = useState<any[]>([]);
   const [globalSettings, setGlobalSettings] = useState<any>({});

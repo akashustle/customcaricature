@@ -12,7 +12,7 @@ const GlassCard = ({ children, className = "" }: { children: React.ReactNode; cl
   </div>
 );
 
-const WorkshopAssignments = ({ user }: { user: any }) => {
+const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
   const [settings, setSettings] = useState<any>({});
