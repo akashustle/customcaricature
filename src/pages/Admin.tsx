@@ -1522,6 +1522,15 @@ const Admin = () => {
             <AdminChatbotTraining />
           </TabsContent>
 
+          <TabsContent value="enquiries">
+            <AdminEnquiries />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <AdminSupport />
+          </TabsContent>
+
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
