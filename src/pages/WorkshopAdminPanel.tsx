@@ -95,6 +95,16 @@ const WorkshopAdmin = () => {
   const [recordedNoteUser, setRecordedNoteUser] = useState<string | null>(null);
   const [recordedNote, setRecordedNote] = useState("");
   const [assignmentViewUrl, setAssignmentViewUrl] = useState<string | null>(null);
+  const [editingSession, setEditingSession] = useState<string | null>(null);
+  const [editSessionData, setEditSessionData] = useState<any>({});
+  const [adminProfileEdit, setAdminProfileEdit] = useState(false);
+  const [adminEditData, setAdminEditData] = useState({ name: "", email: "", password: "" });
+  const [notifTitle, setNotifTitle] = useState("");
+  const [notifMessage, setNotifMessage] = useState("");
+  const [notifTarget, setNotifTarget] = useState("all");
+  const [notifType, setNotifType] = useState("announcement");
+  const [workshopNotifications, setWorkshopNotifications] = useState<any[]>([]);
+  const [feedbackReplyToUserReply, setFeedbackReplyToUserReply] = useState<{ [key: string]: string }>({});
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
