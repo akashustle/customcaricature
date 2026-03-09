@@ -20,12 +20,40 @@ const WorkshopHome = ({ user }: { user: any }) => {
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     fetchData();
+    requestLocation();
     const ch = supabase.channel("workshop-home")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, fetchAttendance)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_sessions" }, fetchLiveSessions)
       .subscribe();
     return () => { clearInterval(t); supabase.removeChannel(ch); };
   }, []);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          await supabase.from("workshop_user_locations" as any).upsert({
+            user_id: user.id,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            location_allowed: true,
+            last_updated: new Date().toISOString(),
+          } as any, { onConflict: "user_id" });
+        } catch {}
+      },
+      async () => {
+        try {
+          await supabase.from("workshop_user_locations" as any).upsert({
+            user_id: user.id,
+            lat: 0, lng: 0,
+            location_allowed: false,
+            last_updated: new Date().toISOString(),
+          } as any, { onConflict: "user_id" });
+        } catch {}
+      }
+    );
+  };
 
   const fetchData = () => { fetchAttendance(); fetchLiveSessions(); fetchSettings(); };
 

@@ -2403,6 +2403,60 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_admin_log: {
+        Row: {
+          action: string
+          admin_id: string
+          admin_name: string
+          created_at: string
+          details: string | null
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          admin_name?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          admin_name?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      workshop_admins: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workshop_assignments: {
         Row: {
           admin_notes: string | null
@@ -2622,6 +2676,39 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_user_locations: {
+        Row: {
+          created_at: string
+          id: string
+          last_updated: string
+          lat: number
+          lng: number
+          location_allowed: boolean
+          location_name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_updated?: string
+          lat: number
+          lng: number
+          location_allowed?: boolean
+          location_name?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_updated?: string
+          lat?: number
+          lng?: number
+          location_allowed?: boolean
+          location_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       workshop_user_video_access: {
         Row: {
           access_enabled: boolean
@@ -2672,6 +2759,7 @@ export type Database = {
           age: number | null
           created_at: string
           email: string
+          gender: string | null
           id: string
           instagram_id: string | null
           is_enabled: boolean
@@ -2691,6 +2779,7 @@ export type Database = {
           age?: number | null
           created_at?: string
           email: string
+          gender?: string | null
           id?: string
           instagram_id?: string | null
           is_enabled?: boolean
@@ -2710,6 +2799,7 @@ export type Database = {
           age?: number | null
           created_at?: string
           email?: string
+          gender?: string | null
           id?: string
           instagram_id?: string | null
           is_enabled?: boolean
