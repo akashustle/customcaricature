@@ -105,6 +105,7 @@ const WorkshopDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "home": return <WorkshopHome user={workshopUser} darkMode={darkMode} />;
+      case "notifications": return <WorkshopNotifications user={workshopUser} darkMode={darkMode} />;
       case "certificates": return <WorkshopCertificates user={workshopUser} darkMode={darkMode} />;
       case "assignments": return <WorkshopAssignments user={workshopUser} darkMode={darkMode} />;
       case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
