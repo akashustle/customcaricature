@@ -120,14 +120,7 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
   );
 
   if (!globalSettings.global_video_access?.enabled) {
-    return (
-      <GlassCard>
-        <div className="text-center py-12">
-          <Play className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
-          <p className={textSecondary}>Workshop videos will be available soon</p>
-        </div>
-      </GlassCard>
-    );
+    return null;
   }
 
   return (
