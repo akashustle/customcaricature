@@ -1375,10 +1375,20 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
   const [gradedBy, setGradedBy] = useState(assignment.graded_by_artist || "");
   const [grading, setGrading] = useState(false);
 
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+
   const viewFile = async () => {
     if (!assignment.storage_path) return;
     const { data } = await supabase.storage.from("workshop-files").createSignedUrl(assignment.storage_path, 3600);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    if (data?.signedUrl) {
+      // Check if it's an image
+      const ext = (assignment.file_name || "").toLowerCase();
+      if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png")) {
+        setViewingImage(data.signedUrl);
+      } else {
+        window.open(data.signedUrl, "_blank");
+      }
+    }
   };
 
   return (
