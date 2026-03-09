@@ -1322,7 +1322,40 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
-              {/* SETTINGS */}
+              {/* ACTIVITY LOG */}
+              {tab === "log" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary} flex items-center gap-2`}><History className="w-5 h-5 text-[#b08d57]" /> Activity Log</h1>
+                    <div className="flex gap-2">
+                      <RefreshButton />
+                      <ExportButton data={adminLog.map(l => ({ Admin: l.admin_name, Action: l.action, Details: l.details || "—", Time: new Date(l.created_at).toLocaleString("en-IN") }))} sheetName="ActivityLog" fileName="CCC_AdminLog" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <GlassCard className="!p-4"><p className={`${textSecondary} text-xs`}>Total Actions</p><p className={`text-2xl font-bold ${textPrimary}`}>{adminLog.length}</p></GlassCard>
+                    <GlassCard className="!p-4"><p className={`${textSecondary} text-xs`}>Today</p><p className={`text-2xl font-bold ${textPrimary}`}>{adminLog.filter(l => l.created_at?.startsWith(new Date().toISOString().split("T")[0])).length}</p></GlassCard>
+                  </div>
+                  {adminLog.map((log: any) => (
+                    <GlassCard key={log.id} className="!p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b08d57]/30 to-[#c9a96e]/30 flex items-center justify-center flex-shrink-0"><Activity className="w-4 h-4 text-[#b08d57]" /></div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`${textPrimary} text-xs`}>{log.admin_name}</span>
+                            <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[9px]`}>{log.action}</Badge>
+                          </div>
+                          {log.details && <p className={`${textSecondary} text-xs mt-0.5`}>{log.details}</p>}
+                          <p className={`${textMuted} text-[10px]`}>{new Date(log.created_at).toLocaleString("en-IN")}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-red-400 h-7 px-1" onClick={() => deleteLogEntry(log.id)}><Trash2 className="w-3 h-3" /></Button>
+                      </div>
+                    </GlassCard>
+                  ))}
+                  {adminLog.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>No activity yet</p></GlassCard>}
+                </div>
+              )}
+
               {tab === "settings" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
