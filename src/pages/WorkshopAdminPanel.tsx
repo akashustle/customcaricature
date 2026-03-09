@@ -116,6 +116,7 @@ const WorkshopAdmin = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_user_locations" }, fetchLocations)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_admin_log" }, fetchAdminLog)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_certificates" }, fetchCertificates)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_session_requests" }, fetchLiveRequests)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
