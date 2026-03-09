@@ -408,6 +408,7 @@ const Enquiry = () => {
                   </div>
                 </div>
 
+                <LocationDropdowns
                   state={state}
                   district={district}
                   city={city}
