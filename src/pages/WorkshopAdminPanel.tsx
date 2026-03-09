@@ -46,6 +46,7 @@ const sidebarItems = [
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
   { key: "notifications", icon: Bell, label: "Notifications" },
+  { key: "log", icon: History, label: "Activity Log" },
   { key: "settings", icon: Settings, label: "Settings" },
 ];
 
