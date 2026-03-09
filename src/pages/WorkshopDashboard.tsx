@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
 import WorkshopCertificates from "@/components/workshop/WorkshopCertificates";
@@ -11,9 +12,11 @@ import WorkshopAssignments from "@/components/workshop/WorkshopAssignments";
 import WorkshopVideos from "@/components/workshop/WorkshopVideos";
 import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
 import WorkshopProfile from "@/components/workshop/WorkshopProfile";
+import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
 
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
+  { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
   { key: "videos", icon: Video, label: "Videos", settingKey: "global_video_access" },
   { key: "assignments", icon: FileText, label: "Assignments", settingKey: "assignment_submission_enabled" },
   { key: "certificates", icon: Award, label: "Certificates", settingKey: "certificate_visibility" },
