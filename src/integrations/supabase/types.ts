@@ -2411,9 +2411,11 @@ export type Database = {
           graded_at: string | null
           id: string
           marks: number | null
+          pass_status: string | null
           status: string
           storage_path: string | null
           submitted_at: string | null
+          total_marks: number | null
           user_id: string
         }
         Insert: {
@@ -2423,9 +2425,11 @@ export type Database = {
           graded_at?: string | null
           id?: string
           marks?: number | null
+          pass_status?: string | null
           status?: string
           storage_path?: string | null
           submitted_at?: string | null
+          total_marks?: number | null
           user_id: string
         }
         Update: {
@@ -2435,9 +2439,11 @@ export type Database = {
           graded_at?: string | null
           id?: string
           marks?: number | null
+          pass_status?: string | null
           status?: string
           storage_path?: string | null
           submitted_at?: string | null
+          total_marks?: number | null
           user_id?: string
         }
         Relationships: [
@@ -2450,6 +2456,33 @@ export type Database = {
           },
         ]
       }
+      workshop_attendance: {
+        Row: {
+          created_at: string
+          id: string
+          marked_by: string | null
+          session_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marked_by?: string | null
+          session_date: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marked_by?: string | null
+          session_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workshop_certificates: {
         Row: {
           file_name: string
@@ -2457,6 +2490,7 @@ export type Database = {
           storage_path: string
           uploaded_at: string
           user_id: string
+          visible: boolean
         }
         Insert: {
           file_name: string
@@ -2464,6 +2498,7 @@ export type Database = {
           storage_path: string
           uploaded_at?: string
           user_id: string
+          visible?: boolean
         }
         Update: {
           file_name?: string
@@ -2471,6 +2506,7 @@ export type Database = {
           storage_path?: string
           uploaded_at?: string
           user_id?: string
+          visible?: boolean
         }
         Relationships: [
           {
@@ -2485,20 +2521,26 @@ export type Database = {
       workshop_feedback: {
         Row: {
           created_at: string
+          google_review_clicked: boolean
           id: string
           message: string
+          rating: number | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          google_review_clicked?: boolean
           id?: string
           message: string
+          rating?: number | null
           user_id: string
         }
         Update: {
           created_at?: string
+          google_review_clicked?: boolean
           id?: string
           message?: string
+          rating?: number | null
           user_id?: string
         }
         Relationships: [
@@ -2510,6 +2552,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workshop_live_sessions: {
+        Row: {
+          artist_name: string | null
+          artist_portfolio_link: string | null
+          created_at: string
+          id: string
+          link_enabled: boolean
+          link_expiry: string | null
+          meet_link: string | null
+          requirements: string | null
+          session_date: string
+          slot: string
+          status: string
+          title: string
+          updated_at: string
+          what_students_learn: string | null
+        }
+        Insert: {
+          artist_name?: string | null
+          artist_portfolio_link?: string | null
+          created_at?: string
+          id?: string
+          link_enabled?: boolean
+          link_expiry?: string | null
+          meet_link?: string | null
+          requirements?: string | null
+          session_date: string
+          slot?: string
+          status?: string
+          title: string
+          updated_at?: string
+          what_students_learn?: string | null
+        }
+        Update: {
+          artist_name?: string | null
+          artist_portfolio_link?: string | null
+          created_at?: string
+          id?: string
+          link_enabled?: boolean
+          link_expiry?: string | null
+          meet_link?: string | null
+          requirements?: string | null
+          session_date?: string
+          slot?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          what_students_learn?: string | null
+        }
+        Relationships: []
       }
       workshop_settings: {
         Row: {
@@ -2581,14 +2674,17 @@ export type Database = {
           email: string
           id: string
           instagram_id: string | null
+          is_enabled: boolean
           mobile: string
           name: string
           occupation: string | null
+          payment_screenshot_path: string | null
           slot: string
           student_type: string
           updated_at: string
           video_access_enabled: boolean
           video_download_allowed: boolean
+          why_join: string | null
           workshop_date: string
         }
         Insert: {
@@ -2597,14 +2693,17 @@ export type Database = {
           email: string
           id?: string
           instagram_id?: string | null
+          is_enabled?: boolean
           mobile: string
           name: string
           occupation?: string | null
+          payment_screenshot_path?: string | null
           slot: string
           student_type?: string
           updated_at?: string
           video_access_enabled?: boolean
           video_download_allowed?: boolean
+          why_join?: string | null
           workshop_date: string
         }
         Update: {
@@ -2613,14 +2712,17 @@ export type Database = {
           email?: string
           id?: string
           instagram_id?: string | null
+          is_enabled?: boolean
           mobile?: string
           name?: string
           occupation?: string | null
+          payment_screenshot_path?: string | null
           slot?: string
           student_type?: string
           updated_at?: string
           video_access_enabled?: boolean
           video_download_allowed?: boolean
+          why_join?: string | null
           workshop_date?: string
         }
         Relationships: []
