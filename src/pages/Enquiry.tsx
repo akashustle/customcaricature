@@ -278,6 +278,10 @@ const Enquiry = () => {
                   <Input value={mobile} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit mobile number" className="mt-1" maxLength={10} />
                 </div>
                 <div>
+                  <Label className="font-sans">Email Address <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1" />
+                </div>
+                <div>
                   <Label className="font-sans">Instagram ID <span className="text-muted-foreground">(optional)</span></Label>
                   <Input value={instagramId} onChange={(e) => setInstagramId(e.target.value)} placeholder="@your_instagram" className="mt-1" />
                 </div>
