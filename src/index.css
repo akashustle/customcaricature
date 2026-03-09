@@ -283,4 +283,59 @@
     color: hsl(36 35% 49%);
     font-weight: 700;
   }
+
+  /* Glassmorphism admin sidebar */
+  .admin-glass-sidebar {
+    background: linear-gradient(180deg, hsl(40 56% 96% / 0.85), hsl(36 32% 93% / 0.9));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid hsl(30 25% 80% / 0.4);
+  }
+
+  .admin-glass-card {
+    background: hsl(40 56% 97% / 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsl(30 25% 80% / 0.3);
+    box-shadow: 0 2px 12px hsl(33 37% 27% / 0.04);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+  .admin-glass-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px hsl(33 37% 27% / 0.08);
+  }
+
+  /* 3D stat widget (event tab) */
+  .stat-widget-3d {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(145deg, hsl(40, 50%, 98%), hsl(40, 50%, 95%));
+    border: 1px solid hsl(30, 20%, 88%);
+    box-shadow: 0 4px 14px hsl(30 20% 45% / 0.06), 0 1px 3px hsl(30 20% 45% / 0.03), inset 0 1px 0 hsl(40, 60%, 99%);
+  }
+  .stat-widget-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(30 20% 45% / 0.1), 0 2px 6px hsl(30 20% 45% / 0.05);
+  }
+
+  /* Smooth page transitions */
+  .page-transition {
+    animation: pageIn 0.3s ease-out forwards;
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Pulse glow for live indicators */
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(152 50% 48% / 0.4); }
+    50% { box-shadow: 0 0 0 6px hsl(152 50% 48% / 0); }
+  }
+  .pulse-live {
+    animation: pulseGlow 2s infinite;
+  }
 }
