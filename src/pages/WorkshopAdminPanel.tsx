@@ -1423,6 +1423,19 @@ const WorkshopAdmin = () => {
                             <div><Label>Name *</Label><Input value={newAdmin.name} onChange={e => setNewAdmin({...newAdmin, name: e.target.value})} /></div>
                             <div><Label>Email *</Label><Input type="email" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} /></div>
                             <div><Label>Password *</Label><Input type="password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} /></div>
+                            <div>
+                              <Label className="text-xs">Permissions (optional)</Label>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {["dashboard", "analytics", "all-users", "videos", "assignments", "certificates", "attendance", "feedback", "notifications", "settings"].map(perm => (
+                                  <button key={perm} onClick={() => {
+                                    setNewAdmin(prev => ({ ...prev, permissions: prev.permissions.includes(perm) ? prev.permissions.filter(p => p !== perm) : [...prev.permissions, perm] }));
+                                  }}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition-all ${newAdmin.permissions.includes(perm) ? "bg-[#b08d57] text-white border-[#b08d57]" : `${dm ? "bg-white/5 text-white/50 border-white/10" : "bg-[#faf5ef] text-[#6a5a4a] border-[#d4c4b4]"}`}`}>
+                                    {perm.replace(/-/g, " ")}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
                             <Button onClick={addAdmin} className={`w-full ${btnPrimary}`}>Create Admin</Button>
                           </div>
                         </DialogContent>
