@@ -320,7 +320,7 @@ const Dashboard = () => {
               </motion.div>
             ))}
           </div>
-        )
+        )}
 
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
