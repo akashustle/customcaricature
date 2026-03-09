@@ -31,6 +31,8 @@ import BlogPost from "./pages/BlogPost";
 import LiveChat from "./pages/LiveChat";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
+import Enquiry from "./pages/Enquiry";
+import Support from "./pages/Support";
 import Shop from "./pages/Shop";
 import ShopProduct from "./pages/ShopProduct";
 import ShopCart from "./pages/ShopCart";
