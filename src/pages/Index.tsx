@@ -123,7 +123,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-16 md:pb-0">
       <SEOHead canonical="/" />
       <JsonLd />
       {lightboxOpen && (
