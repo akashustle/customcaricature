@@ -390,14 +390,12 @@ const Enquiry = () => {
   return (
     <>
       <SEOHead title="Enquiry | Creative Caricature Club" description="Submit your enquiry for custom caricatures or event bookings." />
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/10 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg shadow-2xl border-primary/20">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] flex items-center justify-center p-4 pb-20 md:pb-4">
+        <Card className="w-full max-w-lg shadow-2xl border-primary/20 bg-white/90 backdrop-blur-sm">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2">
-              <Palette className="w-7 h-7 text-primary" />
-            </div>
-            <CardTitle className="font-display text-2xl">Creative Caricature Club</CardTitle>
-            <p className="text-sm text-muted-foreground font-sans">Tell us what you're looking for</p>
+            <img src="/logo.png" alt="CCC" className="w-14 h-14 rounded-2xl border-2 border-primary/20 shadow-sm mx-auto mb-2" />
+            <CardTitle className="font-calligraphy text-2xl text-foreground">Creative Caricature Club</CardTitle>
+            <p className="text-sm text-muted-foreground font-body">Tell us what you're looking for</p>
             <Progress value={stepProgress[step]} className="mt-3 h-2" />
           </CardHeader>
 
