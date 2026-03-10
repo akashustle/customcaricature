@@ -296,22 +296,40 @@ const Index = () => {
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">Our Services</h2>
             <p className="text-muted-foreground font-body max-w-md mx-auto">From personal gifts to grand events, we have you covered</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {[
               { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event. On-the-spot portraits that wow your guests.", action: handleEventClick, cta: "Book for Event" },
-              { icon: Palette, title: "Custom Digital Caricature", desc: "Hand-crafted digital caricatures from your photos. Perfect for gifts, wall art, and social media.", action: handleOrderClick, cta: "Order Now" },
+              { icon: Palette, title: "Custom Caricature", desc: "Hand-crafted caricatures from your photos. Perfect for gifts, wall art, and memories that last forever.", action: handleOrderClick, cta: "Order Now" },
               { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings, product launches, and team celebrations with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now" },
+              ...(settings.shop_nav_visible?.enabled !== false ? [{
+                icon: ShoppingBag,
+                title: "Merchandise Store",
+                desc: "Caricature-themed apparel, custom printed merchandise, and art collectibles. Shop unique creative products.",
+                action: () => navigate("/shop"),
+                cta: "Shop Now"
+              }] : [{
+                icon: ShoppingBag,
+                title: "Merchandise Store",
+                desc: "Exciting caricature-themed merchandise and custom products coming soon to our online store!",
+                action: () => {},
+                cta: "Coming Soon"
+              }]),
             ].map((service, i) => (
               <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Card className="card-3d h-full flex flex-col">
-                  <CardContent className="pt-8 pb-6 px-6 flex flex-col flex-1">
+                  <CardContent className="pt-8 pb-6 px-5 flex flex-col flex-1">
                     <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5">
                       <service.icon className="w-7 h-7 text-primary" />
                     </div>
-                    <h3 className="font-calligraphy text-2xl font-semibold mb-3 text-foreground">{service.title}</h3>
+                    <h3 className="font-calligraphy text-xl font-semibold mb-3 text-foreground">{service.title}</h3>
                     <p className="text-sm text-muted-foreground font-body leading-relaxed flex-1">{service.desc}</p>
-                    <Button variant="outline" className="mt-5 rounded-full font-body w-full" onClick={service.action}>
-                      {service.cta} <ArrowRight className="w-4 h-4 ml-1" />
+                    <Button 
+                      variant={service.cta === "Coming Soon" ? "secondary" : "outline"} 
+                      className="mt-5 rounded-full font-body w-full" 
+                      onClick={service.action}
+                      disabled={service.cta === "Coming Soon"}
+                    >
+                      {service.cta} {service.cta !== "Coming Soon" && <ArrowRight className="w-4 h-4 ml-1" />}
                     </Button>
                   </CardContent>
                 </Card>
