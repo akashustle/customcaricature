@@ -647,20 +647,20 @@ const Admin = () => {
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
-        <header className="sticky top-0 z-40 dashboard-header backdrop-blur-md">
-          <div className="px-4 md:px-6 py-4 flex items-center justify-between">
+      <div className="flex-1 min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-20 md:pb-0 overflow-x-hidden">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd0] shadow-sm">
+          <div className="px-4 md:px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
               <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm" />
-              <h1 className="font-display text-lg font-bold text-gradient">Admin</h1>
+              <h1 className="font-body text-lg font-bold text-gradient">Admin</h1>
             </div>
             <div className="hidden md:block">
               <LiveGreeting name={adminProfile?.full_name} />
             </div>
             <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex">
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-body"><RefreshCw className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-body hidden md:flex">
                 <LogOut className="w-4 h-4 mr-2" /> Logout
               </Button>
             </div>
