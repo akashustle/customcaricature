@@ -1789,9 +1789,13 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${
+    active 
+      ? "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 scale-105 font-bold" 
+      : "text-[#6a5a4a] font-medium"
+  }`}>
     <Icon className="w-5 h-5" />
-    <span className="text-[10px] font-sans font-medium whitespace-nowrap">{label}</span>
+    <span className="text-[9px] font-body font-medium whitespace-nowrap">{label}</span>
   </button>
 );
 
