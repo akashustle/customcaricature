@@ -647,20 +647,20 @@ const Admin = () => {
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
-        <header className="sticky top-0 z-40 dashboard-header backdrop-blur-md">
-          <div className="px-4 md:px-6 py-4 flex items-center justify-between">
+      <div className="flex-1 min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-20 md:pb-0 overflow-x-hidden">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd0] shadow-sm">
+          <div className="px-4 md:px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
               <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm" />
-              <h1 className="font-display text-lg font-bold text-gradient">Admin</h1>
+              <h1 className="font-body text-lg font-bold text-gradient">Admin</h1>
             </div>
             <div className="hidden md:block">
               <LiveGreeting name={adminProfile?.full_name} />
             </div>
             <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans hidden md:flex">
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-body"><RefreshCw className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-body hidden md:flex">
                 <LogOut className="w-4 h-4 mr-2" /> Logout
               </Button>
             </div>
@@ -1755,7 +1755,7 @@ const Admin = () => {
       )}
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-white/95 border-t border-[#e8ddd0] shadow-lg">
         <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
           <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
@@ -1789,9 +1789,13 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
+  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${
+    active 
+      ? "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 scale-105 font-bold" 
+      : "text-[#6a5a4a] font-medium"
+  }`}>
     <Icon className="w-5 h-5" />
-    <span className="text-[10px] font-sans font-medium whitespace-nowrap">{label}</span>
+    <span className="text-[9px] font-body font-medium whitespace-nowrap">{label}</span>
   </button>
 );
 

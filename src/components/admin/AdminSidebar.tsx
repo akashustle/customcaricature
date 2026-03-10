@@ -84,29 +84,45 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       )}
     >
       {/* Logo + Collapse */}
-      <div className="flex items-center justify-between p-4 border-b border-border/30">
+      <div className="flex items-center justify-between p-3 border-b border-border/30">
         <div 
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
-          <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl border-2 border-primary/30 shadow-sm flex-shrink-0" />
+          <motion.img 
+            src="/logo.png" alt="CCC" 
+            className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm flex-shrink-0"
+            animate={{ y: [0, -2, 0] }} 
+            transition={{ duration: 3, repeat: Infinity }}
+          />
           {!collapsed && (
             <motion.span 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="font-display text-lg font-bold text-gradient"
+              className="font-body text-lg font-bold text-gradient"
             >
               Admin
             </motion.span>
           )}
         </div>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors flex-shrink-0"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {!collapsed && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors flex-shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        )}
       </div>
+      {/* Expand button when collapsed - shows below logo */}
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="mx-auto mt-2 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors"
+        >
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 scrollbar-thin">

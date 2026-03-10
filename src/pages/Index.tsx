@@ -123,7 +123,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-16 md:pb-0">
       <SEOHead canonical="/" />
       <JsonLd />
       {lightboxOpen && (
@@ -138,7 +138,7 @@ const Index = () => {
 
       {/* Top Nav */}
       <header>
-      <nav className="sticky top-0 z-40 backdrop-blur-md bg-background/90 border-b border-border">
+      <nav className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd0] shadow-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
