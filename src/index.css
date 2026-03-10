@@ -6,79 +6,78 @@
 
 @layer base {
   :root {
-    /* Brand: Warm Cream Canvas */
-    --background: 36 38% 94%;
-    /* Warm Soft Brown — light and elegant, never dark */
-    --foreground: 30 22% 45%;
+    /* Brand: Workshop-matched warm cream palette */
+    --background: 30 40% 96%;
+    --foreground: 25 30% 18%;
 
-    /* Soft Cream Cards */
-    --card: 40 50% 97%;
-    --card-foreground: 30 22% 45%;
+    /* White/cream cards */
+    --card: 30 50% 98%;
+    --card-foreground: 25 30% 18%;
 
     /* Popover matches card */
-    --popover: 40 50% 97%;
-    --popover-foreground: 30 22% 45%;
+    --popover: 30 50% 98%;
+    --popover-foreground: 25 30% 18%;
 
-    /* Gold Accent — warm and luxurious */
-    --primary: 36 45% 52%;
+    /* Gold Accent — warm workshop gold #b08d57 */
+    --primary: 36 38% 52%;
     --primary-foreground: 40 60% 98%;
 
     /* Light warm secondary */
-    --secondary: 36 30% 93%;
-    --secondary-foreground: 30 18% 48%;
+    --secondary: 30 25% 94%;
+    --secondary-foreground: 25 20% 30%;
 
     /* Muted — soft warm */
-    --muted: 36 25% 92%;
-    --muted-foreground: 30 12% 56%;
+    --muted: 30 20% 93%;
+    --muted-foreground: 25 15% 42%;
 
     /* Gold accent */
-    --accent: 36 45% 52%;
+    --accent: 36 38% 52%;
     --accent-foreground: 40 60% 98%;
 
     /* Destructive — soft coral */
-    --destructive: 0 55% 62%;
+    --destructive: 0 55% 58%;
     --destructive-foreground: 40 60% 98%;
 
-    /* Borders — Light Mocha */
-    --border: 30 20% 85%;
-    --input: 30 20% 85%;
-    --ring: 36 45% 52%;
+    /* Borders — Light warm */
+    --border: 30 20% 86%;
+    --input: 30 20% 86%;
+    --ring: 36 38% 52%;
 
     --radius: 1rem;
 
-    /* Sidebar — soft cream */
-    --sidebar-background: 36 32% 96%;
-    --sidebar-foreground: 30 18% 48%;
-    --sidebar-primary: 36 45% 52%;
+    /* Sidebar — cream */
+    --sidebar-background: 30 35% 97%;
+    --sidebar-foreground: 25 20% 30%;
+    --sidebar-primary: 36 38% 52%;
     --sidebar-primary-foreground: 40 60% 98%;
-    --sidebar-accent: 36 28% 92%;
-    --sidebar-accent-foreground: 30 18% 48%;
+    --sidebar-accent: 30 22% 93%;
+    --sidebar-accent-foreground: 25 20% 30%;
     --sidebar-border: 30 20% 88%;
-    --sidebar-ring: 36 45% 52%;
+    --sidebar-ring: 36 38% 52%;
 
     /* Semantic */
-    --success: 152 50% 48%;
-    --warning: 38 92% 55%;
-    --info: 210 65% 55%;
+    --success: 152 50% 42%;
+    --warning: 38 85% 52%;
+    --info: 210 60% 50%;
 
-    /* Extended gold palette — all lighter */
+    /* Extended gold palette */
     --gold-50: 40 60% 98%;
     --gold-100: 38 50% 94%;
     --gold-200: 36 42% 86%;
     --gold-300: 34 38% 76%;
-    --gold-400: 36 40% 63%;
-    --gold-500: 36 45% 52%;
-    --gold-600: 34 42% 46%;
-    --gold-700: 33 35% 40%;
-    --gold-800: 33 30% 34%;
-    --gold-900: 30 25% 26%;
+    --gold-400: 36 38% 62%;
+    --gold-500: 36 38% 52%;
+    --gold-600: 34 38% 44%;
+    --gold-700: 33 32% 36%;
+    --gold-800: 33 28% 28%;
+    --gold-900: 30 22% 20%;
 
-    /* Chart colors — vibrant */
-    --chart-1: 36 45% 52%;
-    --chart-2: 152 50% 48%;
-    --chart-3: 210 65% 55%;
-    --chart-4: 38 92% 55%;
-    --chart-5: 340 55% 58%;
+    /* Chart colors */
+    --chart-1: 36 38% 52%;
+    --chart-2: 152 50% 42%;
+    --chart-3: 210 60% 50%;
+    --chart-4: 38 85% 52%;
+    --chart-5: 340 50% 55%;
   }
 }
 

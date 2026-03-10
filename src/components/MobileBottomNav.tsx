@@ -26,18 +26,22 @@ const MobileBottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-md border-t border-border">
-      <div className="flex items-center justify-around py-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-card/95 border-t border-border shadow-lg">
+      <div className="flex items-center justify-around py-2 max-w-md mx-auto">
         {items.map((item) => {
           const active = location.pathname === item.path;
           return (
             <button
               key={item.path}
               onClick={item.action}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${
+                active 
+                  ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/20 scale-105 font-bold" 
+                  : "text-muted-foreground"
+              }`}
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-[10px] font-sans font-medium">{item.label}</span>
+              <span className="text-[9px] font-body font-medium">{item.label}</span>
             </button>
           );
         })}
