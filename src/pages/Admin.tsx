@@ -1755,7 +1755,7 @@ const Admin = () => {
       )}
 
       {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-white/95 border-t border-[#e8ddd0] shadow-lg">
         <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
           <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
