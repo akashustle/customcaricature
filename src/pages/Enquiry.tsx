@@ -245,8 +245,8 @@ const Enquiry = () => {
     return (
       <>
         <SEOHead title="Enquiry Submitted | Creative Caricature Club" description="Your enquiry has been submitted." />
-        <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/10 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-2xl border-primary/20">
+        <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] flex items-center justify-center p-4 pb-20 md:pb-4">
+          <Card className="w-full max-w-md shadow-2xl border-primary/20 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-6 space-y-4">
               <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7 text-green-600" />
