@@ -6,16 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
-import { ArrowRight, ArrowLeft, User, Palette, Calendar, MessageCircle, CheckCircle2, Instagram, IndianRupee } from "lucide-react";
+import { ArrowRight, ArrowLeft, User, Palette, Calendar, MessageCircle, CheckCircle2, Instagram, IndianRupee, ExternalLink } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import SEOHead from "@/components/SEOHead";
 
-type Step = "info" | "type" | "caricature_details" | "event_details" | "help";
+type Step = "info" | "type" | "caricature_select" | "caricature_details" | "event_details" | "event_submitted" | "help";
+
+const COMMON_EVENT_TYPES = [
+  { value: "wedding", label: "Wedding" },
+  { value: "birthday", label: "Birthday Party" },
+  { value: "corporate", label: "Corporate Event" },
+  { value: "college_fest", label: "College Fest" },
+  { value: "anniversary", label: "Anniversary" },
+  { value: "other", label: "Other (type manually)" },
+];
+
+// Helper: render text with clickable links
+const RichText = ({ text }: { text: string }) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return (
+    <span>
+      {parts.map((part, i) =>
+        urlRegex.test(part) ? (
+          <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-primary underline inline-flex items-center gap-0.5">
+            {part.length > 40 ? part.slice(0, 40) + "..." : part}
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </span>
+  );
+};
 
 const Enquiry = () => {
   const [step, setStep] = useState<Step>("info");
@@ -29,6 +60,7 @@ const Enquiry = () => {
   const [email, setEmail] = useState("");
   const [instagramId, setInstagramId] = useState("");
   const [eventType, setEventType] = useState("");
+  const [customEventType, setCustomEventType] = useState("");
   const [enquiryType, setEnquiryType] = useState<"custom_caricature" | "event_booking" | "">("");
   const [caricatureType, setCaricatureType] = useState("");
   const [country, setCountry] = useState("India");
@@ -39,6 +71,7 @@ const Enquiry = () => {
 
   // Settings from admin
   const [descriptions, setDescriptions] = useState<any>({});
+  const [eventDetails, setEventDetails] = useState<any>({});
   const [contactInfo, setContactInfo] = useState<any>({ whatsapp: "", instagram: "" });
   const [maxEvents, setMaxEvents] = useState(2);
   const [bookedDates, setBookedDates] = useState<Record<string, number>>({});
@@ -57,12 +90,17 @@ const Enquiry = () => {
     fetchBookedDates();
     fetchBlockedDates();
     fetchEventPricingRules();
+
+    // Realtime
+    const ch = supabase.channel("enquiry-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "enquiry_settings" }, fetchSettings)
+      .on("postgres_changes", { event: "*", schema: "public", table: "enquiry_event_pricing" }, fetchEventPricingRules)
+      .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, fetchPricing)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // Resolve price when location changes
-  useEffect(() => {
-    resolveEventPrice();
-  }, [state, district, city, eventPricingRules]);
+  useEffect(() => { resolveEventPrice(); }, [state, district, city, eventPricingRules]);
 
   const fetchSettings = async () => {
     const { data } = await supabase.from("enquiry_settings" as any).select("*");
@@ -70,6 +108,7 @@ const Enquiry = () => {
       const settings: any = {};
       (data as any[]).forEach((s: any) => { settings[s.id] = s.value; });
       if (settings.caricature_descriptions) setDescriptions(settings.caricature_descriptions);
+      if (settings.event_region_details) setEventDetails(settings.event_region_details);
       if (settings.contact_info) setContactInfo(settings.contact_info);
       if (settings.event_max_per_date) setMaxEvents(settings.event_max_per_date.max_events || 2);
     }
@@ -100,56 +139,41 @@ const Enquiry = () => {
   };
 
   const resolveEventPrice = () => {
-    if (!state && !district && !city) {
-      setResolvedPrice(null);
-      return;
-    }
-
+    if (!state && !district && !city) { setResolvedPrice(null); return; }
     const activeRules = eventPricingRules.filter((r: any) => r.is_active);
-
-    // Priority: city > district > state > default (null/null/null)
-    // 1. City match
     if (city) {
-      const cityMatch = activeRules.find((r: any) => r.city && r.city.toLowerCase() === city.toLowerCase());
-      if (cityMatch) {
-        setResolvedPrice({ price: cityMatch.price, source: "City", currency: cityMatch.currency });
-        return;
-      }
+      const m = activeRules.find((r: any) => r.city && r.city.toLowerCase() === city.toLowerCase());
+      if (m) { setResolvedPrice({ price: m.price, source: "City", currency: m.currency }); return; }
     }
-
-    // 2. District match
     if (district) {
-      const distMatch = activeRules.find((r: any) => r.district && r.district.toLowerCase() === district.toLowerCase() && !r.city);
-      if (distMatch) {
-        setResolvedPrice({ price: distMatch.price, source: "District", currency: distMatch.currency });
-        return;
-      }
+      const m = activeRules.find((r: any) => r.district && r.district.toLowerCase() === district.toLowerCase() && !r.city);
+      if (m) { setResolvedPrice({ price: m.price, source: "District", currency: m.currency }); return; }
     }
-
-    // 3. State match
     if (state) {
-      const stateMatch = activeRules.find((r: any) => r.state && r.state.toLowerCase() === state.toLowerCase() && !r.district && !r.city);
-      if (stateMatch) {
-        setResolvedPrice({ price: stateMatch.price, source: "State", currency: stateMatch.currency });
-        return;
-      }
+      const m = activeRules.find((r: any) => r.state && r.state.toLowerCase() === state.toLowerCase() && !r.district && !r.city);
+      if (m) { setResolvedPrice({ price: m.price, source: "State", currency: m.currency }); return; }
     }
-
-    // 4. Default (all null)
-    const defaultRule = activeRules.find((r: any) => !r.state && !r.district && !r.city);
-    if (defaultRule) {
-      setResolvedPrice({ price: defaultRule.price, source: "Default", currency: defaultRule.currency });
-      return;
-    }
-
+    const d = activeRules.find((r: any) => !r.state && !r.district && !r.city);
+    if (d) { setResolvedPrice({ price: d.price, source: "Default", currency: d.currency }); return; }
     setResolvedPrice(null);
   };
 
-  const stepProgress: Record<Step, number> = {
-    info: 20, type: 40, caricature_details: 70, event_details: 70, help: 100,
+  // Determine event region for post-submission details
+  const getEventRegion = (): string => {
+    if (country !== "India") return "international";
+    const mumbaiDistricts = ["mumbai city", "mumbai suburban", "thane", "palghar"];
+    const mumbaiCities = ["mumbai", "navi mumbai", "panvel"];
+    if (district && mumbaiDistricts.includes(district.toLowerCase())) return "maharashtra";
+    if (city && mumbaiCities.includes(city.toLowerCase())) return "maharashtra";
+    if (state && state.toLowerCase() === "maharashtra" && district && ["mumbai city", "mumbai suburban", "thane", "palghar", "raigad"].includes(district.toLowerCase())) return "maharashtra";
+    return "pan_india";
   };
 
-  const handleSubmitInfo = async () => {
+  const stepProgress: Record<Step, number> = {
+    info: 15, type: 30, caricature_select: 50, caricature_details: 75, event_details: 60, event_submitted: 100, help: 100,
+  };
+
+  const handleSubmitInfo = () => {
     if (!name.trim() || !mobile.trim()) {
       toast({ title: "Please enter your name and mobile number", variant: "destructive" });
       return;
@@ -165,38 +189,30 @@ const Enquiry = () => {
     setSubmitting(true);
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id || null;
+      const finalEventType = eventType === "other" ? customEventType : eventType;
       const { data, error } = await supabase.from("enquiries" as any).insert({
-        name: name.trim(),
-        mobile: mobile.trim(),
-        email: email.trim() || null,
-        instagram_id: instagramId.trim() || null,
-        enquiry_type: enquiryType,
-        caricature_type: caricatureType || null,
-        event_type: eventType || null,
-        country,
-        state: state || null,
-        district: district || null,
-        city: city || null,
-        event_date: eventDate ? format(eventDate, "yyyy-MM-dd") : null,
-        user_id: userId,
-        estimated_price: resolvedPrice?.price || null,
-        pricing_source: resolvedPrice?.source || null,
+        name: name.trim(), mobile: mobile.trim(), email: email.trim() || null,
+        instagram_id: instagramId.trim() || null, enquiry_type: enquiryType,
+        caricature_type: caricatureType || null, event_type: finalEventType || null,
+        country, state: state || null, district: district || null, city: city || null,
+        event_date: eventDate ? format(eventDate, "yyyy-MM-dd") : null, user_id: userId,
+        estimated_price: resolvedPrice?.price || null, pricing_source: resolvedPrice?.source || null,
       } as any).select("enquiry_number").single();
-
       if (error) throw error;
       setEnquiryId((data as any)?.enquiry_number || "");
       setSubmitted(true);
-      setStep("help");
+      if (enquiryType === "event_booking") {
+        setStep("event_submitted");
+      } else {
+        setStep("help");
+      }
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   const isDateDisabled = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     if (date < today) return true;
     if (date > addYears(today, 2)) return true;
     const dateStr = format(date, "yyyy-MM-dd");
@@ -207,39 +223,162 @@ const Enquiry = () => {
 
   const getDateSlots = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
-    const booked = bookedDates[dateStr] || 0;
-    return maxEvents - booked;
+    return maxEvents - (bookedDates[dateStr] || 0);
   };
 
-  if (submitted) {
+  // Track link click
+  const trackLinkClick = async () => {
+    if (!enquiryId) return;
+    await supabase.from("enquiries" as any).update({
+      link_clicked: true, link_clicked_at: new Date().toISOString()
+    } as any).eq("enquiry_number", enquiryId);
+  };
+
+  // Get caricature details for the selected type
+  const getCaricatureDetails = () => descriptions[caricatureType] || {};
+  const getPricingForType = () => pricing.find((p: any) => p.slug === caricatureType);
+
+  // SUBMITTED: Caricature details page
+  if (submitted && enquiryType === "custom_caricature") {
+    const details = getCaricatureDetails();
+    const priceData = getPricingForType();
     return (
       <>
-        <SEOHead title="Enquiry Submitted | Creative Caricature Club" description="Your enquiry has been submitted successfully." />
+        <SEOHead title="Enquiry Submitted | Creative Caricature Club" description="Your enquiry has been submitted." />
         <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/10 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md shadow-2xl border-primary/20 text-center">
-            <CardContent className="p-8 space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <Card className="w-full max-w-md shadow-2xl border-primary/20">
+            <CardContent className="p-6 space-y-4">
+              <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7 text-green-600" />
               </div>
-              <h2 className="font-display text-2xl font-bold">Enquiry Submitted!</h2>
-              <p className="text-muted-foreground font-sans">Your enquiry ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
-              {resolvedPrice && enquiryType === "event_booking" && (
-                <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
-                  <p className="text-xs text-muted-foreground font-sans">Estimated Event Price</p>
-                  <p className="font-display text-xl font-bold text-primary">₹{resolvedPrice.price.toLocaleString("en-IN")}</p>
+              <h2 className="font-display text-xl font-bold text-center">Enquiry Submitted!</h2>
+              <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
+
+              {/* Pricing */}
+              {priceData && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
+                  <p className="text-xs text-muted-foreground font-sans mb-1 capitalize">{caricatureType} Caricature</p>
+                  <p className="font-display text-3xl font-bold text-primary">
+                    ₹{priceData.price.toLocaleString("en-IN")}
+                    {priceData.per_face && <span className="text-sm font-sans font-normal text-muted-foreground">/face</span>}
+                  </p>
+                  {details.delivery_days && (
+                    <p className="text-xs text-muted-foreground font-sans mt-1">📦 Delivery: ~{details.delivery_days} days</p>
+                  )}
                 </div>
               )}
-              <p className="text-sm text-muted-foreground font-sans">Our team will contact you shortly.</p>
-              <div className="flex flex-col gap-2 pt-4">
-                <Button onClick={() => window.open(`https://wa.me/${contactInfo.whatsapp}`, "_blank")} className="w-full font-sans bg-green-600 hover:bg-green-700">
+
+              {/* Admin-editable details text */}
+              {details.full_details && (
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                  <p className="text-sm font-sans text-foreground whitespace-pre-line leading-relaxed">
+                    <RichText text={details.full_details} />
+                  </p>
+                </div>
+              )}
+
+              {/* Order link button */}
+              {details.order_link && (
+                <Button
+                  className="w-full rounded-full font-sans h-12 text-base"
+                  onClick={() => { trackLinkClick(); window.open(details.order_link, "_blank"); }}
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" /> Proceed to Order
+                </Button>
+              )}
+
+              {/* Contact buttons */}
+              <div className="flex flex-col gap-2 pt-2">
+                <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
+                <Button onClick={() => {
+                  const msg = `Hi, I submitted an enquiry (${enquiryId}) for ${caricatureType} caricature. I'd like to know more.`;
+                  window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+                }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
                 </Button>
                 <Button variant="outline" onClick={() => window.open(contactInfo.instagram, "_blank")} className="w-full font-sans">
                   <Instagram className="w-4 h-4 mr-2" /> Instagram
                 </Button>
-                <Button variant="ghost" onClick={() => window.location.href = "/"} className="font-sans">
-                  Back to Home
+                <Button variant="ghost" onClick={() => window.location.href = "/"} className="font-sans">Back to Home</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
+
+  // SUBMITTED: Event details page
+  if (submitted && enquiryType === "event_booking") {
+    const region = getEventRegion();
+    const regionDetails = eventDetails[region] || {};
+    return (
+      <>
+        <SEOHead title="Event Enquiry Submitted | Creative Caricature Club" description="Your event enquiry has been submitted." />
+        <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/10 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md shadow-2xl border-primary/20">
+            <CardContent className="p-6 space-y-4">
+              <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7 text-green-600" />
+              </div>
+              <h2 className="font-display text-xl font-bold text-center">Event Enquiry Submitted!</h2>
+              <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
+
+              {/* Pricing */}
+              {resolvedPrice && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
+                  <p className="text-xs text-muted-foreground font-sans mb-1">Estimated Event Price</p>
+                  <p className="font-display text-3xl font-bold text-primary">
+                    {resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}{resolvedPrice.price.toLocaleString("en-IN")}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                    Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
+                  </p>
+                </div>
+              )}
+
+              {/* Region-specific details from admin */}
+              {regionDetails.details && (
+                <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                  <p className="font-sans font-semibold text-sm mb-2">{regionDetails.title || (region === "maharashtra" ? "Maharashtra Region" : region === "pan_india" ? "Pan India" : "International")}</p>
+                  <p className="text-sm font-sans text-foreground whitespace-pre-line leading-relaxed">
+                    <RichText text={regionDetails.details} />
+                  </p>
+                </div>
+              )}
+
+              {/* Pricing text from admin */}
+              {regionDetails.pricing_text && (
+                <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+                  <p className="text-sm font-sans text-foreground whitespace-pre-line leading-relaxed">
+                    <RichText text={regionDetails.pricing_text} />
+                  </p>
+                </div>
+              )}
+
+              {/* Order link */}
+              {regionDetails.order_link && (
+                <Button
+                  className="w-full rounded-full font-sans h-12 text-base"
+                  onClick={() => { trackLinkClick(); window.open(regionDetails.order_link, "_blank"); }}
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" /> Book Now
                 </Button>
+              )}
+
+              {/* Contact */}
+              <div className="flex flex-col gap-2 pt-2">
+                <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
+                <Button onClick={() => {
+                  const msg = `Hi, I submitted an event enquiry (${enquiryId}) for ${eventType === "other" ? customEventType : eventType} on ${eventDate ? format(eventDate, "dd MMM yyyy") : "TBD"} in ${city || state || "India"}. I'd like to know more.`;
+                  window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+                }} className="w-full font-sans bg-green-600 hover:bg-green-700">
+                  <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
+                </Button>
+                <Button variant="outline" onClick={() => window.open(contactInfo.instagram, "_blank")} className="w-full font-sans">
+                  <Instagram className="w-4 h-4 mr-2" /> Instagram
+                </Button>
+                <Button variant="ghost" onClick={() => window.location.href = "/"} className="font-sans">Back to Home</Button>
               </div>
             </CardContent>
           </Card>
@@ -271,19 +410,19 @@ const Enquiry = () => {
                 </h3>
                 <div>
                   <Label className="font-sans">Name *</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" className="mt-1" />
+                  <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="mt-1" />
                 </div>
                 <div>
                   <Label className="font-sans">Mobile Number *</Label>
-                  <Input value={mobile} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit mobile number" className="mt-1" maxLength={10} />
+                  <Input value={mobile} onChange={e => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit mobile number" className="mt-1" maxLength={10} />
                 </div>
                 <div>
                   <Label className="font-sans">Email Address <span className="text-muted-foreground">(optional)</span></Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1" />
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1" />
                 </div>
                 <div>
                   <Label className="font-sans">Instagram ID <span className="text-muted-foreground">(optional)</span></Label>
-                  <Input value={instagramId} onChange={(e) => setInstagramId(e.target.value)} placeholder="@your_instagram" className="mt-1" />
+                  <Input value={instagramId} onChange={e => setInstagramId(e.target.value)} placeholder="@your_instagram" className="mt-1" />
                 </div>
                 <Button onClick={handleSubmitInfo} className="w-full rounded-full font-sans h-12 text-base">
                   Continue <ArrowRight className="w-4 h-4 ml-2" />
@@ -297,7 +436,7 @@ const Enquiry = () => {
                 <h3 className="font-display text-lg font-semibold">What are you looking for?</h3>
                 <div className="grid gap-3">
                   <button
-                    onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_details"); }}
+                    onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_select"); }}
                     className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
                   >
                     <div className="flex items-center gap-3">
@@ -331,8 +470,8 @@ const Enquiry = () => {
               </div>
             )}
 
-            {/* Step 3a: Caricature Details */}
-            {step === "caricature_details" && (
+            {/* Step 3: Caricature Type Selection - NO pricing shown */}
+            {step === "caricature_select" && (
               <div className="space-y-4 animate-in fade-in duration-300">
                 <h3 className="font-display text-lg font-semibold">Select Caricature Type</h3>
                 <div className="grid gap-3">
@@ -341,82 +480,110 @@ const Enquiry = () => {
                     return (
                       <button
                         key={p.slug}
-                        onClick={() => setCaricatureType(p.slug)}
-                        className={cn(
-                          "p-4 rounded-2xl border-2 transition-all text-left",
-                          caricatureType === p.slug
-                            ? "border-primary bg-primary/5 shadow-md"
-                            : "border-border hover:border-primary/30"
-                        )}
+                        onClick={() => { setCaricatureType(p.slug); setStep("caricature_details"); }}
+                        className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <p className="font-sans font-semibold text-foreground">{desc.title || p.name}</p>
-                            <p className="text-xs text-muted-foreground font-sans mt-1">{desc.description || ""}</p>
-                            {desc.delivery_days && (
-                              <p className="text-xs text-primary font-sans mt-1">📦 Delivery: ~{desc.delivery_days} days</p>
-                            )}
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                            <Palette className="w-6 h-6 text-primary" />
                           </div>
-                          <div className="text-right">
-                            <p className="font-display font-bold text-primary">
-                              ₹{p.price.toLocaleString("en-IN")}
-                              {p.per_face && <span className="text-xs font-sans font-normal text-muted-foreground">/face</span>}
-                            </p>
+                          <div>
+                            <p className="font-sans font-semibold text-foreground">{desc.title || p.name}</p>
+                            {desc.description && <p className="text-xs text-muted-foreground font-sans mt-0.5">{desc.description}</p>}
                           </div>
                         </div>
                       </button>
                     );
                   })}
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" onClick={() => setStep("type")} className="font-sans">
-                    <ArrowLeft className="w-4 h-4 mr-1" /> Back
-                  </Button>
-                  <Button
-                    onClick={submitEnquiry}
-                    disabled={!caricatureType || submitting}
-                    className="flex-1 rounded-full font-sans h-12 text-base"
-                  >
-                    {submitting ? "Submitting..." : "Submit Enquiry"}
-                  </Button>
-                </div>
+                <Button variant="ghost" onClick={() => setStep("type")} className="font-sans">
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                </Button>
               </div>
             )}
 
-            {/* Step 3b: Event Details */}
+            {/* Step 3b: Caricature Details - shows pricing + admin details + submit */}
+            {step === "caricature_details" && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                {(() => {
+                  const details = getCaricatureDetails();
+                  const priceData = getPricingForType();
+                  return (
+                    <>
+                      <h3 className="font-display text-lg font-semibold capitalize">{caricatureType} Caricature</h3>
+
+                      {/* Pricing Card */}
+                      {priceData && (
+                        <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
+                          <p className="font-display text-3xl font-bold text-primary">
+                            ₹{priceData.price.toLocaleString("en-IN")}
+                            {priceData.per_face && <span className="text-sm font-sans font-normal text-muted-foreground">/face</span>}
+                          </p>
+                          {details.delivery_days && (
+                            <p className="text-xs text-muted-foreground font-sans mt-1">📦 Delivery: ~{details.delivery_days} days</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Admin-editable details */}
+                      {details.full_details && (
+                        <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                          <p className="text-sm font-sans text-foreground whitespace-pre-line leading-relaxed">
+                            <RichText text={details.full_details} />
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Button variant="ghost" onClick={() => setStep("caricature_select")} className="font-sans">
+                          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                        </Button>
+                        <Button onClick={submitEnquiry} disabled={submitting} className="flex-1 rounded-full font-sans h-12 text-base">
+                          {submitting ? "Submitting..." : "Submit Enquiry"}
+                        </Button>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Step 4: Event Details */}
             {step === "event_details" && (
               <div className="space-y-4 animate-in fade-in duration-300">
                 <h3 className="font-display text-lg font-semibold flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-primary" /> Event Details
                 </h3>
 
+                {/* Event Type Dropdown */}
                 <div>
                   <Label className="font-sans">Event Type *</Label>
-                  <div className="mt-1">
-                    <Input
-                      value={eventType}
-                      onChange={(e) => setEventType(e.target.value)}
-                      placeholder="e.g. Wedding, Birthday, Corporate, College Fest..."
-                      className="font-sans"
-                      list="event-types-list"
-                    />
-                    <datalist id="event-types-list">
-                      {["Wedding", "Birthday Party", "Corporate Event", "College Fest", "Anniversary", "Baby Shower", "Engagement", "Kitty Party", "New Year Party", "Christmas Party", "Diwali Party", "Holi Party"].map(t => (
-                        <option key={t} value={t} />
+                  <Select value={eventType} onValueChange={v => { setEventType(v); if (v !== "other") setCustomEventType(""); }}>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select event type" /></SelectTrigger>
+                    <SelectContent>
+                      {COMMON_EVENT_TYPES.map(t => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                       ))}
-                    </datalist>
-                  </div>
+                    </SelectContent>
+                  </Select>
+                  {eventType === "other" && (
+                    <Input
+                      value={customEventType}
+                      onChange={e => setCustomEventType(e.target.value)}
+                      placeholder="Enter your event type"
+                      className="mt-2 font-sans"
+                    />
+                  )}
                 </div>
 
                 <LocationDropdowns
-                  state={state}
-                  district={district}
-                  city={city}
-                  onStateChange={(v) => { setState(v); setDistrict(""); setCity(""); }}
-                  onDistrictChange={(v) => { setDistrict(v); setCity(""); }}
-                  onCityChange={(v) => setCity(v)}
+                  state={state} district={district} city={city}
+                  onStateChange={v => { setState(v); setDistrict(""); setCity(""); }}
+                  onDistrictChange={v => { setDistrict(v); setCity(""); }}
+                  onCityChange={v => setCity(v)}
                 />
 
+                {/* Event Date */}
                 <div>
                   <Label className="font-sans">Event Date</Label>
                   <Popover>
@@ -427,22 +594,15 @@ const Enquiry = () => {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
-                        mode="single"
-                        selected={eventDate}
-                        onSelect={setEventDate}
+                        mode="single" selected={eventDate} onSelect={setEventDate}
                         disabled={isDateDisabled}
                         className={cn("p-3 pointer-events-auto")}
                         modifiers={{
-                          limited: (date) => {
-                            const slots = getDateSlots(date);
-                            return slots === 1 && !isDateDisabled(date);
-                          },
+                          limited: (date) => getDateSlots(date) === 1 && !isDateDisabled(date),
                         }}
-                        modifiersClassNames={{
-                          limited: "bg-amber-100 text-amber-800 font-bold",
-                        }}
+                        modifiersClassNames={{ limited: "bg-amber-100 text-amber-800 font-bold" }}
                       />
-                      <div className="px-3 pb-3 text-[10px] text-muted-foreground font-sans space-y-0.5">
+                      <div className="px-3 pb-3 text-[10px] text-muted-foreground font-sans">
                         <p>🟢 Available · 🟡 1 slot left · 🔴 Fully booked/blocked</p>
                       </div>
                     </PopoverContent>
@@ -454,7 +614,7 @@ const Enquiry = () => {
                   )}
                 </div>
 
-                {/* Estimated Price Card */}
+                {/* Estimated Price */}
                 {resolvedPrice && (
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-300">
                     <div className="flex items-center gap-2 mb-1">
@@ -465,7 +625,7 @@ const Enquiry = () => {
                       ₹{resolvedPrice.price.toLocaleString("en-IN")}
                     </p>
                     <p className="text-[10px] text-muted-foreground font-sans mt-1">
-                      Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary depending on event requirements
+                      Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
                     </p>
                   </div>
                 )}
@@ -476,26 +636,10 @@ const Enquiry = () => {
                   </Button>
                   <Button
                     onClick={submitEnquiry}
-                    disabled={!state || !city || submitting}
+                    disabled={!state || !city || !(eventType && (eventType !== "other" || customEventType)) || submitting}
                     className="flex-1 rounded-full font-sans h-12 text-base"
                   >
                     {submitting ? "Submitting..." : "Submit Enquiry"}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Help / Contact */}
-            {step === "help" && !submitted && (
-              <div className="space-y-4 animate-in fade-in duration-300 text-center">
-                <h3 className="font-display text-lg font-semibold">Need Help?</h3>
-                <p className="text-sm text-muted-foreground font-sans">If you need immediate assistance, contact us:</p>
-                <div className="flex flex-col gap-2">
-                  <Button onClick={() => window.open(`https://wa.me/${contactInfo.whatsapp}`, "_blank")} className="w-full font-sans bg-green-600 hover:bg-green-700">
-                    <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp Chat
-                  </Button>
-                  <Button variant="outline" onClick={() => window.open(contactInfo.instagram, "_blank")} className="w-full font-sans">
-                    <Instagram className="w-4 h-4 mr-2" /> Instagram
                   </Button>
                 </div>
               </div>
