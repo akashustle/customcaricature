@@ -44,6 +44,10 @@ import Workshop from "./pages/Workshop";
 import WorkshopDashboard from "./pages/WorkshopDashboard";
 import WorkshopAdminLogin from "./pages/WorkshopAdminLogin";
 import WorkshopAdminPanel from "./pages/WorkshopAdminPanel";
+import CancellationPolicy from "./pages/CancellationPolicy";
+import IntellectualProperty from "./pages/IntellectualProperty";
+import WorkshopPolicy from "./pages/WorkshopPolicy";
+import Disclaimer from "./pages/Disclaimer";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +80,10 @@ const App = () => {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/shipping" element={<ShippingPolicy />} />
+            <Route path="/cancellation" element={<CancellationPolicy />} />
+            <Route path="/intellectual-property" element={<IntellectualProperty />} />
+            <Route path="/workshop-policy" element={<WorkshopPolicy />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/track-order" element={<TrackOrder />} />
             <Route path="/book-event" element={<BookEvent />} />
             <Route path="/event-policy" element={<EventPolicy />} />

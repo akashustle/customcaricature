@@ -431,7 +431,7 @@ const Index = () => {
               <p className="font-calligraphy text-xl font-semibold text-foreground">Creative Caricature Club</p>
             </div>
             <p className="text-sm text-muted-foreground font-calligraphy text-lg">Drawn with love & laughter ✏️</p>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground font-body">
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground font-body">
               <Link to="/track-order" className="hover:text-foreground transition-colors">Track Order</Link>
               <span>•</span>
               <Link to="/about" className="hover:text-foreground transition-colors">About Us</Link>
@@ -445,6 +445,14 @@ const Index = () => {
               <Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</Link>
               <span>•</span>
               <Link to="/event-policy" className="hover:text-foreground transition-colors">Event Policy</Link>
+              <span>•</span>
+              <Link to="/cancellation" className="hover:text-foreground transition-colors">Cancellation Policy</Link>
+              <span>•</span>
+              <Link to="/intellectual-property" className="hover:text-foreground transition-colors">IP Policy</Link>
+              <span>•</span>
+              <Link to="/workshop-policy" className="hover:text-foreground transition-colors">Workshop Policy</Link>
+              <span>•</span>
+              <Link to="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link>
               {settings.workshop_button.enabled && (
                 <>
                   <span>•</span>
@@ -452,7 +460,7 @@ const Index = () => {
                 </>
               )}
             </div>
-            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
           </div>
         </div>
       </footer>

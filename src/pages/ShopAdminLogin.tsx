@@ -63,13 +63,9 @@ const ShopAdminLogin = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
-              <Store className="w-8 h-8 text-accent-foreground" />
-            </div>
-          </div>
+          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto rounded-xl cursor-pointer" onClick={() => navigate("/")} />
           <CardTitle className="font-display text-2xl">Shop Admin</CardTitle>
-          <p className="text-sm text-muted-foreground font-sans">Creative Caricature Club - Store</p>
+          <p className="text-sm text-muted-foreground font-body">Creative Caricature Club - Store</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
