@@ -1,54 +1,65 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
+const ALLOWED_ATTENDANCE_DATES = ["2026-03-14", "2026-03-15"];
+
 const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [prompt, setPrompt] = useState<any>(null);
   const [marking, setMarking] = useState(false);
   const [marked, setMarked] = useState(false);
 
-  useEffect(() => {
+  const checkPrompt = useCallback(async () => {
     if (!user?.id) return;
-    checkPrompt();
-    const ch = supabase.channel("online-attendance-prompt-" + user.id)
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_online_attendance_prompts" }, () => checkPrompt())
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, () => checkPrompt())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [user?.id, user?.slot]);
 
-  const checkPrompt = async () => {
-    if (!user?.id) return;
-    const today = new Date().toISOString().split("T")[0];
+    const { data: attendanceSetting } = await supabase
+      .from("workshop_settings" as any)
+      .select("value")
+      .eq("id", "online_attendance_enabled")
+      .maybeSingle();
+
+    if (attendanceSetting?.value?.enabled === false) {
+      setPrompt(null);
+      setMarked(false);
+      return;
+    }
+
     const { data } = await supabase
       .from("workshop_online_attendance_prompts" as any)
       .select("*")
-      .eq("is_active", true);
-    
-    if (!data || (data as any[]).length === 0) { setPrompt(null); return; }
+      .eq("is_active", true)
+      .order("updated_at", { ascending: false });
 
-    // Find matching prompt for today or specific date, and matching slot
-    const matching = (data as any[]).find((p: any) => {
-      // Check date match
-      if (p.session_date !== today) return false;
-      // Check slot match - "all" matches everyone
+    if (!data || (data as any[]).length === 0) {
+      setPrompt(null);
+      return;
+    }
+
+    const eligiblePrompts = (data as any[]).filter((p: any) => {
+      if (!ALLOWED_ATTENDANCE_DATES.includes(p.session_date)) return false;
+      if (p.target_user_id && p.target_user_id !== user.id) return false;
       if (p.slot && p.slot !== "all" && user.slot && p.slot !== user.slot) return false;
       return true;
     });
 
-    if (!matching) { setPrompt(null); return; }
+    if (!eligiblePrompts.length) {
+      setPrompt(null);
+      return;
+    }
 
-    // Check if already marked present for today
+    const latestPrompt = eligiblePrompts[0];
+
     const { data: existing } = await supabase
       .from("workshop_attendance" as any)
       .select("id")
       .eq("user_id", user.id)
-      .eq("session_date", today)
-      .eq("status", "present");
-    
+      .eq("session_date", latestPrompt.session_date)
+      .eq("status", "present")
+      .limit(1);
+
     if (existing && (existing as any[]).length > 0) {
       setMarked(true);
       setPrompt(null);
@@ -56,43 +67,63 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
     }
 
     setMarked(false);
-    setPrompt(matching);
-  };
+    setPrompt(latestPrompt);
+  }, [user?.id, user?.slot]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    checkPrompt();
+
+    const ch = supabase
+      .channel("online-attendance-prompt-" + user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_online_attendance_prompts" }, () => checkPrompt())
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, () => checkPrompt())
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings", filter: "id=eq.online_attendance_enabled" }, () => checkPrompt())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user?.id, checkPrompt]);
 
   const handleMarkPresent = async () => {
     if (!prompt || marking) return;
     setMarking(true);
-    const today = new Date().toISOString().split("T")[0];
-    
-    // Try upsert first
-    const { error } = await supabase.from("workshop_attendance" as any).upsert({
-      user_id: user.id,
-      session_date: today,
-      status: "present",
-      marked_by: null,
-    } as any, { onConflict: "user_id,session_date" });
 
-    if (error) {
-      // Fallback: try insert
-      const { error: insertErr } = await supabase.from("workshop_attendance" as any).insert({
-        user_id: user.id,
-        session_date: today,
-        status: "present",
-      } as any);
-      
-      if (insertErr) {
-        // Last resort: update
-        await supabase.from("workshop_attendance" as any)
-          .update({ status: "present" } as any)
-          .eq("user_id", user.id)
-          .eq("session_date", today);
+    try {
+      const { data, error } = await supabase.functions.invoke("mark-workshop-attendance", {
+        body: {
+          user_id: user.id,
+          session_date: prompt.session_date,
+        },
+      });
+
+      if (error || !data?.success) {
+        toast({
+          title: "Unable to mark attendance",
+          description: data?.error || error?.message || "Please try again.",
+          variant: "destructive",
+        });
+        setMarking(false);
+        return;
       }
-    }
 
-    toast({ title: "✅ Attendance Marked!", description: "You have been marked present for today's session." });
-    setMarked(true);
-    setPrompt(null);
-    setMarking(false);
+      toast({
+        title: "✅ Attendance Marked!",
+        description: "You have been marked present for this session.",
+      });
+
+      setMarked(true);
+      setPrompt(null);
+    } catch (err: any) {
+      toast({
+        title: "Unable to mark attendance",
+        description: err?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setMarking(false);
+    }
   };
 
   if (!prompt || marked) return null;
@@ -111,7 +142,7 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
-          className={`w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center ${dm ? "bg-[#241f33] text-white" : "bg-white text-foreground"}`}
+          className={`w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center border ${dm ? "bg-card text-foreground border-border" : "bg-card text-foreground border-border"}`}
         >
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
@@ -120,22 +151,30 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
           >
             <Clock className="w-8 h-8 text-primary" />
           </motion.div>
+
           <h2 className="text-xl font-bold mb-2">📋 Mark Your Attendance</h2>
-          <p className={`text-sm mb-1 ${dm ? "text-white/70" : "text-muted-foreground"}`}>
-            Today's Session: <span className="font-semibold">{prompt.timing || prompt.slot}</span>
+          <p className="text-sm mb-1 text-muted-foreground">
+            Session: <span className="font-semibold text-foreground">{prompt.timing || prompt.slot}</span>
           </p>
-          <p className={`text-xs mb-6 ${dm ? "text-white/50" : "text-muted-foreground"}`}>
-            {new Date(prompt.session_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          <p className="text-xs mb-6 text-muted-foreground">
+            {new Date(prompt.session_date + "T00:00:00").toLocaleDateString("en-IN", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </p>
+
           <Button
             onClick={handleMarkPresent}
             disabled={marking}
-            className="w-full rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold py-3 text-base"
+            className="w-full rounded-full bg-primary text-primary-foreground font-bold py-3 text-base hover:bg-primary/90"
           >
             {marking ? "Marking..." : "✅ Mark Present"}
           </Button>
-          <p className={`text-[10px] mt-3 ${dm ? "text-white/40" : "text-muted-foreground"}`}>
-            This popup will close once you mark your attendance
+
+          <p className="text-[10px] mt-3 text-muted-foreground">
+            This popup will close only after your attendance is marked.
           </p>
         </motion.div>
       </motion.div>
