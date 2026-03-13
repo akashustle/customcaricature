@@ -167,6 +167,28 @@ const WorkshopAdmin = () => {
   const fetchWorkshopNotifications = async () => { const { data } = await supabase.from("workshop_notifications" as any).select("*").order("created_at", { ascending: false }).limit(100); if (data) setWorkshopNotifications(data as any[]); };
   const fetchArtists = async () => { const { data } = await supabase.from("artists").select("*").order("name"); if (data) setArtists(data as any[]); };
 
+  const updateLiveRequestStatus = async (request: any, status: "pending" | "allowed" | "denied", note?: string) => {
+    const payload: any = {
+      status,
+      updated_at: new Date().toISOString(),
+      admin_note: status === "denied" ? (note || request.admin_note || "Denied by admin") : null,
+    };
+
+    const { error } = await supabase
+      .from("workshop_live_session_requests" as any)
+      .update(payload as any)
+      .eq("id", request.id);
+
+    if (error) {
+      toast({ title: "Unable to update request", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    await logAction("update_live_request", `${status} for ${request.user_id}`);
+    toast({ title: `Request marked ${status}` });
+    fetchLiveRequests();
+  };
+
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
     await supabase.from("workshop_admin_log" as any).insert({ admin_id: info.id, admin_name: info.name || info.email, action, details } as any);
