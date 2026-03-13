@@ -1674,6 +1674,26 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
+              {/* Shop Tracking Toggle */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Package className="w-5 h-5 text-primary" />Shop in Track Order</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Shop Tab in Tracking</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display shop order tracking section on the Track Order page</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).shop_tracking_visible?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("shop_tracking_visible", { enabled: checked });
+                        toast({ title: checked ? "Shop tracking visible" : "Shop tracking hidden" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* SEO Settings */}
               <AdminSEOSettings />
 
