@@ -2662,6 +2662,42 @@ export type Database = {
           },
         ]
       }
+      workshop_countdown_prompts: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          is_active: boolean
+          seconds: number
+          session_date: string
+          slot: string
+          started_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_active?: boolean
+          seconds?: number
+          session_date: string
+          slot?: string
+          started_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_active?: boolean
+          seconds?: number
+          session_date?: string
+          slot?: string
+          started_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       workshop_feedback: {
         Row: {
           admin_reply: string | null
