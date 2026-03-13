@@ -106,7 +106,7 @@ const AdminOnlineAttendance = () => {
       .eq("id", "online_attendance_enabled")
       .maybeSingle();
 
-    setAttendanceEnabled(data?.value?.enabled !== false);
+    setAttendanceEnabled((data as any)?.value?.enabled !== false);
   };
 
   const getUsersForPrompt = (prompt: any) => {

@@ -21,7 +21,7 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
       .eq("id", "online_attendance_enabled")
       .maybeSingle();
 
-    if (attendanceSetting?.value?.enabled === false) {
+    if ((attendanceSetting as any)?.value?.enabled === false) {
       setPrompt(null);
       setMarked(false);
       return;
