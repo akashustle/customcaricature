@@ -46,6 +46,7 @@ const sidebarItems = [
   { key: "certificates", icon: Award, label: "Certificates" },
   { key: "attendance", icon: Calendar, label: "Attendance" },
   { key: "online-attendance", icon: Monitor, label: "Online Attendance" },
+  { key: "countdown", icon: Clock, label: "Countdown" },
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
   { key: "notifications", icon: Bell, label: "Notifications" },
