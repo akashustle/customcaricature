@@ -378,6 +378,7 @@ const BookEvent = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead title="Book Caricature Artist for Event" description="Book professional caricature artists for weddings, corporate events, birthdays, and parties across India. Live caricature entertainment for your celebration." canonical="/book-event" noindex />
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}><ArrowLeft className="w-4 h-4" /></Button>
