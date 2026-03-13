@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event-data";
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
+import SEOHead from "@/components/SEOHead";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getCountries, getCountryStates, getCountryCities } from "@/lib/countries-data";
 import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";

@@ -112,6 +112,7 @@ const TrackOrder = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
+      <SEOHead title="Track Your Caricature Order" description="Track the status of your custom caricature order or shop order. Get real-time updates on production progress and delivery." canonical="/track-order" />
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
