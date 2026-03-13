@@ -8,6 +8,7 @@ type SiteSettings = {
   international_booking_global: { enabled: boolean };
   allow_artwork_bypass: { enabled: boolean };
   shop_nav_visible: { enabled: boolean };
+  workshop_mobile_nav: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
