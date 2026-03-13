@@ -20,6 +20,7 @@ const MobileBottomNav = () => {
   const items = [
     { icon: Home, label: "Home", path: "/", action: () => navigate("/") },
     ...(shopNavVisible ? [{ icon: Store, label: "Shop", path: "/shop", action: () => navigate("/shop") }] : []),
+    ...(workshopNavVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop", action: () => navigate("/workshop") }] : []),
     { icon: Package, label: "Track", path: "/track-order", action: () => navigate("/track-order") },
     ...(user
       ? [{ icon: User, label: "Dashboard", path: "/dashboard", action: () => navigate("/dashboard") }]
