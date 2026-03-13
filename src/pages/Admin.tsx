@@ -1654,6 +1654,29 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
+              {/* Workshop Login Tab in Mobile Nav */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Workshop in Mobile Nav</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Workshop Login in Mobile Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display Workshop login button on the mobile bottom navigation bar</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).workshop_mobile_nav?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("workshop_mobile_nav", { enabled: checked });
+                        toast({ title: checked ? "Workshop shown in mobile nav" : "Workshop hidden from mobile nav" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* SEO Settings */}
+              <AdminSEOSettings />
+
               {/* Admin Profile */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
