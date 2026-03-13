@@ -124,7 +124,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-16 md:pb-0">
-      <SEOHead canonical="/" />
+      <SEOHead 
+        title="Book Caricature Artist for Events & Order Custom Caricatures from Photos"
+        description="Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online. India's #1 caricature studio."
+        canonical="/" 
+      />
       <JsonLd />
       {lightboxOpen && (
         <Lightbox
