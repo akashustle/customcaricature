@@ -1821,6 +1821,39 @@ export type Database = {
           },
         ]
       }
+      seo_page_settings: {
+        Row: {
+          id: string
+          meta_description: string
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
+          page_title: string
+          seo_keywords: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          meta_description?: string
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_title?: string
+          seo_keywords?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          meta_description?: string
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          page_title?: string
+          seo_keywords?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shop_cart_items: {
         Row: {
           caricature_image_url: string | null
@@ -2787,6 +2820,36 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      workshop_online_attendance_prompts: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          session_date: string
+          slot: string
+          timing: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          session_date: string
+          slot?: string
+          timing?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          session_date?: string
+          slot?: string
+          timing?: string
+          updated_at?: string
         }
         Relationships: []
       }
