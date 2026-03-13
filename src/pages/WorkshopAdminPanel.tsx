@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
+import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
 
 const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d98c8c", "#8fa3bf", "#a8c0a0", "#e0a060", "#9080c0"];
