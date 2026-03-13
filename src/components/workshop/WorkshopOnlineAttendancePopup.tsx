@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
@@ -11,32 +11,37 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
   const [marked, setMarked] = useState(false);
 
   useEffect(() => {
+    if (!user?.id) return;
     checkPrompt();
-    const ch = supabase.channel("online-attendance-prompt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_online_attendance_prompts" }, checkPrompt)
+    const ch = supabase.channel("online-attendance-prompt-" + user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_online_attendance_prompts" }, () => checkPrompt())
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_attendance" }, () => checkPrompt())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user]);
+  }, [user?.id, user?.slot]);
 
   const checkPrompt = async () => {
+    if (!user?.id) return;
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
       .from("workshop_online_attendance_prompts" as any)
       .select("*")
-      .eq("is_active", true)
-      .eq("session_date", today);
+      .eq("is_active", true);
     
     if (!data || (data as any[]).length === 0) { setPrompt(null); return; }
 
-    // Check if user's slot matches
+    // Find matching prompt for today or specific date, and matching slot
     const matching = (data as any[]).find((p: any) => {
-      if (p.slot && user.slot && p.slot !== user.slot) return false;
+      // Check date match
+      if (p.session_date !== today) return false;
+      // Check slot match - "all" matches everyone
+      if (p.slot && p.slot !== "all" && user.slot && p.slot !== user.slot) return false;
       return true;
     });
 
     if (!matching) { setPrompt(null); return; }
 
-    // Check if already marked
+    // Check if already marked present for today
     const { data: existing } = await supabase
       .from("workshop_attendance" as any)
       .select("id")
@@ -50,6 +55,7 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
       return;
     }
 
+    setMarked(false);
     setPrompt(matching);
   };
 
@@ -58,7 +64,7 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
     setMarking(true);
     const today = new Date().toISOString().split("T")[0];
     
-    // Upsert attendance
+    // Try upsert first
     const { error } = await supabase.from("workshop_attendance" as any).upsert({
       user_id: user.id,
       session_date: today,
@@ -67,12 +73,20 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
     } as any, { onConflict: "user_id,session_date" });
 
     if (error) {
-      // Try insert if upsert fails
-      await supabase.from("workshop_attendance" as any).insert({
+      // Fallback: try insert
+      const { error: insertErr } = await supabase.from("workshop_attendance" as any).insert({
         user_id: user.id,
         session_date: today,
         status: "present",
       } as any);
+      
+      if (insertErr) {
+        // Last resort: update
+        await supabase.from("workshop_attendance" as any)
+          .update({ status: "present" } as any)
+          .eq("user_id", user.id)
+          .eq("session_date", today);
+      }
     }
 
     toast({ title: "✅ Attendance Marked!", description: "You have been marked present for today's session." });
@@ -111,7 +125,7 @@ const WorkshopOnlineAttendancePopup = ({ user, darkMode = false }: { user: any; 
             Today's Session: <span className="font-semibold">{prompt.timing || prompt.slot}</span>
           </p>
           <p className={`text-xs mb-6 ${dm ? "text-white/50" : "text-muted-foreground"}`}>
-            {new Date(prompt.session_date).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            {new Date(prompt.session_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
           <Button
             onClick={handleMarkPresent}

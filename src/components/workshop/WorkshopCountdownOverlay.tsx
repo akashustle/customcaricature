@@ -64,9 +64,10 @@ const WorkshopCountdownOverlay = ({ user }: { user: any }) => {
     if (!prompt || remaining === null || remaining > 0 || playedRef.current) return;
 
     playedRef.current = true;
+    // Play stock market bell sound
     try {
       const ctx = new AudioContext();
-      const freqs = [880, 1047, 1319];
+      const freqs = [880, 1047, 1319, 1568];
       freqs.forEach((f, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -75,16 +76,36 @@ const WorkshopCountdownOverlay = ({ user }: { user: any }) => {
         gain.gain.value = 0.0001;
         osc.connect(gain);
         gain.connect(ctx.destination);
-        const start = ctx.currentTime + i * 0.16;
-        gain.gain.exponentialRampToValueAtTime(0.3, start + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.2);
+        const start = ctx.currentTime + i * 0.15;
+        gain.gain.exponentialRampToValueAtTime(0.35, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.4);
         osc.start(start);
-        osc.stop(start + 0.21);
+        osc.stop(start + 0.42);
       });
+      // Extra bell ring
+      setTimeout(() => {
+        try {
+          const ctx2 = new AudioContext();
+          [1319, 1568, 1760].forEach((f, i) => {
+            const osc = ctx2.createOscillator();
+            const gain = ctx2.createGain();
+            osc.type = "sine";
+            osc.frequency.value = f;
+            gain.gain.value = 0.0001;
+            osc.connect(gain);
+            gain.connect(ctx2.destination);
+            const start = ctx2.currentTime + i * 0.12;
+            gain.gain.exponentialRampToValueAtTime(0.25, start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+            osc.start(start);
+            osc.stop(start + 0.52);
+          });
+        } catch {}
+      }, 700);
     } catch {}
 
     setDoneIds((prev) => [...prev, prompt.id]);
-    setTimeout(() => setPrompt(null), 800);
+    setTimeout(() => setPrompt(null), 1200);
   }, [prompt, remaining]);
 
   const value = useMemo(() => {
@@ -97,8 +118,11 @@ const WorkshopCountdownOverlay = ({ user }: { user: any }) => {
   return (
     <div className="fixed inset-0 z-[220] bg-background/95 backdrop-blur-md flex items-center justify-center">
       <div className="text-center px-6">
-        <p className="text-[120px] md:text-[180px] leading-none font-bold text-primary tabular-nums">{value}</p>
+        <p className="text-[120px] md:text-[180px] leading-none font-bold text-primary tabular-nums animate-pulse">{value}</p>
         {prompt.details && <p className="text-sm text-muted-foreground mt-3">{prompt.details}</p>}
+        {remaining === 0 && (
+          <p className="text-2xl font-bold text-primary mt-4 animate-bounce">🔔 Time's Up!</p>
+        )}
       </div>
     </div>
   );
