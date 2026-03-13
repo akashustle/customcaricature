@@ -56,6 +56,7 @@ import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSupport from "@/components/admin/AdminSupport";
+import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
 
 type Order = {
   id: string;
