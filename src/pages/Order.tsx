@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEOHead from "@/components/SEOHead";
 import { motion, AnimatePresence } from "framer-motion";
 import { OrderFormData, initialFormData } from "@/lib/order-types";
 import { usePricing } from "@/hooks/usePricing";
@@ -117,6 +118,7 @@ const Order = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Order Custom Caricature from Photos" description="Order custom hand-crafted caricatures from your photos. Choose from cute, romantic, fun, royal & minimal styles. Delivered across India." canonical="/order" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">

@@ -24,9 +24,10 @@ import {
   MapPin, History, Shield, BarChart3, ChevronDown, ChevronUp, TrendingUp,
   PieChart, Activity, Moon, Sun, ChevronLeft, ChevronRight, AlertTriangle,
   ExternalLink, UsersRound, Download, RefreshCw, Search, Hash, MonitorPlay,
-  Bell, Send, Lock, Reply,
+  Bell, Send, Lock, Reply, Monitor,
 } from "lucide-react";
 import ExportButton from "@/components/admin/ExportButton";
+import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
 
 const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d98c8c", "#8fa3bf", "#a8c0a0", "#e0a060", "#9080c0"];
@@ -43,6 +44,7 @@ const sidebarItems = [
   { key: "assignments", icon: FileText, label: "Assignments" },
   { key: "certificates", icon: Award, label: "Certificates" },
   { key: "attendance", icon: Calendar, label: "Attendance" },
+  { key: "online-attendance", icon: Monitor, label: "Online Attendance" },
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
   { key: "notifications", icon: Bell, label: "Notifications" },
@@ -1172,6 +1174,9 @@ const WorkshopAdmin = () => {
                   ))}
                 </div>
               )}
+
+              {/* ONLINE ATTENDANCE */}
+              {tab === "online-attendance" && <AdminOnlineAttendance />}
 
               {/* LOCATIONS */}
               {tab === "locations" && (

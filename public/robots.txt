@@ -1,7 +1,15 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin-panel
 Disallow: /dashboard
 Disallow: /customcad75
+Disallow: /artist-dashboard
+Disallow: /artistlogin
+Disallow: /shop-admin
+Disallow: /CFCAdmin936
+Disallow: /workshop-admin
+Disallow: /workshop-admin-panel
+Disallow: /cccworkshop2006
 
 Sitemap: https://customcaricature.lovable.app/sitemap.xml

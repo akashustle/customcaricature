@@ -10,7 +10,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "Creative Caricature Club";
-const DEFAULT_DESC = "Order custom hand-crafted caricatures online. Single, couple & group caricatures in cute, romantic, fun, royal & minimal styles. Delivered to your doorstep across India.";
+const DEFAULT_DESC = "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online with Creative Caricature Club.";
 const BASE_URL = "https://customcaricature.lovable.app";
 
 const SEOHead = ({
