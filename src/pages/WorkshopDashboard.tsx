@@ -14,6 +14,7 @@ import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
 import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
+import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
