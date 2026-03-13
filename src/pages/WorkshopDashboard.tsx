@@ -14,6 +14,7 @@ import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
 import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
+import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
@@ -120,6 +121,8 @@ const WorkshopDashboard = () => {
     <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300`}>
       {/* Online Attendance Popup */}
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
+      {/* Countdown Overlay */}
+      <WorkshopCountdownOverlay user={workshopUser} />
       {/* Header */}
       <div className={`sticky top-0 z-40 backdrop-blur-xl ${headerBg} border-b shadow-sm`}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">

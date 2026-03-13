@@ -14,7 +14,9 @@ const MobileBottomNav = () => {
   const shopNavVisible = settings.shop_nav_visible?.enabled !== false;
   const workshopNavVisible = (settings as any).workshop_mobile_nav?.enabled || false;
 
-  const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event", "/shop-admin", "/CFCAdmin936", "/workshop-admin", "/workshop/dashboard", "/cccworkshop2006", "/workshop-admin-panel"];
+  const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event", "/shop-admin", "/CFCAdmin936", "/workshop-admin", "/workshop/dashboard", "/cccworkshop2006", "/workshop-admin-panel", "/workshop/"];
+  // Also hide on exact /workshop/dashboard path
+  if (location.pathname.startsWith("/workshop/")) return null;
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
   const items = [

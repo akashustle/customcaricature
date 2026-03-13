@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +9,6 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Trash2, CheckCircle, Clock, Monitor } from "lucide-react";
-import { format } from "date-fns";
 
 const AdminOnlineAttendance = () => {
   const [prompts, setPrompts] = useState<any[]>([]);
@@ -20,6 +19,7 @@ const AdminOnlineAttendance = () => {
   const [newSlot, setNewSlot] = useState("6pm-9pm");
   const [newTiming, setNewTiming] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedSlotFilter, setSelectedSlotFilter] = useState("all");
 
   useEffect(() => {
     fetchAll();
@@ -40,7 +40,7 @@ const AdminOnlineAttendance = () => {
     if (data) setAttendance(data as any[]);
   };
   const fetchUsers = async () => {
-    const { data } = await supabase.from("workshop_users" as any).select("id, name, roll_number, slot, email").eq("is_enabled", true);
+    const { data } = await supabase.from("workshop_users" as any).select("id, name, roll_number, slot, email, mobile").eq("is_enabled", true);
     if (data) setUsers(data as any[]);
   };
 
@@ -59,7 +59,7 @@ const AdminOnlineAttendance = () => {
 
   const toggleActive = async (id: string, isActive: boolean) => {
     await supabase.from("workshop_online_attendance_prompts" as any).update({ is_active: !isActive } as any).eq("id", id);
-    toast({ title: isActive ? "Prompt deactivated" : "Prompt activated! Users will see attendance popup." });
+    toast({ title: isActive ? "Prompt deactivated" : "✅ Prompt activated! Users will see attendance popup now." });
   };
 
   const deletePrompt = async (id: string) => {
@@ -69,6 +69,30 @@ const AdminOnlineAttendance = () => {
 
   const dateAttendance = attendance.filter(a => a.session_date === selectedDate);
   const attendedUserIds = new Set(dateAttendance.map((a: any) => a.user_id));
+
+  // Filter users by selected slot
+  const filteredUsers = selectedSlotFilter === "all" ? users : users.filter(u => u.slot === selectedSlotFilter);
+
+  // Group users by slot for the slot sections
+  const slot1Users = users.filter(u => u.slot === "12pm-3pm");
+  const slot2Users = users.filter(u => u.slot === "6pm-9pm");
+
+  const renderUserRow = (u: any) => {
+    const isPresent = attendedUserIds.has(u.id);
+    return (
+      <div key={u.id} className={`flex items-center justify-between py-2 px-3 rounded-lg border text-sm ${isPresent ? "bg-primary/10 border-primary/30" : "bg-card border-border"}`}>
+        <div className="flex items-center gap-2">
+          {isPresent ? <CheckCircle className="w-4 h-4 text-primary" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
+          <span className="font-body font-medium">{u.name}</span>
+          {u.roll_number && <span className="text-xs text-muted-foreground">#{u.roll_number}</span>}
+          {u.slot && <Badge variant="outline" className="text-[9px]">{u.slot}</Badge>}
+        </div>
+        <Badge variant={isPresent ? "default" : "secondary"} className="text-[10px]">
+          {isPresent ? "Present ✅" : "Absent"}
+        </Badge>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -95,9 +119,8 @@ const AdminOnlineAttendance = () => {
                 <Select value={newSlot} onValueChange={setNewSlot}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="12pm-3pm">12 PM - 3 PM</SelectItem>
-                    <SelectItem value="3pm-6pm">3 PM - 6 PM</SelectItem>
-                    <SelectItem value="6pm-9pm">6 PM - 9 PM</SelectItem>
+                    <SelectItem value="12pm-3pm">12 PM - 3 PM (Slot 1)</SelectItem>
+                    <SelectItem value="6pm-9pm">6 PM - 9 PM (Slot 2)</SelectItem>
                     <SelectItem value="all">All Slots</SelectItem>
                   </SelectContent>
                 </Select>
@@ -119,58 +142,93 @@ const AdminOnlineAttendance = () => {
       <div className="space-y-2">
         <h3 className="text-sm font-body font-semibold">Attendance Prompts</h3>
         {prompts.length === 0 && <p className="text-sm text-muted-foreground">No prompts created yet</p>}
-        {prompts.map((p: any) => (
-          <Card key={p.id} className="border">
-            <CardContent className="py-3 px-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm font-body font-semibold">
-                    {new Date(p.session_date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{p.timing || p.slot} · Slot: {p.slot}</p>
+        {prompts.map((p: any) => {
+          // Show slot-specific attendance count
+          const promptDate = p.session_date;
+          const promptAttendance = attendance.filter(a => a.session_date === promptDate);
+          const promptSlotUsers = p.slot === "all" ? users : users.filter(u => u.slot === p.slot);
+          const presentCount = promptSlotUsers.filter(u => promptAttendance.some(a => a.user_id === u.id)).length;
+
+          return (
+            <Card key={p.id} className="border">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="text-sm font-body font-semibold">
+                        {new Date(p.session_date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{p.timing || p.slot} · Slot: {p.slot}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {presentCount}/{promptSlotUsers.length} marked present
+                      </p>
+                    </div>
+                    <Badge variant={p.is_active ? "default" : "secondary"} className="text-[10px]">
+                      {p.is_active ? "🟢 Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch checked={p.is_active} onCheckedChange={() => toggleActive(p.id, p.is_active)} />
+                    <Button variant="ghost" size="icon" onClick={() => deletePrompt(p.id)}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <Badge variant={p.is_active ? "default" : "secondary"} className="text-[10px]">
-                  {p.is_active ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={p.is_active} onCheckedChange={() => toggleActive(p.id, p.is_active)} />
-                <Button variant="ghost" size="icon" onClick={() => deletePrompt(p.id)}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Attendance View */}
+      {/* Attendance View by Slots */}
       <div className="space-y-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <h3 className="text-sm font-body font-semibold">Online Attendance Records</h3>
           <Input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="w-44 text-sm" />
+          <Select value={selectedSlotFilter} onValueChange={setSelectedSlotFilter}>
+            <SelectTrigger className="w-36 text-sm"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Slots</SelectItem>
+              <SelectItem value="12pm-3pm">Slot 1 (12-3)</SelectItem>
+              <SelectItem value="6pm-9pm">Slot 2 (6-9)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <div className="grid gap-2">
-          {users.map((u: any) => {
-            const isPresent = attendedUserIds.has(u.id);
-            return (
-              <div key={u.id} className={`flex items-center justify-between py-2 px-3 rounded-lg border text-sm ${isPresent ? "bg-primary/10 border-primary/30" : "bg-card border-border"}`}>
-                <div className="flex items-center gap-2">
-                  {isPresent ? <CheckCircle className="w-4 h-4 text-primary" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
-                  <span className="font-body font-medium">{u.name}</span>
-                  {u.roll_number && <span className="text-xs text-muted-foreground">#{u.roll_number}</span>}
-                  {u.slot && <Badge variant="outline" className="text-[9px]">{u.slot}</Badge>}
-                </div>
-                <Badge variant={isPresent ? "default" : "secondary"} className="text-[10px]">
-                  {isPresent ? "Present" : "Absent"}
-                </Badge>
-              </div>
-            );
-          })}
-          {users.length === 0 && <p className="text-sm text-muted-foreground">No users found</p>}
-        </div>
+
+        {/* Slot 1 Section */}
+        {(selectedSlotFilter === "all" || selectedSlotFilter === "12pm-3pm") && (
+          <div className="space-y-2">
+            <h4 className="text-xs font-body font-bold text-primary flex items-center gap-1">
+              📌 Slot 1 — 12:00 PM – 3:00 PM 
+              <Badge variant="outline" className="text-[9px] ml-1">
+                {slot1Users.filter(u => attendedUserIds.has(u.id)).length}/{slot1Users.length}
+              </Badge>
+            </h4>
+            <div className="grid gap-1.5">
+              {slot1Users.map(renderUserRow)}
+              {slot1Users.length === 0 && <p className="text-xs text-muted-foreground">No users in this slot</p>}
+            </div>
+          </div>
+        )}
+
+        {/* Slot 2 Section */}
+        {(selectedSlotFilter === "all" || selectedSlotFilter === "6pm-9pm") && (
+          <div className="space-y-2">
+            <h4 className="text-xs font-body font-bold text-primary flex items-center gap-1">
+              📌 Slot 2 — 6:00 PM – 9:00 PM
+              <Badge variant="outline" className="text-[9px] ml-1">
+                {slot2Users.filter(u => attendedUserIds.has(u.id)).length}/{slot2Users.length}
+              </Badge>
+            </h4>
+            <div className="grid gap-1.5">
+              {slot2Users.map(renderUserRow)}
+              {slot2Users.length === 0 && <p className="text-xs text-muted-foreground">No users in this slot</p>}
+            </div>
+          </div>
+        )}
+
         <p className="text-xs text-muted-foreground">
-          {dateAttendance.length} / {users.length} students marked present for {selectedDate}
+          Total: {dateAttendance.length} / {filteredUsers.length} students marked present for {selectedDate}
         </p>
       </div>
     </div>
