@@ -13,6 +13,7 @@ import WorkshopVideos from "@/components/workshop/WorkshopVideos";
 import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
 import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
+import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
 
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
