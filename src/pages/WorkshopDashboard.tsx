@@ -118,6 +118,8 @@ const WorkshopDashboard = () => {
 
   return (
     <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300`}>
+      {/* Online Attendance Popup */}
+      <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
       {/* Header */}
       <div className={`sticky top-0 z-40 backdrop-blur-xl ${headerBg} border-b shadow-sm`}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
