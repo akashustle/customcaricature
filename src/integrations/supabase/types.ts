@@ -2866,6 +2866,7 @@ export type Database = {
           is_active: boolean
           session_date: string
           slot: string
+          target_user_id: string | null
           timing: string
           updated_at: string
         }
@@ -2875,6 +2876,7 @@ export type Database = {
           is_active?: boolean
           session_date: string
           slot?: string
+          target_user_id?: string | null
           timing?: string
           updated_at?: string
         }
@@ -2884,6 +2886,7 @@ export type Database = {
           is_active?: boolean
           session_date?: string
           slot?: string
+          target_user_id?: string | null
           timing?: string
           updated_at?: string
         }
