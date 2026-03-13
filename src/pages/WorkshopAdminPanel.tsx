@@ -1180,6 +1180,9 @@ const WorkshopAdmin = () => {
               {/* ONLINE ATTENDANCE */}
               {tab === "online-attendance" && <AdminOnlineAttendance />}
 
+              {/* COUNTDOWN */}
+              {tab === "countdown" && <AdminWorkshopCountdown />}
+
               {/* LOCATIONS */}
               {tab === "locations" && (
                 <div className="space-y-4">
