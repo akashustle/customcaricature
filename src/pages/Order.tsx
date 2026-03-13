@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEOHead from "@/components/SEOHead";
 import { motion, AnimatePresence } from "framer-motion";
 import { OrderFormData, initialFormData } from "@/lib/order-types";
 import { usePricing } from "@/hooks/usePricing";
