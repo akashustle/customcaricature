@@ -167,6 +167,28 @@ const WorkshopAdmin = () => {
   const fetchWorkshopNotifications = async () => { const { data } = await supabase.from("workshop_notifications" as any).select("*").order("created_at", { ascending: false }).limit(100); if (data) setWorkshopNotifications(data as any[]); };
   const fetchArtists = async () => { const { data } = await supabase.from("artists").select("*").order("name"); if (data) setArtists(data as any[]); };
 
+  const updateLiveRequestStatus = async (request: any, status: "pending" | "allowed" | "denied", note?: string) => {
+    const payload: any = {
+      status,
+      updated_at: new Date().toISOString(),
+      admin_note: status === "denied" ? (note || request.admin_note || "Denied by admin") : null,
+    };
+
+    const { error } = await supabase
+      .from("workshop_live_session_requests" as any)
+      .update(payload as any)
+      .eq("id", request.id);
+
+    if (error) {
+      toast({ title: "Unable to update request", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    await logAction("update_live_request", `${status} for ${request.user_id}`);
+    toast({ title: `Request marked ${status}` });
+    fetchLiveRequests();
+  };
+
   const logAction = async (action: string, details: string) => {
     const info = JSON.parse(localStorage.getItem("workshop_admin") || "{}");
     await supabase.from("workshop_admin_log" as any).insert({ admin_id: info.id, admin_name: info.name || info.email, action, details } as any);
@@ -939,30 +961,51 @@ const WorkshopAdmin = () => {
                             <Badge className={`mt-1 text-[10px] ${r.status === "pending" ? "bg-amber-100 text-amber-600" : r.status === "allowed" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#d98c8c]/20 text-[#b06060]"}`}>{r.status}</Badge>
                             {r.admin_note && <p className={`${textSecondary} text-xs mt-1`}>Note: {r.admin_note}</p>}
                           </div>
-                          {r.status === "pending" && (
-                            <div className="flex flex-col gap-1">
-                              <Button size="sm" className="bg-[#7c9885] hover:bg-[#6a8a75] text-white h-7 text-xs font-bold" onClick={async () => {
-                                await supabase.from("workshop_live_session_requests" as any).update({ status: "allowed" } as any).eq("id", r.id);
-                                await logAction("approve_live_request", `Approved for ${u?.name}`);
-                                toast({ title: "Approved ✅" }); fetchLiveRequests();
-                              }}>Allow</Button>
-                              <Dialog>
-                                <DialogTrigger asChild><Button size="sm" variant="destructive" className="h-7 text-xs">Deny</Button></DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader><DialogTitle>Deny Request for {u?.name}</DialogTitle></DialogHeader>
-                                  <div className="space-y-3">
-                                    <div><Label>Reason (shown to user)</Label><Textarea id={`deny-note-${r.id}`} rows={2} placeholder="Why not allowed..." /></div>
-                                    <Button variant="destructive" onClick={async () => {
-                                      const note = (document.getElementById(`deny-note-${r.id}`) as HTMLTextAreaElement)?.value || "";
-                                      await supabase.from("workshop_live_session_requests" as any).update({ status: "denied", admin_note: note } as any).eq("id", r.id);
-                                      await logAction("deny_live_request", `Denied for ${u?.name}`);
-                                      toast({ title: "Denied" }); fetchLiveRequests();
-                                    }}>Deny Request</Button>
+                          <div className="flex flex-col gap-1 min-w-[112px]">
+                            <Button
+                              size="sm"
+                              variant={r.status === "allowed" ? "default" : "outline"}
+                              className="h-7 text-xs"
+                              onClick={() => updateLiveRequestStatus(r, "allowed")}
+                            >
+                              Allow
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant={r.status === "pending" ? "default" : "outline"}
+                              className="h-7 text-xs"
+                              onClick={() => updateLiveRequestStatus(r, "pending")}
+                            >
+                              Pending
+                            </Button>
+
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm" variant={r.status === "denied" ? "default" : "destructive"} className="h-7 text-xs">
+                                  {r.status === "denied" ? "Update Deny" : "Deny"}
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader><DialogTitle>Deny Request for {u?.name}</DialogTitle></DialogHeader>
+                                <div className="space-y-3">
+                                  <div>
+                                    <Label>Reason (shown to user)</Label>
+                                    <Textarea id={`deny-note-${r.id}`} rows={2} placeholder="Why not allowed..." defaultValue={r.admin_note || ""} />
                                   </div>
-                                </DialogContent>
-                              </Dialog>
-                            </div>
-                          )}
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                      const note = (document.getElementById(`deny-note-${r.id}`) as HTMLTextAreaElement)?.value || "";
+                                      updateLiveRequestStatus(r, "denied", note);
+                                    }}
+                                  >
+                                    Save Deny Status
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
                         </div>
                       </GlassCard>
                     );

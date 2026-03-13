@@ -62,18 +62,21 @@ serve(async (req) => {
       });
     }
 
-    const { data: prompt } = await supabase
+    const { data: prompts } = await supabase
       .from("workshop_online_attendance_prompts")
-      .select("id, slot")
+      .select("id, slot, session_date, target_user_id")
       .eq("is_active", true)
       .eq("session_date", sessionDate)
-      .or(`slot.eq.${workshopUser.slot},slot.eq.all`)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("updated_at", { ascending: false });
 
-    if (!prompt) {
-      return new Response(JSON.stringify({ success: false, error: "No active prompt for your slot/date" }), {
+    const matchingPrompt = (prompts || []).find((prompt) => {
+      const slotMatches = prompt.slot === "all" || prompt.slot === workshopUser.slot;
+      const userMatches = !prompt.target_user_id || prompt.target_user_id === userId;
+      return slotMatches && userMatches;
+    });
+
+    if (!matchingPrompt) {
+      return new Response(JSON.stringify({ success: false, error: "No active prompt for this user/date/slot" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -96,7 +99,7 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, prompt_id: matchingPrompt.id }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
