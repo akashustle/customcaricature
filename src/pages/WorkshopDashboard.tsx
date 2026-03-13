@@ -38,10 +38,20 @@ const WorkshopDashboard = () => {
   useEffect(() => {
     const stored = localStorage.getItem("workshop_user");
     if (!stored) { navigate("/workshop"); return; }
+
     const user = JSON.parse(stored);
     setWorkshopUser(user);
     refreshUser(user.id);
     fetchSettings();
+
+    const handleLocalUserUpdate = (event: Event) => {
+      const updated = (event as CustomEvent<any>).detail;
+      if (!updated?.id || updated.id !== user.id) return;
+      setWorkshopUser(updated);
+      localStorage.setItem("workshop_user", JSON.stringify(updated));
+    };
+
+    window.addEventListener("workshop-user-updated", handleLocalUserUpdate as EventListener);
 
     // Real-time user updates
     const ch = supabase.channel("ws-user-profile")
@@ -58,7 +68,11 @@ const WorkshopDashboard = () => {
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings" }, fetchSettings)
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+
+    return () => {
+      supabase.removeChannel(ch);
+      window.removeEventListener("workshop-user-updated", handleLocalUserUpdate as EventListener);
+    };
   }, []);
 
   const refreshUser = async (userId: string) => {
