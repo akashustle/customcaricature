@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, User, Store } from "lucide-react";
+import { Home, Package, User, Store, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
