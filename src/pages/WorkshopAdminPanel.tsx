@@ -111,6 +111,9 @@ const WorkshopAdmin = () => {
   const [notifType, setNotifType] = useState("announcement");
   const [workshopNotifications, setWorkshopNotifications] = useState<any[]>([]);
   const [feedbackReplyToUserReply, setFeedbackReplyToUserReply] = useState<{ [key: string]: string }>({});
+  const [allUsersSubTabState, setAllUsersSubTabState] = useState("all");
+  const [attendanceDateFilter, setAttendanceDateFilter] = useState("2026-03-14");
+  const [attendanceSlotFilter, setAttendanceSlotFilter] = useState("all");
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
