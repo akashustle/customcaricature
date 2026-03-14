@@ -111,6 +111,9 @@ const WorkshopAdmin = () => {
   const [notifType, setNotifType] = useState("announcement");
   const [workshopNotifications, setWorkshopNotifications] = useState<any[]>([]);
   const [feedbackReplyToUserReply, setFeedbackReplyToUserReply] = useState<{ [key: string]: string }>({});
+  const [allUsersSubTabState, setAllUsersSubTabState] = useState("all");
+  const [attendanceDateFilter, setAttendanceDateFilter] = useState("2026-03-14");
+  const [attendanceSlotFilter, setAttendanceSlotFilter] = useState("all");
 
   const [newUser, setNewUser] = useState({ name: "", mobile: "", email: "", instagram_id: "", age: "", gender: "", occupation: "", why_join: "", workshop_date: "2026-03-14", slot: "12pm-3pm", student_type: "manually_added", payment_screenshot: null as File | null });
   const [newVideo, setNewVideo] = useState({ title: "", video_url: "", video_type: "link", workshop_date: "2026-03-14", slot: "", target_type: "all", expiry_date: "", global_download_allowed: false });
@@ -780,14 +783,17 @@ const WorkshopAdmin = () => {
               )}
 
               {/* ALL USERS */}
-              {tab === "all-users" && (
+              {tab === "all-users" && (() => {
+                const [allUsersSubTab, setAllUsersSubTab] = [allUsersSubTabState, setAllUsersSubTabState];
+                const subUsers = allUsersSubTab === "all" ? users : allUsersSubTab === "slot1" ? users.filter(u => u.slot === "12pm-3pm") : users.filter(u => u.slot === "6pm-9pm");
+                return (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-xl ${textPrimary}`}>All Users ({users.length})</h1>
+                    <h1 className={`text-xl ${textPrimary}`}>All Users ({subUsers.length})</h1>
                     <div className="flex gap-2 flex-wrap">
                       <RefreshButton />
                       <Button size="sm" variant="outline" onClick={assignRollNumbers} className={`rounded-xl text-xs ${dm ? "border-white/20 text-white/60" : "border-[#d4c4b4] text-[#6a5a4a]"}`}><Hash className="w-3 h-3 mr-1" />Assign Rolls</Button>
-                      <ExportButton data={users.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
+                      <ExportButton data={subUsers.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
                       <Dialog open={showAddUser} onOpenChange={setShowAddUser}>
                         <DialogTrigger asChild><Button size="sm" className={`${btnPrimary} rounded-xl`}><Plus className="w-4 h-4 mr-1" />Add User</Button></DialogTrigger>
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -817,10 +823,17 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
+                  {/* Sub-tabs for All / Slot 1 / Slot 2 */}
+                  <div className="flex gap-2">
+                    {[{key:"all",label:`All (${users.length})`},{key:"slot1",label:`Slot 1 (${users.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${users.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
+                      <button key={st.key} onClick={()=>setAllUsersSubTabState(st.key)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${allUsersSubTab===st.key ? activeTabClass : inactiveTab}`}>{st.label}</button>
+                    ))}
+                  </div>
                   <SearchBar />
-                  {renderUsersList(users, true)}
+                  {renderUsersList(subUsers, true)}
                 </div>
-              )}
+                );
+              })()}
 
               {/* REGISTERED / MANUAL */}
               {(tab === "registered" || tab === "manual") && (
@@ -1174,17 +1187,84 @@ const WorkshopAdmin = () => {
               )}
 
               {/* ATTENDANCE */}
-              {tab === "attendance" && (
+              {tab === "attendance" && (() => {
+                const attDateFilter = attendanceDateFilter;
+                const attSlotFilter = attendanceSlotFilter;
+                const filteredAttUsers = users.filter(u => {
+                  if (attSlotFilter !== "all" && u.slot !== attSlotFilter) return false;
+                  return true;
+                });
+                const filteredSearchedUsers = filterUsers(filteredAttUsers);
+                const s1Users = filteredAttUsers.filter(u => u.slot === "12pm-3pm");
+                const s2Users = filteredAttUsers.filter(u => u.slot === "6pm-9pm");
+                const s1Present = s1Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "present").length;
+                const s1Absent = s1Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "absent").length;
+                const s1Video = s1Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "video_session").length;
+                const s1NotMarked = s1Users.length - s1Present - s1Absent - s1Video;
+                const s2Present = s2Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "present").length;
+                const s2Absent = s2Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "absent").length;
+                const s2Video = s2Users.filter(u => getAttendanceStatus(u.id, attDateFilter) === "video_session").length;
+                const s2NotMarked = s2Users.length - s2Present - s2Absent - s2Video;
+                return (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-xl ${textPrimary}`}>Attendance</h1>
                     <div className="flex gap-2">
                       <RefreshButton />
-                      <ExportButton data={users.map(u => ({ Roll: u.roll_number || "—", Name: u.name, Mobile: u.mobile, Slot: u.slot, Day1: getAttendanceStatus(u.id, "2026-03-14"), Day2: getAttendanceStatus(u.id, "2026-03-15") }))} sheetName="Attendance" fileName="CCC_Attendance" />
+                      <ExportButton data={filteredSearchedUsers.map(u => ({ Roll: u.roll_number || "—", Name: u.name, Mobile: u.mobile, Slot: u.slot, Day1: getAttendanceStatus(u.id, "2026-03-14"), Day2: getAttendanceStatus(u.id, "2026-03-15") }))} sheetName="Attendance" fileName="CCC_Attendance" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <Select value={attDateFilter} onValueChange={v => setAttendanceDateFilter(v)}>
+                      <SelectTrigger className={`w-44 ${inputClass}`}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2026-03-14">14 March 2026</SelectItem>
+                        <SelectItem value="2026-03-15">15 March 2026</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={attSlotFilter} onValueChange={v => setAttendanceSlotFilter(v)}>
+                      <SelectTrigger className={`w-44 ${inputClass}`}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Slots</SelectItem>
+                        <SelectItem value="12pm-3pm">Slot 1 (12-3)</SelectItem>
+                        <SelectItem value="6pm-9pm">Slot 2 (6-9)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className={`${textPrimary} text-sm`}>📊 Slot 1 — 12 PM to 3 PM</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { label: "Present", value: s1Present, color: "from-[#7c9885] to-[#a8c0a0]", icon: CheckCircle },
+                        { label: "Absent", value: s1Absent, color: "from-[#d98c8c] to-[#e8a8a8]", icon: XCircle },
+                        { label: "Video", value: s1Video, color: "from-[#8fa3bf] to-[#b0c4d8]", icon: MonitorPlay },
+                        { label: "Not Marked", value: s1NotMarked, color: "from-[#a09080] to-[#c0b0a0]", icon: Clock },
+                      ].map(w => (
+                        <GlassCard key={w.label + "s1"} className="!p-3">
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${w.color} flex items-center justify-center mb-1`}><w.icon className="w-4 h-4 text-white" /></div>
+                          <p className={`text-xl ${textPrimary}`}>{w.value}</p>
+                          <p className={`${textMuted} text-[10px]`}>{w.label}</p>
+                        </GlassCard>
+                      ))}
+                    </div>
+                    <h3 className={`${textPrimary} text-sm`}>📊 Slot 2 — 6 PM to 9 PM</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { label: "Present", value: s2Present, color: "from-[#7c9885] to-[#a8c0a0]", icon: CheckCircle },
+                        { label: "Absent", value: s2Absent, color: "from-[#d98c8c] to-[#e8a8a8]", icon: XCircle },
+                        { label: "Video", value: s2Video, color: "from-[#8fa3bf] to-[#b0c4d8]", icon: MonitorPlay },
+                        { label: "Not Marked", value: s2NotMarked, color: "from-[#a09080] to-[#c0b0a0]", icon: Clock },
+                      ].map(w => (
+                        <GlassCard key={w.label + "s2"} className="!p-3">
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${w.color} flex items-center justify-center mb-1`}><w.icon className="w-4 h-4 text-white" /></div>
+                          <p className={`text-xl ${textPrimary}`}>{w.value}</p>
+                          <p className={`${textMuted} text-[10px]`}>{w.label}</p>
+                        </GlassCard>
+                      ))}
                     </div>
                   </div>
                   <SearchBar />
-                  {filterUsers(users).map((u: any) => (
+                  {filteredSearchedUsers.map((u: any) => (
                     <GlassCard key={u.id}>
                       <div className="flex items-center justify-between mb-2">
                         <div>
@@ -1218,7 +1298,8 @@ const WorkshopAdmin = () => {
                     </GlassCard>
                   ))}
                 </div>
-              )}
+                );
+              })()}
 
               {/* ONLINE ATTENDANCE */}
               {tab === "online-attendance" && <AdminOnlineAttendance />}
