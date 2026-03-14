@@ -780,14 +780,17 @@ const WorkshopAdmin = () => {
               )}
 
               {/* ALL USERS */}
-              {tab === "all-users" && (
+              {tab === "all-users" && (() => {
+                const [allUsersSubTab, setAllUsersSubTab] = [allUsersSubTabState, setAllUsersSubTabState];
+                const subUsers = allUsersSubTab === "all" ? users : allUsersSubTab === "slot1" ? users.filter(u => u.slot === "12pm-3pm") : users.filter(u => u.slot === "6pm-9pm");
+                return (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-xl ${textPrimary}`}>All Users ({users.length})</h1>
+                    <h1 className={`text-xl ${textPrimary}`}>All Users ({subUsers.length})</h1>
                     <div className="flex gap-2 flex-wrap">
                       <RefreshButton />
                       <Button size="sm" variant="outline" onClick={assignRollNumbers} className={`rounded-xl text-xs ${dm ? "border-white/20 text-white/60" : "border-[#d4c4b4] text-[#6a5a4a]"}`}><Hash className="w-3 h-3 mr-1" />Assign Rolls</Button>
-                      <ExportButton data={users.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
+                      <ExportButton data={subUsers.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
                       <Dialog open={showAddUser} onOpenChange={setShowAddUser}>
                         <DialogTrigger asChild><Button size="sm" className={`${btnPrimary} rounded-xl`}><Plus className="w-4 h-4 mr-1" />Add User</Button></DialogTrigger>
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -817,10 +820,17 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
+                  {/* Sub-tabs for All / Slot 1 / Slot 2 */}
+                  <div className="flex gap-2">
+                    {[{key:"all",label:`All (${users.length})`},{key:"slot1",label:`Slot 1 (${users.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${users.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
+                      <button key={st.key} onClick={()=>setAllUsersSubTabState(st.key)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${allUsersSubTab===st.key ? activeTabClass : inactiveTab}`}>{st.label}</button>
+                    ))}
+                  </div>
                   <SearchBar />
-                  {renderUsersList(users, true)}
+                  {renderUsersList(subUsers, true)}
                 </div>
-              )}
+                );
+              })()}
 
               {/* REGISTERED / MANUAL */}
               {(tab === "registered" || tab === "manual") && (
