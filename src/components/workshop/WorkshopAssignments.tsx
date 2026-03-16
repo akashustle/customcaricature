@@ -13,9 +13,9 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   const [settings, setSettings] = useState<any>({});
 
   const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
-  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
-  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
+  const textPrimary = dm ? "text-white font-bold" : "text-foreground font-bold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
+  const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
 
   useEffect(() => {
     fetchAssignments(); fetchSettings();
@@ -41,7 +41,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   };
 
   const isSubmissionEnabled = settings.assignment_submission_enabled?.enabled !== false;
-  const workshopEnded = settings.workshop_ended?.enabled;
+  const workshopEnded = settings.workshop_ended?.enabled === true;
   const canUpload = isSubmissionEnabled && !workshopEnded;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,30 +101,32 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
     <GlassCard>
       <div className="flex items-center justify-between mb-4">
         <h2 className={`${textPrimary} text-lg flex items-center gap-2`}>
-          <FileText className="w-5 h-5 text-purple-500" /> Assignments
+          <FileText className="w-5 h-5 text-primary" /> Assignments
         </h2>
         {canUpload && (
-          <label>
-            <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button asChild size="sm" disabled={uploading} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl cursor-pointer font-bold">
-                <span><Upload className="w-4 h-4 mr-1" />{uploading ? "Uploading..." : "Submit"}</span>
-              </Button>
-            </motion.div>
-          </label>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <label className="cursor-pointer">
+              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
+              <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white ${uploading ? "opacity-60 pointer-events-none" : ""}`}
+                style={{ background: "linear-gradient(135deg, hsl(263 70% 58%), hsl(330 65% 60%))" }}>
+                <Upload className="w-4 h-4" />
+                {uploading ? "Uploading..." : "Submit"}
+              </div>
+            </label>
+          </motion.div>
         )}
       </div>
 
       {assignments.length === 0 ? (
         <div className="text-center py-12">
-          <FileText className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <FileText className={`w-16 h-16 ${dm ? "text-white/20" : "text-primary/20"} mx-auto mb-3`} />
           <p className={textSecondary}>No assignments submitted yet</p>
           {canUpload && <p className={`${textMuted} text-xs mt-1`}>Upload your assignment file above</p>}
         </div>
       ) : (
         <div className="space-y-3">
           {assignments.map((a: any) => (
-            <div key={a.id} className={`p-4 rounded-xl ${dm ? "bg-purple-900/20 border-purple-700/30" : "bg-purple-50/40 border-purple-100/30"} border`}>
+            <div key={a.id} className={`p-4 rounded-xl ${dm ? "bg-purple-900/20 border-purple-700/30" : "bg-primary/5 border-primary/10"} border`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <p className={`${textPrimary} text-sm truncate`}>{a.file_name || "Assignment"}</p>
@@ -143,18 +145,18 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
                           {a.pass_status === "pass" ? <><CheckCircle className="w-3 h-3 mr-1" />Pass</> : <><XCircle className="w-3 h-3 mr-1" />Fail</>}
                         </Badge>
                       )}
-                      {a.graded_by_artist && <p className={`text-xs ${dm ? "text-purple-400" : "text-purple-500"} font-bold`}>Graded by: {a.graded_by_artist}</p>}
+                      {a.graded_by_artist && <p className={`text-xs ${dm ? "text-purple-400" : "text-primary"} font-bold`}>Graded by: {a.graded_by_artist}</p>}
                       {a.admin_notes && <p className={`text-xs ${textSecondary} italic`}>"{a.admin_notes}"</p>}
                       {a.pass_status === "fail" && canUpload && (
                         <div className={`mt-2 ${dm ? "bg-amber-900/20 border-amber-700/30" : "bg-amber-50/80 border-amber-200/30"} border rounded-lg p-2`}>
                           <p className={`${dm ? "text-amber-400" : "text-amber-600"} text-xs font-bold flex items-center gap-1`}>
                             <RefreshCw className="w-3 h-3" /> Don't give up! You can re-upload and try again.
                           </p>
-                          <label className="mt-1 block">
+                          <label className="mt-1 block cursor-pointer">
                             <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
-                            <Button asChild size="sm" variant="outline" className="text-xs h-7 cursor-pointer border-amber-300 text-amber-600 hover:bg-amber-50 font-bold">
-                              <span><Upload className="w-3 h-3 mr-1" /> Re-upload</span>
-                            </Button>
+                            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border border-amber-300 text-amber-600 hover:bg-amber-50 transition-colors">
+                              <Upload className="w-3 h-3" /> Re-upload
+                            </div>
                           </label>
                         </div>
                       )}
@@ -171,11 +173,11 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
                      a.status === "graded" ? <><CheckCircle className="w-3 h-3 mr-1" />Graded</> : "Pending"}
                   </Badge>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleView(a)} className={`${textMuted} hover:${textSecondary} rounded-lg h-7 px-2`}>
+                    <Button variant="ghost" size="sm" onClick={() => handleView(a)} className="rounded-lg h-7 px-2">
                       <Eye className="w-3.5 h-3.5 mr-0.5" /><span className="text-[10px]">View</span>
                     </Button>
                     {a.status !== "graded" && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a)} className="text-red-400 hover:text-red-500 hover:bg-red-50/60 rounded-lg h-7 px-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a)} className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-7 px-2">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     )}

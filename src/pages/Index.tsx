@@ -123,7 +123,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-16 md:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5f0ff] via-[#efe8fc] to-[#fdf0f8] pb-24 md:pb-0">
       <SEOHead 
         title="Book Caricature Artist for Events & Order Custom Caricatures from Photos"
         description="Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online. India's #1 caricature studio."
@@ -142,7 +142,7 @@ const Index = () => {
 
       {/* Top Nav */}
       <header>
-      <nav className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd0] shadow-sm">
+      <nav className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
@@ -185,7 +185,7 @@ const Index = () => {
       </nav>
       </header>
 
-      {/* Hero Section — Premium */}
+      {/* Hero Section */}
       <main>
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
@@ -445,43 +445,66 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="py-10 border-t border-border bg-background">
+      <footer className="py-12 border-t border-border bg-gradient-to-b from-background to-card/80">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center gap-5">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
-              <p className="font-calligraphy text-xl font-semibold text-foreground">Creative Caricature Club</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
+                <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-full border-2 border-border" />
+                <span className="font-calligraphy text-xl font-bold text-foreground">CCC</span>
+              </div>
+              <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
+              <p className="font-calligraphy text-sm text-primary mt-3">Drawn with love & laughter ✏️</p>
             </div>
-            <p className="text-sm text-muted-foreground font-calligraphy text-lg">Drawn with love & laughter ✏️</p>
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground font-body">
-              <Link to="/track-order" className="hover:text-foreground transition-colors">Track Order</Link>
-              <span>•</span>
-              <Link to="/about" className="hover:text-foreground transition-colors">About Us</Link>
-              <span>•</span>
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link>
-              <span>•</span>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <span>•</span>
-              <Link to="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link>
-              <span>•</span>
-              <Link to="/shipping" className="hover:text-foreground transition-colors">Shipping Policy</Link>
-              <span>•</span>
-              <Link to="/event-policy" className="hover:text-foreground transition-colors">Event Policy</Link>
-              <span>•</span>
-              <Link to="/cancellation" className="hover:text-foreground transition-colors">Cancellation Policy</Link>
-              <span>•</span>
-              <Link to="/intellectual-property" className="hover:text-foreground transition-colors">IP Policy</Link>
-              <span>•</span>
-              <Link to="/workshop-policy" className="hover:text-foreground transition-colors">Workshop Policy</Link>
-              <span>•</span>
-              <Link to="/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link>
-              {settings.workshop_button.enabled && (
-                <>
-                  <span>•</span>
-                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{settings.workshop_button.label}</a>
-                </>
-              )}
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
+              <div className="flex flex-col gap-2">
+                <Link to="/about" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">About Us</Link>
+                <Link to="/track-order" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Track Order</Link>
+                <Link to="/blog" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Blog</Link>
+                <Link to="/support" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Support</Link>
+              </div>
             </div>
+
+            {/* Policies */}
+            <div>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Policies</h4>
+              <div className="flex flex-col gap-2">
+                <Link to="/terms" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Terms & Conditions</Link>
+                <Link to="/privacy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Privacy Policy</Link>
+                <Link to="/refund" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Refund Policy</Link>
+                <Link to="/shipping" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Shipping Policy</Link>
+                <Link to="/cancellation" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Cancellation Policy</Link>
+                <Link to="/event-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Event Policy</Link>
+              </div>
+            </div>
+
+            {/* More */}
+            <div>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">More</h4>
+              <div className="flex flex-col gap-2">
+                <Link to="/intellectual-property" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">IP Policy</Link>
+                <Link to="/workshop-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Workshop Policy</Link>
+                <Link to="/disclaimer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Disclaimer</Link>
+                {settings.workshop_button?.enabled && (
+                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">{settings.workshop_button.label}</a>
+                )}
+              </div>
+              <div className="flex gap-3 mt-4">
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="Instagram">
+                  <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="WhatsApp">
+                  <MessageCircle className="w-4 h-4 text-primary" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-border pt-6 text-center">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
           </div>
         </div>

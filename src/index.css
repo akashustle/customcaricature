@@ -6,78 +6,78 @@
 
 @layer base {
   :root {
-    /* Brand: Workshop-matched warm cream palette */
-    --background: 30 40% 96%;
-    --foreground: 25 30% 18%;
+    /* Brand: Purple-pink lavender palette */
+    --background: 270 30% 97%;
+    --foreground: 270 25% 15%;
 
-    /* White/cream cards */
-    --card: 30 50% 98%;
-    --card-foreground: 25 30% 18%;
+    /* White/frosted cards */
+    --card: 270 30% 99%;
+    --card-foreground: 270 25% 15%;
 
     /* Popover matches card */
-    --popover: 30 50% 98%;
-    --popover-foreground: 25 30% 18%;
+    --popover: 270 30% 99%;
+    --popover-foreground: 270 25% 15%;
 
-    /* Gold Accent — warm workshop gold #b08d57 */
-    --primary: 36 38% 52%;
-    --primary-foreground: 40 60% 98%;
+    /* Purple Accent — vibrant purple #7c3aed */
+    --primary: 263 70% 58%;
+    --primary-foreground: 270 100% 99%;
 
-    /* Light warm secondary */
-    --secondary: 30 25% 94%;
-    --secondary-foreground: 25 20% 30%;
+    /* Light lavender secondary */
+    --secondary: 270 25% 95%;
+    --secondary-foreground: 270 20% 30%;
 
-    /* Muted — soft warm */
-    --muted: 30 20% 93%;
-    --muted-foreground: 25 15% 42%;
+    /* Muted — soft lavender */
+    --muted: 270 20% 94%;
+    --muted-foreground: 270 12% 45%;
 
-    /* Gold accent */
-    --accent: 36 38% 52%;
-    --accent-foreground: 40 60% 98%;
+    /* Pink accent */
+    --accent: 330 65% 60%;
+    --accent-foreground: 330 100% 99%;
 
     /* Destructive — soft coral */
     --destructive: 0 55% 58%;
-    --destructive-foreground: 40 60% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Borders — Light warm */
-    --border: 30 20% 86%;
-    --input: 30 20% 86%;
-    --ring: 36 38% 52%;
+    /* Borders — Light lavender */
+    --border: 270 20% 88%;
+    --input: 270 20% 88%;
+    --ring: 263 70% 58%;
 
     --radius: 1rem;
 
-    /* Sidebar — cream */
-    --sidebar-background: 30 35% 97%;
-    --sidebar-foreground: 25 20% 30%;
-    --sidebar-primary: 36 38% 52%;
-    --sidebar-primary-foreground: 40 60% 98%;
-    --sidebar-accent: 30 22% 93%;
-    --sidebar-accent-foreground: 25 20% 30%;
-    --sidebar-border: 30 20% 88%;
-    --sidebar-ring: 36 38% 52%;
+    /* Sidebar — lavender */
+    --sidebar-background: 270 28% 97%;
+    --sidebar-foreground: 270 20% 30%;
+    --sidebar-primary: 263 70% 58%;
+    --sidebar-primary-foreground: 270 100% 99%;
+    --sidebar-accent: 270 22% 94%;
+    --sidebar-accent-foreground: 270 20% 30%;
+    --sidebar-border: 270 20% 90%;
+    --sidebar-ring: 263 70% 58%;
 
     /* Semantic */
     --success: 152 50% 42%;
     --warning: 38 85% 52%;
     --info: 210 60% 50%;
 
-    /* Extended gold palette */
-    --gold-50: 40 60% 98%;
-    --gold-100: 38 50% 94%;
-    --gold-200: 36 42% 86%;
-    --gold-300: 34 38% 76%;
-    --gold-400: 36 38% 62%;
-    --gold-500: 36 38% 52%;
-    --gold-600: 34 38% 44%;
-    --gold-700: 33 32% 36%;
-    --gold-800: 33 28% 28%;
-    --gold-900: 30 22% 20%;
+    /* Extended purple palette */
+    --gold-50: 270 60% 98%;
+    --gold-100: 270 50% 95%;
+    --gold-200: 268 42% 88%;
+    --gold-300: 266 38% 78%;
+    --gold-400: 264 50% 68%;
+    --gold-500: 263 70% 58%;
+    --gold-600: 262 65% 50%;
+    --gold-700: 261 55% 40%;
+    --gold-800: 260 45% 30%;
+    --gold-900: 258 35% 22%;
 
     /* Chart colors */
-    --chart-1: 36 38% 52%;
+    --chart-1: 263 70% 58%;
     --chart-2: 152 50% 42%;
-    --chart-3: 210 60% 50%;
+    --chart-3: 330 65% 60%;
     --chart-4: 38 85% 52%;
-    --chart-5: 340 50% 55%;
+    --chart-5: 210 60% 50%;
   }
 }
 
@@ -121,7 +121,7 @@
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(30 25% 76%) transparent;
+    scrollbar-color: hsl(270 25% 78%) transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
     height: 4px;
@@ -131,104 +131,104 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(30 25% 76%);
+    background: hsl(270 25% 78%);
     border-radius: 4px;
   }
 
   /* Premium soft button */
   .btn-soft {
     @apply relative transition-all duration-200 rounded-full;
-    background: linear-gradient(135deg, hsl(36 45% 54%), hsl(36 42% 48%));
-    color: hsl(40 60% 97%);
+    background: linear-gradient(135deg, hsl(263 70% 58%), hsl(330 65% 60%));
+    color: hsl(0 0% 100%);
   }
   .btn-soft:hover {
     transform: scale(1.02);
-    box-shadow: 0 4px 16px hsl(36 40% 52% / 0.3);
+    box-shadow: 0 4px 16px hsl(263 70% 58% / 0.3);
   }
 
   /* 3D button */
   .btn-3d {
     @apply relative transition-all duration-200;
-    box-shadow: 0 3px 0 hsl(34 35% 45%), 0 4px 10px hsl(30 20% 40% / 0.06);
+    box-shadow: 0 3px 0 hsl(262 65% 48%), 0 4px 10px hsl(260 20% 40% / 0.06);
   }
   .btn-3d:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 0 hsl(34 38% 38%), 0 6px 14px hsl(33 37% 27% / 0.12);
+    box-shadow: 0 5px 0 hsl(262 65% 44%), 0 6px 14px hsl(260 30% 30% / 0.12);
   }
   .btn-3d:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 0 hsl(34 38% 38%), 0 2px 6px hsl(33 37% 27% / 0.06);
+    box-shadow: 0 1px 0 hsl(262 65% 44%), 0 2px 6px hsl(260 30% 30% / 0.06);
   }
 
   /* Premium card with subtle depth */
   .card-3d {
-    background: linear-gradient(145deg, hsl(40 56% 96%), hsl(40 56% 93%));
-    border: 1px solid hsl(30 25% 80% / 0.6);
+    background: linear-gradient(145deg, hsl(270 40% 98%), hsl(270 30% 95%));
+    border: 1px solid hsl(270 25% 85% / 0.6);
     box-shadow:
-      0 1px 3px hsl(33 37% 27% / 0.04),
-      0 4px 16px hsl(33 37% 27% / 0.06);
+      0 1px 3px hsl(260 30% 30% / 0.04),
+      0 4px 16px hsl(260 30% 30% / 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 1.125rem;
   }
   .card-3d:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 4px 12px hsl(33 37% 27% / 0.06),
-      0 12px 32px hsl(33 37% 27% / 0.08);
+      0 4px 12px hsl(260 30% 30% / 0.06),
+      0 12px 32px hsl(260 30% 30% / 0.08);
   }
 
   /* Admin stat card */
   .admin-stat-card {
-    background: linear-gradient(135deg, hsl(40 56% 96%), hsl(38 45% 91%));
-    border: 1px solid hsl(30 25% 80% / 0.5);
+    background: linear-gradient(135deg, hsl(270 40% 98%), hsl(268 35% 93%));
+    border: 1px solid hsl(270 25% 85% / 0.5);
     box-shadow:
-      0 1px 4px hsl(33 37% 27% / 0.04),
-      0 4px 16px hsl(33 37% 27% / 0.05);
+      0 1px 4px hsl(260 30% 30% / 0.04),
+      0 4px 16px hsl(260 30% 30% / 0.05);
     border-radius: 1.125rem;
     transition: all 0.3s ease;
   }
   .admin-stat-card:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 4px 12px hsl(33 37% 27% / 0.06),
-      0 8px 24px hsl(33 37% 27% / 0.07);
+      0 4px 12px hsl(260 30% 30% / 0.06),
+      0 8px 24px hsl(260 30% 30% / 0.07);
   }
 
   /* Admin card */
   .admin-card {
-    background: linear-gradient(145deg, hsl(40 56% 96%), hsl(40 56% 93%));
-    border: 1px solid hsl(30 25% 80% / 0.5);
+    background: linear-gradient(145deg, hsl(270 40% 98%), hsl(270 30% 95%));
+    border: 1px solid hsl(270 25% 85% / 0.5);
     box-shadow:
-      0 1px 4px hsl(33 37% 27% / 0.04),
-      0 4px 16px hsl(33 37% 27% / 0.05);
+      0 1px 4px hsl(260 30% 30% / 0.04),
+      0 4px 16px hsl(260 30% 30% / 0.05);
     transition: all 0.3s ease;
     border-radius: 1.125rem;
   }
   .admin-card:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 4px 12px hsl(33 37% 27% / 0.06),
-      0 8px 24px hsl(33 37% 27% / 0.07);
+      0 4px 12px hsl(260 30% 30% / 0.06),
+      0 8px 24px hsl(260 30% 30% / 0.07);
   }
 
   /* Dashboard header */
   .admin-header {
-    background: linear-gradient(180deg, hsl(36 32% 93%), hsl(36 30% 90%));
-    border-bottom: 1px solid hsl(30 25% 80%);
+    background: linear-gradient(180deg, hsl(270 28% 95%), hsl(270 25% 92%));
+    border-bottom: 1px solid hsl(270 25% 85%);
   }
 
   .dashboard-header {
-    background: linear-gradient(135deg, hsl(36 32% 94%), hsl(36 30% 90%));
-    border-bottom: 1px solid hsl(30 25% 80% / 0.6);
+    background: linear-gradient(135deg, hsl(270 28% 96%), hsl(270 25% 92%));
+    border-bottom: 1px solid hsl(270 25% 85% / 0.6);
   }
 
   .dashboard-gradient {
-    background: linear-gradient(180deg, hsl(36 38% 91%) 0%, hsl(36 32% 93%) 100%);
+    background: linear-gradient(180deg, hsl(270 30% 93%) 0%, hsl(270 28% 95%) 100%);
   }
 
   .admin-tab-active {
-    background: linear-gradient(135deg, hsl(36 35% 52%), hsl(36 35% 46%));
-    color: hsl(40 56% 95%);
+    background: linear-gradient(135deg, hsl(263 70% 58%), hsl(263 65% 52%));
+    color: hsl(0 0% 100%);
     border-radius: 9999px;
     font-weight: 600;
   }
@@ -239,13 +239,13 @@
   }
 
   .glass {
-    background: hsl(40 56% 95% / 0.7);
+    background: hsl(270 40% 97% / 0.7);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(30 25% 80% / 0.4);
+    border: 1px solid hsl(270 25% 85% / 0.4);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, hsl(36 45% 52%), hsl(34 38% 44%));
+    background: linear-gradient(135deg, hsl(263 70% 58%), hsl(330 65% 60%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -270,54 +270,54 @@
 
   /* Mobile bottom nav */
   .mobile-bottom-nav {
-    background: linear-gradient(180deg, hsl(36 30% 90% / 0.95), hsl(36 32% 93% / 0.98));
+    background: linear-gradient(180deg, hsl(270 25% 92% / 0.95), hsl(270 28% 95% / 0.98));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
 
   /* Premium sidebar */
   .sidebar-item-active {
-    background: linear-gradient(135deg, hsl(36 35% 49% / 0.12), hsl(36 35% 49% / 0.06));
-    border-right: 3px solid hsl(36 35% 49%);
-    color: hsl(36 35% 49%);
+    background: linear-gradient(135deg, hsl(263 70% 58% / 0.12), hsl(263 70% 58% / 0.06));
+    border-right: 3px solid hsl(263 70% 58%);
+    color: hsl(263 70% 58%);
     font-weight: 700;
   }
 
   /* Glassmorphism admin sidebar */
   .admin-glass-sidebar {
-    background: linear-gradient(180deg, hsl(40 56% 96% / 0.85), hsl(36 32% 93% / 0.9));
+    background: linear-gradient(180deg, hsl(270 40% 98% / 0.85), hsl(270 28% 95% / 0.9));
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-right: 1px solid hsl(30 25% 80% / 0.4);
+    border-right: 1px solid hsl(270 25% 85% / 0.4);
   }
 
   .admin-glass-card {
-    background: hsl(40 56% 97% / 0.6);
+    background: hsl(270 40% 98% / 0.6);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(30 25% 80% / 0.3);
-    box-shadow: 0 2px 12px hsl(33 37% 27% / 0.04);
+    border: 1px solid hsl(270 25% 85% / 0.3);
+    box-shadow: 0 2px 12px hsl(260 30% 30% / 0.04);
     border-radius: 1rem;
     transition: all 0.3s ease;
   }
   .admin-glass-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 20px hsl(33 37% 27% / 0.08);
+    box-shadow: 0 4px 20px hsl(260 30% 30% / 0.08);
   }
 
-  /* 3D stat widget (event tab) */
+  /* 3D stat widget */
   .stat-widget-3d {
     position: relative;
     overflow: hidden;
     border-radius: 1rem;
     padding: 1rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(145deg, hsl(40, 50%, 98%), hsl(40, 50%, 95%));
-    border: 1px solid hsl(30, 20%, 88%);
-    box-shadow: 0 4px 14px hsl(30 20% 45% / 0.06), 0 1px 3px hsl(30 20% 45% / 0.03), inset 0 1px 0 hsl(40, 60%, 99%);
+    background: linear-gradient(145deg, hsl(270, 40%, 98%), hsl(270, 30%, 96%));
+    border: 1px solid hsl(270, 20%, 90%);
+    box-shadow: 0 4px 14px hsl(260 20% 45% / 0.06), 0 1px 3px hsl(260 20% 45% / 0.03), inset 0 1px 0 hsl(270, 60%, 99%);
   }
   .stat-widget-3d:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px hsl(30 20% 45% / 0.1), 0 2px 6px hsl(30 20% 45% / 0.05);
+    box-shadow: 0 8px 24px hsl(260 20% 45% / 0.1), 0 2px 6px hsl(260 20% 45% / 0.05);
   }
 
   /* Smooth page transitions */
