@@ -85,8 +85,8 @@ const Workshop = () => {
   const whatsappLink = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent("Hi, I'm unable to login to the Creative Caricature Club Workshop. Can you help me?")}`;
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ background: "linear-gradient(135deg, #fdf6f0 0%, #f0e6ff 30%, #e8f4fd 60%, #fff5f5 100%)" }}>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 pb-24 md:pb-4"
+      style={{ background: "linear-gradient(135deg, #f5f0ff 0%, #efe8fc 30%, #e8f0fd 60%, #fdf0f8 100%)" }}>
       
       {/* Animated background orbs */}
       <motion.div

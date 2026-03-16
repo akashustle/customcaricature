@@ -13,7 +13,7 @@ const FloatingButtons = () => {
   if (!allowedPaths.includes(location.pathname)) return null;
 
   return (
-    <div className={`fixed z-50 flex flex-col gap-3 ${isMobile ? "bottom-20 right-4" : "bottom-6 right-6"}`}>
+    <div className={`fixed z-40 flex flex-col gap-3 ${isMobile ? "bottom-24 right-4" : "bottom-6 right-6"}`}>
       {/* Instagram - Top */}
       <a
         href={INSTAGRAM_URL}
