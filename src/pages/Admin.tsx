@@ -648,8 +648,8 @@ const Admin = () => {
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef] pb-20 md:pb-0 overflow-x-hidden">
-        <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-[#e8ddd0] shadow-sm">
+      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/80 border-b border-border shadow-sm">
           <div className="px-4 md:px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
               <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm" />

@@ -140,9 +140,9 @@ const Workshop = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-r from-purple-100/80 to-pink-100/80 backdrop-blur-sm border border-purple-200/40 rounded-2xl p-4 space-y-2"
+            className="bg-secondary/80 backdrop-blur-sm border border-border/40 rounded-2xl p-4 space-y-2"
           >
-            <p className="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <p className="font-bold text-foreground text-sm flex items-center gap-2">
               <GraduationCap className="w-4 h-4 text-purple-500" />
               🎨 2 Days Live Workshop
             </p>
@@ -217,7 +217,7 @@ const Workshop = () => {
               <Button
                 onClick={handleLogin}
                 disabled={loading}
-                className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 border-0 shadow-lg shadow-purple-300/30"
+                className="w-full h-12 rounded-xl text-base font-semibold bg-primary hover:bg-primary/90 border-0 shadow-lg"
               >
                 {loading ? (
                   <motion.div
