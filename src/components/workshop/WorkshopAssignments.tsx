@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Upload, CheckCircle, Clock, Star, XCircle, Trash2, RefreshCw, Eye } from "lucide-react";
+import { FileText, Upload, CheckCircle, Clock, Star, XCircle, Trash2, RefreshCw, Eye, CloudUpload } from "lucide-react";
 import { motion } from "framer-motion";
 
 const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
@@ -12,7 +12,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   const [uploading, setUploading] = useState(false);
   const [settings, setSettings] = useState<any>({});
 
-  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
+  const cardBg = dm ? "bg-[#1e1b16]/80 border-[#3a3428]/50" : "bg-card/50 border-border/30";
   const textPrimary = dm ? "text-white font-bold" : "text-foreground font-bold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
   const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
@@ -98,97 +98,129 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   );
 
   return (
-    <GlassCard>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className={`${textPrimary} text-lg flex items-center gap-2`}>
-          <FileText className="w-5 h-5 text-primary" /> Assignments
-        </h2>
-        {canUpload && (
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <label className="cursor-pointer">
-              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
-              <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white ${uploading ? "opacity-60 pointer-events-none" : ""}`}
-                style={{ background: "linear-gradient(135deg, hsl(263 70% 58%), hsl(330 65% 60%))" }}>
-                <Upload className="w-4 h-4" />
-                {uploading ? "Uploading..." : "Submit"}
-              </div>
-            </label>
-          </motion.div>
-        )}
-      </div>
-
-      {assignments.length === 0 ? (
-        <div className="text-center py-12">
-          <FileText className={`w-16 h-16 ${dm ? "text-white/20" : "text-primary/20"} mx-auto mb-3`} />
-          <p className={textSecondary}>No assignments submitted yet</p>
-          {canUpload && <p className={`${textMuted} text-xs mt-1`}>Upload your assignment file above</p>}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {assignments.map((a: any) => (
-            <div key={a.id} className={`p-4 rounded-xl ${dm ? "bg-purple-900/20 border-purple-700/30" : "bg-primary/5 border-primary/10"} border`}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className={`${textPrimary} text-sm truncate`}>{a.file_name || "Assignment"}</p>
-                  <p className={`${textMuted} text-xs`}>{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</p>
-                  
-                  {a.status === "graded" && (
-                    <div className="mt-2 space-y-1">
-                      {a.marks !== null && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                          <span className={`text-sm font-bold ${dm ? "text-amber-400" : "text-amber-500"}`}>{a.marks} / {a.total_marks || 100}</span>
-                        </div>
-                      )}
-                      {a.pass_status && (
-                        <Badge className={`text-xs font-bold ${a.pass_status === "pass" ? "bg-green-100 text-green-600 border-green-200" : "bg-red-100 text-red-500 border-red-200"}`}>
-                          {a.pass_status === "pass" ? <><CheckCircle className="w-3 h-3 mr-1" />Pass</> : <><XCircle className="w-3 h-3 mr-1" />Fail</>}
-                        </Badge>
-                      )}
-                      {a.graded_by_artist && <p className={`text-xs ${dm ? "text-purple-400" : "text-primary"} font-bold`}>Graded by: {a.graded_by_artist}</p>}
-                      {a.admin_notes && <p className={`text-xs ${textSecondary} italic`}>"{a.admin_notes}"</p>}
-                      {a.pass_status === "fail" && canUpload && (
-                        <div className={`mt-2 ${dm ? "bg-amber-900/20 border-amber-700/30" : "bg-amber-50/80 border-amber-200/30"} border rounded-lg p-2`}>
-                          <p className={`${dm ? "text-amber-400" : "text-amber-600"} text-xs font-bold flex items-center gap-1`}>
-                            <RefreshCw className="w-3 h-3" /> Don't give up! You can re-upload and try again.
-                          </p>
-                          <label className="mt-1 block cursor-pointer">
-                            <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
-                            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border border-amber-300 text-amber-600 hover:bg-amber-50 transition-colors">
-                              <Upload className="w-3 h-3" /> Re-upload
-                            </div>
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  )}
+    <div className="space-y-4">
+      <GlassCard>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={`${textPrimary} text-lg flex items-center gap-2`}>
+            <FileText className="w-5 h-5 text-accent" /> Assignments
+          </h2>
+          {canUpload && (
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <label className="cursor-pointer">
+                <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple disabled={uploading} />
+                <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : "hover:opacity-90"} transition-all shadow-md`}>
+                  <Upload className="w-4 h-4" />
+                  {uploading ? "Uploading..." : "Submit Assignment"}
                 </div>
-                <div className="flex flex-col gap-1 flex-shrink-0">
-                  <Badge className={`text-[10px] font-bold ${
-                    a.status === "submitted" ? "bg-blue-100 text-blue-500 border-blue-200" :
-                    a.status === "graded" ? "bg-green-100 text-green-600 border-green-200" :
-                    "bg-gray-100 text-gray-400 border-gray-200"
-                  }`}>
-                    {a.status === "submitted" ? <><Clock className="w-3 h-3 mr-1" />Submitted</> :
-                     a.status === "graded" ? <><CheckCircle className="w-3 h-3 mr-1" />Graded</> : "Pending"}
-                  </Badge>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => handleView(a)} className="rounded-lg h-7 px-2">
-                      <Eye className="w-3.5 h-3.5 mr-0.5" /><span className="text-[10px]">View</span>
-                    </Button>
-                    {a.status !== "graded" && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(a)} className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-7 px-2">
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+              </label>
+            </motion.div>
+          )}
+        </div>
+
+        {assignments.length === 0 ? (
+          <div className="text-center py-12">
+            <FileText className={`w-16 h-16 ${dm ? "text-white/20" : "text-primary/20"} mx-auto mb-3`} />
+            <p className={textSecondary}>No assignments submitted yet</p>
+            {canUpload && <p className={`${textMuted} text-xs mt-1`}>Upload your assignment file using the button above or below</p>}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {assignments.map((a: any) => (
+              <motion.div 
+                key={a.id} 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-4 rounded-xl ${dm ? "bg-white/5 border-white/10" : "bg-secondary/50 border-border/30"} border`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className={`${textPrimary} text-sm truncate`}>{a.file_name || "Assignment"}</p>
+                    <p className={`${textMuted} text-xs`}>{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</p>
+                    
+                    {a.status === "graded" && (
+                      <div className="mt-2 space-y-1">
+                        {a.marks !== null && (
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3.5 h-3.5 text-accent fill-accent" />
+                            <span className={`text-sm font-bold ${dm ? "text-amber-400" : "text-accent"}`}>{a.marks} / {a.total_marks || 100}</span>
+                          </div>
+                        )}
+                        {a.pass_status && (
+                          <Badge className={`text-xs font-bold ${a.pass_status === "pass" ? "bg-green-100 text-green-600 border-green-200" : "bg-red-100 text-red-500 border-red-200"}`}>
+                            {a.pass_status === "pass" ? <><CheckCircle className="w-3 h-3 mr-1" />Pass</> : <><XCircle className="w-3 h-3 mr-1" />Fail</>}
+                          </Badge>
+                        )}
+                        {a.graded_by_artist && <p className={`text-xs ${dm ? "text-accent" : "text-primary"} font-bold`}>Graded by: {a.graded_by_artist}</p>}
+                        {a.admin_notes && <p className={`text-xs ${textSecondary} italic`}>"{a.admin_notes}"</p>}
+                        {a.pass_status === "fail" && canUpload && (
+                          <div className={`mt-2 ${dm ? "bg-amber-900/20 border-amber-700/30" : "bg-warning/10 border-warning/20"} border rounded-lg p-2`}>
+                            <p className={`${dm ? "text-amber-400" : "text-amber-600"} text-xs font-bold flex items-center gap-1`}>
+                              <RefreshCw className="w-3 h-3" /> Don't give up! You can re-upload and try again.
+                            </p>
+                            <label className="mt-1 block cursor-pointer">
+                              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
+                              <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border border-amber-300 text-amber-600 hover:bg-amber-50 transition-colors">
+                                <Upload className="w-3 h-3" /> Re-upload
+                              </div>
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
+                  <div className="flex flex-col gap-1 flex-shrink-0">
+                    <Badge className={`text-[10px] font-bold ${
+                      a.status === "submitted" ? "bg-blue-100 text-blue-500 border-blue-200" :
+                      a.status === "graded" ? "bg-green-100 text-green-600 border-green-200" :
+                      "bg-gray-100 text-gray-400 border-gray-200"
+                    }`}>
+                      {a.status === "submitted" ? <><Clock className="w-3 h-3 mr-1" />Submitted</> :
+                       a.status === "graded" ? <><CheckCircle className="w-3 h-3 mr-1" />Graded</> : "Pending"}
+                    </Badge>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleView(a)} className="rounded-lg h-7 px-2">
+                        <Eye className="w-3.5 h-3.5 mr-0.5" /><span className="text-[10px]">View</span>
+                      </Button>
+                      {a.status !== "graded" && (
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(a)} className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-7 px-2">
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </GlassCard>
+
+      {/* Always-visible submit section at bottom */}
+      {canUpload && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <GlassCard className="text-center">
+            <CloudUpload className={`w-12 h-12 mx-auto mb-3 ${dm ? "text-white/30" : "text-primary/30"}`} />
+            <p className={`${textPrimary} text-base mb-1`}>Submit Your Assignment</p>
+            <p className={`${textMuted} text-xs mb-4`}>Upload PDF, JPG, JPEG or PNG files (Max 20MB each)</p>
+            <label className="cursor-pointer inline-block">
+              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple disabled={uploading} />
+              <motion.div 
+                whileHover={{ scale: 1.05, y: -2 }} 
+                whileTap={{ scale: 0.95 }}
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : ""} transition-all shadow-lg btn-3d`}
+              >
+                <Upload className="w-5 h-5" />
+                {uploading ? "Uploading..." : "Choose Files & Submit"}
+              </motion.div>
+            </label>
+          </GlassCard>
+        </motion.div>
       )}
-    </GlassCard>
+    </div>
   );
 };
 
