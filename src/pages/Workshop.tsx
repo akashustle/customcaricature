@@ -217,7 +217,7 @@ const Workshop = () => {
               <Button
                 onClick={handleLogin}
                 disabled={loading}
-                className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 border-0 shadow-lg shadow-purple-300/30"
+                className="w-full h-12 rounded-xl text-base font-semibold bg-primary hover:bg-primary/90 border-0 shadow-lg"
               >
                 {loading ? (
                   <motion.div
