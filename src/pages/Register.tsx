@@ -132,7 +132,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f0ff] via-[#efe8fc] to-[#fdf0f8] flex items-center justify-center px-4 py-8 pb-24 md:pb-8">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 pb-24 md:pb-8">
       <Card className="w-full max-w-md" style={{ boxShadow: "var(--shadow-card)" }}>
         <CardHeader className="text-center">
           <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />

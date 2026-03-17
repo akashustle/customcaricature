@@ -546,9 +546,9 @@ const WorkshopAdmin = () => {
 
   // Theme
   const dm = darkMode;
-  const bg = dm ? "bg-[#1a1625]" : "bg-gradient-to-br from-[#fdf8f3] via-[#f5efe6] to-[#faf5ef]";
-  const cardBg = dm ? "bg-[#241f33]/90 border-[#3a3150]/60" : "bg-white/80 border-[#e8ddd0]/60";
-  const textPrimary = dm ? "text-white font-semibold" : "text-[#3a2e22] font-semibold";
+  const bg = dm ? "bg-[#0f0d08]" : "bg-background";
+  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-card/80 border-border/60";
+  const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-[#6a5a4a] font-medium";
   const textMuted = dm ? "text-white/40" : "text-[#9a8a7a]";
   const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-[#e8ddd0]/60";
