@@ -140,9 +140,9 @@ const Workshop = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-r from-purple-100/80 to-pink-100/80 backdrop-blur-sm border border-purple-200/40 rounded-2xl p-4 space-y-2"
+            className="bg-secondary/80 backdrop-blur-sm border border-border/40 rounded-2xl p-4 space-y-2"
           >
-            <p className="font-bold text-gray-700 text-sm flex items-center gap-2">
+            <p className="font-bold text-foreground text-sm flex items-center gap-2">
               <GraduationCap className="w-4 h-4 text-purple-500" />
               🎨 2 Days Live Workshop
             </p>
