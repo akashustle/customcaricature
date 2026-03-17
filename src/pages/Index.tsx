@@ -123,7 +123,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5f0ff] via-[#efe8fc] to-[#fdf0f8] pb-24 md:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       <SEOHead 
         title="Book Caricature Artist for Events & Order Custom Caricatures from Photos"
         description="Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online. India's #1 caricature studio."
