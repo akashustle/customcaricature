@@ -532,6 +532,91 @@ const VideoCard = ({ video, onDelete, onUpdateExpiry }: { video: any; onDelete: 
   );
 };
 
+const ManualAssignmentUpload = ({ users, onUploaded }: { users: any[]; onUploaded: () => void }) => {
+  const [open, setOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const filteredUsers = users.filter((u: any) =>
+    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.mobile?.includes(searchTerm)
+  );
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !selectedUserId) return;
+    setUploading(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 20 * 1024 * 1024) {
+          toast({ title: `${file.name} too large`, description: "Max 20MB", variant: "destructive" });
+          continue;
+        }
+        const path = `assignments/${selectedUserId}/${Date.now()}_${file.name}`;
+        const { error: uploadErr } = await supabase.storage.from("workshop-files").upload(path, file);
+        if (uploadErr) throw uploadErr;
+        await supabase.from("workshop_assignments" as any).insert({
+          user_id: selectedUserId, file_name: file.name, storage_path: path,
+          status: "submitted", submitted_at: new Date().toISOString(),
+          added_by_admin: true,
+        } as any);
+      }
+      toast({ title: "Assignment added for user ✅" });
+      onUploaded();
+      setOpen(false);
+      setSelectedUserId("");
+      setSearchTerm("");
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />Add Assignment</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle className="font-display">Add Assignment for Student</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label>Search Student</Label>
+            <Input placeholder="Search by name, email, mobile..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          </div>
+          {searchTerm && (
+            <div className="max-h-40 overflow-y-auto border border-border rounded-lg">
+              {filteredUsers.length === 0 ? (
+                <p className="text-xs text-muted-foreground p-3">No users found</p>
+              ) : filteredUsers.slice(0, 10).map((u: any) => (
+                <div
+                  key={u.id}
+                  className={`p-2 cursor-pointer hover:bg-muted text-sm font-sans ${selectedUserId === u.id ? "bg-primary/10 font-semibold" : ""}`}
+                  onClick={() => { setSelectedUserId(u.id); setSearchTerm(u.name); }}
+                >
+                  {u.name} <span className="text-xs text-muted-foreground">({u.email})</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {selectedUserId && (
+            <div>
+              <Label>Upload File (PDF, Image, Docs)</Label>
+              <Input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple onChange={handleUpload} disabled={uploading} />
+              {uploading && <p className="text-xs text-muted-foreground mt-1">Uploading...</p>}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const AssignmentCard = ({ assignment, onGrade }: { assignment: any; onGrade: (id: string, marks: number, notes: string) => void }) => {
   const [marks, setMarks] = useState(assignment.marks?.toString() || "");
   const [notes, setNotes] = useState(assignment.admin_notes || "");
