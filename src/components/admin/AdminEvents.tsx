@@ -95,10 +95,12 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchArtists();
     fetchArtistAssignments();
     fetchPaymentDates();
+    fetchDemands();
     const ch = supabase.channel("admin-events")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents())
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => { fetchEvents(); fetchPaymentDates(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchArtistAssignments())
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_demands" }, () => fetchDemands())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
