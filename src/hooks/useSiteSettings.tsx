@@ -9,6 +9,7 @@ type SiteSettings = {
   allow_artwork_bypass: { enabled: boolean };
   shop_nav_visible: { enabled: boolean };
   workshop_mobile_nav: { enabled: boolean };
+  shop_tracking_visible: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
