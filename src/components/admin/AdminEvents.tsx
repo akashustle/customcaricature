@@ -62,6 +62,11 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const { pricing: dbPricing, refetch: refetchPricing } = useEventPricing();
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [editEventData, setEditEventData] = useState<Partial<EventBooking>>({});
+  const [demandId, setDemandId] = useState<string | null>(null);
+  const [demandAmount, setDemandAmount] = useState("");
+  const [demandNote, setDemandNote] = useState("");
+  const [demandStatusOnPaid, setDemandStatusOnPaid] = useState("confirmed");
+  const [demands, setDemands] = useState<any[]>([]);
 
   const [pricingEdits, setPricingEdits] = useState<Record<string, { total_price: string; advance_amount: string; extra_hour_rate: string; valid_until: string }>>({});
 
