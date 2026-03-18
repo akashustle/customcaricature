@@ -24,7 +24,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2, ChevronDown, Eye,
+  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2, ChevronDown, Eye, Bell,
 } from "lucide-react";
 import EventRevenueWidget from "@/components/EventRevenueWidget";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
