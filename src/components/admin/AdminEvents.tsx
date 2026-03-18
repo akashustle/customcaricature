@@ -912,6 +912,35 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           </Card>
         </div>
       )}
+
+      {/* Demand Payment Dialog */}
+      {demandId && (
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setDemandId(null)}>
+          <Card className="w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <CardHeader><CardTitle className="font-display text-lg">Demand Payment</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div><Label>Amount (₹) *</Label><Input type="number" value={demandAmount} onChange={e => setDemandAmount(e.target.value)} placeholder="Enter amount" /></div>
+              <div><Label>Note / Reason</Label><Textarea value={demandNote} onChange={e => setDemandNote(e.target.value)} placeholder="What is this payment for?" rows={2} /></div>
+              <div>
+                <Label>Event Status If Paid</Label>
+                <Select value={demandStatusOnPaid} onValueChange={setDemandStatusOnPaid}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                    <SelectItem value="confirmed">Advance Received</SelectItem>
+                    <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={createDemand} className="flex-1 font-sans" disabled={!demandAmount}><Bell className="w-4 h-4 mr-1" />Create Demand</Button>
+                <Button variant="ghost" onClick={() => setDemandId(null)}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
