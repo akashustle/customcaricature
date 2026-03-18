@@ -765,6 +765,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
                         <DollarSign className="w-3 h-3 mr-1" />Negotiate
                       </Button>
+                      <Button variant="outline" size="sm" className="text-xs h-8 text-amber-700 border-amber-300 hover:bg-amber-50" onClick={() => setDemandId(ev.id)}>
+                        <Bell className="w-3 h-3 mr-1" />Demand Payment
+                      </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="text-xs h-8"><Trash2 className="w-3 h-3" /></Button></AlertDialogTrigger>
                         <AlertDialogContent>
@@ -773,6 +776,30 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
+
+                    {/* Payment Demands */}
+                    {getEventDemands(ev.id).length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground font-sans uppercase tracking-wide">Payment Demands</p>
+                        {getEventDemands(ev.id).map((d: any) => (
+                          <div key={d.id} className={`flex items-center justify-between p-2 rounded-lg text-sm font-sans ${d.is_paid ? "bg-green-50 border border-green-200" : "bg-amber-50 border border-amber-200"}`}>
+                            <div>
+                              <p className="font-semibold">{formatPrice(d.amount)} <Badge className={`text-[10px] ml-1 ${d.is_paid ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}`}>{d.is_paid ? "Paid ✅" : "Pending"}</Badge></p>
+                              {d.note && <p className="text-xs text-muted-foreground">{d.note}</p>}
+                              <p className="text-[10px] text-muted-foreground">If paid → {d.status_on_paid} · {new Date(d.created_at).toLocaleDateString("en-IN")}</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => toggleDemandPaid(d)}>
+                                {d.is_paid ? "Undo" : "Mark Paid"}
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => deleteDemand(d.id)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Artist Assignment */}
                     <div className="space-y-1 pt-2 border-t border-border">
