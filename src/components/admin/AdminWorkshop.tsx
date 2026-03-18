@@ -328,7 +328,10 @@ const AdminWorkshop = () => {
 
         {/* ASSIGNMENTS TAB */}
         <TabsContent value="assignments" className="space-y-4">
-          <h2 className="font-display text-lg font-bold">Assignments ({assignments.length})</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-bold">Assignments ({assignments.length})</h2>
+            <ManualAssignmentUpload users={users} onUploaded={fetchAssignments} />
+          </div>
           {assignments.map((a: any) => (
             <AssignmentCard key={a.id} assignment={a} onGrade={gradeAssignment} />
           ))}

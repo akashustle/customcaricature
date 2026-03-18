@@ -128,10 +128,12 @@ const TrackOrder = () => {
 
       <div className="container mx-auto px-4 py-8 max-w-lg">
         <Tabs value={trackType} onValueChange={(v) => { setTrackType(v as any); setOrder(null); setShopOrder(null); setSearched(false); }}>
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="custom" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Order</TabsTrigger>
-            <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-1" />Shop Order</TabsTrigger>
-          </TabsList>
+          {shopTrackingVisible && (
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="custom" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Order</TabsTrigger>
+              <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-1" />Shop Order</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="custom">
             <Card>
