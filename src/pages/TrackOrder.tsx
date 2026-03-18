@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import { Search, Package, ArrowLeft, Clock, CreditCard, Truck, CheckCircle, Loader2, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ORDER_STATUS_STEPS = [
   { key: "new", label: "Order Placed", icon: Package },
@@ -48,6 +49,7 @@ type TrackedShopOrder = {
 
 const TrackOrder = () => {
   const navigate = useNavigate();
+  const { settings: siteSettings } = useSiteSettings();
   const [orderId, setOrderId] = useState("");
   const [verifyContact, setVerifyContact] = useState("");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
@@ -56,6 +58,7 @@ const TrackOrder = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [trackType, setTrackType] = useState<"custom" | "shop">("custom");
+  const shopTrackingVisible = (siteSettings as any).shop_tracking_visible?.enabled !== false;
 
   const handleTrackCustom = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,10 +128,12 @@ const TrackOrder = () => {
 
       <div className="container mx-auto px-4 py-8 max-w-lg">
         <Tabs value={trackType} onValueChange={(v) => { setTrackType(v as any); setOrder(null); setShopOrder(null); setSearched(false); }}>
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="custom" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Order</TabsTrigger>
-            <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-1" />Shop Order</TabsTrigger>
-          </TabsList>
+          {shopTrackingVisible && (
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="custom" className="flex-1 font-sans"><Package className="w-4 h-4 mr-1" />Custom Order</TabsTrigger>
+              <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-1" />Shop Order</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="custom">
             <Card>

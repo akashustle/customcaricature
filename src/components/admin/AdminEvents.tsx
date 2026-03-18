@@ -24,7 +24,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2, ChevronDown, Eye,
+  CalendarIcon, Plus, Search, Trash2, DollarSign, X, Save, Settings, TrendingUp, CreditCard, MapPin, Users, BarChart3, Edit2, ChevronDown, Eye, Bell,
 } from "lucide-react";
 import EventRevenueWidget from "@/components/EventRevenueWidget";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
@@ -62,6 +62,11 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const { pricing: dbPricing, refetch: refetchPricing } = useEventPricing();
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [editEventData, setEditEventData] = useState<Partial<EventBooking>>({});
+  const [demandId, setDemandId] = useState<string | null>(null);
+  const [demandAmount, setDemandAmount] = useState("");
+  const [demandNote, setDemandNote] = useState("");
+  const [demandStatusOnPaid, setDemandStatusOnPaid] = useState("confirmed");
+  const [demands, setDemands] = useState<any[]>([]);
 
   const [pricingEdits, setPricingEdits] = useState<Record<string, { total_price: string; advance_amount: string; extra_hour_rate: string; valid_until: string }>>({});
 
@@ -90,10 +95,12 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchArtists();
     fetchArtistAssignments();
     fetchPaymentDates();
+    fetchDemands();
     const ch = supabase.channel("admin-events")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents())
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => { fetchEvents(); fetchPaymentDates(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchArtistAssignments())
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_demands" }, () => fetchDemands())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
@@ -196,6 +203,44 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchBlockedDates();
   };
   const removeBlockedDate = async (id: string) => { await supabase.from("artist_blocked_dates").delete().eq("id", id); toast({ title: "Date Unblocked" }); fetchBlockedDates(); };
+
+  const fetchDemands = async () => {
+    const { data } = await supabase.from("payment_demands" as any).select("*").order("created_at", { ascending: false });
+    if (data) setDemands(data as any[]);
+  };
+
+  const createDemand = async () => {
+    if (!demandId || !demandAmount) return;
+    await supabase.from("payment_demands" as any).insert({
+      event_id: demandId, amount: parseInt(demandAmount), note: demandNote || null,
+      status_on_paid: demandStatusOnPaid,
+    } as any);
+    toast({ title: "Payment Demand Created! 📢" });
+    setDemandId(null); setDemandAmount(""); setDemandNote(""); setDemandStatusOnPaid("confirmed");
+    fetchDemands();
+  };
+
+  const toggleDemandPaid = async (demand: any) => {
+    const newPaid = !demand.is_paid;
+    await supabase.from("payment_demands" as any).update({
+      is_paid: newPaid,
+      paid_at: newPaid ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    } as any).eq("id", demand.id);
+    if (newPaid && demand.status_on_paid) {
+      await supabase.from("event_bookings").update({ payment_status: demand.status_on_paid } as any).eq("id", demand.event_id);
+    }
+    toast({ title: newPaid ? "Marked as Paid ✅" : "Marked as Unpaid" });
+    fetchDemands(); fetchEvents();
+  };
+
+  const deleteDemand = async (id: string) => {
+    await supabase.from("payment_demands" as any).delete().eq("id", id);
+    toast({ title: "Demand Deleted" });
+    fetchDemands();
+  };
+
+  const getEventDemands = (eventId: string) => demands.filter((d: any) => d.event_id === eventId);
   const updateEventStatus = async (id: string, status: string) => { await supabase.from("event_bookings").update({ status } as any).eq("id", id); toast({ title: "Status Updated" }); fetchEvents(); };
   const updatePaymentStatus = async (id: string, ps: string) => { await supabase.from("event_bookings").update({ payment_status: ps } as any).eq("id", id); toast({ title: "Payment Status Updated" }); fetchEvents(); };
   const deleteEvent = async (id: string) => { await supabase.from("event_bookings").delete().eq("id", id); toast({ title: "Event Deleted" }); fetchEvents(); };
@@ -720,6 +765,9 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                       <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => { setNegotiateId(ev.id); setNegTotal(String(ev.negotiated_total || ev.total_price)); setNegAdvance(String(ev.negotiated_advance || ev.advance_amount)); }}>
                         <DollarSign className="w-3 h-3 mr-1" />Negotiate
                       </Button>
+                      <Button variant="outline" size="sm" className="text-xs h-8 text-amber-700 border-amber-300 hover:bg-amber-50" onClick={() => setDemandId(ev.id)}>
+                        <Bell className="w-3 h-3 mr-1" />Demand Payment
+                      </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="text-xs h-8"><Trash2 className="w-3 h-3" /></Button></AlertDialogTrigger>
                         <AlertDialogContent>
@@ -728,6 +776,30 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
+
+                    {/* Payment Demands */}
+                    {getEventDemands(ev.id).length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        <p className="text-xs font-semibold text-muted-foreground font-sans uppercase tracking-wide">Payment Demands</p>
+                        {getEventDemands(ev.id).map((d: any) => (
+                          <div key={d.id} className={`flex items-center justify-between p-2 rounded-lg text-sm font-sans ${d.is_paid ? "bg-green-50 border border-green-200" : "bg-amber-50 border border-amber-200"}`}>
+                            <div>
+                              <p className="font-semibold">{formatPrice(d.amount)} <Badge className={`text-[10px] ml-1 ${d.is_paid ? "bg-green-100 text-green-700 border-green-200" : "bg-amber-100 text-amber-700 border-amber-200"}`}>{d.is_paid ? "Paid ✅" : "Pending"}</Badge></p>
+                              {d.note && <p className="text-xs text-muted-foreground">{d.note}</p>}
+                              <p className="text-[10px] text-muted-foreground">If paid → {d.status_on_paid} · {new Date(d.created_at).toLocaleDateString("en-IN")}</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => toggleDemandPaid(d)}>
+                                {d.is_paid ? "Undo" : "Mark Paid"}
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => deleteDemand(d.id)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Artist Assignment */}
                     <div className="space-y-1 pt-2 border-t border-border">
@@ -835,6 +907,35 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
               <div className="flex gap-2">
                 <Button onClick={saveEventEdit} className="flex-1 font-sans"><Save className="w-4 h-4 mr-1" />Save Changes</Button>
                 <Button variant="ghost" onClick={() => setEditingEventId(null)}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Demand Payment Dialog */}
+      {demandId && (
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setDemandId(null)}>
+          <Card className="w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <CardHeader><CardTitle className="font-display text-lg">Demand Payment</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div><Label>Amount (₹) *</Label><Input type="number" value={demandAmount} onChange={e => setDemandAmount(e.target.value)} placeholder="Enter amount" /></div>
+              <div><Label>Note / Reason</Label><Textarea value={demandNote} onChange={e => setDemandNote(e.target.value)} placeholder="What is this payment for?" rows={2} /></div>
+              <div>
+                <Label>Event Status If Paid</Label>
+                <Select value={demandStatusOnPaid} onValueChange={setDemandStatusOnPaid}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
+                    <SelectItem value="confirmed">Advance Received</SelectItem>
+                    <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={createDemand} className="flex-1 font-sans" disabled={!demandAmount}><Bell className="w-4 h-4 mr-1" />Create Demand</Button>
+                <Button variant="ghost" onClick={() => setDemandId(null)}>Cancel</Button>
               </div>
             </CardContent>
           </Card>

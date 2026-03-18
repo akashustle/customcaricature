@@ -9,6 +9,7 @@ type SiteSettings = {
   allow_artwork_bypass: { enabled: boolean };
   shop_nav_visible: { enabled: boolean };
   workshop_mobile_nav: { enabled: boolean };
+  shop_tracking_visible: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -19,6 +20,7 @@ const defaults: SiteSettings = {
   allow_artwork_bypass: { enabled: false },
   shop_nav_visible: { enabled: true },
   workshop_mobile_nav: { enabled: false },
+  shop_tracking_visible: { enabled: true },
 };
 
 export const useSiteSettings = () => {

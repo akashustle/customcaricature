@@ -40,7 +40,8 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
     }
   };
 
-  const isSubmissionEnabled = settings.assignment_submission_enabled?.enabled !== false;
+  // The submit button should ALWAYS show unless explicitly disabled or workshop ended
+  const isSubmissionEnabled = settings.assignment_submission_enabled ? settings.assignment_submission_enabled.enabled !== false : true;
   const workshopEnded = settings.workshop_ended?.enabled === true;
   const canUpload = isSubmissionEnabled && !workshopEnded;
 
@@ -99,21 +100,45 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
 
   return (
     <div className="space-y-4">
+      {/* Always show submit area at top when allowed */}
+      {canUpload && (
+        <GlassCard className="text-center">
+          <CloudUpload className={`w-12 h-12 mx-auto mb-3 ${dm ? "text-white/30" : "text-primary/30"}`} />
+          <p className={`${textPrimary} text-base mb-1`}>Submit Your Assignment</p>
+          <p className={`${textMuted} text-xs mb-4`}>Upload PDF, JPG, JPEG or PNG files (Max 20MB each)</p>
+          <label className="cursor-pointer inline-block">
+            <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple disabled={uploading} />
+            <motion.div 
+              whileHover={{ scale: 1.05, y: -2 }} 
+              whileTap={{ scale: 0.95 }}
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : ""} transition-all shadow-lg btn-3d`}
+            >
+              <Upload className="w-5 h-5" />
+              {uploading ? "Uploading..." : "Choose Files & Submit"}
+            </motion.div>
+          </label>
+        </GlassCard>
+      )}
+
+      {!canUpload && workshopEnded && (
+        <GlassCard className="text-center">
+          <p className={`${textSecondary} text-sm`}>Assignment submissions are closed.</p>
+        </GlassCard>
+      )}
+
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
           <h2 className={`${textPrimary} text-lg flex items-center gap-2`}>
-            <FileText className="w-5 h-5 text-accent" /> Assignments
+            <FileText className="w-5 h-5 text-accent" /> My Assignments
           </h2>
           {canUpload && (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <label className="cursor-pointer">
-                <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple disabled={uploading} />
-                <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : "hover:opacity-90"} transition-all shadow-md`}>
-                  <Upload className="w-4 h-4" />
-                  {uploading ? "Uploading..." : "Submit Assignment"}
-                </div>
-              </label>
-            </motion.div>
+            <label className="cursor-pointer">
+              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple disabled={uploading} />
+              <div className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : "hover:opacity-90"} transition-all shadow-md`}>
+                <Upload className="w-4 h-4" />
+                {uploading ? "Uploading..." : "Submit"}
+              </div>
+            </label>
           )}
         </div>
 
@@ -121,7 +146,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
           <div className="text-center py-12">
             <FileText className={`w-16 h-16 ${dm ? "text-white/20" : "text-primary/20"} mx-auto mb-3`} />
             <p className={textSecondary}>No assignments submitted yet</p>
-            {canUpload && <p className={`${textMuted} text-xs mt-1`}>Upload your assignment file using the button above or below</p>}
+            {canUpload && <p className={`${textMuted} text-xs mt-1`}>Upload your assignment file using the buttons above</p>}
           </div>
         ) : (
           <div className="space-y-3">
@@ -135,7 +160,10 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className={`${textPrimary} text-sm truncate`}>{a.file_name || "Assignment"}</p>
-                    <p className={`${textMuted} text-xs`}>{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</p>
+                    <p className={`${textMuted} text-xs`}>
+                      {a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}
+                      {a.added_by_admin && <span className="ml-1 text-accent">(Added by Admin)</span>}
+                    </p>
                     
                     {a.status === "graded" && (
                       <div className="mt-2 space-y-1">
@@ -158,7 +186,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
                               <RefreshCw className="w-3 h-3" /> Don't give up! You can re-upload and try again.
                             </p>
                             <label className="mt-1 block cursor-pointer">
-                              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple />
+                              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple />
                               <div className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border border-amber-300 text-amber-600 hover:bg-amber-50 transition-colors">
                                 <Upload className="w-3 h-3" /> Re-upload
                               </div>
@@ -194,32 +222,6 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
           </div>
         )}
       </GlassCard>
-
-      {/* Always-visible submit section at bottom */}
-      {canUpload && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <GlassCard className="text-center">
-            <CloudUpload className={`w-12 h-12 mx-auto mb-3 ${dm ? "text-white/30" : "text-primary/30"}`} />
-            <p className={`${textPrimary} text-base mb-1`}>Submit Your Assignment</p>
-            <p className={`${textMuted} text-xs mb-4`}>Upload PDF, JPG, JPEG or PNG files (Max 20MB each)</p>
-            <label className="cursor-pointer inline-block">
-              <input type="file" className="hidden" onChange={handleUpload} accept=".pdf,.jpg,.jpeg,.png" multiple disabled={uploading} />
-              <motion.div 
-                whileHover={{ scale: 1.05, y: -2 }} 
-                whileTap={{ scale: 0.95 }}
-                className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-primary-foreground bg-primary ${uploading ? "opacity-60 pointer-events-none" : ""} transition-all shadow-lg btn-3d`}
-              >
-                <Upload className="w-5 h-5" />
-                {uploading ? "Uploading..." : "Choose Files & Submit"}
-              </motion.div>
-            </label>
-          </GlassCard>
-        </motion.div>
-      )}
     </div>
   );
 };

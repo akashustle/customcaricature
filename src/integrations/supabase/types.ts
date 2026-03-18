@@ -1593,6 +1593,50 @@ export type Database = {
           },
         ]
       }
+      payment_demands: {
+        Row: {
+          amount: number
+          created_at: string | null
+          event_id: string
+          id: string
+          is_paid: boolean | null
+          note: string | null
+          paid_at: string | null
+          status_on_paid: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          event_id: string
+          id?: string
+          is_paid?: boolean | null
+          note?: string | null
+          paid_at?: string | null
+          status_on_paid?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          is_paid?: boolean | null
+          note?: string | null
+          paid_at?: string | null
+          status_on_paid?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_demands_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_history: {
         Row: {
           amount: number
