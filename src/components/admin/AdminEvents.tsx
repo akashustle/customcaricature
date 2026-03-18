@@ -203,6 +203,44 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     fetchBlockedDates();
   };
   const removeBlockedDate = async (id: string) => { await supabase.from("artist_blocked_dates").delete().eq("id", id); toast({ title: "Date Unblocked" }); fetchBlockedDates(); };
+
+  const fetchDemands = async () => {
+    const { data } = await supabase.from("payment_demands" as any).select("*").order("created_at", { ascending: false });
+    if (data) setDemands(data as any[]);
+  };
+
+  const createDemand = async () => {
+    if (!demandId || !demandAmount) return;
+    await supabase.from("payment_demands" as any).insert({
+      event_id: demandId, amount: parseInt(demandAmount), note: demandNote || null,
+      status_on_paid: demandStatusOnPaid,
+    } as any);
+    toast({ title: "Payment Demand Created! 📢" });
+    setDemandId(null); setDemandAmount(""); setDemandNote(""); setDemandStatusOnPaid("confirmed");
+    fetchDemands();
+  };
+
+  const toggleDemandPaid = async (demand: any) => {
+    const newPaid = !demand.is_paid;
+    await supabase.from("payment_demands" as any).update({
+      is_paid: newPaid,
+      paid_at: newPaid ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    } as any).eq("id", demand.id);
+    if (newPaid && demand.status_on_paid) {
+      await supabase.from("event_bookings").update({ payment_status: demand.status_on_paid } as any).eq("id", demand.event_id);
+    }
+    toast({ title: newPaid ? "Marked as Paid ✅" : "Marked as Unpaid" });
+    fetchDemands(); fetchEvents();
+  };
+
+  const deleteDemand = async (id: string) => {
+    await supabase.from("payment_demands" as any).delete().eq("id", id);
+    toast({ title: "Demand Deleted" });
+    fetchDemands();
+  };
+
+  const getEventDemands = (eventId: string) => demands.filter((d: any) => d.event_id === eventId);
   const updateEventStatus = async (id: string, status: string) => { await supabase.from("event_bookings").update({ status } as any).eq("id", id); toast({ title: "Status Updated" }); fetchEvents(); };
   const updatePaymentStatus = async (id: string, ps: string) => { await supabase.from("event_bookings").update({ payment_status: ps } as any).eq("id", id); toast({ title: "Payment Status Updated" }); fetchEvents(); };
   const deleteEvent = async (id: string) => { await supabase.from("event_bookings").delete().eq("id", id); toast({ title: "Event Deleted" }); fetchEvents(); };
