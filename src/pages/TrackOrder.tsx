@@ -49,6 +49,7 @@ type TrackedShopOrder = {
 
 const TrackOrder = () => {
   const navigate = useNavigate();
+  const { settings: siteSettings } = useSiteSettings();
   const [orderId, setOrderId] = useState("");
   const [verifyContact, setVerifyContact] = useState("");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
@@ -57,6 +58,7 @@ const TrackOrder = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [trackType, setTrackType] = useState<"custom" | "shop">("custom");
+  const shopTrackingVisible = (siteSettings as any).shop_tracking_visible?.enabled !== false;
 
   const handleTrackCustom = async (e: React.FormEvent) => {
     e.preventDefault();
