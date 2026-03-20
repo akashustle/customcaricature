@@ -646,10 +646,12 @@ const ManualAssignmentUpload = ({ users, onUploaded }: { users: any[]; onUploade
   );
 };
 
-const AssignmentCard = ({ assignment, onGrade }: { assignment: any; onGrade: (id: string, marks: number, notes: string) => void }) => {
+const AssignmentCard = ({ assignment, onGrade, onDelete, onEdit }: { assignment: any; onGrade: (id: string, marks: number, notes: string) => void; onDelete?: (id: string) => void; onEdit?: (id: string, updates: any) => void }) => {
   const [marks, setMarks] = useState(assignment.marks?.toString() || "");
   const [notes, setNotes] = useState(assignment.admin_notes || "");
   const [grading, setGrading] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [newStatus, setNewStatus] = useState(assignment.status);
 
   const viewFile = async () => {
     if (!assignment.storage_path) return;
@@ -671,8 +673,36 @@ const AssignmentCard = ({ assignment, onGrade }: { assignment: any; onGrade: (id
               {assignment.status}
             </Badge>
             <Button variant="outline" size="sm" onClick={viewFile}><Eye className="w-4 h-4" /></Button>
+            {onEdit && (
+              <Button variant="outline" size="sm" onClick={() => setEditingStatus(!editingStatus)}><Edit2 className="w-4 h-4" /></Button>
+            )}
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader><AlertDialogTitle>Delete Assignment?</AlertDialogTitle></AlertDialogHeader>
+                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => onDelete(assignment.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
+        {editingStatus && onEdit && (
+          <div className="flex gap-2 items-end pt-2 border-t border-border">
+            <div className="flex-1">
+              <Label className="text-xs">Status</Label>
+              <Select value={newStatus} onValueChange={setNewStatus}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="graded">Graded</SelectItem>
+                  <SelectItem value="retry">Retry</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button size="sm" onClick={() => { onEdit(assignment.id, { status: newStatus }); setEditingStatus(false); }}><Save className="w-4 h-4 mr-1" />Update</Button>
+          </div>
+        )}
         {!grading && assignment.status !== "graded" && (
           <Button size="sm" variant="outline" onClick={() => setGrading(true)} className="font-sans">Grade Assignment</Button>
         )}
