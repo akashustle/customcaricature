@@ -372,6 +372,27 @@ const AdminWorkshop = () => {
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="font-sans font-semibold text-sm">Enable Workshop Registration</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow new users to register from the workshop page</p>
+                </div>
+                <Switch checked={settings.registration_enabled?.enabled ?? false} onCheckedChange={v => toggleGlobalSetting("registration_enabled", v)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold text-sm">Assignments Deletable</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow deleting assignments from admin</p>
+                </div>
+                <Switch checked={settings.assignments_deletable?.enabled ?? true} onCheckedChange={v => toggleGlobalSetting("assignments_deletable", v)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold text-sm">Assignments Editable</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow editing assignments from admin</p>
+                </div>
+                <Switch checked={settings.assignments_editable?.enabled ?? true} onCheckedChange={v => toggleGlobalSetting("assignments_editable", v)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="font-sans font-semibold text-sm">Enable Video Access for Everyone</p>
                   <p className="text-xs text-muted-foreground font-sans">Toggle ON/OFF video access globally</p>
                 </div>
