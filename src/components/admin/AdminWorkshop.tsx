@@ -333,7 +333,15 @@ const AdminWorkshop = () => {
             <ManualAssignmentUpload users={users} onUploaded={fetchAssignments} />
           </div>
           {assignments.map((a: any) => (
-            <AssignmentCard key={a.id} assignment={a} onGrade={gradeAssignment} />
+            <AssignmentCard key={a.id} assignment={a} onGrade={gradeAssignment} onDelete={async (id: string) => {
+              await supabase.from("workshop_assignments" as any).delete().eq("id", id);
+              toast({ title: "Assignment Deleted" });
+              fetchAssignments();
+            }} onEdit={async (id: string, updates: any) => {
+              await supabase.from("workshop_assignments" as any).update(updates as any).eq("id", id);
+              toast({ title: "Assignment Updated ✅" });
+              fetchAssignments();
+            }} />
           ))}
           {assignments.length === 0 && <p className="text-center text-muted-foreground py-8 font-sans">No assignments submitted</p>}
         </TabsContent>
