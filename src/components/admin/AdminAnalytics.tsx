@@ -229,6 +229,15 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
         <StatCard3D icon={Globe} label="Upcoming Events" value={String(upcomingEvents)} color="hsl(210,65%,55%)" delay={0.2} />
       </div>
 
+      {/* NEW: Event-specific widgets */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <StatCard3D icon={AlertTriangle} label="Remaining to Collect" value={formatPrice(eventRemainingToCollect)} color="hsl(0,55%,55%)" delay={0} />
+        <StatCard3D icon={Target} label="Avg Event Value" value={formatPrice(avgEventValue)} color="hsl(280,50%,55%)" delay={0.05} />
+        <StatCard3D icon={Calendar} label="Events This Month" value={String(eventsThisMonth)} color="hsl(36,45%,52%)" delay={0.1} />
+        <StatCard3D icon={Activity} label="Completed Events" value={String(completedEvents)} color="hsl(152,50%,48%)" delay={0.15} />
+        <StatCard3D icon={Package} label="Cancelled Events" value={String(cancelledEvents)} color="hsl(340,55%,58%)" delay={0.2} />
+      </div>
+
       {/* Revenue Breakdown */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard3D icon={DollarSign} label="Today" value={formatPrice(todayRevenue)} color="hsl(15,65%,55%)" delay={0} />
