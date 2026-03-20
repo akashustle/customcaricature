@@ -74,6 +74,27 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
   // Event revenue metrics
   const eventAdvanceCollected = events.filter(e => ["confirmed", "fully_paid", "partial_1_paid"].includes(e.payment_status)).reduce((s, e) => s + (e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount), 0);
 
+  // NEW: Remaining amount to collect from events
+  const eventRemainingToCollect = events
+    .filter(e => ["confirmed", "partial_1_paid"].includes(e.payment_status))
+    .reduce((s, e) => {
+      const total = e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price;
+      const advance = e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount;
+      return s + Math.max(0, total - advance);
+    }, 0);
+
+  // NEW: Manual payments total
+  const manualPaymentsTotal = 0; // Tracked via payment_history
+
+  // NEW: Average event value
+  const avgEventValue = events.length > 0 ? Math.round(events.reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0) / events.length) : 0;
+
+  // NEW: Events this month
+  const eventsThisMonth = events.filter(e => { const d = new Date(e.event_date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length;
+
+  // NEW: Cancelled events count
+  const cancelledEvents = events.filter(e => e.status === "cancelled").length;
+
   // Age demographics
   const ageGroups: Record<string, number> = { "Under 18": 0, "18-25": 0, "26-35": 0, "36-45": 0, "46-60": 0, "60+": 0 };
   customers.forEach(c => {
@@ -206,6 +227,15 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
         <StatCard3D icon={Zap} label="Most Popular" value={mostPopularType ? mostPopularType[0] : "N/A"} color="hsl(36,45%,52%)" delay={0.1} />
         <StatCard3D icon={ShoppingCart} label="Pending Orders" value={String(pending.length)} color="hsl(38,92%,55%)" delay={0.15} />
         <StatCard3D icon={Globe} label="Upcoming Events" value={String(upcomingEvents)} color="hsl(210,65%,55%)" delay={0.2} />
+      </div>
+
+      {/* NEW: Event-specific widgets */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <StatCard3D icon={AlertTriangle} label="Remaining to Collect" value={formatPrice(eventRemainingToCollect)} color="hsl(0,55%,55%)" delay={0} />
+        <StatCard3D icon={Target} label="Avg Event Value" value={formatPrice(avgEventValue)} color="hsl(280,50%,55%)" delay={0.05} />
+        <StatCard3D icon={Calendar} label="Events This Month" value={String(eventsThisMonth)} color="hsl(36,45%,52%)" delay={0.1} />
+        <StatCard3D icon={Activity} label="Completed Events" value={String(completedEvents)} color="hsl(152,50%,48%)" delay={0.15} />
+        <StatCard3D icon={Package} label="Cancelled Events" value={String(cancelledEvents)} color="hsl(340,55%,58%)" delay={0.2} />
       </div>
 
       {/* Revenue Breakdown */}
