@@ -333,7 +333,15 @@ const AdminWorkshop = () => {
             <ManualAssignmentUpload users={users} onUploaded={fetchAssignments} />
           </div>
           {assignments.map((a: any) => (
-            <AssignmentCard key={a.id} assignment={a} onGrade={gradeAssignment} />
+            <AssignmentCard key={a.id} assignment={a} onGrade={gradeAssignment} onDelete={async (id: string) => {
+              await supabase.from("workshop_assignments" as any).delete().eq("id", id);
+              toast({ title: "Assignment Deleted" });
+              fetchAssignments();
+            }} onEdit={async (id: string, updates: any) => {
+              await supabase.from("workshop_assignments" as any).update(updates as any).eq("id", id);
+              toast({ title: "Assignment Updated ✅" });
+              fetchAssignments();
+            }} />
           ))}
           {assignments.length === 0 && <p className="text-center text-muted-foreground py-8 font-sans">No assignments submitted</p>}
         </TabsContent>
@@ -362,6 +370,27 @@ const AdminWorkshop = () => {
           <h2 className="font-display text-lg font-bold">Global Controls</h2>
           <Card>
             <CardContent className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold text-sm">Enable Workshop Registration</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow new users to register from the workshop page</p>
+                </div>
+                <Switch checked={settings.registration_enabled?.enabled ?? false} onCheckedChange={v => toggleGlobalSetting("registration_enabled", v)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold text-sm">Assignments Deletable</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow deleting assignments from admin</p>
+                </div>
+                <Switch checked={settings.assignments_deletable?.enabled ?? true} onCheckedChange={v => toggleGlobalSetting("assignments_deletable", v)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold text-sm">Assignments Editable</p>
+                  <p className="text-xs text-muted-foreground font-sans">Allow editing assignments from admin</p>
+                </div>
+                <Switch checked={settings.assignments_editable?.enabled ?? true} onCheckedChange={v => toggleGlobalSetting("assignments_editable", v)} />
+              </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-sans font-semibold text-sm">Enable Video Access for Everyone</p>
@@ -617,10 +646,12 @@ const ManualAssignmentUpload = ({ users, onUploaded }: { users: any[]; onUploade
   );
 };
 
-const AssignmentCard = ({ assignment, onGrade }: { assignment: any; onGrade: (id: string, marks: number, notes: string) => void }) => {
+const AssignmentCard = ({ assignment, onGrade, onDelete, onEdit }: { assignment: any; onGrade: (id: string, marks: number, notes: string) => void; onDelete?: (id: string) => void; onEdit?: (id: string, updates: any) => void }) => {
   const [marks, setMarks] = useState(assignment.marks?.toString() || "");
   const [notes, setNotes] = useState(assignment.admin_notes || "");
   const [grading, setGrading] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [newStatus, setNewStatus] = useState(assignment.status);
 
   const viewFile = async () => {
     if (!assignment.storage_path) return;
@@ -642,8 +673,36 @@ const AssignmentCard = ({ assignment, onGrade }: { assignment: any; onGrade: (id
               {assignment.status}
             </Badge>
             <Button variant="outline" size="sm" onClick={viewFile}><Eye className="w-4 h-4" /></Button>
+            {onEdit && (
+              <Button variant="outline" size="sm" onClick={() => setEditingStatus(!editingStatus)}><Edit2 className="w-4 h-4" /></Button>
+            )}
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader><AlertDialogTitle>Delete Assignment?</AlertDialogTitle></AlertDialogHeader>
+                  <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => onDelete(assignment.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
+        {editingStatus && onEdit && (
+          <div className="flex gap-2 items-end pt-2 border-t border-border">
+            <div className="flex-1">
+              <Label className="text-xs">Status</Label>
+              <Select value={newStatus} onValueChange={setNewStatus}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="graded">Graded</SelectItem>
+                  <SelectItem value="retry">Retry</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button size="sm" onClick={() => { onEdit(assignment.id, { status: newStatus }); setEditingStatus(false); }}><Save className="w-4 h-4 mr-1" />Update</Button>
+          </div>
+        )}
         {!grading && assignment.status !== "graded" && (
           <Button size="sm" variant="outline" onClick={() => setGrading(true)} className="font-sans">Grade Assignment</Button>
         )}

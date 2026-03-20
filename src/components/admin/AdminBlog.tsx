@@ -45,7 +45,13 @@ const AdminBlog = () => {
   const [showEditor, setShowEditor] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
 
-  useEffect(() => { fetchPosts(); }, []);
+  useEffect(() => {
+    fetchPosts();
+    const ch = supabase.channel("admin-blog-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => fetchPosts())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   const fetchPosts = async () => {
     const { data } = await supabase.from("blog_posts").select("*").order("created_at", { ascending: false });
