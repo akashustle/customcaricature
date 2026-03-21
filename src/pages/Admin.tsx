@@ -1573,6 +1573,14 @@ const Admin = () => {
             <AdminGallery />
           </TabsContent>
 
+          <TabsContent value="hp-reviews">
+            <AdminHomepageReviews />
+          </TabsContent>
+
+          <TabsContent value="brands">
+            <AdminTrustedBrands />
+          </TabsContent>
+
           <TabsContent value="files">
             <AdminFileExplorer />
           </TabsContent>
