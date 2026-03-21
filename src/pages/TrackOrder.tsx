@@ -115,19 +115,19 @@ const TrackOrder = () => {
   const shopStep = shopOrder ? (SHOP_STATUS_INDEX[shopOrder.status] ?? 0) : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen brand-gradient-bg pb-16 md:pb-0">
       <SEOHead title="Track Your Caricature Order" description="Track the status of your custom caricature order or shop order. Get real-time updates on production progress and delivery." canonical="/track-order" />
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full"><ArrowLeft className="w-5 h-5" /></Button>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-            <h1 className="font-display text-lg font-bold">Track Your Order</h1>
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full shadow-3d" />
+            <h1 className="font-calligraphy text-lg font-bold text-3d">Track Your Order</h1>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-lg">
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }} className="container mx-auto px-4 py-8 max-w-lg">
         <Tabs value={trackType} onValueChange={(v) => { setTrackType(v as any); setOrder(null); setShopOrder(null); setSearched(false); }}>
           {shopTrackingVisible && (
             <TabsList className="w-full mb-4">
