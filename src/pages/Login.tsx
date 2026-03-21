@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Sparkles, Palette } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Login = () => {
@@ -28,186 +28,134 @@ const Login = () => {
   const finalizeLogin = async () => {
     const { data: userData, error: userError } = await withTimeout(supabase.auth.getUser());
     if (userError || !userData.user) throw userError || new Error("Could not validate session");
-
     const [{ data: roles, error: rolesError }, { data: artistData, error: artistError }] = await Promise.all([
       withTimeout(supabase.from("user_roles").select("role").eq("user_id", userData.user.id) as any),
       withTimeout((supabase.from("artists").select("id") as any).eq("auth_user_id", userData.user.id).maybeSingle()),
     ]);
-
     if (rolesError || artistError) throw rolesError || artistError;
-
     if (roles && roles.length > 0) {
       await supabase.auth.signOut();
       toast({ title: "Admin account detected", description: "Please use the admin login page.", variant: "destructive" });
-      navigate("/customcad75", { replace: true });
-      return;
+      navigate("/customcad75", { replace: true }); return;
     }
-
     if (artistData) {
       await supabase.auth.signOut();
       toast({ title: "Artist account detected", description: "Please use the artist login page.", variant: "destructive" });
-      navigate("/artistlogin", { replace: true });
-      return;
+      navigate("/artistlogin", { replace: true }); return;
     }
-
     navigate("/dashboard", { replace: true });
   };
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault(); setLoading(true);
     try {
       const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password }));
-      if (error) {
-        toast({ title: "Login failed", description: error.message, variant: "destructive" });
-      } else {
-        await finalizeLogin();
-      }
-    } catch (err: any) {
-      toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
+      if (error) toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      else await finalizeLogin();
+    } catch (err: any) { toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" }); }
+    finally { setLoading(false); }
   };
 
   const handleSecretCodeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !secretCode) {
-      toast({ title: "Please fill all fields", variant: "destructive" });
-      return;
-    }
+    if (!email || !secretCode) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
         body: { email: email.trim().toLowerCase(), secret_code: secretCode },
       });
-      if (error) {
-        toast({ title: "Login failed", description: "Could not connect. Please try again.", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-      if (!data?.success) {
-        toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-
-      // Use the token hash to verify OTP and create session
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: data.token_hash,
-        type: "magiclink",
-      });
-
-      if (verifyError) {
-        toast({ title: "Login failed", description: "Could not verify. Please try again.", variant: "destructive" });
-      } else {
-        toast({ title: "Login successful!" });
-        await finalizeLogin();
-      }
-    } catch (err: any) {
-      toast({ title: "Login failed", description: err.message || "Please try again.", variant: "destructive" });
-    }
+      if (error) { toast({ title: "Login failed", description: "Could not connect.", variant: "destructive" }); setLoading(false); return; }
+      if (!data?.success) { toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" }); setLoading(false); return; }
+      const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
+      if (verifyError) toast({ title: "Login failed", description: "Could not verify.", variant: "destructive" });
+      else { toast({ title: "Login successful!" }); await finalizeLogin(); }
+    } catch (err: any) { toast({ title: "Login failed", description: err.message, variant: "destructive" }); }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen brand-gradient-bg flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden">
-      {/* Background orbs */}
-      <motion.div className="absolute w-64 h-64 rounded-full opacity-15 animate-morph" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.3), transparent)", top: "10%", right: "5%" }} animate={{ y: [0, -20, 0] }} transition={{ duration: 6, repeat: Infinity }} />
-      <motion.div className="absolute w-40 h-40 rounded-full opacity-10 animate-morph" style={{ background: "radial-gradient(circle, hsl(38 88% 50% / 0.3), transparent)", bottom: "15%", left: "10%" }} animate={{ x: [0, 20, 0] }} transition={{ duration: 5, repeat: Infinity }} />
-      
-      <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5, type: "spring" }}>
-        <Card className="w-full max-w-sm shadow-3d border-glow">
-          <CardHeader className="text-center">
-            <motion.img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer shadow-3d" onClick={() => navigate("/")} animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }} />
-            <CardTitle className="font-calligraphy text-2xl text-3d">Welcome Back</CardTitle>
-            <CardDescription className="font-body">Sign in to your account</CardDescription>
+    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(38 40% 96%), hsl(22 30% 92%), hsl(38 50% 94%))" }}>
+      {/* Decorative elements */}
+      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.4), transparent 70%)" }} animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
+      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(38 88% 50% / 0.4), transparent 70%)" }} animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
+
+      {/* Floating art elements */}
+      <motion.div className="absolute top-[15%] left-[8%] text-4xl opacity-20 pointer-events-none" animate={{ y: [0, -12, 0], rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity }}>🎨</motion.div>
+      <motion.div className="absolute top-[25%] right-[12%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, 10, 0], rotate: [0, -15, 0] }} transition={{ duration: 7, repeat: Infinity }}>✏️</motion.div>
+      <motion.div className="absolute bottom-[20%] right-[8%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity }}>🖌️</motion.div>
+      <motion.div className="absolute bottom-[30%] left-[12%] text-2xl opacity-10 pointer-events-none" animate={{ x: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity }}>🎭</motion.div>
+
+      <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.6, type: "spring", bounce: 0.3 }} className="w-full max-w-sm relative z-10">
+        <Card className="border-none shadow-2xl backdrop-blur-sm" style={{ background: "hsl(38 30% 99% / 0.95)", boxShadow: "0 25px 60px -15px hsl(22 78% 30% / 0.15), 0 0 0 1px hsl(38 30% 90% / 0.5)" }}>
+          <CardHeader className="text-center pb-4">
+            <motion.div className="relative mx-auto mb-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+              <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" onClick={() => navigate("/")}>
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+              </div>
+              <motion.div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                <Sparkles className="w-3 h-3 text-primary-foreground" />
+              </motion.div>
+            </motion.div>
+            <CardTitle className="font-display text-2xl" style={{ background: "linear-gradient(135deg, hsl(22 78% 40%), hsl(38 88% 45%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Welcome Back</CardTitle>
+            <CardDescription className="font-sans text-sm">Sign in to your caricature studio</CardDescription>
           </CardHeader>
-          <CardContent>
-          {/* Email - always required */}
-          <div className="mb-4">
-            <Label className="font-sans">Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="font-sans text-sm font-medium">Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl border-border/60 focus:border-primary/50" placeholder="you@email.com" />
+            </div>
 
-          {/* Login method tabs */}
-          <div className="flex rounded-full border border-border mb-4 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setLoginMethod("password")}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-sans font-medium transition-colors ${
-                loginMethod === "password"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Lock className="w-3.5 h-3.5" /> Password
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginMethod("secret_code")}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-sans font-medium transition-colors ${
-                loginMethod === "secret_code"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <KeyRound className="w-3.5 h-3.5" /> Secret Code
-            </button>
-          </div>
+            <div className="flex rounded-xl border border-border/60 overflow-hidden bg-muted/30">
+              <button type="button" onClick={() => setLoginMethod("password")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-sans font-semibold transition-all ${loginMethod === "password" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <Lock className="w-3.5 h-3.5" /> Password
+              </button>
+              <button type="button" onClick={() => setLoginMethod("secret_code")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-sans font-semibold transition-all ${loginMethod === "secret_code" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+                <KeyRound className="w-3.5 h-3.5" /> Secret Code
+              </button>
+            </div>
 
-          {loginMethod === "password" ? (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div>
-                <Label className="font-sans">Password</Label>
-                <div className="relative">
-                  <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+            {loginMethod === "password" ? (
+              <form onSubmit={handlePasswordLogin} className="space-y-4">
+                <div>
+                  <Label className="font-sans text-sm font-medium">Password</Label>
+                  <div className="relative">
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl border-border/60" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button type="submit" disabled={loading} className="w-full rounded-full font-body btn-3d">
-                  {loading ? "Signing in..." : "Sign In"}
-                </Button>
-              </motion.div>
-            </form>
-          ) : (
-            <form onSubmit={handleSecretCodeLogin} className="space-y-4">
-              <div>
-                <Label className="font-sans">Secret Code (4-digit)</Label>
-                <Input
-                  type="text"
-                  value={secretCode}
-                  onChange={(e) => {
-                    const d = e.target.value.replace(/\D/g, "");
-                    if (d.length <= 4) setSecretCode(d);
-                  }}
-                  maxLength={4}
-                  placeholder="Enter your 4-digit secret code"
-                  required
-                  className="font-mono text-center text-lg tracking-widest"
-                />
-                <p className="text-xs text-muted-foreground font-sans mt-1">
-                  Your secret code was provided during registration. Check your dashboard.
-                </p>
-              </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full rounded-full font-body btn-3d">
-                  {loading ? "Signing in..." : "Sign In with Secret Code"}
-                </Button>
-              </motion.div>
-            </form>
-          )}
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+                  <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold text-base" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))", boxShadow: "0 4px 14px hsl(22 78% 52% / 0.3)" }}>
+                    {loading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </motion.div>
+              </form>
+            ) : (
+              <form onSubmit={handleSecretCodeLogin} className="space-y-4">
+                <div>
+                  <Label className="font-sans text-sm font-medium">Secret Code (4-digit)</Label>
+                  <Input type="text" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl border-border/60" />
+                  <p className="text-xs text-muted-foreground font-sans mt-1">Available in your dashboard after first login.</p>
+                </div>
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+                  <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))", boxShadow: "0 4px 14px hsl(22 78% 52% / 0.3)" }}>
+                    {loading ? "Signing in..." : "Sign In with Code"}
+                  </Button>
+                </motion.div>
+              </form>
+            )}
 
-          <div className="mt-4 text-center space-y-2">
-            <a href="/register" className="text-sm text-primary font-sans hover:underline">Create an account</a>
-            <span className="text-muted-foreground mx-2">•</span>
-            <a href="/forgot-password" className="text-sm text-primary font-sans hover:underline">Forgot password?</a>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="text-center space-y-1 pt-2">
+              <div className="flex items-center justify-center gap-3 text-sm font-sans">
+                <a href="/register" className="text-primary hover:underline font-medium">Create account</a>
+                <span className="text-muted-foreground/40">•</span>
+                <a href="/forgot-password" className="text-primary hover:underline font-medium">Forgot password?</a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club © {new Date().getFullYear()}</p>
       </motion.div>
     </div>
   );
