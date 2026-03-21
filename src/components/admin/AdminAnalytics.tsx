@@ -530,17 +530,20 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
   );
 };
 
-const StatCard3D = ({ icon: Icon, label, value, color, delay = 0 }: { icon: any; label: string; value: string; color: string; delay?: number }) => (
+const StatCard3D = ({ icon: Icon, label, value, color, delay = 0, onClick }: { icon: any; label: string; value: string; color: string; delay?: number; onClick?: () => void }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.4 }}
-    className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1"
+    className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 ${onClick ? "cursor-pointer active:scale-95" : ""}`}
     style={{
       background: "linear-gradient(145deg, hsl(40, 50%, 98%), hsl(40, 50%, 95%))",
       border: "1px solid hsl(30, 20%, 88%)",
       boxShadow: "0 4px 14px hsl(30 20% 45% / 0.06), 0 1px 3px hsl(30 20% 45% / 0.03), inset 0 1px 0 hsl(40, 60%, 99%)",
     }}
+    onClick={onClick}
+    whileHover={onClick ? { scale: 1.02 } : undefined}
+    whileTap={onClick ? { scale: 0.97 } : undefined}
   >
     <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-10 -translate-y-6 translate-x-6" style={{ background: color }} />
     <div className="flex items-center gap-3 relative z-10">

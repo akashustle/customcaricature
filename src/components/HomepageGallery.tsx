@@ -18,10 +18,18 @@ const HomepageGallery = ({ table, title, subtitle }: {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  const fetchItems = async () => {
+    const { data } = await supabase.from(table).select("*").order("sort_order");
+    if (data) setItems(data as GalleryItem[]);
+  };
+
   useEffect(() => {
-    supabase.from(table).select("*").order("sort_order").then(({ data }) => {
-      if (data) setItems(data as GalleryItem[]);
-    });
+    fetchItems();
+    const ch = supabase
+      .channel(`homepage-${table}-rt`)
+      .on("postgres_changes", { event: "*", schema: "public", table }, () => fetchItems())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [table]);
 
   if (items.length === 0) return null;

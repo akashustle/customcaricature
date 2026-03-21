@@ -199,6 +199,7 @@ const Workshop = () => {
     }
     setSubmittingReg(true);
     try {
+      // Check if already registered in workshop
       const { data: existing } = await supabase.from("workshop_users" as any).select("id").or(`email.eq.${regForm.email.trim().toLowerCase()},mobile.eq.${regForm.mobile.trim()}`);
       if (existing && (existing as any[]).length > 0) {
         toast({ title: "Already Registered", description: "Please login.", variant: "destructive" });
@@ -206,6 +207,19 @@ const Workshop = () => {
         setSubmittingReg(false);
         return;
       }
+
+      // Check if user exists in main CCC platform (profiles table)
+      const { data: cccProfile } = await supabase.from("profiles").select("user_id, full_name, email, mobile").or(`email.eq.${regForm.email.trim().toLowerCase()},mobile.eq.${regForm.mobile.trim()}`).limit(1);
+      if (cccProfile && (cccProfile as any[]).length > 0) {
+        toast({
+          title: "🎨 You're already a CCC member!",
+          description: "Login to your CCC account and register for the workshop from your Dashboard → Workshop tab.",
+          duration: 8000,
+        });
+        setSubmittingReg(false);
+        return;
+      }
+
       const { error } = await supabase.from("workshop_users" as any).insert({
         name: regForm.name.trim(),
         email: regForm.email.trim().toLowerCase(),
