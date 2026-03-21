@@ -59,7 +59,7 @@ const AdminCalculatorHistory = () => {
 
   const addPricingSet = async () => {
     if (!newSet.label || !newSet.price) return;
-    await supabase.from("calculator_pricing_sets").insert({
+    await (supabase.from("calculator_pricing_sets" as any) as any).insert({
       label: newSet.label,
       price: parseFloat(newSet.price),
       details: newSet.details || null,
