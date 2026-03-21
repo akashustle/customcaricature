@@ -365,14 +365,18 @@ const Workshop = () => {
                 {loginType === "mobile" ? (
                   <div className="space-y-2">
                     <Label className="font-body text-sm">Mobile Number</Label>
-                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} onKeyDown={e => e.key === "Enter" && handleLogin()} /></div>
+                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Label className="font-body text-sm">Email Address</Label>
-                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} /></div>
+                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label className="font-body text-sm">Password</Label>
+                  <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} />
+                </div>
                 <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
                   {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
                 </Button>
