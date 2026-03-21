@@ -105,9 +105,10 @@ const AdminPayments = () => {
       return;
     }
     setSubmitting(true);
+    const bookingVal = (!manualBookingId || manualBookingId === "none") ? null : manualBookingId;
     const { error } = await supabase.from("payment_history").insert({
       user_id: manualUserId || null,
-      booking_id: manualBookingId || null,
+      booking_id: bookingVal,
       payment_type: manualType,
       razorpay_payment_id: manualPaymentId || null,
       amount: Number(manualAmount),

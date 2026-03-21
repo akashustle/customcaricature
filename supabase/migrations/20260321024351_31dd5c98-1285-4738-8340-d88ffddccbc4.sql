@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN gateway_charges_enabled SET DEFAULT true;

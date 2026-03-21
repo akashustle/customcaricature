@@ -10,6 +10,8 @@ type SiteSettings = {
   shop_nav_visible: { enabled: boolean };
   workshop_mobile_nav: { enabled: boolean };
   shop_tracking_visible: { enabled: boolean };
+  support_button_visible: { enabled: boolean };
+  gateway_charge_percentage: { percentage: number };
 };
 
 const defaults: SiteSettings = {
@@ -21,7 +23,10 @@ const defaults: SiteSettings = {
   shop_nav_visible: { enabled: true },
   workshop_mobile_nav: { enabled: false },
   shop_tracking_visible: { enabled: true },
+  support_button_visible: { enabled: true },
+  gateway_charge_percentage: { percentage: 2.6 },
 };
+
 
 export const useSiteSettings = () => {
   const [settings, setSettings] = useState<SiteSettings>(defaults);
