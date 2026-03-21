@@ -631,6 +631,8 @@ const WorkshopAdmin = () => {
     const [newTitle, setNewTitle] = useState("");
     const [newDates, setNewDates] = useState("");
     const [newPrice, setNewPrice] = useState("");
+    const [editingWs, setEditingWs] = useState<string | null>(null);
+    const [editWsData, setEditWsData] = useState<any>({});
 
     useEffect(() => {
       fetchWorkshops();
@@ -642,13 +644,13 @@ const WorkshopAdmin = () => {
     };
 
     const setActive = async (id: string) => {
-      // Deactivate all first
       await supabase.from("workshops").update({ is_active: false } as any).neq("id", "00000000");
-      // Activate selected
       await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
+      setActiveWorkshopId(id);
       await logAction("switch_workshop", `Activated workshop ${id}`);
       toast({ title: "Workshop activated! ✅" });
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const createWorkshop = async () => {
@@ -665,6 +667,7 @@ const WorkshopAdmin = () => {
       toast({ title: "Workshop created! ✅" });
       setCreating(false); setNewTitle(""); setNewDates(""); setNewPrice("");
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const deleteWorkshop = async (id: string, title: string) => {
@@ -672,12 +675,30 @@ const WorkshopAdmin = () => {
       await logAction("delete_workshop", `Deleted: ${title}`);
       toast({ title: "Workshop deleted" });
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const toggleRegistration = async (id: string, enabled: boolean) => {
       await supabase.from("workshops").update({ registration_enabled: enabled } as any).eq("id", id);
       toast({ title: enabled ? "Registration enabled" : "Registration disabled" });
       fetchWorkshops();
+    };
+
+    const saveWsEdit = async () => {
+      if (!editingWs) return;
+      await supabase.from("workshops").update({
+        title: editWsData.title,
+        dates: editWsData.dates,
+        price: editWsData.price,
+        status: editWsData.status,
+        description: editWsData.description,
+        updated_at: new Date().toISOString(),
+      } as any).eq("id", editingWs);
+      await logAction("edit_workshop", `Edited: ${editWsData.title}`);
+      toast({ title: "Workshop updated! ✅" });
+      setEditingWs(null);
+      fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     return (
@@ -710,45 +731,73 @@ const WorkshopAdmin = () => {
           <div className="space-y-3">
             {workshops.map((ws: any) => (
               <GlassCard key={ws.id} className={ws.is_active ? "!border-green-500/40 ring-1 ring-green-500/20" : ""}>
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex-1 min-w-0">
+                {editingWs === ws.id ? (
+                  <div className="space-y-3">
+                    <Input value={editWsData.title} onChange={e => setEditWsData({ ...editWsData, title: e.target.value })} className={inputClass} placeholder="Title" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input value={editWsData.dates || ""} onChange={e => setEditWsData({ ...editWsData, dates: e.target.value })} className={inputClass} placeholder="Dates" />
+                      <Input value={editWsData.price || ""} onChange={e => setEditWsData({ ...editWsData, price: e.target.value })} className={inputClass} placeholder="Price" />
+                    </div>
+                    <Textarea value={editWsData.description || ""} onChange={e => setEditWsData({ ...editWsData, description: e.target.value })} className={inputClass} placeholder="Description" rows={2} />
+                    <Select value={editWsData.status} onValueChange={v => setEditWsData({ ...editWsData, status: v })}>
+                      <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="upcoming">Upcoming</SelectItem>
+                        <SelectItem value="live">Live</SelectItem>
+                        <SelectItem value="ended">Ended</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveWsEdit} className={btnPrimary}><Save className="w-3 h-3 mr-1" />Save</Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingWs(null)}><X className="w-3 h-3 mr-1" />Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className={`${textPrimary} text-lg truncate`}>{ws.title}</p>
+                        {ws.is_active && <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">Active</Badge>}
+                        <Badge variant="outline" className="text-xs">{ws.status}</Badge>
+                      </div>
+                      <p className={`${textMuted} text-xs mt-1`}>{ws.dates} · {ws.price}</p>
+                      {ws.description && <p className={`${textMuted} text-xs mt-1 line-clamp-2`}>{ws.description}</p>}
+                      <p className={`${textMuted} text-[10px]`}>Registration: {ws.registration_enabled ? "✅ Open" : "❌ Closed"} · Users: {users.filter(u => u.workshop_id === ws.id).length}</p>
+                    </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`${textPrimary} text-lg truncate`}>{ws.title}</p>
-                      {ws.is_active && <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">Active</Badge>}
-                      <Badge variant="outline" className="text-xs">{ws.status}</Badge>
-                    </div>
-                    <p className={`${textMuted} text-xs mt-1`}>{ws.dates} · {ws.price}</p>
-                    <p className={`${textMuted} text-[10px]`}>Registration: {ws.registration_enabled ? "✅ Open" : "❌ Closed"}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <Label className={`text-xs ${textSecondary}`}>Registration</Label>
-                      <Switch checked={ws.registration_enabled} onCheckedChange={(v) => toggleRegistration(ws.id, v)} />
-                    </div>
-                    {!ws.is_active && (
-                      <Button size="sm" onClick={() => setActive(ws.id)} className={btnPrimary}>
-                        Set Active
+                      <div className="flex items-center gap-2">
+                        <Label className={`text-xs ${textSecondary}`}>Registration</Label>
+                        <Switch checked={ws.registration_enabled} onCheckedChange={(v) => toggleRegistration(ws.id, v)} />
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => { setEditingWs(ws.id); setEditWsData({ title: ws.title, dates: ws.dates, price: ws.price, status: ws.status, description: ws.description }); }}>
+                        <Edit2 className="w-3.5 h-3.5" />
                       </Button>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="outline" className="text-destructive border-destructive/30">
-                          <Trash2 className="w-3.5 h-3.5" />
+                      {!ws.is_active && (
+                        <Button size="sm" onClick={() => setActive(ws.id)} className={btnPrimary}>
+                          Set Active
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle>
-                          <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteWorkshop(ws.id, ws.title)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle>
+                            <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteWorkshop(ws.id, ws.title)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
+                )}
               </GlassCard>
             ))}
           </div>
