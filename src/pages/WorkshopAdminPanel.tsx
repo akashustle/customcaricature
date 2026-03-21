@@ -97,6 +97,7 @@ const WorkshopAdmin = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string>("current");
+  const [activeWorkshopId, setActiveWorkshopId] = useState<string | null>(null);
   const [liveRequests, setLiveRequests] = useState<any[]>([]);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [editVideoData, setEditVideoData] = useState<any>({});
@@ -158,7 +159,17 @@ const WorkshopAdmin = () => {
   };
   const fetchAllWorkshops = async () => {
     const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
-    if (data) setAllWorkshops(data as any[]);
+    if (data) {
+      setAllWorkshops(data as any[]);
+      const active = (data as any[]).find(w => w.is_active);
+      if (active) setActiveWorkshopId(active.id);
+    }
+  };
+
+  // Get the effective workshop ID for filtering
+  const getFilterWorkshopId = () => {
+    if (selectedWorkshopId === "current") return activeWorkshopId;
+    return selectedWorkshopId;
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
   const fetchVideos = async () => { const { data } = await supabase.from("workshop_videos" as any).select("*").order("created_at", { ascending: false }); if (data) setVideos(data as any[]); };
@@ -263,6 +274,7 @@ const WorkshopAdmin = () => {
       why_join: newUser.why_join || null, workshop_date: newUser.workshop_date,
       slot: newUser.slot, student_type: newUser.student_type,
       payment_screenshot_path: paymentPath, roll_number: rollNum,
+      workshop_id: activeWorkshopId || null,
     } as any);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     await logAction("add_user", `Added user: ${newUser.name} (Roll #${rollNum})`);
@@ -318,6 +330,7 @@ const WorkshopAdmin = () => {
         workshop_date: newVideo.workshop_date, slot: newVideo.slot || null,
         target_type: newVideo.target_type, expiry_date: newVideo.expiry_date || null,
         global_download_allowed: newVideo.global_download_allowed,
+        workshop_id: activeWorkshopId || null,
       } as any);
       await logAction("add_video", `Added video: ${newVideo.title}`);
       toast({ title: "Video Added! ✅" });
@@ -334,7 +347,7 @@ const WorkshopAdmin = () => {
   // Live Session CRUD
   const addLiveSession = async () => {
     if (!newSession.title) { toast({ title: "Title required", variant: "destructive" }); return; }
-    await supabase.from("workshop_live_sessions" as any).insert(newSession as any);
+    await supabase.from("workshop_live_sessions" as any).insert({ ...newSession, workshop_id: activeWorkshopId || null } as any);
     await logAction("add_session", `Created: ${newSession.title}`);
     toast({ title: "Session Created! ✅" });
     setShowAddSession(false);
@@ -518,19 +531,25 @@ const WorkshopAdmin = () => {
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
 
-  const registeredOnline = users.filter((u: any) => u.student_type === "registered_online");
-  const manuallyAdded = users.filter((u: any) => u.student_type === "manually_added");
+  // Filter data by selected workshop
+  const wsFilterId = selectedWorkshopId === "current" ? activeWorkshopId : selectedWorkshopId;
+  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId || (!u.workshop_id && selectedWorkshopId === "current")) : users;
+  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId || (!v.workshop_id && selectedWorkshopId === "current")) : videos;
+  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId || (!s.workshop_id && selectedWorkshopId === "current")) : liveSessions;
+
+  const registeredOnline = filteredUsers.filter((u: any) => u.student_type === "registered_online");
+  const manuallyAdded = filteredUsers.filter((u: any) => u.student_type === "manually_added");
 
   const getAttendanceStatus = (userId: string, date: string) => {
     const a = attendance.find((att: any) => att.user_id === userId && att.session_date === date);
     return a?.status || "not_marked";
   };
 
-  // Analytics data
-  const slotData = [{ name: "12–3 PM", value: users.filter(u => u.slot === "12pm-3pm").length }, { name: "6–9 PM", value: users.filter(u => u.slot === "6pm-9pm").length }];
+  // Analytics data - use filteredUsers
+  const slotData = [{ name: "12–3 PM", value: filteredUsers.filter(u => u.slot === "12pm-3pm").length }, { name: "6–9 PM", value: filteredUsers.filter(u => u.slot === "6pm-9pm").length }];
   const typeData = [{ name: "Online", value: registeredOnline.length }, { name: "Manual", value: manuallyAdded.length }];
-  const genderData = [{ name: "Male", value: users.filter(u => u.gender === "male").length }, { name: "Female", value: users.filter(u => u.gender === "female").length }, { name: "Other", value: users.filter(u => u.gender && u.gender !== "male" && u.gender !== "female").length }].filter(d => d.value > 0);
-  const ageGroups = [{ name: "<18", value: users.filter(u => u.age && u.age < 18).length }, { name: "18-25", value: users.filter(u => u.age && u.age >= 18 && u.age <= 25).length }, { name: "26-35", value: users.filter(u => u.age && u.age >= 26 && u.age <= 35).length }, { name: "36+", value: users.filter(u => u.age && u.age > 35).length }].filter(d => d.value > 0);
+  const genderData = [{ name: "Male", value: filteredUsers.filter(u => u.gender === "male").length }, { name: "Female", value: filteredUsers.filter(u => u.gender === "female").length }, { name: "Other", value: filteredUsers.filter(u => u.gender && u.gender !== "male" && u.gender !== "female").length }].filter(d => d.value > 0);
+  const ageGroups = [{ name: "<18", value: filteredUsers.filter(u => u.age && u.age < 18).length }, { name: "18-25", value: filteredUsers.filter(u => u.age && u.age >= 18 && u.age <= 25).length }, { name: "26-35", value: filteredUsers.filter(u => u.age && u.age >= 26 && u.age <= 35).length }, { name: "36+", value: filteredUsers.filter(u => u.age && u.age > 35).length }].filter(d => d.value > 0);
   const day1Present = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "present").length;
   const day1Absent = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "absent").length;
   const day1Video = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "video_session").length;
@@ -542,15 +561,15 @@ const WorkshopAdmin = () => {
   const passFailData = [{ name: "Pass", value: assignments.filter(a => a.pass_status === "pass").length }, { name: "Fail", value: assignments.filter(a => a.pass_status === "fail").length }].filter(d => d.value > 0);
   const feedbackRatings = [1,2,3,4,5].map(r => ({ name: `${r}★`, value: feedbacks.filter(f => f.rating === r).length }));
   const locationAllowed = locations.filter(l => l.location_allowed).length;
-  const locationDenied = users.length - locationAllowed;
+  const locationDenied = filteredUsers.length - locationAllowed;
   const topRankers = [...assignments].filter(a => a.status === "graded" && a.marks != null).sort((a, b) => (b.marks / (b.total_marks || 100)) - (a.marks / (a.total_marks || 100)));
 
   // Extra analytics
-  const videoAccessData = [{ name: "Enabled", value: users.filter(u => u.video_access_enabled !== false).length }, { name: "Disabled", value: users.filter(u => u.video_access_enabled === false).length }];
-  const certUploadData = [{ name: "Has Cert", value: [...new Set(certificates.map(c => c.user_id))].length }, { name: "No Cert", value: users.length - [...new Set(certificates.map(c => c.user_id))].length }];
+  const videoAccessData = [{ name: "Enabled", value: filteredUsers.filter(u => u.video_access_enabled !== false).length }, { name: "Disabled", value: filteredUsers.filter(u => u.video_access_enabled === false).length }];
+  const certUploadData = [{ name: "Has Cert", value: [...new Set(certificates.map(c => c.user_id))].length }, { name: "No Cert", value: filteredUsers.length - [...new Set(certificates.map(c => c.user_id))].length }];
   const avgMarks = assignments.filter(a => a.marks != null).reduce((s, a) => s + (a.marks / (a.total_marks || 100)) * 100, 0) / Math.max(1, assignments.filter(a => a.marks != null).length);
   const marksDistribution = [{ name: "0-40", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 <= 40).length }, { name: "41-60", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 40 && (a.marks/(a.total_marks||100))*100 <= 60).length }, { name: "61-80", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 60 && (a.marks/(a.total_marks||100))*100 <= 80).length }, { name: "81-100", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 80).length }].filter(d => d.value > 0);
-  const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: users.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
+  const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: filteredUsers.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
 
   // Theme
   const dm = darkMode;
@@ -613,6 +632,8 @@ const WorkshopAdmin = () => {
     const [newTitle, setNewTitle] = useState("");
     const [newDates, setNewDates] = useState("");
     const [newPrice, setNewPrice] = useState("");
+    const [editingWs, setEditingWs] = useState<string | null>(null);
+    const [editWsData, setEditWsData] = useState<any>({});
 
     useEffect(() => {
       fetchWorkshops();
@@ -624,13 +645,13 @@ const WorkshopAdmin = () => {
     };
 
     const setActive = async (id: string) => {
-      // Deactivate all first
       await supabase.from("workshops").update({ is_active: false } as any).neq("id", "00000000");
-      // Activate selected
       await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
+      setActiveWorkshopId(id);
       await logAction("switch_workshop", `Activated workshop ${id}`);
       toast({ title: "Workshop activated! ✅" });
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const createWorkshop = async () => {
@@ -647,6 +668,7 @@ const WorkshopAdmin = () => {
       toast({ title: "Workshop created! ✅" });
       setCreating(false); setNewTitle(""); setNewDates(""); setNewPrice("");
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const deleteWorkshop = async (id: string, title: string) => {
@@ -654,12 +676,30 @@ const WorkshopAdmin = () => {
       await logAction("delete_workshop", `Deleted: ${title}`);
       toast({ title: "Workshop deleted" });
       fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     const toggleRegistration = async (id: string, enabled: boolean) => {
       await supabase.from("workshops").update({ registration_enabled: enabled } as any).eq("id", id);
       toast({ title: enabled ? "Registration enabled" : "Registration disabled" });
       fetchWorkshops();
+    };
+
+    const saveWsEdit = async () => {
+      if (!editingWs) return;
+      await supabase.from("workshops").update({
+        title: editWsData.title,
+        dates: editWsData.dates,
+        price: editWsData.price,
+        status: editWsData.status,
+        description: editWsData.description,
+        updated_at: new Date().toISOString(),
+      } as any).eq("id", editingWs);
+      await logAction("edit_workshop", `Edited: ${editWsData.title}`);
+      toast({ title: "Workshop updated! ✅" });
+      setEditingWs(null);
+      fetchWorkshops();
+      fetchAllWorkshops();
     };
 
     return (
@@ -692,45 +732,73 @@ const WorkshopAdmin = () => {
           <div className="space-y-3">
             {workshops.map((ws: any) => (
               <GlassCard key={ws.id} className={ws.is_active ? "!border-green-500/40 ring-1 ring-green-500/20" : ""}>
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex-1 min-w-0">
+                {editingWs === ws.id ? (
+                  <div className="space-y-3">
+                    <Input value={editWsData.title} onChange={e => setEditWsData({ ...editWsData, title: e.target.value })} className={inputClass} placeholder="Title" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input value={editWsData.dates || ""} onChange={e => setEditWsData({ ...editWsData, dates: e.target.value })} className={inputClass} placeholder="Dates" />
+                      <Input value={editWsData.price || ""} onChange={e => setEditWsData({ ...editWsData, price: e.target.value })} className={inputClass} placeholder="Price" />
+                    </div>
+                    <Textarea value={editWsData.description || ""} onChange={e => setEditWsData({ ...editWsData, description: e.target.value })} className={inputClass} placeholder="Description" rows={2} />
+                    <Select value={editWsData.status} onValueChange={v => setEditWsData({ ...editWsData, status: v })}>
+                      <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="upcoming">Upcoming</SelectItem>
+                        <SelectItem value="live">Live</SelectItem>
+                        <SelectItem value="ended">Ended</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveWsEdit} className={btnPrimary}><Save className="w-3 h-3 mr-1" />Save</Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingWs(null)}><X className="w-3 h-3 mr-1" />Cancel</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className={`${textPrimary} text-lg truncate`}>{ws.title}</p>
+                        {ws.is_active && <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">Active</Badge>}
+                        <Badge variant="outline" className="text-xs">{ws.status}</Badge>
+                      </div>
+                      <p className={`${textMuted} text-xs mt-1`}>{ws.dates} · {ws.price}</p>
+                      {ws.description && <p className={`${textMuted} text-xs mt-1 line-clamp-2`}>{ws.description}</p>}
+                      <p className={`${textMuted} text-[10px]`}>Registration: {ws.registration_enabled ? "✅ Open" : "❌ Closed"} · Users: {users.filter(u => u.workshop_id === ws.id).length}</p>
+                    </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`${textPrimary} text-lg truncate`}>{ws.title}</p>
-                      {ws.is_active && <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">Active</Badge>}
-                      <Badge variant="outline" className="text-xs">{ws.status}</Badge>
-                    </div>
-                    <p className={`${textMuted} text-xs mt-1`}>{ws.dates} · {ws.price}</p>
-                    <p className={`${textMuted} text-[10px]`}>Registration: {ws.registration_enabled ? "✅ Open" : "❌ Closed"}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <Label className={`text-xs ${textSecondary}`}>Registration</Label>
-                      <Switch checked={ws.registration_enabled} onCheckedChange={(v) => toggleRegistration(ws.id, v)} />
-                    </div>
-                    {!ws.is_active && (
-                      <Button size="sm" onClick={() => setActive(ws.id)} className={btnPrimary}>
-                        Set Active
+                      <div className="flex items-center gap-2">
+                        <Label className={`text-xs ${textSecondary}`}>Registration</Label>
+                        <Switch checked={ws.registration_enabled} onCheckedChange={(v) => toggleRegistration(ws.id, v)} />
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => { setEditingWs(ws.id); setEditWsData({ title: ws.title, dates: ws.dates, price: ws.price, status: ws.status, description: ws.description }); }}>
+                        <Edit2 className="w-3.5 h-3.5" />
                       </Button>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="outline" className="text-destructive border-destructive/30">
-                          <Trash2 className="w-3.5 h-3.5" />
+                      {!ws.is_active && (
+                        <Button size="sm" onClick={() => setActive(ws.id)} className={btnPrimary}>
+                          Set Active
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle>
-                          <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteWorkshop(ws.id, ws.title)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle>
+                            <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteWorkshop(ws.id, ws.title)}>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
+                )}
               </GlassCard>
             ))}
           </div>
@@ -850,12 +918,12 @@ const WorkshopAdmin = () => {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Users", value: users.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
+                      { label: "Total Users", value: filteredUsers.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
                       { label: "Online Reg", value: registeredOnline.length, icon: Users, color: "from-[#7c9885] to-[#a8c0a0]" },
                       { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, color: "from-[#d4a574] to-[#e8c9a8]" },
                       { label: "Assignments", value: assignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
-                      { label: "Videos", value: videos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
-                      { label: "Live Sessions", value: liveSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
+                      { label: "Videos", value: filteredVideos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
+                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
                       { label: "Feedbacks", value: feedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
                       { label: "Certificates", value: certificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
                     ].map((s) => (
