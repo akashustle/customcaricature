@@ -1594,6 +1594,27 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
+                  {/* Create New Workshop */}
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3 flex items-center gap-2`}><Plus className="w-4 h-4 text-[#b08d57]" /> Create New Workshop</h3>
+                    <p className={`${textMuted} text-xs mb-3`}>Create a fresh workshop with zero data. Previous workshop data will be preserved.</p>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className={btnPrimary}><Plus className="w-4 h-4 mr-1" />Create New Workshop</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader><DialogTitle>Create New Workshop</DialogTitle></DialogHeader>
+                        <CreateWorkshopForm dm={dm} textSecondary={textSecondary} inputClass={inputClass} btnPrimary={btnPrimary} logAction={logAction} fetchSettings={fetchSettings} />
+                      </DialogContent>
+                    </Dialog>
+                  </GlassCard>
+
+                  {/* Switch Workshops */}
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3 flex items-center gap-2`}><History className="w-4 h-4 text-[#b08d57]" /> Workshop History</h3>
+                    <WorkshopSwitcher dm={dm} textPrimary={textPrimary} textSecondary={textSecondary} textMuted={textMuted} cardBg={cardBg} btnPrimary={btnPrimary} />
+                  </GlassCard>
+
                   {/* Admin Management */}
                   <GlassCard>
                     <div className="flex items-center justify-between mb-4">
@@ -1830,6 +1851,27 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
           <div className="flex gap-1 items-center">
             <Badge className={`text-[10px] ${assignment.status === "graded" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{assignment.status}</Badge>
             <Button variant="ghost" size="sm" onClick={viewFile} className={textSecondary}><Eye className="w-4 h-4" /></Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-red-400 h-7 w-7 p-0"><Trash2 className="w-3.5 h-3.5" /></Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this assignment?</AlertDialogTitle>
+                  <AlertDialogDescription>This will permanently delete the assignment by {assignment.workshop_users?.name || "User"}.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={async () => {
+                    if (assignment.storage_path) {
+                      await supabase.storage.from("workshop-files").remove([assignment.storage_path]);
+                    }
+                    await supabase.from("workshop_assignments" as any).delete().eq("id", assignment.id);
+                    toast({ title: "Assignment deleted" });
+                  }}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         {!grading && assignment.status !== "graded" && (
@@ -1851,6 +1893,99 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
         )}
       </motion.div>
     </>
+  );
+};
+
+/* Create Workshop Form */
+const CreateWorkshopForm = ({ dm, textSecondary, inputClass, btnPrimary, logAction, fetchSettings }: any) => {
+  const [title, setTitle] = useState("");
+  const [dates, setDates] = useState("");
+  const [duration, setDuration] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (!title) { toast({ title: "Title is required", variant: "destructive" }); return; }
+    setCreating(true);
+    // Deactivate all existing workshops
+    await supabase.from("workshops").update({ is_active: false } as any).eq("is_active", true);
+    // Create new workshop
+    const { error } = await supabase.from("workshops").insert({
+      title, description, dates, duration, price,
+      is_active: true, status: "upcoming", highlights: [],
+    } as any);
+    if (error) {
+      toast({ title: "Error creating workshop", description: error.message, variant: "destructive" });
+    } else {
+      await logAction("create_workshop", `Created: ${title}`);
+      toast({ title: "✅ New workshop created!", description: "Previous workshops are now archived." });
+      fetchSettings();
+    }
+    setCreating(false);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div><Label className={`${textSecondary} text-xs`}>Title *</Label><Input value={title} onChange={e => setTitle(e.target.value)} className={inputClass} placeholder="e.g., Caricature Masterclass 2026" /></div>
+      <div><Label className={`${textSecondary} text-xs`}>Dates</Label><Input value={dates} onChange={e => setDates(e.target.value)} className={inputClass} placeholder="e.g., April 10-12, 2026" /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label className={`${textSecondary} text-xs`}>Duration</Label><Input value={duration} onChange={e => setDuration(e.target.value)} className={inputClass} placeholder="e.g., 3 Days" /></div>
+        <div><Label className={`${textSecondary} text-xs`}>Price</Label><Input value={price} onChange={e => setPrice(e.target.value)} className={inputClass} placeholder="e.g., ₹2,999" /></div>
+      </div>
+      <div><Label className={`${textSecondary} text-xs`}>Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} className={inputClass} placeholder="Workshop description..." /></div>
+      <Button onClick={handleCreate} disabled={creating} className={`w-full ${btnPrimary}`}>
+        {creating ? "Creating..." : "🎨 Create Workshop"}
+      </Button>
+    </div>
+  );
+};
+
+/* Workshop Switcher */
+const WorkshopSwitcher = ({ dm, textPrimary, textSecondary, textMuted, cardBg, btnPrimary }: any) => {
+  const [workshops, setWorkshops] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+      if (data) setWorkshops(data);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  const switchWorkshop = async (id: string) => {
+    await supabase.from("workshops").update({ is_active: false } as any).eq("is_active", true);
+    await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
+    toast({ title: "Workshop switched!" });
+    const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+    if (data) setWorkshops(data);
+  };
+
+  if (loading) return <p className={`${textMuted} text-sm`}>Loading...</p>;
+
+  return (
+    <div className="space-y-2 max-h-72 overflow-y-auto">
+      {workshops.map(w => (
+        <div key={w.id} className={`flex items-center justify-between ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-xl p-3`}>
+          <div className="flex-1 min-w-0">
+            <p className={`${textPrimary} text-sm truncate`}>{w.title}</p>
+            <p className={`${textMuted} text-xs`}>{w.dates || "No dates"} · {w.status}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {w.is_active ? (
+              <Badge className="bg-green-100 text-green-700 border-none text-[10px]">Active</Badge>
+            ) : (
+              <Button size="sm" variant="ghost" className="text-[#b08d57] text-xs font-bold h-7" onClick={() => switchWorkshop(w.id)}>
+                Activate
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+      {workshops.length === 0 && <p className={`${textMuted} text-sm text-center py-4`}>No workshops found</p>}
+    </div>
   );
 };
 

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -327,15 +327,27 @@ const Dashboard = () => {
             <TabsList className="w-full mb-6">
               <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
               <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>
-              <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
+              {settings.shop_nav_visible?.enabled !== false && (
+                <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
+              )}
               <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
+              <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>
+              {(settings as any).workshop_dashboard_visible?.enabled && (
+                <TabsTrigger value="workshop" className="flex-1 font-sans"><GraduationCap className="w-4 h-4 mr-2" />Workshop</TabsTrigger>
+              )}
               <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
             <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
-            <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
+            {settings.shop_nav_visible?.enabled !== false && (
+              <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
+            )}
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
+            {(settings as any).workshop_dashboard_visible?.enabled && (
+              <TabsContent value="workshop"><WorkshopSection profile={profile} user={user} navigate={navigate} /></TabsContent>
+            )}
             <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
             <TabsContent value="settings">
               <SettingsSection
@@ -350,8 +362,10 @@ const Dashboard = () => {
         <div className="md:hidden">
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
-          {activeTab === "shop" && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
+          {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
+          {activeTab === "workshop" && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
           {activeTab === "settings" && (
             <SettingsSection
@@ -369,9 +383,14 @@ const Dashboard = () => {
           <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
-          <BottomNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
+          {settings.shop_nav_visible?.enabled !== false && (
+            <BottomNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
+          )}
           <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-          <BottomNavItem icon={Bell} label="Alerts" active={false} onClick={() => navigate("/notifications")} />
+          <BottomNavItem icon={Bell} label="Alerts" active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} />
+          {(settings as any).workshop_dashboard_visible?.enabled && (
+            <BottomNavItem icon={GraduationCap} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
+          )}
           <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
           <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
         </div>
@@ -1373,6 +1392,142 @@ const ShopOrdersList = ({ shopOrders, navigate }: { shopOrders: any[]; navigate:
         </div>
       )}
     </>
+  );
+};
+
+/* Alerts Section - Inline notifications */
+const AlertsSection = ({ userId }: { userId: string }) => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const ch = supabase.channel(`user-alerts-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => fetchNotifications())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
+
+  const fetchNotifications = async () => {
+    const { data } = await supabase.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(50);
+    if (data) setNotifications(data);
+  };
+
+  const markRead = async (id: string) => {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    fetchNotifications();
+  };
+
+  const markAllRead = async () => {
+    await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
+    fetchNotifications();
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-display text-xl font-bold flex items-center gap-2">
+          <Bell className="w-5 h-5 text-primary" /> Alerts
+          {unreadCount > 0 && <Badge className="bg-primary text-primary-foreground text-xs">{unreadCount}</Badge>}
+        </h2>
+        {unreadCount > 0 && (
+          <Button variant="outline" size="sm" onClick={markAllRead} className="font-sans text-xs rounded-full">Mark All Read</Button>
+        )}
+      </div>
+      {notifications.length === 0 ? (
+        <Card><CardContent className="p-8 text-center">
+          <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="font-sans text-muted-foreground">No notifications yet</p>
+        </CardContent></Card>
+      ) : (
+        notifications.map((n) => (
+          <motion.div key={n.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className={`cursor-pointer transition-all ${!n.read ? "border-primary/30 bg-primary/5" : ""}`}
+              onClick={() => { if (!n.read) markRead(n.id); if (n.link) window.location.href = n.link; }}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1">
+                    <p className={`font-sans text-sm ${!n.read ? "font-bold" : "font-medium"}`}>{n.title}</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-1">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/60 font-sans mt-2">
+                      {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
+                  {!n.read && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))
+      )}
+    </div>
+  );
+};
+
+/* Workshop Section - Registration from dashboard */
+const WorkshopSection = ({ profile, user, navigate }: { profile: any; user: any; navigate: any }) => {
+  const [workshops, setWorkshops] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("workshops").select("*").eq("is_active", true).limit(1);
+      if (data) setWorkshops(data);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  if (loading) return <div className="text-center py-8"><p className="text-muted-foreground font-sans">Loading...</p></div>;
+
+  const activeWorkshop = workshops[0];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="font-display text-xl font-bold flex items-center gap-2">
+          <GraduationCap className="w-5 h-5 text-primary" /> Workshop
+        </h2>
+      </div>
+
+      {activeWorkshop ? (
+        <Card className="border-primary/20">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-display text-lg font-bold">{activeWorkshop.title}</h3>
+                {activeWorkshop.dates && <p className="text-sm text-muted-foreground font-sans">📅 {activeWorkshop.dates}</p>}
+                {activeWorkshop.duration && <p className="text-sm text-muted-foreground font-sans">⏱ {activeWorkshop.duration}</p>}
+                {activeWorkshop.price && <p className="text-sm font-sans font-semibold text-primary mt-1">💰 {activeWorkshop.price}</p>}
+              </div>
+              <Badge className={`${activeWorkshop.status === "active" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"} border-none`}>
+                {activeWorkshop.status === "active" ? "Enrolling" : activeWorkshop.status}
+              </Badge>
+            </div>
+            {activeWorkshop.description && (
+              <p className="text-sm text-muted-foreground font-sans">{activeWorkshop.description}</p>
+            )}
+            {activeWorkshop.highlights?.length > 0 && (
+              <div className="space-y-1">
+                {activeWorkshop.highlights.map((h: string, i: number) => (
+                  <p key={i} className="text-xs font-sans text-muted-foreground">✅ {h}</p>
+                ))}
+              </div>
+            )}
+            <Button onClick={() => navigate("/workshop")} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+              <GraduationCap className="w-4 h-4 mr-2" /> View Workshop & Register
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card><CardContent className="p-8 text-center">
+          <GraduationCap className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="font-sans text-muted-foreground mb-2">No active workshops right now</p>
+          <p className="text-xs text-muted-foreground font-sans">Check back soon for upcoming workshops!</p>
+        </CardContent></Card>
+      )}
+    </div>
   );
 };
 

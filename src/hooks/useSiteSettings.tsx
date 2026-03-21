@@ -11,8 +11,10 @@ type SiteSettings = {
   workshop_mobile_nav: { enabled: boolean };
   shop_tracking_visible: { enabled: boolean };
   support_button_visible: { enabled: boolean };
+  support_mobile_nav: { enabled: boolean };
   gateway_charge_percentage: { percentage: number };
   admin_action_prompt: { enabled: boolean };
+  workshop_dashboard_visible: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -25,8 +27,10 @@ const defaults: SiteSettings = {
   workshop_mobile_nav: { enabled: false },
   shop_tracking_visible: { enabled: true },
   support_button_visible: { enabled: true },
+  support_mobile_nav: { enabled: false },
   gateway_charge_percentage: { percentage: 2.6 },
   admin_action_prompt: { enabled: true },
+  workshop_dashboard_visible: { enabled: false },
 };
 
 
