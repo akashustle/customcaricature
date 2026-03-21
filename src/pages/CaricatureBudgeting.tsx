@@ -15,6 +15,9 @@ import UrgencyTimer from "@/components/UrgencyTimer";
 import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2 } from "lucide-react";
 import { playCurrencySound, playEnterSound, playCoinDrop, playCashRegister } from "@/lib/sounds";
 
+const WHATSAPP_NUMBER = "918369594271";
+const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
+
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
   const { types, getPrice } = usePricing();
