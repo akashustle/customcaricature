@@ -1665,7 +1665,25 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              {/* Shop Nav Toggle */}
+              {/* Admin Action Prompt Toggle */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Admin Action Confirmation</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Require Name for Crucial Actions</p>
+                      <p className="text-xs text-muted-foreground font-sans">Ask admins to enter their name before status changes, deletions, and other critical actions</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).admin_action_prompt?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("admin_action_prompt", { enabled: checked });
+                        toast({ title: checked ? "Action confirmation enabled" : "Action confirmation disabled" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               <Card>
                 <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Navigation Settings</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
