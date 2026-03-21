@@ -111,14 +111,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 pb-24 md:pb-0">
-      <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
-        <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
-          <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
-          <CardDescription className="font-sans">Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen brand-gradient-bg flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden">
+      {/* Background orbs */}
+      <motion.div className="absolute w-64 h-64 rounded-full opacity-15 animate-morph" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.3), transparent)", top: "10%", right: "5%" }} animate={{ y: [0, -20, 0] }} transition={{ duration: 6, repeat: Infinity }} />
+      <motion.div className="absolute w-40 h-40 rounded-full opacity-10 animate-morph" style={{ background: "radial-gradient(circle, hsl(38 88% 50% / 0.3), transparent)", bottom: "15%", left: "10%" }} animate={{ x: [0, 20, 0] }} transition={{ duration: 5, repeat: Infinity }} />
+      
+      <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5, type: "spring" }}>
+        <Card className="w-full max-w-sm shadow-3d border-glow">
+          <CardHeader className="text-center">
+            <motion.img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer shadow-3d" onClick={() => navigate("/")} animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }} />
+            <CardTitle className="font-calligraphy text-2xl text-3d">Welcome Back</CardTitle>
+            <CardDescription className="font-body">Sign in to your account</CardDescription>
+          </CardHeader>
+          <CardContent>
           {/* Email - always required */}
           <div className="mb-4">
             <Label className="font-sans">Email</Label>
