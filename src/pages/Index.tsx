@@ -424,22 +424,35 @@ const Index = () => {
       </section>
 
       {/* Styles */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 overflow-hidden">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
             <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Pick Your Vibe</p>
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">Our Styles</h2>
             <p className="text-muted-foreground font-body">Choose the vibe that matches your personality</p>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div key={style.name} initial={{ opacity: 0, rotateY: 90, scale: 0.7 }} whileInView={{ opacity: 1, rotateY: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1, type: "spring" }} whileHover={{ scale: 1.06, y: -6, rotateY: 8 }}
-                onClick={handleOrderClick} className="perspective-1000">
-                <Card className="group cursor-pointer border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-lg">
+              <motion.div
+                key={style.name}
+                initial={{ opacity: 0, y: 50, rotate: -3 }}
+                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.08, y: -10, transition: { duration: 0.25 } }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleOrderClick}
+                className="cursor-pointer"
+              >
+                <Card className="group border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-xl hover:shadow-primary/5">
                   <CardContent className="p-5 md:p-6 text-center">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors">
+                    <motion.div
+                      className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
                       <style.icon className="w-6 h-6 text-primary" />
-                    </div>
+                    </motion.div>
                     <h3 className="font-calligraphy text-xl md:text-2xl font-semibold mb-1 text-foreground">{style.name}</h3>
                     <p className="text-xs text-muted-foreground font-body">{style.desc}</p>
                   </CardContent>
