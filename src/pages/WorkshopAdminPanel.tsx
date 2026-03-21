@@ -1896,4 +1896,97 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
   );
 };
 
+/* Create Workshop Form */
+const CreateWorkshopForm = ({ dm, textSecondary, inputClass, btnPrimary, logAction, fetchSettings }: any) => {
+  const [title, setTitle] = useState("");
+  const [dates, setDates] = useState("");
+  const [duration, setDuration] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async () => {
+    if (!title) { toast({ title: "Title is required", variant: "destructive" }); return; }
+    setCreating(true);
+    // Deactivate all existing workshops
+    await supabase.from("workshops").update({ is_active: false } as any).eq("is_active", true);
+    // Create new workshop
+    const { error } = await supabase.from("workshops").insert({
+      title, description, dates, duration, price,
+      is_active: true, status: "upcoming", highlights: [],
+    } as any);
+    if (error) {
+      toast({ title: "Error creating workshop", description: error.message, variant: "destructive" });
+    } else {
+      await logAction("create_workshop", `Created: ${title}`);
+      toast({ title: "✅ New workshop created!", description: "Previous workshops are now archived." });
+      fetchSettings();
+    }
+    setCreating(false);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div><Label className={`${textSecondary} text-xs`}>Title *</Label><Input value={title} onChange={e => setTitle(e.target.value)} className={inputClass} placeholder="e.g., Caricature Masterclass 2026" /></div>
+      <div><Label className={`${textSecondary} text-xs`}>Dates</Label><Input value={dates} onChange={e => setDates(e.target.value)} className={inputClass} placeholder="e.g., April 10-12, 2026" /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label className={`${textSecondary} text-xs`}>Duration</Label><Input value={duration} onChange={e => setDuration(e.target.value)} className={inputClass} placeholder="e.g., 3 Days" /></div>
+        <div><Label className={`${textSecondary} text-xs`}>Price</Label><Input value={price} onChange={e => setPrice(e.target.value)} className={inputClass} placeholder="e.g., ₹2,999" /></div>
+      </div>
+      <div><Label className={`${textSecondary} text-xs`}>Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} className={inputClass} placeholder="Workshop description..." /></div>
+      <Button onClick={handleCreate} disabled={creating} className={`w-full ${btnPrimary}`}>
+        {creating ? "Creating..." : "🎨 Create Workshop"}
+      </Button>
+    </div>
+  );
+};
+
+/* Workshop Switcher */
+const WorkshopSwitcher = ({ dm, textPrimary, textSecondary, textMuted, cardBg, btnPrimary }: any) => {
+  const [workshops, setWorkshops] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+      if (data) setWorkshops(data);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  const switchWorkshop = async (id: string) => {
+    await supabase.from("workshops").update({ is_active: false } as any).eq("is_active", true);
+    await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
+    toast({ title: "Workshop switched!" });
+    const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+    if (data) setWorkshops(data);
+  };
+
+  if (loading) return <p className={`${textMuted} text-sm`}>Loading...</p>;
+
+  return (
+    <div className="space-y-2 max-h-72 overflow-y-auto">
+      {workshops.map(w => (
+        <div key={w.id} className={`flex items-center justify-between ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-xl p-3`}>
+          <div className="flex-1 min-w-0">
+            <p className={`${textPrimary} text-sm truncate`}>{w.title}</p>
+            <p className={`${textMuted} text-xs`}>{w.dates || "No dates"} · {w.status}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {w.is_active ? (
+              <Badge className="bg-green-100 text-green-700 border-none text-[10px]">Active</Badge>
+            ) : (
+              <Button size="sm" variant="ghost" className="text-[#b08d57] text-xs font-bold h-7" onClick={() => switchWorkshop(w.id)}>
+                Activate
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+      {workshops.length === 0 && <p className={`${textMuted} text-sm text-center py-4`}>No workshops found</p>}
+    </div>
+  );
+};
+
 export default WorkshopAdmin;
