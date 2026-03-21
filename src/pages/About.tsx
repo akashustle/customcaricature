@@ -10,6 +10,7 @@ const About = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen brand-gradient-bg pb-16 md:pb-0">
+      <SEOHead title="About Us" description="Learn about Creative Caricature Club - India's premium caricature studio. Founded by Ritesh Mahendra Gupta." canonical="/about" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full"><ArrowLeft className="w-5 h-5" /></Button>
