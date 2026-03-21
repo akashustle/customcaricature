@@ -36,6 +36,7 @@ const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d
 
 const sidebarItems = [
   { key: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { key: "workshops", icon: GraduationCap, label: "Workshops" },
   { key: "analytics", icon: BarChart3, label: "Analytics" },
   { key: "all-users", icon: UsersRound, label: "All Users" },
   { key: "registered", icon: Users, label: "Registered" },
