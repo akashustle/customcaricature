@@ -408,8 +408,8 @@ const AdminWorkshop = () => {
             </CardContent>
           </Card>
 
-          {/* Workshop Management */}
-          <h2 className="font-display text-lg font-bold pt-4">Workshop Details</h2>
+          {/* Workshop Management - Current Workshop Details */}
+          <h2 className="font-display text-lg font-bold pt-4">Current Workshop Details</h2>
           <Card>
             <CardContent className="p-4 space-y-4">
               <div>
@@ -537,6 +537,9 @@ const AdminWorkshop = () => {
               />
             </CardContent>
           </Card>
+
+          {/* Multi-Workshop Manager */}
+          <WorkshopManager />
         </TabsContent>
       </Tabs>
     </div>
