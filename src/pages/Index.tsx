@@ -332,7 +332,7 @@ const Index = () => {
                 cta: "Coming Soon"
               }]),
             ].map((service, i) => (
-              <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+              <motion.div key={service.title} initial={{ opacity: 0, scale: 0.85, rotateY: -20 }} whileInView={{ opacity: 1, scale: 1, rotateY: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.5, type: "spring" }} whileHover={{ scale: 1.04, rotateY: 5 }} className="perspective-1000">
                 <Card className="card-3d h-full flex flex-col">
                   <CardContent className="pt-8 pb-6 px-5 flex flex-col flex-1">
                     <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5">
