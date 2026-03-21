@@ -9,6 +9,9 @@ import { useState, useCallback } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import HomepageGallery from "@/components/HomepageGallery";
+import HomepageScrollEvents from "@/components/HomepageScrollEvents";
+import HomepageReviews from "@/components/HomepageReviews";
+import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
