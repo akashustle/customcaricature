@@ -256,19 +256,25 @@ const Enquiry = () => {
               <h2 className="font-display text-xl font-bold text-center">Enquiry Submitted!</h2>
               <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
 
-              {/* Pricing */}
+              {/* Pricing with reveal animation */}
               {priceData && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
-                  <p className="text-xs text-muted-foreground font-sans mb-1 capitalize">{caricatureType} Caricature</p>
-                  <p className="font-display text-3xl font-bold text-primary">
-                    ₹{priceData.price.toLocaleString("en-IN")}
-                    {priceData.per_face && <span className="text-sm font-sans font-normal text-muted-foreground">/face</span>}
-                  </p>
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                  <PricingReveal
+                    finalPrice={priceData.price}
+                    revealed={true}
+                    label={`${caricatureType} Caricature${priceData.per_face ? " (per face)" : ""}`}
+                  />
                   {details.delivery_days && (
-                    <p className="text-xs text-muted-foreground font-sans mt-1">📦 Delivery: ~{details.delivery_days} days</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-2 text-center">📦 Delivery: ~{details.delivery_days} days</p>
                   )}
                 </div>
               )}
+
+              {/* Urgency Timer */}
+              <UrgencyTimer
+                durationMinutes={10}
+                message="Best offer expires in"
+              />
 
               {/* Admin-editable details text */}
               {details.full_details && (
