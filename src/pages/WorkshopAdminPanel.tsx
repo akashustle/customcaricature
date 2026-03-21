@@ -559,15 +559,15 @@ const WorkshopAdmin = () => {
   const passFailData = [{ name: "Pass", value: assignments.filter(a => a.pass_status === "pass").length }, { name: "Fail", value: assignments.filter(a => a.pass_status === "fail").length }].filter(d => d.value > 0);
   const feedbackRatings = [1,2,3,4,5].map(r => ({ name: `${r}★`, value: feedbacks.filter(f => f.rating === r).length }));
   const locationAllowed = locations.filter(l => l.location_allowed).length;
-  const locationDenied = users.length - locationAllowed;
+  const locationDenied = filteredUsers.length - locationAllowed;
   const topRankers = [...assignments].filter(a => a.status === "graded" && a.marks != null).sort((a, b) => (b.marks / (b.total_marks || 100)) - (a.marks / (a.total_marks || 100)));
 
   // Extra analytics
-  const videoAccessData = [{ name: "Enabled", value: users.filter(u => u.video_access_enabled !== false).length }, { name: "Disabled", value: users.filter(u => u.video_access_enabled === false).length }];
-  const certUploadData = [{ name: "Has Cert", value: [...new Set(certificates.map(c => c.user_id))].length }, { name: "No Cert", value: users.length - [...new Set(certificates.map(c => c.user_id))].length }];
+  const videoAccessData = [{ name: "Enabled", value: filteredUsers.filter(u => u.video_access_enabled !== false).length }, { name: "Disabled", value: filteredUsers.filter(u => u.video_access_enabled === false).length }];
+  const certUploadData = [{ name: "Has Cert", value: [...new Set(certificates.map(c => c.user_id))].length }, { name: "No Cert", value: filteredUsers.length - [...new Set(certificates.map(c => c.user_id))].length }];
   const avgMarks = assignments.filter(a => a.marks != null).reduce((s, a) => s + (a.marks / (a.total_marks || 100)) * 100, 0) / Math.max(1, assignments.filter(a => a.marks != null).length);
   const marksDistribution = [{ name: "0-40", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 <= 40).length }, { name: "41-60", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 40 && (a.marks/(a.total_marks||100))*100 <= 60).length }, { name: "61-80", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 60 && (a.marks/(a.total_marks||100))*100 <= 80).length }, { name: "81-100", value: assignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 80).length }].filter(d => d.value > 0);
-  const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: users.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
+  const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: filteredUsers.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
 
   // Theme
   const dm = darkMode;
