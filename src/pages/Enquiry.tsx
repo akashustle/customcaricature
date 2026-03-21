@@ -628,17 +628,32 @@ const Enquiry = () => {
                   )}
                 </div>
 
-                {/* Estimated Price */}
+                {/* Fluctuating price range before submission */}
+                {!resolvedPrice && (state || city) && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={40000}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={30000}
+                      rangeMax={80000}
+                      label="Estimated Event Price"
+                    />
+                  </div>
+                )}
+
+                {/* Resolved price with fluctuation */}
                 {resolvedPrice && (
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-300">
-                    <div className="flex items-center gap-2 mb-1">
-                      <IndianRupee className="w-4 h-4 text-primary" />
-                      <p className="text-xs text-muted-foreground font-sans font-medium">Estimated Event Booking Price</p>
-                    </div>
-                    <p className="font-display text-2xl font-bold text-primary">
-                      ₹{resolvedPrice.price.toLocaleString("en-IN")}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={resolvedPrice.price}
+                      revealed={!!state && !!city}
+                      showRange={!state || !city}
+                      rangeMin={30000}
+                      rangeMax={80000}
+                      label="Estimated Event Booking Price"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-sans mt-1 text-center">
                       Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
                     </p>
                   </div>
