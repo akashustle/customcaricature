@@ -1992,4 +1992,214 @@ const WorkshopSwitcher = ({ dm, textPrimary, textSecondary, textMuted, cardBg, b
   );
 };
 
+/* Workshop Page Content Editor */
+const WorkshopPageEditor = ({ dm, textPrimary, textSecondary, textMuted, inputClass, btnPrimary, logAction }: any) => {
+  const [ws, setWs] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [brochureImg, setBrochureImg] = useState<File | null>(null);
+  const [brochurePdf, setBrochurePdf] = useState<File | null>(null);
+
+  useEffect(() => {
+    fetchActive();
+  }, []);
+
+  const fetchActive = async () => {
+    const { data } = await supabase.from("workshops").select("*").eq("is_active", true).limit(1);
+    if (data && (data as any[]).length > 0) setWs((data as any[])[0]);
+    setLoading(false);
+  };
+
+  const updateField = (key: string, value: any) => setWs((prev: any) => prev ? { ...prev, [key]: value } : prev);
+
+  const handleSave = async () => {
+    if (!ws) return;
+    setSaving(true);
+    let brochureImageUrl = ws.brochure_image_url || "";
+    let brochurePdfUrl = ws.brochure_pdf_url || "";
+
+    if (brochureImg) {
+      const path = `brochures/${ws.id}_${Date.now()}_img.${brochureImg.name.split(".").pop()}`;
+      const { error } = await supabase.storage.from("workshop-files").upload(path, brochureImg, { upsert: true });
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("workshop-files").getPublicUrl(path);
+        brochureImageUrl = urlData.publicUrl;
+      }
+    }
+    if (brochurePdf) {
+      const path = `brochures/${ws.id}_${Date.now()}.pdf`;
+      const { error } = await supabase.storage.from("workshop-files").upload(path, brochurePdf, { upsert: true });
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("workshop-files").getPublicUrl(path);
+        brochurePdfUrl = urlData.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.from("workshops").update({
+      title: ws.title,
+      description: ws.description,
+      dates: ws.dates,
+      duration: ws.duration,
+      price: ws.price,
+      highlights: ws.highlights || [],
+      contact_whatsapp: ws.contact_whatsapp || "",
+      status: ws.status,
+      registration_enabled: ws.registration_enabled ?? false,
+      brochure_image_url: brochureImageUrl,
+      brochure_pdf_url: brochurePdfUrl,
+      instructor_name: ws.instructor_name || "",
+      instructor_title: ws.instructor_title || "",
+      instructor_bio: ws.instructor_bio || "",
+      instructor_stats: ws.instructor_stats || [],
+      faq: ws.faq || [],
+      what_you_learn: ws.what_you_learn || [],
+      who_is_for: ws.who_is_for || [],
+      workshop_mode: ws.workshop_mode || "Live Online",
+      workshop_language: ws.workshop_language || "English & Hindi",
+      skill_level: ws.skill_level || "Beginner to Intermediate",
+      requirements: ws.requirements || "",
+      max_participants: ws.max_participants || 60,
+      preview_video_url: ws.preview_video_url || "",
+      updated_at: new Date().toISOString(),
+    } as any).eq("id", ws.id);
+
+    if (error) {
+      toast({ title: "Error saving", description: error.message, variant: "destructive" });
+    } else {
+      await logAction("update_workshop_page", `Updated: ${ws.title}`);
+      toast({ title: "✅ Workshop page updated!" });
+      fetchActive();
+    }
+    setSaving(false);
+  };
+
+  if (loading) return <div className={`${textMuted} text-sm text-center py-4`}>Loading...</div>;
+  if (!ws) return <div className={`${textMuted} text-sm text-center py-4`}>No active workshop. Create one first.</div>;
+
+  const GlassCard = ({ children, className = "" }: any) => (
+    <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-white/80 border-[#e8ddd0]"} border rounded-2xl p-4 shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+
+  return (
+    <GlassCard>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className={`${textPrimary} text-sm flex items-center gap-2`}>
+          <Edit2 className="w-4 h-4 text-[#b08d57]" /> Workshop Page Content
+        </h3>
+        <Badge className={ws.registration_enabled ? "bg-green-100 text-green-700 border-none text-[10px]" : "bg-yellow-100 text-yellow-700 border-none text-[10px]"}>
+          {ws.registration_enabled ? "Registration Open" : "Registration Closed"}
+        </Badge>
+      </div>
+      <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+        {/* Core */}
+        <div className="space-y-3">
+          <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={ws.title || ""} onChange={e => updateField("title", e.target.value)} className={inputClass} /></div>
+          <div><Label className={`${textSecondary} text-xs`}>Description</Label><Textarea value={ws.description || ""} onChange={e => updateField("description", e.target.value)} rows={2} className={inputClass} /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className={`${textSecondary} text-xs`}>Dates</Label><Input value={ws.dates || ""} onChange={e => updateField("dates", e.target.value)} className={inputClass} /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Duration</Label><Input value={ws.duration || ""} onChange={e => updateField("duration", e.target.value)} className={inputClass} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className={`${textSecondary} text-xs`}>Price</Label><Input value={ws.price || ""} onChange={e => updateField("price", e.target.value)} className={inputClass} /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Status</Label>
+              <Select value={ws.status} onValueChange={v => updateField("status", v)}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="live">Live</SelectItem><SelectItem value="ended">Ended</SelectItem></SelectContent></Select>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div><p className={`${textPrimary} text-sm`}>Registration Open</p><p className={`${textMuted} text-xs`}>Allow new registrations</p></div>
+            <Switch checked={ws.registration_enabled ?? false} onCheckedChange={v => updateField("registration_enabled", v)} />
+          </div>
+        </div>
+
+        {/* Brochure */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>📄 Brochure</p>
+          <div className="space-y-2">
+            <div><Label className={`${textSecondary} text-xs`}>Brochure Image</Label><Input type="file" accept="image/*" onChange={e => setBrochureImg(e.target.files?.[0] || null)} className={inputClass} /></div>
+            {ws.brochure_image_url && <p className={`${textMuted} text-xs truncate`}>Current: {ws.brochure_image_url.split("/").pop()}</p>}
+            <div><Label className={`${textSecondary} text-xs`}>Brochure PDF</Label><Input type="file" accept=".pdf" onChange={e => setBrochurePdf(e.target.files?.[0] || null)} className={inputClass} /></div>
+            {ws.brochure_pdf_url && <p className={`${textMuted} text-xs truncate`}>Current: {ws.brochure_pdf_url.split("/").pop()}</p>}
+          </div>
+        </div>
+
+        {/* Instructor */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>👨‍🎨 Instructor</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className={`${textSecondary} text-xs`}>Name</Label><Input value={ws.instructor_name || ""} onChange={e => updateField("instructor_name", e.target.value)} className={inputClass} /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Title</Label><Input value={ws.instructor_title || ""} onChange={e => updateField("instructor_title", e.target.value)} className={inputClass} /></div>
+          </div>
+          <div className="mt-2"><Label className={`${textSecondary} text-xs`}>Bio</Label><Textarea value={ws.instructor_bio || ""} onChange={e => updateField("instructor_bio", e.target.value)} rows={2} className={inputClass} /></div>
+        </div>
+
+        {/* Details */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>📋 Details</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div><Label className={`${textSecondary} text-xs`}>Mode</Label><Input value={ws.workshop_mode || ""} onChange={e => updateField("workshop_mode", e.target.value)} className={inputClass} /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Language</Label><Input value={ws.workshop_language || ""} onChange={e => updateField("workshop_language", e.target.value)} className={inputClass} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div><Label className={`${textSecondary} text-xs`}>Skill Level</Label><Input value={ws.skill_level || ""} onChange={e => updateField("skill_level", e.target.value)} className={inputClass} /></div>
+            <div><Label className={`${textSecondary} text-xs`}>Max Participants</Label><Input type="number" value={ws.max_participants || 60} onChange={e => updateField("max_participants", parseInt(e.target.value) || 60)} className={inputClass} /></div>
+          </div>
+          <div className="mt-2"><Label className={`${textSecondary} text-xs`}>Requirements</Label><Input value={ws.requirements || ""} onChange={e => updateField("requirements", e.target.value)} className={inputClass} /></div>
+          <div className="mt-2"><Label className={`${textSecondary} text-xs`}>Preview Video URL</Label><Input value={ws.preview_video_url || ""} onChange={e => updateField("preview_video_url", e.target.value)} className={inputClass} placeholder="https://youtube.com/..." /></div>
+          <div className="mt-2"><Label className={`${textSecondary} text-xs`}>WhatsApp Number</Label><Input value={ws.contact_whatsapp || ""} onChange={e => updateField("contact_whatsapp", e.target.value)} className={inputClass} /></div>
+        </div>
+
+        {/* Highlights */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>✨ Highlights (one per line)</p>
+          <Textarea value={(ws.highlights || []).join("\n")} onChange={e => updateField("highlights", e.target.value.split("\n").filter((l: string) => l.trim()))} rows={4} className={inputClass} placeholder="Live demonstrations&#10;Hands-on practice&#10;..." />
+        </div>
+
+        {/* What You'll Learn */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>📚 What You'll Learn (one per line)</p>
+          <Textarea value={(ws.what_you_learn || []).join("\n")} onChange={e => updateField("what_you_learn", e.target.value.split("\n").filter((l: string) => l.trim()))} rows={4} className={inputClass} />
+        </div>
+
+        {/* Who Is For */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>🎯 Who This Is For (one per line)</p>
+          <Textarea value={(ws.who_is_for || []).join("\n")} onChange={e => updateField("who_is_for", e.target.value.split("\n").filter((l: string) => l.trim()))} rows={4} className={inputClass} />
+        </div>
+
+        {/* FAQ */}
+        <div className={`border-t ${dm ? "border-white/10" : "border-[#e8ddd0]"} pt-3`}>
+          <p className={`${textPrimary} text-sm mb-2`}>❓ FAQ</p>
+          {(ws.faq || []).map((f: any, i: number) => (
+            <div key={i} className="mb-3 space-y-1">
+              <Input value={f.question} onChange={e => {
+                const newFaq = [...(ws.faq || [])];
+                newFaq[i] = { ...newFaq[i], question: e.target.value };
+                updateField("faq", newFaq);
+              }} className={inputClass} placeholder="Question" />
+              <Textarea value={f.answer} onChange={e => {
+                const newFaq = [...(ws.faq || [])];
+                newFaq[i] = { ...newFaq[i], answer: e.target.value };
+                updateField("faq", newFaq);
+              }} rows={2} className={inputClass} placeholder="Answer" />
+              <Button size="sm" variant="ghost" className="text-red-400 text-xs h-6" onClick={() => {
+                const newFaq = (ws.faq || []).filter((_: any, idx: number) => idx !== i);
+                updateField("faq", newFaq);
+              }}><Trash2 className="w-3 h-3 mr-1" />Remove</Button>
+            </div>
+          ))}
+          <Button size="sm" variant="ghost" className="text-[#b08d57] text-xs" onClick={() => updateField("faq", [...(ws.faq || []), { question: "", answer: "" }])}>
+            <Plus className="w-3 h-3 mr-1" /> Add FAQ
+          </Button>
+        </div>
+      </div>
+
+      <Button onClick={handleSave} disabled={saving} className={`w-full mt-4 ${btnPrimary}`}>
+        <Save className="w-4 h-4 mr-1" /> {saving ? "Saving..." : "Save Workshop Page"}
+      </Button>
+    </GlassCard>
+  );
+};
+
 export default WorkshopAdmin;
