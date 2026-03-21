@@ -397,10 +397,8 @@ const Admin = () => {
   };
 
   const updateStatus = async (orderId: string, status: string) => {
-    // If changing to artwork_ready, check if artwork is uploaded
     if (status === "artwork_ready") {
       const { data: artPhotos } = await supabase.from("artwork_ready_photos").select("id").eq("order_id", orderId) as any;
-      // Check admin setting for bypass
       const { data: bypassSetting } = await supabase.from("admin_site_settings").select("value").eq("id", "allow_artwork_status_without_upload").maybeSingle();
       const bypassEnabled = (bypassSetting?.value as any)?.enabled === true;
       if ((!artPhotos || artPhotos.length === 0) && !bypassEnabled) {
@@ -408,36 +406,44 @@ const Admin = () => {
         return;
       }
     }
-    if (!confirm(`Change order status to "${STATUS_LABELS[status]}"?`)) return;
-    
-    // If reversing from artwork_ready/dispatched back to earlier status, reset art confirmation
-    const reverseStatuses = ["new", "in_progress"];
-    if (reverseStatuses.includes(status)) {
-      await supabase.from("orders").update({ 
-        status: status as any, 
-        art_confirmation_status: null 
-      } as any).eq("id", orderId);
-    } else {
-      await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
-    }
-    toast({ title: "Status Updated" });
-    logAdminAction("Order Status Changed", `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`);
-    fetchOrders();
+    confirmAction(
+      "Order Status Change",
+      `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`,
+      async (adminName) => {
+        const reverseStatuses = ["new", "in_progress"];
+        if (reverseStatuses.includes(status)) {
+          await supabase.from("orders").update({ status: status as any, art_confirmation_status: null } as any).eq("id", orderId);
+        } else {
+          await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
+        }
+        toast({ title: `Status Updated by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
-    if (!confirm(`Change payment to "${PAYMENT_STATUS_LABELS[paymentStatus]}"?`)) return;
-    await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
-    toast({ title: "Payment Updated" });
-    logAdminAction("Payment Status Changed", `Order ${orderId.slice(0, 8)} → ${PAYMENT_STATUS_LABELS[paymentStatus]}`);
-    fetchOrders();
+    confirmAction(
+      "Payment Status Change",
+      `Order ${orderId.slice(0, 8)} → ${PAYMENT_STATUS_LABELS[paymentStatus]}`,
+      async (adminName) => {
+        await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
+        toast({ title: `Payment Updated by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const deleteOrder = async (orderId: string) => {
-    await supabase.from("orders").delete().eq("id", orderId);
-    toast({ title: "Deleted" });
-    logAdminAction("Order Deleted", `Order ${orderId.slice(0, 8)}`);
-    fetchOrders();
+    confirmAction(
+      "Delete Order",
+      `Order ${orderId.slice(0, 8)} will be permanently deleted`,
+      async (adminName) => {
+        await supabase.from("orders").delete().eq("id", orderId);
+        toast({ title: `Order deleted by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const saveNegotiatedAmount = async () => {
