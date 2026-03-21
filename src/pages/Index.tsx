@@ -8,6 +8,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useState, useCallback } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
+import HomepageGallery from "@/components/HomepageGallery";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
