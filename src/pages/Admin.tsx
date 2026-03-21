@@ -1855,15 +1855,13 @@ const Admin = () => {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-white/95 border-t border-[#e8ddd0] shadow-lg">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
+      {/* Mobile Bottom Navigation — Premium */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden admin-header-premium safe-area-bottom">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-0.5 scrollbar-thin">
           <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-
-
           <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
@@ -1877,7 +1875,6 @@ const Admin = () => {
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
-
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
           <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
           <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
@@ -1892,13 +1889,14 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${
+  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all flex-shrink-0 ${
     active 
-      ? "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 scale-105 font-bold" 
-      : "text-[#6a5a4a] font-medium"
-  }`}>
-    <Icon className="w-5 h-5" />
-    <span className="text-[9px] font-body font-medium whitespace-nowrap">{label}</span>
+      ? "bg-foreground/[0.08] text-foreground font-semibold" 
+      : "text-muted-foreground"
+  }`} style={{ fontFamily: 'Inter, sans-serif' }}>
+    <Icon className="w-4.5 h-4.5" style={{ width: '18px', height: '18px' }} />
+    <span className="text-[9px] font-medium whitespace-nowrap">{label}</span>
+    {active && <div className="w-1 h-1 rounded-full bg-[hsl(22,78%,52%)]" />}
   </button>
 );
 
