@@ -274,6 +274,7 @@ const WorkshopAdmin = () => {
       why_join: newUser.why_join || null, workshop_date: newUser.workshop_date,
       slot: newUser.slot, student_type: newUser.student_type,
       payment_screenshot_path: paymentPath, roll_number: rollNum,
+      workshop_id: activeWorkshopId || null,
     } as any);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     await logAction("add_user", `Added user: ${newUser.name} (Roll #${rollNum})`);
