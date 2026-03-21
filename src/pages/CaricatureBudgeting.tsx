@@ -51,7 +51,7 @@ const CaricatureBudgeting = () => {
   useEffect(() => {
     if (!soundPlayed.current) {
       soundPlayed.current = true;
-      setTimeout(() => playSound("enter"), 300);
+      setTimeout(() => playEnterSound(), 300);
     }
   }, []);
 
