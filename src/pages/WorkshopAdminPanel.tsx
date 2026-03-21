@@ -159,7 +159,17 @@ const WorkshopAdmin = () => {
   };
   const fetchAllWorkshops = async () => {
     const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
-    if (data) setAllWorkshops(data as any[]);
+    if (data) {
+      setAllWorkshops(data as any[]);
+      const active = (data as any[]).find(w => w.is_active);
+      if (active) setActiveWorkshopId(active.id);
+    }
+  };
+
+  // Get the effective workshop ID for filtering
+  const getFilterWorkshopId = () => {
+    if (selectedWorkshopId === "current") return activeWorkshopId;
+    return selectedWorkshopId;
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
   const fetchVideos = async () => { const { data } = await supabase.from("workshop_videos" as any).select("*").order("created_at", { ascending: false }); if (data) setVideos(data as any[]); };
