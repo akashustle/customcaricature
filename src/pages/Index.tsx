@@ -366,8 +366,8 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div key={style.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.08 }} whileHover={{ scale: 1.04, y: -4 }}
-                onClick={handleOrderClick}>
+              <motion.div key={style.name} initial={{ opacity: 0, rotateY: 90, scale: 0.7 }} whileInView={{ opacity: 1, rotateY: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1, type: "spring" }} whileHover={{ scale: 1.06, y: -6, rotateY: 8 }}
+                onClick={handleOrderClick} className="perspective-1000">
                 <Card className="group cursor-pointer border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-lg">
                   <CardContent className="p-5 md:p-6 text-center">
                     <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors">
