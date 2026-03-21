@@ -282,8 +282,8 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
-            <motion.div key={item.step} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -6 }}
-              className="cursor-pointer" onClick={() => navigate(item.route)}>
+            <motion.div key={item.step} initial={{ opacity: 0, rotateX: -15, y: 40 }} whileInView={{ opacity: 1, rotateX: 0, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.2, type: "spring" }} whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
+              className="cursor-pointer perspective-1000" onClick={() => navigate(item.route)}>
               <Card className="text-center card-3d h-full">
                 <CardContent className="pt-10 pb-8 px-6">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15">
