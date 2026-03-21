@@ -58,6 +58,7 @@ import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSupport from "@/components/admin/AdminSupport";
 import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
 import AdminBlog from "@/components/admin/AdminBlog";
+import AdminIntegrations from "@/components/admin/AdminIntegrations";
 
 type Order = {
   id: string;
