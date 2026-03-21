@@ -1694,6 +1694,48 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
+              {/* Gateway Charge Settings */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" />Gateway Charges</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="font-sans text-sm">Gateway Charge Percentage (%)</Label>
+                    <p className="text-xs text-muted-foreground font-sans mb-2">Applied to users with gateway charges enabled</p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={settings.gateway_charge_percentage?.percentage ?? 2.6}
+                        onChange={async (e) => {
+                          const val = parseFloat(e.target.value);
+                          if (!isNaN(val) && val >= 0 && val <= 10) {
+                            await updateSetting("gateway_charge_percentage", { percentage: val });
+                            toast({ title: `Gateway charge set to ${val}%` });
+                          }
+                        }}
+                        className="max-w-[120px] font-sans"
+                      />
+                      <span className="text-sm text-muted-foreground font-sans self-center">%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Support Button Visible</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show/hide support button on main website</p>
+                    </div>
+                    <Switch
+                      checked={settings.support_button_visible?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("support_button_visible", { enabled: checked });
+                        toast({ title: checked ? "Support button visible" : "Support button hidden" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* SEO Settings */}
               <AdminSEOSettings />
 
