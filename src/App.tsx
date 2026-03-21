@@ -80,6 +80,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+        <AppUpdateBanner />
         <BrowserRouter>
           <ScrollToTop />
           <FloatingButtons />
