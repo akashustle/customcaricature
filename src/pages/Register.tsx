@@ -307,6 +307,7 @@ const Register = () => {
           </p>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   );
 };
