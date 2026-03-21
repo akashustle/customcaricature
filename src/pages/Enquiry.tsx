@@ -272,9 +272,13 @@ const Enquiry = () => {
 
               {/* Urgency Timer */}
               <UrgencyTimer
-                durationMinutes={10}
-                message="Best offer expires in"
+                durationMinutes={5}
+                message="🔥 Grab your special price before it expires!"
               />
+
+              <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
+                <p className="text-xs font-sans font-semibold text-green-700">🎊 Best offer for you! Your guests will love the caricature experience!</p>
+              </div>
 
               {/* Admin-editable details text */}
               {details.full_details && (
