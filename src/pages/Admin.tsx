@@ -710,6 +710,9 @@ const Admin = () => {
           </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
+          {/* Dashboard Widgets - always visible */}
+          <AdminDashboardWidgets />
+
           {/* Orders Tab */}
           <TabsContent value="orders">
             <div className="flex flex-col gap-3 mb-4">
