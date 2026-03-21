@@ -10,6 +10,21 @@ type SiteSettings = {
   shop_nav_visible: { enabled: boolean };
   workshop_mobile_nav: { enabled: boolean };
   shop_tracking_visible: { enabled: boolean };
+  support_button_visible: { enabled: boolean };
+  gateway_charge_percentage: { percentage: number };
+};
+
+const defaults: SiteSettings = {
+  event_booking_global: { enabled: false },
+  workshop_button: { enabled: true, label: "Workshop", url: "https://creativecaricatureclub.com/workshop" },
+  event_booking_button: { enabled: true },
+  international_booking_global: { enabled: false },
+  allow_artwork_bypass: { enabled: false },
+  shop_nav_visible: { enabled: true },
+  workshop_mobile_nav: { enabled: false },
+  shop_tracking_visible: { enabled: true },
+  support_button_visible: { enabled: true },
+  gateway_charge_percentage: { percentage: 2.6 },
 };
 
 const defaults: SiteSettings = {

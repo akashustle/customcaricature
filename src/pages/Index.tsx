@@ -157,6 +157,11 @@ const Index = () => {
             <Button variant="outline" size="sm" onClick={() => navigate("/track-order")} className="rounded-full font-body gap-1 hidden sm:flex">
               <Search className="w-4 h-4" /> Track Order
             </Button>
+            {settings.support_button_visible?.enabled && (
+              <Button variant="outline" size="sm" onClick={() => navigate("/support")} className="rounded-full font-body gap-1 hidden sm:flex border-accent/30 text-accent hover:bg-accent/10">
+                <MessageCircle className="w-4 h-4" /> Support
+              </Button>
+            )}
             {!loading && (
               user ? (
                 <DropdownMenu>
