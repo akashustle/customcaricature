@@ -167,9 +167,11 @@ const Login = () => {
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button type="submit" disabled={loading} className="w-full rounded-full font-body btn-3d">
+                  {loading ? "Signing in..." : "Sign In"}
+                </Button>
+              </motion.div>
             </form>
           ) : (
             <form onSubmit={handleSecretCodeLogin} className="space-y-4">
