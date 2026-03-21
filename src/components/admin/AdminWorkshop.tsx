@@ -546,6 +546,143 @@ const AdminWorkshop = () => {
   );
 };
 
+/* ─── Multi-Workshop Manager ─── */
+const WorkshopManager = () => {
+  const [workshops, setWorkshops] = useState<any[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newWs, setNewWs] = useState({ title: "", description: "", dates: "", duration: "", price: "", contact_whatsapp: "", highlights: "" });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWorkshops();
+    const ch = supabase.channel("workshops-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshops" }, fetchWorkshops)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  const fetchWorkshops = async () => {
+    const { data } = await supabase.from("workshops" as any).select("*").order("created_at", { ascending: false });
+    if (data) setWorkshops(data as any[]);
+    setLoading(false);
+  };
+
+  const addWorkshop = async () => {
+    if (!newWs.title) { toast({ title: "Title required", variant: "destructive" }); return; }
+    await supabase.from("workshops" as any).insert({
+      title: newWs.title, description: newWs.description, dates: newWs.dates,
+      duration: newWs.duration, price: newWs.price, contact_whatsapp: newWs.contact_whatsapp,
+      highlights: newWs.highlights.split(",").map((h: string) => h.trim()).filter(Boolean),
+      status: "upcoming", is_active: false,
+    } as any);
+    toast({ title: "Workshop Created! ✅" });
+    setShowAdd(false);
+    setNewWs({ title: "", description: "", dates: "", duration: "", price: "", contact_whatsapp: "", highlights: "" });
+    fetchWorkshops();
+  };
+
+  const setActive = async (id: string) => {
+    await supabase.from("workshops" as any).update({ is_active: false } as any).neq("id", "");
+    await supabase.from("workshops" as any).update({ is_active: true } as any).eq("id", id);
+    toast({ title: "Workshop set as active! ✅" });
+    fetchWorkshops();
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    await supabase.from("workshops" as any).update({ status, updated_at: new Date().toISOString() } as any).eq("id", id);
+    toast({ title: `Status updated to ${status}` });
+    fetchWorkshops();
+  };
+
+  const deleteWorkshop = async (id: string) => {
+    await supabase.from("workshops" as any).delete().eq("id", id);
+    toast({ title: "Workshop Deleted" });
+    fetchWorkshops();
+  };
+
+  return (
+    <div className="space-y-4 pt-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-lg font-bold">All Workshops</h2>
+        <Dialog open={showAdd} onOpenChange={setShowAdd}>
+          <DialogTrigger asChild><Button size="sm" className="font-sans rounded-full"><Plus className="w-4 h-4 mr-1" />New Workshop</Button></DialogTrigger>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader><DialogTitle className="font-display">Create New Workshop</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>Title *</Label><Input value={newWs.title} onChange={e => setNewWs({...newWs, title: e.target.value})} placeholder="e.g. Caricature Masterclass Vol 2" /></div>
+              <div><Label>Description</Label><Textarea value={newWs.description} onChange={e => setNewWs({...newWs, description: e.target.value})} rows={3} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Dates</Label><Input value={newWs.dates} onChange={e => setNewWs({...newWs, dates: e.target.value})} placeholder="20 & 21 April 2026" /></div>
+                <div><Label>Duration</Label><Input value={newWs.duration} onChange={e => setNewWs({...newWs, duration: e.target.value})} placeholder="3 hours per session" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Price</Label><Input value={newWs.price} onChange={e => setNewWs({...newWs, price: e.target.value})} placeholder="₹2,999" /></div>
+                <div><Label>WhatsApp</Label><Input value={newWs.contact_whatsapp} onChange={e => setNewWs({...newWs, contact_whatsapp: e.target.value})} placeholder="8433843725" /></div>
+              </div>
+              <div><Label>Highlights (comma-separated)</Label><Input value={newWs.highlights} onChange={e => setNewWs({...newWs, highlights: e.target.value})} placeholder="Live demos, Practice, Certificate" /></div>
+              <Button onClick={addWorkshop} className="w-full font-sans">Create Workshop</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {loading ? (
+        <p className="text-center text-muted-foreground py-4 font-sans">Loading...</p>
+      ) : workshops.length === 0 ? (
+        <Card><CardContent className="p-8 text-center"><p className="text-muted-foreground font-sans">No workshops yet. Create your first one!</p></CardContent></Card>
+      ) : (
+        <div className="space-y-3">
+          {workshops.map((ws: any) => (
+            <Card key={ws.id} className={ws.is_active ? "border-primary/50 bg-primary/5" : ""}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-sans font-semibold">{ws.title}</p>
+                      {ws.is_active && <Badge className="bg-primary/20 text-primary border-none text-[10px]">Active</Badge>}
+                      <Badge variant="outline" className="text-[10px]">{ws.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-sans mt-1">{ws.dates} · {ws.duration} · {ws.price}</p>
+                    {ws.description && <p className="text-xs text-muted-foreground font-sans mt-1 line-clamp-2">{ws.description}</p>}
+                    {ws.highlights?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {ws.highlights.map((h: string, i: number) => (
+                          <Badge key={i} variant="outline" className="text-[10px]">{h}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 ml-2">
+                    {!ws.is_active && (
+                      <Button size="sm" variant="outline" onClick={() => setActive(ws.id)} className="text-xs font-sans">Set Active</Button>
+                    )}
+                    <Select value={ws.status} onValueChange={v => updateStatus(ws.id, v)}>
+                      <SelectTrigger className="h-8 text-xs w-28"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="upcoming">Upcoming</SelectItem>
+                        <SelectItem value="ongoing">Ongoing</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-destructive text-xs"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader><AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle></AlertDialogHeader>
+                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteWorkshop(ws.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ─── Sub-components ─── */
 
 const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUser, editData, setEditData, saveUserEdit, deleteUser, certUserId, setCertUserId, certFile, setCertFile, uploadCertificate, uploading }: any) => {
