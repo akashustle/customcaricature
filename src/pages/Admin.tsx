@@ -57,6 +57,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSupport from "@/components/admin/AdminSupport";
 import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
+import AdminBlog from "@/components/admin/AdminBlog";
 
 type Order = {
   id: string;
