@@ -1550,6 +1550,9 @@ const Admin = () => {
             <AdminSEOSettings />
           </TabsContent>
 
+          <TabsContent value="integrations">
+            <AdminIntegrations />
+          </TabsContent>
 
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
