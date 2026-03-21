@@ -330,6 +330,7 @@ const WorkshopAdmin = () => {
         workshop_date: newVideo.workshop_date, slot: newVideo.slot || null,
         target_type: newVideo.target_type, expiry_date: newVideo.expiry_date || null,
         global_download_allowed: newVideo.global_download_allowed,
+        workshop_id: activeWorkshopId || null,
       } as any);
       await logAction("add_video", `Added video: ${newVideo.title}`);
       toast({ title: "Video Added! ✅" });
