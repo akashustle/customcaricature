@@ -27,8 +27,10 @@ const defaults: SiteSettings = {
   workshop_mobile_nav: { enabled: false },
   shop_tracking_visible: { enabled: true },
   support_button_visible: { enabled: true },
+  support_mobile_nav: { enabled: false },
   gateway_charge_percentage: { percentage: 2.6 },
   admin_action_prompt: { enabled: true },
+  workshop_dashboard_visible: { enabled: false },
 };
 
 
