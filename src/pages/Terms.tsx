@@ -16,6 +16,7 @@ const Terms = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
+      <SEOHead title="Terms & Conditions" description="Terms and conditions for Creative Caricature Club services." canonical="/terms" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
