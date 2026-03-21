@@ -3075,6 +3075,7 @@ export type Database = {
           title: string
           updated_at: string
           what_students_learn: string | null
+          workshop_id: string | null
         }
         Insert: {
           artist_name?: string | null
@@ -3091,6 +3092,7 @@ export type Database = {
           title: string
           updated_at?: string
           what_students_learn?: string | null
+          workshop_id?: string | null
         }
         Update: {
           artist_name?: string | null
@@ -3107,8 +3109,17 @@ export type Database = {
           title?: string
           updated_at?: string
           what_students_learn?: string | null
+          workshop_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workshop_live_sessions_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workshop_notifications: {
         Row: {
@@ -3296,6 +3307,7 @@ export type Database = {
           video_download_allowed: boolean
           why_join: string | null
           workshop_date: string
+          workshop_id: string | null
         }
         Insert: {
           age?: number | null
@@ -3320,6 +3332,7 @@ export type Database = {
           video_download_allowed?: boolean
           why_join?: string | null
           workshop_date: string
+          workshop_id?: string | null
         }
         Update: {
           age?: number | null
@@ -3344,8 +3357,17 @@ export type Database = {
           video_download_allowed?: boolean
           why_join?: string | null
           workshop_date?: string
+          workshop_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workshop_users_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workshop_videos: {
         Row: {
@@ -3360,6 +3382,7 @@ export type Database = {
           video_type: string
           video_url: string | null
           workshop_date: string
+          workshop_id: string | null
         }
         Insert: {
           created_at?: string
@@ -3373,6 +3396,7 @@ export type Database = {
           video_type?: string
           video_url?: string | null
           workshop_date: string
+          workshop_id?: string | null
         }
         Update: {
           created_at?: string
@@ -3386,8 +3410,17 @@ export type Database = {
           video_type?: string
           video_url?: string | null
           workshop_date?: string
+          workshop_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workshop_videos_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workshops: {
         Row: {
