@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { Trash2, Plus, Loader2, Image, GripVertical } from "lucide-react";
+import { Trash2, Plus, Loader2, Image } from "lucide-react";
 
 type GalleryItem = {
   id: string;
@@ -16,13 +16,13 @@ type GalleryItem = {
   created_at: string;
 };
 
-const GallerySection = ({ table, bucketFolder }: { table: "event_gallery" | "caricature_gallery"; bucketFolder: string }) => {
+const GallerySection = ({ table, bucketFolder }: { table: string; bucketFolder: string }) => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
 
   const fetchItems = async () => {
-    const { data } = await supabase.from(table).select("*").order("sort_order");
+    const { data } = await supabase.from(table as any).select("*").order("sort_order");
     if (data) setItems(data as GalleryItem[]);
   };
 
@@ -45,7 +45,7 @@ const GallerySection = ({ table, bucketFolder }: { table: "event_gallery" | "car
         const { error: upErr } = await supabase.storage.from("gallery-images").upload(path, file);
         if (upErr) throw upErr;
         const { data: urlData } = supabase.storage.from("gallery-images").getPublicUrl(path);
-        const { error: dbErr } = await supabase.from(table).insert({
+        const { error: dbErr } = await supabase.from(table as any).insert({
           image_url: urlData.publicUrl,
           caption: caption || null,
           sort_order: items.length,
@@ -64,12 +64,11 @@ const GallerySection = ({ table, bucketFolder }: { table: "event_gallery" | "car
   };
 
   const handleDelete = async (item: GalleryItem) => {
-    // Extract storage path from URL
     const urlParts = item.image_url.split("/gallery-images/");
     if (urlParts[1]) {
       await supabase.storage.from("gallery-images").remove([urlParts[1]]);
     }
-    await supabase.from(table).delete().eq("id", item.id);
+    await supabase.from(table as any).delete().eq("id", item.id);
     toast({ title: "Image deleted" });
     fetchItems();
   };
@@ -125,11 +124,22 @@ const AdminGallery = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold" style={{ fontFamily: 'Inter, sans-serif' }}>Gallery Management</h2>
-      <Tabs defaultValue="events">
+      <Tabs defaultValue="scroll-events">
         <TabsList>
+          <TabsTrigger value="scroll-events">Scroll Event Gallery</TabsTrigger>
           <TabsTrigger value="events">Event Gallery</TabsTrigger>
           <TabsTrigger value="caricatures">Caricature Gallery</TabsTrigger>
         </TabsList>
+        <TabsContent value="scroll-events" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Scroll Event Images (Homepage Slideshow)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GallerySection table="scroll_event_images" bucketFolder="scroll-events" />
+            </CardContent>
+          </Card>
+        </TabsContent>
         <TabsContent value="events" className="mt-4">
           <Card>
             <CardHeader>
