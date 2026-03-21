@@ -735,7 +735,7 @@ const WorkshopAdmin = () => {
 
   const WorkshopSwitcher = ({ GlassCard, RefreshButton, ...props }: any) => <WorkshopSwitcherInner />;
 
-
+  return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
       {/* Sidebar - Desktop — Apple-grade */}
       <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
