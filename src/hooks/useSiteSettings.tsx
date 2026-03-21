@@ -27,16 +27,6 @@ const defaults: SiteSettings = {
   gateway_charge_percentage: { percentage: 2.6 },
 };
 
-const defaults: SiteSettings = {
-  event_booking_global: { enabled: false },
-  workshop_button: { enabled: true, label: "Workshop", url: "https://creativecaricatureclub.com/workshop" },
-  event_booking_button: { enabled: true },
-  international_booking_global: { enabled: false },
-  allow_artwork_bypass: { enabled: false },
-  shop_nav_visible: { enabled: true },
-  workshop_mobile_nav: { enabled: false },
-  shop_tracking_visible: { enabled: true },
-};
 
 export const useSiteSettings = () => {
   const [settings, setSettings] = useState<SiteSettings>(defaults);
