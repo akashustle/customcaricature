@@ -272,9 +272,13 @@ const Enquiry = () => {
 
               {/* Urgency Timer */}
               <UrgencyTimer
-                durationMinutes={10}
-                message="Best offer expires in"
+                durationMinutes={5}
+                message="🔥 Grab your special price before it expires!"
               />
+
+              <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
+                <p className="text-xs font-sans font-semibold text-green-700">🎊 Best offer for you! Your guests will love the caricature experience!</p>
+              </div>
 
               {/* Admin-editable details text */}
               {details.full_details && (
@@ -349,9 +353,13 @@ const Enquiry = () => {
 
               {/* Urgency Timer */}
               <UrgencyTimer
-                durationMinutes={10}
-                message="Best offer expires in"
+                durationMinutes={3}
+                message="🔥 Grab your event date! Best price expires in"
               />
+
+              <div className="text-center p-3 rounded-xl bg-green-50 border border-green-200">
+                <p className="text-xs font-sans font-semibold text-green-700">🎉 Make your event memorable with live funny caricatures! Your guests will have a blast!</p>
+              </div>
 
               {/* Region-specific details from admin */}
               {regionDetails.details && (
@@ -416,9 +424,28 @@ const Enquiry = () => {
           </CardHeader>
 
           <CardContent className="space-y-5 pt-2">
-            {/* Step 1: Visitor Info */}
+            {/* Pricing Psychology Banner - shows on first step */}
             {step === "info" && (
               <div className="space-y-4 animate-in fade-in duration-300">
+                {/* Pricing Range Display at Top */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                  <PricingReveal
+                    finalPrice={45000}
+                    revealed={false}
+                    showRange={true}
+                    rangeMin={30000}
+                    rangeMax={90000}
+                    label="🎨 Event Booking Starts From"
+                    urgencyMessage="Fill details to unlock your special price!"
+                  />
+                </div>
+
+                {/* Urgency message */}
+                <div className="text-center p-3 rounded-xl bg-accent/5 border border-accent/10">
+                  <p className="text-xs font-sans text-foreground font-semibold">📅 Dates are filling up fast!</p>
+                  <p className="text-[10px] text-muted-foreground font-sans mt-0.5">Block your event date & make your celebration unforgettable with live caricatures! 🎉</p>
+                </div>
+
                 <h3 className="font-display text-lg font-semibold flex items-center gap-2">
                   <User className="w-5 h-5 text-primary" /> Your Information
                 </h3>
@@ -439,7 +466,7 @@ const Enquiry = () => {
                   <Input value={instagramId} onChange={e => setInstagramId(e.target.value)} placeholder="@your_instagram" className="mt-1" />
                 </div>
                 <Button onClick={handleSubmitInfo} className="w-full rounded-full font-sans h-12 text-base">
-                  Continue <ArrowRight className="w-4 h-4 ml-2" />
+                  Know Your Special Price <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             )}
@@ -568,6 +595,25 @@ const Enquiry = () => {
                 <h3 className="font-display text-lg font-semibold flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-primary" /> Event Details
                 </h3>
+
+                {/* Show range pricing at top before any data entered */}
+                {!state && !city && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={50000}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={30000}
+                      rangeMax={90000}
+                      label="🎨 Live Event Caricature"
+                      urgencyMessage="Select location to see your exclusive price!"
+                    />
+                  </div>
+                )}
+
+                <div className="text-center p-2 rounded-lg bg-accent/5">
+                  <p className="text-[10px] font-sans text-muted-foreground">😄 Make a smile on your guests with funny caricatures!</p>
+                </div>
 
                 {/* Event Type Dropdown */}
                 <div>
