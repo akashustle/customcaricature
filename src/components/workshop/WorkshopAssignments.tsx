@@ -74,10 +74,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   };
 
   const handleDelete = async (a: any) => {
-    if (a.status === "graded") {
-      toast({ title: "Cannot delete graded assignments", variant: "destructive" });
-      return;
-    }
+    if (!confirm("Delete this assignment?")) return;
     if (a.storage_path) {
       await supabase.storage.from("workshop-files").remove([a.storage_path]);
     }
