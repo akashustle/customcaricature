@@ -1977,6 +1977,7 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[10px]`}>{u.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}</Badge>
                 {u.age && <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[10px]`}>Age: {u.age}</Badge>}
+                {u.secret_code && <Badge className={`${dm ? "bg-yellow-500/20 text-yellow-300" : "bg-yellow-100 text-yellow-700"} text-[10px]`}>🔑 {u.secret_code}</Badge>}
               </div>
             </div>
             {isExpanded ? <ChevronUp className={`w-4 h-4 ${textMuted}`} /> : <ChevronDown className={`w-4 h-4 ${textMuted}`} />}
