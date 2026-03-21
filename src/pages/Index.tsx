@@ -301,6 +301,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Scroll Event Gallery Slideshow */}
+      <HomepageScrollEvents />
+
       {/* Services */}
       <section className="bg-card/50 py-16 md:py-24 border-y border-border/50">
         <div className="container mx-auto px-4">
