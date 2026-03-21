@@ -57,6 +57,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSupport from "@/components/admin/AdminSupport";
 import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
+import AdminBlog from "@/components/admin/AdminBlog";
 
 type Order = {
   id: string;
@@ -188,6 +189,7 @@ const Admin = () => {
     { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
     { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
     { id: "enquiries", label: "Enquiries" }, { id: "support", label: "Support" },
+    { id: "blog", label: "Blog" }, { id: "seo", label: "SEO" },
     { id: "settings", label: "Settings" },
   ];
   const [adminPermAllTabs, setAdminPermAllTabs] = useState(true);
@@ -1532,8 +1534,15 @@ const Admin = () => {
             <AdminSupport />
           </TabsContent>
 
+          <TabsContent value="blog">
+            <AdminBlog />
+          </TabsContent>
 
-          {/* Settings Tab */}
+          <TabsContent value="seo">
+            <AdminSEOSettings />
+          </TabsContent>
+
+
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
               {/* Site Controls */}
@@ -1736,8 +1745,7 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              {/* SEO Settings */}
-              <AdminSEOSettings />
+              {/* SEO Settings moved to dedicated tab */}
 
               {/* Admin Profile */}
               <Card>
@@ -1865,6 +1873,8 @@ const Admin = () => {
 
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
           <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
+          <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
+          <AdminBottomNavItem icon={Globe} label="SEO" active={activeTab === "seo"} onClick={() => setActiveTab("seo")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
