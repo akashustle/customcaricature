@@ -600,7 +600,142 @@ const WorkshopAdmin = () => {
     );
   };
 
-  return (
+  // Workshop Switcher Component
+  const WorkshopSwitcherInner = () => {
+    const [workshops, setWorkshops] = useState<any[]>([]);
+    const [creating, setCreating] = useState(false);
+    const [newTitle, setNewTitle] = useState("");
+    const [newDates, setNewDates] = useState("");
+    const [newPrice, setNewPrice] = useState("");
+
+    useEffect(() => {
+      fetchWorkshops();
+    }, []);
+
+    const fetchWorkshops = async () => {
+      const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+      if (data) setWorkshops(data as any[]);
+    };
+
+    const setActive = async (id: string) => {
+      // Deactivate all first
+      await supabase.from("workshops").update({ is_active: false } as any).neq("id", "00000000");
+      // Activate selected
+      await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
+      await logAction("switch_workshop", `Activated workshop ${id}`);
+      toast({ title: "Workshop activated! ✅" });
+      fetchWorkshops();
+    };
+
+    const createWorkshop = async () => {
+      if (!newTitle.trim()) { toast({ title: "Title required", variant: "destructive" }); return; }
+      const { error } = await supabase.from("workshops").insert({
+        title: newTitle.trim(),
+        dates: newDates.trim() || "TBD",
+        price: newPrice.trim() || "₹1,999",
+        status: "upcoming",
+        is_active: false,
+      } as any);
+      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      await logAction("create_workshop", `Created: ${newTitle}`);
+      toast({ title: "Workshop created! ✅" });
+      setCreating(false); setNewTitle(""); setNewDates(""); setNewPrice("");
+      fetchWorkshops();
+    };
+
+    const deleteWorkshop = async (id: string, title: string) => {
+      await supabase.from("workshops").delete().eq("id", id);
+      await logAction("delete_workshop", `Deleted: ${title}`);
+      toast({ title: "Workshop deleted" });
+      fetchWorkshops();
+    };
+
+    const toggleRegistration = async (id: string, enabled: boolean) => {
+      await supabase.from("workshops").update({ registration_enabled: enabled } as any).eq("id", id);
+      toast({ title: enabled ? "Registration enabled" : "Registration disabled" });
+      fetchWorkshops();
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h1 className={`text-2xl ${textPrimary}`}>🎓 Workshop Manager</h1>
+          <Button onClick={() => setCreating(true)} className={btnPrimary}><Plus className="w-4 h-4 mr-1" /> New Workshop</Button>
+        </div>
+
+        {creating && (
+          <GlassCard>
+            <h3 className={`${textPrimary} text-sm mb-3`}>Create New Workshop</h3>
+            <div className="space-y-3">
+              <Input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Workshop Title" className={inputClass} />
+              <div className="grid grid-cols-2 gap-3">
+                <Input value={newDates} onChange={e => setNewDates(e.target.value)} placeholder="Dates (e.g. March 14-15)" className={inputClass} />
+                <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="Price (e.g. ₹1,999)" className={inputClass} />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={createWorkshop} className={btnPrimary}>Create</Button>
+                <Button variant="outline" onClick={() => setCreating(false)}>Cancel</Button>
+              </div>
+            </div>
+          </GlassCard>
+        )}
+
+        {workshops.length === 0 ? (
+          <GlassCard><p className={`text-center ${textSecondary} py-8`}>No workshops created yet</p></GlassCard>
+        ) : (
+          <div className="space-y-3">
+            {workshops.map((ws: any) => (
+              <GlassCard key={ws.id} className={ws.is_active ? "!border-green-500/40 ring-1 ring-green-500/20" : ""}>
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className={`${textPrimary} text-lg truncate`}>{ws.title}</p>
+                      {ws.is_active && <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">Active</Badge>}
+                      <Badge variant="outline" className="text-xs">{ws.status}</Badge>
+                    </div>
+                    <p className={`${textMuted} text-xs mt-1`}>{ws.dates} · {ws.price}</p>
+                    <p className={`${textMuted} text-[10px]`}>Registration: {ws.registration_enabled ? "✅ Open" : "❌ Closed"}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <Label className={`text-xs ${textSecondary}`}>Registration</Label>
+                      <Switch checked={ws.registration_enabled} onCheckedChange={(v) => toggleRegistration(ws.id, v)} />
+                    </div>
+                    {!ws.is_active && (
+                      <Button size="sm" onClick={() => setActive(ws.id)} className={btnPrimary}>
+                        Set Active
+                      </Button>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="text-destructive border-destructive/30">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete "{ws.title}"?</AlertDialogTitle>
+                          <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteWorkshop(ws.id, ws.title)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const WorkshopSwitcher = ({ GlassCard, RefreshButton, ...props }: any) => <WorkshopSwitcherInner />;
+
+
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
       {/* Sidebar - Desktop — Apple-grade */}
       <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
