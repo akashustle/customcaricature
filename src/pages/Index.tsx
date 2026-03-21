@@ -274,23 +274,32 @@ const Index = () => {
       </section>
 
       {/* Trust Badges */}
-      <section className="py-12 md:py-16 bg-card/50 border-y border-border/50">
+      <section className="py-16 md:py-20 bg-card/50 border-y border-border/50 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {trustStats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, rotateY: 90, scale: 0.8 }}
-                whileInView={{ opacity: 1, rotateY: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.6, type: "spring" }}
-                whileHover={{ rotateY: 10, scale: 1.05 }}
-                className="text-center perspective-1000"
+                initial={{ opacity: 0, y: 60, scale: 0.5 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: i * 0.12, duration: 0.7, type: "spring", bounce: 0.4 }}
+                whileHover={{ y: -8, scale: 1.08, transition: { duration: 0.3 } }}
+                className="text-center group cursor-default"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <motion.div
+                  className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors"
+                  whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
+                >
                   <stat.icon className="w-6 h-6 text-primary" />
-                </div>
-                <p className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground">{stat.value}</p>
+                </motion.div>
+                <motion.p
+                  className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12 + 0.3, duration: 0.5 }}
+                >{stat.value}</motion.p>
                 <p className="text-xs font-body text-muted-foreground mt-1">{stat.label}</p>
               </motion.div>
             ))}
