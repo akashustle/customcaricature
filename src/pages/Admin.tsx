@@ -1567,6 +1567,10 @@ const Admin = () => {
             <AdminBlog />
           </TabsContent>
 
+          <TabsContent value="gallery">
+            <AdminGallery />
+          </TabsContent>
+
           <TabsContent value="files">
             <AdminFileExplorer />
           </TabsContent>
