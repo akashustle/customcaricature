@@ -114,7 +114,9 @@ const Workshop = () => {
   const [regForm, setRegForm] = useState({
     name: "", email: "", mobile: "", instagram_id: "", age: "",
     occupation: "", artist_background: "no", why_suitable: "", slot: "",
+    password: "",
   });
+  const [loginPassword, setLoginPassword] = useState("");
   const [submittingReg, setSubmittingReg] = useState(false);
 
   useEffect(() => {
