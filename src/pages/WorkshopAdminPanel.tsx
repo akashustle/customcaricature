@@ -831,7 +831,22 @@ const WorkshopAdmin = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
-                    <RefreshButton />
+                    <div className="flex items-center gap-2">
+                      <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
+                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
+                          <SelectValue placeholder="Select Workshop" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="current">Current (Active)</SelectItem>
+                          {allWorkshops.map((ws: any) => (
+                            <SelectItem key={ws.id} value={ws.id}>
+                              {ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <RefreshButton />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
