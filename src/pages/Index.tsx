@@ -326,7 +326,7 @@ const Index = () => {
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16 md:py-24">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
           <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Simple Process</p>
           <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">How It Works</h2>
           <p className="text-muted-foreground font-body max-w-md mx-auto">Get your custom caricature in three easy steps</p>
@@ -337,17 +337,29 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
-            <motion.div key={item.step} initial={{ opacity: 0, rotateX: -15, y: 40 }} whileInView={{ opacity: 1, rotateX: 0, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.2, type: "spring" }} whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
-              className="cursor-pointer perspective-1000" onClick={() => navigate(item.route)}>
-              <Card className="text-center card-3d h-full">
+            <motion.div
+              key={item.step}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.7, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -12, transition: { duration: 0.3, ease: "easeOut" } }}
+              className="cursor-pointer group"
+              onClick={() => navigate(item.route)}
+            >
+              <Card className="text-center h-full border border-border group-hover:border-primary/30 group-hover:shadow-xl transition-all duration-500">
                 <CardContent className="pt-10 pb-8 px-6">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15">
+                  <motion.div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                    whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                    transition={{ duration: 0.4 }}
+                  >
                     <item.icon className="w-7 h-7 text-primary" />
-                  </div>
+                  </motion.div>
                   <span className="text-[10px] font-body font-bold text-primary uppercase tracking-widest">Step {item.step}</span>
                   <h3 className="font-calligraphy text-2xl font-semibold mt-2 mb-3 text-foreground">{item.title}</h3>
                   <p className="text-sm text-muted-foreground font-body leading-relaxed">{item.desc}</p>
-                  <span className="inline-flex items-center gap-1 mt-4 text-xs font-body font-semibold text-primary hover:underline">
+                  <span className="inline-flex items-center gap-1 mt-4 text-xs font-body font-semibold text-primary group-hover:gap-2 transition-all">
                     Learn more <ArrowRight className="w-3 h-3" />
                   </span>
                 </CardContent>
