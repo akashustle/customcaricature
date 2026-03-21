@@ -332,18 +332,26 @@ const Enquiry = () => {
               <h2 className="font-display text-xl font-bold text-center">Event Enquiry Submitted!</h2>
               <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
 
-              {/* Pricing */}
+              {/* Pricing with reveal */}
               {resolvedPrice && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
-                  <p className="text-xs text-muted-foreground font-sans mb-1">Estimated Event Price</p>
-                  <p className="font-display text-3xl font-bold text-primary">
-                    {resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}{resolvedPrice.price.toLocaleString("en-IN")}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                  <PricingReveal
+                    finalPrice={resolvedPrice.price}
+                    currency={resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}
+                    revealed={true}
+                    label="Event Booking Price"
+                  />
+                  <p className="text-[10px] text-muted-foreground font-sans mt-2 text-center">
                     Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
                   </p>
                 </div>
               )}
+
+              {/* Urgency Timer */}
+              <UrgencyTimer
+                durationMinutes={10}
+                message="Best offer expires in"
+              />
 
               {/* Region-specific details from admin */}
               {regionDetails.details && (
