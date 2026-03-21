@@ -1594,6 +1594,27 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
+                  {/* Create New Workshop */}
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3 flex items-center gap-2`}><Plus className="w-4 h-4 text-[#b08d57]" /> Create New Workshop</h3>
+                    <p className={`${textMuted} text-xs mb-3`}>Create a fresh workshop with zero data. Previous workshop data will be preserved.</p>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className={btnPrimary}><Plus className="w-4 h-4 mr-1" />Create New Workshop</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader><DialogTitle>Create New Workshop</DialogTitle></DialogHeader>
+                        <CreateWorkshopForm dm={dm} textSecondary={textSecondary} inputClass={inputClass} btnPrimary={btnPrimary} logAction={logAction} fetchSettings={fetchSettings} />
+                      </DialogContent>
+                    </Dialog>
+                  </GlassCard>
+
+                  {/* Switch Workshops */}
+                  <GlassCard>
+                    <h3 className={`${textPrimary} text-sm mb-3 flex items-center gap-2`}><History className="w-4 h-4 text-[#b08d57]" /> Workshop History</h3>
+                    <WorkshopSwitcher dm={dm} textPrimary={textPrimary} textSecondary={textSecondary} textMuted={textMuted} cardBg={cardBg} btnPrimary={btnPrimary} />
+                  </GlassCard>
+
                   {/* Admin Management */}
                   <GlassCard>
                     <div className="flex items-center justify-between mb-4">

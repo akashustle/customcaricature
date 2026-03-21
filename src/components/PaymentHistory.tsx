@@ -24,6 +24,10 @@ const PAYMENT_TYPE_LABELS: Record<string, string> = {
   event_remaining: "Event Remaining",
   event_advance_partial_1: "Partial Advance 1",
   event_advance_partial_2: "Partial Advance 2",
+  manual: "Manual Payment",
+  balance: "Balance Payment",
+  refund: "Refund",
+  shop_order: "Shop Order",
 };
 
 const PaymentHistory = ({ userId }: { userId: string }) => {
