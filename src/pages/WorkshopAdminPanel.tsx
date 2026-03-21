@@ -97,6 +97,7 @@ const WorkshopAdmin = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string>("current");
+  const [activeWorkshopId, setActiveWorkshopId] = useState<string | null>(null);
   const [liveRequests, setLiveRequests] = useState<any[]>([]);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [editVideoData, setEditVideoData] = useState<any>({});
