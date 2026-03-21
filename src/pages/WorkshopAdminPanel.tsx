@@ -95,6 +95,8 @@ const WorkshopAdmin = () => {
   const [certUploadFile, setCertUploadFile] = useState<File | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState("8433843725");
   const [refreshing, setRefreshing] = useState(false);
+  const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string>("current");
   const [liveRequests, setLiveRequests] = useState<any[]>([]);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [editVideoData, setEditVideoData] = useState<any>({});
