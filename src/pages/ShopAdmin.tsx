@@ -409,17 +409,26 @@ const ShopAdmin = () => {
   const dailyRevenueData = Object.entries(dailyRevenue).map(([name, revenue]) => ({ name, revenue }));
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-card border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+    <div className="min-h-screen bg-background admin-panel-font">
+      <div className="admin-header-premium px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <Store className="w-6 h-6 text-primary" />
-          <h1 className="font-display text-xl font-bold">Shop Admin</h1>
-          <Badge variant={shopEnabled ? "default" : "secondary"}>{shopEnabled ? "Live" : "Disabled"}</Badge>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">
+            <Store className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h1 className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Shop Console</h1>
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${shopEnabled ? "bg-[hsl(152,55%,40%)]" : "bg-muted-foreground/30"}`} />
+              <span className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>{shopEnabled ? "Live" : "Disabled"}</span>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2"><span className="text-xs font-sans text-muted-foreground">Shop</span><Switch checked={shopEnabled} onCheckedChange={toggleShop} /></div>
-          <Button variant="ghost" size="sm" onClick={fetchAll}><RefreshCw className="w-4 h-4" /></Button>
-          <Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); navigate("/CFCAdmin936"); }}><LogOut className="w-4 h-4" /></Button>
+          <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Shop</span><Switch checked={shopEnabled} onCheckedChange={toggleShop} /></div>
+          <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); navigate("/CFCAdmin936"); }} className="h-8 gap-1.5 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          </Button>
         </div>
       </div>
 
