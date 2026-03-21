@@ -238,6 +238,7 @@ const Workshop = () => {
         slot: regForm.slot,
         student_type: "registered_online",
         workshop_date: "2026-03-14",
+        password: regForm.password,
       } as any);
       if (error) throw error;
       toast({ title: "Registration Successful! 🎉", description: "You can now login to the workshop." });
