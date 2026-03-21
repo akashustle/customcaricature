@@ -13,39 +13,7 @@ import { usePricing } from "@/hooks/usePricing";
 import PricingReveal from "@/components/PricingReveal";
 import UrgencyTimer from "@/components/UrgencyTimer";
 import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2 } from "lucide-react";
-
-const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
-
-// Simple sound utility using Web Audio API
-const playSound = (type: "enter" | "coin") => {
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    if (type === "enter") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(523, ctx.currentTime);
-      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
-      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.5);
-    } else {
-      osc.type = "square";
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      osc.frequency.setValueAtTime(1600, ctx.currentTime + 0.05);
-      osc.frequency.setValueAtTime(2000, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.25);
-    }
-  } catch {}
-};
+import { playCurrencySound, playEnterSound, playCoinDrop, playCashRegister } from "@/lib/sounds";
 
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
