@@ -8,6 +8,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import SplashScreen from "./components/SplashScreen";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
+import AppUpdateBanner from "./components/AppUpdateBanner";
 
 // Eagerly loaded core pages
 import Index from "./pages/Index";
@@ -79,6 +80,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+        <AppUpdateBanner />
         <BrowserRouter>
           <ScrollToTop />
           <FloatingButtons />

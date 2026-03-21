@@ -58,6 +58,7 @@ import AdminEnquiries from "@/components/admin/AdminEnquiries";
 import AdminSupport from "@/components/admin/AdminSupport";
 import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
 import AdminBlog from "@/components/admin/AdminBlog";
+import AdminIntegrations from "@/components/admin/AdminIntegrations";
 
 type Order = {
   id: string;
@@ -1549,6 +1550,9 @@ const Admin = () => {
             <AdminSEOSettings />
           </TabsContent>
 
+          <TabsContent value="integrations">
+            <AdminIntegrations />
+          </TabsContent>
 
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
