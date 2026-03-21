@@ -68,6 +68,7 @@ const NAV_SECTIONS = [
     label: "Content",
     items: [
       { id: "blog", icon: FileQuestion, label: "Blog", accent: "hsl(280 55% 55%)" },
+      { id: "files", icon: FileQuestion, label: "Files", accent: "hsl(200 55% 50%)" },
       { id: "seo", icon: Zap, label: "SEO", accent: "hsl(152 55% 40%)" },
     ],
   },

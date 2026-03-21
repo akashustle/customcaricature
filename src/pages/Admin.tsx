@@ -61,6 +61,7 @@ import AdminBlog from "@/components/admin/AdminBlog";
 import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
 import { useAdminAction } from "@/hooks/useAdminAction";
+import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
 
 type Order = {
   id: string;
@@ -193,6 +194,7 @@ const Admin = () => {
     { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
     { id: "enquiries", label: "Enquiries" }, { id: "support", label: "Support" },
     { id: "blog", label: "Blog" }, { id: "seo", label: "SEO" },
+    { id: "files", label: "Files" },
     { id: "integrations", label: "Integrations" },
     { id: "settings", label: "Settings" },
   ];
@@ -1562,6 +1564,10 @@ const Admin = () => {
 
           <TabsContent value="blog">
             <AdminBlog />
+          </TabsContent>
+
+          <TabsContent value="files">
+            <AdminFileExplorer />
           </TabsContent>
 
           <TabsContent value="seo">

@@ -74,10 +74,7 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
   };
 
   const handleDelete = async (a: any) => {
-    if (a.status === "graded") {
-      toast({ title: "Cannot delete graded assignments", variant: "destructive" });
-      return;
-    }
+    if (!confirm("Delete this assignment?")) return;
     if (a.storage_path) {
       await supabase.storage.from("workshop-files").remove([a.storage_path]);
     }
@@ -259,11 +256,9 @@ const WorkshopAssignments = ({ user, darkMode = false }: { user: any; darkMode?:
                         <button onClick={() => handleView(a)} className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-secondary transition-colors">
                           <Eye className="w-3.5 h-3.5" /> View
                         </button>
-                        {a.status !== "graded" && (
-                          <button onClick={() => handleDelete(a)} className="flex items-center px-2 py-1 rounded-lg text-[10px] text-destructive hover:bg-destructive/10 transition-colors">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
+                        <button onClick={() => handleDelete(a)} className="flex items-center px-2 py-1 rounded-lg text-[10px] text-destructive hover:bg-destructive/10 transition-colors">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
                     </div>
                   </div>
