@@ -308,9 +308,15 @@ const Index = () => {
       </section>
 
       {/* Gallery */}
-      <section className="py-12 md:py-16" aria-label="Gallery of recent caricature work">
+      <section className="py-16 md:py-20" aria-label="Gallery of recent caricature work">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-8">
+            <motion.p
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3"
+            >Portfolio</motion.p>
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-2">Our Recent Work</h2>
             <p className="text-muted-foreground font-body">Every stroke tells a story — tap to view fullscreen</p>
           </motion.div>
