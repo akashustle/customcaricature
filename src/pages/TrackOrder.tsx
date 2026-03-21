@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { Search, Package, ArrowLeft, Clock, CreditCard, Truck, CheckCircle, Loader2, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { motion } from "framer-motion";
 
 const ORDER_STATUS_STEPS = [
   { key: "new", label: "Order Placed", icon: Package },
