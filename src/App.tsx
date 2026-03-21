@@ -53,6 +53,8 @@ const CancellationPolicy = lazy(() => import("./pages/CancellationPolicy"));
 const IntellectualProperty = lazy(() => import("./pages/IntellectualProperty"));
 const WorkshopPolicy = lazy(() => import("./pages/WorkshopPolicy"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
+const CmsPage = lazy(() => import("./pages/CmsPage"));
+const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
