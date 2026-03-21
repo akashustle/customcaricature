@@ -201,41 +201,76 @@ const Index = () => {
 
       {/* Hero Section */}
       <main>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" ref={heroRef}>
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
+        {/* Floating decorative elements */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute w-1.5 h-1.5 rounded-full bg-primary/20"
+            style={{ left: `${10 + i * 12}%`, top: `${15 + (i % 4) * 18}%` }}
+            animate={{ y: [0, -30, 0], opacity: [0.1, 0.5, 0.1], scale: [1, 1.5, 1] }}
+            transition={{ duration: 3 + i * 0.7, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+          />
+        ))}
+        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-32 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="max-w-3xl mx-auto text-center">
             <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-8 rounded-2xl border-4 border-border bg-card p-1 shadow-lg"
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
-            <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">India's Premium Caricature Studio</p>
-            <h1 className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
+              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4"
+            >India's Premium Caricature Studio</motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]"
+            >
               Book Professional Caricature Artists for Your Event
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto font-body leading-relaxed">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto font-body leading-relaxed"
+            >
               Custom hand-crafted caricatures that capture personality in every stroke. For gifts, events, and memories that last forever.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
                   Order Your Caricature <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button size="xl" variant="outline" onClick={handleEventClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
                   <Zap className="w-5 h-5 mr-2" /> Book for Event
                 </Button>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
-        </div>
-        <div className="bg-card/80 border-t border-border">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
+          className="bg-card/80 border-t border-border"
+        >
           <div className="container mx-auto px-4 py-3 text-center">
             <p className="text-xs md:text-sm font-body text-muted-foreground flex items-center justify-center gap-2">
               <Clock className="w-4 h-4 text-primary" /> Due to high demand, delivery timeline is 25–30 days
             </p>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Trust Badges */}
