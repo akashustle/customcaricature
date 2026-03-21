@@ -59,6 +59,8 @@ import AdminSupport from "@/components/admin/AdminSupport";
 import AdminSEOSettings from "@/components/admin/AdminSEOSettings";
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminIntegrations from "@/components/admin/AdminIntegrations";
+import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
+import { useAdminAction } from "@/hooks/useAdminAction";
 
 type Order = {
   id: string;
@@ -235,6 +237,8 @@ const Admin = () => {
     } catch {}
   };
 
+  const { actionState, confirmAction, executeAction, cancelAction } = useAdminAction();
+
   const logAdminAction = async (action: string, details?: string) => {
     if (!user) return;
     try {
@@ -393,10 +397,8 @@ const Admin = () => {
   };
 
   const updateStatus = async (orderId: string, status: string) => {
-    // If changing to artwork_ready, check if artwork is uploaded
     if (status === "artwork_ready") {
       const { data: artPhotos } = await supabase.from("artwork_ready_photos").select("id").eq("order_id", orderId) as any;
-      // Check admin setting for bypass
       const { data: bypassSetting } = await supabase.from("admin_site_settings").select("value").eq("id", "allow_artwork_status_without_upload").maybeSingle();
       const bypassEnabled = (bypassSetting?.value as any)?.enabled === true;
       if ((!artPhotos || artPhotos.length === 0) && !bypassEnabled) {
@@ -404,36 +406,44 @@ const Admin = () => {
         return;
       }
     }
-    if (!confirm(`Change order status to "${STATUS_LABELS[status]}"?`)) return;
-    
-    // If reversing from artwork_ready/dispatched back to earlier status, reset art confirmation
-    const reverseStatuses = ["new", "in_progress"];
-    if (reverseStatuses.includes(status)) {
-      await supabase.from("orders").update({ 
-        status: status as any, 
-        art_confirmation_status: null 
-      } as any).eq("id", orderId);
-    } else {
-      await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
-    }
-    toast({ title: "Status Updated" });
-    logAdminAction("Order Status Changed", `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`);
-    fetchOrders();
+    confirmAction(
+      "Order Status Change",
+      `Order ${orderId.slice(0, 8)} → ${STATUS_LABELS[status]}`,
+      async (adminName) => {
+        const reverseStatuses = ["new", "in_progress"];
+        if (reverseStatuses.includes(status)) {
+          await supabase.from("orders").update({ status: status as any, art_confirmation_status: null } as any).eq("id", orderId);
+        } else {
+          await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
+        }
+        toast({ title: `Status Updated by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
-    if (!confirm(`Change payment to "${PAYMENT_STATUS_LABELS[paymentStatus]}"?`)) return;
-    await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
-    toast({ title: "Payment Updated" });
-    logAdminAction("Payment Status Changed", `Order ${orderId.slice(0, 8)} → ${PAYMENT_STATUS_LABELS[paymentStatus]}`);
-    fetchOrders();
+    confirmAction(
+      "Payment Status Change",
+      `Order ${orderId.slice(0, 8)} → ${PAYMENT_STATUS_LABELS[paymentStatus]}`,
+      async (adminName) => {
+        await supabase.from("orders").update({ payment_status: paymentStatus, payment_verified: paymentStatus === "confirmed" } as any).eq("id", orderId);
+        toast({ title: `Payment Updated by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const deleteOrder = async (orderId: string) => {
-    await supabase.from("orders").delete().eq("id", orderId);
-    toast({ title: "Deleted" });
-    logAdminAction("Order Deleted", `Order ${orderId.slice(0, 8)}`);
-    fetchOrders();
+    confirmAction(
+      "Delete Order",
+      `Order ${orderId.slice(0, 8)} will be permanently deleted`,
+      async (adminName) => {
+        await supabase.from("orders").delete().eq("id", orderId);
+        toast({ title: `Order deleted by ${adminName}` });
+        fetchOrders();
+      }
+    );
   };
 
   const saveNegotiatedAmount = async () => {
@@ -648,6 +658,13 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex w-full">
+      <AdminActionConfirm
+        open={actionState.pending}
+        action={actionState.action}
+        details={actionState.details}
+        onConfirm={executeAction}
+        onCancel={cancelAction}
+      />
       {/* Desktop Sidebar */}
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -1655,7 +1672,25 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              {/* Shop Nav Toggle */}
+              {/* Admin Action Prompt Toggle */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Admin Action Confirmation</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Require Name for Crucial Actions</p>
+                      <p className="text-xs text-muted-foreground font-sans">Ask admins to enter their name before status changes, deletions, and other critical actions</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).admin_action_prompt?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("admin_action_prompt", { enabled: checked });
+                        toast({ title: checked ? "Action confirmation enabled" : "Action confirmation disabled" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               <Card>
                 <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Navigation Settings</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
