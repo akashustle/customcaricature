@@ -26,6 +26,7 @@ const VIBRANT_COLORS = [
 
 const AdminAnalytics = ({ orders, customers }: Props) => {
   const [events, setEvents] = useState<any[]>([]);
+  const [drilldown, setDrilldown] = useState<{ title: string; data: any[]; columns: { key: string; label: string }[] } | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
