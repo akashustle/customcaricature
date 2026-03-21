@@ -187,6 +187,10 @@ const Workshop = () => {
       const users = data as any[];
       if (!users || users.length === 0) { toast({ title: "Not Registered", description: "Please register first or contact admin.", variant: "destructive" }); setLoading(false); return; }
       if (!users[0].is_enabled) { toast({ title: "Account Disabled", variant: "destructive" }); setLoading(false); return; }
+      // Verify password if user has one set
+      if (users[0].password && users[0].password !== loginPassword) {
+        toast({ title: "Incorrect Password", description: "Please enter the correct password.", variant: "destructive" }); setLoading(false); return;
+      }
       localStorage.setItem("workshop_user", JSON.stringify(users[0]));
       toast({ title: `Welcome, ${users[0].name}! 🎨` });
       navigate("/workshop/dashboard");
