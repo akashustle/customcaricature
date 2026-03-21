@@ -2085,53 +2085,7 @@ const CreateWorkshopForm = ({ dm, textSecondary, inputClass, btnPrimary, logActi
   );
 };
 
-/* Workshop Switcher */
-const WorkshopSwitcher = ({ dm, textPrimary, textSecondary, textMuted, cardBg, btnPrimary }: any) => {
-  const [workshops, setWorkshops] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
-      if (data) setWorkshops(data);
-      setLoading(false);
-    };
-    fetch();
-  }, []);
-
-  const switchWorkshop = async (id: string) => {
-    await supabase.from("workshops").update({ is_active: false } as any).eq("is_active", true);
-    await supabase.from("workshops").update({ is_active: true } as any).eq("id", id);
-    toast({ title: "Workshop switched!" });
-    const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
-    if (data) setWorkshops(data);
-  };
-
-  if (loading) return <p className={`${textMuted} text-sm`}>Loading...</p>;
-
-  return (
-    <div className="space-y-2 max-h-72 overflow-y-auto">
-      {workshops.map(w => (
-        <div key={w.id} className={`flex items-center justify-between ${dm ? "bg-white/5" : "bg-[#faf5ef]"} rounded-xl p-3`}>
-          <div className="flex-1 min-w-0">
-            <p className={`${textPrimary} text-sm truncate`}>{w.title}</p>
-            <p className={`${textMuted} text-xs`}>{w.dates || "No dates"} · {w.status}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {w.is_active ? (
-              <Badge className="bg-green-100 text-green-700 border-none text-[10px]">Active</Badge>
-            ) : (
-              <Button size="sm" variant="ghost" className="text-[#b08d57] text-xs font-bold h-7" onClick={() => switchWorkshop(w.id)}>
-                Activate
-              </Button>
-            )}
-          </div>
-        </div>
-      ))}
-      {workshops.length === 0 && <p className={`${textMuted} text-sm text-center py-4`}>No workshops found</p>}
-    </div>
-  );
-};
+/* Workshop Switcher - uses inner component defined in WorkshopAdmin */
 
 /* Workshop Page Content Editor */
 const WorkshopPageEditor = ({ dm, textPrimary, textSecondary, textMuted, inputClass, btnPrimary, logAction }: any) => {

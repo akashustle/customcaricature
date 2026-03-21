@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, PenTool, Clock, DollarSign, MapPin, AlertTriangle, Users, CreditCard, TrendingUp, BarChart3, RefreshCw, ShoppingCart, Zap, Target, Activity, Layers, Calendar, Globe, UserCheck, Percent, Star, Heart } from "lucide-react";
+import { Package, PenTool, Clock, DollarSign, MapPin, AlertTriangle, Users, CreditCard, TrendingUp, BarChart3, RefreshCw, ShoppingCart, Zap, Target, Activity, Layers, Calendar, Globe, UserCheck, Percent, Star, Heart, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line, RadialBarChart, RadialBar, Legend, ComposedChart, FunnelChart, Funnel, LabelList } from "recharts";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Order = {
   id: string; caricature_type: string; order_type?: string; amount: number;
@@ -23,6 +26,7 @@ const VIBRANT_COLORS = [
 
 const AdminAnalytics = ({ orders, customers }: Props) => {
   const [events, setEvents] = useState<any[]>([]);
+  const [drilldown, setDrilldown] = useState<{ title: string; data: any[]; columns: { key: string; label: string }[] } | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -200,24 +204,61 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
 
   const tooltipStyle = { borderRadius: 14, border: "1px solid hsl(30, 20%, 85%)", background: "hsl(40, 50%, 97%)", fontSize: 12 };
 
+  const openDrilldown = (title: string, data: any[], columns: { key: string; label: string }[]) => {
+    setDrilldown({ title, data, columns });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Drill-down Dialog */}
+      <Dialog open={!!drilldown} onOpenChange={() => setDrilldown(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="font-body">{drilldown?.title} ({drilldown?.data.length} items)</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {drilldown?.columns.map(c => <TableHead key={c.key} className="font-body text-xs">{c.label}</TableHead>)}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {drilldown?.data.map((row, i) => (
+                  <TableRow key={i}>
+                    {drilldown.columns.map(c => (
+                      <TableCell key={c.key} className="font-body text-xs">
+                        {c.key === "amount" || c.key === "total_price" || c.key === "advance_amount" || c.key === "negotiated_total"
+                          ? formatPrice(row[c.key] || 0)
+                          : c.key === "created_at" || c.key === "event_date"
+                          ? new Date(row[c.key]).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                          : String(row[c.key] ?? "-")}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
       {/* Combined Platform Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard3D icon={DollarSign} label="Total Revenue" value={formatPrice(totalRevenue)} color="hsl(152,50%,48%)" delay={0} />
-        <StatCard3D icon={Package} label="Total Orders" value={String(orders.length)} color="hsl(36,45%,52%)" delay={0.05} />
-        <StatCard3D icon={Calendar} label="Total Events" value={String(events.length)} color="hsl(210,65%,55%)" delay={0.1} />
-        <StatCard3D icon={Users} label="Total Users" value={String(customers.length)} color="hsl(280,50%,55%)" delay={0.15} />
+        <StatCard3D icon={DollarSign} label="Total Revenue" value={formatPrice(totalRevenue)} color="hsl(152,50%,48%)" delay={0} onClick={() => openDrilldown("Confirmed Orders + Events", [...confirmedOrders.map(o => ({ ...o, type: "Order" })), ...events.filter(e => ["confirmed","fully_paid"].includes(e.payment_status)).map(e => ({ ...e, type: "Event" }))], [{ key: "type", label: "Type" }, { key: "id", label: "ID" }, { key: "amount", label: "Amount" }, { key: "status", label: "Status" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={Package} label="Total Orders" value={String(orders.length)} color="hsl(36,45%,52%)" delay={0.05} onClick={() => openDrilldown("All Orders", orders, [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "status", label: "Status" }, { key: "payment_status", label: "Payment" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={Calendar} label="Total Events" value={String(events.length)} color="hsl(210,65%,55%)" delay={0.1} onClick={() => openDrilldown("All Events", events, [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "status", label: "Status" }, { key: "payment_status", label: "Payment" }, { key: "event_date", label: "Event Date" }])} />
+        <StatCard3D icon={Users} label="Total Users" value={String(customers.length)} color="hsl(280,50%,55%)" delay={0.15} onClick={() => openDrilldown("All Users", customers, [{ key: "full_name", label: "Name" }, { key: "email", label: "Email" }, { key: "created_at", label: "Joined" }])} />
         <StatCard3D icon={TrendingUp} label="Active (30d)" value={String(activeUsers)} color="hsl(340,55%,58%)" delay={0.2} />
       </div>
 
       {/* Financial Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard3D icon={CreditCard} label="Order Revenue" value={formatPrice(orderRevenue)} color="hsl(152,50%,48%)" delay={0} />
-        <StatCard3D icon={Star} label="Event Revenue" value={formatPrice(eventRevenue)} color="hsl(210,65%,55%)" delay={0.05} />
-        <StatCard3D icon={Clock} label="Pending Revenue" value={formatPrice(totalPendingRev)} color="hsl(38,92%,55%)" delay={0.1} />
+        <StatCard3D icon={CreditCard} label="Order Revenue" value={formatPrice(orderRevenue)} color="hsl(152,50%,48%)" delay={0} onClick={() => openDrilldown("Confirmed Orders", confirmedOrders, [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "city", label: "City" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={Star} label="Event Revenue" value={formatPrice(eventRevenue)} color="hsl(210,65%,55%)" delay={0.05} onClick={() => openDrilldown("Paid Events", events.filter(e => ["confirmed","fully_paid"].includes(e.payment_status)), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "advance_amount", label: "Advance" }, { key: "event_date", label: "Event Date" }])} />
+        <StatCard3D icon={Clock} label="Pending Revenue" value={formatPrice(totalPendingRev)} color="hsl(38,92%,55%)" delay={0.1} onClick={() => openDrilldown("Pending Payments", [...orders.filter(o => o.payment_status !== "confirmed").map(o => ({ ...o, type: "Order" })), ...events.filter(e => !["confirmed","fully_paid"].includes(e.payment_status)).map(e => ({ ...e, type: "Event", amount: e.total_price }))], [{ key: "type", label: "Type" }, { key: "id", label: "ID" }, { key: "amount", label: "Amount" }, { key: "status", label: "Status" }, { key: "created_at", label: "Date" }])} />
         <StatCard3D icon={Target} label="Avg Order" value={formatPrice(avgOrderValue)} color="hsl(280,50%,55%)" delay={0.15} />
-        <StatCard3D icon={DollarSign} label="Advance Collected" value={formatPrice(eventAdvanceCollected)} color="hsl(15,65%,55%)" delay={0.2} />
+        <StatCard3D icon={DollarSign} label="Advance Collected" value={formatPrice(eventAdvanceCollected)} color="hsl(15,65%,55%)" delay={0.2} onClick={() => openDrilldown("Events with Advance", events.filter(e => ["confirmed","fully_paid","partial_1_paid"].includes(e.payment_status)), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "advance_amount", label: "Advance" }, { key: "total_price", label: "Total" }, { key: "event_date", label: "Date" }])} />
       </div>
 
       {/* Quick Insights */}
@@ -225,25 +266,25 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
         <StatCard3D icon={Percent} label="Conversion" value={`${conversionRate}%`} color="hsl(152,50%,48%)" delay={0} />
         <StatCard3D icon={RefreshCw} label="Repeat Users" value={String(repeatCustomers)} color="hsl(180,50%,45%)" delay={0.05} />
         <StatCard3D icon={Zap} label="Most Popular" value={mostPopularType ? mostPopularType[0] : "N/A"} color="hsl(36,45%,52%)" delay={0.1} />
-        <StatCard3D icon={ShoppingCart} label="Pending Orders" value={String(pending.length)} color="hsl(38,92%,55%)" delay={0.15} />
-        <StatCard3D icon={Globe} label="Upcoming Events" value={String(upcomingEvents)} color="hsl(210,65%,55%)" delay={0.2} />
+        <StatCard3D icon={ShoppingCart} label="Pending Orders" value={String(pending.length)} color="hsl(38,92%,55%)" delay={0.15} onClick={() => openDrilldown("Pending Orders", pending, [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "status", label: "Status" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={Globe} label="Upcoming Events" value={String(upcomingEvents)} color="hsl(210,65%,55%)" delay={0.2} onClick={() => openDrilldown("Upcoming Events", events.filter(e => e.status === "upcoming"), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "status", label: "Status" }, { key: "event_date", label: "Date" }])} />
       </div>
 
-      {/* NEW: Event-specific widgets */}
+      {/* Event-specific widgets */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <StatCard3D icon={AlertTriangle} label="Remaining to Collect" value={formatPrice(eventRemainingToCollect)} color="hsl(0,55%,55%)" delay={0} />
+        <StatCard3D icon={AlertTriangle} label="Remaining to Collect" value={formatPrice(eventRemainingToCollect)} color="hsl(0,55%,55%)" delay={0} onClick={() => openDrilldown("Events with Balance", events.filter(e => ["confirmed","partial_1_paid"].includes(e.payment_status)), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "advance_amount", label: "Advance" }, { key: "event_date", label: "Date" }])} />
         <StatCard3D icon={Target} label="Avg Event Value" value={formatPrice(avgEventValue)} color="hsl(280,50%,55%)" delay={0.05} />
-        <StatCard3D icon={Calendar} label="Events This Month" value={String(eventsThisMonth)} color="hsl(36,45%,52%)" delay={0.1} />
-        <StatCard3D icon={Activity} label="Completed Events" value={String(completedEvents)} color="hsl(152,50%,48%)" delay={0.15} />
-        <StatCard3D icon={Package} label="Cancelled Events" value={String(cancelledEvents)} color="hsl(340,55%,58%)" delay={0.2} />
+        <StatCard3D icon={Calendar} label="Events This Month" value={String(eventsThisMonth)} color="hsl(36,45%,52%)" delay={0.1} onClick={() => openDrilldown("Events This Month", events.filter(e => { const d = new Date(e.event_date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "status", label: "Status" }, { key: "event_date", label: "Date" }])} />
+        <StatCard3D icon={Activity} label="Completed Events" value={String(completedEvents)} color="hsl(152,50%,48%)" delay={0.15} onClick={() => openDrilldown("Completed Events", events.filter(e => e.status === "completed"), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "event_date", label: "Date" }])} />
+        <StatCard3D icon={Package} label="Cancelled Events" value={String(cancelledEvents)} color="hsl(340,55%,58%)" delay={0.2} onClick={() => openDrilldown("Cancelled Events", events.filter(e => e.status === "cancelled"), [{ key: "id", label: "ID" }, { key: "city", label: "City" }, { key: "total_price", label: "Total" }, { key: "event_date", label: "Date" }])} />
       </div>
 
       {/* Revenue Breakdown */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard3D icon={DollarSign} label="Today" value={formatPrice(todayRevenue)} color="hsl(15,65%,55%)" delay={0} />
-        <StatCard3D icon={DollarSign} label="This Week" value={formatPrice(weeklyRevenue)} color="hsl(36,45%,52%)" delay={0.05} />
-        <StatCard3D icon={DollarSign} label="This Month" value={formatPrice(monthlyRevenue)} color="hsl(152,50%,48%)" delay={0.1} />
-        <StatCard3D icon={UserCheck} label="Negotiated" value={String(negotiatedOrders.length)} color="hsl(340,55%,58%)" delay={0.15} />
+        <StatCard3D icon={DollarSign} label="Today" value={formatPrice(todayRevenue)} color="hsl(15,65%,55%)" delay={0} onClick={() => openDrilldown("Today's Orders", confirmedOrders.filter(o => new Date(o.created_at).toDateString() === now.toDateString()), [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "created_at", label: "Time" }])} />
+        <StatCard3D icon={DollarSign} label="This Week" value={formatPrice(weeklyRevenue)} color="hsl(36,45%,52%)" delay={0.05} onClick={() => openDrilldown("This Week's Orders", confirmedOrders.filter(o => new Date(o.created_at) > weekAgo), [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={DollarSign} label="This Month" value={formatPrice(monthlyRevenue)} color="hsl(152,50%,48%)" delay={0.1} onClick={() => openDrilldown("This Month's Orders", confirmedOrders.filter(o => new Date(o.created_at) > monthAgo), [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Amount" }, { key: "created_at", label: "Date" }])} />
+        <StatCard3D icon={UserCheck} label="Negotiated" value={String(negotiatedOrders.length)} color="hsl(340,55%,58%)" delay={0.15} onClick={() => openDrilldown("Negotiated Orders", negotiatedOrders, [{ key: "id", label: "ID" }, { key: "caricature_type", label: "Type" }, { key: "amount", label: "Original" }, { key: "negotiated_amount", label: "Negotiated" }, { key: "created_at", label: "Date" }])} />
       </div>
 
       {/* Chart Row 1: Combined Revenue + Revenue Split */}
@@ -530,17 +571,20 @@ const AdminAnalytics = ({ orders, customers }: Props) => {
   );
 };
 
-const StatCard3D = ({ icon: Icon, label, value, color, delay = 0 }: { icon: any; label: string; value: string; color: string; delay?: number }) => (
+const StatCard3D = ({ icon: Icon, label, value, color, delay = 0, onClick }: { icon: any; label: string; value: string; color: string; delay?: number; onClick?: () => void }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.4 }}
-    className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1"
+    className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 ${onClick ? "cursor-pointer active:scale-95" : ""}`}
     style={{
       background: "linear-gradient(145deg, hsl(40, 50%, 98%), hsl(40, 50%, 95%))",
       border: "1px solid hsl(30, 20%, 88%)",
       boxShadow: "0 4px 14px hsl(30 20% 45% / 0.06), 0 1px 3px hsl(30 20% 45% / 0.03), inset 0 1px 0 hsl(40, 60%, 99%)",
     }}
+    onClick={onClick}
+    whileHover={onClick ? { scale: 1.02 } : undefined}
+    whileTap={onClick ? { scale: 0.97 } : undefined}
   >
     <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-10 -translate-y-6 translate-x-6" style={{ background: color }} />
     <div className="flex items-center gap-3 relative z-10">
