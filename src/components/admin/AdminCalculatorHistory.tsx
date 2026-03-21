@@ -85,7 +85,7 @@ const AdminCalculatorHistory = () => {
   };
 
   const deletePricingSet = async (id: string) => {
-    await supabase.from("calculator_pricing_sets").delete().eq("id", id);
+    await (supabase.from("calculator_pricing_sets" as any) as any).delete().eq("id", id);
     toast({ title: "Pricing set deleted" });
     fetchPricingSets();
   };

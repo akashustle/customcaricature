@@ -89,8 +89,8 @@ const CaricatureBudgeting = () => {
 
   // Fetch admin pricing sets
   useEffect(() => {
-    supabase.from("calculator_pricing_sets").select("*").eq("is_active", true).order("sort_order")
-      .then(({ data }) => { if (data) setPricingSets(data); });
+    (supabase.from("calculator_pricing_sets" as any).select("*").eq("is_active", true).order("sort_order") as any)
+      .then(({ data }: any) => { if (data) setPricingSets(data); });
   }, []);
 
   useEffect(() => {
