@@ -1,14 +1,14 @@
 import { 
   Package, Calendar, Receipt, MessageCircle, Users, DollarSign, 
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
-  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight, Moon, Sun,
-  HelpCircle, FileQuestion
+  Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight,
+  HelpCircle, FileQuestion, Shield, Zap, PenTool
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -17,64 +17,64 @@ interface AdminSidebarProps {
 
 const NAV_SECTIONS = [
   {
-    label: "Overview",
+    label: "Dashboard",
     items: [
-      { id: "orders", icon: Package, label: "Orders" },
-      { id: "events", icon: Calendar, label: "Events" },
-      { id: "payments", icon: Receipt, label: "Payments" },
-      { id: "analytics", icon: BarChart3, label: "Analytics" },
+      { id: "orders", icon: Package, label: "Orders", accent: "hsl(22 78% 52%)" },
+      { id: "events", icon: Calendar, label: "Events", accent: "hsl(210 62% 48%)" },
+      { id: "payments", icon: Receipt, label: "Payments", accent: "hsl(152 55% 40%)" },
+      { id: "analytics", icon: BarChart3, label: "Analytics", accent: "hsl(280 55% 55%)" },
     ],
   },
   {
-    label: "Communication",
+    label: "AI & Chat",
     items: [
-      { id: "ai-conversations", icon: Bot, label: "AI Chats" },
-      { id: "chatbot", icon: Settings, label: "AI Bot" },
+      { id: "ai-conversations", icon: Bot, label: "AI Chats", accent: "hsl(270 50% 55%)" },
+      { id: "chatbot", icon: Settings, label: "AI Training", accent: "hsl(190 60% 50%)" },
     ],
   },
   {
     label: "People",
     items: [
-      { id: "customers", icon: Users, label: "Customers" },
-      { id: "event-users", icon: Users, label: "Event Users" },
-      { id: "artists", icon: Star, label: "Artists" },
-      { id: "reviews", icon: Star, label: "Reviews" },
+      { id: "customers", icon: Users, label: "Customers", accent: "hsl(22 78% 52%)" },
+      { id: "event-users", icon: Users, label: "Event Users", accent: "hsl(38 88% 50%)" },
+      { id: "artists", icon: PenTool, label: "Artists", accent: "hsl(340 55% 58%)" },
+      { id: "reviews", icon: Star, label: "Reviews", accent: "hsl(38 70% 58%)" },
     ],
   },
   {
     label: "Pricing",
     items: [
-      { id: "pricing", icon: DollarSign, label: "Pricing" },
-      { id: "intl-pricing", icon: Globe, label: "Intl Pricing" },
+      { id: "pricing", icon: DollarSign, label: "Domestic", accent: "hsl(152 55% 40%)" },
+      { id: "intl-pricing", icon: Globe, label: "International", accent: "hsl(210 62% 48%)" },
     ],
   },
   {
-    label: "Tools",
+    label: "Operations",
     items: [
-      { id: "locations", icon: MapPin, label: "Locations" },
-      { id: "voice", icon: Radio, label: "Voice" },
-      { id: "notify", icon: Bell, label: "Notifications" },
-      { id: "sessions", icon: Monitor, label: "Sessions" },
+      { id: "locations", icon: MapPin, label: "Locations", accent: "hsl(15 65% 55%)" },
+      { id: "voice", icon: Radio, label: "Voice Monitor", accent: "hsl(340 55% 58%)" },
+      { id: "notify", icon: Bell, label: "Notifications", accent: "hsl(38 88% 50%)" },
+      { id: "sessions", icon: Monitor, label: "Sessions", accent: "hsl(270 50% 55%)" },
     ],
   },
   {
     label: "CRM",
     items: [
-      { id: "enquiries", icon: FileQuestion, label: "Enquiries" },
-      { id: "support", icon: HelpCircle, label: "Support" },
+      { id: "enquiries", icon: ClipboardList, label: "Enquiries", accent: "hsl(22 78% 52%)" },
+      { id: "support", icon: HelpCircle, label: "Support", accent: "hsl(210 62% 48%)" },
     ],
   },
   {
     label: "Content",
     items: [
-      { id: "blog", icon: FileQuestion, label: "Blog" },
-      { id: "seo", icon: Globe, label: "SEO" },
+      { id: "blog", icon: FileQuestion, label: "Blog", accent: "hsl(280 55% 55%)" },
+      { id: "seo", icon: Zap, label: "SEO", accent: "hsl(152 55% 40%)" },
     ],
   },
   {
     label: "System",
     items: [
-      { id: "settings", icon: Settings, label: "Settings" },
+      { id: "settings", icon: Settings, label: "Settings", accent: "hsl(28 14% 40%)" },
     ],
   },
 ];
@@ -87,88 +87,70 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     <aside 
       className={cn(
         "hidden md:flex flex-col h-screen sticky top-0 admin-glass-sidebar transition-all duration-300 z-30",
-        collapsed ? "w-[68px]" : "w-[240px]"
+        collapsed ? "w-[72px]" : "w-[260px]"
       )}
     >
       {/* Logo + Collapse */}
-      <div className="flex items-center justify-between p-3 border-b border-border/30">
+      <div className="flex items-center justify-between px-4 py-4 border-b border-border/20">
         <div 
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
-          <motion.img 
-            src="/logo.png" alt="CCC" 
-            className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm flex-shrink-0"
-            animate={{ y: [0, -2, 0] }} 
-            transition={{ duration: 3, repeat: Infinity }}
-          />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center flex-shrink-0 shadow-sm">
+            <span className="text-white font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+          </div>
           {!collapsed && (
-            <motion.span 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              className="font-body text-lg font-bold text-gradient"
-            >
-              Admin
-            </motion.span>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
+              <p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif', color: 'hsl(28,18%,14%)' }}>Admin Console</p>
+              <p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Creative Caricature Club</p>
+            </motion.div>
           )}
         </div>
-        {!collapsed && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors flex-shrink-0"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-      {/* Expand button when collapsed - shows below logo */}
-      {collapsed && (
         <button
-          onClick={() => setCollapsed(false)}
-          className="mx-auto mt-2 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-primary/10 transition-colors"
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-accent/10 transition-colors flex-shrink-0"
         >
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
         </button>
-      )}
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-2 px-2 scrollbar-thin">
         {NAV_SECTIONS.map((section) => (
-          <div key={section.label} className="mb-4">
+          <div key={section.label} className="mb-3">
             {!collapsed && (
-              <p className="text-[10px] font-sans font-bold uppercase tracking-wider text-muted-foreground/70 px-3 mb-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 px-3 mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {section.label}
               </p>
             )}
             {section.items.map((item) => {
               const isActive = activeTab === item.id;
               return (
-                <motion.button
+                <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  whileHover={{ x: 2 }}
-                  whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-sans transition-all duration-200 mb-0.5",
+                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150 mb-0.5",
                     isActive
-                      ? "bg-primary/12 text-primary font-bold shadow-sm border border-primary/15"
-                      : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
+                      ? "bg-foreground/[0.06] font-semibold text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
                   )}
+                  style={{ fontFamily: 'Inter, sans-serif' }}
                   title={collapsed ? item.label : undefined}
                 >
                   <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
-                    isActive ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted/50"
-                  )}>
-                    <item.icon className="w-4 h-4" />
+                    "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                    isActive ? "text-white shadow-sm" : "bg-transparent"
+                  )} style={isActive ? { background: item.accent } : {}}>
+                    <item.icon className={cn("w-3.5 h-3.5", !isActive && "text-muted-foreground")} />
                   </div>
                   {!collapsed && (
                     <span className="truncate">{item.label}</span>
                   )}
                   {isActive && !collapsed && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary pulse-live" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: item.accent }} />
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>
@@ -176,22 +158,24 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       </nav>
 
       {/* Bottom actions */}
-      <div className="p-2 border-t border-border/30 space-y-1">
+      <div className="p-2 border-t border-border/20 space-y-0.5">
         <button
           onClick={() => navigate("/")}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03] transition-all"
+          style={{ fontFamily: 'Inter, sans-serif' }}
           title={collapsed ? "Home" : undefined}
         >
-          <Home className="w-[18px] h-[18px] flex-shrink-0" />
+          <Home className="w-4 h-4 flex-shrink-0" />
           {!collapsed && <span>Go to Website</span>}
         </button>
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-sans text-destructive hover:bg-destructive/10 transition-all"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-destructive hover:bg-destructive/5 transition-all"
+          style={{ fontFamily: 'Inter, sans-serif' }}
           title={collapsed ? "Logout" : undefined}
         >
-          <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
     </aside>

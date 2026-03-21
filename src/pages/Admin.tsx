@@ -650,27 +650,34 @@ const Admin = () => {
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden">
-        <header className="sticky top-0 z-40 backdrop-blur-xl bg-card/80 border-b border-border shadow-sm">
-          <div className="px-4 md:px-6 py-3 flex items-center justify-between">
+      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 admin-header-premium">
+          <div className="px-4 md:px-8 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-primary/30 shadow-sm" />
-              <h1 className="font-body text-lg font-bold text-gradient">Admin</h1>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+              </div>
+              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[hsl(152,55%,40%)] animate-pulse" />
+                <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
+              </div>
+              <span className="text-muted-foreground/30">|</span>
               <LiveGreeting name={adminProfile?.full_name} />
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="font-body"><RefreshCw className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="font-body hidden md:flex">
-                <LogOut className="w-4 h-4 mr-2" /> Logout
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-8 gap-1.5 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <LogOut className="w-3.5 h-3.5" /> Sign Out
               </Button>
             </div>
           </div>
         </header>
 
-        <div className="px-4 md:px-6 py-6">
+        <div className="px-4 md:px-8 py-6">
           <div className="md:hidden mb-4">
             <LiveGreeting name={adminProfile?.full_name} />
           </div>
@@ -1848,15 +1855,13 @@ const Admin = () => {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl bg-white/95 border-t border-[#e8ddd0] shadow-lg">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
+      {/* Mobile Bottom Navigation — Premium */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden admin-header-premium safe-area-bottom">
+        <div className="flex items-center overflow-x-auto py-2 px-1 gap-0.5 scrollbar-thin">
           <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
           <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-
-
           <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
           <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
@@ -1870,7 +1875,6 @@ const Admin = () => {
           <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
           <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
-
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
           <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
           <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
@@ -1885,13 +1889,14 @@ const Admin = () => {
 };
 
 const AdminBottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${
+  <button onClick={onClick} className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg transition-all flex-shrink-0 ${
     active 
-      ? "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 scale-105 font-bold" 
-      : "text-[#6a5a4a] font-medium"
-  }`}>
-    <Icon className="w-5 h-5" />
-    <span className="text-[9px] font-body font-medium whitespace-nowrap">{label}</span>
+      ? "bg-foreground/[0.08] text-foreground font-semibold" 
+      : "text-muted-foreground"
+  }`} style={{ fontFamily: 'Inter, sans-serif' }}>
+    <Icon className="w-4.5 h-4.5" style={{ width: '18px', height: '18px' }} />
+    <span className="text-[9px] font-medium whitespace-nowrap">{label}</span>
+    {active && <div className="w-1 h-1 rounded-full bg-[hsl(22,78%,52%)]" />}
   </button>
 );
 

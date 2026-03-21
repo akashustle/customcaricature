@@ -24,8 +24,9 @@ import {
   MapPin, History, Shield, BarChart3, ChevronDown, ChevronUp, TrendingUp,
   PieChart, Activity, Moon, Sun, ChevronLeft, ChevronRight, AlertTriangle,
   ExternalLink, UsersRound, Download, RefreshCw, Search, Hash, MonitorPlay,
-  Bell, Send, Lock, Reply, Monitor,
+  Bell, Send, Lock, Reply, Monitor, GraduationCap,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
@@ -599,57 +600,72 @@ const WorkshopAdmin = () => {
   };
 
   return (
-    <div className={`min-h-screen flex ${bg} transition-colors duration-300`}>
-      {/* Sidebar - Desktop */}
-      <div className={`hidden lg:flex flex-col ${sidebarBg} backdrop-blur-xl border-r sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[68px]" : "w-[250px]"}`}>
-        <div className="flex items-center justify-between p-4 border-b border-inherit">
+    <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
+      {/* Sidebar - Desktop — Apple-grade */}
+      <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-border/20">
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl border-2 border-[#b08d57]/30 shadow-sm flex-shrink-0" />
-            {!collapsed && <div><h2 className={`text-sm ${textPrimary}`}>Workshop Admin</h2><p className={`text-[10px] ${textMuted}`}>Creative Caricature Club</p></div>}
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <GraduationCap className="w-4 h-4 text-white" />
+            </div>
+            {!collapsed && <div><p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif', color: 'hsl(28,18%,14%)' }}>Workshop Console</p><p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>CCC Academy</p></div>}
           </div>
-          <button onClick={() => setCollapsed(!collapsed)} className={`w-7 h-7 rounded-lg flex items-center justify-center ${inactiveTab} flex-shrink-0`}>
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-accent/10 transition-colors flex-shrink-0">
+            {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
           </button>
         </div>
         <nav className="flex-1 p-2 space-y-0.5">
           {sidebarItems.map((item) => (
             <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${tab === item.key ? activeTabClass : inactiveTab}`}>
-              <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150",
+                tab === item.key
+                  ? "bg-foreground/[0.06] font-semibold text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
+              )} style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className={cn(
+                "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
+                tab === item.key ? "bg-[hsl(22,78%,52%)] text-white shadow-sm" : ""
+              )}>
+                <item.icon className="w-3.5 h-3.5" />
+              </div>
               {!collapsed && <span className="truncate">{item.label}</span>}
+              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[hsl(22,78%,52%)]" />}
             </button>
           ))}
         </nav>
-        <div className="p-2 border-t border-inherit space-y-1">
-          <button onClick={() => setDarkMode(!darkMode)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm ${inactiveTab}`}>
-            {darkMode ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+        <div className="p-2 border-t border-border/20 space-y-0.5">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03] transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
           </button>
-          {!collapsed && <p className={`${textMuted} text-[10px] px-3`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</p>}
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-500/10">
-            <LogOut className="w-[18px] h-[18px]" />{!collapsed && <span>Logout</span>}
+          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-destructive hover:bg-destructive/5 transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <LogOut className="w-4 h-4" />{!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </div>
 
-      {/* Mobile Header */}
+      {/* Mobile Header — Apple-grade */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1625]/95" : "bg-white/90"} border-b ${dm ? "border-white/10" : "border-[#e8ddd0]"}`}>
+        <div className="admin-header-premium">
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-lg border border-[#b08d57]/30" />
-              <span className={`text-sm ${textPrimary}`}>Workshop Admin</span>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">
+                <GraduationCap className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</span>
             </div>
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" onClick={fetchAll} className={textSecondary}><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
-              <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className={textSecondary}>{darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-red-500"><LogOut className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
+              <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className="h-8 w-8 p-0">{darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
-          <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-1">
+          <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? activeTabClass : inactiveTab}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-foreground/[0.08] text-foreground font-semibold" : "text-muted-foreground"}`}
+                style={{ fontFamily: 'Inter, sans-serif' }}>
                 <item.icon className="w-3.5 h-3.5" />{item.label}
               </button>
             ))}
