@@ -12,10 +12,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePricing } from "@/hooks/usePricing";
 import PricingReveal from "@/components/PricingReveal";
 import UrgencyTimer from "@/components/UrgencyTimer";
-import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator } from "lucide-react";
+import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2 } from "lucide-react";
 
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
+
+// Simple sound utility using Web Audio API
+const playSound = (type: "enter" | "coin") => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === "enter") {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.5);
+    } else {
+      osc.type = "square";
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      osc.frequency.setValueAtTime(1600, ctx.currentTime + 0.05);
+      osc.frequency.setValueAtTime(2000, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.25);
+    }
+  } catch {}
+};
 
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
@@ -23,6 +53,12 @@ const CaricatureBudgeting = () => {
   const [phase, setPhase] = useState<"intro" | "event" | "caricature">("intro");
   const [introComplete, setIntroComplete] = useState(false);
   const [introStep, setIntroStep] = useState(0);
+  const soundPlayed = useRef(false);
+
+  // Admin pricing sets for caricature
+  const [pricingSets, setPricingSets] = useState<any[]>([]);
+  const [selectedPricingSet, setSelectedPricingSet] = useState<string>("");
+  const [showCaricDetails, setShowCaricDetails] = useState(false);
 
   // Event calculator state
   const [guestCount, setGuestCount] = useState("");
@@ -31,11 +67,10 @@ const CaricatureBudgeting = () => {
   const [eventTimerActive, setEventTimerActive] = useState(false);
 
   // Caricature calculator state
-  const [caricType, setCaricType] = useState("single");
+  const [caricType, setCaricType] = useState("");
   const [faceCount, setFaceCount] = useState(1);
   const [showCaricResult, setShowCaricResult] = useState(false);
 
-  // Intro animation
   const introTexts = [
     "🎨 Welcome to Creative Caricature Club",
     "💰 Let's find the perfect pricing for you...",
@@ -43,6 +78,20 @@ const CaricatureBudgeting = () => {
     "🎯 Almost there...",
     "✨ Your personalized pricing is ready!"
   ];
+
+  // Play enter sound on mount
+  useEffect(() => {
+    if (!soundPlayed.current) {
+      soundPlayed.current = true;
+      setTimeout(() => playSound("enter"), 300);
+    }
+  }, []);
+
+  // Fetch admin pricing sets
+  useEffect(() => {
+    supabase.from("calculator_pricing_sets").select("*").eq("is_active", true).order("sort_order")
+      .then(({ data }) => { if (data) setPricingSets(data); });
+  }, []);
 
   useEffect(() => {
     if (phase !== "intro") return;
@@ -59,7 +108,6 @@ const CaricatureBudgeting = () => {
     return () => clearInterval(interval);
   }, [phase]);
 
-  // Price animation during intro
   const [introPrice, setIntroPrice] = useState(25000);
   useEffect(() => {
     if (phase !== "intro" || introComplete) return;
@@ -69,7 +117,6 @@ const CaricatureBudgeting = () => {
     return () => clearInterval(interval);
   }, [phase, introComplete]);
 
-  // Event pricing logic
   const guests = parseInt(guestCount) || 0;
   const isMumbai = city.toLowerCase().includes("mumbai") || city.toLowerCase().includes("thane") || city.toLowerCase().includes("navi mumbai") || city.toLowerCase().includes("palghar");
   const suggestedArtists = guests <= 50 ? 1 : 2;
@@ -93,12 +140,21 @@ const CaricatureBudgeting = () => {
 
   const calculateEvent = () => {
     if (!guestCount || !city) return;
+    playSound("coin");
     setShowEventResult(true);
     setEventTimerActive(true);
     logSession("calculated");
   };
 
-  const caricaturePrice = getPrice(caricType, faceCount);
+  const caricaturePrice = caricType ? getPrice(caricType, faceCount) : 0;
+
+  const handleCaricCalculate = () => {
+    if (!caricType) return;
+    playSound("coin");
+    setShowCaricResult(true);
+  };
+
+  const selectedSet = pricingSets.find(p => p.id === selectedPricingSet);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
@@ -110,6 +166,7 @@ const CaricatureBudgeting = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
           <Calculator className="w-5 h-5 text-primary" />
           <h1 className="font-display text-xl font-bold">Caricature Budgeting</h1>
+          <Volume2 className="w-4 h-4 text-muted-foreground ml-auto" />
         </div>
       </div>
 
@@ -118,6 +175,13 @@ const CaricatureBudgeting = () => {
         {phase === "intro" && !introComplete && (
           <motion.div exit={{ opacity: 0, scale: 0.9 }} className="container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-[70vh]">
             <motion.div className="text-center space-y-6">
+              {/* Floating particles */}
+              {[...Array(6)].map((_, i) => (
+                <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-primary/20"
+                  style={{ left: `${15 + i * 15}%`, top: `${20 + (i % 3) * 20}%` }}
+                  animate={{ y: [0, -20, 0], opacity: [0.2, 0.6, 0.2] }}
+                  transition={{ duration: 2 + i * 0.5, repeat: Infinity, delay: i * 0.3 }} />
+              ))}
               <AnimatePresence mode="wait">
                 <motion.p key={introStep} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
                   className="text-2xl md:text-3xl font-display font-bold text-foreground">
@@ -125,7 +189,6 @@ const CaricatureBudgeting = () => {
                 </motion.p>
               </AnimatePresence>
 
-              {/* Fluctuating price animation */}
               <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}
                 className="text-5xl md:text-7xl font-display font-bold text-primary">
                 ₹{introPrice.toLocaleString("en-IN")}
@@ -164,7 +227,6 @@ const CaricatureBudgeting = () => {
                   <Palette className="w-12 h-12 mx-auto text-primary" />
                   <h3 className="font-display text-xl font-bold">Custom Caricature</h3>
                   <p className="text-sm text-muted-foreground">Personalized caricature artwork</p>
-                  <Badge className="bg-primary/10 text-primary">Starting ₹3,499</Badge>
                 </CardContent>
               </Card>
             </motion.div>
@@ -206,7 +268,6 @@ const CaricatureBudgeting = () => {
             </CardContent>
           </Card>
 
-          {/* EVENT RESULT */}
           <AnimatePresence>
             {showEventResult && (
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
@@ -216,61 +277,40 @@ const CaricatureBudgeting = () => {
                   <UrgencyTimer durationMinutes={3} message="🔥 This special rate expires in" onExpire={() => setEventTimerActive(false)} />
                 )}
 
-                {/* Suggestion Card */}
                 <Card className="border-primary/30">
                   <CardContent className="p-5 space-y-3">
                     <h3 className="font-display font-bold text-lg">
                       {suggestedArtists === 1 ? "🎨 Best for You: 1 Artist" : "🎨🎨 Recommended: 2 Artists"}
                     </h3>
-
                     <div className="space-y-2 text-sm text-foreground/80">
                       <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /><strong>4-hour</strong> live event</p>
                       <p className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" />
-                        {suggestedArtists === 1
-                          ? "1 artist can create 35-45 caricatures comfortably"
-                          : "2 artists can create 60-70 caricatures comfortably"}
+                        {suggestedArtists === 1 ? "1 artist can create 35-45 caricatures comfortably" : "2 artists can create 60-70 caricatures comfortably"}
                       </p>
-                      <p className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" />
-                        Output depends on guest flow & preference (B&W or Color)
-                      </p>
-                      <p className="text-xs text-muted-foreground italic">
-                        Sometimes output goes beyond expectations — we don't commit exact numbers as it depends on guest engagement!
-                      </p>
+                      <p className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" />Output depends on guest flow & preference (B&W or Color)</p>
+                      <p className="text-xs text-muted-foreground italic">Sometimes output goes beyond expectations — we don't commit exact numbers as it depends on guest engagement!</p>
                     </div>
-
                     {guests > 30 && guests <= 50 && (
                       <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                        <p className="text-sm text-green-800 dark:text-green-300">
-                          ✅ For {guests} guests, <strong>1 artist for 4 hours</strong> is perfect! Make your event memorable with funny caricatures! 🎉
-                        </p>
+                        <p className="text-sm text-green-800 dark:text-green-300">✅ For {guests} guests, <strong>1 artist for 4 hours</strong> is perfect! 🎉</p>
                       </div>
                     )}
-
                     {guests > 50 && (
                       <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm text-blue-800 dark:text-blue-300">
-                          🌟 For {guests} guests, <strong>2 artists</strong> will ensure every guest gets their caricature! Create lasting memories for all your guests! 🎊
-                        </p>
+                        <p className="text-sm text-blue-800 dark:text-blue-300">🌟 For {guests} guests, <strong>2 artists</strong> will ensure every guest gets their caricature! 🎊</p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
-                {/* CTA Buttons */}
                 <div className="space-y-3">
                   <Button className="w-full rounded-full text-base py-6" onClick={() => { logSession("book_event", "/book-event"); navigate("/book-event"); }}>
                     <Calendar className="w-5 h-5 mr-2" />Book Your Event Now <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
-
                   <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="rounded-full" onClick={() => { logSession("enquiry", "/enquiry"); navigate("/enquiry"); }}>
-                      📋 Send Enquiry
-                    </Button>
-                    <Button variant="outline" className="rounded-full" onClick={() => { logSession("whatsapp", "whatsapp"); window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I checked your pricing calculator. I need an event for ${guests} guests in ${city}.`, "_blank"); }}>
-                      💬 WhatsApp
-                    </Button>
+                    <Button variant="outline" className="rounded-full" onClick={() => { logSession("enquiry", "/enquiry"); navigate("/enquiry"); }}>📋 Send Enquiry</Button>
+                    <Button variant="outline" className="rounded-full" onClick={() => { logSession("whatsapp", "whatsapp"); window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I checked your pricing calculator. I need an event for ${guests} guests in ${city}.`, "_blank"); }}>💬 WhatsApp</Button>
                   </div>
-
                   <div className="flex justify-center gap-4 text-xs text-muted-foreground">
                     <a href={INSTAGRAM_URL} target="_blank" className="hover:text-primary transition-colors">📸 Instagram</a>
                     <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" className="hover:text-primary transition-colors">📱 WhatsApp Support</a>
@@ -286,13 +326,9 @@ const CaricatureBudgeting = () => {
       {/* CARICATURE CALCULATOR */}
       {phase === "caricature" && (
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-lg">
-          <Button variant="ghost" size="sm" onClick={() => { setPhase("intro"); setIntroComplete(true); setShowCaricResult(false); }} className="mb-4">
+          <Button variant="ghost" size="sm" onClick={() => { setPhase("intro"); setIntroComplete(true); setShowCaricResult(false); setShowCaricDetails(false); }} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-1" />Back
           </Button>
-
-          {!showCaricResult && (
-            <PricingReveal finalPrice={5000} revealed={false} showRange rangeMin={3000} rangeMax={25000} label="Caricature Pricing" urgencyMessage="Select type to see your price" className="mb-6" />
-          )}
 
           <Card>
             <CardContent className="p-6 space-y-5">
@@ -301,38 +337,66 @@ const CaricatureBudgeting = () => {
               <div>
                 <Label>Caricature Type</Label>
                 <Select value={caricType} onValueChange={(v) => { setCaricType(v); setShowCaricResult(false); }}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select type..." /></SelectTrigger>
                   <SelectContent>
                     {types.length > 0 ? types.map(t => (
-                      <SelectItem key={t.slug} value={t.slug}>{t.name} — ₹{t.price.toLocaleString("en-IN")}{t.per_face ? "/face" : ""}</SelectItem>
+                      <SelectItem key={t.slug} value={t.slug}>{t.name}</SelectItem>
                     )) : (
                       <>
-                        <SelectItem value="single">Single — ₹3,499</SelectItem>
-                        <SelectItem value="couple">Couple — ₹9,499</SelectItem>
-                        <SelectItem value="group">Group — ₹3,499/face</SelectItem>
+                        <SelectItem value="single">Single</SelectItem>
+                        <SelectItem value="couple">Couple</SelectItem>
+                        <SelectItem value="group">Group</SelectItem>
                       </>
                     )}
                   </SelectContent>
                 </Select>
               </div>
 
-              {(caricType === "group" || types.find(t => t.slug === caricType)?.per_face) && (
-                <div>
+              {caricType && (caricType === "group" || types.find(t => t.slug === caricType)?.per_face) && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
                   <Label>Number of Faces</Label>
                   <Input type="number" min={1} max={6} value={faceCount} onChange={(e) => setFaceCount(Math.max(1, Math.min(6, parseInt(e.target.value) || 1)))} className="mt-1" />
+                </motion.div>
+              )}
+
+              {/* Admin pricing sets section */}
+              {pricingSets.length > 0 && (
+                <div>
+                  <Label>Pricing Package (Optional)</Label>
+                  <Select value={selectedPricingSet} onValueChange={(v) => { setSelectedPricingSet(v); setShowCaricDetails(false); }}>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select a package..." /></SelectTrigger>
+                    <SelectContent>
+                      {pricingSets.map(ps => (
+                        <SelectItem key={ps.id} value={ps.id}>{ps.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
-              <Button onClick={() => setShowCaricResult(true)} className="w-full rounded-full">
-                <Sparkles className="w-4 h-4 mr-2" />Calculate Price
-              </Button>
+              {caricType && (
+                <Button onClick={handleCaricCalculate} className="w-full rounded-full">
+                  <Sparkles className="w-4 h-4 mr-2" />Calculate Price
+                </Button>
+              )}
             </CardContent>
           </Card>
 
           <AnimatePresence>
-            {showCaricResult && (
+            {showCaricResult && caricType && (
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
-                <PricingReveal finalPrice={caricaturePrice} revealed={true} label="Your Caricature Price" />
+                <PricingReveal finalPrice={selectedSet ? selectedSet.price : caricaturePrice} revealed={true} label="Your Caricature Price" />
+
+                {selectedSet?.details && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <Card className="border-primary/20">
+                      <CardContent className="p-4">
+                        <p className="text-sm font-semibold mb-1">{selectedSet.label}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">{selectedSet.details}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
 
                 <div className="space-y-3 mt-4">
                   <Button className="w-full rounded-full text-base py-6" onClick={() => navigate("/order")}>
