@@ -407,6 +407,136 @@ const AdminWorkshop = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Workshop Management */}
+          <h2 className="font-display text-lg font-bold pt-4">Workshop Details</h2>
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div>
+                <Label className="text-sm font-sans">Workshop Title</Label>
+                <Input
+                  value={settings.workshop_details?.title || ""}
+                  onChange={async (e) => {
+                    await supabase.from("workshop_settings" as any).update({
+                      value: { ...settings.workshop_details, title: e.target.value },
+                      updated_at: new Date().toISOString(),
+                    } as any).eq("id", "workshop_details");
+                    fetchSettings();
+                  }}
+                  placeholder="Caricature Masterclass Workshop"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-sans">Description</Label>
+                <Textarea
+                  value={settings.workshop_details?.description || ""}
+                  onChange={async (e) => {
+                    await supabase.from("workshop_settings" as any).update({
+                      value: { ...settings.workshop_details, description: e.target.value },
+                      updated_at: new Date().toISOString(),
+                    } as any).eq("id", "workshop_details");
+                    fetchSettings();
+                  }}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm font-sans">Dates</Label>
+                  <Input
+                    value={settings.workshop_details?.dates || ""}
+                    onChange={async (e) => {
+                      await supabase.from("workshop_settings" as any).update({
+                        value: { ...settings.workshop_details, dates: e.target.value },
+                        updated_at: new Date().toISOString(),
+                      } as any).eq("id", "workshop_details");
+                      fetchSettings();
+                    }}
+                    placeholder="14 & 15 March 2026"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-sans">Duration</Label>
+                  <Input
+                    value={settings.workshop_details?.duration || ""}
+                    onChange={async (e) => {
+                      await supabase.from("workshop_settings" as any).update({
+                        value: { ...settings.workshop_details, duration: e.target.value },
+                        updated_at: new Date().toISOString(),
+                      } as any).eq("id", "workshop_details");
+                      fetchSettings();
+                    }}
+                    placeholder="3 hours per session"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm font-sans">Price</Label>
+                  <Input
+                    value={settings.workshop_details?.price || ""}
+                    onChange={async (e) => {
+                      await supabase.from("workshop_settings" as any).update({
+                        value: { ...settings.workshop_details, price: e.target.value },
+                        updated_at: new Date().toISOString(),
+                      } as any).eq("id", "workshop_details");
+                      fetchSettings();
+                    }}
+                    placeholder="₹2,999"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-sans">WhatsApp Contact</Label>
+                  <Input
+                    value={settings.workshop_details?.contact_whatsapp || ""}
+                    onChange={async (e) => {
+                      await supabase.from("workshop_settings" as any).update({
+                        value: { ...settings.workshop_details, contact_whatsapp: e.target.value },
+                        updated_at: new Date().toISOString(),
+                      } as any).eq("id", "workshop_details");
+                      fetchSettings();
+                    }}
+                    placeholder="8433843725"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-sans">Highlights (comma-separated)</Label>
+                <Input
+                  value={(settings.workshop_details?.highlights || []).join(", ")}
+                  onChange={async (e) => {
+                    const highlights = e.target.value.split(",").map((h: string) => h.trim()).filter(Boolean);
+                    await supabase.from("workshop_settings" as any).update({
+                      value: { ...settings.workshop_details, highlights },
+                      updated_at: new Date().toISOString(),
+                    } as any).eq("id", "workshop_details");
+                    fetchSettings();
+                  }}
+                  placeholder="Live demonstrations, Hands-on practice, Certificate"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Available Slots */}
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <h3 className="font-sans font-semibold text-sm">Available Slots</h3>
+              <p className="text-xs text-muted-foreground font-sans">Comma-separated time slots for registration</p>
+              <Input
+                value={(settings.registration_slots?.slots || []).join(", ")}
+                onChange={async (e) => {
+                  const slots = e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean);
+                  await supabase.from("workshop_settings" as any).update({
+                    value: { slots },
+                    updated_at: new Date().toISOString(),
+                  } as any).eq("id", "registration_slots");
+                  fetchSettings();
+                }}
+                placeholder="12pm-3pm, 6pm-9pm"
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

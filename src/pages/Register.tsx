@@ -132,14 +132,16 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8 pb-24 md:pb-8">
-      <Card className="w-full max-w-md" style={{ boxShadow: "var(--shadow-card)" }}>
-        <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
-          <CardTitle className="font-display text-2xl">Create Account</CardTitle>
-          <CardDescription className="font-sans">Register to track your caricature orders</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen brand-gradient-bg flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden">
+      <motion.div className="absolute w-56 h-56 rounded-full opacity-15 animate-morph" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.25), transparent)", top: "5%", left: "5%" }} animate={{ y: [0, -15, 0] }} transition={{ duration: 7, repeat: Infinity }} />
+      <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+        <Card className="w-full max-w-md shadow-3d border-glow">
+          <CardHeader className="text-center">
+            <motion.img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer shadow-3d" onClick={() => navigate("/")} animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }} />
+            <CardTitle className="font-calligraphy text-2xl text-3d">Create Account</CardTitle>
+            <CardDescription className="font-body">Register to track your caricature orders</CardDescription>
+          </CardHeader>
+          <CardContent>
           {/* Progress Steps */}
           <div className="flex items-center justify-between mb-6 px-2">
             {STEPS.map((s, i) => (
@@ -305,6 +307,7 @@ const Register = () => {
           </p>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   );
 };

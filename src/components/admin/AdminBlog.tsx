@@ -11,8 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Edit2, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, EyeOff, Upload, Image } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 type BlogPost = {
   id: string;
@@ -44,6 +45,7 @@ const AdminBlog = () => {
   const [form, setForm] = useState(EMPTY_POST);
   const [showEditor, setShowEditor] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -184,8 +186,44 @@ const AdminBlog = () => {
             </div>
 
             <div>
-              <Label className="font-sans">Cover Image URL</Label>
-              <Input value={form.cover_image} onChange={(e) => setForm({ ...form, cover_image: e.target.value })} placeholder="https://..." className="font-sans" />
+              <Label className="font-sans">Cover Image</Label>
+              <div className="flex gap-2">
+                <Input value={form.cover_image} onChange={(e) => setForm({ ...form, cover_image: e.target.value })} placeholder="https://... or upload →" className="font-sans flex-1" />
+                <label className="cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    try {
+                      const path = `blog/${Date.now()}_${file.name}`;
+                      const { error } = await supabase.storage.from("blog-images" as any).upload(path, file);
+                      if (error) {
+                        // If bucket doesn't exist, try workshop-files as fallback
+                        const { error: err2 } = await supabase.storage.from("workshop-files").upload(`blog/${Date.now()}_${file.name}`, file);
+                        if (err2) throw err2;
+                        const { data: urlData } = await supabase.storage.from("workshop-files").getPublicUrl(`blog/${Date.now()}_${file.name}`);
+                        setForm({ ...form, cover_image: urlData?.publicUrl || "" });
+                      } else {
+                        const { data: urlData } = await supabase.storage.from("blog-images" as any).getPublicUrl(path);
+                        setForm({ ...form, cover_image: urlData?.publicUrl || "" });
+                      }
+                      toast({ title: "Image uploaded!" });
+                    } catch (err: any) {
+                      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                    } finally {
+                      setUploading(false);
+                    }
+                  }} />
+                  <Button type="button" variant="outline" size="sm" disabled={uploading} className="font-sans" asChild>
+                    <span>{uploading ? "Uploading..." : <><Upload className="w-4 h-4 mr-1" />Upload</>}</span>
+                  </Button>
+                </label>
+              </div>
+              {form.cover_image && (
+                <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-border">
+                  <img src={form.cover_image} alt="Cover preview" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
 
             <div>
