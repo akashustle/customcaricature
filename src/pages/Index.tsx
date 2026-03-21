@@ -476,19 +476,34 @@ const Index = () => {
       <HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" />
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20 md:py-28">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center max-w-2xl mx-auto">
-          <h2 className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6">Make Your Event Unforgettable</h2>
+      <section className="container mx-auto px-4 py-20 md:py-28 relative">
+        {/* Background glow */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="text-center max-w-2xl mx-auto relative z-10">
+          <motion.h2
+            className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+          >Make Your Event Unforgettable</motion.h2>
           <p className="text-muted-foreground font-body mb-10 text-lg leading-relaxed">
             Turn your favorite photos into stunning hand-crafted caricatures. Perfect for gifts, events & memories!
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold">
+            <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
+              <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
                 Start Your Order <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
               <Button size="xl" variant="outline" onClick={() => navigate("/track-order")} className="rounded-full font-body font-semibold border-border hover:bg-card">
                 <Search className="w-5 h-5 mr-2" /> Track Order
               </Button>

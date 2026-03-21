@@ -119,7 +119,8 @@ const CaricatureBudgeting = () => {
 
   const handleCaricCalculate = () => {
     if (!caricType) return;
-    playSound("coin");
+    playCashRegister();
+    setTimeout(() => playCurrencySound(), 250);
     setShowCaricResult(true);
   };
 
