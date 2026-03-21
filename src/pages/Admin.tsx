@@ -1534,8 +1534,15 @@ const Admin = () => {
             <AdminSupport />
           </TabsContent>
 
+          <TabsContent value="blog">
+            <AdminBlog />
+          </TabsContent>
 
-          {/* Settings Tab */}
+          <TabsContent value="seo">
+            <AdminSEOSettings />
+          </TabsContent>
+
+
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
               {/* Site Controls */}
