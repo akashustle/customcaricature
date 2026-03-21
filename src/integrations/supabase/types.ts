@@ -1189,6 +1189,39 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_reviews: {
+        Row: {
+          created_at: string | null
+          designation: string | null
+          id: string
+          is_visible: boolean | null
+          rating: number
+          review_text: string
+          reviewer_name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          is_visible?: boolean | null
+          rating?: number
+          review_text: string
+          reviewer_name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          is_visible?: boolean | null
+          rating?: number
+          review_text?: string
+          reviewer_name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       international_event_pricing: {
         Row: {
           advance_amount: number
@@ -1913,6 +1946,30 @@ export type Database = {
           },
         ]
       }
+      scroll_event_images: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       seo_page_settings: {
         Row: {
           id: string
@@ -2498,6 +2555,36 @@ export type Database = {
           status?: string
           subject?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      trusted_brands: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          logo_url: string
+          name: string
+          sort_order: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          logo_url: string
+          name: string
+          sort_order?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          logo_url?: string
+          name?: string
+          sort_order?: number | null
         }
         Relationships: []
       }

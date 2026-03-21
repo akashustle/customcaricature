@@ -9,6 +9,9 @@ import { useState, useCallback } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import HomepageGallery from "@/components/HomepageGallery";
+import HomepageScrollEvents from "@/components/HomepageScrollEvents";
+import HomepageReviews from "@/components/HomepageReviews";
+import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -298,6 +301,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Scroll Event Gallery Slideshow */}
+      <HomepageScrollEvents />
+
       {/* Services */}
       <section className="bg-card/50 py-16 md:py-24 border-y border-border/50">
         <div className="container mx-auto px-4">
@@ -376,36 +382,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-card/50 py-16 md:py-24 border-y border-border/50">
-        <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">What Our Clients Say</p>
-            <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">Loved by Thousands</h2>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              { name: "Priya S.", review: "Absolutely stunning work! The caricature captured my husband's personality perfectly. Best anniversary gift ever!", rating: 5 },
-              { name: "Rahul M.", review: "Booked for our corporate event — the artist was professional, fast, and our guests loved their portraits!", rating: 5 },
-              { name: "Ananya K.", review: "The attention to detail is incredible. Ordered for my parents' 25th anniversary and they were thrilled!", rating: 5 },
-            ].map((testimonial, i) => (
-              <motion.div key={testimonial.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                <Card className="card-3d h-full">
-                  <CardContent className="p-6">
-                    <div className="flex gap-1 mb-4">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`w-4 h-4 ${s <= testimonial.rating ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
-                      ))}
-                    </div>
-                    <p className="text-sm font-body text-foreground leading-relaxed mb-4">"{testimonial.review}"</p>
-                    <p className="text-xs font-body font-semibold text-primary">{testimonial.name}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Dynamic Reviews from Admin */}
+      <HomepageReviews />
+
+      {/* Trusted Brands */}
+      <HomepageTrustedBrands />
 
       {/* Event Gallery */}
       <HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" />
@@ -492,6 +473,7 @@ const Index = () => {
               <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
               <div className="flex flex-col gap-2">
                 <Link to="/about" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">About Us</Link>
+                <Link to="/enquiry" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Enquiry</Link>
                 <Link to="/track-order" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Track Order</Link>
                 <Link to="/blog" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Blog</Link>
                 <Link to="/support" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Support</Link>

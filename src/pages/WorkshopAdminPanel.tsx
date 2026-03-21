@@ -95,6 +95,8 @@ const WorkshopAdmin = () => {
   const [certUploadFile, setCertUploadFile] = useState<File | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState("8433843725");
   const [refreshing, setRefreshing] = useState(false);
+  const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState<string>("current");
   const [liveRequests, setLiveRequests] = useState<any[]>([]);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [editVideoData, setEditVideoData] = useState<any>({});
@@ -151,8 +153,12 @@ const WorkshopAdmin = () => {
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications(), fetchArtists()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications(), fetchArtists(), fetchAllWorkshops()]);
     setRefreshing(false);
+  };
+  const fetchAllWorkshops = async () => {
+    const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+    if (data) setAllWorkshops(data as any[]);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
   const fetchVideos = async () => { const { data } = await supabase.from("workshop_videos" as any).select("*").order("created_at", { ascending: false }); if (data) setVideos(data as any[]); };
@@ -825,7 +831,22 @@ const WorkshopAdmin = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
-                    <RefreshButton />
+                    <div className="flex items-center gap-2">
+                      <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
+                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
+                          <SelectValue placeholder="Select Workshop" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="current">Current (Active)</SelectItem>
+                          {allWorkshops.map((ws: any) => (
+                            <SelectItem key={ws.id} value={ws.id}>
+                              {ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <RefreshButton />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
