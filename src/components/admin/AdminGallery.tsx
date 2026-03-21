@@ -23,7 +23,7 @@ const GallerySection = ({ table, bucketFolder }: { table: string; bucketFolder: 
 
   const fetchItems = async () => {
     const { data } = await supabase.from(table as any).select("*").order("sort_order");
-    if (data) setItems(data as GalleryItem[]);
+    if (data) setItems(data as unknown as GalleryItem[]);
   };
 
   useEffect(() => {
