@@ -21,61 +21,55 @@ const MobileBottomNav = () => {
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
   const items = [
-    { icon: Home, label: "Home", path: "/", action: () => navigate("/") },
-    ...(shopNavVisible ? [{ icon: Store, label: "Shop", path: "/shop", action: () => navigate("/shop") }] : []),
-    ...(workshopNavVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop", action: () => navigate("/workshop") }] : []),
-    { icon: Package, label: "Track", path: "/track-order", action: () => navigate("/track-order") },
-    ...(supportNavVisible ? [{ icon: HeadphonesIcon, label: "Support", path: "/support", action: () => navigate("/support") }] : []),
+    { icon: Home, label: "Home", path: "/" },
+    ...(shopNavVisible ? [{ icon: Store, label: "Shop", path: "/shop" }] : []),
+    ...(workshopNavVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop" }] : []),
+    { icon: Package, label: "Track", path: "/track-order" },
+    ...(supportNavVisible ? [{ icon: HeadphonesIcon, label: "Support", path: "/support" }] : []),
     ...(user
-      ? [{ icon: User, label: "Dashboard", path: "/dashboard", action: () => navigate("/dashboard") }]
-      : [{ icon: User, label: "Login", path: "/login", action: () => navigate("/login") }]),
+      ? [{ icon: User, label: "Dashboard", path: "/dashboard" }]
+      : [{ icon: User, label: "Login", path: "/login" }]),
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-      <div className="backdrop-blur-2xl bg-card/85 border-t border-border/40 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
-        <div className="flex items-center justify-around py-1.5 px-1 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
+      <div className="bg-card/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-around px-2 py-2 max-w-lg mx-auto">
           {items.map((item) => {
             const active = location.pathname === item.path;
             return (
               <motion.button
                 key={item.path}
-                onClick={item.action}
-                whileTap={{ scale: 0.9 }}
-                className="flex flex-col items-center gap-0.5 min-w-[52px] py-1 relative group"
+                onClick={() => navigate(item.path)}
+                whileTap={{ scale: 0.88 }}
+                className="flex flex-col items-center gap-0.5 min-w-0 flex-1 py-1 relative"
               >
-                {active && (
-                  <motion.div
-                    layoutId="nav-indicator"
-                    className="absolute -top-1.5 w-10 h-1 rounded-full bg-gradient-to-r from-primary to-primary/70"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <motion.div
-                  animate={active ? { scale: 1.1, y: -2 } : { scale: 1, y: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className={`flex items-center justify-center w-9 h-9 rounded-2xl transition-all duration-200 ${
-                    active
-                      ? "bg-primary/15 shadow-[0_2px_8px_hsl(var(--primary)/0.2)]"
-                      : "group-active:bg-muted"
-                  }`}
-                >
-                  <item.icon className={`w-[18px] h-[18px] transition-all duration-200 ${
-                    active ? "text-primary stroke-[2.5]" : "text-muted-foreground group-hover:text-foreground"
-                  }`} />
-                </motion.div>
-                <span className={`text-[9px] font-body font-semibold leading-none transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground/80"
+                <div className={`flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200 ${
+                  active ? "bg-primary/12" : ""
+                }`}>
+                  <item.icon className={`w-[20px] h-[20px] transition-colors duration-200 ${
+                    active ? "text-primary" : "text-muted-foreground"
+                  }`} strokeWidth={active ? 2.5 : 1.8} />
+                </div>
+                <span className={`text-[10px] font-body leading-none transition-colors duration-200 ${
+                  active ? "text-primary font-bold" : "text-muted-foreground font-medium"
                 }`}>
                   {item.label}
                 </span>
+                {active && (
+                  <motion.div
+                    layoutId="mobile-nav-dot"
+                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
               </motion.button>
             );
           })}
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </div>
-    </div>
+    </nav>
   );
 };
 

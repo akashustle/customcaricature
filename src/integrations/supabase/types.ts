@@ -3151,46 +3151,94 @@ export type Database = {
       }
       workshops: {
         Row: {
+          brochure_image_url: string | null
+          brochure_pdf_url: string | null
           contact_whatsapp: string | null
           created_at: string
           dates: string | null
           description: string | null
           duration: string | null
+          faq: Json | null
           highlights: string[] | null
           id: string
+          instructor_bio: string | null
+          instructor_name: string | null
+          instructor_stats: Json | null
+          instructor_title: string | null
           is_active: boolean
+          max_participants: number | null
+          preview_video_url: string | null
           price: string | null
+          registration_enabled: boolean | null
+          requirements: string | null
+          skill_level: string | null
           status: string
           title: string
           updated_at: string
+          what_you_learn: string[] | null
+          who_is_for: string[] | null
+          workshop_language: string | null
+          workshop_mode: string | null
         }
         Insert: {
+          brochure_image_url?: string | null
+          brochure_pdf_url?: string | null
           contact_whatsapp?: string | null
           created_at?: string
           dates?: string | null
           description?: string | null
           duration?: string | null
+          faq?: Json | null
           highlights?: string[] | null
           id?: string
+          instructor_bio?: string | null
+          instructor_name?: string | null
+          instructor_stats?: Json | null
+          instructor_title?: string | null
           is_active?: boolean
+          max_participants?: number | null
+          preview_video_url?: string | null
           price?: string | null
+          registration_enabled?: boolean | null
+          requirements?: string | null
+          skill_level?: string | null
           status?: string
           title: string
           updated_at?: string
+          what_you_learn?: string[] | null
+          who_is_for?: string[] | null
+          workshop_language?: string | null
+          workshop_mode?: string | null
         }
         Update: {
+          brochure_image_url?: string | null
+          brochure_pdf_url?: string | null
           contact_whatsapp?: string | null
           created_at?: string
           dates?: string | null
           description?: string | null
           duration?: string | null
+          faq?: Json | null
           highlights?: string[] | null
           id?: string
+          instructor_bio?: string | null
+          instructor_name?: string | null
+          instructor_stats?: Json | null
+          instructor_title?: string | null
           is_active?: boolean
+          max_participants?: number | null
+          preview_video_url?: string | null
           price?: string | null
+          registration_enabled?: boolean | null
+          requirements?: string | null
+          skill_level?: string | null
           status?: string
           title?: string
           updated_at?: string
+          what_you_learn?: string[] | null
+          who_is_for?: string[] | null
+          workshop_language?: string | null
+          workshop_mode?: string | null
         }
         Relationships: []
       }

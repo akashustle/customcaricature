@@ -1,0 +1,17 @@
+ALTER TABLE public.workshops
+ADD COLUMN IF NOT EXISTS brochure_image_url text DEFAULT '',
+ADD COLUMN IF NOT EXISTS brochure_pdf_url text DEFAULT '',
+ADD COLUMN IF NOT EXISTS registration_enabled boolean DEFAULT false,
+ADD COLUMN IF NOT EXISTS instructor_name text DEFAULT 'Ritesh Gupta',
+ADD COLUMN IF NOT EXISTS instructor_title text DEFAULT 'Founder & Lead Artist, Creative Caricature Club',
+ADD COLUMN IF NOT EXISTS instructor_bio text DEFAULT '',
+ADD COLUMN IF NOT EXISTS instructor_stats jsonb DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS faq jsonb DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS what_you_learn text[] DEFAULT ARRAY[]::text[],
+ADD COLUMN IF NOT EXISTS who_is_for text[] DEFAULT ARRAY[]::text[],
+ADD COLUMN IF NOT EXISTS workshop_mode text DEFAULT 'Live Online',
+ADD COLUMN IF NOT EXISTS workshop_language text DEFAULT 'English & Hindi',
+ADD COLUMN IF NOT EXISTS skill_level text DEFAULT 'Beginner to Intermediate',
+ADD COLUMN IF NOT EXISTS requirements text DEFAULT 'Drawing materials & stable internet',
+ADD COLUMN IF NOT EXISTS max_participants integer DEFAULT 60,
+ADD COLUMN IF NOT EXISTS preview_video_url text DEFAULT '';
