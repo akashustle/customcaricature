@@ -65,6 +65,8 @@ import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
 import AdminGallery from "@/components/admin/AdminGallery";
 import AdminHomepageReviews from "@/components/admin/AdminHomepageReviews";
 import AdminTrustedBrands from "@/components/admin/AdminTrustedBrands";
+import AdminPages from "@/components/admin/AdminPages";
+import AdminCalculatorHistory from "@/components/admin/AdminCalculatorHistory";
 
 type Order = {
   id: string;
