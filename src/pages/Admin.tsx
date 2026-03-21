@@ -62,6 +62,7 @@ import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
 import { useAdminAction } from "@/hooks/useAdminAction";
 import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
+import AdminGallery from "@/components/admin/AdminGallery";
 
 type Order = {
   id: string;
@@ -1564,6 +1565,10 @@ const Admin = () => {
 
           <TabsContent value="blog">
             <AdminBlog />
+          </TabsContent>
+
+          <TabsContent value="gallery">
+            <AdminGallery />
           </TabsContent>
 
           <TabsContent value="files">

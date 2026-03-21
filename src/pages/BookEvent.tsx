@@ -21,6 +21,7 @@ import { EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import PricingReveal from "@/components/PricingReveal";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getCountries, getCountryStates, getCountryCities } from "@/lib/countries-data";
 import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";
@@ -499,11 +500,11 @@ const BookEvent = () => {
           </CardContent>
         </Card>
 
-        {/* Pricing Range Preview (after city selected, before availability check) */}
+        {/* Pricing Range Preview with Fluctuation Effect */}
         {((isInternational && country && intlCity) || (!isInternational && state && district && actualCity)) && !availabilityChecked && (
           <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4 space-y-2">
-              <p className="font-sans font-semibold text-sm flex items-center gap-2">💰 Estimated Pricing Range</p>
+            <CardContent className="p-5 space-y-3">
+              <p className="font-sans font-semibold text-sm flex items-center gap-2">💰 Estimated Pricing</p>
               {(() => {
                 if (isInternational) {
                   const countryPricing = intlPricing.filter((p: any) => p.country === country);
@@ -511,43 +512,64 @@ const BookEvent = () => {
                     const minPrice = Math.min(...countryPricing.map((p: any) => p.total_price));
                     const maxPrice = Math.max(...countryPricing.map((p: any) => p.total_price));
                     return (
-                      <p className="font-sans text-lg font-bold text-primary">
-                        {formatPrice(minPrice)} – {formatPrice(maxPrice)}
-                        <span className="text-xs font-normal text-muted-foreground ml-2">(International - {country})</span>
-                      </p>
+                      <PricingReveal
+                        finalPrice={minPrice}
+                        revealed={false}
+                        showRange={true}
+                        rangeMin={minPrice}
+                        rangeMax={maxPrice}
+                        label={`International - ${country}`}
+                      />
                     );
                   }
                   return <p className="text-sm text-muted-foreground font-sans">Custom quote will be provided. Check availability to proceed.</p>;
                 }
                 const mumbaiDistricts = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
                 const regionIsMumbai = state === "Maharashtra" && mumbaiDistricts.includes(district);
-                const region = regionIsMumbai ? "mumbai" : "pan_india";
                 const cpRegion = regionIsMumbai ? "mumbai" : "outside";
                 const cp = customerEventPricing.filter((p: any) => p.region === cpRegion);
                 if (cp.length > 0) {
                   const minPrice = Math.min(...cp.map((p: any) => p.custom_total_price));
                   const maxPrice = Math.max(...cp.map((p: any) => p.custom_total_price));
                   return (
-                    <p className="font-sans text-lg font-bold text-primary">
-                      {formatPrice(minPrice)} – {formatPrice(maxPrice)}
-                      <span className="text-xs font-normal text-muted-foreground ml-2">(Custom pricing for you)</span>
-                    </p>
+                    <PricingReveal
+                      finalPrice={minPrice}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={minPrice}
+                      rangeMax={maxPrice}
+                      label="Custom pricing for you"
+                    />
                   );
                 }
+                const region = regionIsMumbai ? "mumbai" : "pan_india";
                 const regionPricing = dbPricing.filter((p: any) => p.region === region || (region === "pan_india" && p.region === "outside"));
                 if (regionPricing.length > 0) {
                   const minPrice = Math.min(...regionPricing.map((p: any) => p.total_price));
                   const maxPrice = Math.max(...regionPricing.map((p: any) => p.total_price));
                   return (
-                    <p className="font-sans text-lg font-bold text-primary">
-                      {formatPrice(minPrice)} – {formatPrice(maxPrice)}
-                      <span className="text-xs font-normal text-muted-foreground ml-2">({regionIsMumbai ? "Mumbai" : "Pan India"} rates)</span>
-                    </p>
+                    <PricingReveal
+                      finalPrice={minPrice}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={minPrice}
+                      rangeMax={maxPrice}
+                      label={regionIsMumbai ? "Mumbai rates" : "Pan India rates"}
+                    />
                   );
                 }
-                return <p className="text-sm text-muted-foreground font-sans">Pricing will be shown after availability check</p>;
+                return (
+                  <PricingReveal
+                    finalPrice={40000}
+                    revealed={false}
+                    showRange={true}
+                    rangeMin={30000}
+                    rangeMax={80000}
+                    label="Estimated range"
+                  />
+                );
               })()}
-              <p className="text-[11px] text-muted-foreground font-sans">Final price depends on number of artists and extra hours. Check availability to see full pricing.</p>
+              <p className="text-[11px] text-muted-foreground font-sans text-center">🎉 Your guests will love this experience! Check availability to see final pricing.</p>
             </CardContent>
           </Card>
         )}

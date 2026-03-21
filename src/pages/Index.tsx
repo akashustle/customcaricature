@@ -8,6 +8,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useState, useCallback } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
+import HomepageGallery from "@/components/HomepageGallery";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -405,6 +406,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Event Gallery */}
+      <HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" />
+
+      {/* Caricature Gallery */}
+      <HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" />
 
       {/* CTA */}
       <section className="container mx-auto px-4 py-20 md:py-28">

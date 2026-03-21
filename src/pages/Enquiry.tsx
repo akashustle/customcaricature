@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import SEOHead from "@/components/SEOHead";
+import PricingReveal from "@/components/PricingReveal";
+import UrgencyTimer from "@/components/UrgencyTimer";
 
 type Step = "info" | "type" | "caricature_select" | "caricature_details" | "event_details" | "event_submitted" | "help";
 
@@ -254,19 +256,25 @@ const Enquiry = () => {
               <h2 className="font-display text-xl font-bold text-center">Enquiry Submitted!</h2>
               <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
 
-              {/* Pricing */}
+              {/* Pricing with reveal animation */}
               {priceData && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
-                  <p className="text-xs text-muted-foreground font-sans mb-1 capitalize">{caricatureType} Caricature</p>
-                  <p className="font-display text-3xl font-bold text-primary">
-                    ₹{priceData.price.toLocaleString("en-IN")}
-                    {priceData.per_face && <span className="text-sm font-sans font-normal text-muted-foreground">/face</span>}
-                  </p>
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                  <PricingReveal
+                    finalPrice={priceData.price}
+                    revealed={true}
+                    label={`${caricatureType} Caricature${priceData.per_face ? " (per face)" : ""}`}
+                  />
                   {details.delivery_days && (
-                    <p className="text-xs text-muted-foreground font-sans mt-1">📦 Delivery: ~{details.delivery_days} days</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-2 text-center">📦 Delivery: ~{details.delivery_days} days</p>
                   )}
                 </div>
               )}
+
+              {/* Urgency Timer */}
+              <UrgencyTimer
+                durationMinutes={10}
+                message="Best offer expires in"
+              />
 
               {/* Admin-editable details text */}
               {details.full_details && (
@@ -324,18 +332,26 @@ const Enquiry = () => {
               <h2 className="font-display text-xl font-bold text-center">Event Enquiry Submitted!</h2>
               <p className="text-center text-sm text-muted-foreground font-sans">ID: <span className="font-bold text-foreground">{enquiryId}</span></p>
 
-              {/* Pricing */}
+              {/* Pricing with reveal */}
               {resolvedPrice && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
-                  <p className="text-xs text-muted-foreground font-sans mb-1">Estimated Event Price</p>
-                  <p className="font-display text-3xl font-bold text-primary">
-                    {resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}{resolvedPrice.price.toLocaleString("en-IN")}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                  <PricingReveal
+                    finalPrice={resolvedPrice.price}
+                    currency={resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}
+                    revealed={true}
+                    label="Event Booking Price"
+                  />
+                  <p className="text-[10px] text-muted-foreground font-sans mt-2 text-center">
                     Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
                   </p>
                 </div>
               )}
+
+              {/* Urgency Timer */}
+              <UrgencyTimer
+                durationMinutes={10}
+                message="Best offer expires in"
+              />
 
               {/* Region-specific details from admin */}
               {regionDetails.details && (
@@ -612,17 +628,32 @@ const Enquiry = () => {
                   )}
                 </div>
 
-                {/* Estimated Price */}
+                {/* Fluctuating price range before submission */}
+                {!resolvedPrice && (state || city) && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={40000}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={30000}
+                      rangeMax={80000}
+                      label="Estimated Event Price"
+                    />
+                  </div>
+                )}
+
+                {/* Resolved price with fluctuation */}
                 {resolvedPrice && (
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-300">
-                    <div className="flex items-center gap-2 mb-1">
-                      <IndianRupee className="w-4 h-4 text-primary" />
-                      <p className="text-xs text-muted-foreground font-sans font-medium">Estimated Event Booking Price</p>
-                    </div>
-                    <p className="font-display text-2xl font-bold text-primary">
-                      ₹{resolvedPrice.price.toLocaleString("en-IN")}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={resolvedPrice.price}
+                      revealed={!!state && !!city}
+                      showRange={!state || !city}
+                      rangeMin={30000}
+                      rangeMax={80000}
+                      label="Estimated Event Booking Price"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-sans mt-1 text-center">
                       Based on {resolvedPrice.source.toLowerCase()} pricing · Final price may vary
                     </p>
                   </div>

@@ -504,6 +504,30 @@ export type Database = {
         }
         Relationships: []
       }
+      caricature_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       caricature_types: {
         Row: {
           created_at: string
@@ -1104,6 +1128,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       event_pricing: {
         Row: {
