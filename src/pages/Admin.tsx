@@ -1795,6 +1795,32 @@ const Admin = () => {
                       }}
                     />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Support in Mobile Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show support tab in mobile bottom navigation</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).support_mobile_nav?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("support_mobile_nav", { enabled: checked });
+                        toast({ title: checked ? "Support added to mobile nav" : "Support removed from mobile nav" });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Workshop in User Dashboard</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show workshop registration tab on user dashboard</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).workshop_dashboard_visible?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("workshop_dashboard_visible", { enabled: checked });
+                        toast({ title: checked ? "Workshop visible on dashboard" : "Workshop hidden from dashboard" });
+                      }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 

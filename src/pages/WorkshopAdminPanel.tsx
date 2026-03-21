@@ -1830,6 +1830,27 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
           <div className="flex gap-1 items-center">
             <Badge className={`text-[10px] ${assignment.status === "graded" ? "bg-[#7c9885]/20 text-[#5a7a65]" : "bg-[#8fa3bf]/20 text-[#6a8aaa]"}`}>{assignment.status}</Badge>
             <Button variant="ghost" size="sm" onClick={viewFile} className={textSecondary}><Eye className="w-4 h-4" /></Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-red-400 h-7 w-7 p-0"><Trash2 className="w-3.5 h-3.5" /></Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this assignment?</AlertDialogTitle>
+                  <AlertDialogDescription>This will permanently delete the assignment by {assignment.workshop_users?.name || "User"}.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={async () => {
+                    if (assignment.storage_path) {
+                      await supabase.storage.from("workshop-files").remove([assignment.storage_path]);
+                    }
+                    await supabase.from("workshop_assignments" as any).delete().eq("id", assignment.id);
+                    toast({ title: "Assignment deleted" });
+                  }}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         {!grading && assignment.status !== "graded" && (
