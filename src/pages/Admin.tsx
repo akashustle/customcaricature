@@ -61,6 +61,7 @@ import AdminBlog from "@/components/admin/AdminBlog";
 import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
 import { useAdminAction } from "@/hooks/useAdminAction";
+import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
 
 type Order = {
   id: string;
