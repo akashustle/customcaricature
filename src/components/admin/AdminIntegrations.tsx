@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,18 +8,42 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Smartphone, Key, Shield, Save, ExternalLink } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminIntegrations = () => {
-  const { settings, updateSetting } = useSiteSettings();
+  const { settings, loading, updateSetting } = useSiteSettings();
 
   // OneSignal
-  const [onesignalAppId, setOnesignalAppId] = useState((settings as any)?.onesignal_config?.app_id || "");
-  const [onesignalEnabled, setOnesignalEnabled] = useState((settings as any)?.onesignal_config?.enabled || false);
+  const [onesignalAppId, setOnesignalAppId] = useState("");
+  const [onesignalEnabled, setOnesignalEnabled] = useState(false);
 
   // OTP
-  const [otpEnabled, setOtpEnabled] = useState((settings as any)?.otp_config?.enabled || false);
-  const [otpApiKey, setOtpApiKey] = useState((settings as any)?.otp_config?.api_key || "");
-  const [otpProvider, setOtpProvider] = useState((settings as any)?.otp_config?.provider || "twilio");
+  const [otpEnabled, setOtpEnabled] = useState(false);
+  const [otpApiKey, setOtpApiKey] = useState("");
+  const [otpProvider, setOtpProvider] = useState("twilio");
+
+  // Load from DB settings
+  useEffect(() => {
+    if (loading) return;
+    // Fetch integration settings directly since they aren't in the typed SiteSettings
+    const fetchIntegrationSettings = async () => {
+      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config"]);
+      if (data) {
+        data.forEach((row: any) => {
+          if (row.id === "onesignal_config" && row.value) {
+            setOnesignalEnabled(row.value.enabled || false);
+            setOnesignalAppId(row.value.app_id || "");
+          }
+          if (row.id === "otp_config" && row.value) {
+            setOtpEnabled(row.value.enabled || false);
+            setOtpApiKey(row.value.api_key || "");
+            setOtpProvider(row.value.provider || "twilio");
+          }
+        });
+      }
+    };
+    fetchIntegrationSettings();
+  }, [loading]);
 
   const saveOneSignal = async () => {
     await updateSetting("onesignal_config", {
@@ -38,6 +62,10 @@ const AdminIntegrations = () => {
     toast({ title: "OTP settings saved ✅" });
   };
 
+  if (loading) {
+    return <p className="text-center text-muted-foreground py-10">Loading...</p>;
+  }
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold font-display flex items-center gap-2">
@@ -46,13 +74,13 @@ const AdminIntegrations = () => {
       </h2>
 
       {/* OneSignal Push Notifications */}
-      <Card className="admin-card-premium">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bell className="w-5 h-5 text-accent" />
             OneSignal Push Notifications
             {onesignalEnabled ? (
-              <Badge className="bg-emerald-100 text-emerald-700 text-xs ml-2">Active</Badge>
+              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
             ) : (
               <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
             )}
@@ -97,13 +125,13 @@ const AdminIntegrations = () => {
       </Card>
 
       {/* Mobile OTP Verification */}
-      <Card className="admin-card-premium">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Smartphone className="w-5 h-5 text-accent" />
             Mobile OTP Verification
             {otpEnabled ? (
-              <Badge className="bg-emerald-100 text-emerald-700 text-xs ml-2">Active</Badge>
+              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
             ) : (
               <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
             )}
