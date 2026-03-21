@@ -1745,8 +1745,7 @@ const Admin = () => {
                 </CardContent>
               </Card>
 
-              {/* SEO Settings */}
-              <AdminSEOSettings />
+              {/* SEO Settings moved to dedicated tab */}
 
               {/* Admin Profile */}
               <Card>
