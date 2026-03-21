@@ -193,9 +193,11 @@ const Login = () => {
                   Your secret code was provided during registration. Check your dashboard.
                 </p>
               </div>
-              <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
-                {loading ? "Signing in..." : "Sign In with Secret Code"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full rounded-full font-body btn-3d">
+                  {loading ? "Signing in..." : "Sign In with Secret Code"}
+                </Button>
+              </motion.div>
             </form>
           )}
 
