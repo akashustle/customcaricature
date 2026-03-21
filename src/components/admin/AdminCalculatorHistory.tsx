@@ -73,7 +73,7 @@ const AdminCalculatorHistory = () => {
 
   const updatePricingSet = async () => {
     if (!editingSet) return;
-    await supabase.from("calculator_pricing_sets").update({
+    await (supabase.from("calculator_pricing_sets" as any) as any).update({
       label: editingSet.label,
       price: parseFloat(editingSet.price),
       details: editingSet.details,
