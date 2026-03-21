@@ -108,7 +108,8 @@ const CaricatureBudgeting = () => {
 
   const calculateEvent = () => {
     if (!guestCount || !city) return;
-    playSound("coin");
+    playCashRegister();
+    setTimeout(() => playCoinDrop(), 300);
     setShowEventResult(true);
     setEventTimerActive(true);
     logSession("calculated");
