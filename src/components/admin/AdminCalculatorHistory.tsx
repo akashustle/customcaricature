@@ -31,7 +31,7 @@ const AdminCalculatorHistory = () => {
   };
 
   const fetchPricingSets = async () => {
-    const { data } = await supabase.from("calculator_pricing_sets").select("*").order("sort_order", { ascending: true });
+    const { data } = await (supabase.from("calculator_pricing_sets" as any).select("*").order("sort_order", { ascending: true }) as any);
     if (data) setPricingSets(data);
   };
 
