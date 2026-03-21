@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format, addYears } from "date-fns";
 import { cn } from "@/lib/utils";
 import SEOHead from "@/components/SEOHead";
+import PricingReveal from "@/components/PricingReveal";
+import UrgencyTimer from "@/components/UrgencyTimer";
 
 type Step = "info" | "type" | "caricature_select" | "caricature_details" | "event_details" | "event_submitted" | "help";
 
