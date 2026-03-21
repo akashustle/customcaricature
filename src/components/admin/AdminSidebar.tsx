@@ -65,6 +65,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "Content",
+    items: [
+      { id: "blog", icon: FileQuestion, label: "Blog" },
+      { id: "seo", icon: Globe, label: "SEO" },
+    ],
+  },
+  {
     label: "System",
     items: [
       { id: "settings", icon: Settings, label: "Settings" },
