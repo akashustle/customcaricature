@@ -45,6 +45,7 @@ const AdminBlog = () => {
   const [form, setForm] = useState(EMPTY_POST);
   const [showEditor, setShowEditor] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchPosts();
