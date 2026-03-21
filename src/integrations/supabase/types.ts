@@ -504,6 +504,39 @@ export type Database = {
         }
         Relationships: []
       }
+      calculator_pricing_sets: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          is_active: boolean
+          label: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calculator_sessions: {
         Row: {
           action_taken: string | null
