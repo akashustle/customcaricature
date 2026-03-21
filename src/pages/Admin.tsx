@@ -658,6 +658,13 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex w-full">
+      <AdminActionConfirm
+        open={actionState.pending}
+        action={actionState.action}
+        details={actionState.details}
+        onConfirm={executeAction}
+        onCancel={cancelAction}
+      />
       {/* Desktop Sidebar */}
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
