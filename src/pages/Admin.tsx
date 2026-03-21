@@ -1884,6 +1884,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
           <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
           <AdminBottomNavItem icon={Globe} label="SEO" active={activeTab === "seo"} onClick={() => setActiveTab("seo")} />
+          <AdminBottomNavItem icon={Settings} label="Integrations" active={activeTab === "integrations"} onClick={() => setActiveTab("integrations")} />
           <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
