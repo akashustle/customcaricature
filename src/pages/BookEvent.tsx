@@ -21,6 +21,7 @@ import { EVENT_TYPES, getEventPrice, calculateGatewayCharges } from "@/lib/event
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import PricingReveal from "@/components/PricingReveal";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { getCountries, getCountryStates, getCountryCities } from "@/lib/countries-data";
 import InternationalLocationDropdowns from "@/components/InternationalLocationDropdowns";
