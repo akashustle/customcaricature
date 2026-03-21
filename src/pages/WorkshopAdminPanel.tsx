@@ -1594,6 +1594,9 @@ const WorkshopAdmin = () => {
                     </div>
                   </GlassCard>
 
+                  {/* Workshop Page Content Editor */}
+                  <WorkshopPageEditor dm={dm} textPrimary={textPrimary} textSecondary={textSecondary} textMuted={textMuted} inputClass={inputClass} btnPrimary={btnPrimary} logAction={logAction} />
+
                   {/* Create New Workshop */}
                   <GlassCard>
                     <h3 className={`${textPrimary} text-sm mb-3 flex items-center gap-2`}><Plus className="w-4 h-4 text-[#b08d57]" /> Create New Workshop</h3>
