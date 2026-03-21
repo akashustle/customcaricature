@@ -596,6 +596,25 @@ const Enquiry = () => {
                   <Calendar className="w-5 h-5 text-primary" /> Event Details
                 </h3>
 
+                {/* Show range pricing at top before any data entered */}
+                {!state && !city && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
+                    <PricingReveal
+                      finalPrice={50000}
+                      revealed={false}
+                      showRange={true}
+                      rangeMin={30000}
+                      rangeMax={90000}
+                      label="🎨 Live Event Caricature"
+                      urgencyMessage="Select location to see your exclusive price!"
+                    />
+                  </div>
+                )}
+
+                <div className="text-center p-2 rounded-lg bg-accent/5">
+                  <p className="text-[10px] font-sans text-muted-foreground">😄 Make a smile on your guests with funny caricatures!</p>
+                </div>
+
                 {/* Event Type Dropdown */}
                 <div>
                   <Label className="font-sans">Event Type *</Label>
