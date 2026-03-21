@@ -273,7 +273,7 @@ const TrackOrder = () => {
             <p className="font-sans text-muted-foreground">No order found with that ID</p>
           </CardContent></Card>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };
