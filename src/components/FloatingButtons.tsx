@@ -9,7 +9,7 @@ const FloatingButtons = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
 
-  const allowedPaths = ["/", "/about", "/terms", "/privacy", "/refund", "/shipping", "/track-order", "/event-policy"];
+  const allowedPaths = ["/", "/about", "/terms", "/privacy", "/refund", "/shipping", "/track-order", "/event-policy", "/blog", "/enquiry", "/support", "/shop", "/book-event", "/order"];
   if (!allowedPaths.includes(location.pathname)) return null;
 
   return (

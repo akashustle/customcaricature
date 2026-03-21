@@ -3149,6 +3149,51 @@ export type Database = {
         }
         Relationships: []
       }
+      workshops: {
+        Row: {
+          contact_whatsapp: string | null
+          created_at: string
+          dates: string | null
+          description: string | null
+          duration: string | null
+          highlights: string[] | null
+          id: string
+          is_active: boolean
+          price: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contact_whatsapp?: string | null
+          created_at?: string
+          dates?: string | null
+          description?: string | null
+          duration?: string | null
+          highlights?: string[] | null
+          id?: string
+          is_active?: boolean
+          price?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          contact_whatsapp?: string | null
+          created_at?: string
+          dates?: string | null
+          description?: string | null
+          duration?: string | null
+          highlights?: string[] | null
+          id?: string
+          is_active?: boolean
+          price?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
