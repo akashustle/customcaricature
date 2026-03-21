@@ -208,6 +208,7 @@ const Login = () => {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   );
 };
