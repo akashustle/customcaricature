@@ -53,6 +53,8 @@ const CancellationPolicy = lazy(() => import("./pages/CancellationPolicy"));
 const IntellectualProperty = lazy(() => import("./pages/IntellectualProperty"));
 const WorkshopPolicy = lazy(() => import("./pages/WorkshopPolicy"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
+const CmsPage = lazy(() => import("./pages/CmsPage"));
+const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +108,8 @@ const App = () => {
               <Route path="/intellectual-property" element={<IntellectualProperty />} />
               <Route path="/workshop-policy" element={<WorkshopPolicy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/page/:slug" element={<CmsPage />} />
+              <Route path="/caricature-budgeting" element={<CaricatureBudgeting />} />
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/book-event" element={<BookEvent />} />
               <Route path="/event-policy" element={<EventPolicy />} />

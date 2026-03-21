@@ -2,7 +2,7 @@ import {
   Package, Calendar, Receipt, MessageCircle, Users, DollarSign, 
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
   Settings, Search, Home, GraduationCap, ClipboardList, LogOut, ChevronLeft, ChevronRight,
-  HelpCircle, FileQuestion, Shield, Zap, PenTool, Image
+  HelpCircle, FileQuestion, Shield, Zap, PenTool, Image, FileText, Calculator
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -71,8 +71,10 @@ const NAV_SECTIONS = [
       { id: "gallery", icon: Image, label: "Gallery", accent: "hsl(340 55% 58%)" },
       { id: "hp-reviews", icon: Star, label: "HP Reviews", accent: "hsl(38 70% 58%)" },
       { id: "brands", icon: Shield, label: "Brands", accent: "hsl(210 62% 48%)" },
-      { id: "files", icon: FileQuestion, label: "Files", accent: "hsl(200 55% 50%)" },
+      { id: "pages", icon: FileText, label: "Pages", accent: "hsl(200 55% 50%)" },
+      { id: "files", icon: FileQuestion, label: "Files", accent: "hsl(175 55% 45%)" },
       { id: "seo", icon: Zap, label: "SEO", accent: "hsl(152 55% 40%)" },
+      { id: "calculator", icon: Calculator, label: "Calculator", accent: "hsl(22 78% 52%)" },
     ],
   },
   {
