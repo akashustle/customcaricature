@@ -114,7 +114,9 @@ const Workshop = () => {
   const [regForm, setRegForm] = useState({
     name: "", email: "", mobile: "", instagram_id: "", age: "",
     occupation: "", artist_background: "no", why_suitable: "", slot: "",
+    password: "",
   });
+  const [loginPassword, setLoginPassword] = useState("");
   const [submittingReg, setSubmittingReg] = useState(false);
 
   useEffect(() => {
@@ -185,6 +187,10 @@ const Workshop = () => {
       const users = data as any[];
       if (!users || users.length === 0) { toast({ title: "Not Registered", description: "Please register first or contact admin.", variant: "destructive" }); setLoading(false); return; }
       if (!users[0].is_enabled) { toast({ title: "Account Disabled", variant: "destructive" }); setLoading(false); return; }
+      // Verify password if user has one set
+      if (users[0].password && users[0].password !== loginPassword) {
+        toast({ title: "Incorrect Password", description: "Please enter the correct password.", variant: "destructive" }); setLoading(false); return;
+      }
       localStorage.setItem("workshop_user", JSON.stringify(users[0]));
       toast({ title: `Welcome, ${users[0].name}! 🎨` });
       navigate("/workshop/dashboard");
@@ -194,8 +200,8 @@ const Workshop = () => {
   };
 
   const handleRegister = async () => {
-    if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot) {
-      toast({ title: "Please fill all required fields", variant: "destructive" }); return;
+    if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot || !regForm.password) {
+      toast({ title: "Please fill all required fields (including password)", variant: "destructive" }); return;
     }
     setSubmittingReg(true);
     try {
@@ -232,6 +238,7 @@ const Workshop = () => {
         slot: regForm.slot,
         student_type: "registered_online",
         workshop_date: "2026-03-14",
+        password: regForm.password,
       } as any);
       if (error) throw error;
       toast({ title: "Registration Successful! 🎉", description: "You can now login to the workshop." });
@@ -264,6 +271,7 @@ const Workshop = () => {
         <div><Label>Full Name *</Label><Input value={regForm.name} onChange={e => setRegForm({...regForm, name: e.target.value})} placeholder="Your full name" /></div>
         <div><Label>Email *</Label><Input type="email" value={regForm.email} onChange={e => setRegForm({...regForm, email: e.target.value})} placeholder="your@email.com" /></div>
         <div><Label>Mobile Number *</Label><Input value={regForm.mobile} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setRegForm({...regForm, mobile: d}); }} placeholder="10-digit number" maxLength={10} /></div>
+        <div><Label>Password *</Label><Input type="password" value={regForm.password} onChange={e => setRegForm({...regForm, password: e.target.value})} placeholder="Create a password for login" /></div>
         <div><Label>Instagram ID</Label><Input value={regForm.instagram_id} onChange={e => setRegForm({...regForm, instagram_id: e.target.value})} placeholder="@yourid" /></div>
       </div>,
       <div key="step1" className="space-y-4">
@@ -318,7 +326,7 @@ const Workshop = () => {
                 <Button variant="outline" onClick={() => setView("details")} className="rounded-full">Cancel</Button>
                 {regStep < regSteps.length - 1 ? (
                   <Button onClick={() => {
-                    if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile)) { toast({ title: "Fill required fields", variant: "destructive" }); return; }
+                    if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.password)) { toast({ title: "Fill required fields (including password)", variant: "destructive" }); return; }
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (
@@ -357,14 +365,18 @@ const Workshop = () => {
                 {loginType === "mobile" ? (
                   <div className="space-y-2">
                     <Label className="font-body text-sm">Mobile Number</Label>
-                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} onKeyDown={e => e.key === "Enter" && handleLogin()} /></div>
+                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <Label className="font-body text-sm">Email Address</Label>
-                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} /></div>
+                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label className="font-body text-sm">Password</Label>
+                  <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} />
+                </div>
                 <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
                   {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
                 </Button>

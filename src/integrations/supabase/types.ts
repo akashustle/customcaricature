@@ -3295,11 +3295,13 @@ export type Database = {
           mobile: string
           name: string
           occupation: string | null
+          password: string | null
           payment_screenshot_path: string | null
           prefers_recorded: boolean
           prefers_recorded_at: string | null
           prefers_recorded_note: string | null
           roll_number: number | null
+          secret_code: string | null
           slot: string
           student_type: string
           updated_at: string
@@ -3320,11 +3322,13 @@ export type Database = {
           mobile: string
           name: string
           occupation?: string | null
+          password?: string | null
           payment_screenshot_path?: string | null
           prefers_recorded?: boolean
           prefers_recorded_at?: string | null
           prefers_recorded_note?: string | null
           roll_number?: number | null
+          secret_code?: string | null
           slot: string
           student_type?: string
           updated_at?: string
@@ -3345,11 +3349,13 @@ export type Database = {
           mobile?: string
           name?: string
           occupation?: string | null
+          password?: string | null
           payment_screenshot_path?: string | null
           prefers_recorded?: boolean
           prefers_recorded_at?: string | null
           prefers_recorded_note?: string | null
           roll_number?: number | null
+          secret_code?: string | null
           slot?: string
           student_type?: string
           updated_at?: string

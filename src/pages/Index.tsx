@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight, Star, Users, Calendar, Award, Zap, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import HomepageGallery from "@/components/HomepageGallery";
@@ -114,6 +114,11 @@ const Index = () => {
   const { settings } = useSiteSettings();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
 
   const handleOrderClick = () => navigate(user ? "/order" : "/login");
   const handleEventClick = () => {
@@ -196,61 +201,105 @@ const Index = () => {
 
       {/* Hero Section */}
       <main>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" ref={heroRef}>
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-3xl mx-auto text-center">
+        {/* Floating decorative elements */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute w-1.5 h-1.5 rounded-full bg-primary/20"
+            style={{ left: `${10 + i * 12}%`, top: `${15 + (i % 4) * 18}%` }}
+            animate={{ y: [0, -30, 0], opacity: [0.1, 0.5, 0.1], scale: [1, 1.5, 1] }}
+            transition={{ duration: 3 + i * 0.7, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+          />
+        ))}
+        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-32 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="max-w-3xl mx-auto text-center">
             <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-8 rounded-2xl border-4 border-border bg-card p-1 shadow-lg"
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
-            <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">India's Premium Caricature Studio</p>
-            <h1 className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
+              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4"
+            >India's Premium Caricature Studio</motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]"
+            >
               Book Professional Caricature Artists for Your Event
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto font-body leading-relaxed">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto font-body leading-relaxed"
+            >
               Custom hand-crafted caricatures that capture personality in every stroke. For gifts, events, and memories that last forever.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold">
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
                   Order Your Caricature <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button size="xl" variant="outline" onClick={handleEventClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
                   <Zap className="w-5 h-5 mr-2" /> Book for Event
                 </Button>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
-        </div>
-        <div className="bg-card/80 border-t border-border">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.5 }}
+          className="bg-card/80 border-t border-border"
+        >
           <div className="container mx-auto px-4 py-3 text-center">
             <p className="text-xs md:text-sm font-body text-muted-foreground flex items-center justify-center gap-2">
               <Clock className="w-4 h-4 text-primary" /> Due to high demand, delivery timeline is 25–30 days
             </p>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Trust Badges */}
-      <section className="py-12 md:py-16 bg-card/50 border-y border-border/50">
+      <section className="py-16 md:py-20 bg-card/50 border-y border-border/50 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {trustStats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, rotateY: 90, scale: 0.8 }}
-                whileInView={{ opacity: 1, rotateY: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, duration: 0.6, type: "spring" }}
-                whileHover={{ rotateY: 10, scale: 1.05 }}
-                className="text-center perspective-1000"
+                initial={{ opacity: 0, y: 60, scale: 0.5 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: i * 0.12, duration: 0.7, type: "spring", bounce: 0.4 }}
+                whileHover={{ y: -8, scale: 1.08, transition: { duration: 0.3 } }}
+                className="text-center group cursor-default"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <motion.div
+                  className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors"
+                  whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
+                >
                   <stat.icon className="w-6 h-6 text-primary" />
-                </div>
-                <p className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground">{stat.value}</p>
+                </motion.div>
+                <motion.p
+                  className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12 + 0.3, duration: 0.5 }}
+                >{stat.value}</motion.p>
                 <p className="text-xs font-body text-muted-foreground mt-1">{stat.label}</p>
               </motion.div>
             ))}
@@ -259,9 +308,15 @@ const Index = () => {
       </section>
 
       {/* Gallery */}
-      <section className="py-12 md:py-16" aria-label="Gallery of recent caricature work">
+      <section className="py-16 md:py-20" aria-label="Gallery of recent caricature work">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-8">
+            <motion.p
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3"
+            >Portfolio</motion.p>
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-2">Our Recent Work</h2>
             <p className="text-muted-foreground font-body">Every stroke tells a story — tap to view fullscreen</p>
           </motion.div>
@@ -271,7 +326,7 @@ const Index = () => {
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16 md:py-24">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
           <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Simple Process</p>
           <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">How It Works</h2>
           <p className="text-muted-foreground font-body max-w-md mx-auto">Get your custom caricature in three easy steps</p>
@@ -282,17 +337,29 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
-            <motion.div key={item.step} initial={{ opacity: 0, rotateX: -15, y: 40 }} whileInView={{ opacity: 1, rotateX: 0, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.2, type: "spring" }} whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
-              className="cursor-pointer perspective-1000" onClick={() => navigate(item.route)}>
-              <Card className="text-center card-3d h-full">
+            <motion.div
+              key={item.step}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.7, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -12, transition: { duration: 0.3, ease: "easeOut" } }}
+              className="cursor-pointer group"
+              onClick={() => navigate(item.route)}
+            >
+              <Card className="text-center h-full border border-border group-hover:border-primary/30 group-hover:shadow-xl transition-all duration-500">
                 <CardContent className="pt-10 pb-8 px-6">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15">
+                  <motion.div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                    whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                    transition={{ duration: 0.4 }}
+                  >
                     <item.icon className="w-7 h-7 text-primary" />
-                  </div>
+                  </motion.div>
                   <span className="text-[10px] font-body font-bold text-primary uppercase tracking-widest">Step {item.step}</span>
                   <h3 className="font-calligraphy text-2xl font-semibold mt-2 mb-3 text-foreground">{item.title}</h3>
                   <p className="text-sm text-muted-foreground font-body leading-relaxed">{item.desc}</p>
-                  <span className="inline-flex items-center gap-1 mt-4 text-xs font-body font-semibold text-primary hover:underline">
+                  <span className="inline-flex items-center gap-1 mt-4 text-xs font-body font-semibold text-primary group-hover:gap-2 transition-all">
                     Learn more <ArrowRight className="w-3 h-3" />
                   </span>
                 </CardContent>
@@ -357,22 +424,35 @@ const Index = () => {
       </section>
 
       {/* Styles */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 overflow-hidden">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
             <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Pick Your Vibe</p>
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">Our Styles</h2>
             <p className="text-muted-foreground font-body">Choose the vibe that matches your personality</p>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div key={style.name} initial={{ opacity: 0, rotateY: 90, scale: 0.7 }} whileInView={{ opacity: 1, rotateY: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1, type: "spring" }} whileHover={{ scale: 1.06, y: -6, rotateY: 8 }}
-                onClick={handleOrderClick} className="perspective-1000">
-                <Card className="group cursor-pointer border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-lg">
+              <motion.div
+                key={style.name}
+                initial={{ opacity: 0, y: 50, rotate: -3 }}
+                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.08, y: -10, transition: { duration: 0.25 } }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleOrderClick}
+                className="cursor-pointer"
+              >
+                <Card className="group border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-xl hover:shadow-primary/5">
                   <CardContent className="p-5 md:p-6 text-center">
-                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors">
+                    <motion.div
+                      className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
                       <style.icon className="w-6 h-6 text-primary" />
-                    </div>
+                    </motion.div>
                     <h3 className="font-calligraphy text-xl md:text-2xl font-semibold mb-1 text-foreground">{style.name}</h3>
                     <p className="text-xs text-muted-foreground font-body">{style.desc}</p>
                   </CardContent>
@@ -396,19 +476,34 @@ const Index = () => {
       <HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" />
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20 md:py-28">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center max-w-2xl mx-auto">
-          <h2 className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6">Make Your Event Unforgettable</h2>
+      <section className="container mx-auto px-4 py-20 md:py-28 relative">
+        {/* Background glow */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <div className="w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="text-center max-w-2xl mx-auto relative z-10">
+          <motion.h2
+            className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+          >Make Your Event Unforgettable</motion.h2>
           <p className="text-muted-foreground font-body mb-10 text-lg leading-relaxed">
             Turn your favorite photos into stunning hand-crafted caricatures. Perfect for gifts, events & memories!
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold">
+            <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
+              <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
                 Start Your Order <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
               <Button size="xl" variant="outline" onClick={() => navigate("/track-order")} className="rounded-full font-body font-semibold border-border hover:bg-card">
                 <Search className="w-5 h-5 mr-2" /> Track Order
               </Button>

@@ -1039,7 +1039,7 @@ const WorkshopAdmin = () => {
                     <div className="flex gap-2 flex-wrap">
                       <RefreshButton />
                       <Button size="sm" variant="outline" onClick={assignRollNumbers} className={`rounded-xl text-xs ${dm ? "border-white/20 text-white/60" : "border-[#d4c4b4] text-[#6a5a4a]"}`}><Hash className="w-3 h-3 mr-1" />Assign Rolls</Button>
-                      <ExportButton data={subUsers.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
+                      <ExportButton data={subUsers.map((u: any) => ({ Roll: u.roll_number || "—", Name: u.name, Email: u.email, Mobile: u.mobile, Gender: u.gender || "—", Age: u.age || "—", Slot: u.slot, Type: u.student_type, SecretCode: u.secret_code || "—", Enabled: u.is_enabled }))} sheetName="Users" fileName="CCC_Workshop_Users" />
                       <Dialog open={showAddUser} onOpenChange={setShowAddUser}>
                         <DialogTrigger asChild><Button size="sm" className={`${btnPrimary} rounded-xl`}><Plus className="w-4 h-4 mr-1" />Add User</Button></DialogTrigger>
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -1977,6 +1977,7 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[10px]`}>{u.slot === "12pm-3pm" ? "12–3 PM" : "6–9 PM"}</Badge>
                 {u.age && <Badge className={`${dm ? "bg-white/10 text-white/60" : "bg-[#e8ddd0] text-[#6a5a4a]"} text-[10px]`}>Age: {u.age}</Badge>}
+                {u.secret_code && <Badge className={`${dm ? "bg-yellow-500/20 text-yellow-300" : "bg-yellow-100 text-yellow-700"} text-[10px]`}>🔑 {u.secret_code}</Badge>}
               </div>
             </div>
             {isExpanded ? <ChevronUp className={`w-4 h-4 ${textMuted}`} /> : <ChevronDown className={`w-4 h-4 ${textMuted}`} />}
