@@ -326,7 +326,7 @@ const Workshop = () => {
                 <Button variant="outline" onClick={() => setView("details")} className="rounded-full">Cancel</Button>
                 {regStep < regSteps.length - 1 ? (
                   <Button onClick={() => {
-                {regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.password)} { toast({ title: "Fill required fields (including password)", variant: "destructive" }); return; }
+                    if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.password)) { toast({ title: "Fill required fields (including password)", variant: "destructive" }); return; }
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (
