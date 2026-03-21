@@ -1,13 +1,14 @@
 {
   "name": "Creative Caricature Club",
   "short_name": "CCC",
-  "description": "Custom hand-crafted caricatures online in India",
-  "theme_color": "#F6F1EB",
+  "description": "India's premium caricature studio — Custom art, live events & workshops",
+  "theme_color": "#E8603C",
   "background_color": "#F6F1EB",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
+  "categories": ["entertainment", "lifestyle", "shopping"],
   "icons": [
     {
       "src": "/logo.png",
