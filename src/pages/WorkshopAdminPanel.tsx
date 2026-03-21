@@ -347,7 +347,7 @@ const WorkshopAdmin = () => {
   // Live Session CRUD
   const addLiveSession = async () => {
     if (!newSession.title) { toast({ title: "Title required", variant: "destructive" }); return; }
-    await supabase.from("workshop_live_sessions" as any).insert(newSession as any);
+    await supabase.from("workshop_live_sessions" as any).insert({ ...newSession, workshop_id: activeWorkshopId || null } as any);
     await logAction("add_session", `Created: ${newSession.title}`);
     toast({ title: "Session Created! ✅" });
     setShowAddSession(false);
