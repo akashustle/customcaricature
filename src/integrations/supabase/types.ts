@@ -504,6 +504,45 @@ export type Database = {
         }
         Relationships: []
       }
+      calculator_sessions: {
+        Row: {
+          action_taken: string | null
+          artist_count: number | null
+          city: string | null
+          clicked_link: string | null
+          created_at: string
+          guest_count: number | null
+          id: string
+          ip_address: string | null
+          region: string | null
+          suggested_price: number | null
+        }
+        Insert: {
+          action_taken?: string | null
+          artist_count?: number | null
+          city?: string | null
+          clicked_link?: string | null
+          created_at?: string
+          guest_count?: number | null
+          id?: string
+          ip_address?: string | null
+          region?: string | null
+          suggested_price?: number | null
+        }
+        Update: {
+          action_taken?: string | null
+          artist_count?: number | null
+          city?: string | null
+          clicked_link?: string | null
+          created_at?: string
+          guest_count?: number | null
+          id?: string
+          ip_address?: string | null
+          region?: string | null
+          suggested_price?: number | null
+        }
+        Relationships: []
+      }
       caricature_gallery: {
         Row: {
           caption: string | null
@@ -641,6 +680,39 @@ export type Database = {
           id?: string
           is_active?: boolean
           question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cms_pages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
           updated_at?: string
         }
         Relationships: []
