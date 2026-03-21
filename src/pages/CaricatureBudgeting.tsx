@@ -213,7 +213,7 @@ const CaricatureBudgeting = () => {
                 <PricingReveal finalPrice={eventPrice} revealed={true} label="Your Event Price" className="mb-4" />
 
                 {eventTimerActive && (
-                  <UrgencyTimer minutes={3} label="🔥 This special rate expires in" onExpire={() => setEventTimerActive(false)} />
+                  <UrgencyTimer durationMinutes={3} message="🔥 This special rate expires in" onExpire={() => setEventTimerActive(false)} />
                 )}
 
                 {/* Suggestion Card */}
