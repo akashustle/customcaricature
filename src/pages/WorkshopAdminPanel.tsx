@@ -153,8 +153,12 @@ const WorkshopAdmin = () => {
 
   const fetchAll = async () => {
     setRefreshing(true);
-    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications(), fetchArtists()]);
+    await Promise.all([fetchUsers(), fetchVideos(), fetchFeedbacks(), fetchAssignments(), fetchLiveSessions(), fetchAttendance(), fetchSettings(), fetchLocations(), fetchAdminLog(), fetchWorkshopAdmins(), fetchCertificates(), fetchLiveRequests(), fetchWorkshopNotifications(), fetchArtists(), fetchAllWorkshops()]);
     setRefreshing(false);
+  };
+  const fetchAllWorkshops = async () => {
+    const { data } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+    if (data) setAllWorkshops(data as any[]);
   };
   const fetchUsers = async () => { const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false }); if (data) setUsers(data as any[]); };
   const fetchVideos = async () => { const { data } = await supabase.from("workshop_videos" as any).select("*").order("created_at", { ascending: false }); if (data) setVideos(data as any[]); };
