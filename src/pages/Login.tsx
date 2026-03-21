@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, KeyRound } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const navigate = useNavigate();
