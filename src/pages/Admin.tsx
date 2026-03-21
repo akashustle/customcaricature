@@ -237,6 +237,8 @@ const Admin = () => {
     } catch {}
   };
 
+  const { actionState, confirmAction, executeAction, cancelAction } = useAdminAction();
+
   const logAdminAction = async (action: string, details?: string) => {
     if (!user) return;
     try {
