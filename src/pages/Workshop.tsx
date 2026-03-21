@@ -200,8 +200,8 @@ const Workshop = () => {
   };
 
   const handleRegister = async () => {
-    if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot) {
-      toast({ title: "Please fill all required fields", variant: "destructive" }); return;
+    if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot || !regForm.password) {
+      toast({ title: "Please fill all required fields (including password)", variant: "destructive" }); return;
     }
     setSubmittingReg(true);
     try {
