@@ -240,11 +240,12 @@ const Index = () => {
             {trustStats.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, rotateY: 90, scale: 0.8 }}
+                whileInView={{ opacity: 1, rotateY: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
+                transition={{ delay: i * 0.15, duration: 0.6, type: "spring" }}
+                whileHover={{ rotateY: 10, scale: 1.05 }}
+                className="text-center perspective-1000"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <stat.icon className="w-6 h-6 text-primary" />
@@ -281,8 +282,8 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
-            <motion.div key={item.step} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.15 }} whileHover={{ y: -6 }}
-              className="cursor-pointer" onClick={() => navigate(item.route)}>
+            <motion.div key={item.step} initial={{ opacity: 0, rotateX: -15, y: 40 }} whileInView={{ opacity: 1, rotateX: 0, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.2, type: "spring" }} whileHover={{ y: -8, rotateY: 5, scale: 1.02 }}
+              className="cursor-pointer perspective-1000" onClick={() => navigate(item.route)}>
               <Card className="text-center card-3d h-full">
                 <CardContent className="pt-10 pb-8 px-6">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15">
@@ -331,7 +332,7 @@ const Index = () => {
                 cta: "Coming Soon"
               }]),
             ].map((service, i) => (
-              <motion.div key={service.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+              <motion.div key={service.title} initial={{ opacity: 0, scale: 0.85, rotateY: -20 }} whileInView={{ opacity: 1, scale: 1, rotateY: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.5, type: "spring" }} whileHover={{ scale: 1.04, rotateY: 5 }} className="perspective-1000">
                 <Card className="card-3d h-full flex flex-col">
                   <CardContent className="pt-8 pb-6 px-5 flex flex-col flex-1">
                     <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5">
@@ -365,8 +366,8 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div key={style.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.08 }} whileHover={{ scale: 1.04, y: -4 }}
-                onClick={handleOrderClick}>
+              <motion.div key={style.name} initial={{ opacity: 0, rotateY: 90, scale: 0.7 }} whileInView={{ opacity: 1, rotateY: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1, type: "spring" }} whileHover={{ scale: 1.06, y: -6, rotateY: 8 }}
+                onClick={handleOrderClick} className="perspective-1000">
                 <Card className="group cursor-pointer border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-lg">
                   <CardContent className="p-5 md:p-6 text-center">
                     <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors">
