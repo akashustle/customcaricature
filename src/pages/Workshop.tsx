@@ -628,10 +628,16 @@ const Workshop = () => {
                   Register Now <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               ) : (
-                <Button size="lg" className="w-full rounded-full font-body text-base h-14" onClick={() => setView("login")}>
-                  Already Registered? Login <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                <div className="space-y-3">
+                  <div className="bg-card border border-border rounded-xl p-4 text-left">
+                    <p className="text-sm font-body font-bold text-foreground">Registration opening soon!</p>
+                    <p className="text-xs text-muted-foreground font-body mt-1">Stay tuned for the upcoming workshop dates.</p>
+                  </div>
+                </div>
               )}
+              <Button size="lg" variant="outline" className="w-full rounded-full font-body text-base h-14" onClick={() => setView("login")}>
+                <User className="w-5 h-5 mr-2" /> Already Registered? Login
+              </Button>
               <a href={`https://wa.me/91${whatsappNumber}?text=${encodeURIComponent("Hi! I'd like to know more about the CCC Workshop.")}`}
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-3 rounded-full border border-green-200 bg-green-50/80 text-green-600 text-sm font-body font-medium hover:bg-green-100 transition-colors">

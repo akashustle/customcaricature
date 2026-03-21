@@ -391,7 +391,22 @@ const BookEvent = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
-        {/* Client Details */}
+        {/* Pricing Psychology Banner */}
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+          <CardContent className="p-5 space-y-3 text-center">
+            <PricingReveal
+              finalPrice={pricing.total}
+              revealed={false}
+              showRange={true}
+              rangeMin={30000}
+              rangeMax={90000}
+              label="🎨 Live Caricature Event"
+              urgencyMessage="Complete details to unlock your exclusive price!"
+            />
+            <p className="text-xs font-sans text-muted-foreground">🎉 Make your event unforgettable! Your guests will love the caricature experience!</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader><CardTitle className="font-display text-lg">Client Details</CardTitle></CardHeader>
           <CardContent className="space-y-3">
