@@ -12,6 +12,7 @@ type SiteSettings = {
   shop_tracking_visible: { enabled: boolean };
   support_button_visible: { enabled: boolean };
   gateway_charge_percentage: { percentage: number };
+  admin_action_prompt: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -25,6 +26,7 @@ const defaults: SiteSettings = {
   shop_tracking_visible: { enabled: true },
   support_button_visible: { enabled: true },
   gateway_charge_percentage: { percentage: 2.6 },
+  admin_action_prompt: { enabled: true },
 };
 
 
