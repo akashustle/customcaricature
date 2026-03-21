@@ -529,19 +529,25 @@ const WorkshopAdmin = () => {
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
 
-  const registeredOnline = users.filter((u: any) => u.student_type === "registered_online");
-  const manuallyAdded = users.filter((u: any) => u.student_type === "manually_added");
+  // Filter data by selected workshop
+  const wsFilterId = selectedWorkshopId === "current" ? activeWorkshopId : selectedWorkshopId;
+  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId || (!u.workshop_id && selectedWorkshopId === "current")) : users;
+  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId || (!v.workshop_id && selectedWorkshopId === "current")) : videos;
+  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId || (!s.workshop_id && selectedWorkshopId === "current")) : liveSessions;
+
+  const registeredOnline = filteredUsers.filter((u: any) => u.student_type === "registered_online");
+  const manuallyAdded = filteredUsers.filter((u: any) => u.student_type === "manually_added");
 
   const getAttendanceStatus = (userId: string, date: string) => {
     const a = attendance.find((att: any) => att.user_id === userId && att.session_date === date);
     return a?.status || "not_marked";
   };
 
-  // Analytics data
-  const slotData = [{ name: "12–3 PM", value: users.filter(u => u.slot === "12pm-3pm").length }, { name: "6–9 PM", value: users.filter(u => u.slot === "6pm-9pm").length }];
+  // Analytics data - use filteredUsers
+  const slotData = [{ name: "12–3 PM", value: filteredUsers.filter(u => u.slot === "12pm-3pm").length }, { name: "6–9 PM", value: filteredUsers.filter(u => u.slot === "6pm-9pm").length }];
   const typeData = [{ name: "Online", value: registeredOnline.length }, { name: "Manual", value: manuallyAdded.length }];
-  const genderData = [{ name: "Male", value: users.filter(u => u.gender === "male").length }, { name: "Female", value: users.filter(u => u.gender === "female").length }, { name: "Other", value: users.filter(u => u.gender && u.gender !== "male" && u.gender !== "female").length }].filter(d => d.value > 0);
-  const ageGroups = [{ name: "<18", value: users.filter(u => u.age && u.age < 18).length }, { name: "18-25", value: users.filter(u => u.age && u.age >= 18 && u.age <= 25).length }, { name: "26-35", value: users.filter(u => u.age && u.age >= 26 && u.age <= 35).length }, { name: "36+", value: users.filter(u => u.age && u.age > 35).length }].filter(d => d.value > 0);
+  const genderData = [{ name: "Male", value: filteredUsers.filter(u => u.gender === "male").length }, { name: "Female", value: filteredUsers.filter(u => u.gender === "female").length }, { name: "Other", value: filteredUsers.filter(u => u.gender && u.gender !== "male" && u.gender !== "female").length }].filter(d => d.value > 0);
+  const ageGroups = [{ name: "<18", value: filteredUsers.filter(u => u.age && u.age < 18).length }, { name: "18-25", value: filteredUsers.filter(u => u.age && u.age >= 18 && u.age <= 25).length }, { name: "26-35", value: filteredUsers.filter(u => u.age && u.age >= 26 && u.age <= 35).length }, { name: "36+", value: filteredUsers.filter(u => u.age && u.age > 35).length }].filter(d => d.value > 0);
   const day1Present = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "present").length;
   const day1Absent = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "absent").length;
   const day1Video = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "video_session").length;
