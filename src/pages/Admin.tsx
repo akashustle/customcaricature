@@ -1591,6 +1591,14 @@ const Admin = () => {
             <AdminSEOSettings />
           </TabsContent>
 
+          <TabsContent value="pages">
+            <AdminPages />
+          </TabsContent>
+
+          <TabsContent value="calculator">
+            <AdminCalculatorHistory />
+          </TabsContent>
+
           <TabsContent value="integrations">
             <AdminIntegrations />
           </TabsContent>
