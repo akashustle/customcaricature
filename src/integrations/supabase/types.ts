@@ -76,6 +76,39 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_login_tracking: {
+        Row: {
+          created_at: string | null
+          id: string
+          otp_code: string | null
+          otp_expires_at: string | null
+          otp_required: boolean | null
+          total_logins: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_required?: boolean | null
+          total_logins?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          otp_required?: boolean | null
+          total_logins?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_media_audit_log: {
         Row: {
           action: string
@@ -137,34 +170,43 @@ export type Database = {
         Row: {
           admin_name: string
           device_info: string | null
+          entered_name: string | null
           id: string
           ip_address: string | null
           is_active: boolean
           last_active_at: string
           location_info: string | null
           login_at: string
+          login_count: number | null
+          steps_log: Json | null
           user_id: string
         }
         Insert: {
           admin_name?: string
           device_info?: string | null
+          entered_name?: string | null
           id?: string
           ip_address?: string | null
           is_active?: boolean
           last_active_at?: string
           location_info?: string | null
           login_at?: string
+          login_count?: number | null
+          steps_log?: Json | null
           user_id: string
         }
         Update: {
           admin_name?: string
           device_info?: string | null
+          entered_name?: string | null
           id?: string
           ip_address?: string | null
           is_active?: boolean
           last_active_at?: string
           location_info?: string | null
           login_at?: string
+          login_count?: number | null
+          steps_log?: Json | null
           user_id?: string
         }
         Relationships: []
