@@ -34,6 +34,7 @@ const AdminIntegrations = () => {
           if (row.id === "onesignal_config" && row.value) {
             setOnesignalEnabled(row.value.enabled || false);
             setOnesignalAppId(row.value.app_id || "");
+            setOnesignalRestApiKey(row.value.rest_api_key || "");
           }
           if (row.id === "otp_config" && row.value) {
             setOtpEnabled(row.value.enabled || false);
