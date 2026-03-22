@@ -15,6 +15,7 @@ const AdminIntegrations = () => {
 
   // OneSignal
   const [onesignalAppId, setOnesignalAppId] = useState("");
+  const [onesignalRestApiKey, setOnesignalRestApiKey] = useState("");
   const [onesignalEnabled, setOnesignalEnabled] = useState(false);
 
   // OTP
