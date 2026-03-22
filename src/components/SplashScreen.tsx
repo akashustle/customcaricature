@@ -114,7 +114,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
               />
               <motion.circle
                 cx="70" cy="70" r="56"
-                fill="none" stroke="#e8643c" strokeWidth="0.8" opacity="0.15"
+                fill="none" stroke="#a08462" strokeWidth="0.8" opacity="0.15"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{ duration: 2.5, delay: 0.3, ease: "easeInOut" }}
