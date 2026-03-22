@@ -1149,7 +1149,7 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {liveSessions.map((s: any) => {
+                  {filteredSessions.map((s: any) => {
                     const isEditingS = editingSession === s.id;
                     return (
                     <GlassCard key={s.id}>
