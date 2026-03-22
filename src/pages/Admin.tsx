@@ -72,6 +72,7 @@ import AdminHomepageControl from "@/components/admin/AdminHomepageControl";
 import AdminCRMPipeline from "@/components/admin/AdminCRMPipeline";
 import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 import AdminAutomation from "@/components/admin/AdminAutomation";
+import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
 
 type Order = {
   id: string;
@@ -1621,6 +1622,10 @@ const Admin = () => {
 
           <TabsContent value="automation">
             <AdminAutomation />
+          </TabsContent>
+
+          <TabsContent value="team">
+            <AdminTeamManagement />
           </TabsContent>
 
           <TabsContent value="integrations">
