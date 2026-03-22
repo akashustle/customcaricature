@@ -147,6 +147,22 @@
     --chart-3: 38 75% 55%;
     --chart-4: 210 55% 55%;
     --chart-5: 280 40% 58%;
+
+    --success: 152 45% 48%;
+    --warning: 38 75% 55%;
+    --info: 210 55% 55%;
+
+    --soft-green: 130 30% 22%;
+    --soft-blue: 220 30% 22%;
+    --soft-pink: 345 30% 22%;
+    --warm-peach: 20 40% 22%;
+    --light-gold: 40 35% 45%;
+
+    --brand-cream: 30 15% 14%;
+    --brand-gold: 35 40% 50%;
+    --brand-terracotta: 18 40% 55%;
+    --brand-brown: 25 25% 75%;
+    --brand-warm: 30 10% 18%;
   }
 }
 
