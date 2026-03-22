@@ -18,6 +18,7 @@ import { formatPrice } from "@/lib/pricing";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LogOut, Plus, Edit2, Trash2, Package, ShoppingCart, Tag, Settings, Users, BarChart3, Loader2, Store, Image, Copy, Upload, TrendingUp, AlertTriangle, Eye, Search, DollarSign, RefreshCw, FileText, Download, Calendar, Star, Percent, Clock, ShoppingBag, Truck, MapPin, Layers, Zap, Target, Award, Activity, PieChart as PieIcon, BarChart2, Gift, MessageSquare, ArrowUpDown, CheckCircle, XCircle, Hash } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from "recharts";
+import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import { exportToExcel } from "@/lib/export-excel";
 
 const COLORS = ["hsl(36, 45%, 52%)", "hsl(152, 50%, 48%)", "hsl(210, 65%, 55%)", "hsl(340, 55%, 58%)", "hsl(38, 92%, 55%)", "hsl(270, 50%, 55%)", "hsl(190, 60%, 50%)", "hsl(15, 65%, 55%)"];
