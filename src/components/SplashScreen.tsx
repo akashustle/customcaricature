@@ -63,7 +63,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             {/* Squiggly decorative lines */}
             <motion.path
               d="M120,140 C130,130 140,140 150,130 S170,140 180,130"
-              fill="none" stroke="#e8643c" strokeWidth="1.5" strokeLinecap="round" opacity="0.15"
+              fill="none" stroke="#a08462" strokeWidth="1.5" strokeLinecap="round" opacity="0.15"
               initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
               transition={{ duration: 1, delay: 1.2 }}
             />
