@@ -81,6 +81,11 @@ const OneSignalInit = () => {
   return null;
 };
 
+const RouteMemoryTracker = () => {
+  useRouteMemory();
+  return null;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
