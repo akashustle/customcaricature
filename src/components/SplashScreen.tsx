@@ -106,7 +106,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             <svg className="absolute -inset-5 w-[calc(100%+40px)] h-[calc(100%+40px)]" viewBox="0 0 140 140">
               <motion.circle
                 cx="70" cy="70" r="62"
-                fill="none" stroke="#b08d57" strokeWidth="1.5" opacity="0.3"
+                fill="none" stroke="#a08462" strokeWidth="1.5" opacity="0.3"
                 strokeDasharray="4 3"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
