@@ -144,9 +144,25 @@ const AdminNotificationSender = () => {
       }));
 
       for (let i = 0; i < notifications.length; i += 50) {
-        const batch = notifications.slice(i, i + 50);
-        const { error } = await supabase.from("notifications").insert(batch as any);
+        const chunk = notifications.slice(i, i + 50);
+        const { error } = await supabase.from("notifications").insert(chunk as any);
         if (error) throw error;
+      }
+
+      // Also send via OneSignal for push reach
+      try {
+        const userIds = mode === "all" ? undefined : targetUsers.map(u => u.user_id);
+        await supabase.functions.invoke("send-onesignal", {
+          body: {
+            title: title.trim(),
+            message: message.trim(),
+            url: link.trim() || null,
+            user_ids: userIds,
+            admin_user_id: user?.id,
+          },
+        });
+      } catch (osErr) {
+        console.warn("OneSignal push failed (non-fatal):", osErr);
       }
 
       toast({ title: `✅ Sent to ${targetUsers.length} user(s)!` });
