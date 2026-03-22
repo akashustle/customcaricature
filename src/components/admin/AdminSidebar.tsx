@@ -83,7 +83,8 @@ const NAV_SECTIONS = [
   {
     label: "System",
     items: [
-      { id: "integrations", icon: Zap, label: "Integrations", accent: "hsl(175 55% 45%)" },
+      { id: "automation", icon: Zap, label: "Automation", accent: "hsl(280 55% 55%)" },
+      { id: "integrations", icon: Shield, label: "Integrations", accent: "hsl(175 55% 45%)" },
       { id: "settings", icon: Settings, label: "Settings", accent: "hsl(28 14% 40%)" },
     ],
   },

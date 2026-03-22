@@ -450,6 +450,48 @@ export type Database = {
           },
         ]
       }
+      automation_templates: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          delay_minutes: number | null
+          id: string
+          is_enabled: boolean | null
+          label: string
+          message_body: string
+          sort_order: number | null
+          template_key: string
+          trigger_event: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          delay_minutes?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          label: string
+          message_body: string
+          sort_order?: number | null
+          template_key: string
+          trigger_event?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          delay_minutes?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          label?: string
+          message_body?: string
+          sort_order?: number | null
+          template_key?: string
+          trigger_event?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_name: string
@@ -1306,6 +1348,36 @@ export type Database = {
         }
         Relationships: []
       }
+      funnel_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       homepage_reviews: {
         Row: {
           created_at: string | null
@@ -2106,6 +2178,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_scripts: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          script_body: string
+          sort_order: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          script_body: string
+          sort_order?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          script_body?: string
+          sort_order?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       scroll_event_images: {
         Row: {
