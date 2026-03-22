@@ -1579,6 +1579,10 @@ const Admin = () => {
             <AdminAnalytics orders={orders as any} customers={customers} />
           </TabsContent>
 
+          <TabsContent value="ai-intelligence">
+            <AdminAIIntelligence />
+          </TabsContent>
+
           {/* Live Locations Tab */}
           <TabsContent value="locations">
             <AdminLiveLocations />
