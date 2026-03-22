@@ -691,6 +691,14 @@ const Admin = () => {
     return <OrderDetail orderId={selectedOrder} onBack={() => { setSelectedOrder(null); fetchOrders(); }} />;
   }
 
+  // Admin Name Gate — mandatory name entry before accessing panel
+  if (!adminEnteredName) {
+    return <AdminNameGate onNameSubmit={(name) => {
+      setAdminEnteredName(name);
+      logAdminAction("Admin panel accessed", `Entered as: ${name}`);
+    }} />;
+  }
+
   return (
     <div className="min-h-screen flex w-full">
       <AdminActionConfirm
