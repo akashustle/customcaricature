@@ -872,8 +872,8 @@ const WorkshopAdmin = () => {
         <div className="admin-header-premium">
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">
-                <GraduationCap className="w-3.5 h-3.5 text-white" />
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-border/40">
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</span>
             </div>
