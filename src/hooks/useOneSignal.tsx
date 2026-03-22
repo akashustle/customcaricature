@@ -11,21 +11,31 @@ export const useOneSignal = () => {
     if (initRef.current) return;
     initRef.current = true;
 
-    // Fetch OneSignal config from admin settings
     const init = async () => {
+      // First try DB config
       const { data } = await supabase
         .from("admin_site_settings")
         .select("value")
         .eq("id", "onesignal_config")
         .maybeSingle();
 
+      let appId = "";
       if (data?.value) {
         const config = data.value as any;
         if (config.enabled && config.app_id) {
-          await initOneSignal(config.app_id);
-          // Slight delay to let SDK fully init
-          setTimeout(() => promptOneSignalPush(), 3000);
+          appId = config.app_id;
         }
+      }
+      
+      // Fallback to hardcoded app ID
+      if (!appId) {
+        appId = "d5da4d00-44cc-4ea0-b231-c66129f599f3";
+      }
+
+      if (appId) {
+        await initOneSignal(appId);
+        // Delay to let SDK fully init before prompting
+        setTimeout(() => promptOneSignalPush(), 3000);
       }
     };
     init();
@@ -34,7 +44,6 @@ export const useOneSignal = () => {
   useEffect(() => {
     if (user) {
       setOneSignalExternalId(user.id);
-      // Tag user with email for targeting
       if (user.email) {
         setOneSignalTags({ email: user.email });
       }

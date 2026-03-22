@@ -35,9 +35,10 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Use secret env var first, then fall back to DB config
     const apiKey = onesignalApiKey || config?.rest_api_key;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "OneSignal REST API key not configured" }), {
+      return new Response(JSON.stringify({ error: "OneSignal REST API key not configured. Add ONESIGNAL_REST_API_KEY secret." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -59,7 +60,6 @@ Deno.serve(async (req) => {
 
     // Target specific users or all
     if (action === "send_to_admins") {
-      // Get admin user IDs
       const { data: adminRoles } = await supabase
         .from("user_roles")
         .select("user_id")
