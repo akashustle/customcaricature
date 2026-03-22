@@ -265,13 +265,24 @@ const Admin = () => {
 
   const logAdminAction = async (action: string, details?: string) => {
     if (!user) return;
+    const enteredName = sessionStorage.getItem("admin_entered_name") || adminProfile?.full_name || "Admin";
     try {
       await supabase.from("admin_action_log").insert({
         user_id: user.id,
-        admin_name: adminProfile?.full_name || "Admin",
+        admin_name: enteredName,
         action,
         details: details || null,
+        session_id: currentSessionId,
       } as any);
+      // Also append to session steps_log
+      if (currentSessionId) {
+        const { data: sess } = await supabase.from("admin_sessions").select("steps_log").eq("id", currentSessionId).single();
+        if (sess) {
+          const steps = Array.isArray((sess as any).steps_log) ? (sess as any).steps_log : [];
+          steps.push({ action, details, time: new Date().toISOString() });
+          await supabase.from("admin_sessions").update({ steps_log: steps } as any).eq("id", currentSessionId);
+        }
+      }
     } catch {}
   };
 
