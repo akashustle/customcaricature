@@ -174,7 +174,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
               className="text-3xl md:text-4xl font-bold"
               style={{
                 fontFamily: "'Dancing Script', cursive",
-                color: "#3a2e22",
+                color: "#4a3e32",
               }}
             >
               Creative Caricature Club
