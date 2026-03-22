@@ -200,7 +200,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           >
             <motion.div
               className="w-8 h-[1.5px] rounded-full"
-              style={{ background: "linear-gradient(90deg, transparent, #b08d57)" }}
+              style={{ background: "linear-gradient(90deg, transparent, #a08462)" }}
               initial={{ scaleX: 0 }}
               animate={step >= 3 ? { scaleX: 1 } : {}}
               transition={{ duration: 0.5 }}
