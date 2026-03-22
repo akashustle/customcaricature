@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Calendar, Users, Star, Award } from "lucide-react";
+import { Calendar, Users, Star, Award, TrendingUp } from "lucide-react";
 
 const iconMap: Record<string, any> = {
   "Events Completed": Calendar,
@@ -10,18 +10,20 @@ const iconMap: Record<string, any> = {
 };
 
 const AnimatedCounter = ({ value, inView }: { value: string; inView: boolean }) => {
-  const numMatch = value.match(/^(\d+)/);
-  const suffix = value.replace(/^\d+/, "");
-  const target = numMatch ? parseInt(numMatch[1]) : 0;
+  const numMatch = value.match(/^([\d.]+)/);
+  const suffix = value.replace(/^[\d.]+/, "");
+  const target = numMatch ? parseFloat(numMatch[1]) : 0;
+  const isDecimal = value.includes(".");
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     if (!inView || !target) return;
     let start = 0;
     const duration = 2000;
-    const step = Math.max(1, Math.floor(target / (duration / 16)));
+    const steps = duration / 16;
+    const increment = target / steps;
     const timer = setInterval(() => {
-      start += step;
+      start += increment;
       if (start >= target) { setCount(target); clearInterval(timer); }
       else setCount(start);
     }, 16);
@@ -29,7 +31,7 @@ const AnimatedCounter = ({ value, inView }: { value: string; inView: boolean }) 
   }, [inView, target]);
 
   if (!target) return <span>{value}</span>;
-  return <span>{count}{suffix}</span>;
+  return <span>{isDecimal ? count.toFixed(1) : Math.floor(count)}{suffix}</span>;
 };
 
 const HomepageSocialProof = ({ config }: { config: any }) => {
@@ -38,6 +40,8 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
 
   if (!config?.stats) return null;
   const stats = config.stats as Array<{ value: string; label: string }>;
+  const monthlyText = config.monthly_text;
+  const monthlyRange = config.monthly_range;
 
   return (
     <section ref={ref} className="py-16 md:py-20 bg-card/50 border-y border-border/50 overflow-hidden">
@@ -69,14 +73,30 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
             );
           })}
         </div>
-        {config.monthly_text && (
+
+        {/* Monthly Range */}
+        {monthlyRange && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center justify-center gap-2 mt-8"
+          >
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <p className="text-sm font-body font-semibold text-primary">
+              🔥 {monthlyRange.label || "Events Booked This Month"}: {monthlyRange.min || 25} – {monthlyRange.max || 50}
+            </p>
+          </motion.div>
+        )}
+
+        {monthlyText && !monthlyRange && (
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             className="text-center text-sm font-body font-semibold text-primary mt-8"
           >
-            {config.monthly_text}
+            {monthlyText}
           </motion.p>
         )}
       </div>

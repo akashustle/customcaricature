@@ -1,11 +1,18 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const HomepageInstantQuote = ({ config }: { config: any }) => {
-  const navigate = useNavigate();
   if (!config) return null;
+
+  const handleClick = () => {
+    const link = config.link || "https://porta.creativecaricatureclub.com/caricature-budgeting";
+    if (link.startsWith("http")) {
+      window.open(link, "_blank", "noopener,noreferrer");
+    } else {
+      window.location.href = link;
+    }
+  };
 
   return (
     <section className="py-12 md:py-16">
@@ -29,7 +36,7 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="xl"
-              onClick={() => navigate(config.link || "/enquiry")}
+              onClick={handleClick}
               className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 mt-4"
             >
               {config.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />

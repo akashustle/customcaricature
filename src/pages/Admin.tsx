@@ -75,6 +75,7 @@ import AdminAutomation from "@/components/admin/AdminAutomation";
 import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
 import AdminNameGate from "@/components/admin/AdminNameGate";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
+import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 
 type Order = {
   id: string;
@@ -1577,6 +1578,10 @@ const Admin = () => {
 
           <TabsContent value="analytics">
             <AdminAnalytics orders={orders as any} customers={customers} />
+          </TabsContent>
+
+          <TabsContent value="ai-intelligence">
+            <AdminAIIntelligence />
           </TabsContent>
 
           {/* Live Locations Tab */}

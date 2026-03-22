@@ -23,6 +23,7 @@ const NAV_SECTIONS = [
       { id: "events", icon: Calendar, label: "Events", accent: "hsl(210 62% 48%)" },
       { id: "payments", icon: Receipt, label: "Payments", accent: "hsl(152 55% 40%)" },
       { id: "analytics", icon: BarChart3, label: "Analytics", accent: "hsl(280 55% 55%)" },
+      { id: "ai-intelligence", icon: Zap, label: "AI Intelligence", accent: "hsl(270 65% 60%)" },
     ],
   },
   {
