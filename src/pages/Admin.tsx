@@ -67,7 +67,7 @@ import AdminHomepageReviews from "@/components/admin/AdminHomepageReviews";
 import AdminTrustedBrands from "@/components/admin/AdminTrustedBrands";
 import AdminPages from "@/components/admin/AdminPages";
 import AdminCalculatorHistory from "@/components/admin/AdminCalculatorHistory";
-import AdminDashboardWidgets from "@/components/admin/AdminDashboardWidgets";
+
 import AdminHomepageControl from "@/components/admin/AdminHomepageControl";
 import AdminCRMPipeline from "@/components/admin/AdminCRMPipeline";
 import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
