@@ -716,8 +716,8 @@ const Admin = () => {
         <header className="sticky top-0 z-40 admin-header-premium">
           <div className="px-4 md:px-8 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-                <span className="text-primary-foreground font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm">
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>
