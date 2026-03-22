@@ -102,13 +102,15 @@ const Login = () => {
               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" placeholder="you@email.com" />
             </div>
 
-            <div className="flex rounded-xl border border-border overflow-hidden bg-muted/30">
-              <button type="button" onClick={() => setLoginMethod("password")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-sans font-semibold transition-all ${loginMethod === "password" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                <Lock className="w-3.5 h-3.5" /> Password
-              </button>
-              <button type="button" onClick={() => setLoginMethod("secret_code")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-sans font-semibold transition-all ${loginMethod === "secret_code" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
-                <KeyRound className="w-3.5 h-3.5" /> Secret Code
-              </button>
+            <div>
+              <Label className="font-sans text-sm font-medium">Login Method</Label>
+              <Select value={loginMethod} onValueChange={(v: any) => setLoginMethod(v)}>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="password">🔒 Password</SelectItem>
+                  <SelectItem value="secret_code">🔑 Secret Code</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {loginMethod === "password" ? (
