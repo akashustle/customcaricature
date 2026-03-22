@@ -6,23 +6,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [secretCode, setSecretCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
+  const [loginWith, setLoginWith] = useState<"email" | "phone">("email");
 
   const withTimeout = async (promise: Promise<any>, ms = 10000) => {
     return await Promise.race([
       promise,
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Request timed out. Please try again.")), ms)),
     ]);
+  };
+
+  const getIdentifier = () => {
+    if (loginWith === "phone") {
+      // Format phone for Supabase auth (needs country code)
+      const cleaned = phone.replace(/\D/g, "");
+      return cleaned.startsWith("91") ? `+${cleaned}` : `+91${cleaned}`;
+    }
+    return email.trim().toLowerCase();
   };
 
   const finalizeLogin = async () => {
@@ -49,7 +61,15 @@ const Login = () => {
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
     try {
-      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password }));
+      const identifier = loginWith === "email" ? email.trim().toLowerCase() : email.trim().toLowerCase();
+      // For phone login, we use email derived from phone
+      let loginEmail = identifier;
+      if (loginWith === "phone") {
+        const cleaned = phone.replace(/\D/g, "");
+        // Try to find user by phone - use phone as email pattern
+        loginEmail = `${cleaned}@phone.user`;
+      }
+      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`, password }));
       if (error) toast({ title: "Login failed", description: error.message, variant: "destructive" });
       else await finalizeLogin();
     } catch (err: any) { toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" }); }
@@ -58,11 +78,13 @@ const Login = () => {
 
   const handleSecretCodeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !secretCode) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
+    const identifier = loginWith === "email" ? email : phone;
+    if (!identifier || !secretCode) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
     setLoading(true);
     try {
+      const emailToUse = loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`;
       const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-        body: { email: email.trim().toLowerCase(), secret_code: secretCode },
+        body: { email: emailToUse, secret_code: secretCode },
       });
       if (error) { toast({ title: "Login failed", description: "Could not connect.", variant: "destructive" }); setLoading(false); return; }
       if (!data?.success) { toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" }); setLoading(false); return; }
@@ -97,10 +119,30 @@ const Login = () => {
             <CardDescription className="font-sans text-sm">Sign in to your caricature studio</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Login With selector */}
             <div>
-              <Label className="font-sans text-sm font-medium">Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" placeholder="you@email.com" />
+              <Label className="font-sans text-sm font-medium">Login With</Label>
+              <Select value={loginWith} onValueChange={(v: any) => setLoginWith(v)}>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email"><span className="flex items-center gap-2"><Mail className="w-4 h-4" /> Email Address</span></SelectItem>
+                  <SelectItem value="phone"><span className="flex items-center gap-2"><Phone className="w-4 h-4" /> Phone Number</span></SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Email or Phone input */}
+            {loginWith === "email" ? (
+              <div>
+                <Label className="font-sans text-sm font-medium">Email</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" placeholder="you@email.com" />
+              </div>
+            ) : (
+              <div>
+                <Label className="font-sans text-sm font-medium">Phone Number</Label>
+                <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} required className="h-11 rounded-xl" placeholder="+91 9876543210" maxLength={13} />
+              </div>
+            )}
 
             <div>
               <Label className="font-sans text-sm font-medium">Login Method</Label>
