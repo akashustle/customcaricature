@@ -1083,7 +1083,7 @@ const WorkshopAdmin = () => {
                   </div>
                   {/* Sub-tabs for All / Slot 1 / Slot 2 */}
                   <div className="flex gap-2">
-                    {[{key:"all",label:`All (${users.length})`},{key:"slot1",label:`Slot 1 (${users.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${users.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
+                    {[{key:"all",label:`All (${filteredUsers.length})`},{key:"slot1",label:`Slot 1 (${filteredUsers.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${filteredUsers.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
                       <button key={st.key} onClick={()=>setAllUsersSubTabState(st.key)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${allUsersSubTab===st.key ? activeTabClass : inactiveTab}`}>{st.label}</button>
                     ))}
                   </div>
