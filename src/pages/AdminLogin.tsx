@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Loader2, Eye, EyeOff, Shield, Lock, Mail } from "lucide-react";
+import { Loader2, Eye, EyeOff, Shield, Lock, Mail, KeyRound } from "lucide-react";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) => {
   return await Promise.race([
@@ -21,6 +21,9 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +52,45 @@ const AdminLogin = () => {
         return;
       }
 
+      // Check login tracking — OTP required after every 5 logins
+      const { data: tracking } = await supabase.from("admin_login_tracking" as any).select("*").eq("user_id", authData.user.id).maybeSingle();
+      const totalLogins = (tracking as any)?.total_logins || 0;
+
+      if (totalLogins > 0 && totalLogins % 5 === 0) {
+        // Generate OTP and send via email
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        await supabase.from("admin_login_tracking" as any).update({
+          otp_code: otp,
+          otp_required: true,
+          otp_expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+        } as any).eq("user_id", authData.user.id);
+
+        // Send OTP email
+        try {
+          await supabase.functions.invoke("send-notification-email", {
+            body: {
+              to: email.trim().toLowerCase(),
+              subject: "Admin Login OTP - Creative Caricature Club",
+              html: `<div style="font-family:sans-serif;max-width:400px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
+                <h2 style="color:#b08d57;">🔐 Admin Login Verification</h2>
+                <p>Your one-time password for admin login:</p>
+                <div style="font-size:32px;font-weight:bold;letter-spacing:6px;text-align:center;padding:16px;background:#fdf8f3;border-radius:8px;color:#b08d57;">${otp}</div>
+                <p style="color:#666;font-size:12px;margin-top:16px;">This OTP expires in 10 minutes. If you did not request this, ignore this email.</p>
+              </div>`,
+            },
+          });
+        } catch {}
+
+        setPendingUserId(authData.user.id);
+        setOtpStep(true);
+        // Sign out until OTP verified
+        await supabase.auth.signOut();
+        toast({ title: "OTP Required", description: "A 6-digit OTP has been sent to your email. Please verify to continue." });
+        setLoading(false);
+        return;
+      }
+
       // Clear any previous session name to force re-entry
       sessionStorage.removeItem("admin_entered_name");
 
@@ -56,6 +98,38 @@ const AdminLogin = () => {
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.length !== 6 || !pendingUserId) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
+    setLoading(true);
+    try {
+      const { data: tracking } = await supabase.from("admin_login_tracking" as any).select("*").eq("user_id", pendingUserId).maybeSingle();
+      if (!tracking) throw new Error("No tracking record found");
+      const t = tracking as any;
+      if (t.otp_code !== otpCode) { toast({ title: "Invalid OTP", variant: "destructive" }); setLoading(false); return; }
+      if (new Date(t.otp_expires_at) < new Date()) { toast({ title: "OTP Expired", description: "Please login again.", variant: "destructive" }); setOtpStep(false); setLoading(false); return; }
+
+      // OTP valid — clear it and re-authenticate
+      await supabase.from("admin_login_tracking" as any).update({
+        otp_code: null, otp_required: false, otp_expires_at: null,
+        total_logins: (t.total_logins || 0) + 1,
+        updated_at: new Date().toISOString(),
+      } as any).eq("user_id", pendingUserId);
+
+      // Re-sign in
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+      if (signInErr) throw signInErr;
+
+      sessionStorage.removeItem("admin_entered_name");
+      toast({ title: "OTP Verified! Welcome back, admin!" });
+      navigate("/admin-panel", { replace: true });
+    } catch (err: any) {
+      toast({ title: "Verification Failed", description: err?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -85,33 +159,63 @@ const AdminLogin = () => {
             <p className="text-sm text-muted-foreground">Creative Caricature Club</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com" required
-                  className="pl-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
+          {!otpStep ? (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com" required
+                    className="pl-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" required className="pl-10 pr-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••" required className="pl-10 pr-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-            </div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl text-base font-semibold shadow-lg">
-                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : "Sign In as Admin"}
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button type="submit" disabled={loading}
+                  className="w-full h-12 rounded-xl text-base font-semibold shadow-lg">
+                  {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : "Sign In as Admin"}
+                </Button>
+              </motion.div>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpVerify} className="space-y-4">
+              <div className="bg-primary/5 rounded-xl p-4 border border-primary/20 text-center space-y-2">
+                <KeyRound className="w-8 h-8 text-primary mx-auto" />
+                <p className="text-sm font-semibold text-foreground">Email OTP Verification</p>
+                <p className="text-xs text-muted-foreground">A 6-digit OTP has been sent to <strong>{email}</strong>. Enter it below to continue.</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">Enter OTP</Label>
+                <Input
+                  value={otpCode}
+                  onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
+                  placeholder="123456"
+                  maxLength={6}
+                  className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-background/60 border-border rounded-xl"
+                  autoFocus
+                />
+              </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button type="submit" disabled={loading || otpCode.length !== 6}
+                  className="w-full h-12 rounded-xl text-base font-semibold shadow-lg">
+                  {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify & Login"}
+                </Button>
+              </motion.div>
+              <Button type="button" variant="ghost" className="w-full text-xs" onClick={() => { setOtpStep(false); setOtpCode(""); }}>
+                ← Back to Login
               </Button>
-            </motion.div>
-          </form>
+            </form>
+          )}
 
           <div className="text-center">
             <button onClick={() => navigate("/")} className="text-xs text-muted-foreground hover:text-primary transition-colors">← Back to Home</button>
