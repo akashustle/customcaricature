@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import SplashScreen from "./components/SplashScreen";
 import FloatingButtons from "./components/FloatingButtons";
@@ -78,6 +79,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -142,6 +144,7 @@ const App = () => {
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

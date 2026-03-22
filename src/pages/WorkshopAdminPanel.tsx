@@ -531,11 +531,23 @@ const WorkshopAdmin = () => {
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
 
-  // Filter data by selected workshop
+  // Filter data by selected workshop — strict isolation
   const wsFilterId = selectedWorkshopId === "current" ? activeWorkshopId : selectedWorkshopId;
-  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId || (!u.workshop_id && selectedWorkshopId === "current")) : users;
-  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId || (!v.workshop_id && selectedWorkshopId === "current")) : videos;
-  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId || (!s.workshop_id && selectedWorkshopId === "current")) : liveSessions;
+  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId) : users;
+  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId) : videos;
+  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId) : liveSessions;
+  const filteredAssignments = wsFilterId ? assignments.filter((a: any) => {
+    const assignUser = users.find(u => u.id === a.user_id);
+    return assignUser?.workshop_id === wsFilterId;
+  }) : assignments;
+  const filteredFeedbacks = wsFilterId ? feedbacks.filter((f: any) => {
+    const fbUser = users.find(u => u.id === f.user_id);
+    return fbUser?.workshop_id === wsFilterId;
+  }) : feedbacks;
+  const filteredCertificates = wsFilterId ? certificates.filter((c: any) => {
+    const certUser = users.find(u => u.id === c.user_id);
+    return certUser?.workshop_id === wsFilterId;
+  }) : certificates;
 
   const registeredOnline = filteredUsers.filter((u: any) => u.student_type === "registered_online");
   const manuallyAdded = filteredUsers.filter((u: any) => u.student_type === "manually_added");
@@ -921,11 +933,11 @@ const WorkshopAdmin = () => {
                       { label: "Total Users", value: filteredUsers.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
                       { label: "Online Reg", value: registeredOnline.length, icon: Users, color: "from-[#7c9885] to-[#a8c0a0]" },
                       { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, color: "from-[#d4a574] to-[#e8c9a8]" },
-                      { label: "Assignments", value: assignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
                       { label: "Videos", value: filteredVideos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
                       { label: "Live Sessions", value: filteredSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
-                      { label: "Feedbacks", value: feedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
-                      { label: "Certificates", value: certificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
                     ].map((s) => (
                       <GlassCard key={s.label} className="!p-4">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
@@ -1031,7 +1043,7 @@ const WorkshopAdmin = () => {
               {/* ALL USERS */}
               {tab === "all-users" && (() => {
                 const [allUsersSubTab, setAllUsersSubTab] = [allUsersSubTabState, setAllUsersSubTabState];
-                const subUsers = allUsersSubTab === "all" ? users : allUsersSubTab === "slot1" ? users.filter(u => u.slot === "12pm-3pm") : users.filter(u => u.slot === "6pm-9pm");
+                const subUsers = allUsersSubTab === "all" ? filteredUsers : allUsersSubTab === "slot1" ? filteredUsers.filter(u => u.slot === "12pm-3pm") : filteredUsers.filter(u => u.slot === "6pm-9pm");
                 return (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1071,7 +1083,7 @@ const WorkshopAdmin = () => {
                   </div>
                   {/* Sub-tabs for All / Slot 1 / Slot 2 */}
                   <div className="flex gap-2">
-                    {[{key:"all",label:`All (${users.length})`},{key:"slot1",label:`Slot 1 (${users.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${users.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
+                    {[{key:"all",label:`All (${filteredUsers.length})`},{key:"slot1",label:`Slot 1 (${filteredUsers.filter(u=>u.slot==="12pm-3pm").length})`},{key:"slot2",label:`Slot 2 (${filteredUsers.filter(u=>u.slot==="6pm-9pm").length})`}].map(st=>(
                       <button key={st.key} onClick={()=>setAllUsersSubTabState(st.key)} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${allUsersSubTab===st.key ? activeTabClass : inactiveTab}`}>{st.label}</button>
                     ))}
                   </div>
@@ -1100,10 +1112,10 @@ const WorkshopAdmin = () => {
               {tab === "live" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-xl ${textPrimary}`}>Live Sessions ({liveSessions.length})</h1>
+                    <h1 className={`text-xl ${textPrimary}`}>Live Sessions ({filteredSessions.length})</h1>
                     <div className="flex gap-2">
                       <RefreshButton />
-                      <ExportButton data={liveSessions.map(s => ({ Title: s.title, Date: s.session_date, Slot: s.slot, Artist: s.artist_name || "—", Status: s.status }))} sheetName="Sessions" fileName="CCC_LiveSessions" />
+                      <ExportButton data={filteredSessions.map(s => ({ Title: s.title, Date: s.session_date, Slot: s.slot, Artist: s.artist_name || "—", Status: s.status }))} sheetName="Sessions" fileName="CCC_LiveSessions" />
                       <Dialog open={showAddSession} onOpenChange={setShowAddSession}>
                         <DialogTrigger asChild><Button size="sm" className={`${btnPrimary} rounded-xl`}><Plus className="w-4 h-4 mr-1" />Add Session</Button></DialogTrigger>
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -1137,7 +1149,7 @@ const WorkshopAdmin = () => {
                       </Dialog>
                     </div>
                   </div>
-                  {liveSessions.map((s: any) => {
+                  {filteredSessions.map((s: any) => {
                     const isEditingS = editingSession === s.id;
                     return (
                     <GlassCard key={s.id}>

@@ -190,6 +190,9 @@ const WorkshopDashboard = () => {
             </div>
           </div>
           <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className={`${textSecondary} rounded-xl`} title="Back to Dashboard">
+              <Home className="w-4 h-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setShowColorPicker(!showColorPicker)} className={`${textSecondary} rounded-xl`}>
               <Palette className="w-4 h-4" />
             </Button>
