@@ -933,11 +933,11 @@ const WorkshopAdmin = () => {
                       { label: "Total Users", value: filteredUsers.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
                       { label: "Online Reg", value: registeredOnline.length, icon: Users, color: "from-[#7c9885] to-[#a8c0a0]" },
                       { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, color: "from-[#d4a574] to-[#e8c9a8]" },
-                      { label: "Assignments", value: assignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
                       { label: "Videos", value: filteredVideos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
                       { label: "Live Sessions", value: filteredSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
-                      { label: "Feedbacks", value: feedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
-                      { label: "Certificates", value: certificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
                     ].map((s) => (
                       <GlassCard key={s.label} className="!p-4">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
