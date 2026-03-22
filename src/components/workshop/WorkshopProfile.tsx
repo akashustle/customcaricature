@@ -193,6 +193,27 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
           ))}
         </div>
       )}
+
+      {/* Payment Details Section */}
+      <div className="mt-6 pt-4 border-t border-border">
+        <h3 className={`${textPrimary} text-base mb-3`}>💳 Payment Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {paymentInfo.map((d) => (
+            <div key={d.label} className={`flex items-center gap-3 p-3 rounded-xl ${itemBg} border`}>
+              <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0`}>
+                <d.icon className="w-4 h-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className={`text-[10px] ${textMuted} uppercase tracking-wider`}>{d.label}</p>
+                <p className={`${textPrimary} text-sm truncate`}>{d.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        {profileData.payment_status === "pending" && (
+          <p className={`text-xs ${textMuted} mt-2`}>Payment status will be updated once confirmed by admin.</p>
+        )}
+      </div>
     </div>
   );
 };
