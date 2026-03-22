@@ -73,6 +73,7 @@ import AdminCRMPipeline from "@/components/admin/AdminCRMPipeline";
 import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 import AdminAutomation from "@/components/admin/AdminAutomation";
 import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
+import AdminNameGate from "@/components/admin/AdminNameGate";
 
 type Order = {
   id: string;
