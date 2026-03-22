@@ -86,6 +86,21 @@ const RouteMemoryTracker = () => {
   return null;
 };
 
+const RouteMemoryRedirector = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const lastRoute = getLastRoute();
+      if (lastRoute && lastRoute !== "/") {
+        navigate(lastRoute, { replace: true });
+        clearRouteMemory();
+      }
+    }
+  }, []);
+  return null;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
