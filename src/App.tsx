@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import SplashScreen from "./components/SplashScreen";
@@ -11,7 +11,7 @@ import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
 import { useOneSignal } from "./hooks/useOneSignal";
-import { useRouteMemory } from "./hooks/useRouteMemory";
+import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 
 // Eagerly loaded core pages
 import Index from "./pages/Index";
@@ -86,6 +86,21 @@ const RouteMemoryTracker = () => {
   return null;
 };
 
+const RouteMemoryRedirector = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const lastRoute = getLastRoute();
+      if (lastRoute && lastRoute !== "/") {
+        navigate(lastRoute, { replace: true });
+        clearRouteMemory();
+      }
+    }
+  }, []);
+  return null;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -101,6 +116,7 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           <RouteMemoryTracker />
+          <RouteMemoryRedirector />
           <FloatingButtons />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>

@@ -31,6 +31,7 @@ import ExportButton from "@/components/admin/ExportButton";
 import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
+import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 
 const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d98c8c", "#8fa3bf", "#a8c0a0", "#e0a060", "#9080c0"];
 
@@ -878,6 +879,9 @@ const WorkshopAdmin = () => {
               <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
+          <div className="px-3 pb-2">
+            <AdminGlobalSearch onNavigate={setTab} />
+          </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
@@ -907,6 +911,9 @@ const WorkshopAdmin = () => {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
                     <div className="flex items-center gap-2">
+                      <div className="hidden lg:block w-64">
+                        <AdminGlobalSearch onNavigate={setTab} />
+                      </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
                         <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
                           <SelectValue placeholder="Select Workshop" />
