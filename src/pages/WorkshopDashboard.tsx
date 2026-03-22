@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
