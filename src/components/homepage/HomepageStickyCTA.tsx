@@ -11,7 +11,7 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background/95 backdrop-blur-lg border-t border-border p-3 flex items-center gap-2"
+      className="fixed bottom-[60px] left-0 right-0 z-40 md:hidden bg-background/95 backdrop-blur-lg border-t border-border p-3 flex items-center gap-2"
     >
       <Button
         onClick={() => navigate(config.link || "/enquiry")}
