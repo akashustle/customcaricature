@@ -1043,7 +1043,7 @@ const WorkshopAdmin = () => {
               {/* ALL USERS */}
               {tab === "all-users" && (() => {
                 const [allUsersSubTab, setAllUsersSubTab] = [allUsersSubTabState, setAllUsersSubTabState];
-                const subUsers = allUsersSubTab === "all" ? users : allUsersSubTab === "slot1" ? users.filter(u => u.slot === "12pm-3pm") : users.filter(u => u.slot === "6pm-9pm");
+                const subUsers = allUsersSubTab === "all" ? filteredUsers : allUsersSubTab === "slot1" ? filteredUsers.filter(u => u.slot === "12pm-3pm") : filteredUsers.filter(u => u.slot === "6pm-9pm");
                 return (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
