@@ -104,6 +104,7 @@ const Workshop = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<"details" | "login" | "register">("details");
   const [loginType, setLoginType] = useState<"mobile" | "email">("mobile");
+  const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -117,15 +118,31 @@ const Workshop = () => {
     password: "",
   });
   const [loginPassword, setLoginPassword] = useState("");
+  const [loginSecretCode, setLoginSecretCode] = useState("");
   const [submittingReg, setSubmittingReg] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<"upcoming" | "march-14-15">("upcoming");
+  const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
+  const [secretCodeLoginEnabled, setSecretCodeLoginEnabled] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_user");
     if (stored) { navigate("/workshop/dashboard"); return; }
     fetchActiveWorkshop();
+    fetchSecretCodeSetting();
   }, []);
 
+  const fetchSecretCodeSetting = async () => {
+    const { data } = await supabase.from("workshop_settings" as any).select("*").eq("id", "secret_code_login");
+    if (data && (data as any[]).length > 0) {
+      setSecretCodeLoginEnabled((data as any[])[0].value?.enabled === true);
+    }
+  };
+
   const fetchActiveWorkshop = async () => {
+    // Fetch all workshops for batch selector
+    const { data: allWs } = await supabase.from("workshops").select("*").order("created_at", { ascending: false });
+    if (allWs) setAllWorkshops(allWs as any[]);
+
     // Get active workshop from workshops table
     const { data: wsData } = await supabase.from("workshops").select("*").eq("is_active", true).limit(1);
     if (wsData && (wsData as any[]).length > 0) {
@@ -171,6 +188,9 @@ const Workshop = () => {
     }
   };
 
+  // Determine if password is required based on batch
+  const isPasswordRequired = selectedBatch === "upcoming";
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -187,10 +207,26 @@ const Workshop = () => {
       const users = data as any[];
       if (!users || users.length === 0) { toast({ title: "Not Registered", description: "Please register first or contact admin.", variant: "destructive" }); setLoading(false); return; }
       if (!users[0].is_enabled) { toast({ title: "Account Disabled", variant: "destructive" }); setLoading(false); return; }
-      // Verify password if user has one set
-      if (users[0].password && users[0].password !== loginPassword) {
-        toast({ title: "Incorrect Password", description: "Please enter the correct password.", variant: "destructive" }); setLoading(false); return;
+
+      // Secret code login
+      if (loginMethod === "secret_code") {
+        if (!loginSecretCode.trim()) { toast({ title: "Enter secret code", variant: "destructive" }); setLoading(false); return; }
+        if (!users[0].secret_code || users[0].secret_code !== loginSecretCode.trim()) {
+          toast({ title: "Invalid Secret Code", variant: "destructive" }); setLoading(false); return;
+        }
+        localStorage.setItem("workshop_user", JSON.stringify(users[0]));
+        toast({ title: `Welcome, ${users[0].name}! 🎨` });
+        navigate("/workshop/dashboard");
+        return;
       }
+
+      // Password login - only required for upcoming batch
+      if (isPasswordRequired) {
+        if (users[0].password && users[0].password !== loginPassword) {
+          toast({ title: "Incorrect Password", description: "Please enter the correct password.", variant: "destructive" }); setLoading(false); return;
+        }
+      }
+      // For old batches (march-14-15), no password needed — direct login
       localStorage.setItem("workshop_user", JSON.stringify(users[0]));
       toast({ title: `Welcome, ${users[0].name}! 🎨` });
       navigate("/workshop/dashboard");
