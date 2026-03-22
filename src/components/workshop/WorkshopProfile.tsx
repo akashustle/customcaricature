@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X } from "lucide-react";
+import { User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X, CreditCard, MapPin, Key } from "lucide-react";
 
 const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [editing, setEditing] = useState(false);
