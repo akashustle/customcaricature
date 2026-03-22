@@ -34,7 +34,7 @@ const MobileBottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
       <div className="bg-card/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center overflow-x-auto no-scrollbar px-2 py-2 max-w-lg mx-auto gap-1">
+        <div className="flex items-center justify-evenly px-1 py-2 max-w-lg mx-auto">
           {items.map((item) => {
             const active = location.pathname === item.path;
             return (
@@ -42,7 +42,7 @@ const MobileBottomNav = () => {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 whileTap={{ scale: 0.88 }}
-                className="flex flex-col items-center gap-0.5 min-w-0 flex-shrink-0 py-1 relative" style={{ minWidth: '56px' }}>
+                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-1 relative">
                 <div className={`flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200 ${
                   active ? "bg-primary/12" : ""
                 }`}>
