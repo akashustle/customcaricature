@@ -139,6 +139,8 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
   usePermissions(true);
+  const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
