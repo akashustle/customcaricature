@@ -106,6 +106,15 @@ const AdminSessionsLog = () => {
     fetchSessions();
   };
 
+  const handleDeleteSession = async (sessionId: string) => {
+    await supabase.from("admin_sessions").delete().eq("id", sessionId);
+    toast({ title: "Session record deleted" });
+    if (user) {
+      await supabase.from("admin_action_log").insert({ user_id: user.id, admin_name: "Admin", action: "Deleted Admin Session", details: `Session ${sessionId.slice(0, 8)} permanently removed` } as any);
+    }
+    fetchSessions(); fetchAdminUsers();
+  };
+
   const handleBlockIP = async () => {
     if (!blockIPInput.trim()) return;
     await supabase.from("admin_blocked_ips").insert({ ip_address: blockIPInput.trim(), blocked_by: user?.id, reason: blockReason.trim() || null } as any);
