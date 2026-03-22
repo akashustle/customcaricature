@@ -54,7 +54,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             {/* Hand-drawn frame around center */}
             <motion.rect
               x="180" y="160" width="240" height="280" rx="20"
-              fill="none" stroke="#b08d57" strokeWidth="1.2" opacity="0.1"
+              fill="none" stroke="#a08462" strokeWidth="1.2" opacity="0.1"
               strokeDasharray="6 3"
               initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
               transition={{ duration: 3, ease: "easeInOut" }}
