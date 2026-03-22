@@ -910,6 +910,9 @@ const WorkshopAdmin = () => {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
                     <div className="flex items-center gap-2">
+                      <div className="hidden lg:block w-64">
+                        <AdminGlobalSearch onNavigate={setTab} />
+                      </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
                         <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
                           <SelectValue placeholder="Select Workshop" />
