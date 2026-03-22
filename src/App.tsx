@@ -76,12 +76,9 @@ const PageLoader = () => (
 );
 
 const OneSignalInit = () => {
-  const { useOneSignal: initOneSignal } = require("@/hooks/useOneSignal");
-  initOneSignal();
+  useOneSignal();
   return null;
 };
-
-const OneSignalWrapper = lazy(() => import("@/components/OneSignalProvider"));
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -90,6 +87,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
+        <OneSignalInit />
+        <Toaster />
+        <Sonner />
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
