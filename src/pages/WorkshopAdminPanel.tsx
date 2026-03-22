@@ -1766,6 +1766,7 @@ const WorkshopAdmin = () => {
                         { key: "live_session_enabled", label: "Live Sessions", desc: "Enable system" },
                         { key: "feedback_visibility", label: "Feedback Page", desc: "Show to users" },
                         { key: "workshop_ended", label: "Workshop Ended", desc: "Mark complete" },
+                        { key: "secret_code_login", label: "Secret Code Login", desc: "Allow users to login with secret code" },
                       ].map((s) => (
                         <div key={s.key} className="flex items-center justify-between">
                           <div><p className={`${textPrimary} text-sm`}>{s.label}</p><p className={`${textMuted} text-xs`}>{s.desc}</p></div>
