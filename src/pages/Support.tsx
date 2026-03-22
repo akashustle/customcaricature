@@ -68,7 +68,7 @@ const Support = () => {
                 <h2 className="font-calligraphy text-3xl font-bold text-3d">Message Sent!</h2>
                 <p className="text-sm text-muted-foreground font-body">We'll get back to you as soon as possible.</p>
                 <div className="flex flex-col gap-2 pt-4">
-                  <Button onClick={() => window.open("https://wa.me/918369594271", "_blank")} className="w-full font-body bg-green-600 hover:bg-green-700 btn-3d rounded-full h-12">
+                  <Button onClick={() => window.open("https://wa.me/918369594271", "_blank")} className="w-full font-body bg-emerald-500 hover:bg-emerald-600 text-white btn-3d rounded-full h-12">
                     <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/")} className="font-body rounded-full">
