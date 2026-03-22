@@ -1919,6 +1919,19 @@ const Admin = () => {
                       }}
                     />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Allow International Workshop Registration</p>
+                      <p className="text-xs text-muted-foreground font-sans">Let users from other countries register for workshops</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).allow_international_registration?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("allow_international_registration", { enabled: checked });
+                        toast({ title: checked ? "International registration enabled" : "International registration disabled" });
+                      }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
