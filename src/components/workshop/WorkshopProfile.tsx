@@ -121,6 +121,13 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
           ? "6:00 PM – 9:00 PM"
           : profileData.slot,
     },
+    { icon: MapPin, label: "Location", value: [profileData.city, profileData.state, profileData.country].filter(Boolean).join(", ") || "—" },
+    { icon: Key, label: "Secret Code", value: profileData.secret_code || "—" },
+  ];
+
+  const paymentInfo = [
+    { icon: CreditCard, label: "Payment Status", value: (profileData.payment_status || "pending").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) },
+    { icon: CreditCard, label: "Amount Paid", value: profileData.payment_amount ? `₹${profileData.payment_amount}` : "—" },
   ];
 
   return (
