@@ -51,6 +51,7 @@ const AdminIntegrations = () => {
     await updateSetting("onesignal_config", {
       enabled: onesignalEnabled,
       app_id: onesignalAppId,
+      rest_api_key: onesignalRestApiKey,
     });
     toast({ title: "OneSignal settings saved ✅" });
   };
