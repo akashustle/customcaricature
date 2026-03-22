@@ -90,8 +90,6 @@ const App = () => {
         <OneSignalInit />
         <Toaster />
         <Sonner />
-        <Toaster />
-        <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
