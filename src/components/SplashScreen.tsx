@@ -25,7 +25,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           transition={{ duration: 0.5, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
           style={{
-            background: "radial-gradient(ellipse at 40% 30%, #fdf8f3 0%, #f5ede0 40%, #ede3d3 70%, #e8ddd0 100%)",
+            background: "radial-gradient(ellipse at 40% 30%, #fdf8f3 0%, #f7f0e6 40%, #f0e8dc 70%, #ebe3d8 100%)",
           }}
         >
           {/* Hand-drawn sketch lines background */}
