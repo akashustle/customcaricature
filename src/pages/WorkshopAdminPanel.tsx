@@ -827,10 +827,10 @@ const WorkshopAdmin = () => {
       <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
         <div className="flex items-center justify-between px-4 py-4 border-b border-border/20">
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center flex-shrink-0 shadow-sm">
-              <GraduationCap className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-border/40">
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <div><p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif', color: 'hsl(28,18%,14%)' }}>Workshop Console</p><p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>CCC Academy</p></div>}
+            {!collapsed && <div><p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</p><p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>CCC Academy</p></div>}
           </div>
           <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-accent/10 transition-colors flex-shrink-0">
             {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
@@ -847,12 +847,12 @@ const WorkshopAdmin = () => {
               )} style={{ fontFamily: 'Inter, sans-serif' }}>
               <div className={cn(
                 "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                tab === item.key ? "bg-[hsl(22,78%,52%)] text-white shadow-sm" : ""
+                tab === item.key ? "bg-primary text-primary-foreground shadow-sm" : ""
               )}>
                 <item.icon className="w-3.5 h-3.5" />
               </div>
               {!collapsed && <span className="truncate">{item.label}</span>}
-              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[hsl(22,78%,52%)]" />}
+              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
             </button>
           ))}
         </nav>
