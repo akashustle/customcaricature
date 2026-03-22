@@ -583,13 +583,13 @@ const WorkshopAdmin = () => {
   const bg = dm ? "bg-[#0f0d08]" : "bg-background";
   const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-card/80 border-border/60";
   const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#6a5a4a] font-medium";
-  const textMuted = dm ? "text-white/40" : "text-[#9a8a7a]";
-  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-[#e8ddd0]/60";
-  const activeTabClass = dm ? "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-lg font-bold" : "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] text-white shadow-md shadow-[#b08d57]/20 font-bold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-[#8b7b6a] hover:text-[#5a4a3a] hover:bg-[#f0e6da]/60";
-  const btnPrimary = "bg-gradient-to-r from-[#b08d57] to-[#c9a96e] hover:from-[#9e7d4a] hover:to-[#b89560] text-white shadow-md font-bold";
-  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-[#faf5ef] border-[#d4c4b4] text-[#3a2e22] font-medium placeholder:text-[#b0a090]";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
+  const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
+  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-card/90 border-border/60";
+  const activeTabClass = "bg-primary text-primary-foreground shadow-lg font-bold";
+  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60";
+  const btnPrimary = "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md font-bold";
+  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-background border-border text-foreground font-medium placeholder:text-muted-foreground";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
