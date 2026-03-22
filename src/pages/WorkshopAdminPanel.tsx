@@ -1115,7 +1115,7 @@ const WorkshopAdmin = () => {
                     <h1 className={`text-xl ${textPrimary}`}>Live Sessions ({filteredSessions.length})</h1>
                     <div className="flex gap-2">
                       <RefreshButton />
-                      <ExportButton data={liveSessions.map(s => ({ Title: s.title, Date: s.session_date, Slot: s.slot, Artist: s.artist_name || "—", Status: s.status }))} sheetName="Sessions" fileName="CCC_LiveSessions" />
+                      <ExportButton data={filteredSessions.map(s => ({ Title: s.title, Date: s.session_date, Slot: s.slot, Artist: s.artist_name || "—", Status: s.status }))} sheetName="Sessions" fileName="CCC_LiveSessions" />
                       <Dialog open={showAddSession} onOpenChange={setShowAddSession}>
                         <DialogTrigger asChild><Button size="sm" className={`${btnPrimary} rounded-xl`}><Plus className="w-4 h-4 mr-1" />Add Session</Button></DialogTrigger>
                         <DialogContent className="max-h-[90vh] overflow-y-auto">
