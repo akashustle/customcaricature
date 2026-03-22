@@ -33,7 +33,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             {/* Pencil sketch strokes */}
             <motion.path
               d="M50,300 C100,250 150,320 200,280 S300,260 350,290 S450,250 550,300"
-              fill="none" stroke="#b08d57" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"
+              fill="none" stroke="#a08462" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"
               strokeDasharray="8 4"
               initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
               transition={{ duration: 2.5, ease: "easeInOut" }}
