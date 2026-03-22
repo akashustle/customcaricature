@@ -183,7 +183,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             <svg className="w-full h-3 mt-1" viewBox="0 0 300 12" preserveAspectRatio="none">
               <motion.path
                 d="M10,6 C50,2 100,10 150,5 S250,8 290,4"
-                fill="none" stroke="#b08d57" strokeWidth="2" strokeLinecap="round" opacity="0.4"
+                fill="none" stroke="#a08462" strokeWidth="2" strokeLinecap="round" opacity="0.4"
                 initial={{ pathLength: 0 }}
                 animate={step >= 2 ? { pathLength: 1 } : {}}
                 transition={{ duration: 0.8, delay: 0.3 }}
