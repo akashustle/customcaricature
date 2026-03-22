@@ -1570,6 +1570,14 @@ const Admin = () => {
             <AdminEnquiries />
           </TabsContent>
 
+          <TabsContent value="crm-pipeline">
+            <AdminCRMPipeline />
+          </TabsContent>
+
+          <TabsContent value="revenue">
+            <AdminRevenueDashboard />
+          </TabsContent>
+
           <TabsContent value="support">
             <AdminSupport />
           </TabsContent>
