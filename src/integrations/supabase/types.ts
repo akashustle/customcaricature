@@ -870,6 +870,8 @@ export type Database = {
       enquiries: {
         Row: {
           admin_notes: string | null
+          assigned_to: string | null
+          budget: number | null
           caricature_type: string | null
           city: string | null
           country: string | null
@@ -881,6 +883,7 @@ export type Database = {
           estimated_price: number | null
           event_date: string | null
           event_type: string | null
+          follow_up_date: string | null
           id: string
           instagram_id: string | null
           link_clicked: boolean | null
@@ -888,6 +891,7 @@ export type Database = {
           mobile: string
           name: string
           pricing_source: string | null
+          source: string | null
           state: string | null
           status: string
           updated_at: string
@@ -895,6 +899,8 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          assigned_to?: string | null
+          budget?: number | null
           caricature_type?: string | null
           city?: string | null
           country?: string | null
@@ -906,6 +912,7 @@ export type Database = {
           estimated_price?: number | null
           event_date?: string | null
           event_type?: string | null
+          follow_up_date?: string | null
           id?: string
           instagram_id?: string | null
           link_clicked?: boolean | null
@@ -913,6 +920,7 @@ export type Database = {
           mobile: string
           name: string
           pricing_source?: string | null
+          source?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -920,6 +928,8 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          assigned_to?: string | null
+          budget?: number | null
           caricature_type?: string | null
           city?: string | null
           country?: string | null
@@ -931,6 +941,7 @@ export type Database = {
           estimated_price?: number | null
           event_date?: string | null
           event_type?: string | null
+          follow_up_date?: string | null
           id?: string
           instagram_id?: string | null
           link_clicked?: boolean | null
@@ -938,6 +949,7 @@ export type Database = {
           mobile?: string
           name?: string
           pricing_source?: string | null
+          source?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -1431,6 +1443,50 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      lead_follow_ups: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          enquiry_id: string
+          follow_up_type: string | null
+          id: string
+          note: string
+          scheduled_at: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          enquiry_id: string
+          follow_up_type?: string | null
+          id?: string
+          note: string
+          scheduled_at?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          enquiry_id?: string
+          follow_up_type?: string | null
+          id?: string
+          note?: string
+          scheduled_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_follow_ups_enquiry_id_fkey"
+            columns: ["enquiry_id"]
+            isOneToOne: false
+            referencedRelation: "enquiries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       live_chat_messages: {
         Row: {

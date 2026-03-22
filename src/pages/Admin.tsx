@@ -69,6 +69,8 @@ import AdminPages from "@/components/admin/AdminPages";
 import AdminCalculatorHistory from "@/components/admin/AdminCalculatorHistory";
 import AdminDashboardWidgets from "@/components/admin/AdminDashboardWidgets";
 import AdminHomepageControl from "@/components/admin/AdminHomepageControl";
+import AdminCRMPipeline from "@/components/admin/AdminCRMPipeline";
+import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 
 type Order = {
   id: string;
@@ -1566,6 +1568,14 @@ const Admin = () => {
 
           <TabsContent value="enquiries">
             <AdminEnquiries />
+          </TabsContent>
+
+          <TabsContent value="crm-pipeline">
+            <AdminCRMPipeline />
+          </TabsContent>
+
+          <TabsContent value="revenue">
+            <AdminRevenueDashboard />
           </TabsContent>
 
           <TabsContent value="support">
