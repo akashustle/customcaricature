@@ -78,6 +78,11 @@ export default {
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",
+        "soft-green": "hsl(var(--soft-green))",
+        "soft-blue": "hsl(var(--soft-blue))",
+        "soft-pink": "hsl(var(--soft-pink))",
+        "warm-peach": "hsl(var(--warm-peach))",
+        "light-gold": "hsl(var(--light-gold))",
       },
       borderRadius: {
         lg: "var(--radius)",
