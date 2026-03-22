@@ -759,8 +759,6 @@ const Admin = () => {
           </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
-          {/* Dashboard Widgets - always visible */}
-          <AdminDashboardWidgets />
 
           {/* Orders Tab */}
           <TabsContent value="orders">
