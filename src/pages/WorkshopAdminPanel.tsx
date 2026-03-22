@@ -878,6 +878,9 @@ const WorkshopAdmin = () => {
               <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
+          <div className="px-3 pb-2">
+            <AdminGlobalSearch onNavigate={setTab} />
+          </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
