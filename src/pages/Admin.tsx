@@ -1624,6 +1624,10 @@ const Admin = () => {
             <AdminAutomation />
           </TabsContent>
 
+          <TabsContent value="team">
+            <AdminTeamManagement />
+          </TabsContent>
+
           <TabsContent value="integrations">
             <AdminIntegrations />
           </TabsContent>
