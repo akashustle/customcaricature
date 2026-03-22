@@ -47,11 +47,11 @@ const Support = () => {
   };
 
   const socials = [
-    { icon: Instagram, label: "@creativecaricatureclub", href: "https://instagram.com/creativecaricatureclub", color: "from-pink-500 to-purple-600" },
-    { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/918369594271", color: "from-green-500 to-green-600" },
-    { icon: Youtube, label: "YouTube", href: "https://youtube.com/@creativecaricatureclub", color: "from-red-500 to-red-600" },
-    { icon: Facebook, label: "Facebook", href: "https://facebook.com/creativecaricatureclub", color: "from-blue-500 to-blue-600" },
-    { icon: Mail, label: "creativecaricatureclub@gmail.com", href: "mailto:creativecaricatureclub@gmail.com", color: "from-amber-500 to-orange-600" },
+    { icon: Instagram, label: "@creativecaricatureclub", href: "https://instagram.com/creativecaricatureclub", color: "from-rose-400 to-rose-500" },
+    { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/918369594271", color: "from-emerald-400 to-emerald-500" },
+    { icon: Youtube, label: "YouTube", href: "https://youtube.com/@creativecaricatureclub", color: "from-red-400 to-red-500" },
+    { icon: Facebook, label: "Facebook", href: "https://facebook.com/creativecaricatureclub", color: "from-blue-400 to-blue-500" },
+    { icon: Mail, label: "creativecaricatureclub@gmail.com", href: "mailto:creativecaricatureclub@gmail.com", color: "from-amber-400 to-amber-500" },
   ];
 
   if (submitted) {
