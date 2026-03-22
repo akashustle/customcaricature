@@ -140,8 +140,8 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
                 alt="Creative Caricature Club"
                 className="w-28 h-28 rounded-full object-cover relative z-10"
                 style={{
-                  border: "3px solid #b08d57",
-                  boxShadow: "0 8px 30px rgba(176,141,87,0.25), 0 0 0 6px rgba(253,248,243,0.8), inset 0 2px 4px rgba(0,0,0,0.1)",
+                  border: "3px solid #a08462",
+                  boxShadow: "0 8px 30px rgba(160,132,98,0.2), 0 0 0 6px rgba(253,248,243,0.8), inset 0 2px 4px rgba(0,0,0,0.08)",
                 }}
               />
             </motion.div>
