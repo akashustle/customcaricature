@@ -15,6 +15,7 @@ const AdminIntegrations = () => {
 
   // OneSignal
   const [onesignalAppId, setOnesignalAppId] = useState("");
+  const [onesignalRestApiKey, setOnesignalRestApiKey] = useState("");
   const [onesignalEnabled, setOnesignalEnabled] = useState(false);
 
   // OTP
@@ -33,6 +34,7 @@ const AdminIntegrations = () => {
           if (row.id === "onesignal_config" && row.value) {
             setOnesignalEnabled(row.value.enabled || false);
             setOnesignalAppId(row.value.app_id || "");
+            setOnesignalRestApiKey(row.value.rest_api_key || "");
           }
           if (row.id === "otp_config" && row.value) {
             setOtpEnabled(row.value.enabled || false);
@@ -49,6 +51,7 @@ const AdminIntegrations = () => {
     await updateSetting("onesignal_config", {
       enabled: onesignalEnabled,
       app_id: onesignalAppId,
+      rest_api_key: onesignalRestApiKey,
     });
     toast({ title: "OneSignal settings saved ✅" });
   };
@@ -109,6 +112,19 @@ const AdminIntegrations = () => {
                   <a href="https://app.onesignal.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline inline-flex items-center gap-1">
                     OneSignal Dashboard <ExternalLink className="w-3 h-3" />
                   </a>
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm">OneSignal REST API Key</Label>
+                <Input
+                  type="password"
+                  placeholder="Your OneSignal REST API Key"
+                  value={onesignalRestApiKey}
+                  onChange={(e) => setOnesignalRestApiKey(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Found in Settings → Keys & IDs in your OneSignal Dashboard
                 </p>
               </div>
               <Button size="sm" onClick={saveOneSignal} className="gap-1">

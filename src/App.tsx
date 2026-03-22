@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,7 @@ import SplashScreen from "./components/SplashScreen";
 import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
+import { useOneSignal } from "./hooks/useOneSignal";
 
 // Eagerly loaded core pages
 import Index from "./pages/Index";
@@ -74,6 +75,11 @@ const PageLoader = () => (
   </div>
 );
 
+const OneSignalInit = () => {
+  useOneSignal();
+  return null;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -81,6 +87,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
+        <OneSignalInit />
+        <Toaster />
+        <Sonner />
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}

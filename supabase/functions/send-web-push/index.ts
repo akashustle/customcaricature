@@ -259,6 +259,37 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Also send via OneSignal as a secondary channel
+    try {
+      const { data: osConfig } = await supabase
+        .from("admin_site_settings")
+        .select("value")
+        .eq("id", "onesignal_config")
+        .maybeSingle();
+      
+      const cfg = osConfig?.value as any;
+      if (cfg?.enabled && cfg?.app_id && cfg?.rest_api_key) {
+        await fetch("https://api.onesignal.com/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Key ${cfg.rest_api_key}`,
+          },
+          body: JSON.stringify({
+            app_id: cfg.app_id,
+            include_aliases: { external_id: [user_id] },
+            target_channel: "push",
+            headings: { en: title || "Creative Caricature Club" },
+            contents: { en: message || "You have a new notification" },
+            chrome_web_icon: "https://customcaricature.lovable.app/logo.png",
+            url: link ? (link.startsWith("http") ? link : `https://customcaricature.lovable.app${link}`) : undefined,
+          }),
+        });
+      }
+    } catch (osErr) {
+      console.warn("OneSignal secondary push failed (non-fatal):", osErr);
+    }
+
     return new Response(JSON.stringify({ sent, failed: failed.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
