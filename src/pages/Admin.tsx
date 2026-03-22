@@ -732,13 +732,16 @@ const Admin = () => {
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
               <span className="text-muted-foreground/30">|</span>
               <LiveGreeting name={adminProfile?.full_name} />
+              <div className="ml-4 flex-1 max-w-md">
+                <AdminGlobalSearch onNavigate={setActiveTab} />
+              </div>
             </div>
             <div className="flex items-center gap-1.5">
               <NotificationBell />
