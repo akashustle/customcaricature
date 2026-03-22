@@ -132,7 +132,15 @@ const Workshop = () => {
     if (stored) { navigate("/workshop/dashboard"); return; }
     fetchActiveWorkshop();
     fetchSecretCodeSetting();
+    fetchInternationalSetting();
   }, []);
+
+  const fetchInternationalSetting = async () => {
+    const { data } = await supabase.from("workshop_settings" as any).select("*").eq("id", "allow_international_registration");
+    if (data && (data as any[]).length > 0) {
+      setAllowInternational((data as any[])[0].value?.enabled === true);
+    }
+  };
 
   const fetchSecretCodeSetting = async () => {
     const { data } = await supabase.from("workshop_settings" as any).select("*").eq("id", "secret_code_login");
