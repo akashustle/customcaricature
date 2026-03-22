@@ -40,7 +40,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             />
             <motion.path
               d="M80,200 Q200,150 300,190 T520,170"
-              fill="none" stroke="#e8643c" strokeWidth="1" strokeLinecap="round" opacity="0.08"
+              fill="none" stroke="#a08462" strokeWidth="1" strokeLinecap="round" opacity="0.08"
               initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
               transition={{ duration: 2, delay: 0.3 }}
             />
