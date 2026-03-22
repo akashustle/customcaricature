@@ -318,10 +318,13 @@ const Workshop = () => {
         </div>
         <div>
           <Label>Do you have an artist background?</Label>
-          <RadioGroup value={regForm.artist_background} onValueChange={v => setRegForm({...regForm, artist_background: v})} className="flex gap-6 mt-2">
-            <div className="flex items-center gap-2"><RadioGroupItem value="yes" id="bg-yes" /><Label htmlFor="bg-yes">Yes</Label></div>
-            <div className="flex items-center gap-2"><RadioGroupItem value="no" id="bg-no" /><Label htmlFor="bg-no">No</Label></div>
-          </RadioGroup>
+          <Select value={regForm.artist_background} onValueChange={v => setRegForm({...regForm, artist_background: v})}>
+            <SelectTrigger className="h-11 rounded-xl mt-2"><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="yes">Yes</SelectItem>
+              <SelectItem value="no">No</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div><Label>Why is this workshop suitable for you?</Label><Textarea value={regForm.why_suitable} onChange={e => setRegForm({...regForm, why_suitable: e.target.value})} placeholder="Tell us why..." rows={3} /></div>
       </div>,
