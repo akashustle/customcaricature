@@ -102,7 +102,7 @@ const defaultWorkshop: WorkshopData = {
 
 const Workshop = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<"details" | "login" | "register">("details");
+  const [view, setView] = useState<"details" | "login" | "register" | "reg-success">("details");
   const [loginType, setLoginType] = useState<"mobile" | "email">("mobile");
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [mobile, setMobile] = useState("");
