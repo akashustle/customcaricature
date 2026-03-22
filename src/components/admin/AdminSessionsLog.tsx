@@ -378,7 +378,27 @@ const AdminSessionsLog = () => {
             <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
               {sessions.filter(s => !s.is_active).map(s => (
                 <div key={s.id} className="bg-muted/30 rounded-lg p-2 text-xs font-sans space-y-1">
-                  <div className="flex justify-between"><span className="font-semibold">{s.admin_name}</span><span className="text-muted-foreground">{formatDate(s.login_at)}</span></div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-semibold">{s.admin_name}</span>
+                      <span className="text-muted-foreground ml-2">{formatDate(s.login_at)}</span>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-6 px-2 text-destructive"><Trash2 className="w-3 h-3" /></Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Session?</AlertDialogTitle>
+                          <AlertDialogDescription>Permanently delete this session record for {s.admin_name}?</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteSession(s.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     {s.device_info && <span>{s.device_info}</span>}
                     {s.ip_address && <span>IP: {s.ip_address}</span>}
