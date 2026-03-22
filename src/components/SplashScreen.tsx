@@ -124,7 +124,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             {/* Warm glow */}
             <motion.div
               className="absolute -inset-4 rounded-full"
-              style={{ background: "radial-gradient(circle, rgba(176,141,87,0.15) 0%, transparent 70%)" }}
+              style={{ background: "radial-gradient(circle, rgba(160,132,98,0.12) 0%, transparent 70%)" }}
               animate={step >= 2 ? { scale: [1, 1.15, 1], opacity: [0.5, 0.2, 0.5] } : {}}
               transition={{ duration: 2.5, repeat: Infinity }}
             />
