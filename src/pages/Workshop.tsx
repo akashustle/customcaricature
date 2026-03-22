@@ -385,7 +385,7 @@ const Workshop = () => {
       <div className="min-h-screen flex items-center justify-center p-4 pb-24 md:pb-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
           <Card>
-            <CardContent className="p-8 space-y-6">
+            <CardContent className="p-8 space-y-5">
               <div className="text-center space-y-3">
                 <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-border shadow-lg">
                   <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
@@ -393,26 +393,75 @@ const Workshop = () => {
                 <h1 className="font-calligraphy text-3xl font-bold text-foreground">Workshop Login</h1>
                 <p className="text-muted-foreground text-sm font-body flex items-center justify-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Creative Caricature Club</p>
               </div>
-              <div className="flex bg-muted rounded-xl p-1">
-                <button onClick={() => setLoginType("mobile")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "mobile" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}><Phone className="w-4 h-4" /> Mobile</button>
-                <button onClick={() => setLoginType("email")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "email" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}><Mail className="w-4 h-4" /> Email</button>
-              </div>
-              <div className="space-y-4">
-                {loginType === "mobile" ? (
-                  <div className="space-y-2">
-                    <Label className="font-body text-sm">Mobile Number</Label>
-                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label className="font-body text-sm">Email Address</Label>
-                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">Password</Label>
-                  <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} />
+
+              {/* Batch Selector */}
+              <div className="space-y-2">
+                <Label className="font-body text-xs text-muted-foreground">Select Batch</Label>
+                <div className="flex bg-muted rounded-xl p-1">
+                  <button onClick={() => setSelectedBatch("upcoming")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "upcoming" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
+                    <Calendar className="w-3.5 h-3.5" /> Upcoming
+                  </button>
+                  <button onClick={() => setSelectedBatch("march-14-15")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "march-14-15" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
+                    <Calendar className="w-3.5 h-3.5" /> 14th & 15th March
+                  </button>
                 </div>
+              </div>
+
+              {/* Login method tabs */}
+              <div className="space-y-2">
+                <Label className="font-body text-xs text-muted-foreground">Login With</Label>
+                <div className="flex bg-muted rounded-xl p-1">
+                  <button onClick={() => setLoginType("mobile")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "mobile" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`} onClickCapture={() => setLoginMethod("password")}><Phone className="w-4 h-4" /> Mobile</button>
+                  <button onClick={() => { setLoginType("email"); setLoginMethod("password"); }} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "email" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}><Mail className="w-4 h-4" /> Email</button>
+                  {secretCodeLoginEnabled && (
+                    <button onClick={() => setLoginMethod("secret_code")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginMethod === "secret_code" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>🔑 Code</button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {loginMethod === "secret_code" ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="font-body text-sm">{loginType === "mobile" ? "Mobile Number" : "Email Address"}</Label>
+                      {loginType === "mobile" ? (
+                        <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
+                      ) : (
+                        <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-body text-sm">Secret Code</Label>
+                      <Input type="password" value={loginSecretCode} onChange={(e) => setLoginSecretCode(e.target.value)} placeholder="Enter your 4-digit code" className="h-12 rounded-xl text-center tracking-[0.5em] text-lg" maxLength={4} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+                      <p className="text-[11px] text-muted-foreground text-center">Secret code provided by admin</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {loginType === "mobile" ? (
+                      <div className="space-y-2">
+                        <Label className="font-body text-sm">Mobile Number</Label>
+                        <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label className="font-body text-sm">Email Address</Label>
+                        <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
+                      </div>
+                    )}
+                    {isPasswordRequired && (
+                      <div className="space-y-2">
+                        <Label className="font-body text-sm">Password</Label>
+                        <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} />
+                      </div>
+                    )}
+                    {!isPasswordRequired && (
+                      <p className="text-xs text-center text-muted-foreground bg-accent/10 rounded-xl p-2.5 font-body">
+                        ✨ No password required for 14th & 15th March batch — login directly with your {loginType === "mobile" ? "mobile number" : "email"}.
+                      </p>
+                    )}
+                  </>
+                )}
                 <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
                   {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
                 </Button>
@@ -420,7 +469,7 @@ const Workshop = () => {
                   <Button variant="outline" className="flex-1 rounded-xl font-body text-sm" onClick={() => setView("details")}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
                   {isRegistrationOpen && <Button variant="outline" className="flex-1 rounded-xl font-body text-sm border-primary text-primary" onClick={() => setView("register")}>Register <ArrowRight className="w-4 h-4 ml-1" /></Button>}
                 </div>
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl border border-green-200 bg-green-50/80 text-green-600 text-sm font-body font-medium hover:bg-green-100 transition-colors"><MessageCircle className="w-4 h-4" /> Can't login? Contact WhatsApp</a>
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-muted-foreground text-sm font-body font-medium hover:bg-secondary transition-colors"><MessageCircle className="w-4 h-4" /> Can't login? Contact WhatsApp</a>
               </div>
             </CardContent>
           </Card>
