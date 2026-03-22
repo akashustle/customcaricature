@@ -74,6 +74,14 @@ const PageLoader = () => (
   </div>
 );
 
+const OneSignalInit = () => {
+  const { useOneSignal: initOneSignal } = require("@/hooks/useOneSignal");
+  initOneSignal();
+  return null;
+};
+
+const OneSignalWrapper = lazy(() => import("@/components/OneSignalProvider"));
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
