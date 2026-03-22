@@ -74,6 +74,7 @@ import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 import AdminAutomation from "@/components/admin/AdminAutomation";
 import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
 import AdminNameGate from "@/components/admin/AdminNameGate";
+import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 
 type Order = {
   id: string;
@@ -731,13 +732,16 @@ const Admin = () => {
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
               <span className="text-muted-foreground/30">|</span>
               <LiveGreeting name={adminProfile?.full_name} />
+              <div className="ml-4 flex-1 max-w-md">
+                <AdminGlobalSearch onNavigate={setActiveTab} />
+              </div>
             </div>
             <div className="flex items-center gap-1.5">
               <NotificationBell />
@@ -1912,6 +1916,19 @@ const Admin = () => {
                       onCheckedChange={async (checked) => {
                         await updateSetting("workshop_dashboard_visible", { enabled: checked });
                         toast({ title: checked ? "Workshop visible on dashboard" : "Workshop hidden from dashboard" });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Allow International Workshop Registration</p>
+                      <p className="text-xs text-muted-foreground font-sans">Let users from other countries register for workshops</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).allow_international_registration?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("allow_international_registration", { enabled: checked });
+                        toast({ title: checked ? "International registration enabled" : "International registration disabled" });
                       }}
                     />
                   </div>

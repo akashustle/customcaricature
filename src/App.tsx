@@ -11,6 +11,7 @@ import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
 import { useOneSignal } from "./hooks/useOneSignal";
+import { useRouteMemory } from "./hooks/useRouteMemory";
 
 // Eagerly loaded core pages
 import Index from "./pages/Index";
@@ -80,6 +81,11 @@ const OneSignalInit = () => {
   return null;
 };
 
+const RouteMemoryTracker = () => {
+  useRouteMemory();
+  return null;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -94,6 +100,7 @@ const App = () => {
         <AppUpdateBanner />
         <BrowserRouter>
           <ScrollToTop />
+          <RouteMemoryTracker />
           <FloatingButtons />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>
