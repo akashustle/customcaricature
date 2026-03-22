@@ -43,7 +43,6 @@ const MobileBottomNav = () => {
                 onClick={() => navigate(item.path)}
                 whileTap={{ scale: 0.88 }}
                 className="flex flex-col items-center gap-0.5 min-w-0 flex-shrink-0 py-1 relative" style={{ minWidth: '56px' }}>
-              >
                 <div className={`flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200 ${
                   active ? "bg-primary/12" : ""
                 }`}>
