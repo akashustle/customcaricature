@@ -412,13 +412,18 @@ const Workshop = () => {
               {/* Login method tabs */}
               <div className="space-y-2">
                 <Label className="font-body text-xs text-muted-foreground">Login With</Label>
-                <div className="flex bg-muted rounded-xl p-1">
-                  <button onClick={() => setLoginType("mobile")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "mobile" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`} onClickCapture={() => setLoginMethod("password")}><Phone className="w-4 h-4" /> Mobile</button>
-                  <button onClick={() => { setLoginType("email"); setLoginMethod("password"); }} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "email" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}><Mail className="w-4 h-4" /> Email</button>
-                  {secretCodeLoginEnabled && (
-                    <button onClick={() => setLoginMethod("secret_code")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginMethod === "secret_code" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>🔑 Code</button>
-                  )}
-                </div>
+                <Select value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`} onValueChange={(v) => {
+                  if (v === "secret_code") { setLoginMethod("secret_code"); }
+                  else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
+                  else { setLoginType("email"); setLoginMethod("password"); }
+                }}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select login method" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mobile_password">📱 Mobile Number</SelectItem>
+                    <SelectItem value="email_password">📧 Email Address</SelectItem>
+                    {secretCodeLoginEnabled && <SelectItem value="secret_code">🔑 Secret Code</SelectItem>}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-4">
