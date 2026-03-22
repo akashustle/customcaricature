@@ -531,11 +531,23 @@ const WorkshopAdmin = () => {
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
   };
 
-  // Filter data by selected workshop
+  // Filter data by selected workshop — strict isolation
   const wsFilterId = selectedWorkshopId === "current" ? activeWorkshopId : selectedWorkshopId;
-  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId || (!u.workshop_id && selectedWorkshopId === "current")) : users;
-  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId || (!v.workshop_id && selectedWorkshopId === "current")) : videos;
-  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId || (!s.workshop_id && selectedWorkshopId === "current")) : liveSessions;
+  const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId) : users;
+  const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId) : videos;
+  const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId) : liveSessions;
+  const filteredAssignments = wsFilterId ? assignments.filter((a: any) => {
+    const assignUser = users.find(u => u.id === a.user_id);
+    return assignUser?.workshop_id === wsFilterId;
+  }) : assignments;
+  const filteredFeedbacks = wsFilterId ? feedbacks.filter((f: any) => {
+    const fbUser = users.find(u => u.id === f.user_id);
+    return fbUser?.workshop_id === wsFilterId;
+  }) : feedbacks;
+  const filteredCertificates = wsFilterId ? certificates.filter((c: any) => {
+    const certUser = users.find(u => u.id === c.user_id);
+    return certUser?.workshop_id === wsFilterId;
+  }) : certificates;
 
   const registeredOnline = filteredUsers.filter((u: any) => u.student_type === "registered_online");
   const manuallyAdded = filteredUsers.filter((u: any) => u.student_type === "manually_added");
