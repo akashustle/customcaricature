@@ -62,7 +62,7 @@ const Support = () => {
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <Card className="w-full max-w-md shadow-3d border-glow text-center">
               <CardContent className="p-8 space-y-4">
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-3d">
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-3d">
                   <CheckCircle2 className="w-10 h-10 text-white" />
                 </motion.div>
                 <h2 className="font-calligraphy text-3xl font-bold text-3d">Message Sent!</h2>
