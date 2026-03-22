@@ -67,13 +67,15 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "Creative Caricature Club",
         short_name: "CCC",
-        description: "Custom hand-crafted caricatures online in India",
-        theme_color: "#e8643c",
-        background_color: "#e8ddd0",
+        description: "India's premium caricature studio — Custom art, live events & workshops",
+        theme_color: "#b08d57",
+        background_color: "#fdf8f3",
         display: "standalone",
         orientation: "portrait",
         scope: "/",
         start_url: "/",
+        id: "/",
+        categories: ["entertainment", "lifestyle", "art", "shopping"],
         icons: [
           {
             src: "/logo.png",
@@ -85,6 +87,26 @@ export default defineConfig(({ mode }) => ({
             src: "/favicon.png",
             sizes: "192x192",
             type: "image/png",
+          },
+        ],
+        shortcuts: [
+          {
+            name: "Order Caricature",
+            short_name: "Order",
+            url: "/order",
+            icons: [{ src: "/logo.png", sizes: "192x192" as any }],
+          },
+          {
+            name: "Book Event",
+            short_name: "Event",
+            url: "/book-event",
+            icons: [{ src: "/logo.png", sizes: "192x192" as any }],
+          },
+          {
+            name: "Workshop",
+            short_name: "Workshop",
+            url: "/workshop",
+            icons: [{ src: "/logo.png", sizes: "192x192" as any }],
           },
         ],
       },
