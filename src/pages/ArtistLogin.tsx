@@ -50,11 +50,11 @@ const ArtistLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm" style={{ boxShadow: "var(--shadow-card)" }}>
+    <div className="min-h-screen bg-gradient-to-br from-secondary via-background to-muted flex items-center justify-center p-4">
+      <Card className="w-full max-w-sm border border-border shadow-2xl bg-card/95">
         <CardHeader className="text-center space-y-2">
           <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto rounded-xl cursor-pointer" onClick={() => navigate("/")} />
-          <CardTitle className="font-display text-2xl">Artist Login</CardTitle>
+          <CardTitle className="font-display text-2xl text-foreground">Artist Login</CardTitle>
           <p className="text-sm text-muted-foreground font-body">Creative Caricature Club</p>
         </CardHeader>
         <CardContent>

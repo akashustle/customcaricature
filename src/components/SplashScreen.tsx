@@ -26,9 +26,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-background"
         >
           {/* Subtle warm radial glow */}
-          <div className="absolute inset-0" style={{
-            background: "radial-gradient(ellipse at 50% 40%, hsl(30 35% 96%) 0%, hsl(30 43% 97%) 60%, hsl(30 20% 95%) 100%)"
-          }} />
+          <div className="absolute inset-0 bg-background" />
 
           {/* Floating dots */}
           {[...Array(6)].map((_, i) => (

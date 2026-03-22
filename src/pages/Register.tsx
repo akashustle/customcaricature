@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { validateEmailFormat } from "@/lib/email-validation";
-import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, Sparkles, UserPlus } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, UserPlus } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,15 +85,15 @@ const Register = () => {
   const stepValid = (s: number) => s === 1 ? !!canGoStep2 : s === 2 ? !!canGoStep3 : s === 3 ? !!canGoStep4 : false;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden" style={{ background: "linear-gradient(160deg, hsl(38 40% 96%), hsl(22 25% 93%), hsl(280 15% 95%))" }}>
-      <motion.div className="absolute top-0 left-0 w-80 h-80 opacity-15 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.3), transparent 70%)" }} animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 7, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(280 55% 55% / 0.3), transparent 70%)" }} animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 9, repeat: Infinity }} />
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden bg-gradient-to-br from-secondary via-background to-muted">
+      <motion.div className="absolute top-0 left-0 w-80 h-80 opacity-15 pointer-events-none bg-primary/10 blur-3xl rounded-full" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 7, repeat: Infinity }} />
+      <motion.div className="absolute bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none bg-accent/10 blur-3xl rounded-full" animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 9, repeat: Infinity }} />
 
       <motion.div className="absolute top-[10%] right-[10%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, -10, 0], rotate: [0, 15, 0] }} transition={{ duration: 6, repeat: Infinity }}>🎨</motion.div>
       <motion.div className="absolute bottom-[15%] left-[8%] text-3xl opacity-10 pointer-events-none" animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity }}>✨</motion.div>
 
       <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="w-full max-w-md relative z-10">
-        <Card className="border-none shadow-2xl backdrop-blur-sm" style={{ background: "hsl(38 30% 99% / 0.95)", boxShadow: "0 25px 60px -15px hsl(22 78% 30% / 0.12), 0 0 0 1px hsl(38 30% 90% / 0.5)" }}>
+        <Card className="border border-border shadow-2xl backdrop-blur-sm bg-card/95">
           <CardHeader className="text-center pb-3">
             <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }}>
               <div className="w-18 h-18 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" style={{ width: 72, height: 72 }} onClick={() => navigate("/")}>
@@ -103,7 +103,7 @@ const Register = () => {
                 <UserPlus className="w-3 h-3 text-accent-foreground" />
               </motion.div>
             </motion.div>
-            <CardTitle className="font-display text-2xl" style={{ background: "linear-gradient(135deg, hsl(22 78% 40%), hsl(280 55% 50%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Create Account</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">Create Account</CardTitle>
             <CardDescription className="font-sans text-sm">Join our caricature community</CardDescription>
           </CardHeader>
           <CardContent>
@@ -114,9 +114,8 @@ const Register = () => {
                   <motion.button
                     onClick={() => { if (s.id < step || stepValid(s.id - 1)) setStep(s.id); }}
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${
-                      step === s.id ? "text-primary-foreground shadow-lg scale-105" : step > s.id ? "bg-primary/20 text-foreground" : "bg-muted text-muted-foreground"
+                      step === s.id ? "bg-primary text-primary-foreground shadow-lg scale-105" : step > s.id ? "bg-primary/20 text-foreground" : "bg-muted text-muted-foreground"
                     }`}
-                    style={step === s.id ? { background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))" } : {}}
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   >
                     {step > s.id ? <Check className="w-4 h-4" /> : s.emoji}
@@ -139,7 +138,7 @@ const Register = () => {
                       <div><Label className="font-sans text-sm font-medium">Gender *</Label><Select value={form.gender} onValueChange={(v) => update("gender", v)}><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent></Select></div>
                     </div>
                     <div><Label className="font-sans text-sm font-medium">Instagram ID</Label><Input value={form.instagramId} onChange={(e) => update("instagramId", e.target.value)} placeholder="@yourusername" className="h-11 rounded-xl" /></div>
-                    <Button type="button" onClick={nextStep} disabled={!canGoStep2} className="w-full h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))" }}>Next <ArrowRight className="w-4 h-4 ml-2" /></Button>
+                    <Button type="button" onClick={nextStep} disabled={!canGoStep2} className="w-full h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-2" /></Button>
                   </motion.div>
                 )}
                 {step === 2 && (
@@ -150,7 +149,7 @@ const Register = () => {
                       {form.mobile && form.mobile.length < 10 && <p className="text-xs text-destructive mt-1">Enter 10-digit number</p>}
                     </div>
                     <div><Label className="font-sans text-sm font-medium">Email *</Label><Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@gmail.com" className="h-11 rounded-xl" />{emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}<p className="text-xs text-muted-foreground mt-1">Gmail, Hotmail, Outlook, Yahoo, Zohomail</p></div>
-                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep3} className="flex-1 h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))" }}>Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
+                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep3} className="flex-1 h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
                   </motion.div>
                 )}
                 {step === 3 && (
@@ -158,7 +157,7 @@ const Register = () => {
                     <div><Label className="font-sans text-sm font-medium">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" autoFocus className="h-11 rounded-xl" /></div>
                     <LocationDropdowns state={form.state} district={form.district} city={form.city} onStateChange={(v) => setForm(prev => ({ ...prev, state: v, district: "", city: "" }))} onDistrictChange={(v) => setForm(prev => ({ ...prev, district: v, city: "" }))} onCityChange={(v) => setForm(prev => ({ ...prev, city: v }))} />
                     <div><Label className="font-sans text-sm font-medium">Pincode * (6 digits)</Label><Input value={form.pincode} onChange={(e) => validatePincode(e.target.value)} placeholder="400001" maxLength={6} className="h-11 rounded-xl" /></div>
-                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep4} className="flex-1 h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))" }}>Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
+                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep4} className="flex-1 h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
                   </motion.div>
                 )}
                 {step === 4 && (
@@ -168,16 +167,16 @@ const Register = () => {
                       <div><Label className="font-sans text-sm font-medium">Confirm *</Label><div className="relative"><Input type={showConfirmPassword ? "text" : "password"} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} placeholder="Re-enter" className="pr-9 h-11 rounded-xl" /><button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button></div></div>
                     </div>
                     {form.password && form.confirmPassword && form.password !== form.confirmPassword && <p className="text-xs text-destructive">Passwords don't match</p>}
-                    <div className="rounded-xl p-3 space-y-1" style={{ background: "hsl(38 40% 96%)", border: "1px solid hsl(38 40% 88%)" }}>
-                      <p className="font-sans font-semibold text-sm">🔑 Secret Recovery Code</p>
+                    <div className="rounded-xl p-3 space-y-1 bg-muted border border-border">
+                      <p className="font-sans font-semibold text-sm text-foreground">🔑 Secret Recovery Code</p>
                       <p className="text-xs text-muted-foreground font-sans">Auto-generated after registration. View it in your Dashboard.</p>
                     </div>
-                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="submit" disabled={!canSubmit || loading} className="flex-1 h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(280 55% 50%))", boxShadow: "0 4px 14px hsl(22 78% 52% / 0.3)" }}>{loading ? "Creating..." : "Create Account 🎉"}</Button></div>
+                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="submit" disabled={!canSubmit || loading} className="flex-1 h-11 rounded-xl font-sans font-semibold">{loading ? "Creating..." : "Create Account 🎉"}</Button></div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </form>
-            <p className="text-center text-sm font-sans mt-4">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
+            <p className="text-center text-sm font-sans mt-4 text-muted-foreground">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
           </CardContent>
         </Card>
         <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club © {new Date().getFullYear()}</p>
