@@ -114,6 +114,19 @@ const AdminIntegrations = () => {
                   </a>
                 </p>
               </div>
+              <div>
+                <Label className="text-sm">OneSignal REST API Key</Label>
+                <Input
+                  type="password"
+                  placeholder="Your OneSignal REST API Key"
+                  value={onesignalRestApiKey}
+                  onChange={(e) => setOnesignalRestApiKey(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Found in Settings → Keys & IDs in your OneSignal Dashboard
+                </p>
+              </div>
               <Button size="sm" onClick={saveOneSignal} className="gap-1">
                 <Save className="w-4 h-4" /> Save OneSignal Config
               </Button>
