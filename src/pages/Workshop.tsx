@@ -329,43 +329,149 @@ const Workshop = () => {
 
   // Registration View
   if (view === "register") {
+    const statesData = (() => { try { const { getStates } = require("@/lib/india-locations"); return getStates(); } catch { return []; } })();
+    const districtsData = (() => { try { if (!regForm.state) return []; const { getDistricts } = require("@/lib/india-locations"); return getDistricts(regForm.state); } catch { return []; } })();
+    const citiesData = (() => { try { if (!regForm.district) return []; const { getCities } = require("@/lib/india-locations"); return getCities(regForm.state, regForm.district); } catch { return []; } })();
+
     const regSteps = [
+      // Step 1: Personal Info
       <div key="step0" className="space-y-4">
         <h3 className="font-body font-bold text-foreground">Personal Information</h3>
         <div><Label>Full Name *</Label><Input value={regForm.name} onChange={e => setRegForm({...regForm, name: e.target.value})} placeholder="Your full name" /></div>
         <div><Label>Email *</Label><Input type="email" value={regForm.email} onChange={e => setRegForm({...regForm, email: e.target.value})} placeholder="your@email.com" /></div>
         <div><Label>Mobile Number *</Label><Input value={regForm.mobile} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setRegForm({...regForm, mobile: d}); }} placeholder="10-digit number" maxLength={10} /></div>
-        <div><Label>Password *</Label><Input type="password" value={regForm.password} onChange={e => setRegForm({...regForm, password: e.target.value})} placeholder="Create a password for login" /></div>
         <div><Label>Instagram ID</Label><Input value={regForm.instagram_id} onChange={e => setRegForm({...regForm, instagram_id: e.target.value})} placeholder="@yourid" /></div>
-      </div>,
-      <div key="step1" className="space-y-4">
-        <h3 className="font-body font-bold text-foreground">Your Background</h3>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label>Age</Label><Input type="number" value={regForm.age} onChange={e => setRegForm({...regForm, age: e.target.value})} placeholder="Your age" /></div>
-          <div><Label>Occupation</Label><Input value={regForm.occupation} onChange={e => setRegForm({...regForm, occupation: e.target.value})} placeholder="Student, Artist..." /></div>
+          <div><Label>Age *</Label><Input type="number" value={regForm.age} onChange={e => setRegForm({...regForm, age: e.target.value})} placeholder="Your age" /></div>
+          <div>
+            <Label>Occupation *</Label>
+            <Select value={regForm.occupation} onValueChange={v => setRegForm({...regForm, occupation: v})}>
+              <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectContent>
+                {OCCUPATION_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+      </div>,
+
+      // Step 2: Background & Motivation
+      <div key="step1" className="space-y-4">
+        <h3 className="font-body font-bold text-foreground">Your Background & Motivation</h3>
         <div>
-          <Label>Do you have an artist background?</Label>
-          <Select value={regForm.artist_background} onValueChange={v => setRegForm({...regForm, artist_background: v})}>
-            <SelectTrigger className="h-11 rounded-xl mt-2"><SelectValue placeholder="Select" /></SelectTrigger>
+          <Label>Skill Level *</Label>
+          <Select value={regForm.skill_level} onValueChange={v => setRegForm({...regForm, skill_level: v})}>
+            <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select your skill level" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
+              {SKILL_LEVELS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        <div><Label>Why is this workshop suitable for you?</Label><Textarea value={regForm.why_suitable} onChange={e => setRegForm({...regForm, why_suitable: e.target.value})} placeholder="Tell us why..." rows={3} /></div>
+        <div>
+          <Label>Artist Background Type *</Label>
+          <Select value={regForm.artist_background_type} onValueChange={v => setRegForm({...regForm, artist_background_type: v, artist_background: v === "No Art Background" ? "no" : "yes"})}>
+            <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select your background" /></SelectTrigger>
+            <SelectContent>
+              {BACKGROUND_TYPES.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>What inspires you to join this workshop? *</Label>
+          <Textarea value={regForm.why_suitable} onChange={e => setRegForm({...regForm, why_suitable: e.target.value})} placeholder="Share your creative journey and what you hope to achieve from this workshop..." rows={3} className="mt-1" />
+        </div>
       </div>,
+
+      // Step 3: Location
       <div key="step2" className="space-y-4">
-        <h3 className="font-body font-bold text-foreground">Select Your Slot *</h3>
-        <Select value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})}>
-          <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose a slot" /></SelectTrigger>
-          <SelectContent>
-            {slots.map(slot => (
-              <SelectItem key={slot} value={slot}>{SLOT_LABELS[slot] || slot}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <h3 className="font-body font-bold text-foreground">Your Location</h3>
+        {allowInternational && (
+          <div>
+            <Label>Country *</Label>
+            <Select value={regForm.country} onValueChange={v => setRegForm({...regForm, country: v, state: "", district: "", city: ""})}>
+              <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select country" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="India">🇮🇳 India</SelectItem>
+                <SelectItem value="USA">🇺🇸 USA</SelectItem>
+                <SelectItem value="UK">🇬🇧 UK</SelectItem>
+                <SelectItem value="UAE">🇦🇪 UAE</SelectItem>
+                <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
+                <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
+                <SelectItem value="Other">🌍 Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        {regForm.country === "India" ? (
+          <>
+            <div>
+              <Label>State *</Label>
+              <Select value={regForm.state} onValueChange={v => setRegForm({...regForm, state: v, district: "", city: ""})}>
+                <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select state" /></SelectTrigger>
+                <SelectContent>{statesData.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
+              </Select>
+              {regForm.state === "Other" && <Input className="mt-2" value={regForm.state === "Other" ? "" : regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Type your state" />}
+            </div>
+            {regForm.state && regForm.state !== "Other" && (
+              <div>
+                <Label>District</Label>
+                <Select value={regForm.district} onValueChange={v => setRegForm({...regForm, district: v, city: ""})}>
+                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
+                  <SelectContent>{districtsData.map((d: string) => <SelectItem key={d} value={d}>{d}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
+                </Select>
+                {regForm.district === "Other" && <Input className="mt-2" onChange={e => setRegForm({...regForm, district: e.target.value})} placeholder="Type your district" />}
+              </div>
+            )}
+            <div>
+              <Label>City *</Label>
+              {regForm.district && regForm.district !== "Other" && citiesData.length > 0 ? (
+                <Select value={regForm.city} onValueChange={v => setRegForm({...regForm, city: v})}>
+                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select city" /></SelectTrigger>
+                  <SelectContent>{citiesData.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
+                </Select>
+              ) : null}
+              {(!regForm.district || regForm.district === "Other" || regForm.city === "Other" || citiesData.length === 0) && (
+                <Input className="mt-1" value={regForm.city === "Other" ? "" : regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Type your city" />
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div><Label>State/Province</Label><Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Your state or province" /></div>
+            <div><Label>City *</Label><Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Your city" /></div>
+          </>
+        )}
+      </div>,
+
+      // Step 4: Slot, Password & Terms
+      <div key="step3" className="space-y-4">
+        <h3 className="font-body font-bold text-foreground">Final Step</h3>
+        <div>
+          <Label>Select Your Slot *</Label>
+          <Select value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})}>
+            <SelectTrigger className="h-12 rounded-xl mt-1"><SelectValue placeholder="Choose a slot" /></SelectTrigger>
+            <SelectContent>
+              {slots.map(slot => (
+                <SelectItem key={slot} value={slot}>{SLOT_LABELS[slot] || slot}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Set Password *</Label>
+          <Input type="password" value={regForm.password} onChange={e => setRegForm({...regForm, password: e.target.value})} placeholder="Create a secure password" className="mt-1" />
+          <p className="text-[11px] text-muted-foreground mt-1">Your secret code will be available in your dashboard after registration.</p>
+        </div>
+        <div className="space-y-3 border-t border-border pt-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={regForm.termsAccepted} onChange={e => setRegForm({...regForm, termsAccepted: e.target.checked})} className="mt-1 w-4 h-4 accent-primary" />
+            <span className="text-sm text-foreground">I accept the <a href="/workshop-policy" target="_blank" className="text-primary underline font-medium">Workshop Terms & Conditions</a> *</span>
+          </label>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={regForm.noticeRead} onChange={e => setRegForm({...regForm, noticeRead: e.target.checked})} className="mt-1 w-4 h-4 accent-primary" />
+            <span className="text-sm text-foreground">I have read the workshop notice and understand the schedule, rules, and expectations *</span>
+          </label>
+        </div>
       </div>,
     ];
 
@@ -393,12 +499,14 @@ const Workshop = () => {
                 <Button variant="outline" onClick={() => setView("details")} className="rounded-full">Cancel</Button>
                 {regStep < regSteps.length - 1 ? (
                   <Button onClick={() => {
-                    if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.password)) { toast({ title: "Fill required fields (including password)", variant: "destructive" }); return; }
+                    if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.age)) { toast({ title: "Fill all required fields", variant: "destructive" }); return; }
+                    if (regStep === 1 && (!regForm.skill_level || !regForm.artist_background_type || !regForm.why_suitable)) { toast({ title: "Fill all background fields", variant: "destructive" }); return; }
+                    if (regStep === 2 && (!regForm.state || !regForm.city)) { toast({ title: "Please select your location", variant: "destructive" }); return; }
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (
-                  <Button onClick={handleRegister} disabled={submittingReg || !regForm.slot} className="flex-1 rounded-full">
-                    {submittingReg ? "Registering..." : "Submit"} <CheckCircle className="w-4 h-4 ml-1" />
+                  <Button onClick={handleRegister} disabled={submittingReg || !regForm.slot || !regForm.password || !regForm.termsAccepted || !regForm.noticeRead} className="flex-1 rounded-full">
+                    {submittingReg ? "Registering..." : "Register"} <CheckCircle className="w-4 h-4 ml-1" />
                   </Button>
                 )}
               </div>
