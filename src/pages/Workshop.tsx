@@ -288,7 +288,7 @@ const Workshop = () => {
         return;
       }
 
-      const { error } = await supabase.from("workshop_users" as any).insert({
+      const { data: insertedData, error } = await supabase.from("workshop_users" as any).insert({
         name: regForm.name.trim(),
         email: regForm.email.trim().toLowerCase(),
         mobile: regForm.mobile.trim(),
@@ -308,12 +308,11 @@ const Workshop = () => {
         city: regForm.city || null,
         district: regForm.district || null,
         terms_accepted: regForm.termsAccepted,
-      } as any);
+      } as any).select("id").single();
       if (error) throw error;
-      toast({ title: "Registration Successful! 🎉", description: "You can now login to the workshop." });
-      setView("login");
-      setEmail(regForm.email);
-      setRegStep(0);
+      if (insertedData) setRegisteredUserId((insertedData as any).id);
+      toast({ title: "Registration Successful! 🎉", description: "You can pay now or login and pay later." });
+      setView("reg-success");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally { setSubmittingReg(false); }
