@@ -50,22 +50,17 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ background: "linear-gradient(135deg, hsl(22 90% 97%) 0%, hsl(280 20% 96%) 40%, hsl(210 30% 95%) 70%, hsl(38 30% 96%) 100%)" }}>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-secondary via-background to-muted">
 
-      {/* Animated background blobs */}
-      <motion.div className="absolute top-10 left-10 w-80 h-80 rounded-full opacity-20"
-        style={{ background: "radial-gradient(circle, hsl(22 78% 52%), transparent)" }}
+      <motion.div className="absolute top-10 left-10 w-80 h-80 rounded-full opacity-20 bg-primary/20 blur-3xl"
         animate={{ scale: [1, 1.3, 1], x: [0, 40, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-15"
-        style={{ background: "radial-gradient(circle, hsl(280 50% 60%), transparent)" }}
+      <motion.div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-15 bg-accent/20 blur-3xl"
         animate={{ scale: [1.2, 1, 1.2] }} transition={{ duration: 10, repeat: Infinity }} />
-      <motion.div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full opacity-10"
-        style={{ background: "radial-gradient(circle, hsl(38 88% 50%), transparent)" }}
+      <motion.div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full opacity-10 bg-primary/10 blur-3xl"
         animate={{ y: [0, -30, 0] }} transition={{ duration: 7, repeat: Infinity }} />
 
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative z-10">
-        <div className="backdrop-blur-2xl bg-white/50 border border-white/30 rounded-3xl shadow-2xl shadow-primary/10 p-8 space-y-6">
+        <div className="backdrop-blur-2xl bg-card/80 border border-border rounded-3xl shadow-2xl shadow-primary/10 p-8 space-y-6">
           <div className="text-center space-y-3">
             <motion.div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg shadow-primary/10"
               animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
@@ -84,7 +79,7 @@ const AdminLogin = () => {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com" required
-                  className="pl-10 h-12 bg-white/60 border-primary/10 rounded-xl focus:border-primary focus:ring-primary/20" />
+                  className="pl-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
               </div>
             </div>
             <div className="space-y-2">
@@ -92,7 +87,7 @@ const AdminLogin = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" required className="pl-10 pr-10 h-12 bg-white/60 border-primary/10 rounded-xl focus:border-primary focus:ring-primary/20" />
+                  placeholder="••••••••" required className="pl-10 pr-10 h-12 bg-background/60 border-border rounded-xl focus:border-primary focus:ring-primary/20" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -100,8 +95,7 @@ const AdminLogin = () => {
             </div>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button type="submit" disabled={loading}
-                className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/20"
-                style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(28 14% 24%))" }}>
+                className="w-full h-12 rounded-xl text-base font-semibold shadow-lg">
                 {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing In...</> : "Sign In as Admin"}
               </Button>
             </motion.div>

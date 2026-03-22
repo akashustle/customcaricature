@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound, Sparkles, Palette } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Login = () => {
@@ -74,19 +74,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(38 40% 96%), hsl(22 30% 92%), hsl(38 50% 94%))" }}>
-      {/* Decorative elements */}
-      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(22 78% 52% / 0.4), transparent 70%)" }} animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none" style={{ background: "radial-gradient(circle, hsl(38 88% 50% / 0.4), transparent 70%)" }} animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
+    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-gradient-to-br from-secondary via-background to-muted">
+      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none bg-primary/10 blur-3xl rounded-full" animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
+      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none bg-accent/10 blur-3xl rounded-full" animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
 
-      {/* Floating art elements */}
       <motion.div className="absolute top-[15%] left-[8%] text-4xl opacity-20 pointer-events-none" animate={{ y: [0, -12, 0], rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity }}>🎨</motion.div>
       <motion.div className="absolute top-[25%] right-[12%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, 10, 0], rotate: [0, -15, 0] }} transition={{ duration: 7, repeat: Infinity }}>✏️</motion.div>
       <motion.div className="absolute bottom-[20%] right-[8%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity }}>🖌️</motion.div>
-      <motion.div className="absolute bottom-[30%] left-[12%] text-2xl opacity-10 pointer-events-none" animate={{ x: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity }}>🎭</motion.div>
 
       <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.6, type: "spring", bounce: 0.3 }} className="w-full max-w-sm relative z-10">
-        <Card className="border-none shadow-2xl backdrop-blur-sm" style={{ background: "hsl(38 30% 99% / 0.95)", boxShadow: "0 25px 60px -15px hsl(22 78% 30% / 0.15), 0 0 0 1px hsl(38 30% 90% / 0.5)" }}>
+        <Card className="border border-border shadow-2xl backdrop-blur-sm bg-card/95">
           <CardHeader className="text-center pb-4">
             <motion.div className="relative mx-auto mb-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
               <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" onClick={() => navigate("/")}>
@@ -96,16 +93,16 @@ const Login = () => {
                 <Sparkles className="w-3 h-3 text-primary-foreground" />
               </motion.div>
             </motion.div>
-            <CardTitle className="font-display text-2xl" style={{ background: "linear-gradient(135deg, hsl(22 78% 40%), hsl(38 88% 45%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Welcome Back</CardTitle>
+            <CardTitle className="font-display text-2xl text-foreground">Welcome Back</CardTitle>
             <CardDescription className="font-sans text-sm">Sign in to your caricature studio</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label className="font-sans text-sm font-medium">Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl border-border/60 focus:border-primary/50" placeholder="you@email.com" />
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" placeholder="you@email.com" />
             </div>
 
-            <div className="flex rounded-xl border border-border/60 overflow-hidden bg-muted/30">
+            <div className="flex rounded-xl border border-border overflow-hidden bg-muted/30">
               <button type="button" onClick={() => setLoginMethod("password")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-sans font-semibold transition-all ${loginMethod === "password" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 <Lock className="w-3.5 h-3.5" /> Password
               </button>
@@ -119,14 +116,14 @@ const Login = () => {
                 <div>
                   <Label className="font-sans text-sm font-medium">Password</Label>
                   <div className="relative">
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl border-border/60" />
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold text-base" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))", boxShadow: "0 4px 14px hsl(22 78% 52% / 0.3)" }}>
+                  <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold text-base">
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </motion.div>
@@ -135,11 +132,11 @@ const Login = () => {
               <form onSubmit={handleSecretCodeLogin} className="space-y-4">
                 <div>
                   <Label className="font-sans text-sm font-medium">Secret Code (4-digit)</Label>
-                  <Input type="text" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl border-border/60" />
+                  <Input type="text" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" />
                   <p className="text-xs text-muted-foreground font-sans mt-1">Available in your dashboard after first login.</p>
                 </div>
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold" style={{ background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%))", boxShadow: "0 4px 14px hsl(22 78% 52% / 0.3)" }}>
+                  <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold">
                     {loading ? "Signing in..." : "Sign In with Code"}
                   </Button>
                 </motion.div>
