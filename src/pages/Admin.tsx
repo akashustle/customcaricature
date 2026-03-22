@@ -219,6 +219,7 @@ const Admin = () => {
 
   // Log admin session on mount with IP, location, device
   const logAdminSession = async (userId: string) => {
+    const enteredName = sessionStorage.getItem("admin_entered_name") || "Admin";
     const deviceInfo = (() => {
       const ua = navigator.userAgent;
       const isMobile = /Mobile|Android|iPhone/i.test(ua);
@@ -227,10 +228,6 @@ const Admin = () => {
       return `${browser} on ${os} (${isMobile ? "Mobile" : "Desktop"})`;
     })();
     try {
-      const { data: prof } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
-      const adminName = prof?.full_name || "Admin";
-
-      // Fetch IP & location
       let ipAddress = null;
       let locationInfo = null;
       try {
@@ -242,14 +239,25 @@ const Admin = () => {
         }
       } catch {}
 
-      await supabase.from("admin_sessions").insert({
+      const { data: sessionData } = await supabase.from("admin_sessions").insert({
         user_id: userId,
-        admin_name: adminName,
+        admin_name: enteredName,
         device_info: deviceInfo,
         ip_address: ipAddress,
         location_info: locationInfo,
         is_active: true,
-      } as any);
+        entered_name: enteredName,
+        steps_log: [{ action: "Session started", time: new Date().toISOString() }],
+      } as any).select("id").single();
+      if (sessionData) setCurrentSessionId((sessionData as any).id);
+
+      // Update login tracking
+      const { data: tracking } = await supabase.from("admin_login_tracking" as any).select("*").eq("user_id", userId).maybeSingle();
+      if (tracking) {
+        await supabase.from("admin_login_tracking" as any).update({ total_logins: (tracking as any).total_logins + 1, updated_at: new Date().toISOString() } as any).eq("user_id", userId);
+      } else {
+        await supabase.from("admin_login_tracking" as any).insert({ user_id: userId, total_logins: 1 } as any);
+      }
     } catch {}
   };
 
