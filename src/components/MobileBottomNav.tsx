@@ -33,32 +33,57 @@ const MobileBottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
-      <div className="bg-card/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center justify-evenly px-1 py-2 max-w-lg mx-auto">
+      <div 
+        className="border-t shadow-[0_-8px_32px_rgba(0,0,0,0.08)]"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.48) 50%, rgba(255,255,255,0.60) 100%)",
+          backdropFilter: "blur(40px) saturate(180%)",
+          WebkitBackdropFilter: "blur(40px) saturate(180%)",
+          borderColor: "rgba(255,255,255,0.35)",
+        }}
+      >
+        <div className="flex items-center justify-evenly px-1 py-1.5 max-w-lg mx-auto">
           {items.map((item) => {
             const active = location.pathname === item.path;
             return (
               <motion.button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                whileTap={{ scale: 0.88 }}
-                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-1 relative">
-                <div className={`flex items-center justify-center w-10 h-8 rounded-xl transition-all duration-200 ${
-                  active ? "bg-primary/12" : ""
-                }`}>
-                  <item.icon className={`w-[20px] h-[20px] transition-colors duration-200 ${
-                    active ? "text-primary" : "text-muted-foreground"
-                  }`} strokeWidth={active ? 2.5 : 1.8} />
+                whileTap={{ scale: 0.85 }}
+                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-1.5 relative"
+              >
+                <div
+                  className={`flex items-center justify-center w-11 h-9 rounded-2xl transition-all duration-300 ${
+                    active
+                      ? "shadow-[0_2px_12px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.8)]"
+                      : ""
+                  }`}
+                  style={active ? {
+                    background: "linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(240,240,245,0.7) 100%)",
+                    border: "1px solid rgba(255,255,255,0.6)",
+                  } : {}}
+                >
+                  <item.icon
+                    className={`w-[19px] h-[19px] transition-all duration-300 ${
+                      active ? "text-primary drop-shadow-sm" : "text-muted-foreground/70"
+                    }`}
+                    strokeWidth={active ? 2.4 : 1.6}
+                  />
                 </div>
-                <span className={`text-[10px] font-body leading-none transition-colors duration-200 ${
-                  active ? "text-primary font-bold" : "text-muted-foreground font-medium"
-                }`}>
+                <span
+                  className={`text-[9px] leading-none transition-all duration-300 ${
+                    active
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground/60 font-medium"
+                  }`}
+                  style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" }}
+                >
                   {item.label}
                 </span>
                 {active && (
                   <motion.div
-                    layoutId="mobile-nav-dot"
-                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary"
+                    layoutId="mobile-nav-indicator"
+                    className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
