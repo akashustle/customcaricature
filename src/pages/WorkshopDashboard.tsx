@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
@@ -251,15 +251,20 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-card/95 border-border"} border-t shadow-xl`}>
-        <div className="flex items-center justify-around py-2 px-2 max-w-md mx-auto">
+        <div className="flex items-center overflow-x-auto no-scrollbar py-2 px-2 max-w-md mx-auto gap-1">
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${activeTab === tab.key ? `${activeClass} scale-105` : inactiveClass}`}>
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 min-w-[56px] ${activeTab === tab.key ? `${activeClass} scale-105` : inactiveClass}`}>
               <tab.icon className="w-5 h-5" />
               <span className="text-[9px]">{tab.label}</span>
             </button>
           ))}
+          <button onClick={() => navigate("/dashboard")}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 min-w-[56px] ${inactiveClass}`}>
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="text-[9px]">Dashboard</span>
+          </button>
         </div>
       </div>
     </div>

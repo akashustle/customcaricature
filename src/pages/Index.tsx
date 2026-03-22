@@ -553,7 +553,7 @@ const Index = () => {
           <div className="border-t border-border pt-6 flex flex-col items-center gap-2">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
             <p className="text-xs text-muted-foreground font-body">
-              Built with <a href="https://lovable.dev" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Lovable</a> · Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline font-semibold">Akash</a>
+              Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
             </p>
           </div>
         </div>
