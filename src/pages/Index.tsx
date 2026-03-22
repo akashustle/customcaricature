@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight, Star, Users, Calendar, Award, Zap, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useHomepageContent } from "@/hooks/useHomepageContent";
 import { useState, useCallback, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
@@ -12,6 +13,15 @@ import HomepageGallery from "@/components/HomepageGallery";
 import HomepageScrollEvents from "@/components/HomepageScrollEvents";
 import HomepageReviews from "@/components/HomepageReviews";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
+import HomepageVideo from "@/components/homepage/HomepageVideo";
+import HomepageInstantQuote from "@/components/homepage/HomepageInstantQuote";
+import HomepageSocialProof from "@/components/homepage/HomepageSocialProof";
+import HomepageWhatYouGet from "@/components/homepage/HomepageWhatYouGet";
+import HomepageWhyUs from "@/components/homepage/HomepageWhyUs";
+import HomepageUseCases from "@/components/homepage/HomepageUseCases";
+import HomepageSmartHelp from "@/components/homepage/HomepageSmartHelp";
+import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
+import HomepageUrgencyStrip from "@/components/homepage/HomepageUrgencyStrip";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -37,16 +47,6 @@ const styles = [
   { icon: Minimize2, name: "Minimal", desc: "Clean & elegant lines" },
   { icon: Sparkles, name: "Artist's Choice", desc: "Let our artists surprise you" },
 ];
-
-const trustStats = [
-  { icon: Calendar, value: "500+", label: "Events Completed" },
-  { icon: Users, value: "100+", label: "Professional Artists" },
-  { icon: Star, value: "1000+", label: "Happy Clients" },
-  { icon: Award, value: "4.9★", label: "Average Rating" },
-];
-
-const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
 
 const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
   images: string[]; currentIndex: number; onClose: () => void; onPrev: () => void; onNext: () => void;
@@ -112,6 +112,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const { settings } = useSiteSettings();
+  const { content } = useHomepageContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -120,6 +121,7 @@ const Index = () => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
 
+  const hero = content.homepage_hero || {};
   const handleOrderClick = () => navigate(user ? "/order" : "/login");
   const handleEventClick = () => {
     if (!user) { navigate("/login"); return; }
@@ -149,9 +151,12 @@ const Index = () => {
         />
       )}
 
+      {/* Global Urgency Banner */}
+      <HomepageUrgencyStrip config={content.homepage_urgency} />
+
       {/* Top Nav */}
       <header>
-      <nav className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b border-border shadow-sm">
+      <nav className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
@@ -203,7 +208,6 @@ const Index = () => {
       <main>
       <section className="relative overflow-hidden" ref={heroRef}>
         <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
-        {/* Floating decorative elements */}
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={`particle-${i}`}
@@ -218,53 +222,47 @@ const Index = () => {
             <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-8 rounded-2xl border-4 border-border bg-card p-1 shadow-lg"
               animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4"
-            >India's Premium Caricature Studio</motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]"
-            >
-              Book Professional Caricature Artists for Your Event
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl mx-auto font-body leading-relaxed"
-            >
-              Custom hand-crafted caricatures that capture personality in every stroke. For gifts, events, and memories that last forever.
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">
+              India's Premium Caricature Studio
             </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9, duration: 0.6 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
+            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
+              {hero.headline || "Book Professional Caricature Artists for Your Event"}
+            </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+              className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto font-body leading-relaxed">
+              {hero.subtext || "Custom hand-crafted caricatures that capture personality in every stroke."}
+            </motion.p>
+            {hero.pricing_line && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                className="text-sm font-body font-semibold text-primary mb-2">
+                {hero.pricing_line}
+              </motion.p>
+            )}
+            {hero.urgency_text && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
+                className="text-xs font-body text-accent mb-8">
+                {hero.urgency_text}
+              </motion.p>
+            )}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
-                  Order Your Caricature <ArrowRight className="w-5 h-5 ml-2" />
+                <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
+                  {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="xl" variant="outline" onClick={handleEventClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
-                  <Zap className="w-5 h-5 mr-2" /> Book for Event
+                <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                  <Zap className="w-5 h-5 mr-2" /> {hero.secondary_cta || "Book for Event"}
                 </Button>
               </motion.div>
             </motion.div>
           </motion.div>
         </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
-          className="bg-card/80 border-t border-border"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
+          className="bg-card/80 border-t border-border">
           <div className="container mx-auto px-4 py-3 text-center">
             <p className="text-xs md:text-sm font-body text-muted-foreground flex items-center justify-center gap-2">
               <Clock className="w-4 h-4 text-primary" /> Due to high demand, delivery timeline is 25–30 days
@@ -273,56 +271,30 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="py-16 md:py-20 bg-card/50 border-y border-border/50 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {trustStats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 60, scale: 0.5 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.12, duration: 0.7, type: "spring", bounce: 0.4 }}
-                whileHover={{ y: -8, scale: 1.08, transition: { duration: 0.3 } }}
-                className="text-center group cursor-default"
-              >
-                <motion.div
-                  className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors"
-                  whileHover={{ rotate: [0, -10, 10, 0], transition: { duration: 0.5 } }}
-                >
-                  <stat.icon className="w-6 h-6 text-primary" />
-                </motion.div>
-                <motion.p
-                  className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.12 + 0.3, duration: 0.5 }}
-                >{stat.value}</motion.p>
-                <p className="text-xs font-body text-muted-foreground mt-1">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Instant Quote */}
+      <HomepageInstantQuote config={content.homepage_instant_quote} />
+
+      {/* Social Proof with Animated Counters */}
+      <HomepageSocialProof config={content.homepage_social_proof} />
+
+      {/* Video Section */}
+      <HomepageVideo config={content.homepage_video} />
 
       {/* Gallery */}
       <section className="py-16 md:py-20" aria-label="Gallery of recent caricature work">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-8">
-            <motion.p
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3"
-            >Portfolio</motion.p>
+            <motion.p initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Portfolio</motion.p>
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-2">Our Recent Work</h2>
             <p className="text-muted-foreground font-body">Every stroke tells a story — tap to view fullscreen</p>
           </motion.div>
         </div>
         <InfiniteScrollGallery onImageClick={openLightbox} />
       </section>
+
+      {/* What You Get */}
+      <HomepageWhatYouGet config={content.homepage_what_you_get} />
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16 md:py-24">
@@ -337,23 +309,14 @@ const Index = () => {
             { icon: Palette, step: "2", title: "We Create", desc: "Our talented artists hand-craft your unique caricature with love.", route: "/about" },
             { icon: Truck, step: "3", title: "You Receive", desc: "Get your framed artwork delivered to your doorstep in 25–30 days.", route: "/track-order" },
           ].map((item, i) => (
-            <motion.div
-              key={item.step}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-30px" }}
+            <motion.div key={item.step} initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-30px" }}
               transition={{ duration: 0.7, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -12, transition: { duration: 0.3, ease: "easeOut" } }}
-              className="cursor-pointer group"
-              onClick={() => navigate(item.route)}
-            >
+              className="cursor-pointer group" onClick={() => navigate(item.route)}>
               <Card className="text-center h-full border border-border group-hover:border-primary/30 group-hover:shadow-xl transition-all duration-500">
                 <CardContent className="pt-10 pb-8 px-6">
-                  <motion.div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15 group-hover:bg-primary/25 transition-colors"
-                    whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
-                    transition={{ duration: 0.4 }}
-                  >
+                  <motion.div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                    whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }} transition={{ duration: 0.4 }}>
                     <item.icon className="w-7 h-7 text-primary" />
                   </motion.div>
                   <span className="text-[10px] font-body font-bold text-primary uppercase tracking-widest">Step {item.step}</span>
@@ -423,6 +386,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Use Cases */}
+      <HomepageUseCases config={content.homepage_use_cases} />
+
       {/* Styles */}
       <section className="py-16 md:py-24 overflow-hidden">
         <div className="container mx-auto px-4">
@@ -433,24 +399,14 @@ const Index = () => {
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
             {styles.map((style, i) => (
-              <motion.div
-                key={style.name}
-                initial={{ opacity: 0, y: 50, rotate: -3 }}
-                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-                viewport={{ once: true, margin: "-20px" }}
+              <motion.div key={style.name} initial={{ opacity: 0, y: 50, rotate: -3 }} whileInView={{ opacity: 1, y: 0, rotate: 0 }} viewport={{ once: true, margin: "-20px" }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ scale: 1.08, y: -10, transition: { duration: 0.25 } }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleOrderClick}
-                className="cursor-pointer"
-              >
+                whileTap={{ scale: 0.95 }} onClick={handleOrderClick} className="cursor-pointer">
                 <Card className="group border border-border hover:border-primary/40 transition-all bg-card rounded-2xl hover:shadow-xl hover:shadow-primary/5">
                   <CardContent className="p-5 md:p-6 text-center">
-                    <motion.div
-                      className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
+                    <motion.div className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mx-auto mb-3 bg-primary/15 group-hover:bg-primary/25 transition-colors"
+                      whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
                       <style.icon className="w-6 h-6 text-primary" />
                     </motion.div>
                     <h3 className="font-calligraphy text-xl md:text-2xl font-semibold mb-1 text-foreground">{style.name}</h3>
@@ -462,6 +418,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Why Choose Us */}
+      <HomepageWhyUs config={content.homepage_why_us} />
 
       {/* Dynamic Reviews from Admin */}
       <HomepageReviews />
@@ -475,25 +434,20 @@ const Index = () => {
       {/* Caricature Gallery */}
       <HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" />
 
+      {/* Smart Help */}
+      <HomepageSmartHelp config={content.homepage_smart_help} />
+
       {/* CTA */}
       <section className="container mx-auto px-4 py-20 md:py-28 relative">
-        {/* Background glow */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
+        <motion.div className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <div className="w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="text-center max-w-2xl mx-auto relative z-10">
-          <motion.h2
-            className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-          >Make Your Event Unforgettable</motion.h2>
+          <motion.h2 className="font-calligraphy text-4xl md:text-6xl font-bold text-foreground mb-6"
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.1 }}>
+            Make Your Event Unforgettable
+          </motion.h2>
           <p className="text-muted-foreground font-body mb-10 text-lg leading-relaxed">
             Turn your favorite photos into stunning hand-crafted caricatures. Perfect for gifts, events & memories!
           </p>
@@ -518,11 +472,11 @@ const Index = () => {
           <h2 className="font-calligraphy text-3xl md:text-4xl font-bold mb-4 text-foreground">Need Help?</h2>
           <p className="text-muted-foreground font-body mb-6">Reach out to us anytime for support</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I have a question about caricatures.")}`} target="_blank" rel="noopener noreferrer"
+            <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}?text=${encodeURIComponent("Hi! I have a question about caricatures.")}`} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 btn-soft rounded-full py-3 px-6 font-body font-medium">
               <MessageCircle className="w-5 h-5" /> Chat on WhatsApp
             </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer"
+            <a href={content.homepage_smart_help?.instagram_url || "https://www.instagram.com/creativecaricatureclub"} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 bg-card border border-border text-foreground rounded-full py-3 px-6 font-body font-medium hover:shadow-md transition-all">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
               Follow on Instagram
@@ -537,7 +491,6 @@ const Index = () => {
       <footer className="py-12 border-t border-border bg-gradient-to-b from-background to-card/80">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-8">
-            {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
                 <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-full border-2 border-border" />
@@ -546,7 +499,7 @@ const Index = () => {
               <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
               <p className="font-calligraphy text-sm text-accent mt-3">Drawn with love & laughter ✏️</p>
               <div className="flex gap-3 mt-4 flex-wrap">
-                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="Instagram">
+                <a href={content.homepage_smart_help?.instagram_url || "https://www.instagram.com/creativecaricatureclub"} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="Instagram">
                   <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                 </a>
                 <a href="https://www.youtube.com/@creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="YouTube">
@@ -558,13 +511,11 @@ const Index = () => {
                 <a href="https://twitter.com/creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="Twitter/X">
                   <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </a>
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="WhatsApp">
+                <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="WhatsApp">
                   <MessageCircle className="w-4 h-4 text-primary" />
                 </a>
               </div>
             </div>
-
-            {/* Quick Links */}
             <div>
               <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
               <div className="flex flex-col gap-2">
@@ -575,8 +526,6 @@ const Index = () => {
                 <Link to="/support" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Support</Link>
               </div>
             </div>
-
-            {/* Policies */}
             <div>
               <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Policies</h4>
               <div className="flex flex-col gap-2">
@@ -588,8 +537,6 @@ const Index = () => {
                 <Link to="/event-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Event Policy</Link>
               </div>
             </div>
-
-            {/* More */}
             <div>
               <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">More</h4>
               <div className="flex flex-col gap-2">
@@ -603,7 +550,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-
           <div className="border-t border-border pt-6 flex flex-col items-center gap-2">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
             <p className="text-xs text-muted-foreground font-body">
@@ -612,6 +558,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Sticky CTA (Mobile) */}
+      <HomepageStickyCTA config={content.homepage_sticky_cta} />
     </div>
   );
 };
