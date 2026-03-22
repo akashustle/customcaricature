@@ -434,6 +434,9 @@ const ShopAdmin = () => {
       </div>
 
       <div className="p-4 max-w-7xl mx-auto space-y-4">
+        <div className="max-w-md mb-2">
+          <AdminGlobalSearch onNavigate={() => {}} />
+        </div>
         {/* Stats Grid - 3D Animated Widgets */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[

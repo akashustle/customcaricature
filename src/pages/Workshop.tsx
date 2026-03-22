@@ -136,9 +136,16 @@ const Workshop = () => {
   }, []);
 
   const fetchInternationalSetting = async () => {
+    // Check both workshop_settings and admin_site_settings for the toggle
     const { data } = await supabase.from("workshop_settings" as any).select("*").eq("id", "allow_international_registration");
     if (data && (data as any[]).length > 0) {
       setAllowInternational((data as any[])[0].value?.enabled === true);
+      return;
+    }
+    // Fallback: check admin_site_settings (where main admin stores this setting)
+    const { data: adminData } = await supabase.from("admin_site_settings").select("*").eq("id", "allow_international_registration");
+    if (adminData && adminData.length > 0) {
+      setAllowInternational((adminData[0].value as any)?.enabled === true);
     }
   };
 
