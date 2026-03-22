@@ -34,7 +34,7 @@ const MobileBottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
       <div 
-        className="border-t shadow-[0_-8px_32px_rgba(0,0,0,0.08)]"
+        className="border-t shadow-[0_-8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.3)]"
         style={{
           background: "linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.48) 50%, rgba(255,255,255,0.60) 100%)",
           backdropFilter: "blur(40px) saturate(180%)",
@@ -42,6 +42,13 @@ const MobileBottomNav = () => {
           borderColor: "rgba(255,255,255,0.35)",
         }}
       >
+        {/* Dark mode override via CSS class */}
+        <style>{`
+          .dark nav[aria-label="Mobile navigation"] > div:first-child {
+            background: linear-gradient(135deg, rgba(30,25,20,0.75) 0%, rgba(40,35,28,0.55) 50%, rgba(35,30,24,0.65) 100%) !important;
+            border-color: rgba(255,255,255,0.08) !important;
+          }
+        `}</style>
         <div className="flex items-center justify-evenly px-1 py-1.5 max-w-lg mx-auto">
           {items.map((item) => {
             const active = location.pathname === item.path;
