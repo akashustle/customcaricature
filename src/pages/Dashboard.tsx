@@ -1521,7 +1521,6 @@ const WorkshopSection = ({ profile, user, navigate }: { profile: any; user: any;
             <Button variant="outline" onClick={() => navigate("/workshop/dashboard")} className="w-full rounded-full font-sans">
               Open Workshop Dashboard
             </Button>
-            </Button>
           </CardContent>
         </Card>
       ) : (
