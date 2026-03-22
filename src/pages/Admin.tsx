@@ -73,6 +73,7 @@ import AdminCRMPipeline from "@/components/admin/AdminCRMPipeline";
 import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 import AdminAutomation from "@/components/admin/AdminAutomation";
 import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
+import AdminNameGate from "@/components/admin/AdminNameGate";
 
 type Order = {
   id: string;
@@ -138,6 +139,8 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
   usePermissions(true);
+  const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -216,6 +219,7 @@ const Admin = () => {
 
   // Log admin session on mount with IP, location, device
   const logAdminSession = async (userId: string) => {
+    const enteredName = sessionStorage.getItem("admin_entered_name") || "Admin";
     const deviceInfo = (() => {
       const ua = navigator.userAgent;
       const isMobile = /Mobile|Android|iPhone/i.test(ua);
@@ -224,10 +228,6 @@ const Admin = () => {
       return `${browser} on ${os} (${isMobile ? "Mobile" : "Desktop"})`;
     })();
     try {
-      const { data: prof } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
-      const adminName = prof?.full_name || "Admin";
-
-      // Fetch IP & location
       let ipAddress = null;
       let locationInfo = null;
       try {
@@ -239,14 +239,25 @@ const Admin = () => {
         }
       } catch {}
 
-      await supabase.from("admin_sessions").insert({
+      const { data: sessionData } = await supabase.from("admin_sessions").insert({
         user_id: userId,
-        admin_name: adminName,
+        admin_name: enteredName,
         device_info: deviceInfo,
         ip_address: ipAddress,
         location_info: locationInfo,
         is_active: true,
-      } as any);
+        entered_name: enteredName,
+        steps_log: [{ action: "Session started", time: new Date().toISOString() }],
+      } as any).select("id").single();
+      if (sessionData) setCurrentSessionId((sessionData as any).id);
+
+      // Update login tracking
+      const { data: tracking } = await supabase.from("admin_login_tracking" as any).select("*").eq("user_id", userId).maybeSingle();
+      if (tracking) {
+        await supabase.from("admin_login_tracking" as any).update({ total_logins: (tracking as any).total_logins + 1, updated_at: new Date().toISOString() } as any).eq("user_id", userId);
+      } else {
+        await supabase.from("admin_login_tracking" as any).insert({ user_id: userId, total_logins: 1 } as any);
+      }
     } catch {}
   };
 
@@ -254,13 +265,24 @@ const Admin = () => {
 
   const logAdminAction = async (action: string, details?: string) => {
     if (!user) return;
+    const enteredName = sessionStorage.getItem("admin_entered_name") || adminProfile?.full_name || "Admin";
     try {
       await supabase.from("admin_action_log").insert({
         user_id: user.id,
-        admin_name: adminProfile?.full_name || "Admin",
+        admin_name: enteredName,
         action,
         details: details || null,
+        session_id: currentSessionId,
       } as any);
+      // Also append to session steps_log
+      if (currentSessionId) {
+        const { data: sess } = await supabase.from("admin_sessions").select("steps_log").eq("id", currentSessionId).single();
+        if (sess) {
+          const steps = Array.isArray((sess as any).steps_log) ? (sess as any).steps_log : [];
+          steps.push({ action, details, time: new Date().toISOString() });
+          await supabase.from("admin_sessions").update({ steps_log: steps } as any).eq("id", currentSessionId);
+        }
+      }
     } catch {}
   };
 
@@ -549,6 +571,16 @@ const Admin = () => {
   };
 
   const handleLogout = async () => {
+    // Mark session as inactive and clear name
+    if (currentSessionId) {
+      const { data: sess } = await supabase.from("admin_sessions").select("steps_log").eq("id", currentSessionId).single();
+      if (sess) {
+        const steps = Array.isArray((sess as any).steps_log) ? (sess as any).steps_log : [];
+        steps.push({ action: "Logged out", time: new Date().toISOString() });
+        await supabase.from("admin_sessions").update({ is_active: false, steps_log: steps } as any).eq("id", currentSessionId);
+      }
+    }
+    sessionStorage.removeItem("admin_entered_name");
     await supabase.auth.signOut();
     navigate("/customcad75");
   };
@@ -669,6 +701,14 @@ const Admin = () => {
     return <OrderDetail orderId={selectedOrder} onBack={() => { setSelectedOrder(null); fetchOrders(); }} />;
   }
 
+  // Admin Name Gate — mandatory name entry before accessing panel
+  if (!adminEnteredName) {
+    return <AdminNameGate onNameSubmit={(name) => {
+      setAdminEnteredName(name);
+      logAdminAction("Admin panel accessed", `Entered as: ${name}`);
+    }} />;
+  }
+
   return (
     <div className="min-h-screen flex w-full">
       <AdminActionConfirm
@@ -686,8 +726,8 @@ const Admin = () => {
         <header className="sticky top-0 z-40 admin-header-premium">
           <div className="px-4 md:px-8 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-                <span className="text-primary-foreground font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm">
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>

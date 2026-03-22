@@ -113,12 +113,12 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center flex-shrink-0 shadow-sm">
-            <span className="text-white font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+          <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+            <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
-              <p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif', color: 'hsl(28,18%,14%)' }}>Admin Console</p>
+              <p className="text-sm font-bold tracking-tight text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</p>
               <p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Creative Caricature Club</p>
             </motion.div>
           )}

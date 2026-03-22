@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -318,23 +318,26 @@ const Workshop = () => {
         </div>
         <div>
           <Label>Do you have an artist background?</Label>
-          <RadioGroup value={regForm.artist_background} onValueChange={v => setRegForm({...regForm, artist_background: v})} className="flex gap-6 mt-2">
-            <div className="flex items-center gap-2"><RadioGroupItem value="yes" id="bg-yes" /><Label htmlFor="bg-yes">Yes</Label></div>
-            <div className="flex items-center gap-2"><RadioGroupItem value="no" id="bg-no" /><Label htmlFor="bg-no">No</Label></div>
-          </RadioGroup>
+          <Select value={regForm.artist_background} onValueChange={v => setRegForm({...regForm, artist_background: v})}>
+            <SelectTrigger className="h-11 rounded-xl mt-2"><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="yes">Yes</SelectItem>
+              <SelectItem value="no">No</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div><Label>Why is this workshop suitable for you?</Label><Textarea value={regForm.why_suitable} onChange={e => setRegForm({...regForm, why_suitable: e.target.value})} placeholder="Tell us why..." rows={3} /></div>
       </div>,
       <div key="step2" className="space-y-4">
         <h3 className="font-body font-bold text-foreground">Select Your Slot *</h3>
-        <RadioGroup value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})} className="space-y-3">
-          {slots.map(slot => (
-            <div key={slot} className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${regForm.slot === slot ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-              <RadioGroupItem value={slot} id={`slot-${slot}`} />
-              <Label htmlFor={`slot-${slot}`} className="cursor-pointer flex items-center gap-2 font-body"><Clock className="w-4 h-4 text-primary" />{SLOT_LABELS[slot] || slot}</Label>
-            </div>
-          ))}
-        </RadioGroup>
+        <Select value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})}>
+          <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose a slot" /></SelectTrigger>
+          <SelectContent>
+            {slots.map(slot => (
+              <SelectItem key={slot} value={slot}>{SLOT_LABELS[slot] || slot}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>,
     ];
 
@@ -397,26 +400,30 @@ const Workshop = () => {
               {/* Batch Selector */}
               <div className="space-y-2">
                 <Label className="font-body text-xs text-muted-foreground">Select Batch</Label>
-                <div className="flex bg-muted rounded-xl p-1">
-                  <button onClick={() => setSelectedBatch("upcoming")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "upcoming" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
-                    <Calendar className="w-3.5 h-3.5" /> Upcoming
-                  </button>
-                  <button onClick={() => setSelectedBatch("march-14-15")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "march-14-15" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
-                    <Calendar className="w-3.5 h-3.5" /> 14th & 15th March
-                  </button>
-                </div>
+                <Select value={selectedBatch} onValueChange={(v: any) => setSelectedBatch(v)}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select batch" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">📅 Upcoming Batch</SelectItem>
+                    <SelectItem value="march-14-15">📅 14th & 15th March</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Login method tabs */}
               <div className="space-y-2">
                 <Label className="font-body text-xs text-muted-foreground">Login With</Label>
-                <div className="flex bg-muted rounded-xl p-1">
-                  <button onClick={() => setLoginType("mobile")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "mobile" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`} onClickCapture={() => setLoginMethod("password")}><Phone className="w-4 h-4" /> Mobile</button>
-                  <button onClick={() => { setLoginType("email"); setLoginMethod("password"); }} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginType === "email" && loginMethod === "password" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}><Mail className="w-4 h-4" /> Email</button>
-                  {secretCodeLoginEnabled && (
-                    <button onClick={() => setLoginMethod("secret_code")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${loginMethod === "secret_code" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>🔑 Code</button>
-                  )}
-                </div>
+                <Select value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`} onValueChange={(v) => {
+                  if (v === "secret_code") { setLoginMethod("secret_code"); }
+                  else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
+                  else { setLoginType("email"); setLoginMethod("password"); }
+                }}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select login method" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mobile_password">📱 Mobile Number</SelectItem>
+                    <SelectItem value="email_password">📧 Email Address</SelectItem>
+                    {secretCodeLoginEnabled && <SelectItem value="secret_code">🔑 Secret Code</SelectItem>}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-4">

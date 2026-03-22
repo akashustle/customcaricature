@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
@@ -617,26 +616,13 @@ const BookEvent = () => {
             <Card>
               <CardHeader><CardTitle className="font-display text-lg">Select Artists</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <RadioGroup value={String(artistCount)} onValueChange={v => setArtistCount(Number(v) as 1 | 2)}>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                    <RadioGroupItem value="1" id="artist-1" />
-                     <Label htmlFor="artist-1" className="font-sans flex-1 cursor-pointer">
-                      <span className="font-medium">🔴 1 Professional Caricature Artist</span>
-                      <span className="block text-sm text-muted-foreground">
-                        Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 1); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 1, 0, dbPricing).total; })())} (All Materials Included) · Advance: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 1); return cp ? cp.custom_advance_amount : getEventPrice(isMumbai, 1, 0, dbPricing).advance; })())}
-                      </span>
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                    <RadioGroupItem value="2" id="artist-2" />
-                    <Label htmlFor="artist-2" className="font-sans flex-1 cursor-pointer">
-                      <span className="font-medium">🔴 2 Professional Caricature Artists</span>
-                      <span className="block text-sm text-muted-foreground">
-                        Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 2); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 2, 0, dbPricing).total; })())} (All Materials Included) · Advance: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 2); return cp ? cp.custom_advance_amount : getEventPrice(isMumbai, 2, 0, dbPricing).advance; })())}
-                      </span>
-                    </Label>
-                  </div>
-                </RadioGroup>
+                <Select value={String(artistCount)} onValueChange={v => setArtistCount(Number(v) as 1 | 2)}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select artists" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">🔴 1 Artist — Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 1); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 1, 0, dbPricing).total; })())}</SelectItem>
+                    <SelectItem value="2">🔴 2 Artists — Total: {formatPrice((() => { const cp = customerEventPricing.find((p: any) => p.region === (isMumbai ? "mumbai" : "outside") && p.artist_count === 2); return cp ? cp.custom_total_price : getEventPrice(isMumbai, 2, 0, dbPricing).total; })())}</SelectItem>
+                  </SelectContent>
+                </Select>
 
                 {/* Extra Hours */}
                 <div className="border-t border-border pt-4">
