@@ -536,45 +536,40 @@ const WorkshopAdmin = () => {
   const filteredUsers = wsFilterId ? users.filter(u => u.workshop_id === wsFilterId) : users;
   const filteredVideos = wsFilterId ? videos.filter((v: any) => v.workshop_id === wsFilterId) : videos;
   const filteredSessions = wsFilterId ? liveSessions.filter((s: any) => s.workshop_id === wsFilterId) : liveSessions;
-  const filteredAssignments = wsFilterId ? assignments.filter((a: any) => {
-    const assignUser = users.find(u => u.id === a.user_id);
-    return assignUser?.workshop_id === wsFilterId;
-  }) : assignments;
-  const filteredFeedbacks = wsFilterId ? feedbacks.filter((f: any) => {
-    const fbUser = users.find(u => u.id === f.user_id);
-    return fbUser?.workshop_id === wsFilterId;
-  }) : feedbacks;
-  const filteredCertificates = wsFilterId ? certificates.filter((c: any) => {
-    const certUser = users.find(u => u.id === c.user_id);
-    return certUser?.workshop_id === wsFilterId;
-  }) : certificates;
+  const filteredUserIds = new Set(filteredUsers.map(u => u.id));
+  const filteredAssignments = wsFilterId ? assignments.filter((a: any) => filteredUserIds.has(a.user_id)) : assignments;
+  const filteredFeedbacks = wsFilterId ? feedbacks.filter((f: any) => filteredUserIds.has(f.user_id)) : feedbacks;
+  const filteredCertificates = wsFilterId ? certificates.filter((c: any) => filteredUserIds.has(c.user_id)) : certificates;
+  const filteredAttendance = wsFilterId ? attendance.filter((a: any) => filteredUserIds.has(a.user_id)) : attendance;
+  const filteredLocations = wsFilterId ? locations.filter((l: any) => filteredUserIds.has(l.user_id)) : locations;
+  const filteredLiveRequests = wsFilterId ? liveRequests.filter((r: any) => filteredUserIds.has(r.user_id)) : liveRequests;
 
   const registeredOnline = filteredUsers.filter((u: any) => u.student_type === "registered_online");
   const manuallyAdded = filteredUsers.filter((u: any) => u.student_type === "manually_added");
 
   const getAttendanceStatus = (userId: string, date: string) => {
-    const a = attendance.find((att: any) => att.user_id === userId && att.session_date === date);
+    const a = filteredAttendance.find((att: any) => att.user_id === userId && att.session_date === date);
     return a?.status || "not_marked";
   };
 
-  // Analytics data - use filteredUsers
+  // Analytics data - use filteredUsers and filteredAttendance
   const slotData = [{ name: "12–3 PM", value: filteredUsers.filter(u => u.slot === "12pm-3pm").length }, { name: "6–9 PM", value: filteredUsers.filter(u => u.slot === "6pm-9pm").length }];
   const typeData = [{ name: "Online", value: registeredOnline.length }, { name: "Manual", value: manuallyAdded.length }];
   const genderData = [{ name: "Male", value: filteredUsers.filter(u => u.gender === "male").length }, { name: "Female", value: filteredUsers.filter(u => u.gender === "female").length }, { name: "Other", value: filteredUsers.filter(u => u.gender && u.gender !== "male" && u.gender !== "female").length }].filter(d => d.value > 0);
   const ageGroups = [{ name: "<18", value: filteredUsers.filter(u => u.age && u.age < 18).length }, { name: "18-25", value: filteredUsers.filter(u => u.age && u.age >= 18 && u.age <= 25).length }, { name: "26-35", value: filteredUsers.filter(u => u.age && u.age >= 26 && u.age <= 35).length }, { name: "36+", value: filteredUsers.filter(u => u.age && u.age > 35).length }].filter(d => d.value > 0);
-  const day1Present = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "present").length;
-  const day1Absent = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "absent").length;
-  const day1Video = attendance.filter(a => a.session_date === "2026-03-14" && a.status === "video_session").length;
-  const day2Present = attendance.filter(a => a.session_date === "2026-03-15" && a.status === "present").length;
-  const day2Absent = attendance.filter(a => a.session_date === "2026-03-15" && a.status === "absent").length;
-  const day2Video = attendance.filter(a => a.session_date === "2026-03-15" && a.status === "video_session").length;
+  const day1Present = filteredAttendance.filter(a => a.session_date === "2026-03-14" && a.status === "present").length;
+  const day1Absent = filteredAttendance.filter(a => a.session_date === "2026-03-14" && a.status === "absent").length;
+  const day1Video = filteredAttendance.filter(a => a.session_date === "2026-03-14" && a.status === "video_session").length;
+  const day2Present = filteredAttendance.filter(a => a.session_date === "2026-03-15" && a.status === "present").length;
+  const day2Absent = filteredAttendance.filter(a => a.session_date === "2026-03-15" && a.status === "absent").length;
+  const day2Video = filteredAttendance.filter(a => a.session_date === "2026-03-15" && a.status === "video_session").length;
   const attendanceData = [{ name: "Day 1", Present: day1Present, Absent: day1Absent, Video: day1Video }, { name: "Day 2", Present: day2Present, Absent: day2Absent, Video: day2Video }];
-  const assignmentStatusData = [{ name: "Submitted", value: assignments.filter(a => a.status === "submitted").length }, { name: "Graded", value: assignments.filter(a => a.status === "graded").length }, { name: "Pending", value: assignments.filter(a => a.status === "pending").length }].filter(d => d.value > 0);
-  const passFailData = [{ name: "Pass", value: assignments.filter(a => a.pass_status === "pass").length }, { name: "Fail", value: assignments.filter(a => a.pass_status === "fail").length }].filter(d => d.value > 0);
-  const feedbackRatings = [1,2,3,4,5].map(r => ({ name: `${r}★`, value: feedbacks.filter(f => f.rating === r).length }));
-  const locationAllowed = locations.filter(l => l.location_allowed).length;
+  const assignmentStatusData = [{ name: "Submitted", value: filteredAssignments.filter(a => a.status === "submitted").length }, { name: "Graded", value: filteredAssignments.filter(a => a.status === "graded").length }, { name: "Pending", value: filteredAssignments.filter(a => a.status === "pending").length }].filter(d => d.value > 0);
+  const passFailData = [{ name: "Pass", value: filteredAssignments.filter(a => a.pass_status === "pass").length }, { name: "Fail", value: filteredAssignments.filter(a => a.pass_status === "fail").length }].filter(d => d.value > 0);
+  const feedbackRatings = [1,2,3,4,5].map(r => ({ name: `${r}★`, value: filteredFeedbacks.filter(f => f.rating === r).length }));
+  const locationAllowed = filteredLocations.filter(l => l.location_allowed).length;
   const locationDenied = filteredUsers.length - locationAllowed;
-  const topRankers = [...assignments].filter(a => a.status === "graded" && a.marks != null).sort((a, b) => (b.marks / (b.total_marks || 100)) - (a.marks / (a.total_marks || 100)));
+  const topRankers = [...filteredAssignments].filter(a => a.status === "graded" && a.marks != null).sort((a, b) => (b.marks / (b.total_marks || 100)) - (a.marks / (a.total_marks || 100)));
 
   // Extra analytics
   const videoAccessData = [{ name: "Enabled", value: filteredUsers.filter(u => u.video_access_enabled !== false).length }, { name: "Disabled", value: filteredUsers.filter(u => u.video_access_enabled === false).length }];
