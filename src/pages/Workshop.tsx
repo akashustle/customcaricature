@@ -330,14 +330,14 @@ const Workshop = () => {
       </div>,
       <div key="step2" className="space-y-4">
         <h3 className="font-body font-bold text-foreground">Select Your Slot *</h3>
-        <RadioGroup value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})} className="space-y-3">
-          {slots.map(slot => (
-            <div key={slot} className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${regForm.slot === slot ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-              <RadioGroupItem value={slot} id={`slot-${slot}`} />
-              <Label htmlFor={`slot-${slot}`} className="cursor-pointer flex items-center gap-2 font-body"><Clock className="w-4 h-4 text-primary" />{SLOT_LABELS[slot] || slot}</Label>
-            </div>
-          ))}
-        </RadioGroup>
+        <Select value={regForm.slot} onValueChange={v => setRegForm({...regForm, slot: v})}>
+          <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Choose a slot" /></SelectTrigger>
+          <SelectContent>
+            {slots.map(slot => (
+              <SelectItem key={slot} value={slot}>{SLOT_LABELS[slot] || slot}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>,
     ];
 
