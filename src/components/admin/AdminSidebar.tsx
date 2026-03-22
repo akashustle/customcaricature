@@ -81,6 +81,12 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "Team",
+    items: [
+      { id: "team", icon: Users, label: "Team", accent: "hsl(210 62% 48%)" },
+    ],
+  },
+  {
     label: "System",
     items: [
       { id: "automation", icon: Zap, label: "Automation", accent: "hsl(280 55% 55%)" },
