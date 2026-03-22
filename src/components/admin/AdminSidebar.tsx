@@ -60,7 +60,9 @@ const NAV_SECTIONS = [
   {
     label: "CRM",
     items: [
+      { id: "crm-pipeline", icon: Target, label: "Pipeline", accent: "hsl(280 55% 55%)" },
       { id: "enquiries", icon: ClipboardList, label: "Enquiries", accent: "hsl(22 78% 52%)" },
+      { id: "revenue", icon: DollarSign, label: "Revenue", accent: "hsl(152 55% 40%)" },
       { id: "support", icon: HelpCircle, label: "Support", accent: "hsl(210 62% 48%)" },
     ],
   },
