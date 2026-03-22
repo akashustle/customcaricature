@@ -119,6 +119,8 @@ const Workshop = () => {
     country: "India", state: "", city: "", district: "",
     termsAccepted: false, noticeRead: false,
   });
+  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
+  const [payingNow, setPayingNow] = useState(false);
   const [allowInternational, setAllowInternational] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginSecretCode, setLoginSecretCode] = useState("");
