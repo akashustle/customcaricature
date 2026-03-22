@@ -318,6 +318,53 @@ const Workshop = () => {
     } finally { setSubmittingReg(false); }
   };
 
+  const handleWorkshopPayment = async () => {
+    if (!registeredUserId) return;
+    setPayingNow(true);
+    try {
+      // Extract price number from workshop price string (e.g., "₹1,999" -> 1999)
+      const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
+      const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: priceNum, currency: "INR", receipt: `workshop_${registeredUserId}`, notes: { type: "workshop", user_id: registeredUserId, name: regForm.name } },
+      });
+      if (error || !data?.order_id) throw new Error("Could not create payment order");
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || data.key_id,
+        amount: priceNum * 100,
+        currency: "INR",
+        name: "Creative Caricature Club",
+        description: `Workshop Registration - ${workshop.title}`,
+        order_id: data.order_id,
+        handler: async (response: any) => {
+          // Verify payment
+          const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+            body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature },
+          });
+          if (verifyError || !verifyData?.verified) {
+            toast({ title: "Payment verification failed", variant: "destructive" });
+            return;
+          }
+          // Update workshop user payment status
+          await supabase.from("workshop_users" as any).update({
+            payment_status: "paid",
+            payment_amount: priceNum,
+          } as any).eq("id", registeredUserId);
+          toast({ title: "Payment Successful! 🎉", description: "Your seat is confirmed. You can now login." });
+          setView("login");
+          setEmail(regForm.email);
+          setRegStep(0);
+        },
+        prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
+        theme: { color: "#b08d57" },
+      };
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      toast({ title: "Payment Error", description: err.message, variant: "destructive" });
+    } finally { setPayingNow(false); }
+  };
+
   const SLOT_LABELS: Record<string, string> = { "12pm-3pm": "12 PM – 3 PM", "6pm-9pm": "6 PM – 9 PM" };
   const isRegistrationOpen = workshop.registration_enabled;
 
@@ -334,6 +381,44 @@ const Workshop = () => {
     { icon: BookOpen, label: "Requirements", value: workshop.requirements, sub: "Detailed supply list sent upon registration" },
     { icon: Users, label: "Group Size", value: `Limited to ${workshop.max_participants} participants`, sub: "Ensures personalized attention" },
   ];
+
+  // Registration Success View with Payment Option
+  if (view === "reg-success") {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 pb-24 md:pb-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md">
+          <Card>
+            <CardContent className="p-8 space-y-6 text-center">
+              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                <CheckCircle className="w-16 h-16 mx-auto text-primary" />
+              </motion.div>
+              <div>
+                <h2 className="font-calligraphy text-2xl font-bold text-foreground">Registration Complete! 🎉</h2>
+                <p className="text-sm text-muted-foreground font-body mt-2">Welcome, {regForm.name}! Your spot is reserved.</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-left">
+                  <p className="text-sm font-bold text-foreground font-body">💳 Pay Now & Confirm Your Seat</p>
+                  <p className="text-xs text-muted-foreground font-body mt-1">Pay {workshop.price} securely via Razorpay to lock your spot immediately.</p>
+                </div>
+                <Button onClick={handleWorkshopPayment} disabled={payingNow} className="w-full h-12 rounded-xl font-body font-semibold text-base">
+                  {payingNow ? "Processing..." : `Pay ${workshop.price} Now`}
+                </Button>
+              </div>
+
+              <div className="border-t border-border pt-4 space-y-3">
+                <p className="text-xs text-muted-foreground font-body">Or pay later after admin approval</p>
+                <Button variant="outline" onClick={() => { setView("login"); setEmail(regForm.email); setRegStep(0); }} className="w-full rounded-xl font-body">
+                  <ArrowRight className="w-4 h-4 mr-2" /> Go to Login
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Registration View
   if (view === "register") {
