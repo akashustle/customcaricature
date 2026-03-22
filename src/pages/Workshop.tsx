@@ -114,9 +114,12 @@ const Workshop = () => {
   const [regStep, setRegStep] = useState(0);
   const [regForm, setRegForm] = useState({
     name: "", email: "", mobile: "", instagram_id: "", age: "",
-    occupation: "", artist_background: "no", why_suitable: "", slot: "",
-    password: "",
+    occupation: "", artist_background: "no", skill_level: "", artist_background_type: "",
+    why_suitable: "", slot: "", password: "",
+    country: "India", state: "", city: "", district: "",
+    termsAccepted: false, noticeRead: false,
   });
+  const [allowInternational, setAllowInternational] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginSecretCode, setLoginSecretCode] = useState("");
   const [submittingReg, setSubmittingReg] = useState(false);
