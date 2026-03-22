@@ -1112,7 +1112,7 @@ const WorkshopAdmin = () => {
               {tab === "live" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-xl ${textPrimary}`}>Live Sessions ({liveSessions.length})</h1>
+                    <h1 className={`text-xl ${textPrimary}`}>Live Sessions ({filteredSessions.length})</h1>
                     <div className="flex gap-2">
                       <RefreshButton />
                       <ExportButton data={liveSessions.map(s => ({ Title: s.title, Date: s.session_date, Slot: s.slot, Artist: s.artist_name || "—", Status: s.status }))} sheetName="Sessions" fileName="CCC_LiveSessions" />
