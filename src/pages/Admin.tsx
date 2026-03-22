@@ -1588,6 +1588,10 @@ const Admin = () => {
             <AdminTrustedBrands />
           </TabsContent>
 
+          <TabsContent value="homepage">
+            <AdminHomepageControl />
+          </TabsContent>
+
           <TabsContent value="files">
             <AdminFileExplorer />
           </TabsContent>

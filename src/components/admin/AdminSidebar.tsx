@@ -67,6 +67,7 @@ const NAV_SECTIONS = [
   {
     label: "Content",
     items: [
+      { id: "homepage", icon: Home, label: "Homepage", accent: "hsl(25 25% 32%)" },
       { id: "blog", icon: FileQuestion, label: "Blog", accent: "hsl(280 55% 55%)" },
       { id: "gallery", icon: Image, label: "Gallery", accent: "hsl(340 55% 58%)" },
       { id: "hp-reviews", icon: Star, label: "HP Reviews", accent: "hsl(38 70% 58%)" },
