@@ -571,6 +571,16 @@ const Admin = () => {
   };
 
   const handleLogout = async () => {
+    // Mark session as inactive and clear name
+    if (currentSessionId) {
+      const { data: sess } = await supabase.from("admin_sessions").select("steps_log").eq("id", currentSessionId).single();
+      if (sess) {
+        const steps = Array.isArray((sess as any).steps_log) ? (sess as any).steps_log : [];
+        steps.push({ action: "Logged out", time: new Date().toISOString() });
+        await supabase.from("admin_sessions").update({ is_active: false, steps_log: steps } as any).eq("id", currentSessionId);
+      }
+    }
+    sessionStorage.removeItem("admin_entered_name");
     await supabase.auth.signOut();
     navigate("/customcad75");
   };
