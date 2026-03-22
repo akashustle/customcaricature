@@ -1831,6 +1831,7 @@ export type Database = {
         Row: {
           amount: number
           art_confirmation_status: string | null
+          artist_message: string | null
           artist_name: string | null
           ask_user_delivered: boolean | null
           assigned_artist_id: string | null
@@ -1838,6 +1839,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          current_stage: string | null
           customer_email: string
           customer_mobile: string
           customer_name: string
@@ -1847,6 +1849,8 @@ export type Database = {
           delivery_state: string | null
           district: string | null
           expected_delivery_date: string | null
+          extended_delivery_date: string | null
+          extension_reason: string | null
           face_count: number
           id: string
           instagram_id: string | null
@@ -1856,18 +1860,21 @@ export type Database = {
           order_type: Database["public"]["Enums"]["order_type"]
           payment_status: string | null
           payment_verified: boolean | null
+          preview_image_url: string | null
           priority: number | null
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           state: string | null
           status: Database["public"]["Enums"]["order_status"]
           style: Database["public"]["Enums"]["caricature_style"]
+          timeline_logs: Json | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
           amount: number
           art_confirmation_status?: string | null
+          artist_message?: string | null
           artist_name?: string | null
           ask_user_delivered?: boolean | null
           assigned_artist_id?: string | null
@@ -1875,6 +1882,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_stage?: string | null
           customer_email: string
           customer_mobile: string
           customer_name: string
@@ -1884,6 +1892,8 @@ export type Database = {
           delivery_state?: string | null
           district?: string | null
           expected_delivery_date?: string | null
+          extended_delivery_date?: string | null
+          extension_reason?: string | null
           face_count?: number
           id?: string
           instagram_id?: string | null
@@ -1893,18 +1903,21 @@ export type Database = {
           order_type: Database["public"]["Enums"]["order_type"]
           payment_status?: string | null
           payment_verified?: boolean | null
+          preview_image_url?: string | null
           priority?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           style?: Database["public"]["Enums"]["caricature_style"]
+          timeline_logs?: Json | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           amount?: number
           art_confirmation_status?: string | null
+          artist_message?: string | null
           artist_name?: string | null
           ask_user_delivered?: boolean | null
           assigned_artist_id?: string | null
@@ -1912,6 +1925,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          current_stage?: string | null
           customer_email?: string
           customer_mobile?: string
           customer_name?: string
@@ -1921,6 +1935,8 @@ export type Database = {
           delivery_state?: string | null
           district?: string | null
           expected_delivery_date?: string | null
+          extended_delivery_date?: string | null
+          extension_reason?: string | null
           face_count?: number
           id?: string
           instagram_id?: string | null
@@ -1930,12 +1946,14 @@ export type Database = {
           order_type?: Database["public"]["Enums"]["order_type"]
           payment_status?: string | null
           payment_verified?: boolean | null
+          preview_image_url?: string | null
           priority?: number | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           style?: Database["public"]["Enums"]["caricature_style"]
+          timeline_logs?: Json | null
           updated_at?: string
           user_id?: string | null
         }
