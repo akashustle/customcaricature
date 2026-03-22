@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, KeyRound, Sparkles } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { motion } from "framer-motion";
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
