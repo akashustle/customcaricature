@@ -248,7 +248,13 @@ const Workshop = () => {
 
   const handleRegister = async () => {
     if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot || !regForm.password) {
-      toast({ title: "Please fill all required fields (including password)", variant: "destructive" }); return;
+      toast({ title: "Please fill all required fields", variant: "destructive" }); return;
+    }
+    if (!regForm.termsAccepted || !regForm.noticeRead) {
+      toast({ title: "Please accept Terms & Conditions and the Notice", variant: "destructive" }); return;
+    }
+    if (!regForm.state || !regForm.city) {
+      toast({ title: "Please select your State and City", variant: "destructive" }); return;
     }
     setSubmittingReg(true);
     try {
@@ -280,12 +286,19 @@ const Workshop = () => {
         instagram_id: regForm.instagram_id.trim() || null,
         age: regForm.age ? parseInt(regForm.age) : null,
         occupation: regForm.occupation.trim() || null,
-        artist_background: regForm.artist_background === "yes",
-        why_suitable: regForm.why_suitable.trim() || null,
+        artist_background: regForm.artist_background,
+        skill_level: regForm.skill_level || null,
+        artist_background_type: regForm.artist_background_type || null,
+        why_join: regForm.why_suitable.trim() || null,
         slot: regForm.slot,
         student_type: "registered_online",
         workshop_date: "2026-03-14",
         password: regForm.password,
+        country: regForm.country || "India",
+        state: regForm.state || null,
+        city: regForm.city || null,
+        district: regForm.district || null,
+        terms_accepted: regForm.termsAccepted,
       } as any);
       if (error) throw error;
       toast({ title: "Registration Successful! 🎉", description: "You can now login to the workshop." });
@@ -299,6 +312,10 @@ const Workshop = () => {
 
   const SLOT_LABELS: Record<string, string> = { "12pm-3pm": "12 PM – 3 PM", "6pm-9pm": "6 PM – 9 PM" };
   const isRegistrationOpen = workshop.registration_enabled;
+
+  const OCCUPATION_OPTIONS = ["Student", "Working Professional", "Freelance Artist", "Teacher/Educator", "Homemaker", "Business Owner", "Other"];
+  const SKILL_LEVELS = ["Beginner", "Intermediate", "Advanced", "Professional"];
+  const BACKGROUND_TYPES = ["Self-taught", "Art Student", "Professional Artist", "Hobbyist", "No Art Background"];
 
   const detailItems = [
     { icon: Calendar, label: "Date", value: workshop.dates, sub: isRegistrationOpen ? "Registration closes 24 hours prior" : "Registration will begin soon" },
