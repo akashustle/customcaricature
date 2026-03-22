@@ -3619,7 +3619,12 @@ export type Database = {
       workshop_users: {
         Row: {
           age: number | null
+          artist_background: string | null
+          artist_background_type: string | null
+          city: string | null
+          country: string | null
           created_at: string
+          district: string | null
           email: string
           gender: string | null
           id: string
@@ -3629,14 +3634,21 @@ export type Database = {
           name: string
           occupation: string | null
           password: string | null
+          payment_amount: number | null
           payment_screenshot_path: string | null
+          payment_status: string | null
           prefers_recorded: boolean
           prefers_recorded_at: string | null
           prefers_recorded_note: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           roll_number: number | null
           secret_code: string | null
+          skill_level: string | null
           slot: string
+          state: string | null
           student_type: string
+          terms_accepted: boolean | null
           updated_at: string
           video_access_enabled: boolean
           video_download_allowed: boolean
@@ -3646,7 +3658,12 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          artist_background?: string | null
+          artist_background_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          district?: string | null
           email: string
           gender?: string | null
           id?: string
@@ -3656,14 +3673,21 @@ export type Database = {
           name: string
           occupation?: string | null
           password?: string | null
+          payment_amount?: number | null
           payment_screenshot_path?: string | null
+          payment_status?: string | null
           prefers_recorded?: boolean
           prefers_recorded_at?: string | null
           prefers_recorded_note?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           roll_number?: number | null
           secret_code?: string | null
+          skill_level?: string | null
           slot: string
+          state?: string | null
           student_type?: string
+          terms_accepted?: boolean | null
           updated_at?: string
           video_access_enabled?: boolean
           video_download_allowed?: boolean
@@ -3673,7 +3697,12 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          artist_background?: string | null
+          artist_background_type?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          district?: string | null
           email?: string
           gender?: string | null
           id?: string
@@ -3683,14 +3712,21 @@ export type Database = {
           name?: string
           occupation?: string | null
           password?: string | null
+          payment_amount?: number | null
           payment_screenshot_path?: string | null
+          payment_status?: string | null
           prefers_recorded?: boolean
           prefers_recorded_at?: string | null
           prefers_recorded_note?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           roll_number?: number | null
           secret_code?: string | null
+          skill_level?: string | null
           slot?: string
+          state?: string | null
           student_type?: string
+          terms_accepted?: boolean | null
           updated_at?: string
           video_access_enabled?: boolean
           video_download_allowed?: boolean
