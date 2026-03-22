@@ -100,6 +100,7 @@ const App = () => {
         <AppUpdateBanner />
         <BrowserRouter>
           <ScrollToTop />
+          <RouteMemoryTracker />
           <FloatingButtons />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>
