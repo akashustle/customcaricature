@@ -400,14 +400,13 @@ const Workshop = () => {
               {/* Batch Selector */}
               <div className="space-y-2">
                 <Label className="font-body text-xs text-muted-foreground">Select Batch</Label>
-                <div className="flex bg-muted rounded-xl p-1">
-                  <button onClick={() => setSelectedBatch("upcoming")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "upcoming" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
-                    <Calendar className="w-3.5 h-3.5" /> Upcoming
-                  </button>
-                  <button onClick={() => setSelectedBatch("march-14-15")} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-body font-medium transition-all ${selectedBatch === "march-14-15" ? "bg-card shadow-sm text-primary" : "text-muted-foreground"}`}>
-                    <Calendar className="w-3.5 h-3.5" /> 14th & 15th March
-                  </button>
-                </div>
+                <Select value={selectedBatch} onValueChange={(v: any) => setSelectedBatch(v)}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select batch" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">📅 Upcoming Batch</SelectItem>
+                    <SelectItem value="march-14-15">📅 14th & 15th March</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Login method tabs */}
