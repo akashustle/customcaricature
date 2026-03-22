@@ -688,7 +688,7 @@ const Admin = () => {
             </div>
             <div className="hidden md:flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[hsl(152,55%,40%)] animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
               <span className="text-muted-foreground/30">|</span>

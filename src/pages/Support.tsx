@@ -98,7 +98,7 @@ const Support = () => {
               <ArrowLeft className="w-4 h-4 mr-1" /> Home
             </Button>
             <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }}>
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mb-6 shadow-3d">
+              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center mb-6 shadow-3d">
                 <Headphones className="w-10 h-10 text-accent-foreground" />
               </motion.div>
               <h1 className="font-calligraphy text-4xl md:text-5xl font-bold mb-3 text-3d animate-text-glow">Get in Touch</h1>
