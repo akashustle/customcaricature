@@ -247,7 +247,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
           <motion.div initial={{ opacity: 0 }} animate={step >= 1 ? { opacity: 1 } : {}} className="mt-7 z-10">
             <div
               className="h-1 rounded-full overflow-hidden"
-              style={{ width: 140, background: "rgba(176,141,87,0.15)" }}
+              style={{ width: 140, background: "rgba(160,132,98,0.12)" }}
             >
               <motion.div
                 className="h-full rounded-full"
