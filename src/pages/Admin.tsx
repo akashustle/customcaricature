@@ -681,14 +681,14 @@ const Admin = () => {
         <header className="sticky top-0 z-40 admin-header-premium">
           <div className="px-4 md:px-8 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+                <span className="text-primary-foreground font-bold text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>C</span>
               </div>
               <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
             </div>
             <div className="hidden md:flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[hsl(152,55%,40%)] animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
               <span className="text-muted-foreground/30">|</span>

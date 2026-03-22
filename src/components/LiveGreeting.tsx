@@ -13,13 +13,13 @@ const LiveGreeting = ({ name }: { name?: string }) => {
   const emoji = hour < 12 ? "🌅" : hour < 17 ? "☀️" : "🌙";
 
   return (
-    <div className="mb-4">
-      <p className="font-calligraphy text-2xl md:text-3xl font-bold text-foreground">
-        {emoji} {greeting}{name ? `, ${name.split(" ")[0]}` : ""}!
+    <div className="flex items-center gap-2">
+      <p className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+        {emoji} {greeting}{name ? `, ${name.split(" ")[0]}` : ""}
       </p>
-      <p className="text-xs text-muted-foreground font-body">
-        {now.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" })} · {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true })}
-      </p>
+      <span className="text-[10px] text-muted-foreground font-body hidden lg:inline">
+        {now.toLocaleDateString("en-IN", { day: "2-digit", month: "short" })} · {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+      </span>
     </div>
   );
 };

@@ -47,11 +47,11 @@ const Support = () => {
   };
 
   const socials = [
-    { icon: Instagram, label: "@creativecaricatureclub", href: "https://instagram.com/creativecaricatureclub", color: "from-pink-500 to-purple-600" },
-    { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/918369594271", color: "from-green-500 to-green-600" },
-    { icon: Youtube, label: "YouTube", href: "https://youtube.com/@creativecaricatureclub", color: "from-red-500 to-red-600" },
-    { icon: Facebook, label: "Facebook", href: "https://facebook.com/creativecaricatureclub", color: "from-blue-500 to-blue-600" },
-    { icon: Mail, label: "creativecaricatureclub@gmail.com", href: "mailto:creativecaricatureclub@gmail.com", color: "from-amber-500 to-orange-600" },
+    { icon: Instagram, label: "@creativecaricatureclub", href: "https://instagram.com/creativecaricatureclub", color: "from-rose-400 to-rose-500" },
+    { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/918369594271", color: "from-emerald-400 to-emerald-500" },
+    { icon: Youtube, label: "YouTube", href: "https://youtube.com/@creativecaricatureclub", color: "from-red-400 to-red-500" },
+    { icon: Facebook, label: "Facebook", href: "https://facebook.com/creativecaricatureclub", color: "from-blue-400 to-blue-500" },
+    { icon: Mail, label: "creativecaricatureclub@gmail.com", href: "mailto:creativecaricatureclub@gmail.com", color: "from-amber-400 to-amber-500" },
   ];
 
   if (submitted) {
@@ -62,13 +62,13 @@ const Support = () => {
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <Card className="w-full max-w-md shadow-3d border-glow text-center">
               <CardContent className="p-8 space-y-4">
-                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-3d">
+                <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 flex items-center justify-center shadow-3d">
                   <CheckCircle2 className="w-10 h-10 text-white" />
                 </motion.div>
                 <h2 className="font-calligraphy text-3xl font-bold text-3d">Message Sent!</h2>
                 <p className="text-sm text-muted-foreground font-body">We'll get back to you as soon as possible.</p>
                 <div className="flex flex-col gap-2 pt-4">
-                  <Button onClick={() => window.open("https://wa.me/918369594271", "_blank")} className="w-full font-body bg-green-600 hover:bg-green-700 btn-3d rounded-full h-12">
+                  <Button onClick={() => window.open("https://wa.me/918369594271", "_blank")} className="w-full font-body bg-emerald-500 hover:bg-emerald-600 text-white btn-3d rounded-full h-12">
                     <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/")} className="font-body rounded-full">
@@ -98,7 +98,7 @@ const Support = () => {
               <ArrowLeft className="w-4 h-4 mr-1" /> Home
             </Button>
             <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }}>
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mb-6 shadow-3d">
+              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center mb-6 shadow-3d">
                 <Headphones className="w-10 h-10 text-accent-foreground" />
               </motion.div>
               <h1 className="font-calligraphy text-4xl md:text-5xl font-bold mb-3 text-3d animate-text-glow">Get in Touch</h1>
