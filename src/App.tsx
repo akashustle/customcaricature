@@ -116,6 +116,7 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           <RouteMemoryTracker />
+          <RouteMemoryRedirector />
           <FloatingButtons />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>
