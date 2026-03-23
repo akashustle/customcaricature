@@ -1626,6 +1626,10 @@ const Admin = () => {
             <AdminAIIntelligence />
           </TabsContent>
 
+          <TabsContent value="revenue-target">
+            <AdminRevenueTargetTracker />
+          </TabsContent>
+
           {/* Live Locations Tab */}
           <TabsContent value="locations">
             <AdminLiveLocations />
