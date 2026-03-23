@@ -325,6 +325,36 @@ async function searchMainPanel(q: string, tabFilter: string, all: SearchResult[]
       })
   );
 
+  // Deep search: admin_site_settings (all nested JSON settings - homepage, video, etc.)
+  if (shouldSearch("homepage") || shouldSearch("settings") || tabFilter === "all") searches.push(
+    supabase.from("admin_site_settings").select("id, value")
+      .then(({ data }) => {
+        const lq = q.toLowerCase();
+        (data as any[])?.forEach((row: any) => {
+          const flatResults = flattenJson(row.value, row.id);
+          flatResults.forEach((item) => {
+            if (item.key.toLowerCase().includes(lq) || item.value.toLowerCase().includes(lq)) {
+              // Determine the best tab target based on setting id
+              let tabTarget = "homepage";
+              if (row.id.startsWith("homepage_")) tabTarget = "homepage";
+              else if (row.id.includes("onesignal") || row.id.includes("webpush") || row.id.includes("push")) tabTarget = "push-center";
+              else if (row.id.includes("seo")) tabTarget = "seo";
+              else tabTarget = "settings";
+
+              all.push({
+                type: "Setting",
+                icon: Settings,
+                label: `${row.id} → ${item.key}`,
+                sublabel: item.value.slice(0, 80),
+                tabTarget,
+                id: row.id,
+              });
+            }
+          });
+        });
+      })
+  );
+
   await Promise.all(searches);
 }
 
