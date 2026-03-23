@@ -330,7 +330,7 @@ async function searchMainPanel(q: string, tabFilter: string, all: SearchResult[]
 
 // ─── SHOP ADMIN PANEL SEARCH ────
 async function searchShopPanel(q: string, tabFilter: string, all: SearchResult[]) {
-  const searches: Promise<void>[] = [];
+  const searches: PromiseLike<void>[] = [];
   const shouldSearch = (tab: string) => tabFilter === "all" || tabFilter === tab;
 
   if (shouldSearch("products")) searches.push(
