@@ -1712,6 +1712,18 @@ const Admin = () => {
             <AdminAutomation />
           </TabsContent>
 
+          <TabsContent value="content-editor">
+            <AdminContentEditor />
+          </TabsContent>
+
+          <TabsContent value="form-builder">
+            <AdminFormBuilder />
+          </TabsContent>
+
+          <TabsContent value="design-control">
+            <AdminDesignControl />
+          </TabsContent>
+
           <TabsContent value="team">
             <AdminTeamManagement />
           </TabsContent>
