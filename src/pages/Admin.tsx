@@ -93,6 +93,9 @@ import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
 import AdminRevenueTargetTracker from "@/components/admin/AdminRevenueTargetTracker";
 import AdminDrillDownDialog from "@/components/admin/AdminDrillDownDialog";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
+import AdminReferrals from "@/components/admin/AdminReferrals";
+import AdminCoupons from "@/components/admin/AdminCoupons";
+import AdminMaintenance from "@/components/admin/AdminMaintenance";
 
 type Order = {
   id: string;
@@ -1765,6 +1768,18 @@ const Admin = () => {
 
           <TabsContent value="integrations">
             <AdminIntegrations />
+          </TabsContent>
+
+          <TabsContent value="referrals">
+            <AdminReferrals />
+          </TabsContent>
+
+          <TabsContent value="coupons">
+            <AdminCoupons />
+          </TabsContent>
+
+          <TabsContent value="maintenance">
+            <AdminMaintenance />
           </TabsContent>
 
           <TabsContent value="settings">

@@ -1176,6 +1176,98 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_uses: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          discount_applied: number
+          id: string
+          order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          discount_applied?: number
+          id?: string
+          order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          discount_applied?: number
+          id?: string
+          order_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_uses_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          allowed_user_ids: string[] | null
+          applies_to: string
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_discount_amount: number | null
+          max_uses: number | null
+          min_order_amount: number | null
+          times_used: number
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          allowed_user_ids?: string[] | null
+          applies_to?: string
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount_amount?: number | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          times_used?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          allowed_user_ids?: string[] | null
+          applies_to?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_discount_amount?: number | null
+          max_uses?: number | null
+          min_order_amount?: number | null
+          times_used?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       customer_event_pricing: {
         Row: {
           artist_count: number
@@ -2084,6 +2176,39 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_settings: {
+        Row: {
+          allowed_user_ids: string[] | null
+          estimated_end: string | null
+          id: string
+          is_enabled: boolean
+          message: string | null
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allowed_user_ids?: string[] | null
+          estimated_end?: string | null
+          id: string
+          is_enabled?: boolean
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allowed_user_ids?: string[] | null
+          estimated_end?: string | null
+          id?: string
+          is_enabled?: boolean
+          message?: string | null
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       notification_batches: {
         Row: {
           clicked_count: number
@@ -2648,6 +2773,89 @@ export type Database = {
           welcome_sent?: boolean | null
         }
         Relationships: []
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          reward_type: string
+          reward_value: number
+          times_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          reward_type?: string
+          reward_value?: number
+          times_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          reward_type?: string
+          reward_value?: number
+          times_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_uses: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string | null
+          referral_code_id: string
+          referred_user_id: string
+          referrer_user_id: string
+          reward_amount: number | null
+          reward_given: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          referral_code_id: string
+          referred_user_id: string
+          referrer_user_id: string
+          reward_amount?: number | null
+          reward_given?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          referral_code_id?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          reward_amount?: number | null
+          reward_given?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_uses_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reset_attempts: {
         Row: {
