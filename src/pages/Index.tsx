@@ -24,6 +24,7 @@ import HomepageUseCases from "@/components/homepage/HomepageUseCases";
 import HomepageSmartHelp from "@/components/homepage/HomepageSmartHelp";
 import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageUrgencyStrip from "@/components/homepage/HomepageUrgencyStrip";
+import HomepageEnquiryFunnel from "@/components/homepage/HomepageEnquiryFunnel";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -408,6 +409,9 @@ const Index = () => {
 
       {/* Use Cases */}
       <HomepageUseCases config={content.homepage_use_cases} />
+
+      {/* Smart Enquiry Funnel */}
+      <HomepageEnquiryFunnel />
 
       {/* Styles */}
       <section className="py-16 md:py-24 overflow-hidden">
