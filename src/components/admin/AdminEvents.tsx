@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import ExportButton from "@/components/admin/ExportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useEventPricing } from "@/hooks/useEventPricing";
