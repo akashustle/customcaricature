@@ -15,6 +15,7 @@ type SiteSettings = {
   gateway_charge_percentage: { percentage: number };
   admin_action_prompt: { enabled: boolean };
   workshop_dashboard_visible: { enabled: boolean };
+  app_download_link: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
