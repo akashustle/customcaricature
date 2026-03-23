@@ -2137,30 +2137,96 @@ export type Database = {
         }
         Relationships: []
       }
+      push_analytics: {
+        Row: {
+          batch_id: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          notification_id: string | null
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          batch_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          notification_id?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          batch_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          notification_id?: string | null
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
+          browser: string | null
+          city: string | null
+          country: string | null
           created_at: string
+          device_name: string | null
+          device_type: string | null
           endpoint: string
           id: string
+          ip_address: string | null
+          is_active: boolean | null
+          last_active_at: string | null
+          os: string | null
           p256dh: string
+          timezone: string | null
           user_id: string
+          welcome_sent: boolean | null
         }
         Insert: {
           auth: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          device_name?: string | null
+          device_type?: string | null
           endpoint: string
           id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_active_at?: string | null
+          os?: string | null
           p256dh: string
+          timezone?: string | null
           user_id: string
+          welcome_sent?: boolean | null
         }
         Update: {
           auth?: string
+          browser?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
+          device_name?: string | null
+          device_type?: string | null
           endpoint?: string
           id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_active_at?: string | null
+          os?: string | null
           p256dh?: string
+          timezone?: string | null
           user_id?: string
+          welcome_sent?: boolean | null
         }
         Relationships: []
       }
@@ -2267,6 +2333,63 @@ export type Database = {
           is_active?: boolean | null
           script_body?: string
           sort_order?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      scheduled_push_notifications: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          failed_count: number | null
+          icon_url: string | null
+          id: string
+          image_url: string | null
+          link: string | null
+          message: string
+          scheduled_at: string
+          sent_at: string | null
+          sent_count: number | null
+          status: string
+          target_type: string
+          target_user_ids: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          failed_count?: number | null
+          icon_url?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          message: string
+          scheduled_at: string
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          target_type?: string
+          target_user_ids?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          failed_count?: number | null
+          icon_url?: string | null
+          id?: string
+          image_url?: string | null
+          link?: string | null
+          message?: string
+          scheduled_at?: string
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          target_type?: string
+          target_user_ids?: string[] | null
           title?: string
           updated_at?: string | null
         }
