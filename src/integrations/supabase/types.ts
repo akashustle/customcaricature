@@ -1795,6 +1795,47 @@ export type Database = {
           },
         ]
       }
+      order_extensions: {
+        Row: {
+          admin_name: string | null
+          created_at: string | null
+          id: string
+          new_date: string
+          old_date: string | null
+          order_id: string
+          reason: string
+          updated_by: string | null
+        }
+        Insert: {
+          admin_name?: string | null
+          created_at?: string | null
+          id?: string
+          new_date: string
+          old_date?: string | null
+          order_id: string
+          reason: string
+          updated_by?: string | null
+        }
+        Update: {
+          admin_name?: string | null
+          created_at?: string | null
+          id?: string
+          new_date?: string
+          old_date?: string | null
+          order_id?: string
+          reason?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_extensions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_images: {
         Row: {
           created_at: string

@@ -79,6 +79,8 @@ import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
+import AdminQuickActions from "@/components/admin/AdminQuickActions";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
 
 type Order = {
   id: string;
@@ -725,6 +727,13 @@ const Admin = () => {
       />
       {/* Desktop Sidebar */}
       <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <AdminMobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <AdminQuickActions onAction={(action) => {
+        if (action === "add-order") { setActiveTab("orders"); setShowAddOrder(true); }
+        else if (action === "add-event") setActiveTab("events");
+        else if (action === "add-enquiry") setActiveTab("enquiries");
+        else if (action === "send-notification") setActiveTab("notify");
+      }} />
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">

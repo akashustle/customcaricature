@@ -122,6 +122,15 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
 
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
 
+    // Log extension to order_extensions table
+    await supabase.from("order_extensions" as any).insert({
+      order_id: orderId,
+      old_date: order?.expected_delivery_date || order?.extended_delivery_date || null,
+      new_date: extendDate,
+      reason: extendReason || "Due to high demand, extra care is being taken to ensure premium quality 🎨",
+      admin_name: sessionStorage.getItem("admin_entered_name") || "Admin",
+    });
+
     if (extendNotify && order) {
       // Create notification for customer
       if ((order as any).user_id) {
