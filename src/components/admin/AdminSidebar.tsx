@@ -131,31 +131,31 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     <aside 
       className={cn(
         "hidden md:flex flex-col h-screen sticky top-0 transition-all duration-300 z-30",
-        "bg-[#0f1629] border-r border-[#1e2a4a]",
+        "bg-card border-r border-border shadow-sm",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
       {/* Logo + Collapse */}
-      <div className="flex items-center justify-between px-3 py-3.5 border-b border-[#1e2a4a]">
+      <div className="flex items-center justify-between px-3 py-3.5 border-b border-border">
         <div 
           className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
-          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-lg ring-1 ring-blue-500/20">
+          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-md ring-1 ring-border">
             <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
-              <p className="text-[13px] font-bold tracking-tight text-white font-sans">Admin</p>
-              <p className="text-[9px] text-blue-300/60 leading-none font-sans">Creative Caricature Club</p>
+              <p className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</p>
+              <p className="text-[9px] text-muted-foreground leading-none font-sans">Creative Caricature Club</p>
             </motion.div>
           )}
         </div>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-white/5 transition-colors flex-shrink-0"
+          className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors flex-shrink-0"
         >
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5 text-blue-300/50" /> : <ChevronLeft className="w-3.5 h-3.5 text-blue-300/50" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground" />}
         </button>
       </div>
 
@@ -164,7 +164,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         {NAV_SECTIONS.map((section) => (
           <div key={section.label} className="mb-2">
             {!collapsed && (
-              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-blue-400/40 px-2.5 mb-1 mt-1.5 font-sans">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 px-2.5 mb-1 mt-1.5 font-sans">
                 {section.label}
               </p>
             )}
@@ -177,20 +177,20 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                   className={cn(
                     "w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[12px] transition-all duration-200 mb-0.5 font-sans",
                     isActive
-                      ? "bg-blue-600/15 text-blue-300 font-semibold"
-                      : "text-slate-400 hover:text-blue-200 hover:bg-white/5"
+                      ? "bg-primary/10 text-primary font-semibold shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
                   <item.icon className={cn(
                     "w-[15px] h-[15px] flex-shrink-0 transition-colors",
-                    isActive ? "text-blue-400" : "text-slate-500"
+                    isActive ? "text-primary" : "text-muted-foreground"
                   )} />
                   {!collapsed && (
                     <span className="truncate">{item.label}</span>
                   )}
                   {isActive && !collapsed && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
                 </button>
               );
@@ -200,10 +200,10 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       </nav>
 
       {/* Bottom actions */}
-      <div className="p-1.5 border-t border-[#1e2a4a] space-y-0.5">
+      <div className="p-1.5 border-t border-border space-y-0.5">
         <button
           onClick={() => navigate("/")}
-          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-slate-400 hover:text-blue-200 hover:bg-white/5 transition-all font-sans"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all font-sans"
           title={collapsed ? "Home" : undefined}
         >
           <Home className="w-[15px] h-[15px] flex-shrink-0" />
@@ -211,7 +211,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         </button>
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}
-          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-red-400/80 hover:bg-red-500/10 transition-all font-sans"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-destructive/80 hover:bg-destructive/10 transition-all font-sans"
           title={collapsed ? "Logout" : undefined}
         >
           <LogOut className="w-[15px] h-[15px] flex-shrink-0" />

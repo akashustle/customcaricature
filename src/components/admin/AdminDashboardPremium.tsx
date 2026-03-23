@@ -24,7 +24,8 @@ interface DashboardProps {
   onNavigate: (tab: string) => void;
 }
 
-const CHART_COLORS = ["#6366F1", "#22D3EE", "#A78BFA", "#F472B6", "#34D399", "#FBBF24", "#F87171", "#818CF8"];
+const CHART_COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "#FBBF24", "#F87171", "#818CF8"];
+const CHART_HEX = ["#6366F1", "#22D3EE", "#A78BFA", "#F472B6", "#34D399", "#FBBF24", "#F87171", "#818CF8"];
 
 const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
   const [stats, setStats] = useState({
@@ -129,13 +130,13 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
     o.forEach((x: any) => { if (x.city) cityMap[x.city] = (cityMap[x.city] || 0) + 1; });
     e.forEach((x: any) => { if (x.city) cityMap[x.city] = (cityMap[x.city] || 0) + 1; });
     setCityData(Object.entries(cityMap).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, value], i) => ({
-      name, value, fill: CHART_COLORS[i % CHART_COLORS.length]
+      name, value, fill: CHART_HEX[i % CHART_HEX.length]
     })));
 
     const statusMap: Record<string, number> = {};
     o.forEach((x: any) => { statusMap[x.status] = (statusMap[x.status] || 0) + 1; });
     setOrderStatusData(Object.entries(statusMap).map(([name, value], i) => ({
-      name: name.replace("_", " "), value, fill: CHART_COLORS[i % CHART_COLORS.length]
+      name: name.replace("_", " "), value, fill: CHART_HEX[i % CHART_HEX.length]
     })));
 
     setRecentOrders(o.slice(0, 8).map((x: any) => ({
@@ -199,7 +200,7 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       <div className="space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-[130px] rounded-2xl bg-[#131b2e] animate-pulse border border-[#1e2a4a]" />
+            <div key={i} className="h-[130px] rounded-2xl bg-muted animate-pulse border border-border" />
           ))}
         </div>
       </div>
@@ -211,15 +212,15 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       {/* Welcome Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white font-sans">Welcome Back 👋</h1>
-          <p className="text-sm text-slate-400 font-sans">Here's what's happening with your business today.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground font-sans">Welcome Back 👋</h1>
+          <p className="text-sm text-muted-foreground font-sans">Here's what's happening with your business today.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/20 font-sans">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
+          <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-sans">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 mr-1.5 animate-pulse" />
             Live
           </Badge>
-          <span className="text-xs text-slate-500 font-sans">{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</span>
+          <span className="text-xs text-muted-foreground font-sans">{new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short", year: "numeric" })}</span>
         </div>
       </motion.div>
 
@@ -245,13 +246,13 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       {/* ROW 2: Transaction Activity + Sales Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div className="lg:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <DarkCard>
+          <AdminCard>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-semibold text-white font-sans">Transaction Activity</h3>
-                <p className="text-xs text-slate-500 font-sans">Revenue over last 6 months</p>
+                <h3 className="text-sm font-semibold text-foreground font-sans">Transaction Activity</h3>
+                <p className="text-xs text-muted-foreground font-sans">Revenue over last 6 months</p>
               </div>
-              <Button variant="outline" size="sm" className="text-xs h-7 border-[#2a3654] bg-transparent text-slate-300 hover:bg-[#1e2a4a] font-sans" onClick={() => onNavigate("analytics")}>
+              <Button variant="outline" size="sm" className="text-xs h-7 font-sans" onClick={() => onNavigate("analytics")}>
                 Details <ArrowUpRight className="w-3 h-3 ml-1" />
               </Button>
             </div>
@@ -267,61 +268,61 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
                     <stop offset="100%" stopColor="#22D3EE" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a4a" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                <Tooltip content={<DarkTooltip />} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <Tooltip content={<ChartTooltip />} />
                 <Area type="monotone" dataKey="orders" stroke="#6366F1" fill="url(#indigoGrad)" strokeWidth={2} name="Orders" dot={false} />
                 <Area type="monotone" dataKey="events" stroke="#22D3EE" fill="url(#cyanGrad)" strokeWidth={2} name="Events" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <DarkCard className="h-full">
-            <h3 className="text-sm font-semibold text-white mb-4 font-sans">Sales Performance</h3>
+          <AdminCard className="h-full">
+            <h3 className="text-sm font-semibold text-foreground mb-4 font-sans">Sales Performance</h3>
             <div className="space-y-4">
               <SalesMetric label="Order Revenue" value={formatPrice(stats.orderRevenue)} total={stats.totalRevenue} color="#6366F1" />
               <SalesMetric label="Event Revenue" value={formatPrice(stats.eventRevenue)} total={stats.totalRevenue} color="#22D3EE" />
               <SalesMetric label="Shop Revenue" value={formatPrice(stats.shopRevenue)} total={stats.totalRevenue} color="#A78BFA" />
-              <div className="border-t border-[#1e2a4a] pt-3 mt-3 space-y-2">
+              <div className="border-t border-border pt-3 mt-3 space-y-2">
                 {[
                   { l: "Avg Order Value", v: formatPrice(stats.avgOrderValue) },
                   { l: "Avg Event Value", v: formatPrice(stats.avgEventValue) },
                   { l: "Conversion Rate", v: `${conversionRate}%` },
                 ].map(item => (
                   <div key={item.l} className="flex justify-between text-xs font-sans">
-                    <span className="text-slate-500">{item.l}</span>
-                    <span className="font-semibold text-slate-200">{item.v}</span>
+                    <span className="text-muted-foreground">{item.l}</span>
+                    <span className="font-semibold text-foreground">{item.v}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
       </div>
 
       {/* ROW 3: Secondary Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         {[
-          { icon: Users, label: "Customers", value: stats.totalCustomers, color: "text-indigo-400", bg: "bg-indigo-500/10", click: () => setDrillDown({ metric: "customers", title: "Customers" }) },
-          { icon: UserPlus, label: "New This Week", value: stats.newCustomersWeek, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-          { icon: Target, label: "Conversion", value: `${conversionRate}%`, color: "text-amber-400", bg: "bg-amber-500/10", click: () => setDrillDown({ metric: "enquiries", title: "Enquiry Conversion" }) },
-          { icon: CheckCircle, label: "Fulfilled", value: `${fulfillmentRate}%`, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-          { icon: AlertTriangle, label: "Pending", value: stats.pendingOrders, color: "text-orange-400", bg: "bg-orange-500/10" },
-          { icon: Star, label: "Completed", value: stats.completedOrders, color: "text-violet-400", bg: "bg-violet-500/10" },
-          { icon: Activity, label: "Sessions", value: stats.activeSessions, color: "text-pink-400", bg: "bg-pink-500/10" },
-          { icon: Globe, label: "Artists", value: stats.totalArtists, color: "text-teal-400", bg: "bg-teal-500/10" },
+          { icon: Users, label: "Customers", value: stats.totalCustomers, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-500/10", click: () => setDrillDown({ metric: "customers", title: "Customers" }) },
+          { icon: UserPlus, label: "New This Week", value: stats.newCustomersWeek, color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-500/10" },
+          { icon: Target, label: "Conversion", value: `${conversionRate}%`, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", click: () => setDrillDown({ metric: "enquiries", title: "Enquiry Conversion" }) },
+          { icon: CheckCircle, label: "Fulfilled", value: `${fulfillmentRate}%`, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10" },
+          { icon: AlertTriangle, label: "Pending", value: stats.pendingOrders, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-500/10" },
+          { icon: Star, label: "Completed", value: stats.completedOrders, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-500/10" },
+          { icon: Activity, label: "Sessions", value: stats.activeSessions, color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-500/10" },
+          { icon: Globe, label: "Artists", value: stats.totalArtists, color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-500/10" },
         ].map((item) => (
           <motion.div key={item.label} whileHover={{ y: -2, scale: 1.02 }} className="cursor-pointer" onClick={item.click}>
-            <DarkCard className="text-center !p-3">
+            <AdminCard className="text-center !p-3">
               <div className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center mx-auto mb-1.5`}>
                 <item.icon className={`w-4 h-4 ${item.color}`} />
               </div>
-              <p className="text-base font-bold text-white leading-none font-sans">{item.value}</p>
-              <p className="text-[9px] text-slate-500 mt-0.5 font-sans">{item.label}</p>
-            </DarkCard>
+              <p className="text-base font-bold text-foreground leading-none font-sans">{item.value}</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5 font-sans">{item.label}</p>
+            </AdminCard>
           </motion.div>
         ))}
       </div>
@@ -329,29 +330,29 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       {/* ROW 4: Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Orders by Hour</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Orders by Hour</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a4a" />
-                <XAxis dataKey="hour" tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} interval={2} />
-                <YAxis tick={{ fontSize: 9, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<DarkTooltip />} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="hour" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={2} />
+                <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} />
                 <Bar dataKey="orders" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Revenue Breakdown</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Revenue Breakdown</h3>
             <ResponsiveContainer width="100%" height={140}>
               <PieChart>
                 <Pie data={revenueSplit} cx="50%" cy="50%" innerRadius={40} outerRadius={60} dataKey="value" paddingAngle={3}>
                   {revenueSplit.map((entry, i) => <Cell key={i} fill={entry.fill} stroke="none" />)}
                 </Pie>
-                <Tooltip content={<DarkTooltip />} formatter={(v: number) => [formatPrice(v), ""]} />
+                <Tooltip content={<ChartTooltip />} formatter={(v: number) => [formatPrice(v), ""]} />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-1.5 mt-1">
@@ -359,24 +360,24 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
                 <div key={item.name} className="flex items-center justify-between text-xs font-sans">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ background: item.fill }} />
-                    <span className="text-slate-400">{item.name}</span>
+                    <span className="text-muted-foreground">{item.name}</span>
                   </div>
-                  <span className="font-semibold text-slate-200">{formatPrice(item.value)}</span>
+                  <span className="font-semibold text-foreground">{formatPrice(item.value)}</span>
                 </div>
               ))}
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Order Status</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Order Status</h3>
             <ResponsiveContainer width="100%" height={140}>
               <PieChart>
                 <Pie data={orderStatusData} cx="50%" cy="50%" outerRadius={55} dataKey="value" paddingAngle={2}>
                   {orderStatusData.map((entry, i) => <Cell key={i} fill={entry.fill} stroke="none" />)}
                 </Pie>
-                <Tooltip content={<DarkTooltip />} />
+                <Tooltip content={<ChartTooltip />} />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-1 mt-1">
@@ -384,170 +385,170 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
                 <div key={item.name} className="flex items-center justify-between text-xs font-sans">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full" style={{ background: item.fill }} />
-                    <span className="text-slate-400 capitalize">{item.name}</span>
+                    <span className="text-muted-foreground capitalize">{item.name}</span>
                   </div>
-                  <span className="font-medium text-slate-200">{item.value}</span>
+                  <span className="font-medium text-foreground">{item.value}</span>
                 </div>
               ))}
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
       </div>
 
       {/* ROW 5: Weekly Trend + City */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Weekly Trend</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Weekly Trend</h3>
             <ResponsiveContainer width="100%" height={200}>
               <ComposedChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a4a" />
-                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<DarkTooltip />} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} />
                 <Bar dataKey="orders" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={20} name="Orders" />
                 <Line type="monotone" dataKey="events" stroke="#22D3EE" strokeWidth={2} dot={{ fill: "#22D3EE", r: 3 }} name="Events" />
               </ComposedChart>
             </ResponsiveContainer>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Top Cities</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Top Cities</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={cityData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a4a" />
-                <XAxis type="number" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={80} />
-                <Tooltip content={<DarkTooltip />} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={80} />
+                <Tooltip content={<ChartTooltip />} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={14}>
-                  {cityData.map((entry, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  {cityData.map((entry, i) => <Cell key={i} fill={CHART_HEX[i % CHART_HEX.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
       </div>
 
       {/* ROW 6: Recent Orders + Upcoming Events + Performance */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-          <DarkCard>
+          <AdminCard>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-white font-sans">Recent Orders</h3>
-              <Button variant="ghost" size="sm" className="text-xs h-6 text-indigo-400 hover:text-indigo-300 font-sans" onClick={() => onNavigate("orders")}>View All</Button>
+              <h3 className="text-sm font-semibold text-foreground font-sans">Recent Orders</h3>
+              <Button variant="ghost" size="sm" className="text-xs h-6 text-primary hover:text-primary/80 font-sans" onClick={() => onNavigate("orders")}>View All</Button>
             </div>
             <div className="space-y-2">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-2 border-b border-[#1e2a4a] last:border-0">
+                <div key={order.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-slate-200 truncate font-sans">{order.name}</p>
-                    <p className="text-[10px] text-slate-500 font-sans">{order.city} • {new Date(order.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
+                    <p className="text-xs font-medium text-foreground truncate font-sans">{order.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans">{order.city} • {new Date(order.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
                   </div>
                   <div className="text-right ml-2">
-                    <p className="text-xs font-semibold text-white font-sans">{formatPrice(order.amount)}</p>
+                    <p className="text-xs font-semibold text-foreground font-sans">{formatPrice(order.amount)}</p>
                     <StatusBadge status={order.status} />
                   </div>
                 </div>
               ))}
-              {recentOrders.length === 0 && <p className="text-xs text-slate-500 text-center py-6 font-sans">No orders yet</p>}
+              {recentOrders.length === 0 && <p className="text-xs text-muted-foreground text-center py-6 font-sans">No orders yet</p>}
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <DarkCard>
+          <AdminCard>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-white font-sans">Schedule</h3>
-              <Button variant="ghost" size="sm" className="text-xs h-6 text-indigo-400 hover:text-indigo-300 font-sans" onClick={() => onNavigate("events")}>View All</Button>
+              <h3 className="text-sm font-semibold text-foreground font-sans">Schedule</h3>
+              <Button variant="ghost" size="sm" className="text-xs h-6 text-primary hover:text-primary/80 font-sans" onClick={() => onNavigate("events")}>View All</Button>
             </div>
             <div className="space-y-2">
               {upcomingEventsList.map((ev) => (
-                <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-[#1e2a4a] last:border-0">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex flex-col items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] font-bold text-indigo-400">{new Date(ev.date).toLocaleDateString("en-IN", { day: "2-digit" })}</span>
-                    <span className="text-[8px] text-indigo-300 uppercase">{new Date(ev.date).toLocaleDateString("en-IN", { month: "short" })}</span>
+                <div key={ev.id} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] font-bold text-primary">{new Date(ev.date).toLocaleDateString("en-IN", { day: "2-digit" })}</span>
+                    <span className="text-[8px] text-primary/70 uppercase">{new Date(ev.date).toLocaleDateString("en-IN", { month: "short" })}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-slate-200 truncate font-sans">{ev.name}</p>
-                    <p className="text-[10px] text-slate-500 font-sans">{ev.city} • {ev.type}</p>
+                    <p className="text-xs font-medium text-foreground truncate font-sans">{ev.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans">{ev.city} • {ev.type}</p>
                   </div>
                 </div>
               ))}
-              {upcomingEventsList.length === 0 && <p className="text-xs text-slate-500 text-center py-6 font-sans">No upcoming events</p>}
+              {upcomingEventsList.length === 0 && <p className="text-xs text-muted-foreground text-center py-6 font-sans">No upcoming events</p>}
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
-          <DarkCard>
-            <h3 className="text-sm font-semibold text-white mb-3 font-sans">Performance</h3>
+          <AdminCard>
+            <h3 className="text-sm font-semibold text-foreground mb-3 font-sans">Performance</h3>
             <div className="space-y-3">
               <PerformanceBar label="Fulfillment Rate" value={fulfillmentRate} color="#22D3EE" />
               <PerformanceBar label="Payment Confirmed" value={stats.totalOrders > 0 ? Math.round((stats.confirmedPayments / (stats.totalOrders + stats.totalEvents)) * 100) : 0} color="#6366F1" />
               <PerformanceBar label="Enquiry Conversion" value={conversionRate} color="#FBBF24" />
               <PerformanceBar label="Event Completion" value={stats.totalEvents > 0 ? Math.round((stats.completedEvents / stats.totalEvents) * 100) : 0} color="#A78BFA" />
             </div>
-            <div className="border-t border-[#1e2a4a] mt-4 pt-3 grid grid-cols-2 gap-3">
+            <div className="border-t border-border mt-4 pt-3 grid grid-cols-2 gap-3">
               <div className="text-center">
-                <p className="text-lg font-bold text-white font-sans">{stats.workshopUsers}</p>
-                <p className="text-[10px] text-slate-500 font-sans">Workshop Users</p>
+                <p className="text-lg font-bold text-foreground font-sans">{stats.workshopUsers}</p>
+                <p className="text-[10px] text-muted-foreground font-sans">Workshop Users</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-white font-sans">{stats.pendingEnquiries}</p>
-                <p className="text-[10px] text-slate-500 font-sans">Open Enquiries</p>
+                <p className="text-lg font-bold text-foreground font-sans">{stats.pendingEnquiries}</p>
+                <p className="text-[10px] text-muted-foreground font-sans">Open Enquiries</p>
               </div>
             </div>
-          </DarkCard>
+          </AdminCard>
         </motion.div>
       </div>
 
       {/* ROW 7: Extended Stats Strip */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-        <DarkCard>
+        <AdminCard>
           <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-4">
             {[
-              { label: "Today Orders", value: stats.todayOrders, icon: Package, color: "text-indigo-400" },
-              { label: "In Progress", value: stats.inProgressOrders, icon: Clock, color: "text-amber-400" },
-              { label: "Artwork Ready", value: stats.artworkReadyOrders, icon: Star, color: "text-violet-400" },
-              { label: "Dispatched", value: stats.dispatchedOrders, icon: Truck, color: "text-cyan-400" },
-              { label: "Delivered", value: stats.completedOrders, icon: CheckCircle, color: "text-emerald-400" },
-              { label: "Upcoming", value: stats.upcomingEvents, icon: Calendar, color: "text-blue-400" },
-              { label: "Cancelled", value: stats.cancelledEvents, icon: AlertTriangle, color: "text-red-400" },
-              { label: "New Today", value: stats.newCustomersToday, icon: UserPlus, color: "text-pink-400" },
-              { label: "This Month", value: stats.newCustomersMonth, icon: Users, color: "text-teal-400" },
-              { label: "Enquiries", value: stats.totalEnquiries, icon: MessageCircle, color: "text-orange-400" },
+              { label: "Today Orders", value: stats.todayOrders, icon: Package, color: "text-indigo-600 dark:text-indigo-400" },
+              { label: "In Progress", value: stats.inProgressOrders, icon: Clock, color: "text-amber-600 dark:text-amber-400" },
+              { label: "Artwork Ready", value: stats.artworkReadyOrders, icon: Star, color: "text-violet-600 dark:text-violet-400" },
+              { label: "Dispatched", value: stats.dispatchedOrders, icon: Truck, color: "text-cyan-600 dark:text-cyan-400" },
+              { label: "Delivered", value: stats.completedOrders, icon: CheckCircle, color: "text-emerald-600 dark:text-emerald-400" },
+              { label: "Upcoming", value: stats.upcomingEvents, icon: Calendar, color: "text-blue-600 dark:text-blue-400" },
+              { label: "Cancelled", value: stats.cancelledEvents, icon: AlertTriangle, color: "text-red-600 dark:text-red-400" },
+              { label: "New Today", value: stats.newCustomersToday, icon: UserPlus, color: "text-pink-600 dark:text-pink-400" },
+              { label: "This Month", value: stats.newCustomersMonth, icon: Users, color: "text-teal-600 dark:text-teal-400" },
+              { label: "Enquiries", value: stats.totalEnquiries, icon: MessageCircle, color: "text-orange-600 dark:text-orange-400" },
             ].map((item) => (
               <div key={item.label} className="flex flex-col items-center gap-1">
                 <item.icon className={`w-4 h-4 ${item.color}`} />
-                <p className="text-sm font-bold text-white font-sans">{item.value}</p>
-                <p className="text-[9px] text-slate-500 text-center whitespace-nowrap font-sans">{item.label}</p>
+                <p className="text-sm font-bold text-foreground font-sans">{item.value}</p>
+                <p className="text-[9px] text-muted-foreground text-center whitespace-nowrap font-sans">{item.label}</p>
               </div>
             ))}
           </div>
-        </DarkCard>
+        </AdminCard>
       </motion.div>
 
       {/* ROW 8: Quick Navigation */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Analytics", icon: BarChart3, tab: "analytics", color: "text-indigo-400", bg: "bg-indigo-500/10" },
-          { label: "AI Insights", icon: Bot, tab: "ai-intelligence", color: "text-violet-400", bg: "bg-violet-500/10" },
-          { label: "CRM Pipeline", icon: Target, tab: "crm-pipeline", color: "text-cyan-400", bg: "bg-cyan-500/10" },
-          { label: "₹10L Target", icon: TrendingUp, tab: "revenue-target", color: "text-amber-400", bg: "bg-amber-500/10" },
-          { label: "Team", icon: Users, tab: "team", color: "text-pink-400", bg: "bg-pink-500/10" },
-          { label: "Security", icon: ShieldCheck, tab: "security-dashboard", color: "text-red-400", bg: "bg-red-500/10" },
+          { label: "Analytics", icon: BarChart3, tab: "analytics", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-500/10" },
+          { label: "AI Insights", icon: Bot, tab: "ai-intelligence", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-500/10" },
+          { label: "CRM Pipeline", icon: Target, tab: "crm-pipeline", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-500/10" },
+          { label: "₹10L Target", icon: TrendingUp, tab: "revenue-target", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10" },
+          { label: "Team", icon: Users, tab: "team", color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-500/10" },
+          { label: "Security", icon: ShieldCheck, tab: "security-dashboard", color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10" },
         ].map((item) => (
           <motion.div key={item.label} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
-            <DarkCard className="cursor-pointer hover:border-[#2a3654]" onClick={() => onNavigate(item.tab)}>
+            <AdminCard className="cursor-pointer hover:border-primary/20 hover:shadow-md" onClick={() => onNavigate(item.tab)}>
               <div className="flex flex-col items-center gap-2">
                 <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center`}>
                   <item.icon className={`w-5 h-5 ${item.color}`} />
                 </div>
-                <span className="text-xs font-medium text-slate-300 font-sans">{item.label}</span>
+                <span className="text-xs font-medium text-muted-foreground font-sans">{item.label}</span>
               </div>
-            </DarkCard>
+            </AdminCard>
           </motion.div>
         ))}
       </div>
@@ -559,9 +560,9 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
   );
 };
 
-/* ===== Shared Dark Card ===== */
-const DarkCard = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
-  <Card className={`bg-[#131b2e] border-[#1e2a4a] shadow-lg shadow-black/10 ${className || ""}`} onClick={onClick}>
+/* ===== Admin Card — Clean 3D White with dark mode support ===== */
+const AdminCard = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
+  <Card className={`bg-card border-border shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] transition-shadow ${className || ""}`} onClick={onClick}>
     <CardContent className="p-5">{children}</CardContent>
   </Card>
 );
@@ -572,22 +573,22 @@ const KPICard = ({ title, value, change, sub, icon, gradient, onClick, sparkData
   gradient: string; onClick?: () => void; sparkData?: number[]; sparkColor?: string;
 }) => (
   <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -3 }}>
-    <Card className="bg-[#131b2e] border-[#1e2a4a] shadow-lg shadow-black/10 cursor-pointer hover:border-[#2a3654] transition-all" onClick={onClick}>
+    <Card className="bg-card border-border shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.3)] cursor-pointer hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.4)] transition-all" onClick={onClick}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}>
             {icon}
           </div>
           {change !== undefined && (
-            <Badge className={`text-[10px] border-0 font-medium font-sans ${change >= 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
+            <Badge className={`text-[10px] border-0 font-medium font-sans ${change >= 0 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-600 dark:text-red-400"}`}>
               {change >= 0 ? <ArrowUp className="w-3 h-3 mr-0.5" /> : <ArrowDown className="w-3 h-3 mr-0.5" />}
               {Math.abs(change)}%
             </Badge>
           )}
         </div>
-        <p className="text-xl font-bold text-white leading-none mb-1 font-sans">{value}</p>
-        <p className="text-[11px] text-slate-500 font-sans">{title}</p>
-        {sub && <p className="text-[10px] text-slate-600 mt-0.5 font-sans">{sub}</p>}
+        <p className="text-xl font-bold text-foreground leading-none mb-1 font-sans">{value}</p>
+        <p className="text-[11px] text-muted-foreground font-sans">{title}</p>
+        {sub && <p className="text-[10px] text-muted-foreground/70 mt-0.5 font-sans">{sub}</p>}
         {sparkData && sparkData.length > 1 && (
           <div className="mt-2 h-6">
             <ResponsiveContainer width="100%" height="100%">
@@ -607,10 +608,10 @@ const SalesMetric = ({ label, value, total, color }: { label: string; value: str
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-xs font-sans">
-        <span className="text-slate-500">{label}</span>
-        <span className="font-semibold text-slate-200">{value}</span>
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-semibold text-foreground">{value}</span>
       </div>
-      <div className="h-1.5 bg-[#1e2a4a] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, ease: "easeOut" }}
           className="h-full rounded-full" style={{ background: color }} />
       </div>
@@ -621,10 +622,10 @@ const SalesMetric = ({ label, value, total, color }: { label: string; value: str
 const PerformanceBar = ({ label, value, color }: { label: string; value: number; color: string }) => (
   <div className="space-y-1">
     <div className="flex justify-between text-xs font-sans">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-semibold text-slate-200">{value}%</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{value}%</span>
     </div>
-    <div className="h-2 bg-[#1e2a4a] rounded-full overflow-hidden">
+    <div className="h-2 bg-muted rounded-full overflow-hidden">
       <motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 1.2, ease: "easeOut" }}
         className="h-full rounded-full" style={{ background: color }} />
     </div>
@@ -633,22 +634,22 @@ const PerformanceBar = ({ label, value, color }: { label: string; value: number;
 
 const StatusBadge = ({ status }: { status: string }) => {
   const colors: Record<string, string> = {
-    new: "bg-blue-500/15 text-blue-400",
-    in_progress: "bg-amber-500/15 text-amber-400",
-    artwork_ready: "bg-violet-500/15 text-violet-400",
-    dispatched: "bg-cyan-500/15 text-cyan-400",
-    delivered: "bg-emerald-500/15 text-emerald-400",
+    new: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+    in_progress: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+    artwork_ready: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+    dispatched: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
+    delivered: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
   };
-  return <Badge className={`${colors[status] || "bg-slate-500/15 text-slate-400"} border-0 text-[8px] px-1.5 py-0 font-sans`}>{status?.replace("_", " ")}</Badge>;
+  return <Badge className={`${colors[status] || "bg-muted text-muted-foreground"} border-0 text-[8px] px-1.5 py-0 font-sans`}>{status?.replace("_", " ")}</Badge>;
 };
 
-const DarkTooltip = ({ active, payload, label }: any) => {
+const ChartTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
   return (
-    <div className="bg-[#1a2340] border border-[#2a3654] rounded-lg shadow-xl p-2.5 text-xs font-sans">
-      <p className="font-medium text-slate-200 mb-1">{label}</p>
+    <div className="bg-popover border border-border rounded-lg shadow-xl p-2.5 text-xs font-sans">
+      <p className="font-medium text-foreground mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
-        <p key={i} style={{ color: p.color }} className="text-slate-400">
+        <p key={i} style={{ color: p.color }} className="text-muted-foreground">
           {p.name}: {typeof p.value === "number" && p.value > 100 ? formatPrice(p.value) : p.value}
         </p>
       ))}
