@@ -117,7 +117,7 @@ const AdminInvoices = () => {
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setCreateOpen(true)} size="sm" className="rounded-full font-sans"><Plus className="w-4 h-4 mr-1" />Create Invoice</Button>
-          <ExportButton data={invoices.map(i => ({ Invoice: i.invoice_number, Customer: i.customer_name, Amount: i.amount, Tax: i.tax_amount, Total: i.total_amount, Status: i.status, Date: new Date(i.created_at).toLocaleDateString() }))} filename="invoices" />
+          <ExportButton data={invoices.map(i => ({ Invoice: i.invoice_number, Customer: i.customer_name, Amount: i.amount, Tax: i.tax_amount, Total: i.total_amount, Status: i.status, Date: new Date(i.created_at).toLocaleDateString() }))} fileName="invoices" sheetName="Invoices" />
         </div>
       </div>
 
