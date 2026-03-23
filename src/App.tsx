@@ -11,6 +11,7 @@ import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
 import { useOneSignal } from "./hooks/useOneSignal";
+import { usePushPilot } from "./hooks/usePushPilot";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 
 // Eagerly loaded core pages
