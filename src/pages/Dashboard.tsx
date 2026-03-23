@@ -357,6 +357,7 @@ const Dashboard = () => {
               <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             )}
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>
             <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
             {(settings as any).workshop_dashboard_visible?.enabled && (
               <TabsContent value="workshop"><WorkshopSection profile={profile} user={user} navigate={navigate} /></TabsContent>
