@@ -79,6 +79,8 @@ import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
+import AdminQuickActions from "@/components/admin/AdminQuickActions";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
 
 type Order = {
   id: string;
