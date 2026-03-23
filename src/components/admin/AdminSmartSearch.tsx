@@ -250,7 +250,7 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
 
 // ─── MAIN ADMIN PANEL SEARCH ────
 async function searchMainPanel(q: string, tabFilter: string, all: SearchResult[]) {
-  const searches: Promise<void>[] = [];
+  const searches: PromiseLike<void>[] = [];
   const shouldSearch = (tab: string) => tabFilter === "all" || tabFilter === tab;
 
   if (shouldSearch("orders")) searches.push(
