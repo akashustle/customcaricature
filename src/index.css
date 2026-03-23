@@ -594,7 +594,7 @@
 
   /* Brand gradient background for pages */
   .brand-gradient-bg {
-    background: linear-gradient(145deg, hsl(30 43% 97%) 0%, hsl(30 30% 95%) 30%, hsl(30 20% 96%) 70%, hsl(30 43% 97%) 100%);
+    background: linear-gradient(145deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 30%, hsl(var(--muted)) 70%, hsl(var(--background)) 100%);
   }
 
   /* 3D text shadow — subtle */
