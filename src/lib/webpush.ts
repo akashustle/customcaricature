@@ -23,15 +23,20 @@ const applicationServerKeyMatches = (currentKey: Uint8Array, existingKey?: Array
   return current.length === existing.length && current.every((value, index) => value === existing[index]);
 };
 
+/**
+ * Show a single local welcome notification — NO DB insert to avoid
+ * the trigger_web_push trigger firing a second push (which Chrome flags as spam).
+ */
 const showLocalWelcomeNotification = async (registration: ServiceWorkerRegistration) => {
   try {
-    await registration.showNotification("Welcome to CCC! 🎨", {
-      body: "Thanks for enabling notifications. You’ll now get order updates, event alerts, and special offers.",
+    await registration.showNotification("Welcome to Creative Caricature Club", {
+      body: "Notifications enabled. You will receive order updates and event alerts.",
       icon: NOTIFICATION_ICON,
       badge: NOTIFICATION_ICON,
       tag: "ccc-welcome",
+      renotify: false,
       data: { url: "/notifications" },
-    });
+    } as NotificationOptions);
   } catch {}
 };
 
@@ -92,19 +97,12 @@ export const initWebPush = async (userId?: string) => {
   }
 
   try {
-    // Register service worker first
     const registration = await navigator.serviceWorker.register("/sw-push.js");
     await navigator.serviceWorker.ready;
     console.log("SW registered for push");
 
     const currentPermission = Notification.permission;
-    console.log("Current notification permission:", currentPermission);
-
-    if (currentPermission === "denied") {
-      console.warn("Notifications blocked by user");
-      return;
-    }
-
+    if (currentPermission === "denied") return;
     if (currentPermission !== "granted") return;
 
     // Get VAPID public key
@@ -114,12 +112,8 @@ export const initWebPush = async (userId?: string) => {
         body: { action: "get_vapid_key" },
       });
       vapidKey = data?.vapid_public_key;
-      if (!vapidKey) {
-        console.warn("No VAPID key returned");
-        return;
-      }
-    } catch (e) {
-      console.warn("Failed to get VAPID key:", e);
+      if (!vapidKey) return;
+    } catch {
       return;
     }
 
@@ -131,7 +125,6 @@ export const initWebPush = async (userId?: string) => {
       await existingSub.unsubscribe().catch(() => undefined);
       await supabase.from("push_subscriptions").delete().eq("endpoint", staleEndpoint);
       existingSub = null;
-      console.log("Old push subscription rotated to current VAPID key");
     }
 
     const subscription = existingSub || await registration.pushManager.subscribe({
@@ -150,7 +143,6 @@ export const initWebPush = async (userId?: string) => {
     const deviceInfo = getDeviceInfo();
     const locationInfo = getLocationInfo();
 
-    // Check if already stored
     const { data: existing } = await supabase
       .from("push_subscriptions")
       .select("id, welcome_sent")
@@ -170,14 +162,11 @@ export const initWebPush = async (userId?: string) => {
         city: locationInfo.city || null,
         timezone: locationInfo.timezone || null,
         is_active: true,
-        welcome_sent: false,
+        welcome_sent: true,
       } as any);
 
+      // Single local-only welcome notification (no DB insert → no trigger → no spam)
       await showLocalWelcomeNotification(registration);
-
-      if (userId && userId !== "anonymous") {
-        sendWelcomeNotification(userId);
-      }
       console.log("New push subscriber registered");
     } else {
       await supabase.from("push_subscriptions").update({
@@ -194,44 +183,12 @@ export const initWebPush = async (userId?: string) => {
         timezone: locationInfo.timezone || null,
         is_active: true,
       } as any).eq("id", existing.id);
-
-      if (!existing.welcome_sent) {
-        await showLocalWelcomeNotification(registration);
-      }
-
-      if (userId && userId !== "anonymous" && !existing.welcome_sent) {
-        sendWelcomeNotification(userId);
-      }
-
-      if (!existing.welcome_sent) {
-        await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
-      }
     }
 
     console.log("Web Push initialized successfully");
   } catch (err) {
     console.warn("Web Push init error:", err);
   }
-};
-
-const sendWelcomeNotification = async (userId: string) => {
-  try {
-    const { data: existing } = await supabase
-      .from("notifications")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("type", "greeting")
-      .maybeSingle();
-    if (existing) return;
-
-    await supabase.from("notifications").insert({
-      user_id: userId,
-      title: "Welcome to CCC! 🎨",
-      message: "Thanks for enabling notifications! You'll now receive updates about your orders, events, and exclusive offers.",
-      type: "greeting",
-      link: "/dashboard",
-    } as any);
-  } catch {}
 };
 
 export const sendWebPushNotification = async (params: {
