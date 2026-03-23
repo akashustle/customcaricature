@@ -254,11 +254,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-            <h1 className="font-calligraphy text-xl font-bold">My Dashboard</h1>
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full shadow-md" />
+            <h1 className="font-calligraphy text-xl font-bold text-gradient">My Dashboard</h1>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />
@@ -276,25 +276,28 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: "Total Orders", value: orders.length, color: "hsl(36,45%,52%)", icon: Package },
-            { label: "Events", value: events.length, color: "hsl(210,65%,55%)", icon: CalIcon },
-            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, color: "hsl(152,50%,48%)", icon: Truck },
+            { label: "Total Orders", value: orders.length, icon: Package, gradient: "from-blue-500 to-indigo-500", bgGradient: "from-blue-500/10 to-indigo-500/5" },
+            { label: "Events", value: events.length, icon: CalIcon, gradient: "from-violet-500 to-purple-500", bgGradient: "from-violet-500/10 to-purple-500/5" },
+            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, gradient: "from-emerald-500 to-green-500", bgGradient: "from-emerald-500/10 to-green-500/5" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="stat-widget-3d"
             >
-              <div className="absolute top-0 right-0 w-12 h-12 rounded-full opacity-10 -translate-y-3 translate-x-3" style={{ background: s.color }} />
-              <div className="text-center relative z-10">
-                <div className="w-8 h-8 rounded-lg mx-auto mb-1 flex items-center justify-center shadow-sm" style={{ background: s.color }}>
-                  <s.icon className="w-4 h-4 text-white" />
-                </div>
-                <p className="text-2xl font-bold font-display animate-count-up">{s.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
-              </div>
+              <Card className="overflow-hidden relative border border-border/60 hover:border-border transition-all hover:shadow-md">
+                <div className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} pointer-events-none`} />
+                <CardContent className="p-3 relative">
+                  <div className="text-center">
+                    <div className={`w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center bg-gradient-to-br ${s.gradient} shadow-md`}>
+                      <s.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <p className="text-2xl font-bold font-display animate-count-up">{s.value}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
@@ -303,22 +306,25 @@ const Dashboard = () => {
         {shopOrders.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { label: "Shop Orders", value: shopOrders.length, color: "hsl(280,50%,55%)", icon: Store },
-              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, color: "hsl(38,92%,55%)", icon: Truck },
-              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, color: "hsl(340,55%,58%)", icon: CreditCard },
+              { label: "Shop Orders", value: shopOrders.length, icon: Store, gradient: "from-purple-500 to-violet-500", bgGradient: "from-purple-500/10 to-violet-500/5" },
+              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, icon: Truck, gradient: "from-amber-500 to-orange-500", bgGradient: "from-amber-500/10 to-orange-500/5" },
+              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, icon: CreditCard, gradient: "from-pink-500 to-rose-500", bgGradient: "from-pink-500/10 to-rose-500/5" },
             ].map((s, i) => (
               <motion.div
                 key={s.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.08 }}
-                className="stat-widget-3d"
               >
-                <div className="absolute top-0 right-0 w-10 h-10 rounded-full opacity-10 -translate-y-2 translate-x-2" style={{ background: s.color }} />
-                <div className="text-center relative z-10">
-                  <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
-                </div>
+                <Card className="overflow-hidden relative border border-border/60 hover:border-border transition-all hover:shadow-md">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} pointer-events-none`} />
+                  <CardContent className="p-3 relative">
+                    <div className="text-center">
+                      <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>

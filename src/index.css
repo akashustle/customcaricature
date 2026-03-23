@@ -432,6 +432,41 @@
     border-right: 1px solid hsl(var(--border) / 0.3);
   }
 
+  /* Premium dark sidebar for admin hybrid layout */
+  .admin-sidebar-dark {
+    background: linear-gradient(180deg, hsl(225, 22%, 9%) 0%, hsl(228, 20%, 7%) 100%);
+    border-right: 1px solid hsl(225, 20%, 15%);
+    box-shadow: 4px 0 24px hsl(225, 30%, 5% / 0.5);
+  }
+  .admin-sidebar-dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(225, 15%, 22%);
+  }
+
+  /* Premium content area */
+  .admin-content-area {
+    background: linear-gradient(180deg, hsl(220, 14%, 96%) 0%, hsl(220, 14%, 98%) 100%);
+  }
+
+  /* Revenue card green glow */
+  .revenue-glow {
+    box-shadow: 0 0 24px hsl(152, 50%, 48% / 0.1), 0 4px 12px hsl(var(--foreground) / 0.04);
+  }
+
+  /* AI insight card purple glow */
+  .ai-glow {
+    box-shadow: 0 0 24px hsl(280, 50%, 55% / 0.1), 0 4px 12px hsl(var(--foreground) / 0.04);
+  }
+
+  /* Alert card red glow */
+  .alert-glow {
+    box-shadow: 0 0 24px hsl(0, 55%, 50% / 0.1), 0 4px 12px hsl(var(--foreground) / 0.04);
+  }
+
+  /* Analytics blue glow */
+  .analytics-glow {
+    box-shadow: 0 0 24px hsl(210, 55%, 50% / 0.1), 0 4px 12px hsl(var(--foreground) / 0.04);
+  }
+
   .admin-glass-card {
     background: hsl(var(--card) / 0.6);
     backdrop-filter: blur(16px);
