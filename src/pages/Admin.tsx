@@ -788,8 +788,8 @@ const Admin = () => {
             </div>
             <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-white/5"><RefreshCw className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-slate-400 hover:text-white hover:bg-white/5 font-sans">
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans">
                 <LogOut className="w-3 h-3" /> Sign Out
               </Button>
             </div>
