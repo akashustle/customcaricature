@@ -7,21 +7,50 @@ const HomepageVideo = ({ config }: { config: any }) => {
 
   const youtubeUrl = config?.youtube_url;
   const customUrl = config?.custom_video_url;
+  const thumbnailUrl = config?.thumbnail_url || "/logo.png";
 
   // If custom video URL provided, render native HTML5 video
   if (customUrl) {
-    return <CustomVideoPlayer url={customUrl} />;
+    return <CustomVideoPlayer url={customUrl} thumbnailUrl={thumbnailUrl} />;
   }
 
   // YouTube embed with minimal controls
   if (youtubeUrl) {
-    return <YouTubeMinimalPlayer url={youtubeUrl} />;
+    return <YouTubeMinimalPlayer url={youtubeUrl} thumbnailUrl={thumbnailUrl} />;
   }
 
   return null;
 };
 
-const CustomVideoPlayer = ({ url }: { url: string }) => {
+const VideoHeader = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className="text-center mb-10"
+  >
+    <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Experience</p>
+    <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">See the Experience Live 🎨</h2>
+  </motion.div>
+);
+
+const ThumbnailOverlay = ({ thumbnailUrl, playing }: { thumbnailUrl: string; playing: boolean }) => (
+  <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
+    <img src={thumbnailUrl} alt="CCC event video thumbnail" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+    <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-background/10 to-background/70" />
+    <div className="relative flex flex-col items-center gap-4 px-6 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 shadow-lg ring-4 ring-background/40">
+        {playing ? <Pause className="h-7 w-7 text-primary-foreground" /> : <Play className="ml-1 h-7 w-7 text-primary-foreground" />}
+      </div>
+      <div>
+        <p className="text-lg font-semibold text-primary-foreground">Play to view one of our events</p>
+        <p className="text-sm text-primary-foreground/80">Creative Caricature Club live moments</p>
+      </div>
+    </div>
+  </div>
+);
+
+const CustomVideoPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -39,15 +68,7 @@ const CustomVideoPlayer = ({ url }: { url: string }) => {
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Experience</p>
-          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">See the Experience Live 🎨</h2>
-        </motion.div>
+        <VideoHeader />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -61,21 +82,17 @@ const CustomVideoPlayer = ({ url }: { url: string }) => {
             className="w-full aspect-video object-cover"
             playsInline
             preload="metadata"
+            poster={thumbnailUrl}
             onEnded={() => setPlaying(false)}
           />
-          {/* Play/Pause overlay */}
-          <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"} bg-black/20`}>
-            <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
-              {playing ? <Pause className="w-7 h-7 text-primary-foreground" /> : <Play className="w-7 h-7 text-primary-foreground ml-1" />}
-            </div>
-          </div>
+          <ThumbnailOverlay thumbnailUrl={thumbnailUrl} playing={playing} />
         </motion.div>
       </div>
     </section>
   );
 };
 
-const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
+const YouTubeMinimalPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl: string }) => {
   const [started, setStarted] = useState(false);
 
   const getYouTubeId = (u: string) => {
@@ -86,21 +103,10 @@ const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
   const videoId = getYouTubeId(url);
   if (!videoId) return null;
 
-  // Thumbnail click-to-play to avoid showing YouTube UI initially
-  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Experience</p>
-          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">See the Experience Live 🎨</h2>
-        </motion.div>
+        <VideoHeader />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -113,17 +119,7 @@ const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
                 className="absolute inset-0 cursor-pointer group"
                 onClick={() => setStarted(true)}
               >
-                <img
-                  src={thumbnailUrl}
-                  alt="Video thumbnail"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/90 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                    <Play className="w-7 h-7 md:w-9 md:h-9 text-primary-foreground ml-1" />
-                  </div>
-                </div>
+                <ThumbnailOverlay thumbnailUrl={thumbnailUrl} playing={false} />
               </div>
             ) : (
               <iframe

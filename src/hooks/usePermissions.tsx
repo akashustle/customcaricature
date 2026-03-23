@@ -55,6 +55,32 @@ export const usePermissions = (requestOnMount = true) => {
     }
   };
 
+  const requestLocation = async () => {
+    if (!navigator.geolocation) {
+      setLocation("unsupported");
+      return false;
+    }
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setLocation("granted");
+            resolve();
+          },
+          () => {
+            setLocation("denied");
+            reject(new Error("Location denied"));
+          },
+          { timeout: 10000 }
+        );
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const requestCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -67,5 +93,5 @@ export const usePermissions = (requestOnMount = true) => {
     }
   };
 
-  return { location, microphone, camera, requestMicrophone, requestCamera };
+  return { location, microphone, camera, requestMicrophone, requestCamera, requestLocation };
 };

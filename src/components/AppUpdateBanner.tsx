@@ -4,8 +4,12 @@ import { RefreshCw, X, Sparkles, Rocket, CheckCircle2, Download } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
-const APP_VERSION_KEY = "ccc_app_version";
 const CHECK_INTERVAL = 30_000;
+const DISMISSED_VERSION_KEY = "ccc_update_dismissed_v";
+const APPLIED_VERSION_KEY = "ccc_update_applied_v";
+const REMIND_AT_KEY = "ccc_update_remind_at";
+const POPUP_OPEN_KEY = "ccc_update_popup_open_v";
+const DEFAULT_REMINDER_HOURS = 4;
 
 const AppUpdateBanner = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -15,7 +19,6 @@ const AppUpdateBanner = () => {
   const [phase, setPhase] = useState<"downloading" | "installing" | "done">("downloading");
   const [updateInfo, setUpdateInfo] = useState<{ version?: string; message?: string }>({});
 
-  // Check DB for admin-pushed updates
   const checkAdminUpdate = useCallback(async () => {
     try {
       const { data } = await supabase
@@ -26,58 +29,46 @@ const AppUpdateBanner = () => {
 
       if (data?.value) {
         const config = data.value as any;
-        const lastDismissed = localStorage.getItem("ccc_update_dismissed_v");
-        if (config.active && config.version && config.version !== lastDismissed) {
+        const version = config.version as string | undefined;
+        const reminderHours = Number(config.remind_after_hours || DEFAULT_REMINDER_HOURS);
+        const dismissedVersion = localStorage.getItem(DISMISSED_VERSION_KEY);
+        const appliedVersion = localStorage.getItem(APPLIED_VERSION_KEY);
+        const popupOpenVersion = localStorage.getItem(POPUP_OPEN_KEY);
+        const remindAt = Number(localStorage.getItem(REMIND_AT_KEY) || "0");
+
+        if (!config.active || !version || version === appliedVersion) {
+          setUpdateAvailable(false);
+          setDismissed(false);
+          return;
+        }
+
+        const reminderDue = !remindAt || Date.now() >= remindAt;
+        const blockedByDismiss = dismissedVersion === version && !reminderDue;
+        const blockedByOtherTab = popupOpenVersion === version && !updateAvailable;
+
+        if (!blockedByDismiss && !blockedByOtherTab) {
           setUpdateInfo({ version: config.version, message: config.message });
+          setDismissed(false);
           setUpdateAvailable(true);
+          localStorage.setItem(POPUP_OPEN_KEY, version);
+        } else if (dismissedVersion === version && reminderDue) {
+          localStorage.removeItem(DISMISSED_VERSION_KEY);
+          localStorage.removeItem(REMIND_AT_KEY);
+          setUpdateInfo({ version: config.version, message: config.message });
+          setDismissed(false);
+          setUpdateAvailable(true);
+          localStorage.setItem(POPUP_OPEN_KEY, version);
+        } else if (blockedByDismiss) {
+          setUpdateAvailable(false);
         }
       }
     } catch {}
   }, []);
 
-  // Also check for asset fingerprint changes
-  const checkAssetUpdate = useCallback(async () => {
-    try {
-      const res = await fetch(`/?_t=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/html" } });
-      if (!res.ok) return;
-      const html = await res.text();
-      const scriptMatches = html.match(/src="\/assets\/[^"]+"/g);
-      const currentVersion = scriptMatches ? scriptMatches.join(",") : "";
-      const storedVersion = sessionStorage.getItem(APP_VERSION_KEY);
-      if (!storedVersion) {
-        sessionStorage.setItem(APP_VERSION_KEY, currentVersion);
-        return;
-      }
-      if (currentVersion && storedVersion !== currentVersion) {
-        setUpdateAvailable(true);
-      }
-    } catch {}
-  }, []);
-
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener("controllerchange", () => setUpdateAvailable(true));
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        if (reg?.waiting) setUpdateAvailable(true);
-        reg?.addEventListener("updatefound", () => {
-          const newWorker = reg.installing;
-          newWorker?.addEventListener("statechange", () => {
-            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-              setUpdateAvailable(true);
-            }
-          });
-        });
-      });
-    }
-
     checkAdminUpdate();
-    const interval = setInterval(() => {
-      checkAdminUpdate();
-      checkAssetUpdate();
-    }, CHECK_INTERVAL);
-    const firstCheck = setTimeout(checkAssetUpdate, 8_000);
+    const interval = setInterval(checkAdminUpdate, CHECK_INTERVAL);
 
-    // Realtime listener for admin-pushed updates
     const ch = supabase
       .channel("app-update-rt")
       .on("postgres_changes", {
@@ -88,12 +79,20 @@ const AppUpdateBanner = () => {
       }, () => checkAdminUpdate())
       .subscribe();
 
+    const syncAcrossTabs = (event: StorageEvent) => {
+      if ([DISMISSED_VERSION_KEY, APPLIED_VERSION_KEY, REMIND_AT_KEY, POPUP_OPEN_KEY].includes(event.key || "")) {
+        checkAdminUpdate();
+      }
+    };
+
+    window.addEventListener("storage", syncAcrossTabs);
+
     return () => {
       clearInterval(interval);
-      clearTimeout(firstCheck);
+      window.removeEventListener("storage", syncAcrossTabs);
       supabase.removeChannel(ch);
     };
-  }, [checkAdminUpdate, checkAssetUpdate]);
+  }, [checkAdminUpdate, updateAvailable]);
 
   const handleUpdate = async () => {
     setUpdating(true);
@@ -124,25 +123,17 @@ const AppUpdateBanner = () => {
     await animate(35, 80, 900);
 
     try {
-      const res = await fetch(`/?_t=${Date.now()}`, { cache: "no-store" });
-      if (res.ok) {
-        const html = await res.text();
-        const scripts = html.match(/src="(\/assets\/[^"]+)"/g) || [];
-        await Promise.allSettled(
-          scripts.map((s) => {
-            const url = s.replace(/src="([^"]+)"/, "$1");
-            return fetch(url, { cache: "no-store" });
-          })
-        );
-      }
+      await navigator.serviceWorker.getRegistration().then((reg) => reg?.update());
     } catch {}
 
     await animate(80, 100, 500);
     setPhase("done");
-    sessionStorage.removeItem(APP_VERSION_KEY);
 
     if (updateInfo.version) {
-      localStorage.setItem("ccc_update_dismissed_v", updateInfo.version);
+      localStorage.setItem(APPLIED_VERSION_KEY, updateInfo.version);
+      localStorage.removeItem(DISMISSED_VERSION_KEY);
+      localStorage.removeItem(REMIND_AT_KEY);
+      localStorage.removeItem(POPUP_OPEN_KEY);
     }
 
     await new Promise((r) => setTimeout(r, 600));
@@ -151,8 +142,11 @@ const AppUpdateBanner = () => {
 
   const handleDismiss = () => {
     setDismissed(true);
+    setUpdateAvailable(false);
     if (updateInfo.version) {
-      localStorage.setItem("ccc_update_dismissed_v", updateInfo.version);
+      localStorage.setItem(DISMISSED_VERSION_KEY, updateInfo.version);
+      localStorage.setItem(REMIND_AT_KEY, String(Date.now() + DEFAULT_REMINDER_HOURS * 60 * 60 * 1000));
+      localStorage.removeItem(POPUP_OPEN_KEY);
     }
   };
 
@@ -192,20 +186,28 @@ const AppUpdateBanner = () => {
           ))}
         </div>
 
-        <motion.div
+          <motion.div
           className="relative z-10 flex flex-col items-center gap-8 px-6 text-center"
           initial={{ scale: 0.8, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
         >
-          {/* App logo */}
-          <motion.img
-            src="/logo.png"
-            alt="CCC"
-            className="w-20 h-20 rounded-2xl border-2 border-border shadow-lg"
-            animate={phase === "done" ? { scale: [1, 1.1, 1] } : { rotate: [0, 5, -5, 0] }}
-            transition={phase === "done" ? { duration: 0.5 } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
+            <div className="relative flex items-center justify-center">
+              <motion.div
+                className="absolute inset-0 rounded-full bg-primary/15 blur-2xl"
+                animate={{ scale: [0.8, 1.15, 0.8], opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                animate={phase === "done" ? { y: [0, -10, 0] } : { y: [12, -28, 12], rotate: [-4, 0, 4] }}
+                transition={{ duration: phase === "done" ? 0.8 : 1.8, repeat: Infinity, ease: "easeInOut" }}
+                className="relative flex h-28 w-28 items-center justify-center rounded-full border border-border bg-card shadow-xl"
+              >
+                {phase === "done" ? <CheckCircle2 className="h-14 w-14 text-primary" /> : <Rocket className="h-14 w-14 text-primary" />}
+              </motion.div>
+              <Sparkles className="absolute -right-2 top-2 h-5 w-5 text-accent" />
+              <Sparkles className="absolute -left-1 bottom-4 h-4 w-4 text-primary" />
+            </div>
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -216,13 +218,13 @@ const AppUpdateBanner = () => {
               className="space-y-2"
             >
               <h2 className="text-2xl font-calligraphy font-bold text-foreground">
-                {phase === "downloading" && "Downloading Update..."}
+                {phase === "downloading" && "Preparing Launch..."}
                 {phase === "installing" && "Installing Update..."}
                 {phase === "done" && "Update Complete! ✨"}
               </h2>
               <p className="text-muted-foreground text-sm font-body">
-                {phase === "downloading" && "Fetching the latest version"}
-                {phase === "installing" && "Applying changes"}
+                {phase === "downloading" && "Fueling your latest CCC release"}
+                {phase === "installing" && "Applying fresh changes live"}
                 {phase === "done" && "Launching new version now"}
               </p>
               {updateInfo.version && (
