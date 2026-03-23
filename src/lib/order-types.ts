@@ -19,6 +19,7 @@ export interface OrderFormData {
 
   // Photos
   photos: File[];
+  referencePhotos: File[];
 
   // Delivery address
   deliveryAddress: string;
@@ -41,6 +42,7 @@ export const initialFormData: OrderFormData = {
   style: "artists_choice",
   notes: "",
   photos: [],
+  referencePhotos: [],
   deliveryAddress: "",
   deliveryCity: "",
   deliveryState: "",

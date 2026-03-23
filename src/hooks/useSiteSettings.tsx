@@ -16,6 +16,8 @@ type SiteSettings = {
   admin_action_prompt: { enabled: boolean };
   workshop_dashboard_visible: { enabled: boolean };
   app_download_link: { enabled: boolean };
+  admin_secret_code: { code: string; enabled: boolean };
+  live_chat_visible: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -33,6 +35,8 @@ const defaults: SiteSettings = {
   admin_action_prompt: { enabled: true },
   workshop_dashboard_visible: { enabled: false },
   app_download_link: { enabled: true },
+  admin_secret_code: { code: "01022006", enabled: true },
+  live_chat_visible: { enabled: false },
 };
 
 
