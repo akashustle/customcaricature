@@ -32,6 +32,7 @@ const defaults: SiteSettings = {
   gateway_charge_percentage: { percentage: 2.6 },
   admin_action_prompt: { enabled: true },
   workshop_dashboard_visible: { enabled: false },
+  app_download_link: { enabled: true },
 };
 
 
