@@ -1,20 +1,19 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause } from "lucide-react";
+import defaultThumbnail from "@/assets/video-thumbnail.jpeg";
 
 const HomepageVideo = ({ config }: { config: any }) => {
   if (!config?.enabled) return null;
 
   const youtubeUrl = config?.youtube_url;
   const customUrl = config?.custom_video_url;
-  const thumbnailUrl = config?.thumbnail_url || "/logo.png";
+  const thumbnailUrl = config?.thumbnail_url || defaultThumbnail;
 
-  // If custom video URL provided, render native HTML5 video
   if (customUrl) {
     return <CustomVideoPlayer url={customUrl} thumbnailUrl={thumbnailUrl} />;
   }
 
-  // YouTube embed with minimal controls
   if (youtubeUrl) {
     return <YouTubeMinimalPlayer url={youtubeUrl} thumbnailUrl={thumbnailUrl} />;
   }

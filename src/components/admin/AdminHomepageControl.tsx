@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,40 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Plus, Trash2, GripVertical } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, Upload, Image } from "lucide-react";
+
+const ThumbnailUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; onUploaded: (url: string) => void }) => {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `thumbnails/video-thumb-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("blog-images").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
+      onUploaded(urlData.publicUrl);
+      toast({ title: "✅ Thumbnail uploaded!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+      <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={() => fileRef.current?.click()} disabled={uploading}>
+        <Image className="w-4 h-4" />
+        {uploading ? "Uploading..." : "Choose Thumbnail Image"}
+      </Button>
+    </div>
+  );
+};
 
 const AdminHomepageControl = () => {
   const [settings, setSettings] = useState<Record<string, any>>({});
@@ -182,12 +215,26 @@ const AdminHomepageControl = () => {
               <div className="border-t border-border pt-4 mt-2">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Custom Video URL (MP4 / direct link from any platform)</label>
                 <Input value={video.custom_video_url || ""} onChange={e => updateSetting("homepage_video", { ...video, custom_video_url: e.target.value })} placeholder="https://your-cloud.com/video.mp4" />
-                <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority. Supports direct video links from Lovable Cloud, S3, or any hosting.</p>
+                <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority.</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Thumbnail URL</label>
-                <Input value={video.thumbnail_url || ""} onChange={e => updateSetting("homepage_video", { ...video, thumbnail_url: e.target.value })} placeholder="Leave blank to use CCC logo" />
-                <p className="text-xs text-muted-foreground mt-1">Optional custom thumbnail for the video cover. If empty, the CCC logo thumbnail is used by default.</p>
+                <Input value={video.thumbnail_url || ""} onChange={e => updateSetting("homepage_video", { ...video, thumbnail_url: e.target.value })} placeholder="Leave blank to use default thumbnail" />
+              </div>
+              <div className="border-t border-border pt-4 mt-2">
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block flex items-center gap-2">
+                  <Upload className="w-4 h-4" /> Upload Thumbnail Image
+                </label>
+                <ThumbnailUploader
+                  currentUrl={video.thumbnail_url}
+                  onUploaded={(url) => updateSetting("homepage_video", { ...video, thumbnail_url: url })}
+                />
+                {video.thumbnail_url && (
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-1">Current Thumbnail:</p>
+                    <img src={video.thumbnail_url} alt="Video thumbnail" className="w-48 h-auto rounded-lg border border-border object-cover" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

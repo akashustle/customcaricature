@@ -325,6 +325,36 @@ async function searchMainPanel(q: string, tabFilter: string, all: SearchResult[]
       })
   );
 
+  // Deep search: admin_site_settings (all nested JSON settings - homepage, video, etc.)
+  if (shouldSearch("homepage") || shouldSearch("settings") || tabFilter === "all") searches.push(
+    supabase.from("admin_site_settings").select("id, value")
+      .then(({ data }) => {
+        const lq = q.toLowerCase();
+        (data as any[])?.forEach((row: any) => {
+          const flatResults = flattenJson(row.value, row.id);
+          flatResults.forEach((item) => {
+            if (item.key.toLowerCase().includes(lq) || item.value.toLowerCase().includes(lq)) {
+              // Determine the best tab target based on setting id
+              let tabTarget = "homepage";
+              if (row.id.startsWith("homepage_")) tabTarget = "homepage";
+              else if (row.id.includes("onesignal") || row.id.includes("webpush") || row.id.includes("push")) tabTarget = "push-center";
+              else if (row.id.includes("seo")) tabTarget = "seo";
+              else tabTarget = "settings";
+
+              all.push({
+                type: "Setting",
+                icon: Settings,
+                label: `${row.id} → ${item.key}`,
+                sublabel: item.value.slice(0, 80),
+                tabTarget,
+                id: row.id,
+              });
+            }
+          });
+        });
+      })
+  );
+
   await Promise.all(searches);
 }
 
@@ -455,6 +485,34 @@ async function searchArtistPanel(q: string, tabFilter: string, all: SearchResult
   );
 
   await Promise.all(searches);
+}
+
+/**
+ * Flatten a nested JSON object into searchable key-value pairs
+ */
+function flattenJson(obj: any, prefix = ""): { key: string; value: string }[] {
+  const results: { key: string; value: string }[] = [];
+  if (!obj || typeof obj !== "object") {
+    if (obj !== null && obj !== undefined) {
+      results.push({ key: prefix, value: String(obj) });
+    }
+    return results;
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) => {
+      results.push(...flattenJson(item, `${prefix}[${i}]`));
+    });
+    return results;
+  }
+  for (const [k, v] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === "object") {
+      results.push(...flattenJson(v, fullKey));
+    } else if (v !== null && v !== undefined) {
+      results.push({ key: fullKey, value: String(v) });
+    }
+  }
+  return results;
 }
 
 export default AdminSmartSearch;
