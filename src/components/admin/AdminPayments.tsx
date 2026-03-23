@@ -146,15 +146,20 @@ const AdminPayments = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-3 justify-between">
-        <h2 className="font-display text-xl font-bold">All Payments ({payments.length})</h2>
+        <h2 className="font-display text-xl font-bold text-white">All Payments ({payments.length})</h2>
         <div className="flex items-center gap-2 flex-wrap">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-3 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-primary" />
-              <span className="font-sans text-sm">Total Revenue:</span>
-              <span className="font-display font-bold text-primary">{formatPrice(totalRevenue)}</span>
-            </CardContent>
-          </Card>
+          <div className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-3 group hover:border-emerald-500/30 transition-all">
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 opacity-10" />
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+                <CreditCard className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span className="text-[11px] text-slate-400">Total Revenue</span>
+                <p className="font-bold text-white">{formatPrice(totalRevenue)}</p>
+              </div>
+            </div>
+          </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
