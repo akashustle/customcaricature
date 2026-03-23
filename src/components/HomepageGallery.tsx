@@ -16,6 +16,8 @@ const HomepageGallery = ({ table, title, subtitle }: {
   title: string;
   subtitle: string;
 }) => {
+  const navigate = useNavigate();
+  const galleryType = table === "caricature_gallery" ? "caricatures" : "events";
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
