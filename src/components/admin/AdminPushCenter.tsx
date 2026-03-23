@@ -44,6 +44,8 @@ type ScheduledNotif = {
   failed_count: number; created_at: string;
 };
 
+type ComposeTargetMode = "all_users" | "all_subscribers" | "selected";
+
 const STORAGE_BUCKETS = [
   { name: "gallery-images", label: "Gallery" },
   { name: "blog-images", label: "Blog" },
@@ -60,7 +62,7 @@ const AdminPushCenter = () => {
   const [message, setMessage] = useState("");
   const [link, setLink] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [mode, setMode] = useState<"all_users" | "all_subscribers" | "selected">("all_subscribers");
+  const [mode, setMode] = useState<ComposeTargetMode>("all_subscribers");
   const [users, setUsers] = useState<Profile[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -233,6 +235,10 @@ const AdminPushCenter = () => {
           }
         }
 
+        await supabase.from("notification_batches").update({
+          delivered_count: data?.sent || 0,
+        } as any).eq("id", (batch as any)?.id);
+
         toast({ title: `✅ Push sent! Delivered: ${data?.sent || 0}, Failed: ${data?.failed || 0}` });
       } else {
         // Send to specific users (all_users or selected)
@@ -251,10 +257,13 @@ const AdminPushCenter = () => {
 
         // Also send direct web push for reliability
         try {
-          await broadcastWebPush({
+          const result = await broadcastWebPush({
             title: title.trim(), message: message.trim(),
             link: link.trim() || undefined, userIds,
           });
+          await supabase.from("notification_batches").update({
+            delivered_count: Math.max(result?.sent || 0, userIds.length),
+          } as any).eq("id", (batch as any)?.id);
         } catch {}
 
         toast({ title: `✅ Sent to ${targetUsers.length} user(s)!` });
@@ -270,6 +279,38 @@ const AdminPushCenter = () => {
   const resetForm = () => {
     setTitle(""); setMessage(""); setLink(""); setImageUrl("");
     setSelectedUsers([]); setScheduleEnabled(false);
+    setScheduleDate(""); setScheduleTime(""); setMode("all_subscribers");
+  };
+
+  const openComposer = (payload: {
+    title: string;
+    message: string;
+    link?: string | null;
+    image_url?: string | null;
+    target_type?: string | null;
+    target_user_ids?: string[];
+    scheduled_at?: string | null;
+  }) => {
+    setTitle(payload.title || "");
+    setMessage(payload.message || "");
+    setLink(payload.link || "");
+    setImageUrl(payload.image_url || "");
+    setMode((payload.target_type as ComposeTargetMode) || "all_subscribers");
+    setSelectedUsers(payload.target_user_ids || []);
+
+    if (payload.scheduled_at) {
+      const scheduledAt = new Date(payload.scheduled_at);
+      const localDate = new Date(scheduledAt.getTime() - scheduledAt.getTimezoneOffset() * 60000);
+      setScheduleEnabled(true);
+      setScheduleDate(localDate.toISOString().slice(0, 10));
+      setScheduleTime(localDate.toISOString().slice(11, 16));
+    } else {
+      setScheduleEnabled(false);
+      setScheduleDate("");
+      setScheduleTime("");
+    }
+
+    setActiveSubTab("compose");
   };
 
   const handleDeleteBatch = async (batchId: string) => {
@@ -647,6 +688,9 @@ const AdminPushCenter = () => {
                       </p>
                     </div>
                     <AlertDialog>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openComposer({ title: b.title, message: b.message, link: b.link, target_type: "all_subscribers" })}>
+                        <Eye className="w-3 h-3" />
+                      </Button>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive"><Trash2 className="w-3 h-3" /></Button>
                       </AlertDialogTrigger>
@@ -697,6 +741,9 @@ const AdminPushCenter = () => {
                       </div>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openComposer({ title: s.title, message: s.message, link: s.link, image_url: s.image_url, target_type: s.target_type, target_user_ids: (s as any).target_user_ids || [], scheduled_at: s.scheduled_at })}>
+                        <Eye className="w-3 h-3" />
+                      </Button>
                       {s.status === "pending" && (
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => handleSendScheduledNow(s)} disabled={sending}>
                           <Send className="w-3 h-3" /> Send Now

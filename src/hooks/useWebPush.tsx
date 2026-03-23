@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const useWebPush = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
+    if (loading) return;
+
     const init = async () => {
       // Check if web push is enabled in admin settings
       const { data } = await supabase
@@ -18,9 +20,9 @@ export const useWebPush = () => {
       const config = data?.value as any;
       if (config?.enabled === false) return;
 
-      // Initialize immediately — no delay, triggers browser prompt
+      // Subscribe silently when permission is already granted
       initWebPush(user?.id);
     };
     init();
-  }, [user]);
+  }, [user?.id, loading]);
 };

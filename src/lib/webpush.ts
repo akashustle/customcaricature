@@ -1,6 +1,40 @@
 // Built-in Web Push Notification System (Self-hosted VAPID)
 import { supabase } from "@/integrations/supabase/client";
 
+const NOTIFICATION_ICON = "/logo.png";
+
+const urlBase64ToUint8Array = (base64String: string) => {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+};
+
+const encodeKey = (buffer: ArrayBuffer) =>
+  btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+
+const applicationServerKeyMatches = (currentKey: Uint8Array, existingKey?: ArrayBuffer | null) => {
+  if (!existingKey) return false;
+  const current = Array.from(currentKey);
+  const existing = Array.from(new Uint8Array(existingKey));
+  return current.length === existing.length && current.every((value, index) => value === existing[index]);
+};
+
+const showLocalWelcomeNotification = async (registration: ServiceWorkerRegistration) => {
+  try {
+    await registration.showNotification("Welcome to CCC! 🎨", {
+      body: "Thanks for enabling notifications. You’ll now get order updates, event alerts, and special offers.",
+      icon: NOTIFICATION_ICON,
+      badge: NOTIFICATION_ICON,
+      tag: "ccc-welcome",
+      data: { url: "/notifications" },
+    });
+  } catch {}
+};
+
 /**
  * Detect device info from user agent
  */
@@ -63,7 +97,6 @@ export const initWebPush = async (userId?: string) => {
     await navigator.serviceWorker.ready;
     console.log("SW registered for push");
 
-    // Immediately request permission — this is the browser prompt
     const currentPermission = Notification.permission;
     console.log("Current notification permission:", currentPermission);
 
@@ -72,14 +105,7 @@ export const initWebPush = async (userId?: string) => {
       return;
     }
 
-    let permission: string = currentPermission;
-    if (currentPermission === "default") {
-      // This triggers the browser's native permission prompt
-      permission = await Notification.requestPermission();
-      console.log("Permission result:", permission);
-    }
-
-    if (permission !== "granted") return;
+    if (currentPermission !== "granted") return;
 
     // Get VAPID public key
     let vapidKey: string;
@@ -97,15 +123,16 @@ export const initWebPush = async (userId?: string) => {
       return;
     }
 
-    // Check existing subscription
-    const existingSub = await registration.pushManager.getSubscription();
+    const applicationServerKey = urlBase64ToUint8Array(vapidKey);
+    let existingSub = await registration.pushManager.getSubscription();
 
-    // Convert VAPID key to Uint8Array
-    const padding = "=".repeat((4 - (vapidKey.length % 4)) % 4);
-    const base64 = (vapidKey + padding).replace(/-/g, "+").replace(/_/g, "/");
-    const rawData = atob(base64);
-    const applicationServerKey = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) applicationServerKey[i] = rawData.charCodeAt(i);
+    if (existingSub && !applicationServerKeyMatches(applicationServerKey, existingSub.options?.applicationServerKey ?? null)) {
+      const staleEndpoint = existingSub.endpoint;
+      await existingSub.unsubscribe().catch(() => undefined);
+      await supabase.from("push_subscriptions").delete().eq("endpoint", staleEndpoint);
+      existingSub = null;
+      console.log("Old push subscription rotated to current VAPID key");
+    }
 
     const subscription = existingSub || await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -116,10 +143,8 @@ export const initWebPush = async (userId?: string) => {
     const auth = subscription.getKey("auth");
     if (!key || !auth) return;
 
-    const p256dh = btoa(String.fromCharCode(...new Uint8Array(key)))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-    const authKey = btoa(String.fromCharCode(...new Uint8Array(auth)))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const p256dh = encodeKey(key);
+    const authKey = encodeKey(auth);
 
     const subUserId = userId || "anonymous";
     const deviceInfo = getDeviceInfo();
@@ -148,7 +173,8 @@ export const initWebPush = async (userId?: string) => {
         welcome_sent: false,
       } as any);
 
-      // Send welcome notification
+      await showLocalWelcomeNotification(registration);
+
       if (userId && userId !== "anonymous") {
         sendWelcomeNotification(userId);
       }
@@ -156,15 +182,28 @@ export const initWebPush = async (userId?: string) => {
     } else {
       await supabase.from("push_subscriptions").update({
         user_id: subUserId !== "anonymous" ? subUserId : undefined,
+        endpoint: subscription.endpoint,
+        p256dh,
+        auth: authKey,
         last_active_at: new Date().toISOString(),
         device_type: deviceInfo.deviceType,
         browser: deviceInfo.browser,
         os: deviceInfo.os,
+        device_name: deviceInfo.deviceName || null,
+        city: locationInfo.city || null,
+        timezone: locationInfo.timezone || null,
         is_active: true,
       } as any).eq("id", existing.id);
 
+      if (!existing.welcome_sent) {
+        await showLocalWelcomeNotification(registration);
+      }
+
       if (userId && userId !== "anonymous" && !existing.welcome_sent) {
         sendWelcomeNotification(userId);
+      }
+
+      if (!existing.welcome_sent) {
         await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
       }
     }
@@ -213,6 +252,20 @@ export const sendWebPushNotification = async (params: {
   });
   if (error) throw error;
   return data;
+};
+
+export const requestBrowserNotificationPermission = async (userId?: string) => {
+  if (!("Notification" in window)) return "unsupported" as const;
+  if (Notification.permission === "granted") {
+    await initWebPush(userId);
+    return "granted" as const;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    await initWebPush(userId);
+  }
+  return permission;
 };
 
 export const broadcastWebPush = async (params: {

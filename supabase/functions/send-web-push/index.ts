@@ -87,9 +87,13 @@ async function sendToSubscription(sub: any, payloadBytes: Uint8Array, vapidPubli
       body: encrypted,
     });
     if (response.status === 201 || response.status === 200) {
+      await supabase.from("push_subscriptions").update({
+        is_active: true,
+        last_active_at: new Date().toISOString(),
+      }).eq("id", sub.id);
       console.log(`Push sent to ${sub.id}`);
       return true;
-    } else if (response.status === 404 || response.status === 410) {
+    } else if (response.status === 401 || response.status === 403 || response.status === 404 || response.status === 410) {
       await supabase.from("push_subscriptions").delete().eq("id", sub.id);
       console.log(`Subscription ${sub.id} expired, removed`);
       return false;
@@ -174,7 +178,7 @@ Deno.serve(async (req) => {
     if (!user_id) throw new Error("user_id required");
 
     const { data: subscriptions, error } = await supabase
-      .from("push_subscriptions").select("*").eq("user_id", user_id);
+      .from("push_subscriptions").select("*").eq("user_id", user_id).eq("is_active", true);
 
     if (error) throw error;
     if (!subscriptions || subscriptions.length === 0) {
