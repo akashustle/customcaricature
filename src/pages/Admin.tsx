@@ -748,21 +748,21 @@ const Admin = () => {
       }} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-[#0a0f1e] pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 bg-[#0f1629]/95 backdrop-blur-xl border-b border-[#1e2a4a]">
+      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg ring-1 ring-blue-500/20">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-1 ring-border">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-[13px] font-bold tracking-tight text-white font-sans">Admin</span>
+              <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-medium text-slate-400 font-sans">Live</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-medium text-muted-foreground font-sans">Live</span>
               </div>
-              <div className="w-px h-4 bg-[#1e2a4a]" />
+              <div className="w-px h-4 bg-border" />
               <LiveGreeting name={adminProfile?.full_name} />
               <div className="ml-auto flex-1 max-w-md">
                 <AdminSmartSearch
