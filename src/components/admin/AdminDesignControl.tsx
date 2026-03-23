@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useUISettings } from "@/hooks/useUISettings";
 import { toast } from "@/hooks/use-toast";
-import { Palette, Type, Image, Save, RefreshCw } from "lucide-react";
+import { Palette, Type, Image, Save, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const FONT_OPTIONS = [
   "Inter", "Poppins", "DM Sans", "Plus Jakarta Sans", "Outfit",
@@ -16,20 +18,20 @@ const FONT_OPTIONS = [
 
 const AdminDesignControl = () => {
   const { settings, updateSetting, loading } = useUISettings();
+  const { theme, setTheme } = useTheme();
 
   const [colors, setColors] = useState<Record<string, string>>(settings.brand_colors || {});
   const [fonts, setFonts] = useState<Record<string, string>>(settings.brand_fonts || {});
   const [logo, setLogo] = useState<Record<string, string>>(settings.brand_logo || {});
   const [dirty, setDirty] = useState(false);
 
-  // Sync state when settings load
-  useState(() => {
+  useEffect(() => {
     if (!loading) {
       setColors(settings.brand_colors || {});
       setFonts(settings.brand_fonts || {});
       setLogo(settings.brand_logo || {});
     }
-  });
+  }, [loading, settings]);
 
   const handleColorChange = (key: string, value: string) => {
     setColors(p => ({ ...p, [key]: value }));
@@ -73,12 +75,56 @@ const AdminDesignControl = () => {
           <h2 className="text-lg font-bold flex items-center gap-2">
             <Palette className="w-5 h-5 text-primary" /> Design Control Panel
           </h2>
-          <p className="text-xs text-muted-foreground">Control colors, fonts, and branding across the website</p>
+          <p className="text-xs text-muted-foreground">Control colors, fonts, dark mode, and branding</p>
         </div>
         <Button onClick={saveAll} disabled={!dirty}>
           <Save className="w-4 h-4 mr-1" /> Save Changes
         </Button>
       </div>
+
+      {/* Dark Mode Toggle */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            {theme === "dark" ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-primary" />}
+            Dark Mode
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Enable Dark Mode</p>
+              <p className="text-xs text-muted-foreground">Switch the entire website and admin panel to dark theme</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Sun className="w-4 h-4 text-muted-foreground" />
+              <Switch
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+              <Moon className="w-4 h-4 text-muted-foreground" />
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {["light", "dark", "system"].map((t) => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                className={`px-3 py-2 rounded-xl text-sm font-medium border transition-all capitalize ${
+                  theme === t
+                    ? "bg-primary text-primary-foreground border-primary shadow-md"
+                    : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
+                }`}
+              >
+                {t === "light" && "☀️ "}
+                {t === "dark" && "🌙 "}
+                {t === "system" && "💻 "}
+                {t}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Colors */}
       <Card>
@@ -114,13 +160,13 @@ const AdminDesignControl = () => {
           </div>
 
           {/* Preview */}
-          <div className="mt-6 p-4 rounded-xl border" style={{ backgroundColor: colors.background || "#fdf8f3" }}>
-            <p className="text-xs font-medium mb-2" style={{ color: colors.text || "#3a2e22" }}>Live Preview</p>
+          <div className="mt-6 p-4 rounded-xl border border-border bg-card">
+            <p className="text-xs font-medium mb-2 text-foreground">Live Preview</p>
             <div className="flex gap-2 flex-wrap">
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white" style={{ backgroundColor: colors.primary || "#C8A97E" }}>Primary Button</button>
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium" style={{ backgroundColor: colors.secondary || "#fdf8f3", color: colors.text || "#3a2e22", border: `1px solid ${colors.primary}20` }}>Secondary</button>
-              <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-white" style={{ backgroundColor: colors.accent || "#22C55E" }}>Success</span>
-              <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-white" style={{ backgroundColor: colors.warning || "#F59E0B" }}>Warning</span>
+              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-primary-foreground bg-primary">Primary Button</button>
+              <button className="px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary text-secondary-foreground border border-border">Secondary</button>
+              <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-primary-foreground bg-accent">Accent</span>
+              <span className="px-3 py-1.5 rounded-lg text-xs font-medium text-destructive-foreground bg-destructive">Danger</span>
             </div>
           </div>
         </CardContent>
