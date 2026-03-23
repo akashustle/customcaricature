@@ -2384,6 +2384,7 @@ export type Database = {
           created_at: string
           display_id: string | null
           email: string
+          email_verified: boolean | null
           event_booking_allowed: boolean
           full_name: string
           gateway_charges_enabled: boolean
@@ -2403,6 +2404,7 @@ export type Database = {
           state: string | null
           updated_at: string
           user_id: string
+          verification_method: string | null
         }
         Insert: {
           address?: string | null
@@ -2411,6 +2413,7 @@ export type Database = {
           created_at?: string
           display_id?: string | null
           email: string
+          email_verified?: boolean | null
           event_booking_allowed?: boolean
           full_name: string
           gateway_charges_enabled?: boolean
@@ -2430,6 +2433,7 @@ export type Database = {
           state?: string | null
           updated_at?: string
           user_id: string
+          verification_method?: string | null
         }
         Update: {
           address?: string | null
@@ -2438,6 +2442,7 @@ export type Database = {
           created_at?: string
           display_id?: string | null
           email?: string
+          email_verified?: boolean | null
           event_booking_allowed?: boolean
           full_name?: string
           gateway_charges_enabled?: boolean
@@ -2457,6 +2462,7 @@ export type Database = {
           state?: string | null
           updated_at?: string
           user_id?: string
+          verification_method?: string | null
         }
         Relationships: []
       }
