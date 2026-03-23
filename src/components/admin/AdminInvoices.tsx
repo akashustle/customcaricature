@@ -237,7 +237,7 @@ const AdminInvoices = () => {
         </DialogContent>
       </Dialog>
 
-      <SecureDeleteConfirm open={!!deleteId} onCancel={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete Invoice" description="This invoice will be permanently deleted." />
+      <SecureDeleteConfirm open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete Invoice" description="This invoice will be permanently deleted." />
     </div>
   );
 };

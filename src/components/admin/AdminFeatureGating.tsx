@@ -187,7 +187,7 @@ const AdminFeatureGating = () => {
         </DialogContent>
       </Dialog>
 
-      <SecureDeleteConfirm open={!!deleteId} onCancel={() => setDeleteId(null)} onConfirm={handleDelete} title="Remove Feature Flag" description="This feature access will be revoked for the user." />
+      <SecureDeleteConfirm open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Remove Feature Flag" description="This feature access will be revoked for the user." />
     </div>
   );
 };
