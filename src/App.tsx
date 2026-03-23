@@ -11,7 +11,7 @@ import FloatingButtons from "./components/FloatingButtons";
 import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
 import { useOneSignal } from "./hooks/useOneSignal";
-import { usePushPilot } from "./hooks/usePushPilot";
+import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 
 // Eagerly loaded core pages
@@ -82,8 +82,8 @@ const OneSignalInit = () => {
   return null;
 };
 
-const PushPilotInit = () => {
-  usePushPilot();
+const WebPushInit = () => {
+  useWebPush();
   return null;
 };
 
@@ -115,7 +115,7 @@ const App = () => {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <OneSignalInit />
-        <PushPilotInit />
+        <WebPushInit />
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
