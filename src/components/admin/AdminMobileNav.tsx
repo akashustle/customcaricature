@@ -81,10 +81,16 @@ const MORE_SECTIONS = [
     { id: "security-dashboard", label: "Security", icon: ShieldCheck },
     { id: "activity-logs", label: "Activity", icon: Activity },
   ]},
+  { section: "Marketing", icon: Gift, items: [
+    { id: "referrals", label: "Referrals", icon: Gift },
+    { id: "coupons", label: "Coupons", icon: Ticket },
+    { id: "feature-gating", label: "Feature Gates", icon: ToggleLeft },
+  ]},
   { section: "System", icon: Settings, items: [
     { id: "team", label: "Team", icon: Users },
     { id: "automation", label: "Automation", icon: Zap },
     { id: "integrations", label: "Integrations", icon: Shield },
+    { id: "maintenance", label: "Maintenance", icon: AlertTriangle },
     { id: "settings", label: "Settings", icon: Settings },
   ]},
 ];

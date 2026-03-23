@@ -116,6 +116,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
               throw new Error("Payment verification failed");
             }
 
+            playPaymentSuccessSound();
             onComplete(orderId);
 
             // Send confirmation email (fire-and-forget)
