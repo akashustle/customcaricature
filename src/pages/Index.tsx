@@ -158,7 +158,7 @@ const Index = () => {
 
       {/* Top Nav */}
       <header>
-      <nav className="sticky top-0 z-40 backdrop-blur-2xl bg-background/40 border-b border-border/30">
+      <nav className="sticky top-0 z-40 glass-nav">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
