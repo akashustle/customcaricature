@@ -410,6 +410,9 @@ const Index = () => {
       {/* Use Cases */}
       <HomepageUseCases config={content.homepage_use_cases} />
 
+      {/* Smart Enquiry Funnel */}
+      <HomepageEnquiryFunnel />
+
       {/* Styles */}
       <section className="py-16 md:py-24 overflow-hidden">
         <div className="container mx-auto px-4">
