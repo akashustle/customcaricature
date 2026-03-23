@@ -378,6 +378,7 @@ const Dashboard = () => {
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
           {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
           {activeTab === "workshop" && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
