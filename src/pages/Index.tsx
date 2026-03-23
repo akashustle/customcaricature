@@ -114,6 +114,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const { settings } = useSiteSettings();
+  const socialLinks = useSocialLinks();
   const { content } = useHomepageContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
