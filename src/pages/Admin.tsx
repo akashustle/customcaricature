@@ -75,7 +75,7 @@ import AdminRevenueDashboard from "@/components/admin/AdminRevenueDashboard";
 import AdminAutomation from "@/components/admin/AdminAutomation";
 import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
 import AdminNameGate from "@/components/admin/AdminNameGate";
-import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
+import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 
