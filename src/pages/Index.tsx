@@ -550,11 +550,17 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <div className="border-t border-border pt-6 flex flex-col items-center gap-2">
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
-            <p className="text-xs text-muted-foreground font-body">
-              Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
-            </p>
+            <div className="flex items-center gap-4">
+              <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:underline">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2.223a.5.5 0 0 0-.866.5l1.39 2.412a9.481 9.481 0 0 0-4.047-.913 9.481 9.481 0 0 0-4.047.913l1.39-2.412a.5.5 0 0 0-.866-.5L9.084 4.636A9.5 9.5 0 0 0 4 13h16a9.5 9.5 0 0 0-5.084-8.364l1.607-2.413zM8.5 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm7 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM4 14h16v1a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-1z"/></svg>
+                Download Android App
+              </a>
+              <p className="text-xs text-muted-foreground font-body">
+                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
+              </p>
+            </div>
           </div>
         </div>
       </footer>
