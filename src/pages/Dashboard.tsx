@@ -271,7 +271,9 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <LiveGreeting name={profile?.full_name} />
 
-        {/* Quick Stats - 3D Animated */}
+        {/* Smart Suggestions */}
+        <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
+
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { label: "Total Orders", value: orders.length, color: "hsl(36,45%,52%)", icon: Package },
