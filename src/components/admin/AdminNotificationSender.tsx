@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { sendPushPilotNotification } from "@/lib/pushpilot";
+import { broadcastWebPush } from "@/lib/webpush";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,35 +17,9 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type Profile = {
-  user_id: string;
-  full_name: string;
-  email: string;
-};
-
-type NotificationBatch = {
-  id: string;
-  title: string;
-  message: string;
-  link: string | null;
-  sent_to_count: number;
-  delivered_count: number;
-  clicked_count: number;
-  created_at: string;
-};
-
-type SentNotification = {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
-  type: string;
-  read: boolean;
-  clicked: boolean;
-  link: string | null;
-  batch_id: string | null;
-  created_at: string;
-};
+type Profile = { user_id: string; full_name: string; email: string };
+type NotificationBatch = { id: string; title: string; message: string; link: string | null; sent_to_count: number; delivered_count: number; clicked_count: number; created_at: string };
+type SentNotification = { id: string; user_id: string; title: string; message: string; type: string; read: boolean; clicked: boolean; link: string | null; batch_id: string | null; created_at: string };
 
 const AdminNotificationSender = () => {
   const { user } = useAuth();
@@ -63,14 +37,8 @@ const AdminNotificationSender = () => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessage, setEditMessage] = useState("");
   const [viewBatchId, setViewBatchId] = useState<string | null>(null);
-  
-  // Permission tracking
-  const [permissionStats, setPermissionStats] = useState<{ allowed: number; denied: number; profiles: { name: string; email: string; allowed: boolean }[] }>({ allowed: 0, denied: 0, profiles: [] });
 
-  useEffect(() => {
-    fetchUsers();
-    fetchBatches();
-  }, []);
+  useEffect(() => { fetchUsers(); fetchBatches(); }, []);
 
   const fetchUsers = async () => {
     const { data } = await supabase.from("profiles").select("user_id, full_name, email").order("full_name");
@@ -86,28 +54,20 @@ const AdminNotificationSender = () => {
     const { data } = await supabase.from("notifications").select("id, user_id, title, message, type, read, clicked, link, batch_id, created_at").eq("batch_id", batchId).order("created_at", { ascending: false });
     if (data) setSentNotifications(data as any);
     setViewBatchId(batchId);
-    
-    // Update batch analytics
     if (data) {
       const readCount = data.filter((n: any) => n.read).length;
       const clickedCount = data.filter((n: any) => n.clicked).length;
-      await supabase.from("notification_batches").update({ 
-        delivered_count: readCount, 
-        clicked_count: clickedCount 
-      } as any).eq("id", batchId);
+      await supabase.from("notification_batches").update({ delivered_count: readCount, clicked_count: clickedCount } as any).eq("id", batchId);
       fetchBatches();
     }
   };
 
   const filteredUsers = users.filter(u =>
-    u.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
+    u.full_name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
   );
 
   const toggleUser = (userId: string) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-    );
+    setSelectedUsers(prev => prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]);
   };
 
   const handleSend = async () => {
@@ -126,62 +86,38 @@ const AdminNotificationSender = () => {
     try {
       // Create batch record
       const { data: batch, error: batchErr } = await supabase.from("notification_batches").insert({
-        title: title.trim(),
-        message: message.trim(),
-        link: link.trim() || null,
-        sent_by: user?.id,
-        sent_to_count: targetUsers.length,
+        title: title.trim(), message: message.trim(), link: link.trim() || null,
+        sent_by: user?.id, sent_to_count: targetUsers.length,
       } as any).select("id").single();
 
       if (batchErr || !batch) throw new Error(batchErr?.message || "Failed to create batch");
 
       const notifications = targetUsers.map(u => ({
-        user_id: u.user_id,
-        title: title.trim(),
-        message: message.trim(),
-        type: "broadcast",
-        link: link.trim() || null,
-        batch_id: (batch as any).id,
+        user_id: u.user_id, title: title.trim(), message: message.trim(),
+        type: "broadcast", link: link.trim() || null, batch_id: (batch as any).id,
       }));
 
+      // Insert in-app notifications (triggers web push via DB trigger)
       for (let i = 0; i < notifications.length; i += 50) {
         const chunk = notifications.slice(i, i + 50);
         const { error } = await supabase.from("notifications").insert(chunk as any);
         if (error) throw error;
       }
 
-      // Send via PushPilot for web push
+      // Also send direct web push for users who may not have DB trigger
       try {
-        await sendPushPilotNotification({
+        await broadcastWebPush({
           title: title.trim(),
           message: message.trim(),
-          click_url: link.trim() || undefined,
+          link: link.trim() || undefined,
+          userIds: targetUsers.map(u => u.user_id),
         });
-      } catch (ppErr) {
-        console.warn("PushPilot push failed (non-fatal):", ppErr);
-      }
-
-      // Also try OneSignal if enabled
-      try {
-        const userIds = mode === "all" ? undefined : targetUsers.map(u => u.user_id);
-        await supabase.functions.invoke("send-onesignal", {
-          body: {
-            title: title.trim(),
-            message: message.trim(),
-            url: link.trim() || null,
-            user_ids: userIds,
-            admin_user_id: user?.id,
-          },
-        });
-      } catch (osErr) {
-        console.warn("OneSignal push failed (non-fatal):", osErr);
+      } catch (pushErr) {
+        console.warn("Direct web push failed (non-fatal):", pushErr);
       }
 
       toast({ title: `✅ Sent to ${targetUsers.length} user(s)!` });
-      setTitle("");
-      setMessage("");
-      setLink("");
-      setSelectedUsers([]);
+      setTitle(""); setMessage(""); setLink(""); setSelectedUsers([]);
       fetchBatches();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -190,34 +126,23 @@ const AdminNotificationSender = () => {
   };
 
   const handleResend = async (batch: NotificationBatch) => {
-    const targetUsers = mode === "all" ? users : users.filter(u => selectedUsers.includes(u.user_id));
-    if (targetUsers.length === 0) {
-      // Resend to all users
-      setSending(true);
-      try {
-        const notifications = users.map(u => ({
-          user_id: u.user_id,
-          title: batch.title,
-          message: batch.message,
-          type: "broadcast",
-          link: batch.link || null,
-          batch_id: batch.id,
-        }));
-
-        for (let i = 0; i < notifications.length; i += 50) {
-          const b = notifications.slice(i, i + 50);
-          const { error } = await supabase.from("notifications").insert(b as any);
-          if (error) throw error;
-        }
-
-        await supabase.from("notification_batches").update({ sent_to_count: batch.sent_to_count + users.length } as any).eq("id", batch.id);
-        toast({ title: `✅ Resent to ${users.length} user(s)!` });
-        fetchBatches();
-      } catch (err: any) {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+    setSending(true);
+    try {
+      const notifications = users.map(u => ({
+        user_id: u.user_id, title: batch.title, message: batch.message,
+        type: "broadcast", link: batch.link || null, batch_id: batch.id,
+      }));
+      for (let i = 0; i < notifications.length; i += 50) {
+        const { error } = await supabase.from("notifications").insert(notifications.slice(i, i + 50) as any);
+        if (error) throw error;
       }
-      setSending(false);
+      await supabase.from("notification_batches").update({ sent_to_count: batch.sent_to_count + users.length } as any).eq("id", batch.id);
+      toast({ title: `✅ Resent to ${users.length} user(s)!` });
+      fetchBatches();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
+    setSending(false);
   };
 
   const handleDeleteBatch = async (batchId: string) => {
@@ -319,7 +244,7 @@ const AdminNotificationSender = () => {
         </CardContent>
       </Card>
 
-      {/* Broadcast History with Analytics */}
+      {/* Broadcast History */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -341,12 +266,8 @@ const AdminNotificationSender = () => {
                   </p>
                 </div>
                 <div className="flex gap-1 flex-shrink-0 ml-2">
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => fetchBatchNotifications(b.id)}>
-                    <Eye className="w-3 h-3" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleResend(b)}>
-                    <RefreshCw className="w-3 h-3" />
-                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => fetchBatchNotifications(b.id)}><Eye className="w-3 h-3" /></Button>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleResend(b)}><RefreshCw className="w-3 h-3" /></Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive"><Trash2 className="w-3 h-3" /></Button>
@@ -358,7 +279,6 @@ const AdminNotificationSender = () => {
                   </AlertDialog>
                 </div>
               </div>
-              {/* Analytics badges */}
               <div className="flex flex-wrap gap-1.5">
                 <Badge variant="outline" className="text-[10px]">📤 Sent: {b.sent_to_count}</Badge>
                 <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700">👀 Opened: {b.delivered_count}</Badge>
@@ -374,7 +294,7 @@ const AdminNotificationSender = () => {
         </CardContent>
       </Card>
 
-      {/* Individual Notifications in Batch */}
+      {/* Batch Details */}
       {viewBatchId && (
         <Card>
           <CardHeader>
@@ -402,23 +322,16 @@ const AdminNotificationSender = () => {
                     <>
                       <div className="flex items-start justify-between">
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-sans font-medium">{u?.full_name || "Unknown"} <span className="text-muted-foreground">({u?.email || n.user_id.slice(0, 8)})</span></p>
-                          <p className="text-[11px] font-sans">{n.title}: {n.message}</p>
+                          <p className="text-xs font-sans font-semibold">{n.title}</p>
+                          <p className="text-[11px] text-muted-foreground font-sans truncate">{n.message}</p>
+                          <p className="text-[10px] text-muted-foreground font-sans">
+                            To: {u?.full_name || "Unknown"} • {n.read ? "✅ Read" : "⏳ Unread"} {n.clicked ? "• 🖱️ Clicked" : ""}
+                          </p>
                         </div>
-                        <div className="flex gap-0.5 flex-shrink-0 ml-2">
-                          <Badge variant="outline" className={`text-[9px] ${n.read ? "bg-green-50 text-green-700" : "bg-muted"}`}>
-                            {n.read ? "✅ Read" : "⏳ Unread"}
-                          </Badge>
-                          {n.clicked && <Badge variant="outline" className="text-[9px] bg-blue-50 text-blue-700">🖱️ Clicked</Badge>}
+                        <div className="flex gap-0.5">
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setEditingNotifId(n.id); setEditTitle(n.title); setEditMessage(n.message); }}><Edit2 className="w-3 h-3" /></Button>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => handleDeleteNotification(n.id)}><Trash2 className="w-3 h-3" /></Button>
                         </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => { setEditingNotifId(n.id); setEditTitle(n.title); setEditMessage(n.message); }}>
-                          <Edit2 className="w-3 h-3 mr-1" />Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 text-destructive" onClick={() => handleDeleteNotification(n.id)}>
-                          <Trash2 className="w-3 h-3 mr-1" />Delete
-                        </Button>
                       </div>
                     </>
                   )}

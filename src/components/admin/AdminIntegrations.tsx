@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Smartphone, Key, Shield, Save, ExternalLink, Zap } from "lucide-react";
+import { Bell, Smartphone, Key, Shield, Save, ExternalLink, Zap, Radio } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +13,11 @@ import { supabase } from "@/integrations/supabase/client";
 const AdminIntegrations = () => {
   const { settings, loading, updateSetting } = useSiteSettings();
 
-  // OneSignal
+  // Built-in Web Push
+  const [webpushEnabled, setWebpushEnabled] = useState(true);
+  const [pushSubCount, setPushSubCount] = useState(0);
+
+  // OneSignal (optional secondary)
   const [onesignalAppId, setOnesignalAppId] = useState("");
   const [onesignalRestApiKey, setOnesignalRestApiKey] = useState("");
   const [onesignalEnabled, setOnesignalEnabled] = useState(false);
@@ -23,15 +27,10 @@ const AdminIntegrations = () => {
   const [otpApiKey, setOtpApiKey] = useState("");
   const [otpProvider, setOtpProvider] = useState("twilio");
 
-  // PushPilot
-  const [pushpilotEnabled, setPushpilotEnabled] = useState(true);
-
-  // Load from DB settings
   useEffect(() => {
     if (loading) return;
-    // Fetch integration settings directly since they aren't in the typed SiteSettings
-    const fetchIntegrationSettings = async () => {
-      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config", "pushpilot_config"]);
+    const fetchSettings = async () => {
+      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config", "webpush_config"]);
       if (data) {
         data.forEach((row: any) => {
           if (row.id === "onesignal_config" && row.value) {
@@ -44,41 +43,35 @@ const AdminIntegrations = () => {
             setOtpApiKey(row.value.api_key || "");
             setOtpProvider(row.value.provider || "twilio");
           }
-          if (row.id === "pushpilot_config" && row.value) {
-            setPushpilotEnabled(row.value.enabled !== false);
+          if (row.id === "webpush_config" && row.value) {
+            setWebpushEnabled(row.value.enabled !== false);
           }
         });
       }
+
+      // Get subscriber count
+      const { count } = await supabase.from("push_subscriptions").select("id", { count: "exact", head: true });
+      setPushSubCount(count || 0);
     };
-    fetchIntegrationSettings();
+    fetchSettings();
   }, [loading]);
 
+  const saveWebPush = async () => {
+    await updateSetting("webpush_config", { enabled: webpushEnabled });
+    toast({ title: "Web Push settings saved ✅" });
+  };
+
   const saveOneSignal = async () => {
-    await updateSetting("onesignal_config", {
-      enabled: onesignalEnabled,
-      app_id: onesignalAppId,
-      rest_api_key: onesignalRestApiKey,
-    });
+    await updateSetting("onesignal_config", { enabled: onesignalEnabled, app_id: onesignalAppId, rest_api_key: onesignalRestApiKey });
     toast({ title: "OneSignal settings saved ✅" });
   };
 
   const saveOTP = async () => {
-    await updateSetting("otp_config", {
-      enabled: otpEnabled,
-      api_key: otpApiKey,
-      provider: otpProvider,
-    });
+    await updateSetting("otp_config", { enabled: otpEnabled, api_key: otpApiKey, provider: otpProvider });
     toast({ title: "OTP settings saved ✅" });
   };
 
-  const savePushPilot = async () => {
-    await updateSetting("pushpilot_config", { enabled: pushpilotEnabled });
-    toast({ title: "PushPilot settings saved ✅" });
-  };
-
-  if (loading) {
-    return <p className="text-center text-muted-foreground py-10">Loading...</p>;
-  }
+  if (loading) return <p className="text-center text-muted-foreground py-10">Loading...</p>;
 
   return (
     <div className="space-y-6">
@@ -87,12 +80,49 @@ const AdminIntegrations = () => {
         Integrations & Security
       </h2>
 
-      {/* OneSignal Push Notifications */}
+      {/* Built-in Web Push (Primary) */}
+      <Card className="border-primary/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Radio className="w-5 h-5 text-primary" />
+            Built-in Web Push
+            {webpushEnabled ? (
+              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
+            )}
+            <Badge variant="outline" className="text-[10px] ml-auto">{pushSubCount} subscribers</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Self-hosted push notifications using VAPID keys — no third-party dependency. Works across all modern browsers. Notifications are sent automatically when in-app notifications are created.
+          </p>
+          <div className="flex items-center gap-3">
+            <Switch checked={webpushEnabled} onCheckedChange={setWebpushEnabled} />
+            <Label className="text-sm font-medium">Enable Built-in Web Push</Label>
+          </div>
+          <div className="bg-muted/50 rounded-lg p-3 space-y-1.5">
+            <p className="text-xs font-semibold text-foreground">How it works:</p>
+            <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4">
+              <li>Users are prompted for notification permission on first visit</li>
+              <li>Push subscriptions are stored in your own database</li>
+              <li>Every in-app notification triggers a real web push via VAPID</li>
+              <li>Works even when the browser is closed (on supported devices)</li>
+            </ul>
+          </div>
+          <Button size="sm" onClick={saveWebPush} className="gap-1">
+            <Save className="w-4 h-4" /> Save Web Push Config
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* OneSignal (Optional Secondary) */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bell className="w-5 h-5 text-accent" />
-            OneSignal Push Notifications
+            OneSignal (Optional Secondary)
             {onesignalEnabled ? (
               <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
             ) : (
@@ -102,7 +132,7 @@ const AdminIntegrations = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Connect OneSignal for advanced push notifications across web and mobile.
+            Optional: Connect OneSignal as a secondary push channel for additional reach.
           </p>
           <div className="flex items-center gap-3">
             <Switch checked={onesignalEnabled} onCheckedChange={setOnesignalEnabled} />
@@ -112,31 +142,11 @@ const AdminIntegrations = () => {
             <div className="space-y-3 pl-1">
               <div>
                 <Label className="text-sm">OneSignal App ID</Label>
-                <Input
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  value={onesignalAppId}
-                  onChange={(e) => setOnesignalAppId(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Find this in your{" "}
-                  <a href="https://app.onesignal.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline inline-flex items-center gap-1">
-                    OneSignal Dashboard <ExternalLink className="w-3 h-3" />
-                  </a>
-                </p>
+                <Input placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value={onesignalAppId} onChange={(e) => setOnesignalAppId(e.target.value)} className="font-mono text-sm" />
               </div>
               <div>
                 <Label className="text-sm">OneSignal REST API Key</Label>
-                <Input
-                  type="password"
-                  placeholder="Your OneSignal REST API Key"
-                  value={onesignalRestApiKey}
-                  onChange={(e) => setOnesignalRestApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Found in Settings → Keys & IDs in your OneSignal Dashboard
-                </p>
+                <Input type="password" placeholder="Your OneSignal REST API Key" value={onesignalRestApiKey} onChange={(e) => setOnesignalRestApiKey(e.target.value)} className="font-mono text-sm" />
               </div>
               <Button size="sm" onClick={saveOneSignal} className="gap-1">
                 <Save className="w-4 h-4" /> Save OneSignal Config
@@ -144,14 +154,12 @@ const AdminIntegrations = () => {
             </div>
           )}
           {!onesignalEnabled && (
-            <Button size="sm" variant="outline" onClick={saveOneSignal}>
-              <Save className="w-4 h-4 mr-1" /> Save
-            </Button>
+            <Button size="sm" variant="outline" onClick={saveOneSignal}><Save className="w-4 h-4 mr-1" /> Save</Button>
           )}
         </CardContent>
       </Card>
 
-      {/* Mobile OTP Verification */}
+      {/* Mobile OTP */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -165,9 +173,7 @@ const AdminIntegrations = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Enable mobile number verification via OTP during registration & login.
-          </p>
+          <p className="text-sm text-muted-foreground">Enable mobile number verification via OTP during registration & login.</p>
           <div className="flex items-center gap-3">
             <Switch checked={otpEnabled} onCheckedChange={setOtpEnabled} />
             <Label className="text-sm font-medium">Enable OTP Verification</Label>
@@ -176,11 +182,7 @@ const AdminIntegrations = () => {
             <div className="space-y-3 pl-1">
               <div>
                 <Label className="text-sm">SMS Provider</Label>
-                <select
-                  value={otpProvider}
-                  onChange={(e) => setOtpProvider(e.target.value)}
-                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
+                <select value={otpProvider} onChange={(e) => setOtpProvider(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
                   <option value="twilio">Twilio</option>
                   <option value="msg91">MSG91</option>
                   <option value="2factor">2Factor</option>
@@ -189,51 +191,14 @@ const AdminIntegrations = () => {
               </div>
               <div>
                 <Label className="text-sm">API Key / Auth Token</Label>
-                <Input
-                  type="password"
-                  placeholder="Enter your SMS provider API key"
-                  value={otpApiKey}
-                  onChange={(e) => setOtpApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
+                <Input type="password" placeholder="Enter your SMS provider API key" value={otpApiKey} onChange={(e) => setOtpApiKey(e.target.value)} className="font-mono text-sm" />
               </div>
-              <Button size="sm" onClick={saveOTP} className="gap-1">
-                <Key className="w-4 h-4" /> Save OTP Config
-              </Button>
+              <Button size="sm" onClick={saveOTP} className="gap-1"><Key className="w-4 h-4" /> Save OTP Config</Button>
             </div>
           )}
           {!otpEnabled && (
-            <Button size="sm" variant="outline" onClick={saveOTP}>
-              <Save className="w-4 h-4 mr-1" /> Save
-            </Button>
+            <Button size="sm" variant="outline" onClick={saveOTP}><Save className="w-4 h-4 mr-1" /> Save</Button>
           )}
-        </CardContent>
-      </Card>
-
-      {/* PushPilot Web Push */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Zap className="w-5 h-5 text-accent" />
-            PushPilot Web Push
-            {pushpilotEnabled ? (
-              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
-            ) : (
-              <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            PushPilot handles web push notifications for all website visitors. Toggle to enable/disable.
-          </p>
-          <div className="flex items-center gap-3">
-            <Switch checked={pushpilotEnabled} onCheckedChange={setPushpilotEnabled} />
-            <Label className="text-sm font-medium">Enable PushPilot Push</Label>
-          </div>
-          <Button size="sm" onClick={savePushPilot} className="gap-1">
-            <Save className="w-4 h-4" /> Save PushPilot Config
-          </Button>
         </CardContent>
       </Card>
     </div>
