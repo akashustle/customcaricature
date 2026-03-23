@@ -124,6 +124,7 @@ const Index = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const maintenance = useMaintenanceCheck("home");
 
   const hero = content.homepage_hero || {};
   const handleOrderClick = () => navigate(user ? "/order" : "/login");
@@ -136,6 +137,10 @@ const Index = () => {
     setLightboxIndex(idx);
     setLightboxOpen(true);
   }, []);
+
+  if (maintenance.isEnabled) {
+    return <MaintenanceScreen title={maintenance.title} message={maintenance.message} estimatedEnd={maintenance.estimatedEnd} />;
+  }
 
   return (
     <div className="min-h-screen bg-background pb-36 md:pb-0">
