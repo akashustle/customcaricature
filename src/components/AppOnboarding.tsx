@@ -121,7 +121,7 @@ const AppOnboarding = () => {
               >
                 Get Started <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              {!user && (
+              {(
                 <Button
                   variant="ghost"
                   size="lg"
