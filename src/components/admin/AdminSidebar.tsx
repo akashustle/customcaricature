@@ -105,6 +105,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "Security",
+    items: [
+      { id: "security-dashboard", icon: ShieldCheck, label: "Security" },
+      { id: "activity-logs", icon: Activity, label: "Activity Logs" },
+    ],
+  },
+  {
     label: "System",
     items: [
       { id: "automation", icon: Zap, label: "Automation" },
