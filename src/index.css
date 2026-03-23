@@ -569,7 +569,7 @@
     100% { background-position: 200% 0; }
   }
   .shimmer {
-    background: linear-gradient(90deg, transparent 0%, hsl(30 30% 96% / 0.5) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--muted) / 0.5) 50%, transparent 100%);
     background-size: 200% 100%;
     animation: shimmer 3s infinite;
   }
