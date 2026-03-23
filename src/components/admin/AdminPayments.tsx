@@ -146,15 +146,20 @@ const AdminPayments = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-3 justify-between">
-        <h2 className="font-display text-xl font-bold">All Payments ({payments.length})</h2>
+        <h2 className="font-display text-xl font-bold text-white">All Payments ({payments.length})</h2>
         <div className="flex items-center gap-2 flex-wrap">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-3 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-primary" />
-              <span className="font-sans text-sm">Total Revenue:</span>
-              <span className="font-display font-bold text-primary">{formatPrice(totalRevenue)}</span>
-            </CardContent>
-          </Card>
+          <div className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-3 group hover:border-emerald-500/30 transition-all">
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 opacity-10" />
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+                <CreditCard className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <span className="text-[11px] text-slate-400">Total Revenue</span>
+                <p className="font-bold text-white">{formatPrice(totalRevenue)}</p>
+              </div>
+            </div>
+          </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -302,29 +307,28 @@ const AdminPayments = () => {
         </Table>
       </div>
 
-      {/* Mobile Cards */}
+      {/* Mobile Cards - Modern */}
       <div className="block md:hidden space-y-3">
         {filtered.map((p, i) => (
           <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-            <Card>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-sans font-medium text-sm">{p.user_id ? (profiles[p.user_id]?.name || "Unknown") : "—"}</p>
-                    <p className="text-xs text-muted-foreground font-sans">{p.description || "—"}</p>
-                    <p className="text-xs text-muted-foreground font-sans">{formatDateTime(p.created_at)}</p>
-                  </div>
-                  <p className="font-display text-lg font-bold text-primary">{formatPrice(p.amount)}</p>
+            <div className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-4 group hover:border-blue-500/30 transition-all">
+              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 opacity-5" />
+              <div className="flex justify-between items-start relative z-10">
+                <div>
+                  <p className="font-sans font-semibold text-sm text-white">{p.user_id ? (profiles[p.user_id]?.name || "Unknown") : "—"}</p>
+                  <p className="text-xs text-slate-400 font-sans mt-0.5">{p.description || "—"}</p>
+                  <p className="text-xs text-slate-500 font-sans">{formatDateTime(p.created_at)}</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-green-100 text-green-800 border-none text-xs">{p.status === "confirmed" ? "Paid ✅" : p.status}</Badge>
-                  <Badge variant="outline" className="text-xs">{PAYMENT_TYPE_LABELS[p.payment_type] || p.payment_type}</Badge>
-                </div>
-                {p.razorpay_payment_id && (
-                  <p className="text-xs font-mono text-muted-foreground">ID: {p.razorpay_payment_id}</p>
-                )}
-              </CardContent>
-            </Card>
+                <p className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">{formatPrice(p.amount)}</p>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">{p.status === "confirmed" ? "Paid ✅" : p.status}</Badge>
+                <Badge variant="outline" className="text-xs border-[#1e2a4a] text-slate-400">{PAYMENT_TYPE_LABELS[p.payment_type] || p.payment_type}</Badge>
+              </div>
+              {p.razorpay_payment_id && (
+                <p className="text-xs font-mono text-slate-500 mt-2">ID: {p.razorpay_payment_id}</p>
+              )}
+            </div>
           </motion.div>
         ))}
       </div>

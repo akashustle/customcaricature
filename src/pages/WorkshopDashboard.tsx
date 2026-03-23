@@ -249,22 +249,36 @@ const WorkshopDashboard = () => {
         </AnimatePresence>
       </div>
 
-      {/* Mobile Bottom Nav */}
-      <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-card/95 border-border"} border-t shadow-xl`}>
-        <div className="flex items-center overflow-x-auto no-scrollbar py-2 px-2 max-w-md mx-auto gap-1">
-          {visibleTabs.map((tab) => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              style={activeTab === tab.key ? activeStyle : {}}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 min-w-[56px] ${activeTab === tab.key ? `${activeClass} scale-105` : inactiveClass}`}>
-              <tab.icon className="w-5 h-5" />
-              <span className="text-[9px]">{tab.label}</span>
+      {/* Mobile Bottom Nav - App Style */}
+      <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden`}>
+        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-background/95 border-border"} border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`}>
+          <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
+            {visibleTabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${isActive ? "bg-primary/10" : ""}`}>
+                    <tab.icon className={`w-[20px] h-[20px] transition-all duration-200 ${isActive ? "text-primary" : dm ? "text-white/40" : "text-muted-foreground/60"}`}
+                      strokeWidth={isActive ? 2.5 : 1.8}
+                      style={isActive ? { color: accent.primary } : {}} />
+                  </div>
+                  <span className={`text-[9px] leading-none font-medium transition-all duration-200 ${isActive ? "font-bold" : dm ? "text-white/40" : "text-muted-foreground/50"}`}
+                    style={isActive ? { color: accent.primary } : {}}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+            <button onClick={() => navigate("/dashboard")}
+              className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
+              <div className="flex items-center justify-center w-8 h-8 rounded-xl">
+                <LayoutDashboard className={`w-[20px] h-[20px] ${dm ? "text-white/40" : "text-muted-foreground/60"}`} strokeWidth={1.8} />
+              </div>
+              <span className={`text-[9px] leading-none font-medium ${dm ? "text-white/40" : "text-muted-foreground/50"}`}>Dashboard</span>
             </button>
-          ))}
-          <button onClick={() => navigate("/dashboard")}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 min-w-[56px] ${inactiveClass}`}>
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-[9px]">Dashboard</span>
-          </button>
+          </div>
+          <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
       </div>
     </div>
