@@ -13,6 +13,7 @@ import HomepageGallery from "@/components/HomepageGallery";
 import HomepageBeforeAfter from "@/components/HomepageBeforeAfter";
 import HomepageScrollEvents from "@/components/HomepageScrollEvents";
 import HomepageReviews from "@/components/HomepageReviews";
+import useSocialLinks from "@/hooks/useSocialLinks";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageInstantQuote from "@/components/homepage/HomepageInstantQuote";
