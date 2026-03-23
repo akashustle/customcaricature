@@ -29,6 +29,8 @@ const AdminLogin = () => {
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [resendingOtp, setResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [sessionLimitReached, setSessionLimitReached] = useState(false);
+  const [sessionSecretCode, setSessionSecretCode] = useState("");
 
   const startResendCooldown = () => {
     setResendCooldown(60);
