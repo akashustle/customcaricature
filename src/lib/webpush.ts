@@ -199,25 +199,8 @@ export const initWebPush = async (userId?: string) => {
   }
 };
 
-const sendWelcomeNotification = async (userId: string) => {
-  try {
-    const { data: existing } = await supabase
-      .from("notifications")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("type", "greeting")
-      .maybeSingle();
-    if (existing) return;
-
-    await supabase.from("notifications").insert({
-      user_id: userId,
-      title: "Welcome to CCC! 🎨",
-      message: "Thanks for enabling notifications! You'll now receive updates about your orders, events, and exclusive offers.",
-      type: "greeting",
-      link: "/dashboard",
-    } as any);
-  } catch {}
-};
+// Welcome notification is now handled locally only (showLocalWelcomeNotification)
+// to avoid double-send via DB trigger → edge function → push, which causes Chrome spam detection.
 
 export const sendWebPushNotification = async (params: {
   userId: string;

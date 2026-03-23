@@ -99,9 +99,21 @@ const TrackOrder = () => {
     } else {
       const found = (Array.isArray(data) ? data[0] : data) as TrackedOrder;
       setOrder(found);
-      // Fetch extended data
-      const { data: full } = await supabase.from("orders").select("extended_delivery_date, extension_reason, preview_image_url, timeline_logs, current_stage, artist_message").eq("id", found.id).single();
-      if (full) setOrderExtras(full);
+      // Fetch extended data from orders + order_extensions
+      const [fullRes, extRes] = await Promise.all([
+        supabase.from("orders").select("extended_delivery_date, extension_reason, preview_image_url, timeline_logs, current_stage, artist_message").eq("id", found.id).single(),
+        supabase.from("order_extensions").select("new_date, reason, created_at").eq("order_id", found.id).order("created_at", { ascending: false }).limit(1),
+      ]);
+      const full = fullRes.data;
+      const latestExt = extRes.data?.[0];
+      if (full) {
+        // Merge extension from order_extensions table if available
+        if (latestExt) {
+          full.extended_delivery_date = latestExt.new_date;
+          full.extension_reason = latestExt.reason;
+        }
+        setOrderExtras(full);
+      }
     }
     setLoading(false);
   };
