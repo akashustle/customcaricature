@@ -102,6 +102,25 @@ const AdminLogin = () => {
       toast({ title: "Welcome back, admin!" });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
+      // Log failed login attempt
+      try {
+        await supabase.from("admin_failed_logins" as any).insert({
+          email: email.trim().toLowerCase(), reason: "invalid_credentials",
+          ip_address: null, device_info: navigator.userAgent.slice(0, 200),
+        });
+        // Check if too many failed attempts — create security alert
+        const { data: recent } = await supabase.from("admin_failed_logins" as any)
+          .select("id").eq("email", email.trim().toLowerCase())
+          .gte("created_at", new Date(Date.now() - 3600000).toISOString());
+        if (recent && recent.length >= 5) {
+          await supabase.from("admin_security_alerts" as any).insert({
+            alert_type: "brute_force", severity: "high",
+            title: "Multiple Failed Login Attempts",
+            description: `${recent.length} failed attempts for ${email} in the last hour.`,
+            ip_address: null,
+          });
+        }
+      } catch {}
       toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
     } finally {
       setLoading(false);
