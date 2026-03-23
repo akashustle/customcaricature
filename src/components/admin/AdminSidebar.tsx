@@ -32,6 +32,7 @@ const NAV_SECTIONS = [
     items: [
       { id: "analytics", icon: BarChart3, label: "Overview" },
       { id: "revenue", icon: DollarSign, label: "Revenue" },
+      { id: "revenue-target", icon: Target, label: "₹10L Target" },
       { id: "ai-intelligence", icon: Zap, label: "AI Insights" },
     ],
   },
