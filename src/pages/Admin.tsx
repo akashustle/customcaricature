@@ -2073,35 +2073,22 @@ const Admin = () => {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation — Premium */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden admin-header-premium safe-area-bottom">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-0.5 scrollbar-thin">
-          <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-xl border-t border-border/15 safe-area-bottom">
+        <div className="flex items-center overflow-x-auto py-1.5 px-1 gap-0.5 scrollbar-thin">
+          <AdminBottomNavItem icon={BarChart3} label="Dash" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
-          <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-          <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
-          <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
+          <AdminBottomNavItem icon={Receipt} label="Pay" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
-          <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
-          <AdminBottomNavItem icon={Star} label="Reviews" active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} />
+          <AdminBottomNavItem icon={Target} label="CRM" active={activeTab === "crm-pipeline"} onClick={() => setActiveTab("crm-pipeline")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
-          <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
-          <AdminBottomNavItem icon={Radio} label="Voice" active={activeTab === "voice"} onClick={() => setActiveTab("voice")} />
+          <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
-          <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
-          <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
-          <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
-          <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
+          <AdminBottomNavItem icon={Bot} label="AI" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
-          <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
-          <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
-          <AdminBottomNavItem icon={Globe} label="SEO" active={activeTab === "seo"} onClick={() => setActiveTab("seo")} />
-          <AdminBottomNavItem icon={ClipboardList} label="Pages" active={activeTab === "pages"} onClick={() => setActiveTab("pages")} />
-          <AdminBottomNavItem icon={BarChart3} label="Calc" active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")} />
-          <AdminBottomNavItem icon={Settings} label="Integrations" active={activeTab === "integrations"} onClick={() => setActiveTab("integrations")} />
-          <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
-          <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
+          <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+          <AdminBottomNavItem icon={LogOut} label="Out" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
       </div>
       </div>
