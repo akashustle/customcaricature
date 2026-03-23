@@ -29,6 +29,18 @@ const AdminLogin = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [sessionLimitReached, setSessionLimitReached] = useState(false);
   const [sessionSecretCode, setSessionSecretCode] = useState("");
+  const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
+
+  // Fetch admin secret code from DB
+  useEffect(() => {
+    const fetchSecret = async () => {
+      const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "admin_secret_code").maybeSingle();
+      if (data?.value && (data.value as any).code) {
+        setAdminMasterSecret((data.value as any).code);
+      }
+    };
+    fetchSecret();
+  }, []);
 
   const startResendCooldown = () => {
     setResendCooldown(60);
