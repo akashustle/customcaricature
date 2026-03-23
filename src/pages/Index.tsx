@@ -218,48 +218,65 @@ const Index = () => {
           />
         ))}
         <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="max-w-3xl mx-auto text-center">
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 md:w-28 md:h-28 mx-auto mb-8 rounded-2xl border-4 border-border bg-card p-1 shadow-lg"
-              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">
-              India's Premium Caricature Studio
-            </motion.p>
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
-              {hero.headline || "Book Professional Caricature Artists for Your Event"}
-            </motion.h1>
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
-              className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto font-body leading-relaxed">
-              {hero.subtext || "Custom hand-crafted caricatures that capture personality in every stroke."}
-            </motion.p>
-            {hero.pricing_line && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-                className="text-sm font-body font-semibold text-primary mb-2">
-                {hero.pricing_line}
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+            {/* Left: Text content */}
+            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
+              <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">
+                India's Premium Caricature Studio
               </motion.p>
-            )}
-            {hero.urgency_text && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
-                className="text-xs font-body text-accent mb-8">
-                {hero.urgency_text}
+              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
+                {hero.headline || "Book Professional Caricature Artists for Your Event"}
+              </motion.h1>
+              <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+                className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
+                {hero.subtext || "Custom hand-crafted caricatures that capture personality in every stroke."}
               </motion.p>
-            )}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
-                  {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card">
-                  <Zap className="w-5 h-5 mr-2" /> {hero.secondary_cta || "Book for Event"}
-                </Button>
+              {hero.pricing_line && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                  className="text-sm font-body font-semibold text-primary mb-2">
+                  {hero.pricing_line}
+                </motion.p>
+              )}
+              {hero.urgency_text && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
+                  className="text-xs font-body text-accent mb-8">
+                  {hero.urgency_text}
+                </motion.p>
+              )}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
+                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
+                    {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                    <Zap className="w-5 h-5 mr-2" /> {hero.secondary_cta || "Book for Event"}
+                  </Button>
+                </motion.div>
               </motion.div>
             </motion.div>
-          </motion.div>
+
+            {/* Right: Gallery preview for desktop */}
+            <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, duration: 0.8 }}
+              className="hidden lg:grid grid-cols-2 gap-4 flex-shrink-0 w-[420px]">
+              {galleryImages.slice(0, 4).map((img, i) => (
+                <motion.div key={i} whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 2 : -2 }}
+                  className="rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-[3/4] border border-border"
+                  onClick={() => openLightbox(i)}>
+                  <img src={img} alt={`Caricature ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Mobile: Logo */}
+            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-border bg-card p-1 shadow-lg lg:hidden"
+              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+          </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
           className="bg-card/80 border-t border-border">
@@ -550,11 +567,17 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <div className="border-t border-border pt-6 flex flex-col items-center gap-2">
+          <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
-            <p className="text-xs text-muted-foreground font-body">
-              Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
-            </p>
+            <div className="flex items-center gap-4">
+              <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:underline">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2.223a.5.5 0 0 0-.866.5l1.39 2.412a9.481 9.481 0 0 0-4.047-.913 9.481 9.481 0 0 0-4.047.913l1.39-2.412a.5.5 0 0 0-.866-.5L9.084 4.636A9.5 9.5 0 0 0 4 13h16a9.5 9.5 0 0 0-5.084-8.364l1.607-2.413zM8.5 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm7 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM4 14h16v1a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-1z"/></svg>
+                Download Android App
+              </a>
+              <p className="text-xs text-muted-foreground font-body">
+                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
+              </p>
+            </div>
           </div>
         </div>
       </footer>

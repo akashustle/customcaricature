@@ -29,6 +29,8 @@ const AdminLogin = () => {
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [resendingOtp, setResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [sessionLimitReached, setSessionLimitReached] = useState(false);
+  const [sessionSecretCode, setSessionSecretCode] = useState("");
 
   const startResendCooldown = () => {
     setResendCooldown(60);
@@ -91,9 +93,12 @@ const AdminLogin = () => {
       }
 
       const { data: activeSessions } = await supabase.from("admin_sessions").select("id").eq("is_active", true);
-      if (activeSessions && activeSessions.length >= 5) {
+      const sessionLimit = parseInt(sessionStorage.getItem("admin_extended_limit") || "5");
+      if (activeSessions && activeSessions.length >= sessionLimit) {
         await supabase.auth.signOut();
-        toast({ title: "Session Limit Reached", description: "Maximum 5 concurrent admin sessions.", variant: "destructive" });
+        setPendingUserId(authData.user.id);
+        setSessionLimitReached(true);
+        setLoading(false);
         return;
       }
 
@@ -282,7 +287,62 @@ const AdminLogin = () => {
             <p className="text-sm text-muted-foreground">Creative Caricature Club • Secure Access</p>
           </div>
 
-          {!otpStep ? (
+          {sessionLimitReached ? (
+            <div className="space-y-4">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                className="bg-gradient-to-br from-orange-500/10 to-red-500/5 rounded-xl p-4 border border-orange-500/20 text-center space-y-2">
+                <Shield className="w-10 h-10 text-orange-500 mx-auto" />
+                <p className="text-sm font-semibold text-foreground">Session Limit Reached</p>
+                <p className="text-xs text-muted-foreground">Maximum concurrent sessions active. Enter admin secret code to unlock 10 more sessions.</p>
+              </motion.div>
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground font-medium">Admin Secret Code</Label>
+                <div className="relative group">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input type="password" value={sessionSecretCode}
+                    onChange={(e) => setSessionSecretCode(e.target.value)}
+                    placeholder="Enter admin secret code"
+                    className="pl-10 h-14 bg-background/60 border-border/60 rounded-xl text-center text-lg tracking-wider font-bold focus:border-primary"
+                    autoFocus />
+                </div>
+              </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={async () => {
+                    if (sessionSecretCode !== ADMIN_MASTER_SECRET) {
+                      toast({ title: "Invalid Secret Code", variant: "destructive" });
+                      return;
+                    }
+                    sessionStorage.setItem("admin_extended_limit", "15");
+                    setSessionLimitReached(false);
+                    setSessionSecretCode("");
+                    // Re-login
+                    setLoading(true);
+                    try {
+                      const { error } = await supabase.auth.signInWithPassword({
+                        email: email.trim().toLowerCase(), password,
+                      });
+                      if (error) throw error;
+                      sessionStorage.removeItem("admin_entered_name");
+                      toast({ title: "Session limit extended! Welcome back! 🔓" });
+                      navigate("/admin-panel", { replace: true });
+                    } catch (err: any) {
+                      toast({ title: "Login Failed", description: err?.message, variant: "destructive" });
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading || !sessionSecretCode}
+                  className="w-full h-12 rounded-xl text-base font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.4)]">
+                  {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Unlock & Login"}
+                </Button>
+              </motion.div>
+              <Button type="button" variant="ghost" className="w-full text-xs text-muted-foreground"
+                onClick={() => { setSessionLimitReached(false); setSessionSecretCode(""); }}>
+                ← Back to Login
+              </Button>
+            </div>
+          ) : !otpStep ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm text-muted-foreground font-medium">Email</Label>
