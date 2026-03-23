@@ -44,7 +44,7 @@ const AppOnboarding = () => {
 
   const handleGetStarted = () => {
     finish();
-    if (!user) navigate("/register");
+    navigate("/register");
   };
 
   const handleSkip = () => {
