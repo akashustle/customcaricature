@@ -1662,6 +1662,9 @@ const Admin = () => {
             <AdminAIChatConversations />
           </TabsContent>
 
+          <TabsContent value="live-chat">
+            <AdminChat adminUserId={user?.id || ""} />
+          </TabsContent>
 
 
 
