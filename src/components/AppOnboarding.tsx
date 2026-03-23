@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Palette, ArrowRight, Sparkles, Star, Users, Calendar } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const ONBOARDING_KEY = "ccc_onboarding_done_v2";
 
