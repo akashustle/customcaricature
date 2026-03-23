@@ -4,7 +4,7 @@ import {
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
-  Type, FormInput, Palette, Activity, ShieldCheck, Brain
+  Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -41,6 +41,7 @@ const NAV_SECTIONS = [
     items: [
       { id: "ai-conversations", icon: Bot, label: "AI Chats" },
       { id: "chatbot", icon: Settings, label: "AI Training" },
+      { id: "live-chat", icon: MessageCircle, label: "Live Chat" },
     ],
   },
   {
@@ -131,31 +132,31 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     <aside 
       className={cn(
         "hidden md:flex flex-col h-screen sticky top-0 transition-all duration-300 z-30",
-        "bg-card border-r border-border shadow-sm",
+        "bg-[hsl(220,20%,10%)] border-r border-white/[0.06]",
         collapsed ? "w-[68px]" : "w-[240px]"
       )}
     >
       {/* Logo + Collapse */}
-      <div className="flex items-center justify-between px-3 py-3.5 border-b border-border">
+      <div className="flex items-center justify-between px-3 py-3.5 border-b border-white/[0.06]">
         <div 
           className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0"
           onClick={() => navigate("/")}
         >
-          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-md ring-1 ring-border">
+          <div className="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 shadow-lg ring-1 ring-white/10">
             <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
           </div>
           {!collapsed && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
-              <p className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</p>
-              <p className="text-[9px] text-muted-foreground leading-none font-sans">Creative Caricature Club</p>
+              <p className="text-[13px] font-bold tracking-tight text-white/90 font-sans">Admin</p>
+              <p className="text-[9px] text-white/40 leading-none font-sans">Creative Caricature Club</p>
             </motion.div>
           )}
         </div>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-muted transition-colors flex-shrink-0"
+          className="w-6 h-6 rounded-md flex items-center justify-center hover:bg-white/[0.06] transition-colors flex-shrink-0"
         >
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5 text-white/40" /> : <ChevronLeft className="w-3.5 h-3.5 text-white/40" />}
         </button>
       </div>
 
@@ -164,7 +165,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         {NAV_SECTIONS.map((section) => (
           <div key={section.label} className="mb-2">
             {!collapsed && (
-              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60 px-2.5 mb-1 mt-1.5 font-sans">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/25 px-2.5 mb-1 mt-1.5 font-sans">
                 {section.label}
               </p>
             )}
@@ -177,20 +178,20 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                   className={cn(
                     "w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[12px] transition-all duration-200 mb-0.5 font-sans",
                     isActive
-                      ? "bg-primary/10 text-primary font-semibold shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                      ? "bg-white/[0.08] text-white font-semibold backdrop-blur-sm shadow-[0_0_12px_rgba(99,102,241,0.15)]"
+                      : "text-white/50 hover:text-white/80 hover:bg-white/[0.04]"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
                   <item.icon className={cn(
                     "w-[15px] h-[15px] flex-shrink-0 transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    isActive ? "text-indigo-400" : "text-white/40"
                   )} />
                   {!collapsed && (
                     <span className="truncate">{item.label}</span>
                   )}
                   {isActive && !collapsed && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400" />
                   )}
                 </button>
               );
@@ -200,10 +201,10 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       </nav>
 
       {/* Bottom actions */}
-      <div className="p-1.5 border-t border-border space-y-0.5">
+      <div className="p-1.5 border-t border-white/[0.06] space-y-0.5">
         <button
           onClick={() => navigate("/")}
-          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all font-sans"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-white/50 hover:text-white/80 hover:bg-white/[0.04] transition-all font-sans"
           title={collapsed ? "Home" : undefined}
         >
           <Home className="w-[15px] h-[15px] flex-shrink-0" />
@@ -211,7 +212,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         </button>
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}
-          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-destructive/80 hover:bg-destructive/10 transition-all font-sans"
+          className="w-full flex items-center gap-2 px-2.5 py-[7px] rounded-lg text-[12px] text-red-400/80 hover:bg-red-500/10 transition-all font-sans"
           title={collapsed ? "Logout" : undefined}
         >
           <LogOut className="w-[15px] h-[15px] flex-shrink-0" />
