@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Phone, Sparkles, Calendar, Clock, Mail, MessageCircle,
