@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Smartphone, Key, Shield, Save, ExternalLink } from "lucide-react";
+import { Bell, Smartphone, Key, Shield, Save, ExternalLink, Zap } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,12 +23,15 @@ const AdminIntegrations = () => {
   const [otpApiKey, setOtpApiKey] = useState("");
   const [otpProvider, setOtpProvider] = useState("twilio");
 
+  // PushPilot
+  const [pushpilotEnabled, setPushpilotEnabled] = useState(true);
+
   // Load from DB settings
   useEffect(() => {
     if (loading) return;
     // Fetch integration settings directly since they aren't in the typed SiteSettings
     const fetchIntegrationSettings = async () => {
-      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config"]);
+      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config", "pushpilot_config"]);
       if (data) {
         data.forEach((row: any) => {
           if (row.id === "onesignal_config" && row.value) {
@@ -40,6 +43,9 @@ const AdminIntegrations = () => {
             setOtpEnabled(row.value.enabled || false);
             setOtpApiKey(row.value.api_key || "");
             setOtpProvider(row.value.provider || "twilio");
+          }
+          if (row.id === "pushpilot_config" && row.value) {
+            setPushpilotEnabled(row.value.enabled !== false);
           }
         });
       }
@@ -63,6 +69,11 @@ const AdminIntegrations = () => {
       provider: otpProvider,
     });
     toast({ title: "OTP settings saved ✅" });
+  };
+
+  const savePushPilot = async () => {
+    await updateSetting("pushpilot_config", { enabled: pushpilotEnabled });
+    toast({ title: "PushPilot settings saved ✅" });
   };
 
   if (loading) {
@@ -196,6 +207,33 @@ const AdminIntegrations = () => {
               <Save className="w-4 h-4 mr-1" /> Save
             </Button>
           )}
+        </CardContent>
+      </Card>
+
+      {/* PushPilot Web Push */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Zap className="w-5 h-5 text-accent" />
+            PushPilot Web Push
+            {pushpilotEnabled ? (
+              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            PushPilot handles web push notifications for all website visitors. Toggle to enable/disable.
+          </p>
+          <div className="flex items-center gap-3">
+            <Switch checked={pushpilotEnabled} onCheckedChange={setPushpilotEnabled} />
+            <Label className="text-sm font-medium">Enable PushPilot Push</Label>
+          </div>
+          <Button size="sm" onClick={savePushPilot} className="gap-1">
+            <Save className="w-4 h-4" /> Save PushPilot Config
+          </Button>
         </CardContent>
       </Card>
     </div>

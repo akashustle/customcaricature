@@ -215,20 +215,14 @@ const AdminHomepageControl = () => {
                 <Input value={socialProof.monthly_text || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_text: e.target.value })} />
               </div>
               <div className="border border-border rounded-xl p-4 space-y-3 mt-3">
-                <p className="text-xs font-semibold text-muted-foreground">Monthly Range Strip</p>
+                <p className="text-xs font-semibold text-muted-foreground">Monthly Counter Strip</p>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Range Label</label>
-                  <Input value={(socialProof.monthly_range || {}).label || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_range: { ...(socialProof.monthly_range || {}), label: e.target.value } })} placeholder="Events Booked This Month" />
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Label</label>
+                  <Input value={(socialProof.monthly_counter || {}).label || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_counter: { ...(socialProof.monthly_counter || {}), label: e.target.value } })} placeholder="Events Booked This Month" />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Min</label>
-                    <Input type="number" value={(socialProof.monthly_range || {}).min || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_range: { ...(socialProof.monthly_range || {}), min: parseInt(e.target.value) || 0 } })} placeholder="25" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Max</label>
-                    <Input type="number" value={(socialProof.monthly_range || {}).max || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_range: { ...(socialProof.monthly_range || {}), max: parseInt(e.target.value) || 0 } })} placeholder="50" />
-                  </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Count</label>
+                  <Input type="number" value={(socialProof.monthly_counter || {}).count || ""} onChange={e => updateSetting("homepage_social_proof", { ...socialProof, monthly_counter: { ...(socialProof.monthly_counter || {}), count: parseInt(e.target.value) || 0 } })} placeholder="40" />
                 </div>
               </div>
             </CardContent>

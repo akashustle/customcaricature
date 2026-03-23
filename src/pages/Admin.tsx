@@ -76,6 +76,7 @@ import AdminTeamManagement from "@/components/admin/AdminTeamManagement";
 import AdminNameGate from "@/components/admin/AdminNameGate";
 import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
+import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 
 type Order = {
   id: string;
@@ -2017,6 +2018,9 @@ const Admin = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Push App Update */}
+              <AdminPushUpdate />
             </div>
           </TabsContent>
         </Tabs>

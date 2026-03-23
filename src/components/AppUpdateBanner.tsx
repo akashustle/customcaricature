@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, X, Sparkles, Rocket, CheckCircle2 } from "lucide-react";
+import { RefreshCw, X, Sparkles, Rocket, CheckCircle2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const APP_VERSION_KEY = "ccc_app_version";
-const CHECK_INTERVAL = 20_000; // 20s
+const CHECK_INTERVAL = 30_000;
 
 const AppUpdateBanner = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -12,8 +13,30 @@ const AppUpdateBanner = () => {
   const [updating, setUpdating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<"downloading" | "installing" | "done">("downloading");
+  const [updateInfo, setUpdateInfo] = useState<{ version?: string; message?: string }>({});
 
-  const checkForUpdate = useCallback(async () => {
+  // Check DB for admin-pushed updates
+  const checkAdminUpdate = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from("admin_site_settings")
+        .select("value")
+        .eq("id", "app_update_push")
+        .maybeSingle();
+
+      if (data?.value) {
+        const config = data.value as any;
+        const lastDismissed = localStorage.getItem("ccc_update_dismissed_v");
+        if (config.active && config.version && config.version !== lastDismissed) {
+          setUpdateInfo({ version: config.version, message: config.message });
+          setUpdateAvailable(true);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Also check for asset fingerprint changes
+  const checkAssetUpdate = useCallback(async () => {
     try {
       const res = await fetch(`/?_t=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/html" } });
       if (!res.ok) return;
@@ -28,16 +51,12 @@ const AppUpdateBanner = () => {
       if (currentVersion && storedVersion !== currentVersion) {
         setUpdateAvailable(true);
       }
-    } catch {
-      // Silently fail
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        setUpdateAvailable(true);
-      });
+      navigator.serviceWorker.addEventListener("controllerchange", () => setUpdateAvailable(true));
       navigator.serviceWorker.getRegistration().then((reg) => {
         if (reg?.waiting) setUpdateAvailable(true);
         reg?.addEventListener("updatefound", () => {
@@ -50,17 +69,37 @@ const AppUpdateBanner = () => {
         });
       });
     }
-    const interval = setInterval(checkForUpdate, CHECK_INTERVAL);
-    const firstCheck = setTimeout(checkForUpdate, 8_000);
-    return () => { clearInterval(interval); clearTimeout(firstCheck); };
-  }, [checkForUpdate]);
+
+    checkAdminUpdate();
+    const interval = setInterval(() => {
+      checkAdminUpdate();
+      checkAssetUpdate();
+    }, CHECK_INTERVAL);
+    const firstCheck = setTimeout(checkAssetUpdate, 8_000);
+
+    // Realtime listener for admin-pushed updates
+    const ch = supabase
+      .channel("app-update-rt")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "admin_site_settings",
+        filter: "id=eq.app_update_push",
+      }, () => checkAdminUpdate())
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(firstCheck);
+      supabase.removeChannel(ch);
+    };
+  }, [checkAdminUpdate, checkAssetUpdate]);
 
   const handleUpdate = async () => {
     setUpdating(true);
     setPhase("downloading");
     setProgress(0);
 
-    // Animate progress phases
     const animate = (from: number, to: number, duration: number) =>
       new Promise<void>((resolve) => {
         const start = Date.now();
@@ -74,18 +113,16 @@ const AppUpdateBanner = () => {
         tick();
       });
 
-    await animate(0, 40, 800);
+    await animate(0, 35, 700);
     setPhase("installing");
 
-    // Skip waiting on service worker
     if ("serviceWorker" in navigator) {
       const reg = await navigator.serviceWorker.getRegistration();
       reg?.waiting?.postMessage({ type: "SKIP_WAITING" });
     }
 
-    await animate(40, 85, 1000);
+    await animate(35, 80, 900);
 
-    // Pre-fetch new assets
     try {
       const res = await fetch(`/?_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
@@ -100,12 +137,23 @@ const AppUpdateBanner = () => {
       }
     } catch {}
 
-    await animate(85, 100, 500);
+    await animate(80, 100, 500);
     setPhase("done");
     sessionStorage.removeItem(APP_VERSION_KEY);
 
+    if (updateInfo.version) {
+      localStorage.setItem("ccc_update_dismissed_v", updateInfo.version);
+    }
+
     await new Promise((r) => setTimeout(r, 600));
     window.location.reload();
+  };
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (updateInfo.version) {
+      localStorage.setItem("ccc_update_dismissed_v", updateInfo.version);
+    }
   };
 
   // Full-screen updating overlay
@@ -114,32 +162,28 @@ const AppUpdateBanner = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 z-[99999] flex flex-col items-center justify-center"
-        style={{
-          background: "linear-gradient(135deg, hsl(22 20% 12%), hsl(22 30% 8%), hsl(38 20% 10%))",
-        }}
+        className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background"
       >
-        {/* Animated particles */}
+        {/* Soft background pattern */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 20 }).map((_, i) => (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+          {Array.from({ length: 12 }).map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full"
+              className="absolute rounded-full bg-primary/10"
               style={{
-                width: Math.random() * 6 + 2,
-                height: Math.random() * 6 + 2,
-                background: `hsla(${22 + Math.random() * 20}, 80%, ${60 + Math.random() * 20}%, ${0.3 + Math.random() * 0.4})`,
+                width: Math.random() * 100 + 40,
+                height: Math.random() * 100 + 40,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
               }}
               animate={{
-                y: [0, -80, 0],
-                x: [0, (Math.random() - 0.5) * 60, 0],
-                opacity: [0.2, 0.8, 0.2],
-                scale: [0.8, 1.5, 0.8],
+                y: [0, -40, 0],
+                opacity: [0.1, 0.3, 0.1],
+                scale: [0.8, 1.2, 0.8],
               }}
               transition={{
-                duration: 2 + Math.random() * 3,
+                duration: 3 + Math.random() * 2,
                 repeat: Infinity,
                 delay: Math.random() * 2,
                 ease: "easeInOut",
@@ -148,77 +192,62 @@ const AppUpdateBanner = () => {
           ))}
         </div>
 
-        {/* Main content */}
         <motion.div
-          className="relative z-10 flex flex-col items-center gap-6 px-6 text-center"
+          className="relative z-10 flex flex-col items-center gap-8 px-6 text-center"
           initial={{ scale: 0.8, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
         >
-          {/* Animated icon */}
-          <motion.div
-            className="relative"
-            animate={phase === "done" ? { scale: [1, 1.2, 1] } : { rotate: 360 }}
-            transition={
-              phase === "done"
-                ? { duration: 0.5 }
-                : { duration: 2, repeat: Infinity, ease: "linear" }
-            }
-          >
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-orange-500/30">
-              {phase === "done" ? (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-                  <CheckCircle2 className="w-10 h-10 text-white" />
-                </motion.div>
-              ) : (
-                <Rocket className="w-10 h-10 text-white" />
-              )}
-            </div>
-          </motion.div>
+          {/* App logo */}
+          <motion.img
+            src="/logo.png"
+            alt="CCC"
+            className="w-20 h-20 rounded-2xl border-2 border-border shadow-lg"
+            animate={phase === "done" ? { scale: [1, 1.1, 1] } : { rotate: [0, 5, -5, 0] }}
+            transition={phase === "done" ? { duration: 0.5 } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
 
-          {/* Phase text */}
           <AnimatePresence mode="wait">
             <motion.div
               key={phase}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-1"
+              className="space-y-2"
             >
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-2xl font-calligraphy font-bold text-foreground">
                 {phase === "downloading" && "Downloading Update..."}
                 {phase === "installing" && "Installing Update..."}
                 {phase === "done" && "Update Complete! ✨"}
               </h2>
-              <p className="text-white/60 text-sm">
+              <p className="text-muted-foreground text-sm font-body">
                 {phase === "downloading" && "Fetching the latest version"}
-                {phase === "installing" && "Applying changes to the app"}
+                {phase === "installing" && "Applying changes"}
                 {phase === "done" && "Launching new version now"}
               </p>
+              {updateInfo.version && (
+                <p className="text-xs text-primary font-body font-semibold">
+                  Version {updateInfo.version}
+                </p>
+              )}
             </motion.div>
           </AnimatePresence>
 
           {/* Progress bar */}
-          <div className="w-64 sm:w-80">
-            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+          <div className="w-72 sm:w-80">
+            <div className="h-2.5 rounded-full bg-muted overflow-hidden">
               <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, hsl(22 78% 52%), hsl(38 88% 50%), hsl(22 78% 52%))",
-                  backgroundSize: "200% 100%",
-                  animation: "gradient-shift 1.5s ease infinite",
-                  width: `${progress}%`,
-                }}
+                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
+                style={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <p className="text-white/40 text-xs mt-2 font-mono">{Math.round(progress)}%</p>
+            <p className="text-muted-foreground text-xs mt-2 font-mono">{Math.round(progress)}%</p>
           </div>
         </motion.div>
 
-        {/* Brand footer */}
         <motion.p
-          className="absolute bottom-8 text-white/20 text-xs font-medium tracking-wider"
+          className="absolute bottom-8 text-muted-foreground/50 text-xs font-body font-medium tracking-wider"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -238,28 +267,32 @@ const AppUpdateBanner = () => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -80, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed top-0 left-0 right-0 z-[10000] flex items-center justify-center px-4 py-2"
-        style={{
-          background: "linear-gradient(135deg, hsl(22 78% 52%), hsl(38 88% 50%), hsl(22 78% 52%))",
-          backgroundSize: "200% 200%",
-          animation: "gradient-shift 3s ease infinite",
-        }}
+        className="fixed top-0 left-0 right-0 z-[10000] px-4 py-3 bg-card border-b border-border shadow-lg"
       >
-        <div className="flex items-center gap-3 text-white max-w-lg w-full justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 animate-pulse" />
-            <span className="text-sm font-semibold font-sans">✨ New update available!</span>
+        <div className="flex items-center justify-center gap-4 max-w-lg mx-auto">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Download className="w-5 h-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-body font-semibold text-foreground truncate">
+                {updateInfo.message || "New update available!"}
+              </p>
+              {updateInfo.version && (
+                <p className="text-xs text-muted-foreground font-body">Version {updateInfo.version}</p>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               size="sm"
               onClick={handleUpdate}
-              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm text-xs h-7 px-3 gap-1"
+              className="rounded-full font-body text-xs gap-1.5 shadow-sm"
             >
-              <RefreshCw className="w-3 h-3" />
-              Update Now
+              <RefreshCw className="w-3.5 h-3.5" />
+              Update
             </Button>
-            <button onClick={() => setDismissed(true)} className="text-white/70 hover:text-white transition-colors">
+            <button onClick={handleDismiss} className="text-muted-foreground hover:text-foreground transition-colors p-1">
               <X className="w-4 h-4" />
             </button>
           </div>
