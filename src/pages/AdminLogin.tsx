@@ -188,7 +188,7 @@ const AdminLogin = () => {
 
     // Admin secret code bypass
     if (otpVerifyMethod === "secret") {
-      if (adminSecretCode !== ADMIN_MASTER_SECRET) {
+      if (adminSecretCode !== adminMasterSecret) {
         toast({ title: "Invalid Admin Secret Code", variant: "destructive" });
         return;
       }
@@ -319,7 +319,7 @@ const AdminLogin = () => {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   onClick={async () => {
-                    if (sessionSecretCode !== ADMIN_MASTER_SECRET) {
+                    if (sessionSecretCode !== adminMasterSecret) {
                       toast({ title: "Invalid Secret Code", variant: "destructive" });
                       return;
                     }
