@@ -54,6 +54,7 @@ const NAV_SECTIONS = [
     items: [
       { id: "locations", icon: MapPin, label: "Locations", accent: "hsl(15 65% 55%)" },
       { id: "voice", icon: Radio, label: "Voice Monitor", accent: "hsl(340 55% 58%)" },
+      { id: "push-center", icon: Zap, label: "Push Center", accent: "hsl(22 78% 52%)" },
       { id: "notify", icon: Bell, label: "Notifications", accent: "hsl(38 88% 50%)" },
       { id: "sessions", icon: Monitor, label: "Sessions", accent: "hsl(270 50% 55%)" },
     ],

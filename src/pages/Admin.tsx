@@ -46,6 +46,7 @@ import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import AdminMediaAuditLog from "@/components/admin/AdminMediaAuditLog";
 import NotificationBell from "@/components/NotificationBell";
 import AdminNotificationSender from "@/components/admin/AdminNotificationSender";
+import AdminPushCenter from "@/components/admin/AdminPushCenter";
 import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
@@ -208,7 +209,7 @@ const Admin = () => {
     { id: "artists", label: "Artists" }, { id: "reviews", label: "Reviews" },
     { id: "pricing", label: "Pricing" }, { id: "intl-pricing", label: "Intl Pricing" },
     { id: "locations", label: "Locations" }, { id: "voice", label: "Voice" },
-    { id: "notify", label: "Notifications" }, { id: "sessions", label: "Sessions" },
+    { id: "notify", label: "Notifications" }, { id: "push-center", label: "Push Center" }, { id: "sessions", label: "Sessions" },
     { id: "enquiries", label: "Enquiries" }, { id: "support", label: "Support" },
     { id: "blog", label: "Blog" }, { id: "seo", label: "SEO" },
     { id: "files", label: "Files" },
@@ -1591,6 +1592,10 @@ const Admin = () => {
             <div className="mt-6">
               <AdminMediaAuditLog />
             </div>
+          </TabsContent>
+
+          <TabsContent value="push-center">
+            <AdminPushCenter />
           </TabsContent>
 
           <TabsContent value="notify">
