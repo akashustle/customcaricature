@@ -746,8 +746,8 @@ const Admin = () => {
       }} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/15">
+      <div className="flex-1 min-h-screen bg-[#0a0f1e] pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 bg-[#0f1629]/95 backdrop-blur-xl border-b border-[#1e2a4a]">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm">
