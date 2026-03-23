@@ -435,7 +435,7 @@ async function searchWorkshopPanel(q: string, tabFilter: string, all: SearchResu
 
 // ─── ARTIST DASHBOARD SEARCH ────
 async function searchArtistPanel(q: string, tabFilter: string, all: SearchResult[]) {
-  const searches: Promise<void>[] = [];
+  const searches: PromiseLike<void>[] = [];
   const shouldSearch = (tab: string) => tabFilter === "all" || tabFilter === tab;
 
   if (shouldSearch("events")) searches.push(
