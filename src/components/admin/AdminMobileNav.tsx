@@ -29,6 +29,7 @@ const PRIMARY_TABS = [
 const MORE_SECTIONS = [
   { section: "Analytics", icon: TrendingUp, items: [
     { id: "payments", label: "Payments", icon: DollarSign },
+    { id: "invoices", label: "Invoices", icon: Receipt },
     { id: "revenue", label: "Revenue", icon: DollarSign },
     { id: "revenue-target", label: "₹10L Target", icon: Target },
     { id: "ai-intelligence", label: "AI Insights", icon: Zap },
