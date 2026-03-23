@@ -2123,6 +2123,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Bot} label="AI" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
+          <AdminBottomNavItem icon={Shield} label="Security" active={activeTab === "security-dashboard"} onClick={() => setActiveTab("security-dashboard")} />
           <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Out" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
