@@ -107,6 +107,13 @@ const HomepageGallery = ({ table, title, subtitle }: {
               </motion.div>
             ))}
           </div>
+          {items.length > 8 && (
+            <div className="text-center mt-8">
+              <Button variant="outline" className="rounded-full font-body gap-2" onClick={() => navigate(`/gallery/${galleryType}`)}>
+                View All {items.length} Photos <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </section>
     </>

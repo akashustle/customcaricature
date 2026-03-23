@@ -1690,6 +1690,9 @@ const Admin = () => {
 
           <TabsContent value="gallery">
             <AdminGallery />
+            <div className="mt-6">
+              <AdminBeforeAfter />
+            </div>
           </TabsContent>
 
           <TabsContent value="hp-reviews">
