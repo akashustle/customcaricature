@@ -40,6 +40,11 @@ const AdminLogin = () => {
       if (roleError) throw roleError;
       if (!roles || roles.length === 0) {
         await supabase.auth.signOut();
+        // Log failed login - not an admin
+        await supabase.from("admin_failed_logins" as any).insert({
+          email: email.trim().toLowerCase(), reason: "not_authorized",
+          ip_address: null, device_info: navigator.userAgent.slice(0, 200),
+        });
         toast({ title: "Access Denied", description: "Not authorized for admin access.", variant: "destructive" });
         return;
       }
