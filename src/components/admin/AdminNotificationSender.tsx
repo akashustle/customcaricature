@@ -150,7 +150,18 @@ const AdminNotificationSender = () => {
         if (error) throw error;
       }
 
-      // Also send via OneSignal for push reach
+      // Send via PushPilot for web push
+      try {
+        await sendPushPilotNotification({
+          title: title.trim(),
+          message: message.trim(),
+          click_url: link.trim() || undefined,
+        });
+      } catch (ppErr) {
+        console.warn("PushPilot push failed (non-fatal):", ppErr);
+      }
+
+      // Also try OneSignal if enabled
       try {
         const userIds = mode === "all" ? undefined : targetUsers.map(u => u.user_id);
         await supabase.functions.invoke("send-onesignal", {
