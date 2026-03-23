@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot, ClipboardList, HelpCircle } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot, ClipboardList, HelpCircle, Target } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -78,6 +78,7 @@ import AdminNameGate from "@/components/admin/AdminNameGate";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
+import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
 
 type Order = {
   id: string;
@@ -168,7 +169,7 @@ const Admin = () => {
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
@@ -727,22 +728,22 @@ const Admin = () => {
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 admin-header-premium">
-          <div className="px-4 md:px-8 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/15">
+          <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
+              <span className="text-[13px] font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
-              <span className="text-muted-foreground/30">|</span>
+              <div className="w-px h-4 bg-border/30" />
               <LiveGreeting name={adminProfile?.full_name} />
-              <div className="ml-4 flex-1 max-w-lg">
+              <div className="ml-auto flex-1 max-w-md">
                 <AdminSmartSearch
                   panelType="main"
                   tabs={[
@@ -764,22 +765,26 @@ const Admin = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-8 gap-1.5 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
-                <LogOut className="w-3.5 h-3.5" /> Sign Out
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <LogOut className="w-3 h-3" /> Sign Out
               </Button>
             </div>
           </div>
         </header>
 
-        <div className="px-4 md:px-8 py-6">
+        <div className="px-4 md:px-6 py-5">
           <div className="md:hidden mb-4">
             <LiveGreeting name={adminProfile?.full_name} />
           </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard">
+            <AdminDashboardPremium onNavigate={setActiveTab} />
+          </TabsContent>
 
           {/* Orders Tab */}
           <TabsContent value="orders">
@@ -2068,35 +2073,22 @@ const Admin = () => {
         </div>
       )}
 
-      {/* Mobile Bottom Navigation — Premium */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden admin-header-premium safe-area-bottom">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-0.5 scrollbar-thin">
-          <AdminBottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-xl border-t border-border/15 safe-area-bottom">
+        <div className="flex items-center overflow-x-auto py-1.5 px-1 gap-0.5 scrollbar-thin">
+          <AdminBottomNavItem icon={BarChart3} label="Dash" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
           <AdminBottomNavItem icon={Package} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <AdminBottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
-          <AdminBottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-          <AdminBottomNavItem icon={Users} label="Evt Users" active={activeTab === "event-users"} onClick={() => setActiveTab("event-users")} />
-          <AdminBottomNavItem icon={DollarSign} label="Pricing" active={activeTab === "pricing"} onClick={() => setActiveTab("pricing")} />
+          <AdminBottomNavItem icon={Receipt} label="Pay" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <AdminBottomNavItem icon={Users} label="Users" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
-          <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
-          <AdminBottomNavItem icon={Star} label="Reviews" active={activeTab === "reviews"} onClick={() => setActiveTab("reviews")} />
+          <AdminBottomNavItem icon={Target} label="CRM" active={activeTab === "crm-pipeline"} onClick={() => setActiveTab("crm-pipeline")} />
           <AdminBottomNavItem icon={BarChart3} label="Stats" active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} />
-          <AdminBottomNavItem icon={MapPin} label="Location" active={activeTab === "locations"} onClick={() => setActiveTab("locations")} />
-          <AdminBottomNavItem icon={Radio} label="Voice" active={activeTab === "voice"} onClick={() => setActiveTab("voice")} />
+          <AdminBottomNavItem icon={Package} label="Artists" active={activeTab === "artists"} onClick={() => setActiveTab("artists")} />
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
-          <AdminBottomNavItem icon={Monitor} label="Sessions" active={activeTab === "sessions"} onClick={() => setActiveTab("sessions")} />
-          <AdminBottomNavItem icon={Globe} label="Intl" active={activeTab === "intl-pricing"} onClick={() => setActiveTab("intl-pricing")} />
-          <AdminBottomNavItem icon={Bot} label="AI Chats" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
-          <AdminBottomNavItem icon={Settings} label="AI Bot" active={activeTab === "chatbot"} onClick={() => setActiveTab("chatbot")} />
+          <AdminBottomNavItem icon={Bot} label="AI" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
-          <AdminBottomNavItem icon={MessageCircle} label="Support" active={activeTab === "support"} onClick={() => setActiveTab("support")} />
-          <AdminBottomNavItem icon={ClipboardList} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
-          <AdminBottomNavItem icon={Globe} label="SEO" active={activeTab === "seo"} onClick={() => setActiveTab("seo")} />
-          <AdminBottomNavItem icon={ClipboardList} label="Pages" active={activeTab === "pages"} onClick={() => setActiveTab("pages")} />
-          <AdminBottomNavItem icon={BarChart3} label="Calc" active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")} />
-          <AdminBottomNavItem icon={Settings} label="Integrations" active={activeTab === "integrations"} onClick={() => setActiveTab("integrations")} />
-          <AdminBottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
-          <AdminBottomNavItem icon={LogOut} label="Logout" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
+          <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+          <AdminBottomNavItem icon={LogOut} label="Out" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>
       </div>
       </div>
