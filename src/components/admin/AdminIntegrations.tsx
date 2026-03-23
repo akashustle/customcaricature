@@ -209,6 +209,33 @@ const AdminIntegrations = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* PushPilot Web Push */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Zap className="w-5 h-5 text-accent" />
+            PushPilot Web Push
+            {pushpilotEnabled ? (
+              <Badge className="bg-emerald-100 text-emerald-800 border-none text-xs ml-2">Active</Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs ml-2">Disabled</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            PushPilot handles web push notifications for all website visitors. Toggle to enable/disable.
+          </p>
+          <div className="flex items-center gap-3">
+            <Switch checked={pushpilotEnabled} onCheckedChange={setPushpilotEnabled} />
+            <Label className="text-sm font-medium">Enable PushPilot Push</Label>
+          </div>
+          <Button size="sm" onClick={savePushPilot} className="gap-1">
+            <Save className="w-4 h-4" /> Save PushPilot Config
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
