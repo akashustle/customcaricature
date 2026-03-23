@@ -82,6 +82,11 @@ const OneSignalInit = () => {
   return null;
 };
 
+const PushPilotInit = () => {
+  usePushPilot();
+  return null;
+};
+
 const RouteMemoryTracker = () => {
   useRouteMemory();
   return null;
