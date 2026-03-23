@@ -30,13 +30,19 @@ const slides = [
 
 const AppOnboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, loading } = useAuth();
   const [visible, setVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
+    // Don't show during OAuth callback or if user is already logged in
+    if (loading) return;
+    if (user) { localStorage.setItem(ONBOARDING_KEY, "done"); return; }
+    if (location.pathname.includes("~oauth") || location.hash.includes("access_token")) return;
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) setVisible(true);
-  }, []);
+  }, [user, loading, location]);
 
   const finish = () => {
     localStorage.setItem(ONBOARDING_KEY, "done");
