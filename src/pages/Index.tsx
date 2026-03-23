@@ -24,6 +24,7 @@ import HomepageUseCases from "@/components/homepage/HomepageUseCases";
 import HomepageSmartHelp from "@/components/homepage/HomepageSmartHelp";
 import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageUrgencyStrip from "@/components/homepage/HomepageUrgencyStrip";
+import HomepageEnquiryFunnel from "@/components/homepage/HomepageEnquiryFunnel";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
