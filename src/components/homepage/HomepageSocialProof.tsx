@@ -9,6 +9,13 @@ const iconMap: Record<string, any> = {
   "Average Rating": Award,
 };
 
+const defaultStats = [
+  { value: "800+", label: "Events Completed" },
+  { value: "15+", label: "Professional Artists" },
+  { value: "1000+", label: "Happy Clients" },
+  { value: "4.9", label: "Average Rating" },
+];
+
 const AnimatedCounter = ({ value, inView }: { value: string; inView: boolean }) => {
   const numMatch = value.match(/^([\d.]+)/);
   const suffix = value.replace(/^[\d.]+/, "");
@@ -38,10 +45,10 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
 
-  if (!config?.stats) return null;
-  const stats = config.stats as Array<{ value: string; label: string }>;
-  const monthlyText = config.monthly_text;
-  const monthlyRange = config.monthly_range;
+  // Use config stats or fallback to defaults
+  const stats = (config?.stats && config.stats.length > 0) ? config.stats as Array<{ value: string; label: string }> : defaultStats;
+  const monthlyCounter = config?.monthly_counter;
+  const monthlyText = config?.monthly_text;
 
   return (
     <section ref={ref} className="py-16 md:py-20 bg-card/50 border-y border-border/50 overflow-hidden">
@@ -74,8 +81,8 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
           })}
         </div>
 
-        {/* Monthly Range */}
-        {monthlyRange && (
+        {/* Monthly Counter - single number */}
+        {monthlyCounter && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -84,12 +91,12 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
           >
             <TrendingUp className="w-5 h-5 text-primary" />
             <p className="text-sm font-body font-semibold text-primary">
-              🔥 {monthlyRange.label || "Events Booked This Month"}: {monthlyRange.min || 25} – {monthlyRange.max || 50}
+              🔥 {monthlyCounter.label || "Events Booked This Month"}: {monthlyCounter.count || 40}
             </p>
           </motion.div>
         )}
 
-        {monthlyText && !monthlyRange && (
+        {monthlyText && !monthlyCounter && (
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
