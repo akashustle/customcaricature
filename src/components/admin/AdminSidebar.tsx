@@ -5,7 +5,7 @@ import {
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
   Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle,
-  Gift, Ticket, AlertTriangle
+  Gift, Ticket, AlertTriangle, ToggleLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -26,6 +26,7 @@ const NAV_SECTIONS = [
       { id: "orders", icon: Package, label: "Orders" },
       { id: "events", icon: Calendar, label: "Events" },
       { id: "payments", icon: Receipt, label: "Payments" },
+      { id: "invoices", icon: FileText, label: "Invoices" },
     ],
   },
   {
@@ -120,6 +121,7 @@ const NAV_SECTIONS = [
     items: [
       { id: "referrals", icon: Gift, label: "Referrals" },
       { id: "coupons", icon: Ticket, label: "Coupons" },
+      { id: "feature-gating", icon: ToggleLeft, label: "Feature Gates" },
     ],
   },
   {

@@ -96,6 +96,8 @@ import { useAutoLogout } from "@/hooks/useAutoLogout";
 import AdminReferrals from "@/components/admin/AdminReferrals";
 import AdminCoupons from "@/components/admin/AdminCoupons";
 import AdminMaintenance from "@/components/admin/AdminMaintenance";
+import AdminInvoices from "@/components/admin/AdminInvoices";
+import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
 
 type Order = {
   id: string;
@@ -1776,6 +1778,14 @@ const Admin = () => {
 
           <TabsContent value="coupons">
             <AdminCoupons />
+          </TabsContent>
+
+          <TabsContent value="invoices">
+            <AdminInvoices />
+          </TabsContent>
+
+          <TabsContent value="feature-gating">
+            <AdminFeatureGating />
           </TabsContent>
 
           <TabsContent value="maintenance">

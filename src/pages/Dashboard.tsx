@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ import NotificationBell from "@/components/NotificationBell";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
+import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -271,6 +272,9 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <LiveGreeting name={profile?.full_name} />
 
+        {/* Payment Reminders */}
+        {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
+
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
@@ -339,6 +343,7 @@ const Dashboard = () => {
                 <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
               )}
               <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
+              <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>
               <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>
               {(settings as any).workshop_dashboard_visible?.enabled && (
                 <TabsTrigger value="workshop" className="flex-1 font-sans"><GraduationCap className="w-4 h-4 mr-2" />Workshop</TabsTrigger>
@@ -352,6 +357,7 @@ const Dashboard = () => {
               <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             )}
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>
             <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
             {(settings as any).workshop_dashboard_visible?.enabled && (
               <TabsContent value="workshop"><WorkshopSection profile={profile} user={user} navigate={navigate} /></TabsContent>
@@ -372,6 +378,7 @@ const Dashboard = () => {
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
           {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
           {activeTab === "workshop" && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
           {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
@@ -396,6 +403,7 @@ const Dashboard = () => {
               <DashNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
             )}
             <DashNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
+            <DashNavItem icon={FileText} label="Invoices" active={activeTab === "invoices"} onClick={() => setActiveTab("invoices")} />
             <DashNavItem icon={Bell} label="Alerts" active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} />
             {(settings as any).workshop_dashboard_visible?.enabled && (
               <DashNavItem icon={GraduationCap} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
@@ -1553,6 +1561,81 @@ const Row = ({ label, value }: { label: string; value: string }) => (
     <span className="font-medium text-right max-w-[60%]">{value}</span>
   </div>
 );
+
+const InvoicesList = ({ userId }: { userId: string }) => {
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("invoices").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+      if (data) setInvoices(data);
+      setLoading(false);
+    };
+    fetch();
+  }, [userId]);
+
+  const downloadInvoice = (inv: any) => {
+    const content = `
+INVOICE - ${inv.invoice_number}
+================================
+Date: ${new Date(inv.created_at).toLocaleDateString()}
+Customer: ${inv.customer_name}
+Email: ${inv.customer_email}
+Mobile: ${inv.customer_mobile}
+Type: ${inv.invoice_type}
+--------------------------------
+Amount: ₹${inv.amount}
+Tax: ₹${inv.tax_amount}
+Total: ₹${inv.total_amount}
+--------------------------------
+Status: ${inv.status}
+Payment: ${inv.payment_method || "N/A"}
+${inv.notes ? `Notes: ${inv.notes}` : ""}
+================================
+Creative Caricature Club
+    `.trim();
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${inv.invoice_number}.txt`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) return <div className="py-8 text-center text-muted-foreground font-sans"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>;
+
+  if (invoices.length === 0) return (
+    <Card><CardContent className="p-8 text-center">
+      <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+      <p className="text-muted-foreground font-sans">No invoices yet</p>
+    </CardContent></Card>
+  );
+
+  return (
+    <div className="space-y-3">
+      <h3 className="font-display text-lg font-bold flex items-center gap-2"><FileText className="w-5 h-5 text-primary" />Your Invoices</h3>
+      {invoices.map(inv => (
+        <Card key={inv.id} className="overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="font-mono text-sm font-bold">{inv.invoice_number}</p>
+                <p className="text-xs text-muted-foreground font-sans">{new Date(inv.created_at).toLocaleDateString()} • {inv.invoice_type}</p>
+              </div>
+              <Badge className={inv.status === "paid" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground"}>{inv.status}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="font-display text-lg font-bold text-primary">{formatPrice(inv.total_amount)}</p>
+              <Button variant="outline" size="sm" className="rounded-full font-sans" onClick={() => downloadInvoice(inv)}>
+                <Download className="w-3.5 h-3.5 mr-1" />Download
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
 
 const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, canBookEvent }: any) => {
   const suggestions: { icon: any; text: string; action: () => void; color: string }[] = [];
