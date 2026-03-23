@@ -3,7 +3,8 @@ import {
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
-  LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion
+  LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion,
+  Type, FormInput, Palette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
