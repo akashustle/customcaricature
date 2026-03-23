@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePermissions } from "@/hooks/usePermissions";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import ChatWidget from "@/components/ChatWidget";
+import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 
 type ArtistEvent = {
   id: string; client_name: string; event_type: string; event_date: string;
