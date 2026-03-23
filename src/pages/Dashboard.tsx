@@ -1562,6 +1562,81 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const InvoicesList = ({ userId }: { userId: string }) => {
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase.from("invoices").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+      if (data) setInvoices(data);
+      setLoading(false);
+    };
+    fetch();
+  }, [userId]);
+
+  const downloadInvoice = (inv: any) => {
+    const content = `
+INVOICE - ${inv.invoice_number}
+================================
+Date: ${new Date(inv.created_at).toLocaleDateString()}
+Customer: ${inv.customer_name}
+Email: ${inv.customer_email}
+Mobile: ${inv.customer_mobile}
+Type: ${inv.invoice_type}
+--------------------------------
+Amount: ₹${inv.amount}
+Tax: ₹${inv.tax_amount}
+Total: ₹${inv.total_amount}
+--------------------------------
+Status: ${inv.status}
+Payment: ${inv.payment_method || "N/A"}
+${inv.notes ? `Notes: ${inv.notes}` : ""}
+================================
+Creative Caricature Club
+    `.trim();
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${inv.invoice_number}.txt`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) return <div className="py-8 text-center text-muted-foreground font-sans"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>;
+
+  if (invoices.length === 0) return (
+    <Card><CardContent className="p-8 text-center">
+      <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+      <p className="text-muted-foreground font-sans">No invoices yet</p>
+    </CardContent></Card>
+  );
+
+  return (
+    <div className="space-y-3">
+      <h3 className="font-display text-lg font-bold flex items-center gap-2"><FileText className="w-5 h-5 text-primary" />Your Invoices</h3>
+      {invoices.map(inv => (
+        <Card key={inv.id} className="overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="font-mono text-sm font-bold">{inv.invoice_number}</p>
+                <p className="text-xs text-muted-foreground font-sans">{new Date(inv.created_at).toLocaleDateString()} • {inv.invoice_type}</p>
+              </div>
+              <Badge className={inv.status === "paid" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground"}>{inv.status}</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="font-display text-lg font-bold text-primary">{formatPrice(inv.total_amount)}</p>
+              <Button variant="outline" size="sm" className="rounded-full font-sans" onClick={() => downloadInvoice(inv)}>
+                <Download className="w-3.5 h-3.5 mr-1" />Download
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, canBookEvent }: any) => {
   const suggestions: { icon: any; text: string; action: () => void; color: string }[] = [];
 
