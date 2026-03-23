@@ -72,7 +72,7 @@ export const initWebPush = async (userId?: string) => {
       return;
     }
 
-    let permission = currentPermission;
+    let permission: string = currentPermission;
     if (currentPermission === "default") {
       // This triggers the browser's native permission prompt
       permission = await Notification.requestPermission();
