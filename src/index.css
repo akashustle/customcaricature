@@ -739,15 +739,15 @@
   /* Floating shadow — subtle */
   .shadow-3d {
     box-shadow:
-      0 2px 4px hsl(25 15% 30% / 0.03),
-      0 6px 16px hsl(25 15% 30% / 0.06),
-      0 12px 32px hsl(25 25% 40% / 0.04);
+      0 2px 4px hsl(var(--foreground) / 0.03),
+      0 6px 16px hsl(var(--foreground) / 0.06),
+      0 12px 32px hsl(var(--foreground) / 0.04);
   }
   .shadow-3d:hover {
     box-shadow:
-      0 4px 8px hsl(25 15% 30% / 0.04),
-      0 12px 28px hsl(25 15% 30% / 0.08),
-      0 20px 48px hsl(25 25% 40% / 0.06);
+      0 4px 8px hsl(var(--foreground) / 0.04),
+      0 12px 28px hsl(var(--foreground) / 0.08),
+      0 20px 48px hsl(var(--foreground) / 0.06);
   }
 
   /* Border glow — subtle */
