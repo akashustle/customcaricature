@@ -84,7 +84,7 @@ const HomepageGallery = ({ table, title, subtitle }: {
             <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">{title}</h2>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {items.map((item, i) => (
+            {items.slice(0, 8).map((item, i) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, scale: 0.95 }}
