@@ -531,18 +531,18 @@
     border-radius: 1rem;
     padding: 1rem;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(145deg, hsl(30 40% 99%), hsl(30 20% 96%));
-    border: 1px solid hsl(30 18% 90%);
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--secondary)));
+    border: 1px solid hsl(var(--border));
     box-shadow: 
-      0 4px 14px hsl(25 15% 40% / 0.05), 
-      0 1px 3px hsl(25 15% 40% / 0.03), 
-      inset 0 1px 0 hsl(30 40% 99%);
+      0 4px 14px hsl(var(--foreground) / 0.05), 
+      0 1px 3px hsl(var(--foreground) / 0.03), 
+      inset 0 1px 0 hsl(var(--card));
   }
   .stat-widget-3d:hover {
     transform: translateY(-3px) scale(1.01);
     box-shadow: 
-      0 10px 30px hsl(25 25% 40% / 0.08), 
-      0 4px 8px hsl(25 15% 40% / 0.04);
+      0 10px 30px hsl(var(--foreground) / 0.08), 
+      0 4px 8px hsl(var(--foreground) / 0.04);
   }
 
   /* Page transitions */
