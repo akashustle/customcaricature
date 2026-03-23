@@ -4,7 +4,8 @@ import {
   ClipboardList, HelpCircle, Star, PenTool, Globe, MapPin,
   Radio, Bell, Monitor, Home as HomeIcon, FileText, Image,
   Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
-  Calculator, FileQuestion, Layers, TrendingUp, UserCheck
+  Calculator, FileQuestion, Layers, TrendingUp, UserCheck,
+  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
