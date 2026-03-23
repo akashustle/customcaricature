@@ -23,6 +23,9 @@ const AdminIntegrations = () => {
   const [otpApiKey, setOtpApiKey] = useState("");
   const [otpProvider, setOtpProvider] = useState("twilio");
 
+  // PushPilot
+  const [pushpilotEnabled, setPushpilotEnabled] = useState(true);
+
   // Load from DB settings
   useEffect(() => {
     if (loading) return;
