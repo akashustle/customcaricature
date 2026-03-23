@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useContentBlocks } from "@/hooks/useContentBlocks";
 import { toast } from "@/hooks/use-toast";
-import { Save, Plus, Eye, EyeOff, Type, Search, FileText, Layout } from "lucide-react";
+import { Save, Plus, Eye, EyeOff, Type, Search, Layout } from "lucide-react";
 
 const PAGES = [
   { id: "global", label: "Global" },
@@ -24,7 +24,7 @@ const PAGES = [
 ];
 
 const AdminContentEditor = () => {
-  const { blocks, updateBlock, toggleVisibility, refetch } = useContentBlocks();
+  const { blocks, updateBlock, toggleVisibility } = useContentBlocks();
   const [selectedPage, setSelectedPage] = useState("global");
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -56,27 +56,27 @@ const AdminContentEditor = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <Type className="w-5 h-5 text-primary" /> Frontend Text Editor
+          <h2 className="text-lg font-bold flex items-center gap-2 text-white font-sans">
+            <Type className="w-5 h-5 text-indigo-400" /> Frontend Text Editor
           </h2>
-          <p className="text-xs text-muted-foreground">Edit any text on the website in real-time</p>
+          <p className="text-xs text-slate-400 font-sans">Edit any text on the website in real-time</p>
         </div>
-        <Button size="sm" onClick={() => setShowAdd(!showAdd)}>
+        <Button size="sm" onClick={() => setShowAdd(!showAdd)} className="bg-indigo-600 hover:bg-indigo-700 text-white font-sans">
           <Plus className="w-4 h-4 mr-1" /> Add Block
         </Button>
       </div>
 
       {showAdd && (
-        <Card className="border-primary/20">
+        <Card className="bg-[#131b2e] border-indigo-500/30">
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Input placeholder="Block ID (e.g. hero_title)" value={newBlock.id} onChange={e => setNewBlock(p => ({ ...p, id: e.target.value }))} />
+              <Input placeholder="Block ID (e.g. hero_title)" value={newBlock.id} onChange={e => setNewBlock(p => ({ ...p, id: e.target.value }))} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
               <Select value={newBlock.page} onValueChange={v => setNewBlock(p => ({ ...p, page: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans"><SelectValue /></SelectTrigger>
                 <SelectContent>{PAGES.map(p => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={newBlock.type} onValueChange={v => setNewBlock(p => ({ ...p, type: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="text">Text</SelectItem>
                   <SelectItem value="heading">Heading</SelectItem>
@@ -86,19 +86,19 @@ const AdminContentEditor = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Textarea placeholder="Content text..." value={newBlock.text} onChange={e => setNewBlock(p => ({ ...p, text: e.target.value }))} rows={2} />
-            <Button size="sm" onClick={handleAdd}><Save className="w-4 h-4 mr-1" /> Save</Button>
+            <Textarea placeholder="Content text..." value={newBlock.text} onChange={e => setNewBlock(p => ({ ...p, text: e.target.value }))} rows={2} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+            <Button size="sm" onClick={handleAdd} className="bg-indigo-600 hover:bg-indigo-700 text-white font-sans"><Save className="w-4 h-4 mr-1" /> Save</Button>
           </CardContent>
         </Card>
       )}
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search blocks..." value={search} onChange={e => setSearch(e.target.value)} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Input className="pl-9 bg-[#131b2e] border-[#2a3654] text-slate-200 font-sans" placeholder="Search blocks..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <Select value={selectedPage} onValueChange={setSelectedPage}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[160px] bg-[#131b2e] border-[#2a3654] text-slate-200 font-sans"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Pages</SelectItem>
             {PAGES.map(p => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
@@ -107,48 +107,48 @@ const AdminContentEditor = () => {
       </div>
 
       {filteredBlocks.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Layout className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm font-medium">No content blocks yet</p>
-            <p className="text-xs mt-1">Add blocks to control text across the website</p>
+        <Card className="bg-[#131b2e] border-[#1e2a4a]">
+          <CardContent className="py-12 text-center">
+            <Layout className="w-10 h-10 mx-auto mb-3 text-slate-600" />
+            <p className="text-sm font-medium text-slate-400 font-sans">No content blocks yet</p>
+            <p className="text-xs mt-1 text-slate-500 font-sans">Add blocks to control text across the website</p>
           </CardContent>
         </Card>
       )}
 
       <div className="space-y-2">
         {filteredBlocks.map(block => (
-          <Card key={block.id} className={`transition-all ${!block.is_visible ? "opacity-50" : ""}`}>
+          <Card key={block.id} className={`bg-[#131b2e] border-[#1e2a4a] transition-all ${!block.is_visible ? "opacity-50" : ""}`}>
             <CardContent className="py-3 px-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{block.id}</code>
-                    <Badge variant="outline" className="text-[10px]">{block.page}</Badge>
-                    <Badge variant="secondary" className="text-[10px]">{block.block_type}</Badge>
+                    <code className="text-xs font-mono bg-[#1e2a4a] text-indigo-300 px-1.5 py-0.5 rounded">{block.id}</code>
+                    <Badge className="text-[10px] bg-[#1e2a4a] text-slate-300 border-0 font-sans">{block.page}</Badge>
+                    <Badge className="text-[10px] bg-violet-500/15 text-violet-300 border-0 font-sans">{block.block_type}</Badge>
                   </div>
                   {editingId === block.id ? (
                     <div className="space-y-2 mt-2">
                       {Object.entries(editContent).map(([key, val]) => (
                         <div key={key}>
-                          <label className="text-[10px] font-medium text-muted-foreground uppercase">{key}</label>
+                          <label className="text-[10px] font-medium text-slate-500 uppercase font-sans">{key}</label>
                           <Textarea
                             value={String(val)}
                             onChange={e => setEditContent(p => ({ ...p, [key]: e.target.value }))}
                             rows={2}
-                            className="text-sm mt-0.5"
+                            className="text-sm mt-0.5 bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans"
                           />
                         </div>
                       ))}
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={() => handleSave(block.id, editContent)}>
+                        <Button size="sm" onClick={() => handleSave(block.id, editContent)} className="bg-indigo-600 hover:bg-indigo-700 text-white font-sans">
                           <Save className="w-3 h-3 mr-1" /> Save
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="text-slate-400 font-sans">Cancel</Button>
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-foreground/80 truncate mt-1 cursor-pointer" onClick={() => {
+                    <p className="text-sm text-slate-300 truncate mt-1 cursor-pointer font-sans" onClick={() => {
                       setEditingId(block.id);
                       setEditContent(block.content);
                     }}>
@@ -156,14 +156,14 @@ const AdminContentEditor = () => {
                     </p>
                   )}
                   {block.updated_by && (
-                    <p className="text-[10px] text-muted-foreground mt-1">
+                    <p className="text-[10px] text-slate-500 mt-1 font-sans">
                       Last edited by {block.updated_by} · {new Date(block.updated_at).toLocaleDateString()}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Switch checked={block.is_visible} onCheckedChange={v => toggleVisibility(block.id, v)} />
-                  {block.is_visible ? <Eye className="w-3.5 h-3.5 text-primary" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
+                  {block.is_visible ? <Eye className="w-3.5 h-3.5 text-indigo-400" /> : <EyeOff className="w-3.5 h-3.5 text-slate-500" />}
                 </div>
               </div>
             </CardContent>
