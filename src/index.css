@@ -795,3 +795,15 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* Search highlight glow */
+@keyframes searchHighlightGlow {
+  0% { box-shadow: 0 0 0 3px hsl(48 96% 53% / 0.6); background-color: hsl(48 96% 53% / 0.1); }
+  70% { box-shadow: 0 0 0 3px hsl(48 96% 53% / 0.3); background-color: hsl(48 96% 53% / 0.05); }
+  100% { box-shadow: none; background-color: transparent; }
+}
+.search-highlight {
+  animation: searchHighlightGlow 4s ease-out forwards;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}

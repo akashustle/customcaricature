@@ -31,7 +31,7 @@ import ExportButton from "@/components/admin/ExportButton";
 import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
-import AdminGlobalSearch from "@/components/admin/AdminGlobalSearch";
+import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 
 const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d98c8c", "#8fa3bf", "#a8c0a0", "#e0a060", "#9080c0"];
 
@@ -880,7 +880,24 @@ const WorkshopAdmin = () => {
             </div>
           </div>
           <div className="px-3 pb-2">
-            <AdminGlobalSearch onNavigate={setTab} />
+            <AdminSmartSearch
+              panelType="workshop"
+              tabs={[
+                { id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" },
+                { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" },
+                { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
+                { id: "live", label: "Live Sessions" },
+              ]}
+              onNavigate={(tab, highlightId) => {
+                setTab(tab);
+                if (highlightId) {
+                  setTimeout(() => {
+                    const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                    if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                  }, 300);
+                }
+              }}
+            />
           </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
@@ -911,8 +928,24 @@ const WorkshopAdmin = () => {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
                     <div className="flex items-center gap-2">
-                      <div className="hidden lg:block w-64">
-                        <AdminGlobalSearch onNavigate={setTab} />
+                      <div className="hidden lg:block w-72">
+                        <AdminSmartSearch
+                          panelType="workshop"
+                          tabs={[
+                            { id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" },
+                            { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
+                            { id: "live", label: "Live Sessions" },
+                          ]}
+                          onNavigate={(t, highlightId) => {
+                            setTab(t);
+                            if (highlightId) {
+                              setTimeout(() => {
+                                const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                                if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                              }, 300);
+                            }
+                          }}
+                        />
                       </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
                         <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>

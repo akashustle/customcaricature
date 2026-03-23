@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { usePermissions } from "@/hooks/usePermissions";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import ChatWidget from "@/components/ChatWidget";
+import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 
 type ArtistEvent = {
   id: string; client_name: string; event_type: string; event_date: string;
@@ -303,6 +304,24 @@ const ArtistDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="mb-4">
+          <AdminSmartSearch
+            panelType="artist"
+            tabs={[
+              { id: "events", label: "Events" },
+              { id: "orders", label: "Orders" },
+            ]}
+            onNavigate={(tab, highlightId) => {
+              setActiveTab(tab);
+              if (highlightId) {
+                setTimeout(() => {
+                  const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                  if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                }, 300);
+              }
+            }}
+          />
+        </div>
         <LiveGreeting name={artist?.name} />
 
         {/* Stats — Enhanced */}
