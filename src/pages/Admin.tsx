@@ -86,6 +86,7 @@ import AdminFormBuilder from "@/components/admin/AdminFormBuilder";
 import AdminDesignControl from "@/components/admin/AdminDesignControl";
 import AdminActivityLogs from "@/components/admin/AdminActivityLogs";
 import AdminSecurityDashboard from "@/components/admin/AdminSecurityDashboard";
+import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 
 type Order = {
