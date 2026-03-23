@@ -374,28 +374,29 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           fileName="CCC_Events"
         />
       </div>
-      {/* Stats Widgets - 3D Animated */}
+      {/* Stats Widgets - Modern Vibrant */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { icon: Calendar, label: "Total Events", value: String(events.length), color: "hsl(36,45%,52%)" },
-          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), color: "hsl(210,65%,55%)" },
-          { icon: Settings, label: "Completed", value: String(completed), color: "hsl(152,50%,48%)" },
-          { icon: X, label: "Cancelled", value: String(cancelled), color: "hsl(0,55%,62%)" },
-          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), color: "hsl(280,50%,55%)" },
-          { icon: MapPin, label: "Outside Mumbai", value: String(outsideEvents), color: "hsl(38,92%,55%)" },
-        ].map((w, i) => (
-          <div key={w.label} className="stat-widget-3d">
-            <div className="absolute top-0 right-0 w-16 h-16 rounded-full opacity-10 -translate-y-4 translate-x-4" style={{ background: w.color }} />
-            <div className="flex items-center gap-2 relative z-10">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style={{ background: w.color }}>
-                <w.icon className="w-4 h-4 text-white" />
+          { icon: Calendar, label: "Total Events", value: String(events.length), gradient: "from-blue-500 to-blue-600" },
+          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), gradient: "from-emerald-500 to-teal-600" },
+          { icon: Settings, label: "Completed", value: String(completed), gradient: "from-violet-500 to-purple-600" },
+          { icon: X, label: "Cancelled", value: String(cancelled), gradient: "from-rose-500 to-red-600" },
+          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), gradient: "from-amber-500 to-orange-600" },
+          { icon: MapPin, label: "Outside Mumbai", value: String(outsideEvents), gradient: "from-cyan-500 to-sky-600" },
+        ].map((w) => (
+          <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-4 group hover:border-blue-500/30 transition-all">
+            <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
+                <w.icon className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg font-body font-bold truncate">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-body">{w.label}</p>
+                <p className="text-xl font-bold text-white">{w.value}</p>
+                <p className="text-[11px] text-slate-400">{w.label}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
