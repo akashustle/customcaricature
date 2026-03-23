@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.generate-caricature]
 verify_jwt = false
+
+[functions.admin-ai-monitor]
+verify_jwt = false

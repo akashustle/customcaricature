@@ -86,6 +86,7 @@ import AdminFormBuilder from "@/components/admin/AdminFormBuilder";
 import AdminDesignControl from "@/components/admin/AdminDesignControl";
 import AdminActivityLogs from "@/components/admin/AdminActivityLogs";
 import AdminSecurityDashboard from "@/components/admin/AdminSecurityDashboard";
+import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 
 type Order = {
@@ -1726,6 +1727,10 @@ const Admin = () => {
 
           <TabsContent value="design-control">
             <AdminDesignControl />
+          </TabsContent>
+
+          <TabsContent value="admin-monitoring">
+            <AdminMonitoringAI />
           </TabsContent>
 
           <TabsContent value="security-dashboard">

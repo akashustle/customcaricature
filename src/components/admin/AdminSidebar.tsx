@@ -4,7 +4,7 @@ import {
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion,
-  Type, FormInput, Palette, Activity, ShieldCheck
+  Type, FormInput, Palette, Activity, ShieldCheck, Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -107,6 +107,7 @@ const NAV_SECTIONS = [
   {
     label: "Security",
     items: [
+      { id: "admin-monitoring", icon: Brain, label: "AI Monitor" },
       { id: "security-dashboard", icon: ShieldCheck, label: "Security" },
       { id: "activity-logs", icon: Activity, label: "Activity Logs" },
     ],
