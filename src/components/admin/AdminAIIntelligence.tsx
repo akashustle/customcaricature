@@ -230,21 +230,22 @@ const AdminAIIntelligence = () => {
         <TabsContent value="predictions" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: "Today's Revenue", value: todayRevenue, predicted: Math.round(avgDailyRevenue), icon: DollarSign, color: "hsl(152,50%,48%)" },
-              { label: "Weekly Projection", value: weekRevenue, predicted: Math.round(predictedWeekly), icon: Calendar, color: "hsl(210,65%,55%)" },
-              { label: "Monthly Forecast", value: monthRevenue, predicted: Math.round(predictedMonthly), icon: BarChart3, color: "hsl(36,45%,52%)" },
-              { label: "Confidence Score", value: null, predicted: null, icon: Brain, color: "hsl(280,50%,55%)", confidence: confidence },
+              { label: "Today's Revenue", value: todayRevenue, predicted: Math.round(avgDailyRevenue), icon: DollarSign, color: "hsl(152,50%,48%)", glowClass: "revenue-glow", gradient: "from-emerald-500/10 to-green-500/5" },
+              { label: "Weekly Projection", value: weekRevenue, predicted: Math.round(predictedWeekly), icon: Calendar, color: "hsl(210,65%,55%)", glowClass: "analytics-glow", gradient: "from-blue-500/10 to-indigo-500/5" },
+              { label: "Monthly Forecast", value: monthRevenue, predicted: Math.round(predictedMonthly), icon: BarChart3, color: "hsl(36,45%,52%)", glowClass: "", gradient: "from-amber-500/10 to-orange-500/5" },
+              { label: "Confidence Score", value: null, predicted: null, icon: Brain, color: "hsl(280,50%,55%)", confidence: confidence, glowClass: "ai-glow", gradient: "from-purple-500/10 to-violet-500/5" },
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                <Card className="border border-border/60 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-5">
+                <Card className={`border border-border/60 hover:shadow-lg transition-all overflow-hidden relative ${card.glowClass}`}>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} pointer-events-none`} />
+                  <CardContent className="p-5 relative">
                     <div className="flex items-start justify-between mb-3">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: card.color + "20" }}>
                         <card.icon className="w-5 h-5" style={{ color: card.color }} />
                       </div>
                       {card.predicted && card.value !== null && (
                         <Badge variant="outline" className="text-[10px]">
-                          {card.value > card.predicted ? <ArrowUp className="w-3 h-3 text-green-600 mr-1" /> : <ArrowDown className="w-3 h-3 text-red-500 mr-1" />}
+                          {card.value > card.predicted ? <ArrowUp className="w-3 h-3 text-emerald-600 mr-1" /> : <ArrowDown className="w-3 h-3 text-red-500 mr-1" />}
                           vs predicted
                         </Badge>
                       )}
