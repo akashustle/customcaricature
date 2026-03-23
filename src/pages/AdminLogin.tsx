@@ -91,9 +91,12 @@ const AdminLogin = () => {
       }
 
       const { data: activeSessions } = await supabase.from("admin_sessions").select("id").eq("is_active", true);
-      if (activeSessions && activeSessions.length >= 5) {
+      const sessionLimit = parseInt(sessionStorage.getItem("admin_extended_limit") || "5");
+      if (activeSessions && activeSessions.length >= sessionLimit) {
         await supabase.auth.signOut();
-        toast({ title: "Session Limit Reached", description: "Maximum 5 concurrent admin sessions.", variant: "destructive" });
+        setPendingUserId(authData.user.id);
+        setSessionLimitReached(true);
+        setLoading(false);
         return;
       }
 
