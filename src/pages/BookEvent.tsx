@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 import { format } from "date-fns";
 import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
