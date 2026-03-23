@@ -33,6 +33,7 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [upcomingEventsList, setUpcomingEventsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [drillDown, setDrillDown] = useState<{ metric: string; title: string } | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
