@@ -1729,6 +1729,10 @@ const Admin = () => {
             <AdminDesignControl />
           </TabsContent>
 
+          <TabsContent value="admin-monitoring">
+            <AdminMonitoringAI />
+          </TabsContent>
+
           <TabsContent value="security-dashboard">
             <AdminSecurityDashboard />
           </TabsContent>
