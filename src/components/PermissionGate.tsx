@@ -1,113 +1,211 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, MapPin, Mic, ShieldCheck, Loader2 } from "lucide-react";
+import { Bell, MapPin, Mic, ShieldCheck, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
 import { requestBrowserNotificationPermission } from "@/lib/webpush";
+import { motion, AnimatePresence } from "framer-motion";
 
-const GATE_KEY = "ccc_permissions_gate_v2";
+const GATE_KEY = "ccc_permissions_gate_v3";
+const DELAY_MS = 5000;
 
 const PermissionGate = () => {
   const { user } = useAuth();
-  const { location, microphone, requestLocation, requestMicrophone } = usePermissions(false);
   const [visible, setVisible] = useState(false);
-  const [notificationStatus, setNotificationStatus] = useState<NotificationPermission | "unsupported">(
+  const [requesting, setRequesting] = useState(false);
+  const [currentStep, setCurrentStep] = useState<string | null>(null);
+
+  const [locationStatus, setLocationStatus] = useState<string>(
+    "prompt"
+  );
+  const [notificationStatus, setNotificationStatus] = useState<string>(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission
   );
-  const [requesting, setRequesting] = useState(false);
+  const [micStatus, setMicStatus] = useState<string>("prompt");
 
   useEffect(() => {
     const done = localStorage.getItem(GATE_KEY) === "done";
-    setVisible(!done);
-  }, []);
+    if (done) return;
 
-  const statuses = useMemo(
-    () => [
-      { label: "Notifications", value: notificationStatus, icon: Bell },
-      { label: "Microphone", value: microphone, icon: Mic },
-      { label: "Location", value: location, icon: MapPin },
-    ],
-    [notificationStatus, microphone, location]
-  );
+    // Check if all permissions are already granted
+    const allAlreadyGranted =
+      typeof Notification !== "undefined" && Notification.permission === "granted";
+
+    if (allAlreadyGranted) {
+      // Still don't show gate but silently init push
+      requestBrowserNotificationPermission(user?.id);
+      return;
+    }
+
+    // Show custom prompt after 5 seconds
+    const timer = setTimeout(() => {
+      setVisible(true);
+    }, DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [user?.id]);
+
+  // Check existing permission states on mount
+  useEffect(() => {
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "geolocation" }).then(r => setLocationStatus(r.state)).catch(() => {});
+      navigator.permissions.query({ name: "microphone" as PermissionName }).then(r => setMicStatus(r.state)).catch(() => {});
+    }
+    if (typeof Notification !== "undefined") {
+      setNotificationStatus(Notification.permission);
+    }
+  }, []);
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
     setVisible(false);
   };
 
-  const handleContinue = async () => {
+  const handleAllow = async () => {
     setRequesting(true);
-    const notif = await requestBrowserNotificationPermission(user?.id);
-    setNotificationStatus(notif);
-    const mic = await requestMicrophone();
-    const geo = await requestLocation();
-    setRequesting(false);
 
-    if (notif === "granted" && mic && geo) {
-      completeGate();
+    // Step 1: Location
+    setCurrentStep("location");
+    try {
+      await new Promise<void>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setLocationStatus("granted");
+            // Store location for use across the site
+            try {
+              localStorage.setItem("ccc_user_location", JSON.stringify({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                timestamp: Date.now()
+              }));
+            } catch {}
+            resolve();
+          },
+          () => {
+            setLocationStatus("denied");
+            resolve();
+          },
+          { timeout: 10000 }
+        );
+      });
+    } catch {}
+
+    // Step 2: Notifications
+    setCurrentStep("notifications");
+    try {
+      const perm = await requestBrowserNotificationPermission(user?.id);
+      setNotificationStatus(perm === "unsupported" ? "unsupported" : perm);
+    } catch {}
+
+    // Step 3: Microphone
+    setCurrentStep("microphone");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicStatus("granted");
+      stream.getTracks().forEach(t => t.stop());
+    } catch {
+      setMicStatus("denied");
     }
+
+    setCurrentStep(null);
+    setRequesting(false);
+    completeGate();
   };
+
+  const statuses = useMemo(
+    () => [
+      { label: "Location", value: locationStatus, icon: MapPin, step: "location" },
+      { label: "Notifications", value: notificationStatus, icon: Bell, step: "notifications" },
+      { label: "Microphone", value: micStatus, icon: Mic, step: "microphone" },
+    ],
+    [locationStatus, notificationStatus, micStatus]
+  );
 
   if (!visible) return null;
 
-  const allGranted = notificationStatus === "granted" && microphone === "granted" && location === "granted";
-  const anyDenied = [notificationStatus, microphone, location].some((status) => status === "denied");
-
   return (
-    <div className="fixed inset-0 z-[100001] flex items-center justify-center bg-background/90 px-4 backdrop-blur-md">
-      <Card className="w-full max-w-xl border-border bg-card shadow-2xl">
-        <CardContent className="space-y-6 p-6 md:p-8">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
-              <img src="/logo.png" alt="CCC logo" className="h-10 w-10 object-contain" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">CCC Access Setup</p>
-              <h2 className="font-display text-2xl font-bold text-foreground">Allow permissions to continue</h2>
-              <p className="mt-1 text-sm text-muted-foreground">We’ll ask for notifications, microphone, and location so updates and live features work properly.</p>
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            {statuses.map((item) => (
-              <div key={item.label} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background ring-1 ring-border">
-                    <item.icon className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-medium text-foreground">{item.label}</span>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100001] flex items-center justify-center bg-background/90 px-4 backdrop-blur-md"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+        >
+          <Card className="w-full max-w-xl border-border bg-card shadow-2xl">
+            <CardContent className="space-y-6 p-6 md:p-8">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
+                  <img src="/logo.png" alt="CCC logo" className="h-10 w-10 object-contain" />
                 </div>
-                <Badge variant="outline" className="capitalize">
-                  {item.value}
-                </Badge>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">CCC Access Setup</p>
+                  <h2 className="font-display text-2xl font-bold text-foreground">For a better experience</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Please allow required permissions for the best experience with updates, live features, and location services.</p>
+                </div>
+                <button onClick={completeGate} className="self-start p-1 rounded-full hover:bg-muted transition-colors">
+                  <X className="w-5 h-5 text-muted-foreground" />
+                </button>
               </div>
-            ))}
-          </div>
 
-          <div className="rounded-2xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-            {allGranted ? (
-              <span className="flex items-center gap-2 text-foreground"><ShieldCheck className="h-4 w-4 text-primary" />All permissions granted — you’re good to go.</span>
-            ) : anyDenied ? (
-              <span>Please enable any blocked permission from your browser site settings, then continue again.</span>
-            ) : (
-              <span>Tap continue and approve all 3 prompts when your browser asks.</span>
-            )}
-          </div>
+              <div className="grid gap-3">
+                {statuses.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-border transition-colors ${
+                        currentStep === item.step ? "bg-primary/20 animate-pulse" : "bg-background"
+                      }`}>
+                        {currentStep === item.step ? (
+                          <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                        ) : (
+                          <item.icon className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                      <span className="font-medium text-foreground">{item.label}</span>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`capitalize ${
+                        item.value === "granted" ? "border-green-500 text-green-600" :
+                        item.value === "denied" ? "border-destructive text-destructive" : ""
+                      }`}
+                    >
+                      {item.value}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
 
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button variant="outline" className="rounded-full" onClick={completeGate}>
-              Continue later
-            </Button>
-            <Button className="rounded-full" onClick={handleContinue} disabled={requesting}>
-              {requesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-              Enable now
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              <div className="rounded-2xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
+                {requesting ? (
+                  <span className="flex items-center gap-2 text-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    Requesting permissions... Please approve the browser prompts.
+                  </span>
+                ) : (
+                  <span>Tap "Allow" to enable all permissions at once, or continue without them.</span>
+                )}
+              </div>
+
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <Button variant="outline" className="rounded-full" onClick={completeGate} disabled={requesting}>
+                  Continue without allowing
+                </Button>
+                <Button className="rounded-full" onClick={handleAllow} disabled={requesting}>
+                  {requesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                  Allow
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
