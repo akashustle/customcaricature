@@ -749,8 +749,8 @@ const Admin = () => {
       }} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border">
+      <div className="flex-1 min-h-screen bg-[hsl(220,15%,97%)] dark:bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 bg-white/90 dark:bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-sm shadow-foreground/[0.02]">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-1 ring-border">
@@ -760,7 +760,7 @@ const Admin = () => {
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-medium text-muted-foreground font-sans">Live</span>
               </div>
               <div className="w-px h-4 bg-border" />
