@@ -306,22 +306,25 @@ const Dashboard = () => {
         {shopOrders.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { label: "Shop Orders", value: shopOrders.length, color: "hsl(280,50%,55%)", icon: Store },
-              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, color: "hsl(38,92%,55%)", icon: Truck },
-              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, color: "hsl(340,55%,58%)", icon: CreditCard },
+              { label: "Shop Orders", value: shopOrders.length, icon: Store, gradient: "from-purple-500 to-violet-500", bgGradient: "from-purple-500/10 to-violet-500/5" },
+              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, icon: Truck, gradient: "from-amber-500 to-orange-500", bgGradient: "from-amber-500/10 to-orange-500/5" },
+              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, icon: CreditCard, gradient: "from-pink-500 to-rose-500", bgGradient: "from-pink-500/10 to-rose-500/5" },
             ].map((s, i) => (
               <motion.div
                 key={s.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.08 }}
-                className="stat-widget-3d"
               >
-                <div className="absolute top-0 right-0 w-10 h-10 rounded-full opacity-10 -translate-y-2 translate-x-2" style={{ background: s.color }} />
-                <div className="text-center relative z-10">
-                  <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
-                </div>
+                <Card className="overflow-hidden relative border border-border/60 hover:border-border transition-all hover:shadow-md">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} pointer-events-none`} />
+                  <CardContent className="p-3 relative">
+                    <div className="text-center">
+                      <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
