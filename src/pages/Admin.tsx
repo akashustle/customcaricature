@@ -775,12 +775,16 @@ const Admin = () => {
           </div>
         </header>
 
-        <div className="px-4 md:px-8 py-6">
+        <div className="px-4 md:px-6 py-5">
           <div className="md:hidden mb-4">
             <LiveGreeting name={adminProfile?.full_name} />
           </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard">
+            <AdminDashboardPremium onNavigate={setActiveTab} />
+          </TabsContent>
 
           {/* Orders Tab */}
           <TabsContent value="orders">
