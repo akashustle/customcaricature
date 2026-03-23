@@ -29,7 +29,6 @@ const slides = [
 
 const AppOnboarding = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
