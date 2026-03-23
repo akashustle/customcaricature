@@ -880,7 +880,24 @@ const WorkshopAdmin = () => {
             </div>
           </div>
           <div className="px-3 pb-2">
-            <AdminGlobalSearch onNavigate={setTab} />
+            <AdminSmartSearch
+              panelType="workshop"
+              tabs={[
+                { id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" },
+                { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" },
+                { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
+                { id: "live", label: "Live Sessions" },
+              ]}
+              onNavigate={(tab, highlightId) => {
+                setTab(tab);
+                if (highlightId) {
+                  setTimeout(() => {
+                    const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                    if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                  }, 300);
+                }
+              }}
+            />
           </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
