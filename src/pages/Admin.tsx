@@ -78,6 +78,7 @@ import AdminNameGate from "@/components/admin/AdminNameGate";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
+import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
 
 type Order = {
   id: string;
