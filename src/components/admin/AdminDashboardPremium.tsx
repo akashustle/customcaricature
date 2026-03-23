@@ -171,37 +171,37 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       icon: DollarSign, gradient: "from-emerald-500/10 to-teal-500/10",
       iconBg: "bg-emerald-500/15", iconColor: "text-emerald-600",
       growth: getGrowth(stats.totalRevenue, stats.prevMonthRevenue),
-      onClick: () => onNavigate("revenue"),
+      onClick: () => setDrillDown({ metric: "revenue", title: "Total Revenue" }),
     },
     {
       label: "Orders", value: stats.totalOrders,
       icon: Package, gradient: "from-blue-500/10 to-indigo-500/10",
       iconBg: "bg-blue-500/15", iconColor: "text-blue-600",
-      sub: `${stats.todayOrders} today`, onClick: () => onNavigate("orders"),
+      sub: `${stats.todayOrders} today`, onClick: () => setDrillDown({ metric: "orders", title: "Orders" }),
     },
     {
       label: "Events", value: stats.totalEvents,
       icon: Calendar, gradient: "from-violet-500/10 to-purple-500/10",
       iconBg: "bg-violet-500/15", iconColor: "text-violet-600",
-      sub: `${stats.upcomingEvents} upcoming`, onClick: () => onNavigate("events"),
+      sub: `${stats.upcomingEvents} upcoming`, onClick: () => setDrillDown({ metric: "events", title: "Events" }),
     },
     {
       label: "Customers", value: stats.totalCustomers,
       icon: Users, gradient: "from-pink-500/10 to-rose-500/10",
       iconBg: "bg-pink-500/15", iconColor: "text-pink-600",
-      sub: `+${stats.newCustomersWeek} this week`, onClick: () => onNavigate("customers"),
+      sub: `+${stats.newCustomersWeek} this week`, onClick: () => setDrillDown({ metric: "customers", title: "Customers" }),
     },
     {
       label: "Conversion", value: `${conversionRate}%`,
       icon: Target, gradient: "from-amber-500/10 to-orange-500/10",
       iconBg: "bg-amber-500/15", iconColor: "text-amber-600",
-      sub: `${stats.convertedEnquiries}/${stats.totalEnquiries}`, onClick: () => onNavigate("enquiries"),
+      sub: `${stats.convertedEnquiries}/${stats.totalEnquiries}`, onClick: () => setDrillDown({ metric: "enquiries", title: "Enquiry Conversion" }),
     },
     {
       label: "Pending", value: formatPrice(stats.pendingRevenue),
       icon: Clock, gradient: "from-red-500/10 to-rose-500/10",
       iconBg: "bg-red-500/15", iconColor: "text-red-500",
-      sub: `${stats.pendingOrders} orders`, onClick: () => onNavigate("payments"),
+      sub: `${stats.pendingOrders} orders`, onClick: () => setDrillDown({ metric: "pending", title: "Pending Revenue" }),
     },
   ];
 
