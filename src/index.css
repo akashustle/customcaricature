@@ -599,7 +599,7 @@
 
   /* 3D text shadow — subtle */
   .text-3d {
-    text-shadow: 0 1px 0 hsl(30 18% 85%), 0 2px 4px hsl(25 15% 30% / 0.08);
+    text-shadow: 0 1px 0 hsl(var(--border)), 0 2px 4px hsl(var(--foreground) / 0.08);
   }
 
   /* Tilt card effect */
