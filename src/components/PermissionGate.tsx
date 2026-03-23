@@ -8,7 +8,7 @@ import { requestBrowserNotificationPermission } from "@/lib/webpush";
 import { motion, AnimatePresence } from "framer-motion";
 
 const GATE_KEY = "ccc_permissions_gate_v3";
-const DELAY_MS = 5000;
+const DELAY_MS = 2500; // Reduced from 5s to 2.5s for faster UX
 
 const PermissionGate = () => {
   const { user } = useAuth();
@@ -16,46 +16,42 @@ const PermissionGate = () => {
   const [requesting, setRequesting] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
 
-  const [locationStatus, setLocationStatus] = useState<string>(
-    "prompt"
-  );
+  const [locationStatus, setLocationStatus] = useState<string>("prompt");
   const [notificationStatus, setNotificationStatus] = useState<string>(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission
   );
   const [micStatus, setMicStatus] = useState<string>("prompt");
 
-  useEffect(() => {
-    const done = localStorage.getItem(GATE_KEY) === "done";
-    if (done) return;
-
-    // Check if all permissions are already granted
-    const allAlreadyGranted =
-      typeof Notification !== "undefined" && Notification.permission === "granted";
-
-    if (allAlreadyGranted) {
-      // Still don't show gate but silently init push
-      requestBrowserNotificationPermission(user?.id);
-      return;
-    }
-
-    // Show custom prompt after 5 seconds
-    const timer = setTimeout(() => {
-      setVisible(true);
-    }, DELAY_MS);
-
-    return () => clearTimeout(timer);
-  }, [user?.id]);
-
-  // Check existing permission states on mount
+  // Check existing permissions immediately on mount
   useEffect(() => {
     if (navigator.permissions) {
-      navigator.permissions.query({ name: "geolocation" }).then(r => setLocationStatus(r.state)).catch(() => {});
-      navigator.permissions.query({ name: "microphone" as PermissionName }).then(r => setMicStatus(r.state)).catch(() => {});
+      navigator.permissions.query({ name: "geolocation" }).then(r => {
+        setLocationStatus(r.state);
+        r.addEventListener("change", () => setLocationStatus(r.state));
+      }).catch(() => {});
+      navigator.permissions.query({ name: "microphone" as PermissionName }).then(r => {
+        setMicStatus(r.state);
+        r.addEventListener("change", () => setMicStatus(r.state));
+      }).catch(() => {});
     }
     if (typeof Notification !== "undefined") {
       setNotificationStatus(Notification.permission);
     }
   }, []);
+
+  useEffect(() => {
+    const done = localStorage.getItem(GATE_KEY) === "done";
+    if (done) return;
+
+    // If all already granted, skip
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      requestBrowserNotificationPermission(user?.id);
+      return;
+    }
+
+    const timer = setTimeout(() => setVisible(true), DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [user?.id]);
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
@@ -65,40 +61,34 @@ const PermissionGate = () => {
   const handleAllow = async () => {
     setRequesting(true);
 
-    // Step 1: Location
-    setCurrentStep("location");
-    try {
-      await new Promise<void>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setLocationStatus("granted");
-            // Store location for use across the site
-            try {
-              localStorage.setItem("ccc_user_location", JSON.stringify({
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude,
-                timestamp: Date.now()
-              }));
-            } catch {}
-            resolve();
-          },
-          () => {
-            setLocationStatus("denied");
-            resolve();
-          },
-          { timeout: 10000 }
-        );
-      });
-    } catch {}
+    // Request all permissions in parallel where possible
+    const locationPromise = new Promise<void>((resolve) => {
+      setCurrentStep("location");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setLocationStatus("granted");
+          try {
+            localStorage.setItem("ccc_user_location", JSON.stringify({
+              lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now()
+            }));
+          } catch {}
+          resolve();
+        },
+        () => { setLocationStatus("denied"); resolve(); },
+        { timeout: 5000, enableHighAccuracy: false } // Faster with lower accuracy
+      );
+    });
 
-    // Step 2: Notifications
+    await locationPromise;
+
+    // Notifications
     setCurrentStep("notifications");
     try {
       const perm = await requestBrowserNotificationPermission(user?.id);
       setNotificationStatus(perm === "unsupported" ? "unsupported" : perm);
     } catch {}
 
-    // Step 3: Microphone
+    // Microphone
     setCurrentStep("microphone");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -146,7 +136,7 @@ const PermissionGate = () => {
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">CCC Access Setup</p>
                   <h2 className="font-display text-2xl font-bold text-foreground">For a better experience</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Please allow required permissions for the best experience with updates, live features, and location services.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Allow permissions for updates, live features, and location services.</p>
                 </div>
                 <button onClick={completeGate} className="self-start p-1 rounded-full hover:bg-muted transition-colors">
                   <X className="w-5 h-5 text-muted-foreground" />
@@ -168,13 +158,10 @@ const PermissionGate = () => {
                       </div>
                       <span className="font-medium text-foreground">{item.label}</span>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={`capitalize ${
-                        item.value === "granted" ? "border-green-500 text-green-600" :
-                        item.value === "denied" ? "border-destructive text-destructive" : ""
-                      }`}
-                    >
+                    <Badge variant="outline" className={`capitalize ${
+                      item.value === "granted" ? "border-success text-success" :
+                      item.value === "denied" ? "border-destructive text-destructive" : ""
+                    }`}>
                       {item.value}
                     </Badge>
                   </div>
