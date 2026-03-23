@@ -834,6 +834,39 @@ export type Database = {
         }
         Relationships: []
       }
+      content_blocks: {
+        Row: {
+          block_type: string
+          content: Json
+          id: string
+          is_visible: boolean
+          page: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          block_type?: string
+          content?: Json
+          id: string
+          is_visible?: boolean
+          page?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          block_type?: string
+          content?: Json
+          id?: string
+          is_visible?: boolean
+          page?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           created_at: string
@@ -1387,6 +1420,54 @@ export type Database = {
           total_price?: number
           updated_at?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      form_fields: {
+        Row: {
+          created_at: string
+          field_key: string
+          field_type: string
+          form_id: string
+          id: string
+          is_required: boolean
+          is_visible: boolean
+          label: string
+          options: Json | null
+          placeholder: string | null
+          sort_order: number
+          updated_at: string
+          validation: Json | null
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          field_type?: string
+          form_id: string
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          label: string
+          options?: Json | null
+          placeholder?: string | null
+          sort_order?: number
+          updated_at?: string
+          validation?: Json | null
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          field_type?: string
+          form_id?: string
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          label?: string
+          options?: Json | null
+          placeholder?: string | null
+          sort_order?: number
+          updated_at?: string
+          validation?: Json | null
         }
         Relationships: []
       }
@@ -3205,6 +3286,30 @@ export type Database = {
           logo_url?: string
           name?: string
           sort_order?: number | null
+        }
+        Relationships: []
+      }
+      ui_settings: {
+        Row: {
+          category: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          category?: string
+          id: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          category?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }

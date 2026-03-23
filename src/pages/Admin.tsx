@@ -81,6 +81,9 @@ import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
 import AdminQuickActions from "@/components/admin/AdminQuickActions";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import AdminContentEditor from "@/components/admin/AdminContentEditor";
+import AdminFormBuilder from "@/components/admin/AdminFormBuilder";
+import AdminDesignControl from "@/components/admin/AdminDesignControl";
 
 type Order = {
   id: string;
@@ -1707,6 +1710,18 @@ const Admin = () => {
 
           <TabsContent value="automation">
             <AdminAutomation />
+          </TabsContent>
+
+          <TabsContent value="content-editor">
+            <AdminContentEditor />
+          </TabsContent>
+
+          <TabsContent value="form-builder">
+            <AdminFormBuilder />
+          </TabsContent>
+
+          <TabsContent value="design-control">
+            <AdminDesignControl />
           </TabsContent>
 
           <TabsContent value="team">

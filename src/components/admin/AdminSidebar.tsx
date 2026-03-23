@@ -3,7 +3,8 @@ import {
   BarChart3, Star, MapPin, Radio, Bell, Monitor, Globe, Bot, 
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
-  LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion
+  LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion,
+  Type, FormInput, Palette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -73,6 +74,14 @@ const NAV_SECTIONS = [
       { id: "push-center", icon: Zap, label: "Push Center" },
       { id: "notify", icon: Bell, label: "Notifications" },
       { id: "sessions", icon: Monitor, label: "Sessions" },
+    ],
+  },
+  {
+    label: "Frontend Control",
+    items: [
+      { id: "content-editor", icon: Type, label: "Text Editor" },
+      { id: "form-builder", icon: FormInput, label: "Form Builder" },
+      { id: "design-control", icon: Palette, label: "Design" },
     ],
   },
   {
