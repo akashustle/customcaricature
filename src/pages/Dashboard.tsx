@@ -1548,4 +1548,58 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, canBookEvent }: any) => {
+  const suggestions: { icon: any; text: string; action: () => void; color: string }[] = [];
+
+  const pendingPayment = orders.find((o: any) => o.payment_status !== "confirmed");
+  if (pendingPayment) {
+    suggestions.push({ icon: CreditCard, text: `Complete payment for order #${pendingPayment.id.slice(0, 8).toUpperCase()}`, action: () => {}, color: "hsl(0,65%,55%)" });
+  }
+
+  const inProgressOrder = orders.find((o: any) => o.status === "in_progress");
+  if (inProgressOrder) {
+    suggestions.push({ icon: Sparkles, text: `Your caricature is being crafted! Check order details`, action: () => {}, color: "hsl(210,65%,55%)" });
+  }
+
+  if (orders.length === 0) {
+    suggestions.push({ icon: Package, text: "Order your first custom caricature today!", action: () => navigate("/order"), color: "hsl(36,45%,52%)" });
+  }
+
+  if (events.length === 0 && canBookEvent) {
+    suggestions.push({ icon: CalIcon, text: "Book a live caricature artist for your next event", action: () => navigate("/book-event"), color: "hsl(280,50%,55%)" });
+  }
+
+  const upcomingEvent = events.find((e: any) => new Date(e.event_date) > new Date());
+  if (upcomingEvent) {
+    const daysLeft = Math.ceil((new Date(upcomingEvent.event_date).getTime() - Date.now()) / 86400000);
+    suggestions.push({ icon: CalIcon, text: `Event in ${daysLeft} days — ${upcomingEvent.event_type} at ${upcomingEvent.city}`, action: () => {}, color: "hsl(152,50%,48%)" });
+  }
+
+  if (!profile?.address) {
+    suggestions.push({ icon: User, text: "Complete your profile for faster checkout", action: () => {}, color: "hsl(38,92%,55%)" });
+  }
+
+  if (suggestions.length === 0) return null;
+
+  return (
+    <div className="mb-4 space-y-2">
+      {suggestions.slice(0, 3).map((s, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.1 }}
+          onClick={s.action}
+          className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border cursor-pointer hover:shadow-sm transition-shadow"
+        >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.color }}>
+            <s.icon className="w-4 h-4 text-white" />
+          </div>
+          <p className="text-sm font-body text-foreground">{s.text}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 export default Dashboard;
