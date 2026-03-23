@@ -97,6 +97,54 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_ai_alerts: {
+        Row: {
+          admin_id: string | null
+          admin_name: string | null
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_read: boolean
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          suggestion: string | null
+          title: string
+        }
+        Insert: {
+          admin_id?: string | null
+          admin_name?: string | null
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_read?: boolean
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          suggestion?: string | null
+          title: string
+        }
+        Update: {
+          admin_id?: string | null
+          admin_name?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_read?: boolean
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          suggestion?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       admin_blocked_ips: {
         Row: {
           blocked_by: string
@@ -235,6 +283,45 @@ export type Database = {
           tab_id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      admin_risk_scores: {
+        Row: {
+          admin_id: string
+          created_at: string
+          failed_logins: number
+          id: string
+          last_calculated_at: string
+          risk_level: string
+          risk_score: number
+          suspicious_edits: number
+          unusual_behavior: number
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          failed_logins?: number
+          id?: string
+          last_calculated_at?: string
+          risk_level?: string
+          risk_score?: number
+          suspicious_edits?: number
+          unusual_behavior?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          failed_logins?: number
+          id?: string
+          last_calculated_at?: string
+          risk_level?: string
+          risk_score?: number
+          suspicious_edits?: number
+          unusual_behavior?: number
+          updated_at?: string
         }
         Relationships: []
       }
