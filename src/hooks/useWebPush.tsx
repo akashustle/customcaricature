@@ -12,7 +12,7 @@ export const useWebPush = () => {
     initRef.current = true;
 
     const init = async () => {
-      // Check if built-in web push is enabled
+      // Check if web push is enabled
       const { data } = await supabase
         .from("admin_site_settings")
         .select("value")
@@ -20,10 +20,10 @@ export const useWebPush = () => {
         .maybeSingle();
 
       const config = data?.value as any;
-      if (config?.enabled === false) return; // Default enabled
+      if (config?.enabled === false) return;
 
-      // Delay to not block initial load
-      setTimeout(() => initWebPush(user?.id), 3000);
+      // Initialize after short delay to not block page load
+      setTimeout(() => initWebPush(user?.id), 2000);
     };
     init();
   }, [user]);
