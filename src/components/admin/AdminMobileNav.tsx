@@ -1,12 +1,16 @@
 import { 
   LayoutDashboard, Package, Calendar, Users, BarChart3, 
-  Settings, MoreHorizontal 
+  MoreHorizontal, DollarSign, Target, Zap, Bot, Settings,
+  ClipboardList, HelpCircle, Star, PenTool, Globe, MapPin,
+  Radio, Bell, Monitor, Home as HomeIcon, FileText, Image,
+  Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
+  Calculator, FileQuestion, Layers, TrendingUp, UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 
 interface AdminMobileNavProps {
   activeTab: string;
@@ -21,54 +25,64 @@ const PRIMARY_TABS = [
   { id: "analytics", icon: BarChart3, label: "Stats" },
 ];
 
-const MORE_TABS = [
-  { section: "Main", items: [
-    { id: "payments", label: "Payments" },
-    { id: "revenue", label: "Revenue" },
-    { id: "revenue-target", label: "₹10L Target" },
-    { id: "ai-intelligence", label: "AI Insights" },
+const MORE_SECTIONS = [
+  { section: "Analytics", icon: TrendingUp, items: [
+    { id: "payments", label: "Payments", icon: DollarSign },
+    { id: "revenue", label: "Revenue", icon: DollarSign },
+    { id: "revenue-target", label: "₹10L Target", icon: Target },
+    { id: "ai-intelligence", label: "AI Insights", icon: Zap },
   ]},
-  { section: "AI & Chat", items: [
-    { id: "ai-conversations", label: "AI Chats" },
-    { id: "chatbot", label: "AI Training" },
+  { section: "AI & Chat", icon: Bot, items: [
+    { id: "ai-conversations", label: "AI Chats", icon: Bot },
+    { id: "chatbot", label: "AI Training", icon: Settings },
   ]},
-  { section: "CRM", items: [
-    { id: "crm-pipeline", label: "Pipeline" },
-    { id: "enquiries", label: "Enquiries" },
-    { id: "support", label: "Support" },
+  { section: "CRM", icon: Target, items: [
+    { id: "crm-pipeline", label: "Pipeline", icon: Target },
+    { id: "enquiries", label: "Enquiries", icon: ClipboardList },
+    { id: "support", label: "Support", icon: HelpCircle },
   ]},
-  { section: "People", items: [
-    { id: "event-users", label: "Event Users" },
-    { id: "artists", label: "Artists" },
-    { id: "reviews", label: "Reviews" },
+  { section: "People", icon: Users, items: [
+    { id: "event-users", label: "Event Users", icon: UserCheck },
+    { id: "artists", label: "Artists", icon: PenTool },
+    { id: "reviews", label: "Reviews", icon: Star },
   ]},
-  { section: "Pricing", items: [
-    { id: "pricing", label: "Domestic" },
-    { id: "intl-pricing", label: "International" },
+  { section: "Pricing", icon: DollarSign, items: [
+    { id: "pricing", label: "Domestic", icon: DollarSign },
+    { id: "intl-pricing", label: "International", icon: Globe },
   ]},
-  { section: "Operations", items: [
-    { id: "locations", label: "Locations" },
-    { id: "voice", label: "Voice Monitor" },
-    { id: "push-center", label: "Push Center" },
-    { id: "notify", label: "Notifications" },
-    { id: "sessions", label: "Sessions" },
+  { section: "Operations", icon: Settings, items: [
+    { id: "locations", label: "Locations", icon: MapPin },
+    { id: "voice", label: "Voice Monitor", icon: Radio },
+    { id: "push-center", label: "Push Center", icon: Zap },
+    { id: "notify", label: "Notifications", icon: Bell },
+    { id: "sessions", label: "Sessions", icon: Monitor },
   ]},
-  { section: "Content", items: [
-    { id: "homepage", label: "Homepage" },
-    { id: "blog", label: "Blog" },
-    { id: "gallery", label: "Gallery" },
-    { id: "hp-reviews", label: "HP Reviews" },
-    { id: "brands", label: "Brands" },
-    { id: "pages", label: "Pages" },
-    { id: "files", label: "Files" },
-    { id: "seo", label: "SEO" },
-    { id: "calculator", label: "Calculator" },
+  { section: "Frontend", icon: Palette, items: [
+    { id: "content-editor", label: "Text Editor", icon: Type },
+    { id: "form-builder", label: "Forms", icon: FormInput },
+    { id: "design-control", label: "Design", icon: Palette },
   ]},
-  { section: "System", items: [
-    { id: "team", label: "Team" },
-    { id: "automation", label: "Automation" },
-    { id: "integrations", label: "Integrations" },
-    { id: "settings", label: "Settings" },
+  { section: "Content", icon: FileText, items: [
+    { id: "homepage", label: "Homepage", icon: HomeIcon },
+    { id: "blog", label: "Blog", icon: FileText },
+    { id: "gallery", label: "Gallery", icon: Image },
+    { id: "hp-reviews", label: "HP Reviews", icon: Star },
+    { id: "brands", label: "Brands", icon: Shield },
+    { id: "pages", label: "Pages", icon: FileQuestion },
+    { id: "files", label: "Files", icon: Layers },
+    { id: "seo", label: "SEO", icon: TrendingUp },
+    { id: "calculator", label: "Calculator", icon: Calculator },
+  ]},
+  { section: "Security", icon: ShieldCheck, items: [
+    { id: "admin-monitoring", label: "AI Monitor", icon: Brain },
+    { id: "security-dashboard", label: "Security", icon: ShieldCheck },
+    { id: "activity-logs", label: "Activity", icon: Activity },
+  ]},
+  { section: "System", icon: Settings, items: [
+    { id: "team", label: "Team", icon: Users },
+    { id: "automation", label: "Automation", icon: Zap },
+    { id: "integrations", label: "Integrations", icon: Shield },
+    { id: "settings", label: "Settings", icon: Settings },
   ]},
 ];
 
@@ -77,65 +91,109 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
   const isPrimaryActive = PRIMARY_TABS.some(t => t.id === activeTab);
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/20 safe-area-bottom">
-      <div className="flex items-center justify-around px-1 py-1.5">
-        {PRIMARY_TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={cn(
-                "flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-all min-w-0 flex-1",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <tab.icon className={cn("w-5 h-5", isActive && "text-primary")} />
-              <span className="text-[9px] font-medium truncate" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {tab.label}
-              </span>
-              {isActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
-            </button>
-          );
-        })}
-        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-          <SheetTrigger asChild>
-            <button className={cn(
-              "flex flex-col items-center gap-0.5 py-1 px-2 rounded-lg transition-all min-w-0 flex-1",
-              !isPrimaryActive ? "text-primary" : "text-muted-foreground"
-            )}>
-              <MoreHorizontal className="w-5 h-5" />
-              <span className="text-[9px] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>More</span>
-              {!isPrimaryActive && <div className="w-1 h-1 rounded-full bg-primary mt-0.5" />}
-            </button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl px-0">
-            <ScrollArea className="h-full px-4">
-              <h3 className="text-sm font-bold mb-4 px-2" style={{ fontFamily: 'Inter, sans-serif' }}>All Sections</h3>
-              {MORE_TABS.map((section) => (
-                <div key={section.section} className="mb-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 px-2 mb-1.5" style={{ fontFamily: 'Inter, sans-serif' }}>
-                    {section.section}
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {section.items.map((item) => (
-                      <Button
-                        key={item.id}
-                        variant={activeTab === item.id ? "default" : "ghost"}
-                        size="sm"
-                        className="h-9 text-[11px] justify-start rounded-lg"
-                        style={{ fontFamily: 'Inter, sans-serif' }}
-                        onClick={() => { onTabChange(item.id); setMoreOpen(false); }}
-                      >
-                        {item.label}
-                      </Button>
-                    ))}
-                  </div>
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+      <div className="bg-[#0f1629]/98 backdrop-blur-xl border-t border-[#1e2a4a] shadow-[0_-4px_24px_rgba(0,0,0,0.3)]">
+        <div className="flex items-stretch justify-evenly px-1 max-w-lg mx-auto">
+          {PRIMARY_TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <motion.button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                whileTap={{ scale: 0.88 }}
+                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-2.5 relative"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="admin-nav-bar"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-blue-400"
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+                <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
+                  isActive ? "bg-blue-500/15" : ""
+                }`}>
+                  <tab.icon
+                    className={`w-[22px] h-[22px] transition-all duration-200 ${
+                      isActive ? "text-blue-400" : "text-slate-500"
+                    }`}
+                    strokeWidth={isActive ? 2.5 : 1.8}
+                  />
                 </div>
-              ))}
-            </ScrollArea>
-          </SheetContent>
-        </Sheet>
+                <span className={`text-[10px] leading-none font-medium transition-all duration-200 ${
+                  isActive ? "text-blue-400 font-bold" : "text-slate-500"
+                }`}>
+                  {tab.label}
+                </span>
+              </motion.button>
+            );
+          })}
+
+          {/* More button */}
+          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+            <SheetTrigger asChild>
+              <motion.button
+                whileTap={{ scale: 0.88 }}
+                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-2.5 relative"
+              >
+                {!isPrimaryActive && (
+                  <motion.div
+                    layoutId="admin-nav-bar"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-blue-400"
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+                <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
+                  !isPrimaryActive ? "bg-blue-500/15" : ""
+                }`}>
+                  <MoreHorizontal className={`w-[22px] h-[22px] ${!isPrimaryActive ? "text-blue-400" : "text-slate-500"}`} />
+                </div>
+                <span className={`text-[10px] leading-none font-medium ${!isPrimaryActive ? "text-blue-400 font-bold" : "text-slate-500"}`}>
+                  More
+                </span>
+              </motion.button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[75vh] rounded-t-3xl px-0 bg-[#0a0f1e] border-[#1e2a4a]">
+              <ScrollArea className="h-full px-4 pt-2">
+                <div className="w-10 h-1 rounded-full bg-slate-600 mx-auto mb-4" />
+                <h3 className="text-sm font-bold text-white mb-4 px-1">All Sections</h3>
+                {MORE_SECTIONS.map((section) => (
+                  <div key={section.section} className="mb-4">
+                    <div className="flex items-center gap-2 px-1 mb-2">
+                      <section.icon className="w-3 h-3 text-blue-400/50" />
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-400/40">
+                        {section.section}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {section.items.map((item) => {
+                        const isActive = activeTab === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            className={cn(
+                              "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all text-center",
+                              isActive
+                                ? "bg-blue-600/15 border border-blue-500/20"
+                                : "bg-[#131b2e] border border-[#1e2a4a] hover:bg-[#1a2440]"
+                            )}
+                            onClick={() => { onTabChange(item.id); setMoreOpen(false); }}
+                          >
+                            <item.icon className={cn("w-4 h-4", isActive ? "text-blue-400" : "text-slate-400")} />
+                            <span className={cn("text-[10px] font-medium leading-tight", isActive ? "text-blue-300" : "text-slate-400")}>
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+        </div>
+        <div className="h-[env(safe-area-inset-bottom)]" />
       </div>
     </div>
   );

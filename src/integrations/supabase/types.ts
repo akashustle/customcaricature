@@ -540,6 +540,66 @@ export type Database = {
         }
         Relationships: []
       }
+      app_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          device_info: string | null
+          id: string
+          metadata: Json | null
+          screen: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          metadata?: Json | null
+          screen?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          metadata?: Json | null
+          screen?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      app_downloads: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          platform: string
+          user_id: string | null
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          platform?: string
+          user_id?: string | null
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          platform?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       artist_blocked_dates: {
         Row: {
           artist_id: string | null
