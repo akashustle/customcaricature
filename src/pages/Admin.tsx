@@ -1780,6 +1780,14 @@ const Admin = () => {
             <AdminCoupons />
           </TabsContent>
 
+          <TabsContent value="invoices">
+            <AdminInvoices />
+          </TabsContent>
+
+          <TabsContent value="feature-gating">
+            <AdminFeatureGating />
+          </TabsContent>
+
           <TabsContent value="maintenance">
             <AdminMaintenance />
           </TabsContent>
