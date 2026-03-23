@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/pricing";
-import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot, ClipboardList, HelpCircle, Target } from "lucide-react";
+import { LogOut, Search, Eye, BarChart3, Package, Trash2, AlertTriangle, Users, DollarSign, Plus, Save, X, Edit2, Settings, Upload, Image, Lock, UserPlus, KeyRound, RefreshCw, CalendarIcon, Calendar as CalIcon, Globe, Receipt, MapPin, Star, SplitSquareHorizontal, Bell, Monitor, Download, Home, Bot, ClipboardList, HelpCircle, Target, Shield } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { validateEmailFormat } from "@/lib/email-validation";
@@ -84,6 +84,9 @@ import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminContentEditor from "@/components/admin/AdminContentEditor";
 import AdminFormBuilder from "@/components/admin/AdminFormBuilder";
 import AdminDesignControl from "@/components/admin/AdminDesignControl";
+import AdminActivityLogs from "@/components/admin/AdminActivityLogs";
+import AdminSecurityDashboard from "@/components/admin/AdminSecurityDashboard";
+import { useAutoLogout } from "@/hooks/useAutoLogout";
 
 type Order = {
   id: string;
@@ -149,6 +152,7 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
   usePermissions(true);
+  useAutoLogout(true);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
@@ -1724,6 +1728,14 @@ const Admin = () => {
             <AdminDesignControl />
           </TabsContent>
 
+          <TabsContent value="security-dashboard">
+            <AdminSecurityDashboard />
+          </TabsContent>
+
+          <TabsContent value="activity-logs">
+            <AdminActivityLogs />
+          </TabsContent>
+
           <TabsContent value="team">
             <AdminTeamManagement />
           </TabsContent>
@@ -2111,6 +2123,7 @@ const Admin = () => {
           <AdminBottomNavItem icon={Bell} label="Notify" active={activeTab === "notify"} onClick={() => setActiveTab("notify")} />
           <AdminBottomNavItem icon={Bot} label="AI" active={activeTab === "ai-conversations"} onClick={() => setActiveTab("ai-conversations")} />
           <AdminBottomNavItem icon={ClipboardList} label="Enquiry" active={activeTab === "enquiries"} onClick={() => setActiveTab("enquiries")} />
+          <AdminBottomNavItem icon={Shield} label="Security" active={activeTab === "security-dashboard"} onClick={() => setActiveTab("security-dashboard")} />
           <AdminBottomNavItem icon={Settings} label="More" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
           <AdminBottomNavItem icon={LogOut} label="Out" active={false} onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }} />
         </div>

@@ -52,6 +52,51 @@ export type Database = {
           },
         ]
       }
+      admin_activity_logs: {
+        Row: {
+          action_type: string
+          admin_id: string
+          admin_name: string
+          created_at: string
+          description: string | null
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          module: string
+          new_value: Json | null
+          old_value: Json | null
+          target_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          admin_name?: string
+          created_at?: string
+          description?: string | null
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          target_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          admin_name?: string
+          created_at?: string
+          description?: string | null
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       admin_blocked_ips: {
         Row: {
           blocked_by: string
@@ -72,6 +117,33 @@ export type Database = {
           created_at?: string
           id?: string
           ip_address?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      admin_failed_logins: {
+        Row: {
+          created_at: string
+          device_info: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_info?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_info?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
           reason?: string | null
         }
         Relationships: []
@@ -163,6 +235,48 @@ export type Database = {
           tab_id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      admin_security_alerts: {
+        Row: {
+          admin_id: string | null
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          ip_address: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          admin_id?: string | null
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          admin_id?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
         }
         Relationships: []
       }

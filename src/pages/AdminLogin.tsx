@@ -40,6 +40,11 @@ const AdminLogin = () => {
       if (roleError) throw roleError;
       if (!roles || roles.length === 0) {
         await supabase.auth.signOut();
+        // Log failed login - not an admin
+        await supabase.from("admin_failed_logins" as any).insert({
+          email: email.trim().toLowerCase(), reason: "not_authorized",
+          ip_address: null, device_info: navigator.userAgent.slice(0, 200),
+        });
         toast({ title: "Access Denied", description: "Not authorized for admin access.", variant: "destructive" });
         return;
       }
@@ -97,6 +102,25 @@ const AdminLogin = () => {
       toast({ title: "Welcome back, admin!" });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
+      // Log failed login attempt
+      try {
+        await supabase.from("admin_failed_logins" as any).insert({
+          email: email.trim().toLowerCase(), reason: "invalid_credentials",
+          ip_address: null, device_info: navigator.userAgent.slice(0, 200),
+        });
+        // Check if too many failed attempts — create security alert
+        const { data: recent } = await supabase.from("admin_failed_logins" as any)
+          .select("id").eq("email", email.trim().toLowerCase())
+          .gte("created_at", new Date(Date.now() - 3600000).toISOString());
+        if (recent && recent.length >= 5) {
+          await supabase.from("admin_security_alerts" as any).insert({
+            alert_type: "brute_force", severity: "high",
+            title: "Multiple Failed Login Attempts",
+            description: `${recent.length} failed attempts for ${email} in the last hour.`,
+            ip_address: null,
+          });
+        }
+      } catch {}
       toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
     } finally {
       setLoading(false);
