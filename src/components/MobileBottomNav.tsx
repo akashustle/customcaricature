@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Package, User, Store, GraduationCap, HeadphonesIcon } from "lucide-react";
+import { Home, Package, Search, User, Store, GraduationCap, HeadphonesIcon, ShoppingBag, Compass } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -21,79 +21,55 @@ const MobileBottomNav = () => {
   if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
 
   const items = [
-    { icon: Home, label: "Home", path: "/" },
-    ...(shopNavVisible ? [{ icon: Store, label: "Shop", path: "/shop" }] : []),
-    ...(workshopNavVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop" }] : []),
-    { icon: Package, label: "Track", path: "/track-order" },
-    ...(supportNavVisible ? [{ icon: HeadphonesIcon, label: "Support", path: "/support" }] : []),
+    { icon: Home, label: "Home", path: "/", fill: true },
+    ...(shopNavVisible ? [{ icon: ShoppingBag, label: "Shop", path: "/shop", fill: false }] : []),
+    { icon: Compass, label: "Explore", path: "/about", fill: false },
+    { icon: Search, label: "Track", path: "/track-order", fill: false },
     ...(user
-      ? [{ icon: User, label: "Dashboard", path: "/dashboard" }]
-      : [{ icon: User, label: "Login", path: "/login" }]),
+      ? [{ icon: User, label: "Account", path: "/dashboard", fill: false }]
+      : [{ icon: User, label: "Login", path: "/login", fill: false }]),
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
-      <div 
-        className="border-t shadow-[0_-8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.3)]"
-        style={{
-          background: "linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.48) 50%, rgba(255,255,255,0.60) 100%)",
-          backdropFilter: "blur(40px) saturate(180%)",
-          WebkitBackdropFilter: "blur(40px) saturate(180%)",
-          borderColor: "rgba(255,255,255,0.35)",
-        }}
-      >
-        {/* Dark mode override via CSS class */}
-        <style>{`
-          .dark nav[aria-label="Mobile navigation"] > div:first-child {
-            background: linear-gradient(135deg, rgba(30,25,20,0.75) 0%, rgba(40,35,28,0.55) 50%, rgba(35,30,24,0.65) 100%) !important;
-            border-color: rgba(255,255,255,0.08) !important;
-          }
-        `}</style>
-        <div className="flex items-center justify-evenly px-1 py-1.5 max-w-lg mx-auto">
+      <div className="bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
+        <div className="flex items-stretch justify-evenly px-1 max-w-lg mx-auto">
           {items.map((item) => {
             const active = location.pathname === item.path;
             return (
               <motion.button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                whileTap={{ scale: 0.85 }}
-                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-1.5 relative"
+                whileTap={{ scale: 0.88 }}
+                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-2 relative"
               >
-                <div
-                  className={`flex items-center justify-center w-11 h-9 rounded-2xl transition-all duration-300 ${
-                    active
-                      ? "shadow-[0_2px_12px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.8)]"
-                      : ""
-                  }`}
-                  style={active ? {
-                    background: "linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(240,240,245,0.7) 100%)",
-                    border: "1px solid rgba(255,255,255,0.6)",
-                  } : {}}
-                >
-                  <item.icon
-                    className={`w-[19px] h-[19px] transition-all duration-300 ${
-                      active ? "text-primary drop-shadow-sm" : "text-muted-foreground/70"
-                    }`}
-                    strokeWidth={active ? 2.4 : 1.6}
-                  />
-                </div>
-                <span
-                  className={`text-[9px] leading-none transition-all duration-300 ${
-                    active
-                      ? "text-primary font-bold"
-                      : "text-muted-foreground/60 font-medium"
-                  }`}
-                  style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" }}
-                >
-                  {item.label}
-                </span>
+                {/* Active indicator bar at top */}
                 {active && (
                   <motion.div
-                    layoutId="mobile-nav-indicator"
-                    className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                    layoutId="app-nav-bar"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
+
+                <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
+                  active ? "bg-primary/10" : ""
+                }`}>
+                  <item.icon
+                    className={`w-[22px] h-[22px] transition-all duration-200 ${
+                      active ? "text-primary" : "text-muted-foreground/60"
+                    }`}
+                    strokeWidth={active ? 2.5 : 1.8}
+                    fill={active && item.fill ? "currentColor" : "none"}
+                  />
+                </div>
+                <span
+                  className={`text-[10px] leading-none font-medium transition-all duration-200 ${
+                    active ? "text-primary font-bold" : "text-muted-foreground/50"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </motion.button>
             );
           })}
