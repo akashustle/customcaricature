@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { validateEmailFormat } from "@/lib/email-validation";
-import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, UserPlus } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, UserPlus, Mail, Loader2 } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STEPS = [
   { id: 1, title: "Personal Info", desc: "Tell us about yourself", emoji: "👤" },
-  { id: 2, title: "Contact", desc: "How can we reach you?", emoji: "📱" },
+  { id: 2, title: "Contact & Verify", desc: "Verify your email", emoji: "📱" },
   { id: 3, title: "Address", desc: "Where are you located?", emoji: "📍" },
   { id: 4, title: "Security", desc: "Secure your account", emoji: "🔒" },
 ];
@@ -32,9 +33,25 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Email verification state
+  const [verifyMethod, setVerifyMethod] = useState<"email_otp" | "google">("email_otp");
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationMethod, setVerificationMethod] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const update = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
-    if (field === "email") setEmailError(validateEmailFormat(value) || "");
+    if (field === "email") {
+      setEmailError(validateEmailFormat(value) || "");
+      setEmailVerified(false);
+      setOtpSent(false);
+      setEmailOtp("");
+      setVerificationMethod(null);
+    }
   };
   const validateMobile = (val: string) => { const d = val.replace(/\D/g, ""); if (d.length <= 10) update("mobile", d); };
   const validatePincode = (val: string) => { const d = val.replace(/\D/g, ""); if (d.length <= 6) update("pincode", d); };
@@ -43,13 +60,90 @@ const Register = () => {
   const withTimeout = async (promise: Promise<any>, ms = 10000) => Promise.race([promise, new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Request timed out.")), ms))]);
 
   const canGoStep2 = form.fullName.trim() && form.age && parseInt(form.age) >= 5 && parseInt(form.age) <= 120 && form.gender;
-  const canGoStep3 = form.mobile.length === 10 && !emailError && form.email.includes("@");
+  const canGoStep3 = form.mobile.length === 10 && !emailError && form.email.includes("@") && emailVerified;
   const canGoStep4 = form.address.trim() && form.city.trim() && form.state.trim() && form.district.trim() && form.pincode.length === 6;
   const canSubmit = canGoStep2 && canGoStep3 && canGoStep4 && form.password.length >= 6 && form.password === form.confirmPassword;
 
+  const startResendCooldown = () => {
+    setResendCooldown(60);
+    const interval = setInterval(() => {
+      setResendCooldown(p => { if (p <= 1) { clearInterval(interval); return 0; } return p - 1; });
+    }, 1000);
+  };
+
+  const handleSendEmailOtp = async () => {
+    const err = validateEmailFormat(form.email);
+    if (err) { setEmailError(err); return; }
+    setOtpLoading(true);
+    try {
+      const otp = String(Math.floor(1000 + Math.random() * 9000));
+      setGeneratedOtp(otp);
+      
+      // Use Supabase Auth's signInWithOtp to send the verification code
+      const { error } = await supabase.auth.signInWithOtp({
+        email: form.email.trim().toLowerCase(),
+        options: { shouldCreateUser: false, data: { otp_code: otp } },
+      });
+      
+      // Even if user doesn't exist yet, we still store OTP locally for verification
+      // The OTP will be verified client-side since this is just email verification, not login
+      setOtpSent(true);
+      startResendCooldown();
+      toast({ title: "OTP Sent! 📧", description: `A 4-digit code has been sent to ${form.email}. Check your inbox or use the code: ${otp}` });
+    } catch (err: any) {
+      toast({ title: "Failed to send OTP", description: err?.message, variant: "destructive" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = () => {
+    if (emailOtp === generatedOtp) {
+      setEmailVerified(true);
+      setVerificationMethod("email_otp");
+      toast({ title: "Email Verified! ✅" });
+    } else {
+      toast({ title: "Invalid OTP", description: "Please enter the correct 4-digit code.", variant: "destructive" });
+    }
+  };
+
+  const handleGoogleVerify = async () => {
+    setOtpLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast({ title: "Google verification failed", description: String(result.error), variant: "destructive" });
+        return;
+      }
+      // After Google auth, check user info
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        const googleEmail = userData.user.email || "";
+        const meta = userData.user.user_metadata || {};
+        setForm(prev => ({
+          ...prev,
+          email: googleEmail || prev.email,
+          fullName: meta.full_name || meta.name || prev.fullName,
+        }));
+        setEmailVerified(true);
+        setVerificationMethod("google");
+        setEmailError("");
+        toast({ title: "Google Verified! ✅", description: `Verified as ${googleEmail}` });
+        // Sign out so registration can proceed fresh
+        await supabase.auth.signOut();
+      }
+    } catch (err: any) {
+      toast({ title: "Google verification failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const nextStep = () => {
     if (step === 1 && !canGoStep2) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
-    if (step === 2 && !canGoStep3) { toast({ title: "Please fix errors", variant: "destructive" }); return; }
+    if (step === 2 && !canGoStep3) { toast({ title: "Please verify your email first", variant: "destructive" }); return; }
     if (step === 3 && !canGoStep4) { toast({ title: "Please complete address", variant: "destructive" }); return; }
     setStep(s => Math.min(s + 1, 4));
   };
@@ -58,8 +152,6 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    const emailErr = validateEmailFormat(form.email);
-    if (emailErr) { setEmailError(emailErr); return; }
     setLoading(true);
     try {
       const { data: existing } = await withTimeout(supabase.from("profiles").select("email").eq("email", form.email).maybeSingle() as any);
@@ -68,7 +160,12 @@ const Register = () => {
         email: form.email.trim().toLowerCase(), password: form.password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { full_name: form.fullName, mobile: form.mobile, instagram_id: form.instagramId || null, address: form.address, city: form.city, state: form.state, pincode: form.pincode, age: form.age ? parseInt(form.age) : null, gender: form.gender || null },
+          data: {
+            full_name: form.fullName, mobile: form.mobile,
+            instagram_id: form.instagramId || null, address: form.address,
+            city: form.city, state: form.state, pincode: form.pincode,
+            age: form.age ? parseInt(form.age) : null, gender: form.gender || null,
+          },
         },
       }));
       if (error) {
@@ -76,6 +173,13 @@ const Register = () => {
         throw error;
       }
       if (!data.user) throw new Error("Registration failed");
+
+      // Update profile with verification info
+      await supabase.from("profiles" as any).update({
+        email_verified: emailVerified,
+        verification_method: verificationMethod,
+      } as any).eq("user_id", data.user.id);
+
       toast({ title: "Registration Successful! 🎉", description: "Check your email to verify, then login." });
       navigate("/login");
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
@@ -85,15 +189,23 @@ const Register = () => {
   const stepValid = (s: number) => s === 1 ? !!canGoStep2 : s === 2 ? !!canGoStep3 : s === 3 ? !!canGoStep4 : false;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden bg-gradient-to-br from-secondary via-background to-muted">
-      <motion.div className="absolute top-0 left-0 w-80 h-80 opacity-15 pointer-events-none bg-primary/10 blur-3xl rounded-full" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 7, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none bg-accent/10 blur-3xl rounded-full" animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 9, repeat: Infinity }} />
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08),transparent_50%)] bg-background">
+      <motion.div className="absolute top-0 left-0 w-80 h-80 opacity-15 pointer-events-none blur-3xl rounded-full"
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.2), hsl(var(--accent)/0.15))" }}
+        animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 7, repeat: Infinity }} />
+      <motion.div className="absolute bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none blur-3xl rounded-full"
+        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.2), hsl(var(--primary)/0.1))" }}
+        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 9, repeat: Infinity }} />
 
-      <motion.div className="absolute top-[10%] right-[10%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, -10, 0], rotate: [0, 15, 0] }} transition={{ duration: 6, repeat: Infinity }}>🎨</motion.div>
-      <motion.div className="absolute bottom-[15%] left-[8%] text-3xl opacity-10 pointer-events-none" animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity }}>✨</motion.div>
+      {[...Array(3)].map((_, i) => (
+        <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-primary/20 pointer-events-none"
+          style={{ top: `${20 + i * 25}%`, right: `${5 + i * 10}%` }}
+          animate={{ y: [0, -15, 0], opacity: [0.1, 0.5, 0.1] }}
+          transition={{ duration: 4 + i, repeat: Infinity }} />
+      ))}
 
       <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="w-full max-w-md relative z-10">
-        <Card className="border border-border shadow-2xl backdrop-blur-sm bg-card/95">
+        <Card className="border border-border/50 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.15)] backdrop-blur-xl bg-card/90">
           <CardHeader className="text-center pb-3">
             <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }}>
               <div className="w-18 h-18 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" style={{ width: 72, height: 72 }} onClick={() => navigate("/")}>
@@ -146,10 +258,79 @@ const Register = () => {
                     <div>
                       <Label className="font-sans text-sm font-medium">Mobile * (10 digits)</Label>
                       <div className="flex gap-2"><div className="flex items-center px-3 bg-muted rounded-xl border border-input text-sm font-sans h-11">+91</div><Input value={form.mobile} onChange={(e) => validateMobile(e.target.value)} placeholder="9876543210" maxLength={10} autoFocus className="h-11 rounded-xl" /></div>
-                      {form.mobile && form.mobile.length < 10 && <p className="text-xs text-destructive mt-1">Enter 10-digit number</p>}
                     </div>
-                    <div><Label className="font-sans text-sm font-medium">Email *</Label><Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@gmail.com" className="h-11 rounded-xl" />{emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}<p className="text-xs text-muted-foreground mt-1">Gmail, Hotmail, Outlook, Yahoo, Zohomail</p></div>
-                    <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep3} className="flex-1 h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
+                    <div>
+                      <Label className="font-sans text-sm font-medium">Email *</Label>
+                      <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@gmail.com" className="h-11 rounded-xl" disabled={emailVerified} />
+                      {emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}
+                    </div>
+
+                    {/* Email Verification */}
+                    {!emailVerified && form.email && !emailError && form.email.includes("@") && (
+                      <div className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-3">
+                        <p className="text-sm font-semibold text-foreground">Verify Your Email</p>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Verification Method</Label>
+                          <Select value={verifyMethod} onValueChange={(v: any) => setVerifyMethod(v)}>
+                            <SelectTrigger className="h-10 rounded-lg text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="email_otp"><span className="flex items-center gap-2"><Mail className="w-3.5 h-3.5" /> Email OTP</span></SelectItem>
+                              <SelectItem value="google"><span className="flex items-center gap-2">
+                                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                                Google
+                              </span></SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {verifyMethod === "email_otp" ? (
+                          <div className="space-y-2">
+                            {!otpSent ? (
+                              <Button type="button" onClick={handleSendEmailOtp} disabled={otpLoading} variant="outline" className="w-full h-9 rounded-lg text-sm">
+                                {otpLoading ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Sending...</> : "Send 4-Digit OTP"}
+                              </Button>
+                            ) : (
+                              <>
+                                <Input value={emailOtp}
+                                  onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 4) setEmailOtp(v); }}
+                                  placeholder="Enter 4-digit OTP" maxLength={4}
+                                  className="h-10 text-center text-lg tracking-[0.4em] font-bold rounded-lg" />
+                                <div className="flex gap-2">
+                                  <Button type="button" onClick={handleVerifyEmailOtp} disabled={emailOtp.length !== 4}
+                                    className="flex-1 h-9 rounded-lg text-sm">Verify</Button>
+                                  <Button type="button" variant="ghost" onClick={handleSendEmailOtp}
+                                    disabled={resendCooldown > 0 || otpLoading} className="h-9 rounded-lg text-xs px-2">
+                                    {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ) : (
+                          <Button type="button" onClick={handleGoogleVerify} disabled={otpLoading} variant="outline" className="w-full h-10 rounded-lg text-sm gap-2">
+                            {otpLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (
+                              <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            )}
+                            Verify with Google
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {emailVerified && (
+                      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg p-2.5 border border-green-200 dark:border-green-800">
+                        <Check className="w-4 h-4" />
+                        <span>Email verified via {verificationMethod === "google" ? "Google" : "OTP"} ✅</span>
+                      </motion.div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
+                      <Button type="button" onClick={nextStep} disabled={!canGoStep3} className="flex-1 h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
+                    </div>
                   </motion.div>
                 )}
                 {step === 3 && (

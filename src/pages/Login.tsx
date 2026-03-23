@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
@@ -17,6 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [secretCode, setSecretCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [loginWith, setLoginWith] = useState<"email" | "phone">("email");
@@ -28,14 +30,19 @@ const Login = () => {
     ]);
   };
 
-  const getIdentifier = () => {
-    if (loginWith === "phone") {
-      // Format phone for Supabase auth (needs country code)
-      const cleaned = phone.replace(/\D/g, "");
-      return cleaned.startsWith("91") ? `+${cleaned}` : `+91${cleaned}`;
-    }
-    return email.trim().toLowerCase();
-  };
+  // Check for returning Google OAuth users
+  useEffect(() => {
+    const checkGoogleReturn = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const provider = session.user.app_metadata?.provider;
+        if (provider === "google") {
+          await finalizeLogin();
+        }
+      }
+    };
+    checkGoogleReturn();
+  }, []);
 
   const finalizeLogin = async () => {
     const { data: userData, error: userError } = await withTimeout(supabase.auth.getUser());
@@ -58,18 +65,43 @@ const Login = () => {
     navigate("/dashboard", { replace: true });
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/login",
+      });
+      if (result.error) {
+        toast({ title: "Google login failed", description: String(result.error), variant: "destructive" });
+        setGoogleLoading(false);
+        return;
+      }
+      // If not redirected, check if user exists
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        // Check if user has a profile (registered)
+        const { data: profile } = await supabase.from("profiles").select("user_id").eq("user_id", userData.user.id).maybeSingle();
+        if (!profile) {
+          // Not registered - redirect to register
+          await supabase.auth.signOut();
+          toast({ title: "Account not found", description: "Please create an account first.", variant: "destructive" });
+          navigate("/register");
+          return;
+        }
+        await finalizeLogin();
+      }
+    } catch (err: any) {
+      toast({ title: "Google login failed", description: err?.message, variant: "destructive" });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
     try {
-      const identifier = loginWith === "email" ? email.trim().toLowerCase() : email.trim().toLowerCase();
-      // For phone login, we use email derived from phone
-      let loginEmail = identifier;
-      if (loginWith === "phone") {
-        const cleaned = phone.replace(/\D/g, "");
-        // Try to find user by phone - use phone as email pattern
-        loginEmail = `${cleaned}@phone.user`;
-      }
-      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`, password }));
+      const loginEmail = loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`;
+      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: loginEmail, password }));
       if (error) toast({ title: "Login failed", description: error.message, variant: "destructive" });
       else await finalizeLogin();
     } catch (err: any) { toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" }); }
@@ -96,16 +128,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-gradient-to-br from-secondary via-background to-muted">
-      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none bg-primary/10 blur-3xl rounded-full" animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none bg-accent/10 blur-3xl rounded-full" animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
+    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.12),transparent_60%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08),transparent_50%)] bg-background">
+      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none blur-3xl rounded-full"
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.2), hsl(var(--accent)/0.15))" }}
+        animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
+      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none blur-3xl rounded-full"
+        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.2), hsl(var(--primary)/0.1))" }}
+        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
 
-      <motion.div className="absolute top-[15%] left-[8%] text-4xl opacity-20 pointer-events-none" animate={{ y: [0, -12, 0], rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity }}>🎨</motion.div>
-      <motion.div className="absolute top-[25%] right-[12%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, 10, 0], rotate: [0, -15, 0] }} transition={{ duration: 7, repeat: Infinity }}>✏️</motion.div>
-      <motion.div className="absolute bottom-[20%] right-[8%] text-3xl opacity-15 pointer-events-none" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity }}>🖌️</motion.div>
+      {[...Array(4)].map((_, i) => (
+        <motion.div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-primary/25 pointer-events-none"
+          style={{ top: `${15 + i * 20}%`, left: `${8 + i * 22}%` }}
+          animate={{ y: [0, -12, 0], opacity: [0.2, 0.6, 0.2] }}
+          transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.5 }} />
+      ))}
 
       <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.6, type: "spring", bounce: 0.3 }} className="w-full max-w-sm relative z-10">
-        <Card className="border border-border shadow-2xl backdrop-blur-sm bg-card/95">
+        <Card className="border border-border/50 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.2)] backdrop-blur-xl bg-card/92">
           <CardHeader className="text-center pb-4">
             <motion.div className="relative mx-auto mb-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
               <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" onClick={() => navigate("/")}>
@@ -119,6 +158,22 @@ const Login = () => {
             <CardDescription className="font-sans text-sm">Sign in to your caricature studio</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Google Login Button */}
+            <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+              <Button type="button" variant="outline" onClick={handleGoogleLogin} disabled={googleLoading}
+                className="w-full h-11 rounded-xl font-sans font-medium gap-2 border-border/60 hover:bg-muted/50">
+                {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                )}
+                Continue with Google
+              </Button>
+            </motion.div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border/40" /></div>
+              <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground">or sign in with</span></div>
+            </div>
+
             {/* Login With selector */}
             <div>
               <Label className="font-sans text-sm font-medium">Login With</Label>
@@ -131,7 +186,6 @@ const Login = () => {
               </Select>
             </div>
 
-            {/* Email or Phone input */}
             {loginWith === "email" ? (
               <div>
                 <Label className="font-sans text-sm font-medium">Email</Label>
@@ -167,7 +221,7 @@ const Login = () => {
                   </div>
                 </div>
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold text-base">
+                  <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold text-base shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </motion.div>
@@ -180,7 +234,7 @@ const Login = () => {
                   <p className="text-xs text-muted-foreground font-sans mt-1">Available in your dashboard after first login.</p>
                 </div>
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold">
+                  <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
                     {loading ? "Signing in..." : "Sign In with Code"}
                   </Button>
                 </motion.div>
