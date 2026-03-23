@@ -82,8 +82,8 @@ const OneSignalInit = () => {
   return null;
 };
 
-const PushPilotInit = () => {
-  usePushPilot();
+const WebPushInit = () => {
+  useWebPush();
   return null;
 };
 
