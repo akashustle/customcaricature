@@ -84,6 +84,9 @@ import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminContentEditor from "@/components/admin/AdminContentEditor";
 import AdminFormBuilder from "@/components/admin/AdminFormBuilder";
 import AdminDesignControl from "@/components/admin/AdminDesignControl";
+import AdminActivityLogs from "@/components/admin/AdminActivityLogs";
+import AdminSecurityDashboard from "@/components/admin/AdminSecurityDashboard";
+import { useAutoLogout } from "@/hooks/useAutoLogout";
 
 type Order = {
   id: string;
