@@ -2015,6 +2015,19 @@ const Admin = () => {
                       }}
                     />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show App Download Link</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show/hide Android APK download link in footer</p>
+                    </div>
+                    <Switch
+                      checked={settings.app_download_link?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("app_download_link", { enabled: checked });
+                        toast({ title: checked ? "App download link visible" : "App download link hidden" });
+                      }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
