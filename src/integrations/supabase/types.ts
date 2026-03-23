@@ -3851,6 +3851,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_feature_flags: {
+        Row: {
+          created_at: string | null
+          enabled_by: string | null
+          feature_key: string
+          id: string
+          is_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          enabled_by?: string | null
+          feature_key: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          enabled_by?: string | null
+          feature_key?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_live_locations: {
         Row: {
           city: string | null
