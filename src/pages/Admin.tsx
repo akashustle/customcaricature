@@ -2017,6 +2017,9 @@ const Admin = () => {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Push App Update */}
+              <AdminPushUpdate />
             </div>
           </TabsContent>
         </Tabs>
