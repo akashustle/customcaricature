@@ -252,69 +252,69 @@
 
   /* Premium card with depth */
   .card-3d {
-    background: linear-gradient(145deg, hsl(30 40% 99%), hsl(30 20% 96%));
-    border: 1px solid hsl(30 18% 88% / 0.6);
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--secondary)));
+    border: 1px solid hsl(var(--border) / 0.6);
     box-shadow:
-      0 1px 3px hsl(25 15% 30% / 0.04),
-      0 6px 24px hsl(25 15% 30% / 0.06),
-      inset 0 1px 0 hsl(30 40% 99%);
+      0 1px 3px hsl(var(--foreground) / 0.04),
+      0 6px 24px hsl(var(--foreground) / 0.06),
+      inset 0 1px 0 hsl(var(--card));
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 1.125rem;
   }
   .card-3d:hover {
     transform: translateY(-4px) scale(1.01);
     box-shadow:
-      0 8px 24px hsl(25 15% 30% / 0.08),
-      0 20px 50px hsl(25 25% 40% / 0.06),
-      inset 0 1px 0 hsl(30 40% 99%);
+      0 8px 24px hsl(var(--foreground) / 0.08),
+      0 20px 50px hsl(var(--foreground) / 0.06),
+      inset 0 1px 0 hsl(var(--card));
   }
 
   /* Admin stat card */
   .admin-stat-card {
-    background: linear-gradient(135deg, hsl(30 40% 99%), hsl(30 20% 95%));
-    border: 1px solid hsl(30 18% 88% / 0.5);
+    background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary)));
+    border: 1px solid hsl(var(--border) / 0.5);
     box-shadow:
-      0 2px 6px hsl(25 15% 30% / 0.04),
-      0 6px 20px hsl(25 25% 40% / 0.04);
+      0 2px 6px hsl(var(--foreground) / 0.04),
+      0 6px 20px hsl(var(--foreground) / 0.04);
     border-radius: 1.125rem;
     transition: all 0.4s ease;
   }
   .admin-stat-card:hover {
     transform: translateY(-3px);
     box-shadow:
-      0 8px 20px hsl(25 15% 30% / 0.08),
-      0 14px 36px hsl(25 25% 40% / 0.06);
+      0 8px 20px hsl(var(--foreground) / 0.08),
+      0 14px 36px hsl(var(--foreground) / 0.06);
   }
 
   /* Admin card */
   .admin-card {
-    background: linear-gradient(145deg, hsl(30 40% 99%), hsl(30 20% 96%));
-    border: 1px solid hsl(30 18% 88% / 0.5);
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--secondary)));
+    border: 1px solid hsl(var(--border) / 0.5);
     box-shadow:
-      0 1px 4px hsl(25 15% 30% / 0.03),
-      0 4px 16px hsl(25 15% 30% / 0.05);
+      0 1px 4px hsl(var(--foreground) / 0.03),
+      0 4px 16px hsl(var(--foreground) / 0.05);
     transition: all 0.4s ease;
     border-radius: 1.125rem;
   }
   .admin-card:hover {
     transform: translateY(-3px);
     box-shadow:
-      0 6px 16px hsl(25 15% 30% / 0.06),
-      0 12px 32px hsl(25 25% 40% / 0.04);
+      0 6px 16px hsl(var(--foreground) / 0.06),
+      0 12px 32px hsl(var(--foreground) / 0.04);
   }
 
   .admin-header {
-    background: linear-gradient(180deg, hsl(30 30% 96%), hsl(30 20% 94%));
-    border-bottom: 1px solid hsl(30 18% 88%);
+    background: linear-gradient(180deg, hsl(var(--secondary)), hsl(var(--muted)));
+    border-bottom: 1px solid hsl(var(--border));
   }
 
   .dashboard-header {
-    background: linear-gradient(135deg, hsl(30 30% 96%), hsl(30 18% 93%));
-    border-bottom: 1px solid hsl(30 18% 88% / 0.6);
+    background: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--muted)));
+    border-bottom: 1px solid hsl(var(--border) / 0.6);
   }
 
   .dashboard-gradient {
-    background: linear-gradient(180deg, hsl(30 25% 95%) 0%, hsl(30 20% 97%) 100%);
+    background: linear-gradient(180deg, hsl(var(--secondary)) 0%, hsl(var(--background)) 100%);
   }
 
   .admin-tab-active {
@@ -330,13 +330,13 @@
   }
 
   .glass {
-    background: hsl(30 40% 98% / 0.7);
+    background: hsl(var(--card) / 0.7);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(30 18% 88% / 0.4);
+    border: 1px solid hsl(var(--border) / 0.4);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, hsl(25 25% 32%), hsl(18 40% 55%));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -360,12 +360,12 @@
 
   /* Mobile bottom nav */
   .mobile-bottom-nav {
-    background: linear-gradient(180deg, hsl(30 20% 95% / 0.95), hsl(30 25% 97% / 0.98));
+    background: linear-gradient(180deg, hsl(var(--secondary) / 0.95), hsl(var(--background) / 0.98));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
 
-  /* Sidebar — Apple-grade */
+  /* Sidebar */
   .sidebar-item-active {
     background: hsl(var(--primary) / 0.1);
     border-right: 3px solid hsl(var(--primary));
@@ -374,23 +374,23 @@
   }
 
   .admin-glass-sidebar {
-    background: linear-gradient(180deg, hsl(30 40% 99% / 0.92), hsl(30 25% 97% / 0.95));
+    background: linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--background) / 0.95));
     backdrop-filter: blur(32px) saturate(180%);
     -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border-right: 1px solid hsl(30 18% 90% / 0.3);
+    border-right: 1px solid hsl(var(--border) / 0.3);
   }
 
   .admin-glass-card {
-    background: hsl(30 40% 98% / 0.6);
+    background: hsl(var(--card) / 0.6);
     backdrop-filter: blur(16px);
-    border: 1px solid hsl(30 18% 88% / 0.3);
-    box-shadow: 0 2px 12px hsl(25 15% 30% / 0.03);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 0 2px 12px hsl(var(--foreground) / 0.03);
     border-radius: 1rem;
     transition: all 0.4s ease;
   }
   .admin-glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px hsl(25 25% 40% / 0.06);
+    box-shadow: 0 6px 24px hsl(var(--foreground) / 0.06);
   }
 
   /* Premium Admin Header — Apple style */
