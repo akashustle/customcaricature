@@ -282,7 +282,7 @@ const Index = () => {
           </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
-          className="bg-card/80 border-t border-border">
+          className="glass-crystal border-t border-border/20">
           <div className="container mx-auto px-4 py-3 text-center">
             <p className="text-xs md:text-sm font-body text-muted-foreground flex items-center justify-center gap-2">
               <Clock className="w-4 h-4 text-primary" /> Due to high demand, delivery timeline is 25–30 days
