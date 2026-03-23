@@ -163,16 +163,8 @@ const AdminLogin = () => {
         updated_at: new Date().toISOString(),
       } as any).eq("user_id", pendingUserId);
 
-      await supabase.functions.invoke("send-notification-email", {
-        body: {
-          to: email.trim().toLowerCase(),
-          subject: "Admin Login OTP (Resent) - Creative Caricature Club",
-          html: `<div style="font-family:sans-serif;max-width:400px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
-            <h2 style="color:#b08d57;">🔐 Admin OTP (Resent)</h2>
-            <div style="font-size:32px;font-weight:bold;letter-spacing:6px;text-align:center;padding:16px;background:#fdf8f3;border-radius:8px;color:#b08d57;">${otp}</div>
-            <p style="color:#666;font-size:12px;margin-top:16px;">Expires in 10 minutes.</p>
-          </div>`,
-        },
+      await supabase.functions.invoke("send-otp-email", {
+        body: { to: email.trim().toLowerCase(), otp },
       });
       startResendCooldown();
       toast({ title: "OTP Resent", description: "Check your email for the new code." });
