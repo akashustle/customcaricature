@@ -182,12 +182,26 @@ const AdminHomepageControl = () => {
               <div className="border-t border-border pt-4 mt-2">
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Custom Video URL (MP4 / direct link from any platform)</label>
                 <Input value={video.custom_video_url || ""} onChange={e => updateSetting("homepage_video", { ...video, custom_video_url: e.target.value })} placeholder="https://your-cloud.com/video.mp4" />
-                <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority. Supports direct video links from Lovable Cloud, S3, or any hosting.</p>
+                <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority.</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Thumbnail URL</label>
-                <Input value={video.thumbnail_url || ""} onChange={e => updateSetting("homepage_video", { ...video, thumbnail_url: e.target.value })} placeholder="Leave blank to use CCC logo" />
-                <p className="text-xs text-muted-foreground mt-1">Optional custom thumbnail for the video cover. If empty, the CCC logo thumbnail is used by default.</p>
+                <Input value={video.thumbnail_url || ""} onChange={e => updateSetting("homepage_video", { ...video, thumbnail_url: e.target.value })} placeholder="Leave blank to use default thumbnail" />
+              </div>
+              <div className="border-t border-border pt-4 mt-2">
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block flex items-center gap-2">
+                  <Upload className="w-4 h-4" /> Upload Thumbnail Image
+                </label>
+                <ThumbnailUploader
+                  currentUrl={video.thumbnail_url}
+                  onUploaded={(url) => updateSetting("homepage_video", { ...video, thumbnail_url: url })}
+                />
+                {video.thumbnail_url && (
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-1">Current Thumbnail:</p>
+                    <img src={video.thumbnail_url} alt="Video thumbnail" className="w-48 h-auto rounded-lg border border-border object-cover" />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
