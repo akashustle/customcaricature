@@ -3384,6 +3384,39 @@ export type Database = {
           },
         ]
       }
+      social_links: {
+        Row: {
+          created_at: string
+          icon_svg: string | null
+          id: string
+          is_active: boolean
+          platform: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon_svg?: string | null
+          id?: string
+          is_active?: boolean
+          platform: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon_svg?: string | null
+          id?: string
+          is_active?: boolean
+          platform?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           admin_reply: string | null
