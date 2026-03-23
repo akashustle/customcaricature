@@ -400,28 +400,29 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
         ))}
       </div>
 
-      {/* Revenue Analytics - 3D Animated */}
+      {/* Revenue Analytics - Modern Vibrant */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), color: "hsl(152,50%,48%)" },
-          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), color: "hsl(210,65%,55%)" },
-          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), color: "hsl(36,45%,52%)" },
-          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), color: "hsl(280,50%,55%)" },
-          { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), color: "hsl(38,92%,55%)" },
-          { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), color: "hsl(340,55%,58%)" },
-        ].map((w, i) => (
-          <div key={w.label} className="stat-widget-3d">
-            <div className="absolute top-0 right-0 w-16 h-16 rounded-full opacity-10 -translate-y-4 translate-x-4" style={{ background: w.color }} />
-            <div className="flex items-center gap-2 relative z-10">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm" style={{ background: w.color }}>
-                <w.icon className="w-4 h-4 text-white" />
+          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), gradient: "from-emerald-500 to-green-600" },
+          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), gradient: "from-blue-500 to-indigo-600" },
+          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), gradient: "from-amber-500 to-yellow-600" },
+          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), gradient: "from-purple-500 to-violet-600" },
+          { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), gradient: "from-orange-500 to-red-500" },
+          { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), gradient: "from-pink-500 to-rose-600" },
+        ].map((w) => (
+          <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-4 group hover:border-blue-500/30 transition-all">
+            <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
+            <div className="flex items-center gap-3 relative z-10">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
+                <w.icon className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm md:text-base font-body font-bold truncate">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-body">{w.label}</p>
+                <p className="text-sm md:text-base font-bold text-white truncate">{w.value}</p>
+                <p className="text-[11px] text-slate-400">{w.label}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
