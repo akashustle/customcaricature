@@ -46,6 +46,7 @@ import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import AdminMediaAuditLog from "@/components/admin/AdminMediaAuditLog";
 import NotificationBell from "@/components/NotificationBell";
 import AdminNotificationSender from "@/components/admin/AdminNotificationSender";
+import AdminPushCenter from "@/components/admin/AdminPushCenter";
 import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
