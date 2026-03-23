@@ -351,6 +351,7 @@ const Workshop = () => {
             payment_status: "paid",
             payment_amount: priceNum,
           } as any).eq("id", registeredUserId);
+          playPaymentSuccessSound();
           toast({ title: "Payment Successful! 🎉", description: "Your seat is confirmed. You can now login." });
           setView("login");
           setEmail(regForm.email);

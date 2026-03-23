@@ -306,6 +306,7 @@ const BookEvent = () => {
             if (verifyError) throw verifyError;
 
             setBookingConfirmed(true);
+            playPaymentSuccessSound();
             toast({ title: "Event Booked Successfully! 🎉" });
 
             // Send confirmation email (fire-and-forget)

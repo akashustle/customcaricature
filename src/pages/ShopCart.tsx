@@ -121,6 +121,7 @@ const ShopCart = () => {
             },
           });
           await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
+          playPaymentSuccessSound();
           toast({ title: "Payment successful! 🎉" });
           navigate(`/shop/order-confirmation?order_id=${order.id}`);
         },
