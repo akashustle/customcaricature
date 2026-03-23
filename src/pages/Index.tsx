@@ -452,6 +452,9 @@ const Index = () => {
       {/* Caricature Gallery */}
       <HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" />
 
+      {/* Before & After Slider */}
+      <HomepageBeforeAfter />
+
       {/* Smart Help */}
       <HomepageSmartHelp config={content.homepage_smart_help} />
 
