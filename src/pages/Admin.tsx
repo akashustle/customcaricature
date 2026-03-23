@@ -67,6 +67,7 @@ import AdminGallery from "@/components/admin/AdminGallery";
 import AdminBeforeAfter from "@/components/admin/AdminBeforeAfter";
 import AdminHomepageReviews from "@/components/admin/AdminHomepageReviews";
 import AdminTrustedBrands from "@/components/admin/AdminTrustedBrands";
+import AdminSocialLinks from "@/components/admin/AdminSocialLinks";
 import AdminPages from "@/components/admin/AdminPages";
 import AdminCalculatorHistory from "@/components/admin/AdminCalculatorHistory";
 
