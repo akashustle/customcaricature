@@ -386,15 +386,15 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           { icon: MapPin, label: "Outside Mumbai", value: String(outsideEvents), gradient: "from-cyan-500 to-sky-600" },
         ].map((w) => (
           <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-4 group hover:border-blue-500/30 transition-all">
+            className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 group hover:border-blue-500/30 transition-all">
             <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
             <div className="flex items-center gap-3 relative z-10">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
-                <w.icon className="w-5 h-5 text-white" />
+                <w.icon className="w-5 h-5 text-foreground" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl font-bold text-white">{w.value}</p>
-                <p className="text-[11px] text-slate-400">{w.label}</p>
+                <p className="text-xl font-bold text-foreground">{w.value}</p>
+                <p className="text-[11px] text-muted-foreground">{w.label}</p>
               </div>
             </div>
           </motion.div>
@@ -412,15 +412,15 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), gradient: "from-pink-500 to-rose-600" },
         ].map((w) => (
           <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl border border-[#1e2a4a] bg-[#131b2e] p-4 group hover:border-blue-500/30 transition-all">
+            className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 group hover:border-blue-500/30 transition-all">
             <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
             <div className="flex items-center gap-3 relative z-10">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
-                <w.icon className="w-5 h-5 text-white" />
+                <w.icon className="w-5 h-5 text-foreground" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm md:text-base font-bold text-white truncate">{w.value}</p>
-                <p className="text-[11px] text-slate-400">{w.label}</p>
+                <p className="text-sm md:text-base font-bold text-foreground truncate">{w.value}</p>
+                <p className="text-[11px] text-muted-foreground">{w.label}</p>
               </div>
             </div>
           </motion.div>
