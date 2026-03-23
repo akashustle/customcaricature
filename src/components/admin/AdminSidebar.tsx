@@ -121,6 +121,7 @@ const NAV_SECTIONS = [
     items: [
       { id: "referrals", icon: Gift, label: "Referrals" },
       { id: "coupons", icon: Ticket, label: "Coupons" },
+      { id: "feature-gating", icon: ToggleLeft, label: "Feature Gates" },
     ],
   },
   {
