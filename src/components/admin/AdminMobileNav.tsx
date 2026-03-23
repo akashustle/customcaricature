@@ -37,6 +37,7 @@ const MORE_SECTIONS = [
   { section: "AI & Chat", icon: Bot, items: [
     { id: "ai-conversations", label: "AI Chats", icon: Bot },
     { id: "chatbot", label: "AI Training", icon: Settings },
+    { id: "live-chat", label: "Live Chat", icon: MessageCircle },
   ]},
   { section: "CRM", icon: Target, items: [
     { id: "crm-pipeline", label: "Pipeline", icon: Target },
