@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Phone, Sparkles, Calendar, Clock, Mail, MessageCircle,
@@ -350,6 +351,7 @@ const Workshop = () => {
             payment_status: "paid",
             payment_amount: priceNum,
           } as any).eq("id", registeredUserId);
+          playPaymentSuccessSound();
           toast({ title: "Payment Successful! 🎉", description: "Your seat is confirmed. You can now login." });
           setView("login");
           setEmail(regForm.email);

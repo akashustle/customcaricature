@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart, Loader2, Store } from "lucide-react";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 const ShopCart = () => {
   const navigate = useNavigate();
@@ -120,6 +121,7 @@ const ShopCart = () => {
             },
           });
           await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
+          playPaymentSuccessSound();
           toast({ title: "Payment successful! 🎉" });
           navigate(`/shop/order-confirmation?order_id=${order.id}`);
         },

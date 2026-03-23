@@ -927,6 +927,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             });
             if (verifyError) throw new Error("Verification failed");
             if (verifyData?.verified || verifyData?.success) {
+              playPaymentSuccessSound();
               toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
             } else {
               throw new Error("Verification failed");
@@ -972,6 +973,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             });
             if (verifyError) throw new Error("Verification failed");
             if (verifyData?.verified || verifyData?.success) {
+              playPaymentSuccessSound();
               setShowPaymentCelebration(true);
               toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
               setTimeout(() => setShowPaymentCelebration(false), 8000);
