@@ -31,7 +31,7 @@ const AdminIntegrations = () => {
     if (loading) return;
     // Fetch integration settings directly since they aren't in the typed SiteSettings
     const fetchIntegrationSettings = async () => {
-      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config"]);
+      const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", ["onesignal_config", "otp_config", "pushpilot_config"]);
       if (data) {
         data.forEach((row: any) => {
           if (row.id === "onesignal_config" && row.value) {
@@ -43,6 +43,9 @@ const AdminIntegrations = () => {
             setOtpEnabled(row.value.enabled || false);
             setOtpApiKey(row.value.api_key || "");
             setOtpProvider(row.value.provider || "twilio");
+          }
+          if (row.id === "pushpilot_config" && row.value) {
+            setPushpilotEnabled(row.value.enabled !== false);
           }
         });
       }
