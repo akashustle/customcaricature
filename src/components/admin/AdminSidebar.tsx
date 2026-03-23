@@ -107,6 +107,7 @@ const NAV_SECTIONS = [
   {
     label: "Security",
     items: [
+      { id: "admin-monitoring", icon: Brain, label: "AI Monitor" },
       { id: "security-dashboard", icon: ShieldCheck, label: "Security" },
       { id: "activity-logs", icon: Activity, label: "Activity Logs" },
     ],
