@@ -25,6 +25,7 @@ const MORE_TABS = [
   { section: "Main", items: [
     { id: "payments", label: "Payments" },
     { id: "revenue", label: "Revenue" },
+    { id: "revenue-target", label: "₹10L Target" },
     { id: "ai-intelligence", label: "AI Insights" },
   ]},
   { section: "AI & Chat", items: [
