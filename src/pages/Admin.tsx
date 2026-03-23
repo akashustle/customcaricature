@@ -1770,6 +1770,18 @@ const Admin = () => {
             <AdminIntegrations />
           </TabsContent>
 
+          <TabsContent value="referrals">
+            <AdminReferrals />
+          </TabsContent>
+
+          <TabsContent value="coupons">
+            <AdminCoupons />
+          </TabsContent>
+
+          <TabsContent value="maintenance">
+            <AdminMaintenance />
+          </TabsContent>
+
           <TabsContent value="settings">
             <div className="space-y-6 max-w-lg">
               {/* Site Controls */}
