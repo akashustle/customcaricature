@@ -487,4 +487,32 @@ async function searchArtistPanel(q: string, tabFilter: string, all: SearchResult
   await Promise.all(searches);
 }
 
+/**
+ * Flatten a nested JSON object into searchable key-value pairs
+ */
+function flattenJson(obj: any, prefix = ""): { key: string; value: string }[] {
+  const results: { key: string; value: string }[] = [];
+  if (!obj || typeof obj !== "object") {
+    if (obj !== null && obj !== undefined) {
+      results.push({ key: prefix, value: String(obj) });
+    }
+    return results;
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) => {
+      results.push(...flattenJson(item, `${prefix}[${i}]`));
+    });
+    return results;
+  }
+  for (const [k, v] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === "object") {
+      results.push(...flattenJson(v, fullKey));
+    } else if (v !== null && v !== undefined) {
+      results.push({ key: fullKey, value: String(v) });
+    }
+  }
+  return results;
+}
+
 export default AdminSmartSearch;
