@@ -12,7 +12,7 @@ export const useOneSignal = () => {
     initRef.current = true;
 
     const init = async () => {
-      // First try DB config
+      // Check if OneSignal is enabled in admin settings
       const { data } = await supabase
         .from("admin_site_settings")
         .select("value")
@@ -22,19 +22,22 @@ export const useOneSignal = () => {
       let appId = "";
       if (data?.value) {
         const config = data.value as any;
-        if (config.enabled && config.app_id) {
+        // Only init if explicitly enabled
+        if (!config.enabled) {
+          console.log("OneSignal disabled by admin");
+          return;
+        }
+        if (config.app_id) {
           appId = config.app_id;
         }
-      }
-      
-      // Fallback to hardcoded app ID
-      if (!appId) {
-        appId = "d5da4d00-44cc-4ea0-b231-c66129f599f3";
+      } else {
+        // No config found = disabled by default now
+        console.log("OneSignal not configured, skipping");
+        return;
       }
 
       if (appId) {
         await initOneSignal(appId);
-        // Delay to let SDK fully init before prompting
         setTimeout(() => promptOneSignalPush(), 3000);
       }
     };
