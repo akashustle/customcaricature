@@ -61,6 +61,7 @@ const WorkshopPolicy = lazy(() => import("./pages/WorkshopPolicy"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
