@@ -77,6 +77,14 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "Frontend Control",
+    items: [
+      { id: "content-editor", icon: Type, label: "Text Editor" },
+      { id: "form-builder", icon: FormInput, label: "Form Builder" },
+      { id: "design-control", icon: Palette, label: "Design" },
+    ],
+  },
+  {
     label: "Content",
     items: [
       { id: "homepage", icon: Home, label: "Homepage" },
