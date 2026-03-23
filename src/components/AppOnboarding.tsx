@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
 import { Palette, ArrowRight, Sparkles, Star, Users, Calendar } from "lucide-react";
 
 const ONBOARDING_KEY = "ccc_onboarding_done_v2";
@@ -30,7 +29,6 @@ const slides = [
 
 const AppOnboarding = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -46,7 +44,7 @@ const AppOnboarding = () => {
 
   const handleGetStarted = () => {
     finish();
-    if (!user) navigate("/register");
+    navigate("/register");
   };
 
   const handleSkip = () => {
@@ -123,7 +121,7 @@ const AppOnboarding = () => {
               >
                 Get Started <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              {!user && (
+              {(
                 <Button
                   variant="ghost"
                   size="lg"

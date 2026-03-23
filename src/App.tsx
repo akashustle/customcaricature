@@ -121,10 +121,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-        <AppOnboarding />
-        <PermissionGate />
         <AppUpdateBanner />
         <BrowserRouter>
+          <AppOnboarding />
+          <PermissionGate />
           <ScrollToTop />
           <RouteMemoryTracker />
           <RouteMemoryRedirector />
