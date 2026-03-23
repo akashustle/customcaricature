@@ -9,6 +9,39 @@ import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Save, Plus, Trash2, GripVertical, Upload, Image } from "lucide-react";
 
+const ThumbnailUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; onUploaded: (url: string) => void }) => {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `thumbnails/video-thumb-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("blog-images").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
+      onUploaded(urlData.publicUrl);
+      toast({ title: "✅ Thumbnail uploaded!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+      <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={() => fileRef.current?.click()} disabled={uploading}>
+        <Image className="w-4 h-4" />
+        {uploading ? "Uploading..." : "Choose Thumbnail Image"}
+      </Button>
+    </div>
+  );
+};
+
 const AdminHomepageControl = () => {
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
