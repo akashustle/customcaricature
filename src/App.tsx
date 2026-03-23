@@ -131,6 +131,7 @@ const App = () => {
           <RouteMemoryTracker />
           <RouteMemoryRedirector />
           <FloatingButtons />
+          <LiveChatWrapper />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>
             <Routes>
