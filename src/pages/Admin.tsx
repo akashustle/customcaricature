@@ -750,17 +750,17 @@ const Admin = () => {
         <header className="sticky top-0 z-40 bg-[#0f1629]/95 backdrop-blur-xl border-b border-[#1e2a4a]">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg ring-1 ring-blue-500/20">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-[13px] font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
+              <span className="text-[13px] font-bold tracking-tight text-white font-sans">Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-medium text-slate-400 font-sans">Live</span>
               </div>
-              <div className="w-px h-4 bg-border/30" />
+              <div className="w-px h-4 bg-[#1e2a4a]" />
               <LiveGreeting name={adminProfile?.full_name} />
               <div className="ml-auto flex-1 max-w-md">
                 <AdminSmartSearch
@@ -786,8 +786,8 @@ const Admin = () => {
             </div>
             <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-white/5"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-slate-400 hover:text-white hover:bg-white/5 font-sans">
                 <LogOut className="w-3 h-3" /> Sign Out
               </Button>
             </div>
