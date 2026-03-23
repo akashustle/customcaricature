@@ -71,6 +71,11 @@ const AdminIntegrations = () => {
     toast({ title: "OTP settings saved ✅" });
   };
 
+  const savePushPilot = async () => {
+    await updateSetting("pushpilot_config", { enabled: pushpilotEnabled });
+    toast({ title: "PushPilot settings saved ✅" });
+  };
+
   if (loading) {
     return <p className="text-center text-muted-foreground py-10">Loading...</p>;
   }
