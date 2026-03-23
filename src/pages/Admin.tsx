@@ -51,6 +51,7 @@ import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
+import AdminChat from "@/components/admin/AdminChat";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
