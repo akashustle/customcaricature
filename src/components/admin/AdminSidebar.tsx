@@ -4,7 +4,7 @@ import {
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Percent, Layers, FileQuestion,
-  Type, FormInput, Palette, Activity, ShieldCheck
+  Type, FormInput, Palette, Activity, ShieldCheck, Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
