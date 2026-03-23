@@ -170,14 +170,11 @@ export const initWebPush = async (userId?: string) => {
         city: locationInfo.city || null,
         timezone: locationInfo.timezone || null,
         is_active: true,
-        welcome_sent: false,
+        welcome_sent: true,
       } as any);
 
+      // Only show ONE welcome — local notification only (no DB insert to avoid double-send via trigger)
       await showLocalWelcomeNotification(registration);
-
-      if (userId && userId !== "anonymous") {
-        sendWelcomeNotification(userId);
-      }
       console.log("New push subscriber registered");
     } else {
       await supabase.from("push_subscriptions").update({
@@ -194,18 +191,6 @@ export const initWebPush = async (userId?: string) => {
         timezone: locationInfo.timezone || null,
         is_active: true,
       } as any).eq("id", existing.id);
-
-      if (!existing.welcome_sent) {
-        await showLocalWelcomeNotification(registration);
-      }
-
-      if (userId && userId !== "anonymous" && !existing.welcome_sent) {
-        sendWelcomeNotification(userId);
-      }
-
-      if (!existing.welcome_sent) {
-        await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
-      }
     }
 
     console.log("Web Push initialized successfully");
