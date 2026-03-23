@@ -795,6 +795,36 @@ export type Database = {
         }
         Relationships: []
       }
+      before_after_gallery: {
+        Row: {
+          after_image_url: string
+          before_image_url: string
+          caption: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          sort_order: number
+        }
+        Insert: {
+          after_image_url: string
+          before_image_url: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+        }
+        Update: {
+          after_image_url?: string
+          before_image_url?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_name: string

@@ -61,6 +61,7 @@ const WorkshopPolicy = lazy(() => import("./pages/WorkshopPolicy"));
 const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
+const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -153,6 +154,7 @@ const App = () => {
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/page/:slug" element={<CmsPage />} />
               <Route path="/caricature-budgeting" element={<CaricatureBudgeting />} />
+              <Route path="/gallery/:type" element={<GalleryPage />} />
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/book-event" element={<BookEvent />} />
               <Route path="/event-policy" element={<EventPolicy />} />

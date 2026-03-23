@@ -64,6 +64,7 @@ import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
 import { useAdminAction } from "@/hooks/useAdminAction";
 import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
 import AdminGallery from "@/components/admin/AdminGallery";
+import AdminBeforeAfter from "@/components/admin/AdminBeforeAfter";
 import AdminHomepageReviews from "@/components/admin/AdminHomepageReviews";
 import AdminTrustedBrands from "@/components/admin/AdminTrustedBrands";
 import AdminPages from "@/components/admin/AdminPages";
@@ -1689,6 +1690,9 @@ const Admin = () => {
 
           <TabsContent value="gallery">
             <AdminGallery />
+            <div className="mt-6">
+              <AdminBeforeAfter />
+            </div>
           </TabsContent>
 
           <TabsContent value="hp-reviews">
@@ -2008,6 +2012,19 @@ const Admin = () => {
                       onCheckedChange={async (checked) => {
                         await updateSetting("allow_international_registration", { enabled: checked });
                         toast({ title: checked ? "International registration enabled" : "International registration disabled" });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show App Download Link</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show/hide Android APK download link in footer</p>
+                    </div>
+                    <Switch
+                      checked={settings.app_download_link?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("app_download_link", { enabled: checked });
+                        toast({ title: checked ? "App download link visible" : "App download link hidden" });
                       }}
                     />
                   </div>
