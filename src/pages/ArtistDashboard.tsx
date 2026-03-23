@@ -303,6 +303,24 @@ const ArtistDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="mb-4">
+          <AdminSmartSearch
+            panelType="artist"
+            tabs={[
+              { id: "events", label: "Events" },
+              { id: "orders", label: "Orders" },
+            ]}
+            onNavigate={(tab, highlightId) => {
+              setActiveTab(tab);
+              if (highlightId) {
+                setTimeout(() => {
+                  const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                  if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                }, 300);
+              }
+            }}
+          />
+        </div>
         <LiveGreeting name={artist?.name} />
 
         {/* Stats — Enhanced */}
