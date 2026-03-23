@@ -499,6 +499,15 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
           </CardContent>
         </Card>
       </motion.div>
+      {/* Drill-Down Dialog */}
+      {drillDown && (
+        <AdminDrillDownDialog
+          open={!!drillDown}
+          onClose={() => setDrillDown(null)}
+          metric={drillDown.metric}
+          title={drillDown.title}
+        />
+      )}
     </div>
   );
 };
