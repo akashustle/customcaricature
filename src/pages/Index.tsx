@@ -211,69 +211,140 @@ const Index = () => {
       {/* Hero Section */}
       <main>
       <section className="relative overflow-hidden" ref={heroRef}>
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
-        {[...Array(8)].map((_, i) => (
+        {/* Animated gradient background for desktop */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-card/30 to-background" />
+        <div className="absolute inset-0 hidden lg:block">
+          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand-gold/3 blur-[150px]" />
+        </div>
+        {[...Array(12)].map((_, i) => (
           <motion.div
             key={`particle-${i}`}
-            className="absolute w-1.5 h-1.5 rounded-full bg-primary/20"
-            style={{ left: `${10 + i * 12}%`, top: `${15 + (i % 4) * 18}%` }}
-            animate={{ y: [0, -30, 0], opacity: [0.1, 0.5, 0.1], scale: [1, 1.5, 1] }}
-            transition={{ duration: 3 + i * 0.7, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+            className="absolute rounded-full bg-primary/15 hidden lg:block"
+            style={{
+              left: `${5 + i * 8}%`,
+              top: `${10 + (i % 5) * 16}%`,
+              width: `${4 + (i % 3) * 3}px`,
+              height: `${4 + (i % 3) * 3}px`,
+            }}
+            animate={{ y: [0, -40, 0], opacity: [0.05, 0.4, 0.05], scale: [1, 1.8, 1] }}
+            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: i * 0.3, ease: "easeInOut" }}
           />
         ))}
-        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-28 lg:py-36 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-24">
             {/* Left: Text content */}
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
-              <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-4">
-                India's Premium Caricature Studio
-              </motion.p>
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="font-calligraphy text-5xl md:text-7xl lg:text-8xl font-bold text-foreground mb-6 leading-[1.1]">
-                {hero.headline || "Book Professional Caricature Artists for Your Event"}
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
+                className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                <span className="text-xs font-body font-semibold text-primary tracking-wide">India's #1 Premium Caricature Studio</span>
+              </motion.div>
+              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="font-calligraphy text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-6 leading-[1.05]">
+                {hero.headline || (<>Turn Moments Into <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
               </motion.h1>
-              <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
-                className="text-base md:text-lg text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
-                {hero.subtext || "Custom hand-crafted caricatures that capture personality in every stroke."}
+              <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
+                className="text-base md:text-lg lg:text-xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
+                {hero.subtext || "Book professional caricature artists for weddings, corporate events & parties. Order custom hand-crafted caricatures from your photos."}
               </motion.p>
               {hero.pricing_line && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
                   className="text-sm font-body font-semibold text-primary mb-2">
                   {hero.pricing_line}
                 </motion.p>
               )}
               {hero.urgency_text && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.85 }}
-                  className="text-xs font-body text-accent mb-8">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.75 }}
+                  className="text-xs font-body text-accent mb-6">
                   {hero.urgency_text}
                 </motion.p>
               )}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
-                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 mb-8">
+                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-xl shadow-primary/25 text-base px-8">
                     {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+                  <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card text-base px-8">
                     <Zap className="w-5 h-5 mr-2" /> {hero.secondary_cta || "Book for Event"}
                   </Button>
                 </motion.div>
               </motion.div>
+              {/* Trust badges */}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.6 }}
+                className="hidden lg:flex items-center gap-6 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {[Star, Star, Star, Star, Star].map((S, i) => <S key={i} className="w-4 h-4 text-warning fill-warning" />)}
+                  </div>
+                  <span className="text-xs font-body font-semibold">4.9/5 Rating</span>
+                </div>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-body font-semibold">5000+ Happy Clients</span>
+                </div>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-body font-semibold">800+ Events Served</span>
+                </div>
+              </motion.div>
             </motion.div>
 
-            {/* Right: Gallery preview for desktop */}
-            <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, duration: 0.8 }}
-              className="hidden lg:grid grid-cols-2 gap-4 flex-shrink-0 w-[420px]">
-              {galleryImages.slice(0, 4).map((img, i) => (
-                <motion.div key={i} whileHover={{ scale: 1.05, rotate: i % 2 === 0 ? 2 : -2 }}
-                  className="rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-[3/4] border border-border"
-                  onClick={() => openLightbox(i)}>
-                  <img src={img} alt={`Caricature ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+            {/* Right: Premium gallery mosaic for desktop */}
+            <motion.div initial={{ opacity: 0, scale: 0.85, rotateY: -10 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="hidden lg:block flex-shrink-0 w-[480px] xl:w-[540px] relative perspective-1000">
+              {/* Decorative frame */}
+              <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
+              <div className="relative grid grid-cols-12 grid-rows-6 gap-3 h-[520px] xl:h-[580px]">
+                {/* Large main image */}
+                <motion.div whileHover={{ scale: 1.03, zIndex: 10 }} className="col-span-7 row-span-4 rounded-2xl overflow-hidden shadow-2xl cursor-pointer border border-border/50 relative group"
+                  onClick={() => openLightbox(0)}>
+                  <img src={galleryImages[0]} alt="Featured caricature artwork" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="eager" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-body font-semibold px-3 py-1 rounded-full">View Gallery</span>
+                  </div>
                 </motion.div>
-              ))}
+                {/* Top right */}
+                <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
+                  onClick={() => openLightbox(1)}>
+                  <img src={galleryImages[1]} alt="Custom couple caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                </motion.div>
+                {/* Bottom right top */}
+                <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
+                  onClick={() => openLightbox(2)}>
+                  <img src={galleryImages[2]} alt="Event caricature artist" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                </motion.div>
+                {/* Bottom left */}
+                <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-4 row-span-2 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
+                  onClick={() => openLightbox(3)}>
+                  <img src={galleryImages[3]} alt="Fun style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                </motion.div>
+                {/* Bottom center */}
+                <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-3 row-span-2 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
+                  onClick={() => openLightbox(4)}>
+                  <img src={galleryImages[4]} alt="Royal style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                </motion.div>
+              </div>
+              {/* Floating stats card */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}
+                className="absolute -bottom-6 -left-6 bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl px-5 py-4 z-20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-success/15 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-body font-bold text-foreground">Trusted by 5000+</p>
+                    <p className="text-xs font-body text-muted-foreground">clients across India</p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
 
             {/* Mobile: Logo */}
