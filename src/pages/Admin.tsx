@@ -728,22 +728,22 @@ const Admin = () => {
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 admin-header-premium">
-          <div className="px-4 md:px-8 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/15">
+          <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin Console</span>
+              <span className="text-[13px] font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-medium text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>Live</span>
               </div>
-              <span className="text-muted-foreground/30">|</span>
+              <div className="w-px h-4 bg-border/30" />
               <LiveGreeting name={adminProfile?.full_name} />
-              <div className="ml-4 flex-1 max-w-lg">
+              <div className="ml-auto flex-1 max-w-md">
                 <AdminSmartSearch
                   panelType="main"
                   tabs={[
@@ -765,11 +765,11 @@ const Admin = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-8 gap-1.5 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
-                <LogOut className="w-3.5 h-3.5" /> Sign Out
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px]" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <LogOut className="w-3 h-3" /> Sign Out
               </Button>
             </div>
           </div>
