@@ -378,21 +378,24 @@ const Dashboard = () => {
 
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden mobile-bottom-nav border-t border-border">
-        <div className="flex items-center overflow-x-auto py-2 px-1 gap-1 scrollbar-thin">
-          <BottomNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
-          <BottomNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
-          <BottomNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
-          {settings.shop_nav_visible?.enabled !== false && (
-            <BottomNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
-          )}
-          <BottomNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
-          <BottomNavItem icon={Bell} label="Alerts" active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} />
-          {(settings as any).workshop_dashboard_visible?.enabled && (
-            <BottomNavItem icon={GraduationCap} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
-          )}
-          <BottomNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
-          <BottomNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+        <div className="bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+          <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
+            <DashNavItem icon={Home} label="Home" active={false} onClick={() => navigate("/")} />
+            <DashNavItem icon={ShoppingBag} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
+            <DashNavItem icon={CalIcon} label="Events" active={activeTab === "events"} onClick={() => setActiveTab("events")} />
+            {settings.shop_nav_visible?.enabled !== false && (
+              <DashNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
+            )}
+            <DashNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
+            <DashNavItem icon={Bell} label="Alerts" active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} />
+            {(settings as any).workshop_dashboard_visible?.enabled && (
+              <DashNavItem icon={GraduationCap} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
+            )}
+            <DashNavItem icon={User} label="Profile" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+            <DashNavItem icon={Settings} label="Settings" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+          </div>
+          <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
       </div>
     </div>
