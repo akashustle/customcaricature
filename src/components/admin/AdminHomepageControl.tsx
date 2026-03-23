@@ -179,6 +179,11 @@ const AdminHomepageControl = () => {
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">YouTube URL</label>
                 <Input value={video.youtube_url || ""} onChange={e => updateSetting("homepage_video", { ...video, youtube_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
               </div>
+              <div className="border-t border-border pt-4 mt-2">
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Custom Video URL (MP4 / direct link from any platform)</label>
+                <Input value={video.custom_video_url || ""} onChange={e => updateSetting("homepage_video", { ...video, custom_video_url: e.target.value })} placeholder="https://your-cloud.com/video.mp4" />
+                <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority. Supports direct video links from Lovable Cloud, S3, or any hosting.</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

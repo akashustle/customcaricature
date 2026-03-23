@@ -1,9 +1,5 @@
 // Built-in Web Push Notification System (Self-hosted VAPID)
-// No third-party dependency — uses own send-web-push edge function
-
 import { supabase } from "@/integrations/supabase/client";
-
-let initialized = false;
 
 /**
  * Detect device info from user agent
@@ -15,11 +11,9 @@ const getDeviceInfo = () => {
   let os = "Unknown";
   let deviceName = "";
 
-  // Device type
   if (/Mobi|Android/i.test(ua)) deviceType = "mobile";
   else if (/Tablet|iPad/i.test(ua)) deviceType = "tablet";
 
-  // Browser detection
   if (ua.includes("Firefox")) browser = "Firefox";
   else if (ua.includes("SamsungBrowser")) browser = "Samsung Browser";
   else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
@@ -27,7 +21,6 @@ const getDeviceInfo = () => {
   else if (ua.includes("Chrome")) browser = "Chrome";
   else if (ua.includes("Safari")) browser = "Safari";
 
-  // OS detection
   if (ua.includes("Windows NT 10")) os = "Windows 10/11";
   else if (ua.includes("Windows")) os = "Windows";
   else if (ua.includes("Mac OS X")) os = "macOS";
@@ -39,7 +32,6 @@ const getDeviceInfo = () => {
   else if (ua.includes("iPad")) os = "iPadOS";
   else if (ua.includes("Linux")) os = "Linux";
 
-  // Device name
   if (ua.includes("iPhone")) deviceName = "iPhone";
   else if (ua.includes("iPad")) deviceName = "iPad";
   else if (ua.includes("Pixel")) deviceName = "Google Pixel";
@@ -49,48 +41,66 @@ const getDeviceInfo = () => {
   return { deviceType, browser, os, deviceName };
 };
 
-/**
- * Get approximate location from timezone
- */
 const getLocationInfo = () => {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  // Extract city from timezone like "Asia/Kolkata" → "Kolkata"
   const parts = timezone.split("/");
   const city = parts.length > 1 ? parts[parts.length - 1].replace(/_/g, " ") : "";
   return { timezone, city };
 };
 
 /**
- * Initialize the built-in web push system
+ * Initialize push — called on every page load, safe to call multiple times
  */
 export const initWebPush = async (userId?: string) => {
-  if (initialized) return;
-  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    console.warn("Web Push not supported in this browser");
+    return;
+  }
 
   try {
+    // Register service worker first
     const registration = await navigator.serviceWorker.register("/sw-push.js");
     await navigator.serviceWorker.ready;
+    console.log("SW registered for push");
 
-    // Request permission immediately on visit
-    const permission = await Notification.requestPermission();
+    // Immediately request permission — this is the browser prompt
+    const currentPermission = Notification.permission;
+    console.log("Current notification permission:", currentPermission);
+
+    if (currentPermission === "denied") {
+      console.warn("Notifications blocked by user");
+      return;
+    }
+
+    let permission: string = currentPermission;
+    if (currentPermission === "default") {
+      // This triggers the browser's native permission prompt
+      permission = await Notification.requestPermission();
+      console.log("Permission result:", permission);
+    }
+
     if (permission !== "granted") return;
 
-    // Get VAPID public key from own edge function
+    // Get VAPID public key
     let vapidKey: string;
     try {
       const { data } = await supabase.functions.invoke("send-web-push", {
         body: { action: "get_vapid_key" },
       });
       vapidKey = data?.vapid_public_key;
-      if (!vapidKey) return;
-    } catch {
+      if (!vapidKey) {
+        console.warn("No VAPID key returned");
+        return;
+      }
+    } catch (e) {
+      console.warn("Failed to get VAPID key:", e);
       return;
     }
 
     // Check existing subscription
     const existingSub = await registration.pushManager.getSubscription();
 
-    // Convert VAPID key
+    // Convert VAPID key to Uint8Array
     const padding = "=".repeat((4 - (vapidKey.length % 4)) % 4);
     const base64 = (vapidKey + padding).replace(/-/g, "+").replace(/_/g, "/");
     const rawData = atob(base64);
@@ -123,7 +133,6 @@ export const initWebPush = async (userId?: string) => {
       .maybeSingle();
 
     if (!existing) {
-      // New subscriber — insert with device info
       await supabase.from("push_subscriptions").insert({
         user_id: subUserId,
         endpoint: subscription.endpoint,
@@ -139,12 +148,12 @@ export const initWebPush = async (userId?: string) => {
         welcome_sent: false,
       } as any);
 
-      // Send welcome notification for logged-in users
+      // Send welcome notification
       if (userId && userId !== "anonymous") {
         sendWelcomeNotification(userId);
       }
+      console.log("New push subscriber registered");
     } else {
-      // Update last active and device info
       await supabase.from("push_subscriptions").update({
         user_id: subUserId !== "anonymous" ? subUserId : undefined,
         last_active_at: new Date().toISOString(),
@@ -154,26 +163,20 @@ export const initWebPush = async (userId?: string) => {
         is_active: true,
       } as any).eq("id", existing.id);
 
-      // Send welcome if not sent yet and user is logged in
       if (userId && userId !== "anonymous" && !existing.welcome_sent) {
         sendWelcomeNotification(userId);
         await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
       }
     }
 
-    initialized = true;
-    console.log("Built-in Web Push initialized");
+    console.log("Web Push initialized successfully");
   } catch (err) {
     console.warn("Web Push init error:", err);
   }
 };
 
-/**
- * Send welcome notification to new subscriber
- */
 const sendWelcomeNotification = async (userId: string) => {
   try {
-    // Check if greeting already sent
     const { data: existing } = await supabase
       .from("notifications")
       .select("id")
@@ -185,16 +188,13 @@ const sendWelcomeNotification = async (userId: string) => {
     await supabase.from("notifications").insert({
       user_id: userId,
       title: "Welcome to CCC! 🎨",
-      message: "Thanks for enabling notifications! You'll now receive updates about your orders, events, and exclusive offers even when you're away.",
+      message: "Thanks for enabling notifications! You'll now receive updates about your orders, events, and exclusive offers.",
       type: "greeting",
       link: "/dashboard",
     } as any);
   } catch {}
 };
 
-/**
- * Send push notification to a specific user
- */
 export const sendWebPushNotification = async (params: {
   userId: string;
   title: string;
@@ -215,9 +215,6 @@ export const sendWebPushNotification = async (params: {
   return data;
 };
 
-/**
- * Broadcast push to multiple users
- */
 export const broadcastWebPush = async (params: {
   title: string;
   message: string;
@@ -226,7 +223,6 @@ export const broadcastWebPush = async (params: {
 }) => {
   let totalSent = 0;
   let totalFailed = 0;
-
   for (const userId of params.userIds) {
     try {
       const result = await sendWebPushNotification({
@@ -241,6 +237,5 @@ export const broadcastWebPush = async (params: {
       totalFailed++;
     }
   }
-
   return { sent: totalSent, failed: totalFailed };
 };
