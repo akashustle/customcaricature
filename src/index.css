@@ -414,14 +414,14 @@
     overflow: hidden;
     border-radius: 1.125rem;
     padding: 1.25rem;
-    background: hsl(30 40% 99%);
-    border: 1px solid hsl(30 18% 92%);
-    box-shadow: 0 1px 2px hsl(25 15% 30% / 0.03), 0 4px 12px hsl(25 15% 30% / 0.04);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.03), 0 4px 12px hsl(var(--foreground) / 0.04);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .premium-stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px hsl(25 15% 30% / 0.05), 0 12px 28px hsl(25 15% 30% / 0.07);
+    box-shadow: 0 4px 12px hsl(var(--foreground) / 0.05), 0 12px 28px hsl(var(--foreground) / 0.07);
     border-color: hsl(var(--primary) / 0.15);
   }
   .premium-stat-card::before {
