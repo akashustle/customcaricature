@@ -111,17 +111,8 @@ const AdminLogin = () => {
         } as any).eq("user_id", authData.user.id);
 
         try {
-          await supabase.functions.invoke("send-notification-email", {
-            body: {
-              to: email.trim().toLowerCase(),
-              subject: "Admin Login OTP - Creative Caricature Club",
-              html: `<div style="font-family:sans-serif;max-width:400px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;">
-                <h2 style="color:#b08d57;">🔐 Admin Login Verification</h2>
-                <p>Your one-time password:</p>
-                <div style="font-size:32px;font-weight:bold;letter-spacing:6px;text-align:center;padding:16px;background:#fdf8f3;border-radius:8px;color:#b08d57;">${otp}</div>
-                <p style="color:#666;font-size:12px;margin-top:16px;">Expires in 10 minutes.</p>
-              </div>`,
-            },
+          await supabase.functions.invoke("send-otp-email", {
+            body: { to: email.trim().toLowerCase(), otp },
           });
         } catch {}
 
