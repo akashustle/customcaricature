@@ -10,7 +10,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "Creative Caricature Club";
-const DEFAULT_DESC = "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online with Creative Caricature Club.";
+const DEFAULT_DESC = "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online with Creative Caricature Club. India's #1 caricature studio.";
 const BASE_URL = "https://customcaricature.lovable.app";
 
 const SEOHead = ({
@@ -21,7 +21,7 @@ const SEOHead = ({
   image = "/logo.png",
   noindex = false,
 }: SEOHeadProps) => {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} - Custom Hand-Crafted Caricatures Online`;
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} - Custom Hand-Crafted Caricatures Online India`;
   const fullImage = image.startsWith("http") ? image : `${BASE_URL}${image}`;
   const fullCanonical = canonical ? `${BASE_URL}${canonical}` : undefined;
 
@@ -44,17 +44,12 @@ const SEOHead = ({
     setMeta("og:type", type, "property");
     setMeta("og:image", fullImage, "property");
     setMeta("og:site_name", SITE_NAME, "property");
+    setMeta("og:locale", "en_IN", "property");
     setMeta("twitter:card", "summary_large_image");
     setMeta("twitter:title", fullTitle);
     setMeta("twitter:description", description);
     setMeta("twitter:image", fullImage);
-
-    if (noindex) {
-      setMeta("robots", "noindex, nofollow");
-    } else {
-      const el = document.querySelector('meta[name="robots"]');
-      if (el) el.remove();
-    }
+    setMeta("robots", noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
 
     if (fullCanonical) {
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
@@ -64,9 +59,6 @@ const SEOHead = ({
         document.head.appendChild(link);
       }
       link.href = fullCanonical;
-    }
-
-    if (fullCanonical) {
       setMeta("og:url", fullCanonical, "property");
     }
   }, [fullTitle, description, type, fullImage, fullCanonical, noindex]);
