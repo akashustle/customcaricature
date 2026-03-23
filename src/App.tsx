@@ -154,6 +154,7 @@ const App = () => {
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/page/:slug" element={<CmsPage />} />
               <Route path="/caricature-budgeting" element={<CaricatureBudgeting />} />
+              <Route path="/gallery/:type" element={<GalleryPage />} />
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/book-event" element={<BookEvent />} />
               <Route path="/event-policy" element={<EventPolicy />} />
