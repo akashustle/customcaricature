@@ -26,6 +26,7 @@ const NAV_SECTIONS = [
       { id: "orders", icon: Package, label: "Orders" },
       { id: "events", icon: Calendar, label: "Events" },
       { id: "payments", icon: Receipt, label: "Payments" },
+      { id: "invoices", icon: FileText, label: "Invoices" },
     ],
   },
   {
