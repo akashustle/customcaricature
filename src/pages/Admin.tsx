@@ -1594,6 +1594,10 @@ const Admin = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="push-center">
+            <AdminPushCenter />
+          </TabsContent>
+
           <TabsContent value="notify">
             <AdminNotificationSender />
           </TabsContent>
