@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,6 @@ import { Loader2, Eye, EyeOff, Shield, Lock, Mail, KeyRound, RefreshCw, Sparkles
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
-
-const ADMIN_MASTER_SECRET = "01022006";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -31,6 +29,18 @@ const AdminLogin = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [sessionLimitReached, setSessionLimitReached] = useState(false);
   const [sessionSecretCode, setSessionSecretCode] = useState("");
+  const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
+
+  // Fetch admin secret code from DB
+  useEffect(() => {
+    const fetchSecret = async () => {
+      const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "admin_secret_code").maybeSingle();
+      if (data?.value && (data.value as any).code) {
+        setAdminMasterSecret((data.value as any).code);
+      }
+    };
+    fetchSecret();
+  }, []);
 
   const startResendCooldown = () => {
     setResendCooldown(60);
@@ -178,7 +188,7 @@ const AdminLogin = () => {
 
     // Admin secret code bypass
     if (otpVerifyMethod === "secret") {
-      if (adminSecretCode !== ADMIN_MASTER_SECRET) {
+      if (adminSecretCode !== adminMasterSecret) {
         toast({ title: "Invalid Admin Secret Code", variant: "destructive" });
         return;
       }
@@ -309,7 +319,7 @@ const AdminLogin = () => {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   onClick={async () => {
-                    if (sessionSecretCode !== ADMIN_MASTER_SECRET) {
+                    if (sessionSecretCode !== adminMasterSecret) {
                       toast({ title: "Invalid Secret Code", variant: "destructive" });
                       return;
                     }

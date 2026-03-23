@@ -12,6 +12,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import AppUpdateBanner from "./components/AppUpdateBanner";
 import PermissionGate from "./components/PermissionGate";
 import AppOnboarding from "./components/AppOnboarding";
+import LiveChatWrapper from "./components/LiveChatWrapper";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
@@ -130,6 +131,7 @@ const App = () => {
           <RouteMemoryTracker />
           <RouteMemoryRedirector />
           <FloatingButtons />
+          <LiveChatWrapper />
           <MobileBottomNav />
           <Suspense fallback={<PageLoader />}>
             <Routes>

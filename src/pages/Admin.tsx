@@ -51,6 +51,7 @@ import AdminSessionsLog from "@/components/admin/AdminSessionsLog";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminChatbotTraining from "@/components/admin/AdminChatbotTraining";
 import AdminAIChatConversations from "@/components/admin/AdminAIChatConversations";
+import AdminChat from "@/components/admin/AdminChat";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
@@ -1662,6 +1663,9 @@ const Admin = () => {
             <AdminAIChatConversations />
           </TabsContent>
 
+          <TabsContent value="live-chat">
+            <AdminChat adminUserId={user?.id || ""} />
+          </TabsContent>
 
 
 
@@ -2029,6 +2033,63 @@ const Admin = () => {
                       onCheckedChange={async (checked) => {
                         await updateSetting("app_download_link", { enabled: checked });
                         toast({ title: checked ? "App download link visible" : "App download link hidden" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Admin Secret Code */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><KeyRound className="w-5 h-5 text-primary" />Admin Secret Code</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="font-sans text-sm">Admin Secret Code (used for OTP bypass & session unlock)</Label>
+                    <p className="text-xs text-muted-foreground font-sans mb-2">Change the master admin secret code</p>
+                    <Input
+                      type="text"
+                      maxLength={8}
+                      value={(settings as any).admin_secret_code?.code || "01022006"}
+                      onChange={async (e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        if (val.length <= 8) {
+                          await updateSetting("admin_secret_code", { code: val, enabled: (settings as any).admin_secret_code?.enabled !== false });
+                        }
+                      }}
+                      className="max-w-[200px] font-sans text-center text-lg tracking-widest font-bold"
+                      placeholder="01022006"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Enable Secret Code Login</p>
+                      <p className="text-xs text-muted-foreground font-sans">Allow admins to use the secret code to bypass OTP</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).admin_secret_code?.enabled !== false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("admin_secret_code", { code: (settings as any).admin_secret_code?.code || "01022006", enabled: checked });
+                        toast({ title: checked ? "Secret code login enabled" : "Secret code login disabled" });
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Live Chat Toggle */}
+              <Card>
+                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Live Chat Widget</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Live Chat on Website</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display the WhatsApp-style live chat widget for logged-in users in the footer</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).live_chat_visible?.enabled || false}
+                      onCheckedChange={async (checked) => {
+                        await updateSetting("live_chat_visible", { enabled: checked });
+                        toast({ title: checked ? "Live chat enabled on website" : "Live chat hidden from website" });
                       }}
                     />
                   </div>
