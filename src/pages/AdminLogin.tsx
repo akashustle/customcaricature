@@ -12,8 +12,6 @@ import { Loader2, Eye, EyeOff, Shield, Lock, Mail, KeyRound, RefreshCw, Sparkles
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
 
-const ADMIN_MASTER_SECRET = "01022006";
-
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
