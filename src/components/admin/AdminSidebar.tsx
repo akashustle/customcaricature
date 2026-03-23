@@ -4,7 +4,8 @@ import {
   Settings, Home, ClipboardList, LogOut, ChevronLeft, ChevronRight,
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
-  Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle
+  Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle,
+  Gift, Ticket, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
