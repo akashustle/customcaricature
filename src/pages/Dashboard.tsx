@@ -27,6 +27,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 declare global {
   interface Window { Razorpay: any; }
