@@ -403,6 +403,7 @@ const Dashboard = () => {
               <DashNavItem icon={Store} label="Shop" active={activeTab === "shop"} onClick={() => setActiveTab("shop")} />
             )}
             <DashNavItem icon={Receipt} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
+            <DashNavItem icon={FileText} label="Invoices" active={activeTab === "invoices"} onClick={() => setActiveTab("invoices")} />
             <DashNavItem icon={Bell} label="Alerts" active={activeTab === "alerts"} onClick={() => setActiveTab("alerts")} />
             {(settings as any).workshop_dashboard_visible?.enabled && (
               <DashNavItem icon={GraduationCap} label="Workshop" active={activeTab === "workshop"} onClick={() => setActiveTab("workshop")} />
