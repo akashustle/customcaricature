@@ -27,6 +27,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -216,7 +217,8 @@ const Dashboard = () => {
               body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id },
             });
             if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
-            toast({ title: "Payment Successful!" });
+            playPaymentSuccessSound();
+            toast({ title: "🎉 Payment Successful!" });
             if (user) fetchOrders(user.id);
           } catch { toast({ title: "Verification Failed", description: "Contact support: " + order.id.slice(0, 8).toUpperCase(), variant: "destructive" }); }
           setPayingOrderId(null);

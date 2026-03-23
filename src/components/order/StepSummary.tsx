@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 declare global {
   interface Window {
@@ -115,6 +116,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
               throw new Error("Payment verification failed");
             }
 
+            playPaymentSuccessSound();
             onComplete(orderId);
 
             // Send confirmation email (fire-and-forget)

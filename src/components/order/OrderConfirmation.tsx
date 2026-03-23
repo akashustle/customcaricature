@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Package, Download, Sparkles, PartyPopper } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 interface Props {
   orderId: string;
@@ -10,6 +12,10 @@ interface Props {
 
 const OrderConfirmation = ({ orderId }: Props) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    playPaymentSuccessSound();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">

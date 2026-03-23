@@ -10,6 +10,7 @@ import { CheckCircle, Package, ArrowRight, Home, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import CelebrationBanner from "@/components/CelebrationBanner";
+import { playPaymentSuccessSound } from "@/lib/sounds";
 
 const ShopOrderConfirmation = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +24,7 @@ const ShopOrderConfirmation = () => {
   useEffect(() => {
     if (!orderId) { navigate("/shop"); return; }
     fetchOrder();
+    playPaymentSuccessSound();
   }, [orderId]);
 
   const fetchOrder = async () => {

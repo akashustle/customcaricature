@@ -4,7 +4,8 @@ import {
   ClipboardList, HelpCircle, Star, PenTool, Globe, MapPin,
   Radio, Bell, Monitor, Home as HomeIcon, FileText, Image,
   Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
-  Calculator, FileQuestion, Layers, TrendingUp, UserCheck
+  Calculator, FileQuestion, Layers, TrendingUp, UserCheck,
+  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -28,6 +29,7 @@ const PRIMARY_TABS = [
 const MORE_SECTIONS = [
   { section: "Analytics", icon: TrendingUp, items: [
     { id: "payments", label: "Payments", icon: DollarSign },
+    { id: "invoices", label: "Invoices", icon: Receipt },
     { id: "revenue", label: "Revenue", icon: DollarSign },
     { id: "revenue-target", label: "₹10L Target", icon: Target },
     { id: "ai-intelligence", label: "AI Insights", icon: Zap },
@@ -35,6 +37,7 @@ const MORE_SECTIONS = [
   { section: "AI & Chat", icon: Bot, items: [
     { id: "ai-conversations", label: "AI Chats", icon: Bot },
     { id: "chatbot", label: "AI Training", icon: Settings },
+    { id: "live-chat", label: "Live Chat", icon: MessageCircle },
   ]},
   { section: "CRM", icon: Target, items: [
     { id: "crm-pipeline", label: "Pipeline", icon: Target },
@@ -78,10 +81,16 @@ const MORE_SECTIONS = [
     { id: "security-dashboard", label: "Security", icon: ShieldCheck },
     { id: "activity-logs", label: "Activity", icon: Activity },
   ]},
+  { section: "Marketing", icon: Gift, items: [
+    { id: "referrals", label: "Referrals", icon: Gift },
+    { id: "coupons", label: "Coupons", icon: Ticket },
+    { id: "feature-gating", label: "Feature Gates", icon: ToggleLeft },
+  ]},
   { section: "System", icon: Settings, items: [
     { id: "team", label: "Team", icon: Users },
     { id: "automation", label: "Automation", icon: Zap },
     { id: "integrations", label: "Integrations", icon: Shield },
+    { id: "maintenance", label: "Maintenance", icon: AlertTriangle },
     { id: "settings", label: "Settings", icon: Settings },
   ]},
 ];

@@ -1,5 +1,6 @@
 // Currency/money sound using uploaded MP3 file
 let cachedAudio: HTMLAudioElement | null = null;
+let cachedPaymentAudio: HTMLAudioElement | null = null;
 
 const playMp3Sound = () => {
   try {
@@ -8,6 +9,17 @@ const playMp3Sound = () => {
     }
     const audio = cachedAudio.cloneNode() as HTMLAudioElement;
     audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch {}
+};
+
+export const playPaymentSuccessSound = () => {
+  try {
+    if (!cachedPaymentAudio) {
+      cachedPaymentAudio = new Audio('/sounds/payment-success.mp3');
+    }
+    const audio = cachedPaymentAudio.cloneNode() as HTMLAudioElement;
+    audio.volume = 0.7;
     audio.play().catch(() => {});
   } catch {}
 };
