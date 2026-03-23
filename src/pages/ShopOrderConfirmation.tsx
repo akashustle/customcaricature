@@ -24,6 +24,7 @@ const ShopOrderConfirmation = () => {
   useEffect(() => {
     if (!orderId) { navigate("/shop"); return; }
     fetchOrder();
+    playPaymentSuccessSound();
   }, [orderId]);
 
   const fetchOrder = async () => {

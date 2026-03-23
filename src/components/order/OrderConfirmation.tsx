@@ -13,6 +13,10 @@ interface Props {
 const OrderConfirmation = ({ orderId }: Props) => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    playPaymentSuccessSound();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
       {/* Floating particles */}
