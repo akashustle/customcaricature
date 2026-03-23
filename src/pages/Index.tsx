@@ -9,6 +9,8 @@ import { useHomepageContent } from "@/hooks/useHomepageContent";
 import { useState, useCallback, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
+import MaintenanceScreen from "@/components/MaintenanceScreen";
+import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
 import HomepageGallery from "@/components/HomepageGallery";
 import HomepageBeforeAfter from "@/components/HomepageBeforeAfter";
 import HomepageScrollEvents from "@/components/HomepageScrollEvents";
