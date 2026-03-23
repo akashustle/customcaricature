@@ -402,10 +402,12 @@ const Dashboard = () => {
   );
 };
 
-const BottomNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all flex-shrink-0 ${active ? "text-primary-foreground bg-primary shadow-md scale-105" : "text-muted-foreground hover:text-foreground"}`}>
-    <Icon className="w-5 h-5" />
-    <span className="text-[10px] font-sans font-medium">{label}</span>
+const DashNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
+  <button onClick={onClick} className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
+    <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${active ? "bg-primary/10" : ""}`}>
+      <Icon className={`w-[20px] h-[20px] transition-all duration-200 ${active ? "text-primary" : "text-muted-foreground/60"}`} strokeWidth={active ? 2.5 : 1.8} />
+    </div>
+    <span className={`text-[9px] leading-none font-medium transition-all duration-200 ${active ? "text-primary font-bold" : "text-muted-foreground/50"}`}>{label}</span>
   </button>
 );
 
