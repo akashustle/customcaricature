@@ -1702,6 +1702,9 @@ const Admin = () => {
 
           <TabsContent value="brands">
             <AdminTrustedBrands />
+            <div className="mt-6">
+              <AdminSocialLinks />
+            </div>
           </TabsContent>
 
           <TabsContent value="homepage">
