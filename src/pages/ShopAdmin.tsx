@@ -434,8 +434,25 @@ const ShopAdmin = () => {
       </div>
 
       <div className="p-4 max-w-7xl mx-auto space-y-4">
-        <div className="max-w-md mb-2">
-          <AdminGlobalSearch onNavigate={() => {}} />
+        <div className="max-w-lg mb-2">
+          <AdminSmartSearch
+            panelType="shop"
+            tabs={[
+              { id: "products", label: "Products" }, { id: "orders", label: "Orders" },
+              { id: "categories", label: "Categories" }, { id: "coupons", label: "Coupons" },
+              { id: "reviews", label: "Reviews" }, { id: "invoices", label: "Invoices" },
+            ]}
+            onNavigate={(tab, highlightId) => {
+              const tabsEl = document.querySelector(`[data-radix-collection-item][data-value="${tab}"]`) as HTMLElement;
+              if (tabsEl) tabsEl.click();
+              if (highlightId) {
+                setTimeout(() => {
+                  const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                  if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                }, 300);
+              }
+            }}
+          />
         </div>
         {/* Stats Grid - 3D Animated Widgets */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">

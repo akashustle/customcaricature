@@ -742,8 +742,26 @@ const Admin = () => {
               </div>
               <span className="text-muted-foreground/30">|</span>
               <LiveGreeting name={adminProfile?.full_name} />
-              <div className="ml-4 flex-1 max-w-md">
-                <AdminGlobalSearch onNavigate={setActiveTab} />
+              <div className="ml-4 flex-1 max-w-lg">
+                <AdminSmartSearch
+                  panelType="main"
+                  tabs={[
+                    { id: "orders", label: "Orders" }, { id: "events", label: "Events" },
+                    { id: "payments", label: "Payments" }, { id: "customers", label: "Customers" },
+                    { id: "artists", label: "Artists" }, { id: "enquiries", label: "Enquiries" },
+                    { id: "blog", label: "Blog" }, { id: "reviews", label: "Reviews" },
+                    { id: "ai-conversations", label: "AI Chats" }, { id: "hp-reviews", label: "HP Reviews" },
+                  ]}
+                  onNavigate={(tab, highlightId) => {
+                    setActiveTab(tab);
+                    if (highlightId) {
+                      setTimeout(() => {
+                        const el = document.querySelector(`[data-search-id="${highlightId}"]`);
+                        if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
+                      }, 300);
+                    }
+                  }}
+                />
               </div>
             </div>
             <div className="flex items-center gap-1.5">
