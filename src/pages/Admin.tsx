@@ -87,6 +87,8 @@ import AdminDesignControl from "@/components/admin/AdminDesignControl";
 import AdminActivityLogs from "@/components/admin/AdminActivityLogs";
 import AdminSecurityDashboard from "@/components/admin/AdminSecurityDashboard";
 import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
+import AdminRevenueTargetTracker from "@/components/admin/AdminRevenueTargetTracker";
+import AdminDrillDownDialog from "@/components/admin/AdminDrillDownDialog";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
 
 type Order = {
@@ -1624,6 +1626,10 @@ const Admin = () => {
 
           <TabsContent value="ai-intelligence">
             <AdminAIIntelligence />
+          </TabsContent>
+
+          <TabsContent value="revenue-target">
+            <AdminRevenueTargetTracker />
           </TabsContent>
 
           {/* Live Locations Tab */}
