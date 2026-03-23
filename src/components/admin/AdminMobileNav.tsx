@@ -92,7 +92,7 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-      <div className="bg-[#0f1629]/98 backdrop-blur-xl border-t border-[#1e2a4a] shadow-[0_-4px_24px_rgba(0,0,0,0.3)]">
+      <div className="bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
         <div className="flex items-stretch justify-evenly px-1 max-w-lg mx-auto">
           {PRIMARY_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -106,22 +106,22 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                 {isActive && (
                   <motion.div
                     layoutId="admin-nav-bar"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-blue-400"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
                 <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
-                  isActive ? "bg-blue-500/15" : ""
+                  isActive ? "bg-primary/10" : ""
                 }`}>
                   <tab.icon
                     className={`w-[22px] h-[22px] transition-all duration-200 ${
-                      isActive ? "text-blue-400" : "text-slate-500"
+                      isActive ? "text-primary" : "text-muted-foreground/60"
                     }`}
                     strokeWidth={isActive ? 2.5 : 1.8}
                   />
                 </div>
                 <span className={`text-[10px] leading-none font-medium transition-all duration-200 ${
-                  isActive ? "text-blue-400 font-bold" : "text-slate-500"
+                  isActive ? "text-primary font-bold" : "text-muted-foreground/50"
                 }`}>
                   {tab.label}
                 </span>
@@ -139,29 +139,29 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                 {!isPrimaryActive && (
                   <motion.div
                     layoutId="admin-nav-bar"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-blue-400"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
                 <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
-                  !isPrimaryActive ? "bg-blue-500/15" : ""
+                  !isPrimaryActive ? "bg-primary/10" : ""
                 }`}>
-                  <MoreHorizontal className={`w-[22px] h-[22px] ${!isPrimaryActive ? "text-blue-400" : "text-slate-500"}`} />
+                  <MoreHorizontal className={`w-[22px] h-[22px] ${!isPrimaryActive ? "text-primary" : "text-muted-foreground/60"}`} />
                 </div>
-                <span className={`text-[10px] leading-none font-medium ${!isPrimaryActive ? "text-blue-400 font-bold" : "text-slate-500"}`}>
+                <span className={`text-[10px] leading-none font-medium ${!isPrimaryActive ? "text-primary font-bold" : "text-muted-foreground/50"}`}>
                   More
                 </span>
               </motion.button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[75vh] rounded-t-3xl px-0 bg-[#0a0f1e] border-[#1e2a4a]">
+            <SheetContent side="bottom" className="h-[75vh] rounded-t-3xl px-0 bg-background border-border">
               <ScrollArea className="h-full px-4 pt-2">
-                <div className="w-10 h-1 rounded-full bg-slate-600 mx-auto mb-4" />
-                <h3 className="text-sm font-bold text-white mb-4 px-1">All Sections</h3>
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4" />
+                <h3 className="text-sm font-bold text-foreground mb-4 px-1">All Sections</h3>
                 {MORE_SECTIONS.map((section) => (
                   <div key={section.section} className="mb-4">
                     <div className="flex items-center gap-2 px-1 mb-2">
-                      <section.icon className="w-3 h-3 text-blue-400/50" />
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-400/40">
+                      <section.icon className="w-3 h-3 text-primary/50" />
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
                         {section.section}
                       </p>
                     </div>
@@ -174,13 +174,13 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                             className={cn(
                               "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all text-center",
                               isActive
-                                ? "bg-blue-600/15 border border-blue-500/20"
-                                : "bg-[#131b2e] border border-[#1e2a4a] hover:bg-[#1a2440]"
+                                ? "bg-primary/10 border border-primary/20 shadow-sm"
+                                : "bg-card border border-border hover:bg-muted/60"
                             )}
                             onClick={() => { onTabChange(item.id); setMoreOpen(false); }}
                           >
-                            <item.icon className={cn("w-4 h-4", isActive ? "text-blue-400" : "text-slate-400")} />
-                            <span className={cn("text-[10px] font-medium leading-tight", isActive ? "text-blue-300" : "text-slate-400")}>
+                            <item.icon className={cn("w-4 h-4", isActive ? "text-primary" : "text-muted-foreground")} />
+                            <span className={cn("text-[10px] font-medium leading-tight", isActive ? "text-primary" : "text-muted-foreground")}>
                               {item.label}
                             </span>
                           </button>
