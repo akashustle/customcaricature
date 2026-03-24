@@ -352,6 +352,7 @@ const Register = () => {
         <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club © {new Date().getFullYear()}</p>
       </motion.div>
     </div>
+    </>
   );
 };
 
