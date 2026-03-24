@@ -8,10 +8,11 @@ import {
   Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -138,9 +139,21 @@ const NAV_SECTIONS = [
   },
 ];
 
+const SHOP_RELATED_TABS = ["shop", "shop-orders", "shop-products", "shop-categories", "shop-settings"];
+
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
+  const hideShop = (settings as any)?.hide_shop_from_admin?.enabled || false;
+
+  const filteredSections = useMemo(() => {
+    if (!hideShop) return NAV_SECTIONS;
+    return NAV_SECTIONS.map(section => ({
+      ...section,
+      items: section.items.filter(item => !SHOP_RELATED_TABS.includes(item.id))
+    })).filter(section => section.items.length > 0);
+  }, [hideShop]);
 
   return (
     <aside 
@@ -176,7 +189,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 scrollbar-thin">
-        {NAV_SECTIONS.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.label} className="mb-1">
             {!collapsed && (
               <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 px-2.5 mb-1.5 mt-3 font-sans">
@@ -237,6 +250,26 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             <Home className="w-3.5 h-3.5" />
           </div>
           {!collapsed && <span>Website</span>}
+        </button>
+        <button
+          onClick={() => navigate("/cccworkshop2006")}
+          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
+          title={collapsed ? "Workshop Admin" : undefined}
+        >
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+            <CalendarDays className="w-3.5 h-3.5 text-white" />
+          </div>
+          {!collapsed && <span>Workshop Admin</span>}
+        </button>
+        <button
+          onClick={() => navigate("/CFCAdmin936")}
+          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
+          title={collapsed ? "Shop Admin" : undefined}
+        >
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <Package className="w-3.5 h-3.5 text-white" />
+          </div>
+          {!collapsed && <span>Shop Admin</span>}
         </button>
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}

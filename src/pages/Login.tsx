@@ -166,12 +166,12 @@ const Login = () => {
                   {loginWith === "email" ? (
                     <div>
                       <Label className="font-sans text-sm">Email Address</Label>
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl" autoFocus />
+                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl" />
                     </div>
                   ) : (
                     <div>
                       <Label className="font-sans text-sm">Phone Number</Label>
-                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" className="h-11 rounded-xl" maxLength={13} autoFocus />
+                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" className="h-11 rounded-xl" maxLength={13} />
                     </div>
                   )}
                   <Button onClick={goNext} disabled={!canProceedStep1} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
@@ -211,7 +211,7 @@ const Login = () => {
                       <div>
                         <Label className="font-sans text-sm">Password</Label>
                         <div className="relative">
-                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" autoFocus />
+                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" />
                           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
@@ -225,7 +225,7 @@ const Login = () => {
                     <form onSubmit={handleSecretCodeLogin} className="space-y-4">
                       <div>
                         <Label className="font-sans text-sm">Secret Code (4-digit)</Label>
-                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" autoFocus />
+                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" />
                       </div>
                       <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Sign In with Code

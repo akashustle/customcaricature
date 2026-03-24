@@ -247,7 +247,7 @@ const WorkshopAdminLogin = () => {
                           <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                              placeholder="••••••••" className="pl-10 pr-10 h-12 bg-slate-50/80 border-slate-200 rounded-xl focus:border-violet-500" autoFocus />
+                              placeholder="••••••••" className="pl-10 pr-10 h-12 bg-slate-50/80 border-slate-200 rounded-xl focus:border-violet-500" />
                             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
@@ -258,7 +258,7 @@ const WorkshopAdminLogin = () => {
                         <div className="space-y-2">
                           <Label className="text-sm text-slate-500 font-medium">6-Digit Secret Code</Label>
                           <Input type="password" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
-                            placeholder="• • • • • •" className="h-12 bg-slate-50/80 border-slate-200 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-violet-500" autoFocus />
+                            placeholder="• • • • • •" className="h-12 bg-slate-50/80 border-slate-200 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-violet-500" />
                         </div>
                       )}
                       {authMethod === "otp" && (
@@ -272,7 +272,7 @@ const WorkshopAdminLogin = () => {
                             <>
                               <Label className="text-sm text-slate-500 font-medium">Enter 6-digit OTP</Label>
                               <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
-                                placeholder="• • • • • •" className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-slate-50/80 border-slate-200 rounded-xl" autoFocus />
+                                placeholder="• • • • • •" className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-slate-50/80 border-slate-200 rounded-xl" />
                               <button type="button" disabled={resendCooldown > 0}
                                 onClick={async () => { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); }}
                                 className="text-sm text-violet-600 hover:underline disabled:text-slate-400 flex items-center gap-1 mx-auto">
