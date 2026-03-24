@@ -129,9 +129,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {EVENT_TYPES.map(t => (
-                      <button
+                       <button
                         key={t.id}
-                        onClick={() => setData({ ...data, event: t.id })}
+                        onClick={() => { setData({ ...data, event: t.id }); setTimeout(() => setStep(1), 300); }}
                         className={cn(
                           "relative p-4 rounded-xl border-2 text-left transition-all font-body",
                           data.event === t.id
