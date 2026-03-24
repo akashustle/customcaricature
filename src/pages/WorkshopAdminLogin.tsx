@@ -93,9 +93,21 @@ const WorkshopAdminLogin = () => {
         </motion.span>
       ))}
 
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }} className="w-full max-w-md relative z-10">
-        <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden">
-          <div className="p-8 space-y-6">
+      <motion.div initial={{ opacity: 0, y: 40, scale: 0.9, rotateX: 10 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.8, type: "spring", bounce: 0.3 }} className="w-full max-w-md relative z-10" style={{ perspective: "1200px" }}>
+
+        {/* Outer glow */}
+        <motion.div className="absolute -inset-1 rounded-[26px] opacity-30 blur-sm"
+          style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(99,102,241,0.2), rgba(168,85,247,0.15))" }}
+          animate={{ opacity: [0.2, 0.4, 0.2] }} transition={{ duration: 3, repeat: Infinity }} />
+
+        <div className="relative bg-white border border-slate-200/60 rounded-2xl shadow-[0_25px_60px_-15px_rgba(124,58,237,0.15),0_0_0_1px_rgba(226,232,240,0.5)] overflow-hidden">
+          {/* Shimmer */}
+          <motion.div className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(105deg, transparent 40%, rgba(124,58,237,0.03) 45%, rgba(124,58,237,0.06) 50%, rgba(124,58,237,0.03) 55%, transparent 60%)" }}
+            animate={{ x: ["-100%", "200%"] }} transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }} />
+
+          <div className="relative p-8 space-y-6">
             <div className="text-center space-y-3">
               <motion.div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-black/[0.04] shadow-lg"
                 animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity }}>
