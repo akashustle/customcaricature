@@ -133,6 +133,7 @@ const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+type Order = {
   id: string;
   caricature_type: string;
   order_type: string;
