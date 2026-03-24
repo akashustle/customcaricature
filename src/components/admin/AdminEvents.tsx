@@ -375,52 +375,58 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
           fileName="CCC_Events"
         />
       </div>
-      {/* Stats Widgets - Modern Vibrant */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Stats Widgets - 3D Flashcard Style */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {[
-          { icon: Calendar, label: "Total Events", value: String(events.length), gradient: "from-blue-500 to-blue-600" },
-          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), gradient: "from-emerald-500 to-teal-600" },
-          { icon: Settings, label: "Completed", value: String(completed), gradient: "from-violet-500 to-purple-600" },
-          { icon: X, label: "Cancelled", value: String(cancelled), gradient: "from-rose-500 to-red-600" },
-          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), gradient: "from-amber-500 to-orange-600" },
-          { icon: MapPin, label: "Outside Mumbai", value: String(outsideEvents), gradient: "from-cyan-500 to-sky-600" },
-        ].map((w) => (
-          <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 group hover:border-blue-500/30 transition-all">
-            <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
-            <div className="flex items-center gap-3 relative z-10">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
-                <w.icon className="w-5 h-5 text-foreground" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xl font-bold text-foreground">{w.value}</p>
-                <p className="text-[11px] text-muted-foreground">{w.label}</p>
+          { icon: Calendar, label: "Total Events", value: String(events.length), gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500" },
+          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
+          { icon: Settings, label: "Completed", value: String(completed), gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500" },
+          { icon: X, label: "Cancelled", value: String(cancelled), gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500" },
+          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500" },
+          { icon: MapPin, label: "Outside", value: String(outsideEvents), gradient: "from-cyan-50 to-teal-50", iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500" },
+        ].map((w, i) => (
+          <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
+            whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
+            className="cursor-pointer">
+            <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
+              <div className="p-3 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-4 h-4 text-white" />
+                  </div>
+                </div>
+                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
               </div>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Revenue Analytics - Modern Vibrant */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Revenue Analytics - 3D Flashcard Style */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {[
-          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), gradient: "from-emerald-500 to-green-600" },
-          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), gradient: "from-blue-500 to-indigo-600" },
-          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), gradient: "from-amber-500 to-yellow-600" },
-          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), gradient: "from-purple-500 to-violet-600" },
-          { icon: DollarSign, label: "Pending Payments", value: String(pendingPayments), gradient: "from-orange-500 to-red-500" },
-          { icon: Users, label: "Negotiated Events", value: String(negotiatedEvents), gradient: "from-pink-500 to-rose-600" },
-        ].map((w) => (
-          <motion.div key={w.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 group hover:border-blue-500/30 transition-all">
-            <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
-            <div className="flex items-center gap-3 relative z-10">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${w.gradient} flex items-center justify-center shadow-lg`}>
-                <w.icon className="w-5 h-5 text-foreground" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm md:text-base font-bold text-foreground truncate">{w.value}</p>
-                <p className="text-[11px] text-muted-foreground">{w.label}</p>
+          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
+          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", borderAccent: "border-l-blue-500" },
+          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), gradient: "from-amber-50 to-yellow-50", iconBg: "from-amber-500 to-yellow-500", borderAccent: "border-l-amber-500" },
+          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), gradient: "from-purple-50 to-violet-50", iconBg: "from-purple-500 to-violet-500", borderAccent: "border-l-purple-500" },
+          { icon: DollarSign, label: "Pending Pay", value: String(pendingPayments), gradient: "from-orange-50 to-red-50", iconBg: "from-orange-500 to-red-500", borderAccent: "border-l-orange-500" },
+          { icon: Users, label: "Negotiated", value: String(negotiatedEvents), gradient: "from-pink-50 to-rose-50", iconBg: "from-pink-500 to-rose-500", borderAccent: "border-l-pink-500" },
+        ].map((w, i) => (
+          <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
+            whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
+            className="cursor-pointer">
+            <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
+              <div className="p-3 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-4 h-4 text-white" />
+                  </div>
+                </div>
+                <p className="text-sm md:text-base font-extrabold text-foreground leading-tight truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
               </div>
             </div>
           </motion.div>

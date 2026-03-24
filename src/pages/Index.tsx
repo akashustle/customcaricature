@@ -592,81 +592,96 @@ const Index = () => {
 
       </main>
 
-      {/* Footer */}
-      <footer className="py-12 glass-footer">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-8">
+      {/* Footer - Modern Vibrant */}
+      <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(236,72,153,0.1),transparent_50%)]" />
+        <div className="container mx-auto px-4 py-12 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-full border-2 border-border" />
-                <span className="font-calligraphy text-xl font-bold text-foreground">CCC</span>
+              <div className="flex items-center gap-2 cursor-pointer mb-4" onClick={() => navigate("/")}>
+                <img src="/logo.png" alt="CCC" className="w-12 h-12 rounded-xl border-2 border-white/20 shadow-lg" />
+                <div>
+                  <span className="font-calligraphy text-xl font-bold text-white block">CCC</span>
+                  <span className="text-[10px] text-white/50">Creative Caricature Club</span>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
-              <p className="font-calligraphy text-sm text-accent mt-3">Drawn with love & laughter ✏️</p>
-              <div className="flex gap-3 mt-4 flex-wrap">
+              <p className="text-sm text-white/60 font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
+              <p className="font-calligraphy text-sm text-pink-300/80 mt-3">Drawn with love & laughter ✏️</p>
+              <div className="flex gap-2.5 mt-5 flex-wrap">
                 {socialLinks.map((link) => (
                   <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-full glass-crystal flex items-center justify-center hover:bg-primary/20 transition-all hover:scale-110"
+                    className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all hover:scale-110 border border-white/10"
                     aria-label={link.platform}>
                     {link.icon_svg ? (
-                      <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: link.icon_svg }} />
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: link.icon_svg }} />
                     ) : (
-                      <span className="text-xs font-bold text-primary">{link.platform[0].toUpperCase()}</span>
+                      <span className="text-xs font-bold text-white">{link.platform[0].toUpperCase()}</span>
                     )}
                   </a>
                 ))}
                 {socialLinks.length === 0 && (
-                  <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full glass-crystal flex items-center justify-center hover:bg-primary/20 transition-colors" aria-label="WhatsApp">
-                    <MessageCircle className="w-4 h-4 text-primary" />
-                  </a>
+                  <>
+                    <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center hover:bg-green-500/30 transition-all border border-green-500/20" aria-label="WhatsApp">
+                      <MessageCircle className="w-4 h-4 text-green-400" />
+                    </a>
+                    <a href={content.homepage_smart_help?.instagram_url || "https://www.instagram.com/creativecaricatureclub"} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center hover:bg-pink-500/30 transition-all border border-pink-500/20" aria-label="Instagram">
+                      <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                  </>
                 )}
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
-              <div className="flex flex-col gap-2">
-                <Link to="/about" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">About Us</Link>
-                <Link to="/enquiry" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Enquiry</Link>
-                <Link to="/track-order" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Track Order</Link>
-                <Link to="/blog" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Blog</Link>
-                <Link to="/support" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Support</Link>
+              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> Quick Links
+              </h4>
+              <div className="flex flex-col gap-2.5">
+                <Link to="/about" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">About Us</Link>
+                <Link to="/enquiry" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Enquiry</Link>
+                <Link to="/track-order" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Track Order</Link>
+                <Link to="/blog" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Blog</Link>
+                <Link to="/support" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Support</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Policies</h4>
-              <div className="flex flex-col gap-2">
-                <Link to="/terms" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Terms & Conditions</Link>
-                <Link to="/privacy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Privacy Policy</Link>
-                <Link to="/refund" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Refund Policy</Link>
-                <Link to="/shipping" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Shipping Policy</Link>
-                <Link to="/cancellation" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Cancellation Policy</Link>
-                <Link to="/event-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Event Policy</Link>
+              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-pink-400" /> Policies
+              </h4>
+              <div className="flex flex-col gap-2.5">
+                <Link to="/terms" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Terms & Conditions</Link>
+                <Link to="/privacy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Privacy Policy</Link>
+                <Link to="/refund" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Refund Policy</Link>
+                <Link to="/shipping" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Shipping Policy</Link>
+                <Link to="/cancellation" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Cancellation</Link>
+                <Link to="/event-policy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Event Policy</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">More</h4>
-              <div className="flex flex-col gap-2">
-                <Link to="/intellectual-property" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">IP Policy</Link>
-                <Link to="/workshop-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Workshop Policy</Link>
-                <Link to="/disclaimer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Disclaimer</Link>
-                <Link to="/caricature-budgeting" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Caricature Budgeting</Link>
+              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> More
+              </h4>
+              <div className="flex flex-col gap-2.5">
+                <Link to="/intellectual-property" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">IP Policy</Link>
+                <Link to="/workshop-policy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Workshop Policy</Link>
+                <Link to="/disclaimer" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Disclaimer</Link>
+                <Link to="/caricature-budgeting" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Caricature Budgeting</Link>
                 {settings.workshop_button?.enabled && (
-                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">{settings.workshop_button.label}</a>
+                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">{settings.workshop_button.label}</a>
                 )}
               </div>
             </div>
           </div>
-          <div className="border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
+          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-white/40 font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
             <div className="flex items-center gap-4">
-              {settings.app_download_link?.enabled !== false && (
-                <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:underline">
+              {settings.app_download_link?.enabled === true && (
+                <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-indigo-300 hover:text-white transition-colors">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2.223a.5.5 0 0 0-.866.5l1.39 2.412a9.481 9.481 0 0 0-4.047-.913 9.481 9.481 0 0 0-4.047.913l1.39-2.412a.5.5 0 0 0-.866-.5L9.084 4.636A9.5 9.5 0 0 0 4 13h16a9.5 9.5 0 0 0-5.084-8.364l1.607-2.413zM8.5 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm7 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM4 14h16v1a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-1z"/></svg>
                   Download Android App
                 </a>
               )}
-              <p className="text-xs text-muted-foreground font-body">
-                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Akash</a>
+              <p className="text-xs text-white/40 font-body">
+                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:text-white font-semibold transition-colors">Akash</a>
               </p>
             </div>
           </div>
