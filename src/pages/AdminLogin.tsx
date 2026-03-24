@@ -60,7 +60,7 @@ const AdminLogin = () => {
     const fetchAvatars = async () => {
       const avatars: Record<string, string> = {};
       for (const admin of ADMIN_LIST) {
-        const { data } = await supabase.from("profiles").select("avatar_url, full_name").eq("email", admin.email).maybeSingle();
+      const { data } = await supabase.from("profiles" as any).select("avatar_url, full_name").eq("email", admin.email).maybeSingle() as any;
         if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
       }
       setAdminAvatars(avatars);
