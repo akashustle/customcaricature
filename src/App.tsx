@@ -66,6 +66,7 @@ const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const DatabaseEntryReversal = lazy(() => import("./pages/DatabaseEntryReversal"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
