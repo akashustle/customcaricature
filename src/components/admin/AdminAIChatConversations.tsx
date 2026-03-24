@@ -282,6 +282,7 @@ const AdminAIChatConversations = () => {
       )}
     </div>
   );
+};
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
