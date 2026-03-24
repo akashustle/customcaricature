@@ -754,19 +754,19 @@ const Admin = () => {
       }} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-[hsl(220,15%,97%)] dark:bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 bg-white/90 dark:bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-sm shadow-foreground/[0.02]">
+      <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-1 ring-border">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-medium text-muted-foreground font-sans">Live</span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 font-sans">Live</span>
               </div>
               <div className="w-px h-4 bg-border" />
               <LiveGreeting name={adminProfile?.full_name} />
@@ -792,12 +792,20 @@ const Admin = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"><RefreshCw className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans">
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans rounded-xl">
                 <LogOut className="w-3 h-3" /> Sign Out
               </Button>
+              {/* Admin Profile Avatar */}
+              <div 
+                className="admin-avatar hidden md:flex" 
+                onClick={() => setActiveTab("settings")}
+                title={adminProfile?.full_name || "Admin Profile"}
+              >
+                {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+              </div>
             </div>
           </div>
         </header>
