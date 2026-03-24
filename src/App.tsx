@@ -66,6 +66,7 @@ const Disclaimer = lazy(() => import("./pages/Disclaimer"));
 const CmsPage = lazy(() => import("./pages/CmsPage"));
 const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
+const DatabaseEntryReversal = lazy(() => import("./pages/DatabaseEntryReversal"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -201,6 +202,7 @@ const App = () => {
                 <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
+                <Route path="/database-entry-reversal" element={<DatabaseEntryReversal />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
