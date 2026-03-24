@@ -546,13 +546,18 @@ const AdminLogin = () => {
                             </div>
                           ) : (
                             <>
-                              <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Enter 6-digit OTP</Label>
-                              <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
-                                placeholder="• • • • • •" maxLength={6}
+                              <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Enter 4-digit OTP</Label>
+                              <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 4) setOtpCode(v); }}
+                                placeholder="• • • •" maxLength={4}
                                 className="h-16 text-center text-3xl tracking-[0.5em] font-black rounded-xl border"
                                 style={{ background: BRAND.cream, borderColor: BRAND.light }} />
                               <button type="button" disabled={resendCooldown > 0}
-                                onClick={async () => { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); }}
+                                onClick={async () => {
+                                  const newOtp = String(Math.floor(1000 + Math.random() * 9000));
+                                  await supabase.functions.invoke("send-otp-email", { body: { to: "akashxbhavans@gmail.com", otp: newOtp, admin_email: selectedAdmin?.email } });
+                                  startResendCooldown();
+                                  toast({ title: "New OTP generated" });
+                                }}
                                 className="text-sm hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto font-semibold"
                                 style={{ color: BRAND.accent }}>
                                 <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
