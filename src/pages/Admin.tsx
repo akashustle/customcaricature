@@ -1930,7 +1930,7 @@ const Admin = () => {
                         <Input value={adminEditData.full_name || ""} onChange={e => setAdminEditData({...adminEditData, full_name: e.target.value})} placeholder="Full Name" className="font-sans" />
                         <Input value={adminEditData.email || ""} onChange={e => setAdminEditData({...adminEditData, email: e.target.value})} placeholder="Email Address" className="font-sans" />
                         <Input value={adminEditData.mobile || ""} onChange={e => setAdminEditData({...adminEditData, mobile: e.target.value})} placeholder="Mobile" className="font-sans" />
-                        <Input type="number" value={adminEditData.age ?? ""} onChange={e => setAdminEditData({...adminEditData, age: e.target.value ? Number(e.target.value) : null} as any)} placeholder="Age" className="font-sans" />
+                        <Input type="number" value={(adminEditData as any).age ?? ""} onChange={e => setAdminEditData({...adminEditData, age: e.target.value ? Number(e.target.value) : null} as any)} placeholder="Age" className="font-sans" />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={saveAdminProfile} className="font-sans rounded-xl"><Save className="w-3 h-3 mr-1" />Save</Button>
                           <Button size="sm" variant="ghost" onClick={() => setEditingAdminProfile(false)} className="rounded-xl">Cancel</Button>
