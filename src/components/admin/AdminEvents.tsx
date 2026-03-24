@@ -433,16 +433,17 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
             whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
             className="cursor-pointer"
             onClick={() => setDrillDown({ title: w.label, data: events.filter(w.filter) })}>
-            <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
-              <div className="p-3 relative overflow-hidden">
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
-                    <w.icon className="w-4 h-4 text-white" />
+            <div className="relative overflow-hidden rounded-2xl bg-white border border-white/60 shadow-lg hover:shadow-xl transition-all" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.88))" }}>
+              <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} opacity-10 blur-xl`} />
+              <div className="p-4 relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-5 h-5 text-white" />
                   </div>
-                  <Eye className="w-3 h-3 text-muted-foreground/40" />
+                  <Eye className="w-3.5 h-3.5 text-muted-foreground/30" />
                 </div>
-                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
+                <p className="text-2xl font-extrabold text-foreground tracking-tight">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider truncate">{w.label}</p>
               </div>
             </div>
           </motion.div>
@@ -457,16 +458,17 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
             whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
             className="cursor-pointer"
             onClick={() => setDrillDown({ title: w.label, data: events.filter(w.filter) })}>
-            <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
-              <div className="p-3 relative overflow-hidden">
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
-                    <w.icon className="w-4 h-4 text-white" />
+            <div className="relative overflow-hidden rounded-2xl bg-white border border-white/60 shadow-lg hover:shadow-xl transition-all" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.88))" }}>
+              <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} opacity-10 blur-xl`} />
+              <div className="p-4 relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-5 h-5 text-white" />
                   </div>
-                  <Eye className="w-3 h-3 text-muted-foreground/40" />
+                  <Eye className="w-3.5 h-3.5 text-muted-foreground/30" />
                 </div>
-                <p className="text-sm md:text-base font-extrabold text-foreground leading-tight truncate">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
+                <p className="text-base font-extrabold text-foreground leading-tight truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider truncate">{w.label}</p>
               </div>
             </div>
           </motion.div>

@@ -17,6 +17,8 @@ import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
+import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
+import MaintenanceScreen from "./components/MaintenanceScreen";
 
 // Eagerly loaded core pages
 import Index from "./pages/Index";
@@ -68,8 +70,8 @@ const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2, // 2 min
-      gcTime: 1000 * 60 * 10, // 10 min
+      staleTime: 1000 * 60 * 2,
+      gcTime: 1000 * 60 * 10,
       refetchOnWindowFocus: false,
       retry: 1,
     },
@@ -113,6 +115,21 @@ const RouteMemoryRedirector = () => {
   return null;
 };
 
+/** Global Maintenance Gate — blocks ALL pages except admin paths when global maintenance is ON */
+const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const maintenance = useMaintenanceCheck("global");
+  
+  const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
+  const isAdminPath = adminPaths.some(p => location.pathname.startsWith(p));
+  
+  if (!maintenance.loading && maintenance.isEnabled && !isAdminPath) {
+    return <MaintenanceScreen title={maintenance.title} message={maintenance.message} estimatedEnd={maintenance.estimatedEnd} isGlobal={true} />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -127,68 +144,67 @@ const App = () => {
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
-          <AppOnboarding />
-          <PermissionGate />
-          <ScrollToTop />
-          <RouteMemoryTracker />
-          <RouteMemoryRedirector />
-          <FloatingButtons />
-          <LiveChatWrapper />
-          <MobileBottomNav />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/order" element={<Order />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/customcad75" element={<AdminLogin />} />
-              <Route path="/admin-login" element={<AdminLogin />} />
-              <Route path="/admin" element={<Navigate to="/login" replace />} />
-              <Route path="/admin-panel" element={<Admin />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/refund" element={<RefundPolicy />} />
-              <Route path="/shipping" element={<ShippingPolicy />} />
-              <Route path="/cancellation" element={<CancellationPolicy />} />
-              <Route path="/intellectual-property" element={<IntellectualProperty />} />
-              <Route path="/workshop-policy" element={<WorkshopPolicy />} />
-              <Route path="/disclaimer" element={<Disclaimer />} />
-              <Route path="/page/:slug" element={<CmsPage />} />
-              <Route path="/caricature-budgeting" element={<CaricatureBudgeting />} />
-              <Route path="/gallery/:type" element={<GalleryPage />} />
-              <Route path="/track-order" element={<TrackOrder />} />
-              <Route path="/book-event" element={<BookEvent />} />
-              <Route path="/event-policy" element={<EventPolicy />} />
-              <Route path="/artist-dashboard" element={<ArtistDashboard />} />
-              <Route path="/artistlogin" element={<ArtistLogin />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/live-chat" element={<LiveChat />} />
-              <Route path="/enquiry" element={<Enquiry />} />
-              <Route path="/support" element={<Support />} />
-              {/* Shop Routes */}
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/shop/product/:slug" element={<ShopProduct />} />
-              <Route path="/shop/cart" element={<ShopCart />} />
-              <Route path="/shop/order-confirmation" element={<ShopOrderConfirmation />} />
-              <Route path="/shop/ai-caricature" element={<AICaricature />} />
-              {/* Shop Admin */}
-              <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
-              <Route path="/shop-admin" element={<ShopAdmin />} />
-              {/* Workshop Routes */}
-              <Route path="/workshop" element={<Workshop />} />
-              <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
-              <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
-              <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
-              <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
-              <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <GlobalMaintenanceGate>
+            <AppOnboarding />
+            <PermissionGate />
+            <ScrollToTop />
+            <RouteMemoryTracker />
+            <RouteMemoryRedirector />
+            <FloatingButtons />
+            <LiveChatWrapper />
+            <MobileBottomNav />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/order" element={<Order />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/customcad75" element={<AdminLogin />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/admin" element={<Navigate to="/login" replace />} />
+                <Route path="/admin-panel" element={<Admin />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/refund" element={<RefundPolicy />} />
+                <Route path="/shipping" element={<ShippingPolicy />} />
+                <Route path="/cancellation" element={<CancellationPolicy />} />
+                <Route path="/intellectual-property" element={<IntellectualProperty />} />
+                <Route path="/workshop-policy" element={<WorkshopPolicy />} />
+                <Route path="/disclaimer" element={<Disclaimer />} />
+                <Route path="/page/:slug" element={<CmsPage />} />
+                <Route path="/caricature-budgeting" element={<CaricatureBudgeting />} />
+                <Route path="/gallery/:type" element={<GalleryPage />} />
+                <Route path="/track-order" element={<TrackOrder />} />
+                <Route path="/book-event" element={<BookEvent />} />
+                <Route path="/event-policy" element={<EventPolicy />} />
+                <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+                <Route path="/artistlogin" element={<ArtistLogin />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/live-chat" element={<LiveChat />} />
+                <Route path="/enquiry" element={<Enquiry />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/product/:slug" element={<ShopProduct />} />
+                <Route path="/shop/cart" element={<ShopCart />} />
+                <Route path="/shop/order-confirmation" element={<ShopOrderConfirmation />} />
+                <Route path="/shop/ai-caricature" element={<AICaricature />} />
+                <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
+                <Route path="/shop-admin" element={<ShopAdmin />} />
+                <Route path="/workshop" element={<Workshop />} />
+                <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
+                <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
+                <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
+                <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
+                <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </GlobalMaintenanceGate>
         </BrowserRouter>
       </TooltipProvider>
       </ThemeProvider>
