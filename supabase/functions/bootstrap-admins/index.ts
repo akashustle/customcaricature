@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
               const existingUser = users.find((u: any) => u.email === admin.email);
               if (existingUser) {
                 userId = existingUser.id;
-                await adminClient.auth.admin.updateUser(userId, { 
+                await adminClient.auth.admin.updateUserById(userId, { 
                   password: admin.password,
                   user_metadata: { full_name: admin.full_name, mobile: admin.mobile, age: admin.age }
                 });
