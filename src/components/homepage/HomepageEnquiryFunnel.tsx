@@ -266,6 +266,22 @@ const HomepageEnquiryFunnel = () => {
                       <strong>{eventTypes.find((e: any) => e.id === data.event)?.label || data.otherDetails}</strong> in{" "}
                       <strong>{cities.find((c: any) => c.id === data.city)?.label || data.otherDetails}</strong>
                     </p>
+                    {/* State-based pricing preview */}
+                    {(() => {
+                      const MUMBAI_CITIES = ["mumbai"];
+                      const isMumbai = MUMBAI_CITIES.includes(data.city);
+                      const region = isMumbai ? "mumbai" : "pan_india";
+                      const pricing = pricingInfo?.find((p: any) => p.region === region && p.artist_count === 1);
+                      return pricing ? (
+                        <div className="bg-success/5 border border-success/20 rounded-xl p-4 mb-4 text-left">
+                          <p className="text-xs font-body font-semibold text-success mb-1">Estimated Starting Price</p>
+                          <p className="text-2xl font-bold text-foreground">₹{pricing.total_price?.toLocaleString("en-IN")}</p>
+                          <p className="text-xs text-muted-foreground font-body mt-1">
+                            Advance: ₹{pricing.advance_amount?.toLocaleString("en-IN")} · 1 Artist · {isMumbai ? "Mumbai" : "Pan India"}
+                          </p>
+                        </div>
+                      ) : null;
+                    })()}
                     <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
