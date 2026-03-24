@@ -110,6 +110,7 @@ const NAV_SECTIONS = [
     label: "Team",
     items: [
       { id: "team", icon: Users, label: "Team", color: "from-blue-500 to-indigo-500" },
+      { id: "colleagues", icon: MessageCircle, label: "Colleagues", color: "from-pink-500 to-rose-500" },
     ],
   },
   {
