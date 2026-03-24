@@ -20,15 +20,20 @@ const HomepageVideo = ({ config }: { config: any }) => {
 };
 
 const VideoHeader = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    className="text-center mb-10"
-  >
-    <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Experience</p>
-    <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">See the Experience Live 🎨</h2>
-  </motion.div>
+  <div className="text-center mb-10">
+    <motion.p
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3"
+    >Experience</motion.p>
+    <motion.h2
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground"
+    >See the Experience Live 🎨</motion.h2>
+  </div>
 );
 
 const CustomVideoPlayer = ({ url }: { url: string }) => {
