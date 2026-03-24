@@ -889,11 +889,15 @@ const Admin = () => {
               </Button>
               {/* Admin Profile Avatar */}
               <div 
-                className="admin-avatar hidden md:flex" 
+                className="admin-avatar hidden md:flex cursor-pointer overflow-hidden"
                 onClick={() => setActiveTab("settings")}
                 title={adminProfile?.full_name || "Admin Profile"}
               >
-                {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+                {(adminProfile as any)?.avatar_url ? (
+                  <img src={(adminProfile as any).avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  (adminProfile?.full_name || "A").charAt(0).toUpperCase()
+                )}
               </div>
             </div>
           </div>
