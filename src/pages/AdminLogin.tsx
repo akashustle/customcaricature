@@ -85,9 +85,17 @@ const AdminLogin = () => {
     }
     setLoading(true);
     try {
+      // If logged in with mobile, resolve email first
+      let loginEmail = email.trim().toLowerCase();
+      if (loginField === "mobile") {
+        const { data: prof } = await supabase.from("profiles").select("email").eq("mobile", loginEmail).maybeSingle();
+        if (prof?.email) { loginEmail = prof.email; } 
+        else { toast({ title: "No admin found with this mobile", variant: "destructive" }); setLoading(false); return; }
+      }
+
       if (loginMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: email.trim().toLowerCase(), secret_code: secretCode },
+          body: { email: loginEmail, secret_code: secretCode },
         });
         if (error) { toast({ title: "Login failed", description: "Could not connect.", variant: "destructive" }); setLoading(false); return; }
         if (!data?.success) { toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" }); setLoading(false); return; }
