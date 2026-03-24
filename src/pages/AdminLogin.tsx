@@ -68,18 +68,30 @@ const AdminLogin = () => {
     fetchAvatars();
   }, []);
 
-  // Request location on mount
+  // Request location immediately on mount
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (!navigator.geolocation) return;
+    const requestLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setLocationGranted(true);
           setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         },
-        () => setLocationGranted(false),
+        () => {
+          setLocationGranted(false);
+          // Prompt again after short delay
+          setTimeout(() => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+              () => setLocationGranted(false),
+              { enableHighAccuracy: true, timeout: 10000 }
+            );
+          }, 2000);
+        },
         { enableHighAccuracy: true, timeout: 5000 }
       );
-    }
+    };
+    requestLocation();
   }, []);
 
   const startResendCooldown = () => {
