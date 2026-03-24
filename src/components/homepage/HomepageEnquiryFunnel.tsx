@@ -161,9 +161,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {CITIES.map(c => (
-                      <button
+                       <button
                         key={c.id}
-                        onClick={() => setData({ ...data, city: c.id })}
+                        onClick={() => { setData({ ...data, city: c.id }); setTimeout(() => setStep(2), 300); }}
                         className={cn(
                           "relative p-3.5 rounded-xl border-2 text-left transition-all font-body",
                           data.city === c.id
