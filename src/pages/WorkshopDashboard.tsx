@@ -16,7 +16,7 @@ import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineA
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 
 const ACCENT_COLORS = [
-  { name: "Default", primary: "#2d2518", secondary: "#3a3020" },
+  { name: "Violet", primary: "#7c3aed", secondary: "#a855f7" },
   { name: "Terracotta", primary: "#c2703e", secondary: "#d4854f" },
   { name: "Teal", primary: "#0d9488", secondary: "#14b8a6" },
   { name: "Rose", primary: "#be123c", secondary: "#e11d48" },
@@ -142,8 +142,8 @@ const WorkshopDashboard = () => {
   if (!workshopUser) return null;
 
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-background";
-  const headerBg = dm ? "bg-[#1a1710]/95 border-white/10" : "bg-card/80 border-border";
+  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-violet-50/30 via-white to-fuchsia-50/20";
+  const headerBg = dm ? "bg-[#1a1710]/95 border-white/10" : "bg-white/90 border-violet-100/60";
   const textPrimary = dm ? "text-white font-bold" : "text-foreground font-bold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
   const activeClass = `text-white shadow-lg font-bold`;
@@ -224,7 +224,7 @@ const WorkshopDashboard = () => {
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-card/60 border-border/40"} border rounded-2xl p-1.5 flex gap-1 shadow-sm`}>
+        <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-white/70 border-violet-100/50"} border rounded-2xl p-1.5 flex gap-1 shadow-sm`}>
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
@@ -251,7 +251,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - App Style */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden`}>
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-background/95 border-border"} border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`}>
+        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-white/95 border-violet-100/60"} border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`}>
           <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;

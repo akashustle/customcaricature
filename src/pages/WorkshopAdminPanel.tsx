@@ -581,27 +581,27 @@ const WorkshopAdmin = () => {
 
   // Theme
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-background";
-  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-card/80 border-border/60";
+  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-slate-50 via-white to-violet-50/30";
+  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-white/90 border-violet-100/60";
   const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
   const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
-  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-card/90 border-border/60";
-  const activeTabClass = "bg-primary text-primary-foreground shadow-lg font-bold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60";
-  const btnPrimary = "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md font-bold";
-  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-background border-border text-foreground font-medium placeholder:text-muted-foreground";
+  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-violet-100/60";
+  const activeTabClass = "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-300/30 font-bold";
+  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-violet-50";
+  const btnPrimary = "bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-md font-bold";
+  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-white border-violet-100 text-foreground font-medium placeholder:text-muted-foreground rounded-xl";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm transition-all ${className}`}>
+      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-lg shadow-violet-100/20 hover:shadow-xl transition-all ${className}`}>
       {children}
     </motion.div>
   );
 
   const RefreshButton = () => (
     <Button variant="outline" size="sm" onClick={fetchAll} disabled={refreshing}
-      className={`rounded-xl ${dm ? "border-white/20 text-white/60 hover:bg-white/5" : "border-[#d4c4b4] text-[#6a5a4a]"}`}>
+      className={`rounded-xl ${dm ? "border-white/20 text-white/60 hover:bg-white/5" : "border-violet-200 text-violet-600 hover:bg-violet-50"}`}>
       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${refreshing ? "animate-spin" : ""}`} />
       Refresh
     </Button>
@@ -819,16 +819,16 @@ const WorkshopAdmin = () => {
 
   return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
-      {/* Sidebar - Desktop — Apple-grade */}
-      <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-border/20">
+      {/* Sidebar - Desktop */}
+      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"} bg-white/80 backdrop-blur-xl border-r border-violet-100/60 shadow-sm`}>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-violet-100/40">
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-border/40">
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-violet-200/50">
               <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <div><p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</p><p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>CCC Academy</p></div>}
+            {!collapsed && <div><p className="text-sm font-bold tracking-tight text-foreground">Workshop Console</p><p className="text-[10px] text-muted-foreground">CCC Academy</p></div>}
           </div>
-          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-accent/10 transition-colors flex-shrink-0">
+          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-violet-50 transition-colors flex-shrink-0">
             {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
           </button>
         </div>
@@ -836,74 +836,63 @@ const WorkshopAdmin = () => {
           {sidebarItems.map((item) => (
             <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150",
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-150",
                 tab === item.key
-                  ? "bg-foreground/[0.06] font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
-              )} style={{ fontFamily: 'Inter, sans-serif' }}>
+                  ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 font-semibold text-violet-700 border border-violet-200/50"
+                  : "text-muted-foreground hover:text-foreground hover:bg-violet-50/60"
+              )}>
               <div className={cn(
                 "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                tab === item.key ? "bg-primary text-primary-foreground shadow-sm" : ""
+                tab === item.key ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm" : "text-muted-foreground"
               )}>
                 <item.icon className="w-3.5 h-3.5" />
               </div>
               {!collapsed && <span className="truncate">{item.label}</span>}
-              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500" />}
             </button>
           ))}
         </nav>
-        <div className="p-2 border-t border-border/20 space-y-0.5">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03] transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="p-2 border-t border-violet-100/40 space-y-0.5">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-muted-foreground hover:text-foreground hover:bg-violet-50/60 transition-all">
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-destructive hover:bg-destructive/5 transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-destructive hover:bg-destructive/5 transition-all">
             <LogOut className="w-4 h-4" />{!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </div>
 
-      {/* Mobile Header — Apple-grade */}
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className="admin-header-premium">
+        <div className="bg-white/90 backdrop-blur-xl border-b border-violet-100/60 shadow-sm">
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-border/40">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-violet-200/40">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</span>
+              <span className="text-sm font-bold tracking-tight text-foreground">Workshop Console</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 items-center">
+              {/* Admin Profile Avatar */}
+              <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                {adminInfo?.name?.[0]?.toUpperCase() || "A"}
+              </button>
               <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
-              <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className="h-8 w-8 p-0">{darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
           <div className="px-3 pb-2">
-            <AdminSmartSearch
-              panelType="workshop"
-              tabs={[
-                { id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" },
-                { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" },
-                { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
-                { id: "live", label: "Live Sessions" },
-              ]}
-              onNavigate={(tab, highlightId) => {
-                setTab(tab);
-                if (highlightId) {
-                  setTimeout(() => {
-                    const el = document.querySelector(`[data-search-id="${highlightId}"]`);
-                    if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
-                  }, 300);
-                }
-              }}
+            <AdminSmartSearch panelType="workshop"
+              tabs={[{ id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" }, { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
+              onNavigate={(tab, highlightId) => { setTab(tab); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
             />
           </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-foreground/[0.08] text-foreground font-semibold" : "text-muted-foreground"}`}
-                style={{ fontFamily: 'Inter, sans-serif' }}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-violet-100 text-violet-700 font-semibold" : "text-muted-foreground"}`}>
                 <item.icon className="w-3.5 h-3.5" />{item.label}
               </button>
             ))}
@@ -928,59 +917,55 @@ const WorkshopAdmin = () => {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
                     <div className="flex items-center gap-2">
+                      {/* Admin Profile - Desktop */}
+                      <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
+                        className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-200/50 hover:shadow-md transition-all">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                          {adminInfo?.name?.[0]?.toUpperCase() || "A"}
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs font-semibold text-foreground leading-none">{adminInfo?.name || "Admin"}</p>
+                          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{adminInfo?.email}</p>
+                        </div>
+                      </button>
                       <div className="hidden lg:block w-72">
-                        <AdminSmartSearch
-                          panelType="workshop"
-                          tabs={[
-                            { id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" },
-                            { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
-                            { id: "live", label: "Live Sessions" },
-                          ]}
-                          onNavigate={(t, highlightId) => {
-                            setTab(t);
-                            if (highlightId) {
-                              setTimeout(() => {
-                                const el = document.querySelector(`[data-search-id="${highlightId}"]`);
-                                if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
-                              }, 300);
-                            }
-                          }}
+                        <AdminSmartSearch panelType="workshop"
+                          tabs={[{ id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
+                          onNavigate={(t, highlightId) => { setTab(t); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
                         />
                       </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
-                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
-                          <SelectValue placeholder="Select Workshop" />
-                        </SelectTrigger>
+                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="current">Current (Active)</SelectItem>
                           {allWorkshops.map((ws: any) => (
-                            <SelectItem key={ws.id} value={ws.id}>
-                              {ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}
-                            </SelectItem>
+                            <SelectItem key={ws.id} value={ws.id}>{ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <RefreshButton />
                     </div>
                   </div>
+                  {/* 3D Stat Widgets */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Users", value: filteredUsers.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
-                      { label: "Online Reg", value: registeredOnline.length, icon: Users, color: "from-[#7c9885] to-[#a8c0a0]" },
-                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, color: "from-[#d4a574] to-[#e8c9a8]" },
-                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
-                      { label: "Videos", value: filteredVideos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
-                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
-                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
-                      { label: "Certificates", value: filteredCertificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
+                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-500 to-violet-600", light: "from-violet-50 to-violet-100", accent: "border-l-violet-500" },
+                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-500 to-emerald-600", light: "from-emerald-50 to-emerald-100", accent: "border-l-emerald-500" },
+                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-amber-600", light: "from-amber-50 to-amber-100", accent: "border-l-amber-500" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-500 to-blue-600", light: "from-blue-50 to-blue-100", accent: "border-l-blue-500" },
+                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-500 to-pink-600", light: "from-pink-50 to-pink-100", accent: "border-l-pink-500" },
+                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-500 to-red-600", light: "from-red-50 to-red-100", accent: "border-l-red-500" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-500 to-indigo-600", light: "from-indigo-50 to-indigo-100", accent: "border-l-indigo-500" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-500 to-fuchsia-600", light: "from-fuchsia-50 to-fuchsia-100", accent: "border-l-fuchsia-500" },
                     ].map((s) => (
-                      <GlassCard key={s.label} className="!p-4">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
+                      <motion.div key={s.label} whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}
+                        className={`bg-gradient-to-br ${s.light} border border-l-4 ${s.accent} rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all`}>
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-2 shadow-md`}>
                           <s.icon className="w-5 h-5 text-white" />
                         </div>
-                        <p className={`text-2xl ${textPrimary}`}>{s.value}</p>
-                        <p className={`${textSecondary} text-xs`}>{s.label}</p>
-                      </GlassCard>
+                        <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+                      </motion.div>
                     ))}
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
