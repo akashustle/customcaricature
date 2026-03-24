@@ -5,7 +5,7 @@ import {
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
   Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle,
-  Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays
+  Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -37,6 +37,7 @@ const NAV_SECTIONS = [
       { id: "revenue-target", icon: Target, label: "₹10L Target", color: "from-amber-500 to-yellow-500" },
       { id: "ai-intelligence", icon: Zap, label: "AI Insights", color: "from-purple-500 to-pink-500" },
       { id: "calendar", icon: CalendarDays, label: "Calendar", color: "from-rose-500 to-pink-500" },
+      { id: "website-analytics", icon: LineChart, label: "Web Analytics", color: "from-cyan-500 to-blue-500" },
     ],
   },
   {

@@ -5,7 +5,8 @@ import {
   Radio, Bell, Monitor, Home as HomeIcon, FileText, Image,
   Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
   Calculator, FileQuestion, Layers, TrendingUp, UserCheck,
-  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt
+  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt,
+  CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -33,6 +34,8 @@ const MORE_SECTIONS = [
     { id: "revenue", label: "Revenue", icon: DollarSign },
     { id: "revenue-target", label: "₹10L Target", icon: Target },
     { id: "ai-intelligence", label: "AI Insights", icon: Zap },
+    { id: "calendar", label: "Calendar", icon: CalendarDays },
+    { id: "website-analytics", label: "Web Analytics", icon: LineChart },
   ]},
   { section: "AI & Chat", icon: Bot, items: [
     { id: "ai-conversations", label: "AI Chats", icon: Bot },
