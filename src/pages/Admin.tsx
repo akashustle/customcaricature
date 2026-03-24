@@ -200,6 +200,20 @@ const Admin = () => {
   useAutoLogout(true);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Auto-set admin name from profile (bypass name gate)
+  useEffect(() => {
+    if (user && !adminEnteredName) {
+      const autoSetName = async () => {
+        const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).maybeSingle();
+        if (profile?.full_name) {
+          sessionStorage.setItem("admin_entered_name", profile.full_name);
+          setAdminEnteredName(profile.full_name);
+        }
+      };
+      autoSetName();
+    }
+  }, [user, adminEnteredName]);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
