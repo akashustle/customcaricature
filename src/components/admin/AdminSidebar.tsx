@@ -265,26 +265,6 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
           {!collapsed && <span>Website</span>}
         </button>
         <button
-          onClick={() => navigate("/cccworkshop2006")}
-          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
-          title={collapsed ? "Workshop Admin" : undefined}
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-            <CalendarDays className="w-3.5 h-3.5 text-white" />
-          </div>
-          {!collapsed && <span>Workshop Admin</span>}
-        </button>
-        <button
-          onClick={() => navigate("/CFCAdmin936")}
-          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
-          title={collapsed ? "Shop Admin" : undefined}
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-            <Package className="w-3.5 h-3.5 text-white" />
-          </div>
-          {!collapsed && <span>Shop Admin</span>}
-        </button>
-        <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}
           className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all font-sans"
           title={collapsed ? "Logout" : undefined}
