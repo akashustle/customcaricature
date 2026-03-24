@@ -1853,6 +1853,10 @@ const Admin = () => {
             <AdminTeamManagement />
           </TabsContent>
 
+          <TabsContent value="colleagues">
+            <AdminColleagues />
+          </TabsContent>
+
           <TabsContent value="integrations">
             <AdminIntegrations />
           </TabsContent>
