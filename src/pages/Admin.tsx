@@ -1716,6 +1716,10 @@ const Admin = () => {
             <AdminChat adminUserId={user?.id || ""} />
           </TabsContent>
 
+          <TabsContent value="quick-questions">
+            <AdminQuickQuestions />
+          </TabsContent>
+
 
 
           <TabsContent value="chatbot">
