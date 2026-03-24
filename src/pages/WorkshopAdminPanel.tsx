@@ -33,7 +33,7 @@ import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 
-const CHART_COLORS = ["#b08d57", "#d4a574", "#8b6f47", "#c9a96e", "#7c9885", "#d98c8c", "#8fa3bf", "#a8c0a0", "#e0a060", "#9080c0"];
+const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
 const sidebarItems = [
   { key: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -579,29 +579,29 @@ const WorkshopAdmin = () => {
   const marksDistribution = [{ name: "0-40", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 <= 40).length }, { name: "41-60", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 40 && (a.marks/(a.total_marks||100))*100 <= 60).length }, { name: "61-80", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 60 && (a.marks/(a.total_marks||100))*100 <= 80).length }, { name: "81-100", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 80).length }].filter(d => d.value > 0);
   const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: filteredUsers.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
 
-  // Theme
+  // Theme — Premium SaaS aesthetic
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-slate-50 via-white to-violet-50/30";
-  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-white/90 border-violet-100/60";
-  const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
-  const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
-  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-violet-100/60";
-  const activeTabClass = "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-300/30 font-bold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-violet-50";
-  const btnPrimary = "bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-md font-bold";
-  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-white border-violet-100 text-foreground font-medium placeholder:text-muted-foreground rounded-xl";
+  const bg = dm ? "bg-[#0a0a0f]" : "bg-[#f8fafc]";
+  const cardBg = dm ? "bg-[#141420]/95 border-white/[0.06]" : "bg-white border-slate-200/60";
+  const textPrimary = dm ? "text-white font-semibold" : "text-slate-900 font-semibold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-slate-500 font-medium";
+  const textMuted = dm ? "text-white/35" : "text-slate-400";
+  const sidebarBg = dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/95 border-slate-200/60";
+  const activeTabClass = "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold";
+  const inactiveTab = dm ? "text-white/40 hover:text-white/80 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50";
+  const btnPrimary = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 font-semibold";
+  const inputClass = dm ? "bg-white/[0.06] border-white/[0.08] text-white font-medium placeholder:text-white/25 rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20" : "bg-slate-50/80 border-slate-200 text-slate-900 font-medium placeholder:text-slate-400 rounded-xl focus:border-violet-500 focus:ring-violet-500/20";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-lg shadow-violet-100/20 hover:shadow-xl transition-all ${className}`}>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}
+      className={`${cardBg} border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 ${className}`}>
       {children}
     </motion.div>
   );
 
   const RefreshButton = () => (
     <Button variant="outline" size="sm" onClick={fetchAll} disabled={refreshing}
-      className={`rounded-xl ${dm ? "border-white/20 text-white/60 hover:bg-white/5" : "border-violet-200 text-violet-600 hover:bg-violet-50"}`}>
+      className={`rounded-xl ${dm ? "border-white/[0.08] text-white/50 hover:bg-white/[0.04]" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}>
       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${refreshing ? "animate-spin" : ""}`} />
       Refresh
     </Button>
@@ -819,68 +819,70 @@ const WorkshopAdmin = () => {
 
   return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
-      {/* Sidebar - Desktop */}
-      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"} bg-white/80 backdrop-blur-xl border-r border-violet-100/60 shadow-sm`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-violet-100/40">
+      {/* Sidebar - Desktop — Premium SaaS */}
+      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[68px]" : "w-[250px]"} ${dm ? "bg-[#0e0e18] border-white/[0.06]" : "bg-white border-slate-200/60"} border-r`}>
+        <div className={`flex items-center justify-between px-4 py-5 border-b ${dm ? "border-white/[0.06]" : "border-slate-100"}`}>
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-violet-200/50">
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-black/[0.04]">
               <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <div><p className="text-sm font-bold tracking-tight text-foreground">Workshop Console</p><p className="text-[10px] text-muted-foreground">CCC Academy</p></div>}
+            {!collapsed && <div><p className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</p><p className={`text-[10px] ${dm ? "text-white/40" : "text-slate-400"}`}>CCC Academy</p></div>}
           </div>
-          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-violet-50 transition-colors flex-shrink-0">
-            {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
+          <button onClick={() => setCollapsed(!collapsed)} className={`w-7 h-7 rounded-lg flex items-center justify-center ${dm ? "hover:bg-white/[0.04]" : "hover:bg-slate-100"} transition-colors flex-shrink-0`}>
+            {collapsed ? <ChevronRight className={`w-4 h-4 ${textMuted}`} /> : <ChevronLeft className={`w-4 h-4 ${textMuted}`} />}
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5">
-          {sidebarItems.map((item) => (
-            <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
-              className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-150",
-                tab === item.key
-                  ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 font-semibold text-violet-700 border border-violet-200/50"
-                  : "text-muted-foreground hover:text-foreground hover:bg-violet-50/60"
-              )}>
-              <div className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                tab === item.key ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm" : "text-muted-foreground"
-              )}>
-                <item.icon className="w-3.5 h-3.5" />
-              </div>
-              {!collapsed && <span className="truncate">{item.label}</span>}
-              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500" />}
-            </button>
-          ))}
+        <nav className="flex-1 px-2 py-3 space-y-0.5">
+          {sidebarItems.map((item) => {
+            const isActive = tab === item.key;
+            return (
+              <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
+                  isActive
+                    ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold"
+                    : dm ? "text-white/40 hover:text-white/70 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                )}>
+                <div className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                  isActive ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/30" : dm ? "text-white/40 group-hover:text-white/60" : "text-slate-400 group-hover:text-slate-600"
+                )}>
+                  <item.icon className="w-3.5 h-3.5" />
+                </div>
+                {!collapsed && <span className="truncate">{item.label}</span>}
+                {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />}
+              </button>
+            );
+          })}
         </nav>
-        <div className="p-2 border-t border-violet-100/40 space-y-0.5">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-muted-foreground hover:text-foreground hover:bg-violet-50/60 transition-all">
+        <div className={`px-2 py-3 border-t ${dm ? "border-white/[0.06]" : "border-slate-100"} space-y-0.5`}>
+          <button onClick={() => setDarkMode(!darkMode)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] ${inactiveTab} transition-all`}>
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-destructive hover:bg-destructive/5 transition-all">
+          <button onClick={handleLogout} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] ${dm ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50"} transition-all`}>
             <LogOut className="w-4 h-4" />{!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </div>
 
-      {/* Mobile Header */}
+      {/* Mobile Header — Premium */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className="bg-white/90 backdrop-blur-xl border-b border-violet-100/60 shadow-sm">
+        <div className={`${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} backdrop-blur-xl border-b`}>
           <div className="flex items-center justify-between px-3 py-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-violet-200/40">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight text-foreground">Workshop Console</span>
+              <span className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</span>
             </div>
             <div className="flex gap-1 items-center">
-              {/* Admin Profile Avatar */}
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
                 {adminInfo?.name?.[0]?.toUpperCase() || "A"}
               </button>
-              <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={fetchAll} className={`h-8 w-8 p-0 ${textMuted}`}><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-red-500"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
           <div className="px-3 pb-2">
@@ -892,7 +894,7 @@ const WorkshopAdmin = () => {
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-violet-100 text-violet-700 font-semibold" : "text-muted-foreground"}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold" : textMuted}`}>
                 <item.icon className="w-3.5 h-3.5" />{item.label}
               </button>
             ))}
@@ -913,29 +915,31 @@ const WorkshopAdmin = () => {
 
               {/* DASHBOARD */}
               {tab === "dashboard" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h1 className={`text-2xl ${textPrimary} tracking-tight`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
+                      <p className={`${textMuted} text-sm mt-0.5`}>Here's your workshop overview</p>
+                    </div>
                     <div className="flex items-center gap-2">
-                      {/* Admin Profile - Desktop */}
                       <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                        className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-200/50 hover:shadow-md transition-all">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        className={`hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-xl ${dm ? "bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.06]" : "bg-slate-50 border-slate-200/60 hover:bg-slate-100"} border transition-all`}>
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
                           {adminInfo?.name?.[0]?.toUpperCase() || "A"}
                         </div>
                         <div className="text-left">
-                          <p className="text-xs font-semibold text-foreground leading-none">{adminInfo?.name || "Admin"}</p>
-                          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{adminInfo?.email}</p>
+                          <p className={`text-xs font-semibold ${textPrimary} leading-none`}>{adminInfo?.name || "Admin"}</p>
+                          <p className={`text-[10px] ${textMuted} leading-none mt-0.5`}>{adminInfo?.email}</p>
                         </div>
                       </button>
-                      <div className="hidden lg:block w-72">
+                      <div className="hidden lg:block w-64">
                         <AdminSmartSearch panelType="workshop"
                           tabs={[{ id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
                           onNavigate={(t, highlightId) => { setTab(t); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
                         />
                       </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
-                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
+                        <SelectTrigger className={`w-[180px] h-9 text-sm ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="current">Current (Active)</SelectItem>
                           {allWorkshops.map((ws: any) => (
@@ -946,25 +950,26 @@ const WorkshopAdmin = () => {
                       <RefreshButton />
                     </div>
                   </div>
-                  {/* 3D Stat Widgets */}
+                  {/* Premium Stat Widgets */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-500 to-violet-600", light: "from-violet-50 to-violet-100", accent: "border-l-violet-500" },
-                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-500 to-emerald-600", light: "from-emerald-50 to-emerald-100", accent: "border-l-emerald-500" },
-                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-amber-600", light: "from-amber-50 to-amber-100", accent: "border-l-amber-500" },
-                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-500 to-blue-600", light: "from-blue-50 to-blue-100", accent: "border-l-blue-500" },
-                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-500 to-pink-600", light: "from-pink-50 to-pink-100", accent: "border-l-pink-500" },
-                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-500 to-red-600", light: "from-red-50 to-red-100", accent: "border-l-red-500" },
-                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-500 to-indigo-600", light: "from-indigo-50 to-indigo-100", accent: "border-l-indigo-500" },
-                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-500 to-fuchsia-600", light: "from-fuchsia-50 to-fuchsia-100", accent: "border-l-fuchsia-500" },
+                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-600 to-indigo-600", bgGlow: "bg-violet-500" },
+                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-600 to-teal-600", bgGlow: "bg-emerald-500" },
+                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-orange-500", bgGlow: "bg-amber-500" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-600 to-cyan-600", bgGlow: "bg-blue-500" },
+                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-600 to-rose-600", bgGlow: "bg-pink-500" },
+                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-600 to-orange-600", bgGlow: "bg-red-500" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-600 to-purple-600", bgGlow: "bg-indigo-500" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-600 to-pink-600", bgGlow: "bg-fuchsia-500" },
                     ].map((s) => (
-                      <motion.div key={s.label} whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}
-                        className={`bg-gradient-to-br ${s.light} border border-l-4 ${s.accent} rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all`}>
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-2 shadow-md`}>
+                      <motion.div key={s.label} whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className={`${dm ? "bg-white/[0.04] border-white/[0.06]" : "bg-white border-slate-200/60"} border rounded-2xl p-4 cursor-pointer group relative overflow-hidden`}>
+                        <div className={`absolute top-0 right-0 w-20 h-20 ${s.bgGlow} opacity-[0.04] rounded-full blur-2xl translate-x-6 -translate-y-6 group-hover:opacity-[0.08] transition-opacity`} />
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-3 shadow-lg`}>
                           <s.icon className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                        <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+                        <p className={`text-2xl font-bold ${textPrimary} tracking-tight`}>{s.value}</p>
+                        <p className={`text-xs ${textMuted} mt-0.5`}>{s.label}</p>
                       </motion.div>
                     ))}
                   </div>

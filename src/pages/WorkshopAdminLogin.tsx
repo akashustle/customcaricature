@@ -56,36 +56,33 @@ const WorkshopAdminLogin = () => {
   const [direction, setDirection] = useState(1);
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-violet-50 via-fuchsia-50/30 to-indigo-50">
-      {/* Animated background orbs */}
-      <motion.div className="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 blur-3xl bg-violet-400"
-        animate={{ scale: [1, 1.3, 1], x: [0, 30, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-20 right-10 w-96 h-96 rounded-full opacity-15 blur-3xl bg-fuchsia-400"
-        animate={{ scale: [1.2, 1, 1.2] }} transition={{ duration: 10, repeat: Infinity }} />
-      <motion.div className="absolute top-1/3 right-1/4 w-48 h-48 rounded-full opacity-10 blur-2xl bg-amber-300"
-        animate={{ y: [0, -25, 0] }} transition={{ duration: 6, repeat: Infinity }} />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-[#f8fafc]">
+      {/* Subtle animated background */}
+      <motion.div className="absolute top-10 left-10 w-96 h-96 rounded-full opacity-[0.06] blur-[100px] bg-violet-500"
+        animate={{ scale: [1, 1.2, 1], x: [0, 40, 0] }} transition={{ duration: 12, repeat: Infinity }} />
+      <motion.div className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[120px] bg-indigo-500"
+        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 14, repeat: Infinity }} />
+      <motion.div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full opacity-[0.04] blur-[80px] bg-blue-400"
+        animate={{ y: [0, -30, 0] }} transition={{ duration: 8, repeat: Infinity }} />
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative z-10">
-        <div className="backdrop-blur-2xl bg-white/70 border border-white/40 rounded-3xl shadow-2xl shadow-violet-200/30 overflow-hidden">
-          {/* Header gradient bar */}
-          <div className="h-1.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500" />
-          
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }} className="w-full max-w-md relative z-10">
+        <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden">
           <div className="p-8 space-y-6">
             <div className="text-center space-y-3">
-              <motion.div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-violet-200/50 shadow-lg shadow-violet-200/30"
-                animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+              <motion.div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-black/[0.04] shadow-lg"
+                animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity }}>
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")} />
               </motion.div>
               <p className="text-sm font-medium text-violet-600">{getGreeting()}</p>
               <div className="flex items-center justify-center gap-2">
                 <GraduationCap className="w-5 h-5 text-violet-600" />
-                <h1 className="text-2xl font-bold text-foreground">Workshop Admin</h1>
+                <h1 className="text-xl font-bold text-slate-900 tracking-tight">Workshop Admin</h1>
               </div>
-              <p className="text-sm text-muted-foreground">CCC Academy Console</p>
+              <p className="text-sm text-slate-400">CCC Academy Console</p>
               {/* Progress */}
-              <div className="flex items-center justify-center gap-2 mt-2">
+              <div className="flex items-center justify-center gap-2 mt-3">
                 {[1, 2].map(s => (
-                  <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${s === step ? "w-10 bg-violet-500" : s < step ? "w-6 bg-violet-300" : "w-6 bg-muted"}`} />
+                  <div key={s} className={`h-1 rounded-full transition-all duration-300 ${s === step ? "w-10 bg-gradient-to-r from-violet-600 to-indigo-600" : s < step ? "w-6 bg-violet-300" : "w-6 bg-slate-200"}`} />
                 ))}
               </div>
             </div>
@@ -95,15 +92,15 @@ const WorkshopAdminLogin = () => {
                 {step === 1 && (
                   <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground font-medium">Admin Email</Label>
+                      <Label className="text-sm text-slate-500 font-medium">Admin Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com"
-                          className="pl-10 h-12 bg-white/60 border-violet-100 rounded-xl focus:border-violet-400 focus:ring-violet-200" autoFocus />
+                          className="pl-10 h-12 bg-slate-50/80 border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20" autoFocus />
                       </div>
                     </div>
                     <Button onClick={() => { if (!email.trim()) { toast({ title: "Enter email", variant: "destructive" }); return; } setDirection(1); setStep(2); }}
-                      className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 shadow-lg shadow-violet-300/30 gap-2">
+                      className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/20 gap-2">
                       Continue <ArrowRight className="w-4 h-4" />
                     </Button>
                   </motion.div>
@@ -111,23 +108,23 @@ const WorkshopAdminLogin = () => {
                 {step === 2 && (
                   <motion.div key="s2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
                     <form onSubmit={handleLogin} className="space-y-4">
-                      <p className="text-xs text-muted-foreground text-center">{email}</p>
+                      <p className="text-xs text-slate-400 text-center">{email}</p>
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground font-medium">Password</Label>
+                        <Label className="text-sm text-slate-500 font-medium">Password</Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                           <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••" className="pl-10 pr-10 h-12 bg-white/60 border-violet-100 rounded-xl focus:border-violet-400 focus:ring-violet-200" autoFocus />
-                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            placeholder="••••••••" className="pl-10 pr-10 h-12 bg-slate-50/80 border-slate-200 rounded-xl focus:border-violet-500 focus:ring-violet-500/20" autoFocus />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
                       <Button type="submit" disabled={loading}
-                        className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 shadow-lg shadow-violet-300/30">
+                        className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/20">
                         {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : "Sign In"}
                       </Button>
-                      <Button type="button" variant="ghost" onClick={() => { setDirection(-1); setStep(1); }} className="w-full h-10 rounded-xl gap-2 text-muted-foreground">
+                      <Button type="button" variant="ghost" onClick={() => { setDirection(-1); setStep(1); }} className="w-full h-10 rounded-xl gap-2 text-slate-400 hover:text-slate-600">
                         <ArrowLeft className="w-4 h-4" /> Back
                       </Button>
                     </form>
@@ -137,7 +134,7 @@ const WorkshopAdminLogin = () => {
             </div>
 
             <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs text-muted-foreground hover:text-violet-600 transition-colors">← Back to Home</button>
+              <button onClick={() => navigate("/")} className="text-xs text-slate-400 hover:text-violet-600 transition-colors">← Back to Home</button>
             </div>
           </div>
         </div>
