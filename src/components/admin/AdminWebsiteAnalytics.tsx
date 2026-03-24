@@ -122,7 +122,7 @@ const AdminWebsiteAnalytics = () => {
     const topActions = Object.entries(actions.reduce((acc: Record<string, number>, a) => {
       acc[a.action_type] = (acc[a.action_type] || 0) + 1;
       return acc;
-    }, {})).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    }, {})).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 10);
     const chatCount = chatSessions.length;
     const activeSessions = sessions.filter(s => s.is_active).length;
     const conversionRate = totalUsers > 0 ? ((orders.length / totalUsers) * 100).toFixed(1) : "0";
