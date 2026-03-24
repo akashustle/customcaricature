@@ -105,7 +105,6 @@ const WorkshopAdminLogin = () => {
     if (authMethod === "secret_code") {
       const norm = secretCode.replace(/[-\s]/g, "");
       if (norm.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
-      if (norm !== adminMasterSecret) { setFailedAttempts(p => p + 1); toast({ title: "Invalid secret code", variant: "destructive" }); return; }
     }
     if (failedAttempts >= 3 && authMethod !== "otp") { setAuthMethod("otp"); return; }
     if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
