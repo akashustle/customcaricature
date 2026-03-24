@@ -60,18 +60,31 @@ Deno.serve(async (req) => {
           });
           
           if (createError && createError.message?.includes("already been registered")) {
-            // Find existing user and update
-            const { data: { users } } = await adminClient.auth.admin.listUsers();
-            const existingUser = users?.find((u: any) => u.email === admin.email);
-            if (!existingUser) {
-              results.push({ email: admin.email, success: false, error: "User exists but not found" });
+            // Find existing user by listing with pagination
+            let found = false;
+            let page = 1;
+            const perPage = 50;
+            while (!found) {
+              const { data: { users }, error: listErr } = await adminClient.auth.admin.listUsers({ page, perPage });
+              if (listErr || !users || users.length === 0) break;
+              const existingUser = users.find((u: any) => u.email === admin.email);
+              if (existingUser) {
+                userId = existingUser.id;
+                await adminClient.auth.admin.updateUser(userId, { 
+                  password: admin.password,
+                  user_metadata: { full_name: admin.full_name, mobile: admin.mobile, age: admin.age }
+                });
+                found = true;
+              } else if (users.length < perPage) {
+                break;
+              } else {
+                page++;
+              }
+            }
+            if (!found) {
+              results.push({ email: admin.email, success: false, error: "User exists but not found in listing" });
               continue;
             }
-            userId = existingUser.id;
-            await adminClient.auth.admin.updateUser(userId, { 
-              password: admin.password,
-              user_metadata: { full_name: admin.full_name, mobile: admin.mobile, age: admin.age }
-            });
           } else if (createError || !authData?.user) {
             results.push({ email: admin.email, success: false, error: createError?.message });
             continue;
