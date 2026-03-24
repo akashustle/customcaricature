@@ -8,6 +8,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
 import { useState, useCallback, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
+import { toast } from "@/hooks/use-toast";
 import JsonLd from "@/components/JsonLd";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
