@@ -439,10 +439,10 @@ const Admin = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     const ext = file.name.split(".").pop();
-    const path = `avatars/${user.id}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("gallery-images").upload(path, file, { upsert: true });
-    if (upErr) { toast({ title: "Upload failed", variant: "destructive" }); return; }
-    const { data: urlData } = supabase.storage.from("gallery-images").getPublicUrl(path);
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (upErr) { console.error("Avatar upload error:", upErr); toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); return; }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     if (urlData?.publicUrl) {
       await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", user.id);
       toast({ title: "Profile photo updated! 📸" });
