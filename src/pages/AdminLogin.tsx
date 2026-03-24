@@ -268,8 +268,9 @@ const AdminLogin = () => {
         } as any).eq("user_id", pendingUserId);
       }
 
-      sessionStorage.removeItem("admin_entered_name");
-      toast({ title: "OTP Verified! Welcome back, admin! ✅" });
+      const verifiedUser = (await supabase.auth.getUser()).data.user;
+      if (verifiedUser) await setAdminSessionName(verifiedUser.id);
+      toast({ title: `OTP Verified! Welcome back, ${adminGreetName || "admin"}! ✅` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       toast({ title: "Verification Failed", description: err?.message, variant: "destructive" });
