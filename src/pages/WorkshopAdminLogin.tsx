@@ -309,9 +309,9 @@ const WorkshopAdminLogin = () => {
                       <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Authenticate With</Label>
                       <Select value={verifyMethod} onValueChange={(v) => { setVerifyMethod(v as "email" | "mobile"); setVerifyInput(""); }}>
                         <SelectTrigger className="h-12 rounded-xl border" style={{ background: BRAND.cream, borderColor: BRAND.light }}><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white rounded-xl">
-                          <SelectItem value="email"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email</div></SelectItem>
-                          <SelectItem value="mobile"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile</div></SelectItem>
+                        <SelectContent className="rounded-xl shadow-xl" style={{ background: '#FFFFFF', borderColor: BRAND.light }}>
+                          <SelectItem value="email" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email</div></SelectItem>
+                          <SelectItem value="mobile" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile</div></SelectItem>
                         </SelectContent>
                       </Select>
                       <div>
