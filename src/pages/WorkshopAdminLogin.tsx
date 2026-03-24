@@ -263,9 +263,9 @@ const WorkshopAdminLogin = () => {
                       )}
                       {authMethod === "secret_code" && (
                         <div className="space-y-2">
-                          <Label className="text-sm text-slate-500 font-medium">6-Digit Secret Code</Label>
+                         <Label className="text-sm text-slate-500 font-medium">8-Digit Secret Code</Label>
                           <Input type="password" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
-                            placeholder="• • • • • •" className="h-12 bg-slate-50/80 border-slate-200 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-violet-500" />
+                            placeholder="• • • • • • • •" className="h-12 bg-slate-50/80 border-slate-200 rounded-xl text-center text-xl tracking-[0.3em] font-bold focus:border-violet-500" />
                         </div>
                       )}
                       {authMethod === "otp" && (
