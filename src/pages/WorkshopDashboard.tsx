@@ -173,34 +173,59 @@ const WorkshopDashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300`}>
+    <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300 relative`}>
+      {/* Background animated orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px]"
+          style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }}
+          animate={{ scale: [1, 1.2, 1], x: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity }} />
+        <motion.div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.03] blur-[80px]"
+          style={{ background: `linear-gradient(225deg, ${accent.secondary}, ${accent.primary})` }}
+          animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 12, repeat: Infinity }} />
+      </div>
+
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
       <WorkshopCountdownOverlay user={workshopUser} />
 
-      {/* Header */}
-      <div className={`sticky top-0 z-40 backdrop-blur-xl ${headerBg} border-b`}>
+      {/* Header - Premium Glassmorphism */}
+      <motion.div className={`sticky top-0 z-40 backdrop-blur-2xl ${headerBg} border-b`}
+        initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <motion.img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl shadow-sm ring-1 ring-black/[0.04]"
-              animate={{ y: [0, -2, 0] }} transition={{ duration: 4, repeat: Infinity }} />
+            <motion.div className="relative"
+              whileHover={{ scale: 1.1, rotateY: 15 }}>
+              <div className="absolute -inset-0.5 rounded-xl blur-sm opacity-40"
+                style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }} />
+              <img src="/logo.png" alt="CCC" className="relative w-9 h-9 rounded-xl shadow-sm ring-1 ring-black/[0.04]" />
+            </motion.div>
             <div>
-              <h1 className={`${textPrimary} text-sm md:text-base tracking-tight`}>{getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨</h1>
-              <p className={`${textSecondary} text-[10px] md:text-xs`}>CCC Workshop {workshopUser.roll_number && `· Roll #${workshopUser.roll_number}`}</p>
+              <motion.h1 className={`${textPrimary} text-sm md:text-base tracking-tight`}
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+                {getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨
+              </motion.h1>
+              <motion.p className={`${textSecondary} text-[10px] md:text-xs`}
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+                CCC Workshop {workshopUser.roll_number && `· Roll #${workshopUser.roll_number}`}
+              </motion.p>
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className={`${textSecondary} rounded-xl`} title="Back to Dashboard">
-              <Home className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowColorPicker(!showColorPicker)} className={`${textSecondary} rounded-xl`}>
-              <Palette className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className={`${textSecondary} rounded-xl`}>
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
-              <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
-            </Button>
+            {[
+              { icon: Home, action: () => navigate("/dashboard"), tip: "Dashboard" },
+              { icon: Palette, action: () => setShowColorPicker(!showColorPicker), tip: "Theme" },
+              { icon: darkMode ? Sun : Moon, action: () => setDarkMode(!darkMode), tip: "Mode" },
+            ].map((btn, i) => (
+              <motion.div key={i} whileHover={{ scale: 1.1, y: -1 }} whileTap={{ scale: 0.9 }}>
+                <Button variant="ghost" size="sm" onClick={btn.action} className={`${textSecondary} rounded-xl`} title={btn.tip}>
+                  <btn.icon className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            ))}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
+                <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -210,8 +235,9 @@ const WorkshopDashboard = () => {
               <div className="max-w-5xl mx-auto px-4 pb-3 flex gap-2 items-center">
                 <span className={`${textSecondary} text-xs`}>Theme:</span>
                 {ACCENT_COLORS.map((c, i) => (
-                  <button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent hover:scale-110"}`}
+                  <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
+                    whileHover={{ scale: 1.2, y: -2 }} whileTap={{ scale: 0.9 }}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent"}`}
                     style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
                     title={c.name} />
                 ))}
@@ -219,7 +245,7 @@ const WorkshopDashboard = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
