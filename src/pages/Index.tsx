@@ -227,33 +227,25 @@ const Index = () => {
       {/* Hero Section */}
       <main>
       <section className="relative overflow-hidden" ref={heroRef}>
-        {/* Animated gradient background for desktop */}
+        {/* Soft gradient — no harsh animations on mobile */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card/30 to-background" />
         <div className="absolute inset-0 hidden lg:block">
           <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
           <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand-gold/3 blur-[150px]" />
         </div>
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute rounded-full bg-primary/15 hidden lg:block"
-            style={{
-              left: `${5 + i * 8}%`,
-              top: `${10 + (i % 5) * 16}%`,
-              width: `${4 + (i % 3) * 3}px`,
-              height: `${4 + (i % 3) * 3}px`,
-            }}
-            animate={{ y: [0, -40, 0], opacity: [0.05, 0.4, 0.05], scale: [1, 1.8, 1] }}
-            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: i * 0.3, ease: "easeInOut" }}
-          />
-        ))}
-        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-28 lg:py-36 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-24">
-            {/* Mobile: Logo - above text */}
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-border bg-card p-1 shadow-lg lg:hidden"
-              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
+            {/* Mobile: Compact logo + branding */}
+            <div className="flex flex-col items-center lg:hidden w-full">
+              <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-full px-3 py-1 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[11px] font-sans font-semibold text-primary">India's #1 Caricature Studio</span>
+              </motion.div>
+            </div>
 
             {/* Left: Text content */}
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
