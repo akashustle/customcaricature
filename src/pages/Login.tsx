@@ -211,7 +211,7 @@ const Login = () => {
                       <div>
                         <Label className="font-sans text-sm">Password</Label>
                         <div className="relative">
-                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" autoFocus />
+                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" />
                           <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
