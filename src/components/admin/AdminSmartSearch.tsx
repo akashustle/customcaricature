@@ -150,6 +150,11 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
             onFocus={() => { if (query && results.length) setOpen(true); else if (!query && recent.length) setShowRecent(true); }}
             onKeyDown={handleKeyDown}
             placeholder="Search everything..."
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            name="admin-smart-search-nofill"
             className="pl-9 pr-8 h-9 rounded-xl bg-card border-border text-sm"
           />
           {query && (
