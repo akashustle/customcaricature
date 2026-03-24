@@ -44,17 +44,17 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
         if (isAdmin) { setLoading(false); return; }
       }
 
-      // Check if estimated_end has passed — auto-disable
+      // Check if estimated_end has passed — auto-disable immediately
       const checkAutoDisable = async (setting: any) => {
-        if (setting?.is_enabled && setting?.estimated_end) {
+        if (!setting?.is_enabled) return false;
+        if (setting?.estimated_end) {
           const end = new Date(setting.estimated_end);
-          if (end <= new Date()) {
-            // Auto-disable
+          if (end.getTime() <= Date.now()) {
             await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: new Date().toISOString() } as any).eq("id", setting.id);
-            return false; // no longer enabled
+            return false;
           }
         }
-        return setting?.is_enabled || false;
+        return true;
       };
 
       const globalEnabled = await checkAutoDisable(global);
