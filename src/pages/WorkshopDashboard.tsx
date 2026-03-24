@@ -251,7 +251,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - App Style */}
       <div className={`fixed bottom-0 left-0 right-0 z-50 md:hidden`}>
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-background/95 border-border"} border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`}>
+        <div className={`backdrop-blur-xl ${dm ? "bg-[#1a1710]/95 border-white/10" : "bg-white/95 border-violet-100/60"} border-t shadow-[0_-4px_20px_rgba(0,0,0,0.06)]`}>
           <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
