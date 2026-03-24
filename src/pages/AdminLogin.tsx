@@ -101,8 +101,8 @@ const AdminLogin = () => {
           toast({ title: "Access Denied", description: "Not authorized for admin.", variant: "destructive" });
           setLoading(false); return;
         }
-        sessionStorage.removeItem("admin_entered_name");
-        toast({ title: "Welcome back, admin!" });
+        await setAdminSessionName(userData.user.id);
+        toast({ title: `Welcome back, ${adminGreetName || "admin"}! 🎉` });
         navigate("/admin-panel", { replace: true });
         setLoading(false); return;
       }
