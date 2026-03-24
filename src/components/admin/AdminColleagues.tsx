@@ -40,6 +40,7 @@ const AdminColleagues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [tab, setTab] = useState("chats");
   const [onlineAdmins, setOnlineAdmins] = useState<string[]>([]);
+  const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +51,16 @@ const AdminColleagues = () => {
     };
     fetchProfile();
     fetchOnlineAdmins();
+    // Fetch avatars for all admins
+    const fetchAvatars = async () => {
+      const avatars: Record<string, string> = {};
+      for (const admin of ADMIN_LIST) {
+        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
+        if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
+      }
+      setAdminAvatars(avatars);
+    };
+    fetchAvatars();
   }, [user]);
 
   useEffect(() => {
@@ -164,9 +175,13 @@ const AdminColleagues = () => {
                   }`}>
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary/60" />
-                      </div>
+                      {adminAvatars[c.email] ? (
+                        <img src={adminAvatars[c.email]} alt={c.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                          <span className="text-sm font-bold text-primary/60">{c.name.charAt(0)}</span>
+                        </div>
+                      )}
                       {isOnline && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -191,9 +206,13 @@ const AdminColleagues = () => {
               {/* Chat header */}
               <CardHeader className="py-3 px-4 border-b flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary/60" />
-                  </div>
+                  {adminAvatars[selectedColleague] ? (
+                    <img src={adminAvatars[selectedColleague]} alt={selectedColleagueInfo.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary/60">{selectedColleagueInfo.name.charAt(0)}</span>
+                    </div>
+                  )}
                   <div>
                     <p className="font-bold text-sm">{selectedColleagueInfo.name}</p>
                     <p className="text-[10px] text-indigo-600">{selectedColleagueInfo.designation}</p>

@@ -420,8 +420,20 @@ const AdminLogin = () => {
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-4">
                     <motion.div className="text-center py-4 rounded-2xl border"
                       style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}>
+                      <motion.div className="mx-auto mb-2 rounded-full overflow-hidden relative"
+                        style={{ width: 64, height: 64 }} animate={{ y: [0, -3, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+                        <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30)` }} />
+                        <div className="relative w-full h-full rounded-full overflow-hidden shadow-lg flex items-center justify-center"
+                          style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 12px ${BRAND.accent}20` }}>
+                          {adminAvatars[selectedAdmin.email] ? (
+                            <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xl font-black text-white" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>{selectedAdmin.name.charAt(0)}</div>
+                          )}
+                        </div>
+                      </motion.div>
                       <p className="text-lg font-bold" style={{ color: BRAND.primary }}>Hi {selectedAdmin.name}! 👋</p>
-                      <p className="text-[11px] font-semibold mt-0.5" style={{ color: BRAND.accent }}>{selectedAdmin.designation}</p>
+                      <p className="text-[11px] font-semibold mt-0.5" style={{ color: BRAND.accent }}>{selectedAdmin.emoji} {selectedAdmin.designation}</p>
                       <p className="text-xs mt-1.5" style={{ color: "#9B8B7A" }}>Verify your identity to continue</p>
                     </motion.div>
 
