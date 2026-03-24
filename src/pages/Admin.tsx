@@ -754,6 +754,8 @@ const Admin = () => {
         else if (action === "add-enquiry") setActiveTab("enquiries");
         else if (action === "send-notification") setActiveTab("notify");
       }} />
+      {/* Floating Chat Button for Admin */}
+      <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
