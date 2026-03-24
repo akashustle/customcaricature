@@ -139,9 +139,21 @@ const NAV_SECTIONS = [
   },
 ];
 
+const SHOP_RELATED_TABS = ["shop", "shop-orders", "shop-products", "shop-categories", "shop-settings"];
+
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
+  const hideShop = (settings as any)?.hide_shop_from_admin?.enabled || false;
+
+  const filteredSections = useMemo(() => {
+    if (!hideShop) return NAV_SECTIONS;
+    return NAV_SECTIONS.map(section => ({
+      ...section,
+      items: section.items.filter(item => !SHOP_RELATED_TABS.includes(item.id))
+    })).filter(section => section.items.length > 0);
+  }, [hideShop]);
 
   return (
     <aside 
