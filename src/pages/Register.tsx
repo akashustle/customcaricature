@@ -246,7 +246,7 @@ const Register = () => {
               <AnimatePresence mode="wait">
                 {step === 1 && (
                   <motion.div key="s1" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
-                    <div><Label className="font-sans text-sm font-medium">Full Name *</Label><Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" autoFocus className="h-11 rounded-xl" /></div>
+                    <div><Label className="font-sans text-sm font-medium">Full Name *</Label><Input value={form.fullName} onChange={(e) => update("fullName", e.target.value)} placeholder="Your full name" className="h-11 rounded-xl" /></div>
                     <div className="grid grid-cols-2 gap-3">
                       <div><Label className="font-sans text-sm font-medium">Age *</Label><Input value={form.age} onChange={(e) => validateAge(e.target.value)} placeholder="25" maxLength={3} className="h-11 rounded-xl" />{form.age && (parseInt(form.age) < 5 || parseInt(form.age) > 120) && <p className="text-xs text-destructive mt-1">Invalid age</p>}</div>
                       <div><Label className="font-sans text-sm font-medium">Gender *</Label><Select value={form.gender} onValueChange={(v) => update("gender", v)}><SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent></Select></div>
@@ -259,7 +259,7 @@ const Register = () => {
                   <motion.div key="s2" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
                     <div>
                       <Label className="font-sans text-sm font-medium">Mobile * (10 digits)</Label>
-                      <div className="flex gap-2"><div className="flex items-center px-3 bg-muted rounded-xl border border-input text-sm font-sans h-11">+91</div><Input value={form.mobile} onChange={(e) => validateMobile(e.target.value)} placeholder="9876543210" maxLength={10} autoFocus className="h-11 rounded-xl" /></div>
+                      <div className="flex gap-2"><div className="flex items-center px-3 bg-muted rounded-xl border border-input text-sm font-sans h-11">+91</div><Input value={form.mobile} onChange={(e) => validateMobile(e.target.value)} placeholder="9876543210" maxLength={10} className="h-11 rounded-xl" /></div>
                     </div>
                     <div>
                       <Label className="font-sans text-sm font-medium">Email *</Label>
@@ -337,7 +337,7 @@ const Register = () => {
                 )}
                 {step === 3 && (
                   <motion.div key="s3" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
-                    <div><Label className="font-sans text-sm font-medium">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" autoFocus className="h-11 rounded-xl" /></div>
+                    <div><Label className="font-sans text-sm font-medium">Full Address *</Label><Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="House no, Street, Area" className="h-11 rounded-xl" /></div>
                     <LocationDropdowns state={form.state} district={form.district} city={form.city} onStateChange={(v) => setForm(prev => ({ ...prev, state: v, district: "", city: "" }))} onDistrictChange={(v) => setForm(prev => ({ ...prev, district: v, city: "" }))} onCityChange={(v) => setForm(prev => ({ ...prev, city: v }))} />
                     <div><Label className="font-sans text-sm font-medium">Pincode * (6 digits)</Label><Input value={form.pincode} onChange={(e) => validatePincode(e.target.value)} placeholder="400001" maxLength={6} className="h-11 rounded-xl" /></div>
                     <div className="flex gap-2"><Button type="button" variant="outline" onClick={prevStep} className="flex-1 h-11 rounded-xl font-sans"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button><Button type="button" onClick={nextStep} disabled={!canGoStep4} className="flex-1 h-11 rounded-xl font-sans font-semibold">Next <ArrowRight className="w-4 h-4 ml-1" /></Button></div>
@@ -346,7 +346,7 @@ const Register = () => {
                 {step === 4 && (
                   <motion.div key="s4" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <div><Label className="font-sans text-sm font-medium">Password *</Label><div className="relative"><Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Min 6 chars" className="pr-9 h-11 rounded-xl" autoFocus /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button></div></div>
+                      <div><Label className="font-sans text-sm font-medium">Password *</Label><div className="relative"><Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Min 6 chars" className="pr-9 h-11 rounded-xl" /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button></div></div>
                       <div><Label className="font-sans text-sm font-medium">Confirm *</Label><div className="relative"><Input type={showConfirmPassword ? "text" : "password"} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} placeholder="Re-enter" className="pr-9 h-11 rounded-xl" /><button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">{showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}</button></div></div>
                     </div>
                     {form.password && form.confirmPassword && form.password !== form.confirmPassword && <p className="text-xs text-destructive">Passwords don't match</p>}
