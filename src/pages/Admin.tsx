@@ -2187,7 +2187,24 @@ const Admin = () => {
                 </CardContent>
               </div>
 
-              {/* Add New Admin */}
+              {/* Hide Shop from Admin Panel */}
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Package className="w-5 h-5 text-orange-600 dark:text-orange-400" />Shop Visibility in Admin</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Hide Shop Data from Admin Panel</p>
+                      <p className="text-xs text-muted-foreground font-sans">Remove all shop-related widgets, tabs, and graphics from the main admin panel</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).hide_shop_from_admin?.enabled || false}
+                      onCheckedChange={async (checked) => { await updateSetting("hide_shop_from_admin", { enabled: checked }); toast({ title: checked ? "Shop data hidden from admin panel" : "Shop data visible in admin panel" }); }}
+                    />
+                  </div>
+                </CardContent>
+              </div>
               <div className="admin-settings-card overflow-hidden">
                 <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/5 border-b border-border/30">
                   <h3 className="font-sans font-bold text-base flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />Add New Admin</h3>
