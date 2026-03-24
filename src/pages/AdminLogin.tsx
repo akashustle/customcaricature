@@ -431,7 +431,7 @@ const AdminLogin = () => {
 
                     {authMethod === "secret_code" && (
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground font-medium">6-Digit Secret Code</Label>
+                        <Label className="text-sm text-muted-foreground font-medium">8-Digit Secret Code</Label>
                         <div className="relative group">
                           <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input type="password" value={secretCode}
