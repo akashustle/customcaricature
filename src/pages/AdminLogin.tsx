@@ -169,17 +169,22 @@ const AdminLogin = () => {
     setLoading(true);
     try {
       if (authMethod === "otp" || failedAttempts >= 3) {
-        const { error } = await supabase.auth.verifyOtp({ email: "akashxbhavans@gmail.com", token: otpCode, type: "email" });
-        if (error) throw error;
-        if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
-          await supabase.auth.signOut();
-          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", {
-            body: { email: selectedAdmin.email, secret_code: adminMasterSecret.slice(0, 4) },
-          });
-          if (scErr || !data?.success) throw new Error("Could not sign in as " + selectedAdmin.name);
-          const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
-          if (vErr) throw vErr;
+        // Verify OTP against admin_login_tracking table
+        const { data: trackData } = await supabase.from("admin_login_tracking" as any)
+          .select("otp_code, otp_expires_at")
+          .eq("user_id", (await supabase.from("profiles").select("user_id").eq("email", selectedAdmin.email).maybeSingle()).data?.user_id || "")
+          .maybeSingle() as any;
+        
+        if (!trackData || trackData.otp_code !== otpCode || new Date(trackData.otp_expires_at) < new Date()) {
+          throw new Error("Invalid or expired OTP");
         }
+        // OTP verified, now login via secret code mechanism
+        const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
+          body: { email: selectedAdmin.email, secret_code: adminMasterSecret },
+        });
+        if (error || !data?.success) throw new Error(data?.error || "Login failed after OTP verification");
+        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
+        if (vErr) throw vErr;
       } else if (authMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
           body: { email: selectedAdmin.email, secret_code: secretCode },
