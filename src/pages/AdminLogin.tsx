@@ -123,8 +123,8 @@ const AdminLogin = () => {
     if (authMethod === "password" && !password) {
       toast({ title: "Enter password", variant: "destructive" }); return;
     }
-    if (authMethod === "secret_code" && secretCode.length !== 6) {
-      toast({ title: "Enter 6-digit secret code", variant: "destructive" }); return;
+    if (authMethod === "secret_code" && secretCode.length !== 8) {
+      toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return;
     }
     if (authMethod === "otp" && !otpSent) {
       // Send OTP to main admin email
