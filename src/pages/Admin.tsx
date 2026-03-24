@@ -424,12 +424,12 @@ const Admin = () => {
 
   const saveAdminProfile = async () => {
     if (!user) return;
-    await supabase.from("profiles").update({
+    await (supabase.from("profiles").update({
       full_name: adminEditData.full_name, mobile: adminEditData.mobile,
-      email: adminEditData.email, age: adminEditData.age,
+      email: (adminEditData as any).email, age: (adminEditData as any).age,
       instagram_id: adminEditData.instagram_id, address: adminEditData.address,
       city: adminEditData.city, state: adminEditData.state, pincode: adminEditData.pincode,
-    } as any).eq("user_id", user.id);
+    } as any).eq("user_id", user.id));
     toast({ title: "Profile Updated" });
     setEditingAdminProfile(false);
     fetchAdminProfile();
