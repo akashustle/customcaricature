@@ -104,11 +104,13 @@ const AdminHomepageControl = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="hero" className="space-y-4">
+      <Tabs defaultValue="sections" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="sections" className="text-xs">Sections</TabsTrigger>
           <TabsTrigger value="hero" className="text-xs">Hero</TabsTrigger>
           <TabsTrigger value="urgency" className="text-xs">Urgency</TabsTrigger>
           <TabsTrigger value="quote" className="text-xs">Quote</TabsTrigger>
+          <TabsTrigger value="funnel" className="text-xs">Funnel Data</TabsTrigger>
           <TabsTrigger value="video" className="text-xs">Video</TabsTrigger>
           <TabsTrigger value="social" className="text-xs">Social Proof</TabsTrigger>
           <TabsTrigger value="whatyouget" className="text-xs">What You Get</TabsTrigger>
