@@ -426,12 +426,28 @@ const Admin = () => {
     if (!user) return;
     await supabase.from("profiles").update({
       full_name: adminEditData.full_name, mobile: adminEditData.mobile,
+      email: adminEditData.email, age: adminEditData.age,
       instagram_id: adminEditData.instagram_id, address: adminEditData.address,
       city: adminEditData.city, state: adminEditData.state, pincode: adminEditData.pincode,
     } as any).eq("user_id", user.id);
     toast({ title: "Profile Updated" });
     setEditingAdminProfile(false);
     fetchAdminProfile();
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    const ext = file.name.split(".").pop();
+    const path = `avatars/${user.id}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("gallery-images").upload(path, file, { upsert: true });
+    if (upErr) { toast({ title: "Upload failed", variant: "destructive" }); return; }
+    const { data: urlData } = supabase.storage.from("gallery-images").getPublicUrl(path);
+    if (urlData?.publicUrl) {
+      await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", user.id);
+      toast({ title: "Profile photo updated! 📸" });
+      fetchAdminProfile();
+    }
   };
 
   const changeAdminPassword = async () => {
