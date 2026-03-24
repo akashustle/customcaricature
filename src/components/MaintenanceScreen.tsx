@@ -1,24 +1,32 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Clock, ArrowLeft } from "lucide-react";
+import { AlertTriangle, Clock, ArrowLeft, Bell, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { requestBrowserNotificationPermission } from "@/lib/webpush";
 
 interface MaintenanceScreenProps {
   title?: string;
   message?: string;
   estimatedEnd?: string | null;
+  isGlobal?: boolean;
 }
 
-const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are performing scheduled maintenance. Please check back soon.", estimatedEnd }: MaintenanceScreenProps) => {
+const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are performing scheduled maintenance. Please check back soon.", estimatedEnd, isGlobal }: MaintenanceScreenProps) => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState("");
+  const [notifyRequested, setNotifyRequested] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
     if (!estimatedEnd) return;
     const update = () => {
       const diff = new Date(estimatedEnd).getTime() - Date.now();
-      if (diff <= 0) { setCountdown("Coming back now..."); return; }
+      if (diff <= 0) {
+        setCountdown("Coming back now...");
+        setIsExpired(true);
+        return;
+      }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
@@ -29,8 +37,24 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
     return () => clearInterval(iv);
   }, [estimatedEnd]);
 
+  // Auto-reload when timer expires
+  useEffect(() => {
+    if (isExpired) {
+      const timeout = setTimeout(() => window.location.reload(), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isExpired]);
+
+  const handleNotifyMe = async () => {
+    const result = await requestBrowserNotificationPermission();
+    if (result === "granted") {
+      setNotifyRequested(true);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center p-4 overflow-hidden">
+      {/* Background particles */}
       <div className="absolute inset-0">
         {[...Array(15)].map((_, i) => (
           <motion.div key={i} className="absolute rounded-full bg-primary/5"
@@ -56,10 +80,8 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           className="text-muted-foreground font-body text-base md:text-lg mb-6 leading-relaxed">{message}</motion.p>
 
-        {/* Countdown Timer */}
         {estimatedEnd && countdown && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="mb-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-6">
             <div className="inline-flex items-center gap-2 bg-card border border-border rounded-2xl px-6 py-4 shadow-lg">
               <Clock className="w-5 h-5 text-primary" />
               <div className="text-left">
@@ -67,9 +89,6 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
                 <p className="text-2xl font-extrabold text-foreground tracking-tight">{countdown}</p>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Expected: {new Date(estimatedEnd).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-            </p>
           </motion.div>
         )}
 
@@ -80,11 +99,26 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
-          <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-body gap-2">
-            <ArrowLeft className="w-4 h-4" /> Go to Homepage
-          </Button>
+        {/* Notify Me Button */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }} className="mb-4">
+          {notifyRequested ? (
+            <div className="inline-flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full">
+              <BellRing className="w-4 h-4" /> You'll be notified when we're back!
+            </div>
+          ) : (
+            <Button variant="default" onClick={handleNotifyMe} className="rounded-full font-body gap-2">
+              <Bell className="w-4 h-4" /> Notify me when it's back
+            </Button>
+          )}
         </motion.div>
+
+        {!isGlobal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+            <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-body gap-2">
+              <ArrowLeft className="w-4 h-4" /> Go to Homepage
+            </Button>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );
