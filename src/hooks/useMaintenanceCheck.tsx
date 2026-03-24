@@ -21,7 +21,6 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
 
   useEffect(() => {
     const check = async () => {
-      // Check global + page-specific
       const { data } = await supabase
         .from("maintenance_settings")
         .select("*")
@@ -32,42 +31,59 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
       const global = data.find(d => d.id === "global");
       const page = data.find(d => d.id === pageId);
 
-      // Check if current user is in allowed list
       const isAllowed = (setting: any) => {
         if (!setting?.allowed_user_ids || setting.allowed_user_ids.length === 0) return false;
         return user && setting.allowed_user_ids.includes(user.id);
       };
 
-      // Admin users bypass maintenance
+      // Admin bypass
       if (user) {
         const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id);
+          .from("user_roles").select("role").eq("user_id", user.id);
         const isAdmin = roles?.some(r => r.role === "admin");
         if (isAdmin) { setLoading(false); return; }
       }
 
-      // Global takes priority
-      if (global?.is_enabled && !isAllowed(global)) {
+      // Check if estimated_end has passed — auto-disable
+      const checkAutoDisable = async (setting: any) => {
+        if (setting?.is_enabled && setting?.estimated_end) {
+          const end = new Date(setting.estimated_end);
+          if (end <= new Date()) {
+            // Auto-disable
+            await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: new Date().toISOString() } as any).eq("id", setting.id);
+            return false; // no longer enabled
+          }
+        }
+        return setting?.is_enabled || false;
+      };
+
+      const globalEnabled = await checkAutoDisable(global);
+      const pageEnabled = await checkAutoDisable(page);
+
+      // Global takes priority — blocks ALL pages
+      if (globalEnabled && !isAllowed(global)) {
         setState({
           isEnabled: true,
-          title: global.title || "Site Under Maintenance",
-          message: global.message || "Please check back soon.",
-          estimatedEnd: global.estimated_end,
+          title: global?.title || "Site Under Maintenance",
+          message: global?.message || "Please check back soon.",
+          estimatedEnd: global?.estimated_end,
         });
-      } else if (page?.is_enabled && !isAllowed(page)) {
+      } else if (pageEnabled && !isAllowed(page)) {
         setState({
           isEnabled: true,
-          title: page.title || "Under Maintenance",
-          message: page.message || "Please check back soon.",
-          estimatedEnd: page.estimated_end,
+          title: page?.title || "Under Maintenance",
+          message: page?.message || "Please check back soon.",
+          estimatedEnd: page?.estimated_end,
         });
       }
 
       setLoading(false);
     };
     check();
+
+    // Re-check periodically for auto-disable
+    const iv = setInterval(check, 30000);
+    return () => clearInterval(iv);
   }, [pageId, user]);
 
   return { ...state, loading };
