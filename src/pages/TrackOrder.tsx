@@ -399,7 +399,7 @@ const TrackOrder = () => {
                   )}
 
                   {/* SECTION 8: Notification */}
-                  <Card className="border-0 shadow-md cursor-pointer hover:shadow-lg transition-shadow" style={{ background: "linear-gradient(135deg, hsl(152, 40%, 95%), hsl(152, 45%, 92%))" }} onClick={() => window.open("https://wa.me/918369594271?text=I want updates on my order " + order.id.slice(0, 8), "_blank")}>
+                  <Card className="border-0 shadow-md cursor-pointer hover:shadow-lg transition-shadow" style={{ background: "linear-gradient(135deg, hsl(152, 40%, 95%), hsl(152, 45%, 92%))" }} onClick={() => window.open("https://wa.me/918369594271?text=Hi! I'd like to get WhatsApp updates for my caricature order #" + order.id.slice(0, 8), "_blank")}>
                     <CardContent className="p-4 flex items-center gap-3">
                       <Bell className="w-5 h-5" style={{ color: "hsl(152, 50%, 38%)" }} />
                       <p className="text-sm font-medium" style={{ color: "hsl(152, 45%, 28%)" }}>🔔 Get live updates on WhatsApp</p>
@@ -432,7 +432,7 @@ const TrackOrder = () => {
                           { label: "Express Delivery", emoji: "⚡", desc: "Get it faster" },
                         ].map((item, i) => (
                           <motion.div key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="text-center p-3 rounded-xl cursor-pointer" style={{ background: "white", border: "1px solid hsl(30, 20%, 88%)" }}
-                            onClick={() => window.open("https://wa.me/918369594271?text=I want to " + item.label + " for order " + order.id.slice(0, 8), "_blank")}>
+                            onClick={() => window.open("https://wa.me/918369594271?text=Hi! I need help with '" + item.label + "' for my caricature order #" + order.id.slice(0, 8), "_blank")}>
                             <span className="text-2xl">{item.emoji}</span>
                             <p className="text-xs font-semibold mt-1" style={{ color: "hsl(30, 30%, 25%)" }}>{item.label}</p>
                             <p className="text-[10px]" style={{ color: "hsl(30, 12%, 56%)" }}>{item.desc}</p>
