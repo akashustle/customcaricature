@@ -193,6 +193,7 @@ const Register = () => {
         verification_method: verificationMethod,
       } as any).eq("user_id", data.user.id);
 
+      clearDraft();
       toast({ title: "Registration Successful! 🎉", description: "Check your email to verify, then login." });
       navigate("/login");
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
