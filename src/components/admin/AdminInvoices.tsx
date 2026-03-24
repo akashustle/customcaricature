@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/pricing";
-import { Search, FileText, Edit2, Trash2, Plus, Download, Eye, Loader2 } from "lucide-react";
+import { Search, FileText, Edit2, Trash2, Plus, Download, Eye, Loader2, DollarSign, TrendingUp } from "lucide-react";
 import ExportButton from "@/components/admin/ExportButton";
 import SecureDeleteConfirm from "@/components/admin/SecureDeleteConfirm";
 import { motion } from "framer-motion";
