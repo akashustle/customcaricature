@@ -13,7 +13,7 @@ const MobileBottomNav = () => {
   const { settings } = useSiteSettings();
 
   const shopVisible = settings.shop_nav_visible?.enabled === true;
-  const workshopVisible = settings.show_workshop?.enabled === true;
+  const workshopVisible = settings.workshop_mobile_nav?.enabled === true;
   const supportVisible = settings.support_button_visible?.enabled === true;
 
   // Hide on admin paths only
