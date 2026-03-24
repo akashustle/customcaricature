@@ -101,6 +101,7 @@ import AdminInvoices from "@/components/admin/AdminInvoices";
 import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
 import AdminCalendar from "@/components/admin/AdminCalendar";
 import AdminWebsiteAnalytics from "@/components/admin/AdminWebsiteAnalytics";
+import AdminQuickQuestions from "@/components/admin/AdminQuickQuestions";
 
 const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -118,19 +119,17 @@ const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
     return () => { supabase.removeChannel(ch); };
   }, []);
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center text-white"
+      className="relative h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
     >
-      <MessageCircle className="w-5 h-5" />
+      <MessageCircle className="w-4 h-4" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
-    </motion.button>
+    </button>
   );
 };
 
@@ -787,8 +786,7 @@ const Admin = () => {
         else if (action === "add-enquiry") setActiveTab("enquiries");
         else if (action === "send-notification") setActiveTab("notify");
       }} />
-      {/* Floating Chat Button for Admin */}
-      <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
+      {/* Chat button moved to header */}
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
@@ -830,6 +828,7 @@ const Admin = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans rounded-xl">
@@ -1715,6 +1714,10 @@ const Admin = () => {
 
           <TabsContent value="live-chat">
             <AdminChat adminUserId={user?.id || ""} />
+          </TabsContent>
+
+          <TabsContent value="quick-questions">
+            <AdminQuickQuestions />
           </TabsContent>
 
 

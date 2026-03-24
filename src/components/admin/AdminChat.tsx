@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Loader2, MessageCircle, User, Palette } from "lucide-react";
+import { Send, Loader2, MessageCircle, User, Palette, Trash2, Edit2, Check, X, LogIn } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ChatUser = {
   user_id: string;
@@ -26,6 +32,8 @@ type Message = {
   read: boolean;
   created_at: string;
   is_artist_chat: boolean;
+  edited_at?: string | null;
+  deleted?: boolean;
 };
 
 const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
@@ -36,17 +44,19 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
   const [chatTab, setChatTab] = useState<"customers" | "artists">("customers");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "message" | "chat"; id: string } | null>(null);
+  const [showAdminNamePrompt, setShowAdminNamePrompt] = useState(false);
+  const [adminChatName, setAdminChatName] = useState(() => sessionStorage.getItem("admin_chat_name") || "");
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchChatUsers = async () => {
     const { data: allMsgs } = await supabase
-      .from("chat_messages")
-      .select("*")
-      .order("created_at", { ascending: false });
-
+      .from("chat_messages").select("*").order("created_at", { ascending: false });
     if (!allMsgs) return;
 
-    // Get all artist user IDs
     const { data: artists } = await supabase.from("artists").select("auth_user_id");
     const artistUserIds = new Set((artists || []).map((a: any) => a.auth_user_id).filter(Boolean));
 
@@ -66,10 +76,7 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     const userIds = Array.from(userMsgMap.keys());
     if (userIds.length === 0) { setChatUsers([]); return; }
 
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, full_name, email")
-      .in("user_id", userIds);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, email").in("user_id", userIds);
 
     const users: ChatUser[] = (profiles || []).map((p: any) => {
       const info = userMsgMap.get(p.user_id) || { last_message: "", last_time: "", unread: 0, is_artist_chat: false };
@@ -84,12 +91,9 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
   };
 
   const fetchMessages = async (userId: string) => {
-    const { data } = await supabase
-      .from("chat_messages")
-      .select("*")
+    const { data } = await supabase.from("chat_messages").select("*")
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-      .order("created_at", { ascending: true })
-      .limit(200);
+      .order("created_at", { ascending: true }).limit(200);
     if (data) {
       setMessages(data as any);
       const unreadIds = (data as any[]).filter((m: any) => !m.is_admin && !m.read).map(m => m.id);
@@ -99,7 +103,6 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     }
   };
 
-  // Use ref so realtime callback always has latest selectedUser
   const selectedUserRef = useRef<string | null>(null);
   useEffect(() => { selectedUserRef.current = selectedUser; }, [selectedUser]);
 
@@ -107,11 +110,7 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     fetchChatUsers();
     const ch = supabase
       .channel("admin-chat-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, () => {
-        fetchChatUsers();
-        if (selectedUserRef.current) fetchMessages(selectedUserRef.current);
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_messages" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => {
         fetchChatUsers();
         if (selectedUserRef.current) fetchMessages(selectedUserRef.current);
       })
@@ -127,10 +126,46 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  const selectUser = (userId: string, userName: string) => {
+    if (!adminChatName) {
+      setPendingUserId(userId);
+      setSelectedUserName(userName);
+      setShowAdminNamePrompt(true);
+      return;
+    }
+    setSelectedUser(userId);
+    setSelectedUserName(userName);
+  };
+
+  const confirmAdminName = async () => {
+    if (!adminChatName.trim()) return;
+    sessionStorage.setItem("admin_chat_name", adminChatName.trim());
+    setShowAdminNamePrompt(false);
+    if (pendingUserId) {
+      // Send join message
+      await supabase.from("chat_messages").insert({
+        sender_id: adminUserId,
+        receiver_id: pendingUserId,
+        message: `🟢 ${adminChatName.trim()} joined — one of our specialists`,
+        is_admin: true,
+        is_artist_chat: false,
+      } as any);
+      setSelectedUser(pendingUserId);
+      setPendingUserId(null);
+    }
+  };
+
   const sendMessage = async () => {
     if (!newMsg.trim() || !selectedUser) return;
     setSending(true);
     const selectedChatUser = chatUsers.find(u => u.user_id === selectedUser);
+    
+    // Check if first admin message to this user — send welcome
+    const adminMsgsToUser = messages.filter(m => m.is_admin && !m.message.includes("joined"));
+    if (adminMsgsToUser.length === 0) {
+      // First real message from admin
+    }
+
     await supabase.from("chat_messages").insert({
       sender_id: adminUserId,
       receiver_id: selectedUser,
@@ -140,6 +175,29 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
     } as any);
     setNewMsg("");
     setSending(false);
+  };
+
+  const editMessage = async () => {
+    if (!editingId || !editText.trim()) return;
+    await supabase.from("chat_messages").update({ message: editText.trim(), edited_at: new Date().toISOString() } as any).eq("id", editingId);
+    setEditingId(null);
+    setEditText("");
+    toast({ title: "Message updated" });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === "message") {
+      await supabase.from("chat_messages").delete().eq("id", deleteTarget.id);
+      toast({ title: "Message deleted" });
+    } else {
+      // Delete all messages for this user
+      await supabase.from("chat_messages").delete().or(`sender_id.eq.${deleteTarget.id},receiver_id.eq.${deleteTarget.id}`);
+      setSelectedUser(null);
+      setMessages([]);
+      toast({ title: "Chat history deleted" });
+    }
+    setDeleteTarget(null);
   };
 
   const customerChats = chatUsers.filter(u => !u.is_artist);
@@ -155,11 +213,11 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
       ) : users.map(u => (
         <Card
           key={u.user_id}
-          className={`cursor-pointer transition-colors ${selectedUser === u.user_id ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}
-          onClick={() => { setSelectedUser(u.user_id); setSelectedUserName(u.full_name); }}
+          className={`cursor-pointer transition-colors group ${selectedUser === u.user_id ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}
         >
           <CardContent className="p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1"
+              onClick={() => selectUser(u.user_id, u.full_name)}>
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                 {u.is_artist ? <Palette className="w-4 h-4 text-primary" /> : <User className="w-4 h-4 text-primary" />}
               </div>
@@ -168,9 +226,15 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
                 <p className="text-[10px] text-muted-foreground font-sans truncate">{u.last_message}</p>
               </div>
             </div>
-            {u.unread > 0 && (
-              <Badge className="bg-destructive text-destructive-foreground text-[10px] h-5 min-w-5 flex items-center justify-center">{u.unread}</Badge>
-            )}
+            <div className="flex items-center gap-1">
+              {u.unread > 0 && (
+                <Badge className="bg-destructive text-destructive-foreground text-[10px] h-5 min-w-5 flex items-center justify-center">{u.unread}</Badge>
+              )}
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hidden group-hover:flex text-destructive"
+                onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "chat", id: u.user_id }); }}>
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -179,13 +243,41 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
 
   return (
     <div className="space-y-4">
+      {/* Delete Confirm */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteTarget?.type === "chat" ? "Chat History" : "Message"}?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Admin Name Prompt */}
+      <Dialog open={showAdminNamePrompt} onOpenChange={setShowAdminNamePrompt}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><LogIn className="w-5 h-5" /> Join Live Chat</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Enter your name to start chatting. A join message will be shown to the user.</p>
+            <Input value={adminChatName} onChange={e => setAdminChatName(e.target.value)} placeholder="Your name (e.g. Akash)" className="h-10"
+              onKeyDown={e => { if (e.key === "Enter") confirmAdminName(); }} autoFocus />
+            <Button onClick={confirmAdminName} disabled={!adminChatName.trim()} className="w-full gap-2">
+              <MessageCircle className="w-4 h-4" /> Join Chat
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <h2 className="font-display text-xl font-bold flex items-center gap-2">
         <MessageCircle className="w-5 h-5 text-primary" /> Live Chat
         {totalUnread > 0 && <Badge className="bg-destructive text-destructive-foreground">{totalUnread} new</Badge>}
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ minHeight: 400 }}>
-        {/* User List with sub-tabs */}
         <div>
           <Tabs value={chatTab} onValueChange={(v) => setChatTab(v as any)}>
             <TabsList className="w-full mb-2">
@@ -212,25 +304,59 @@ const AdminChat = ({ adminUserId }: { adminUserId: string }) => {
             </Card>
           ) : (
             <Card className="h-full flex flex-col">
-              <CardHeader className="py-3 px-4 border-b border-border">
+              <CardHeader className="py-3 px-4 border-b border-border flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-sans">{selectedUserName}</CardTitle>
+                <Button variant="ghost" size="sm" className="text-destructive h-7 w-7 p-0"
+                  onClick={() => setDeleteTarget({ type: "chat", id: selectedUser })}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
               </CardHeader>
               <CardContent className="p-0 flex flex-col flex-1">
                 <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2" style={{ maxHeight: 350 }}>
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.is_admin ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs font-sans ${
-                        msg.is_admin
-                          ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-muted rounded-bl-sm"
-                      }`}>
-                        <p>{msg.message}</p>
-                        <p className={`text-[9px] mt-0.5 ${msg.is_admin ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                          {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
-                        </p>
+                  {messages.map(msg => {
+                    const isSystem = msg.message?.includes("joined") && msg.message?.includes("specialist");
+                    if (isSystem) {
+                      return (
+                        <div key={msg.id} className="flex justify-center">
+                          <span className="text-[10px] bg-muted/50 text-muted-foreground px-3 py-1 rounded-full">{msg.message}</span>
+                        </div>
+                      );
+                    }
+                    // Admin on LEFT, User on RIGHT
+                    const isAdminMsg = msg.is_admin;
+                    return (
+                      <div key={msg.id} className={`flex ${isAdminMsg ? "justify-start" : "justify-end"} group`}>
+                        <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs font-sans relative ${
+                          isAdminMsg
+                            ? "bg-accent/30 border border-accent/20 rounded-bl-sm"
+                            : "bg-primary text-primary-foreground rounded-br-sm"
+                        }`}>
+                          {editingId === msg.id ? (
+                            <div className="flex items-center gap-1">
+                              <Input value={editText} onChange={e => setEditText(e.target.value)} className="h-6 text-xs bg-background text-foreground" autoFocus
+                                onKeyDown={e => { if (e.key === "Enter") editMessage(); if (e.key === "Escape") setEditingId(null); }} />
+                              <button onClick={editMessage}><Check className="w-3 h-3" /></button>
+                              <button onClick={() => setEditingId(null)}><X className="w-3 h-3" /></button>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="whitespace-pre-wrap">{msg.message}</p>
+                              <p className={`text-[9px] mt-0.5 ${isAdminMsg ? "text-muted-foreground" : "text-primary-foreground/60"}`}>
+                                {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                                {msg.edited_at && " · edited"}
+                              </p>
+                            </>
+                          )}
+                          {editingId !== msg.id && (
+                            <div className="absolute -top-3 right-0 hidden group-hover:flex gap-0.5 bg-card border border-border rounded-full px-1 py-0.5 shadow-sm">
+                              <button onClick={() => { setEditingId(msg.id); setEditText(msg.message); }} className="p-0.5 hover:bg-muted rounded"><Edit2 className="w-2.5 h-2.5 text-muted-foreground" /></button>
+                              <button onClick={() => setDeleteTarget({ type: "message", id: msg.id })} className="p-0.5 hover:bg-muted rounded"><Trash2 className="w-2.5 h-2.5 text-destructive" /></button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="flex items-center gap-2 p-3 border-t border-border">
                   <Input

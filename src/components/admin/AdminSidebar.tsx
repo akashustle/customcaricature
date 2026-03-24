@@ -46,6 +46,7 @@ const NAV_SECTIONS = [
       { id: "ai-conversations", icon: Bot, label: "AI Chats", color: "from-violet-500 to-fuchsia-500" },
       { id: "chatbot", icon: Settings, label: "AI Training", color: "from-pink-500 to-rose-500" },
       { id: "live-chat", icon: MessageCircle, label: "Live Chat", color: "from-teal-500 to-cyan-500" },
+      { id: "quick-questions", icon: Brain, label: "Quick Q&A", color: "from-amber-500 to-yellow-500" },
     ],
   },
   {

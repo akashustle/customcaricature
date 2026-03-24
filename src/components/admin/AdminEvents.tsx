@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import EventRevenueWidget from "@/components/EventRevenueWidget";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type EventBooking = {
   id: string; user_id: string | null; client_name: string; client_mobile: string;
@@ -352,51 +354,94 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const monthlyRevenue = fullyPaidEvents.filter(e => new Date(e.created_at) > monthAgo).reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0)
     + advancePaidEvents.filter(e => new Date(e.created_at) > monthAgo).reduce((s, e) => s + (e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount), 0);
 
+  const [drillDown, setDrillDown] = useState<{ title: string; data: EventBooking[] } | null>(null);
+
+  const drillDownSets = [
+    { label: "Total Events", icon: CalendarIcon, value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500", filter: () => true },
+    { label: "Upcoming", icon: TrendingUp, value: upcoming, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500", filter: (e: EventBooking) => e.status === "upcoming" },
+    { label: "Completed", icon: Settings, value: completed, gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500", filter: (e: EventBooking) => e.status === "completed" },
+    { label: "Cancelled", icon: X, value: cancelled, gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500", filter: (e: EventBooking) => e.status === "cancelled" },
+    { label: "Mumbai", icon: MapPin, value: mumbaiEvents, gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500", filter: (e: EventBooking) => e.is_mumbai },
+    { label: "Pan India", icon: MapPin, value: outsideEvents, gradient: "from-cyan-50 to-teal-50", iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500", filter: (e: EventBooking) => !e.is_mumbai },
+  ];
+
+  const revDrillDownSets = [
+    { label: "Total Revenue", icon: TrendingUp, value: formatPrice(totalRevenue), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500", filter: (e: EventBooking) => e.payment_status === "fully_paid" },
+    { label: "Advance Collected", icon: CreditCard, value: formatPrice(totalAdvanceCollected), gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", borderAccent: "border-l-blue-500", filter: (e: EventBooking) => e.payment_status === "confirmed" },
+    { label: "Monthly Revenue", icon: DollarSign, value: formatPrice(monthlyRevenue), gradient: "from-amber-50 to-yellow-50", iconBg: "from-amber-500 to-yellow-500", borderAccent: "border-l-amber-500", filter: (e: EventBooking) => new Date(e.created_at) > monthAgo },
+    { label: "Avg Value", icon: BarChart3, value: formatPrice(avgEventValue), gradient: "from-purple-50 to-violet-50", iconBg: "from-purple-500 to-violet-500", borderAccent: "border-l-purple-500", filter: () => true },
+    { label: "Pending Pay", icon: DollarSign, value: String(pendingPayments), gradient: "from-orange-50 to-red-50", iconBg: "from-orange-500 to-red-500", borderAccent: "border-l-orange-500", filter: (e: EventBooking) => e.payment_status === "pending" },
+    { label: "Negotiated", icon: Users, value: String(negotiatedEvents), gradient: "from-pink-50 to-rose-50", iconBg: "from-pink-500 to-rose-500", borderAccent: "border-l-pink-500", filter: (e: EventBooking) => e.negotiated },
+  ];
+
   return (
     <div className="space-y-4">
+      {/* Drill-Down Popup */}
+      <Dialog open={!!drillDown} onOpenChange={() => setDrillDown(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader><DialogTitle className="font-display">{drillDown?.title} ({drillDown?.data.length})</DialogTitle></DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            {drillDown?.data.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8 font-sans">No events found</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Client</TableHead>
+                    <TableHead className="text-xs">Date</TableHead>
+                    <TableHead className="text-xs">City</TableHead>
+                    <TableHead className="text-xs">Amount</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {drillDown?.data.map(ev => (
+                    <TableRow key={ev.id}>
+                      <TableCell className="text-xs font-medium">{ev.client_name}</TableCell>
+                      <TableCell className="text-xs">{ev.event_date}</TableCell>
+                      <TableCell className="text-xs">{ev.city}</TableCell>
+                      <TableCell className="text-xs font-semibold">{formatPrice(ev.negotiated_total || ev.total_price)}</TableCell>
+                      <TableCell><Badge className="text-[9px]">{ev.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex justify-end mb-2">
         <ExportButton
           data={filtered.map(e => ({
-            "Client": e.client_name,
-            "Email": e.client_email,
-            "Mobile": e.client_mobile,
-            "Event Type": e.event_type,
-            "Date": e.event_date,
+            "Client": e.client_name, "Email": e.client_email, "Mobile": e.client_mobile,
+            "Event Type": e.event_type, "Date": e.event_date,
             "Time": `${e.event_start_time} - ${e.event_end_time}`,
-            "Venue": e.venue_name,
-            "City": e.city,
-            "State": e.state,
+            "Venue": e.venue_name, "City": e.city, "State": e.state,
             "Total Price": e.negotiated_total || e.total_price,
             "Advance": e.negotiated_advance || e.advance_amount,
-            "Payment": e.payment_status,
-            "Status": e.status,
+            "Payment": e.payment_status, "Status": e.status,
           }))}
-          sheetName="Events"
-          fileName="CCC_Events"
+          sheetName="Events" fileName="CCC_Events"
         />
       </div>
-      {/* Stats Widgets - 3D Flashcard Style */}
+      {/* Stats Widgets with interactive drill-down */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {[
-          { icon: Calendar, label: "Total Events", value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500" },
-          { icon: TrendingUp, label: "Upcoming", value: upcoming, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
-          { icon: Settings, label: "Completed", value: completed, gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500" },
-          { icon: X, label: "Cancelled", value: cancelled, gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500" },
-          { icon: MapPin, label: "Mumbai", value: mumbaiEvents, gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500" },
-          { icon: MapPin, label: "Pan India", value: outsideEvents, gradient: "from-cyan-50 to-teal-50", iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500" },
-        ].map((w, i) => (
+        {drillDownSets.map((w, i) => (
           <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
             whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
-            className="cursor-pointer">
+            className="cursor-pointer"
+            onClick={() => setDrillDown({ title: w.label, data: events.filter(w.filter) })}>
             <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
-              <div className="p-3 relative">
+              <div className="p-3 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
                   <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
                     <w.icon className="w-4 h-4 text-white" />
                   </div>
+                  <Eye className="w-3 h-3 text-muted-foreground/40" />
                 </div>
-                <p className="text-lg font-extrabold text-foreground leading-tight truncate">{w.value}</p>
+                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
                 <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
               </div>
             </div>
@@ -404,29 +449,24 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
         ))}
       </div>
 
-      {/* Revenue Analytics - 3D Flashcard Style */}
+      {/* Revenue Analytics with drill-down */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {[
-          { icon: TrendingUp, label: "Total Revenue", value: formatPrice(totalRevenue), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
-          { icon: CreditCard, label: "Advance Collected", value: formatPrice(totalAdvanceCollected), gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", borderAccent: "border-l-blue-500" },
-          { icon: DollarSign, label: "Monthly Revenue", value: formatPrice(monthlyRevenue), gradient: "from-amber-50 to-yellow-50", iconBg: "from-amber-500 to-yellow-500", borderAccent: "border-l-amber-500" },
-          { icon: BarChart3, label: "Avg Event Value", value: formatPrice(avgEventValue), gradient: "from-purple-50 to-violet-50", iconBg: "from-purple-500 to-violet-500", borderAccent: "border-l-purple-500" },
-          { icon: DollarSign, label: "Pending Pay", value: String(pendingPayments), gradient: "from-orange-50 to-red-50", iconBg: "from-orange-500 to-red-500", borderAccent: "border-l-orange-500" },
-          { icon: Users, label: "Negotiated", value: String(negotiatedEvents), gradient: "from-pink-50 to-rose-50", iconBg: "from-pink-500 to-rose-500", borderAccent: "border-l-pink-500" },
-        ].map((w, i) => (
+        {revDrillDownSets.map((w, i) => (
           <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
             whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
-            className="cursor-pointer">
+            className="cursor-pointer"
+            onClick={() => setDrillDown({ title: w.label, data: events.filter(w.filter) })}>
             <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
-              <div className="p-3 relative">
+              <div className="p-3 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
                   <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
                     <w.icon className="w-4 h-4 text-white" />
                   </div>
+                  <Eye className="w-3 h-3 text-muted-foreground/40" />
                 </div>
                 <p className="text-sm md:text-base font-extrabold text-foreground leading-tight truncate">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
               </div>
             </div>
           </motion.div>
