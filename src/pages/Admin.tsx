@@ -1801,11 +1801,54 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="space-y-6 max-w-lg">
+            <div className="space-y-6 max-w-2xl">
+              {/* Admin Profile Section */}
+              <div className="admin-settings-card p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-xl shadow-primary/20">
+                    {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    {editingAdminProfile ? (
+                      <div className="space-y-2">
+                        <Input value={adminEditData.full_name || ""} onChange={e => setAdminEditData({...adminEditData, full_name: e.target.value})} placeholder="Full Name" className="font-sans" />
+                        <Input value={adminEditData.mobile || ""} onChange={e => setAdminEditData({...adminEditData, mobile: e.target.value})} placeholder="Mobile" className="font-sans" />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={saveAdminProfile} className="font-sans rounded-xl"><Save className="w-3 h-3 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingAdminProfile(false)} className="rounded-xl">Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="font-sans font-bold text-lg text-foreground">{adminProfile?.full_name || "Admin"}</h3>
+                        <p className="text-sm text-muted-foreground font-sans">{user?.email}</p>
+                        <Button size="sm" variant="outline" className="mt-2 rounded-xl text-xs font-sans" onClick={() => setEditingAdminProfile(true)}>
+                          <Edit2 className="w-3 h-3 mr-1" />Edit Profile
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {/* Password Change */}
+                <div className="border-t border-border/40 pt-4 mt-4 space-y-3">
+                  <p className="font-sans font-semibold text-sm flex items-center gap-2"><Lock className="w-4 h-4 text-primary" />Change Password</p>
+                  <Input type="password" placeholder="Current Password" value={adminCurrentPassword} onChange={e => setAdminCurrentPassword(e.target.value)} className="font-sans" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input type="password" placeholder="New Password" value={adminNewPassword} onChange={e => setAdminNewPassword(e.target.value)} className="font-sans" />
+                    <Input type="password" placeholder="Confirm" value={adminConfirmPassword} onChange={e => setAdminConfirmPassword(e.target.value)} className="font-sans" />
+                  </div>
+                  <Button size="sm" onClick={changeAdminPassword} disabled={changingAdminPassword} className="rounded-xl font-sans">
+                    <KeyRound className="w-3 h-3 mr-1" />{changingAdminPassword ? "Changing..." : "Update Password"}
+                  </Button>
+                </div>
+              </div>
+
               {/* Site Controls */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Globe className="w-5 h-5 text-primary" />Site Controls</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />Site Controls</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   {/* Global Event Booking Toggle */}
                   <div className="flex items-center justify-between">
                     <div>
