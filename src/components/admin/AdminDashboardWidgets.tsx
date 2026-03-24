@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Package, Calendar, Users, DollarSign, TrendingUp, Clock, Star, Zap, ShoppingBag, MessageCircle, Globe, Activity, ArrowUp, ArrowDown, Eye, X } from "lucide-react";
+import { Package, Calendar, Users, DollarSign, TrendingUp, Clock, Star, Zap, ShoppingBag, MessageCircle, Globe, Activity, ArrowUp, ArrowDown, Eye, Sparkles } from "lucide-react";
 import { formatPrice } from "@/lib/pricing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,6 +19,7 @@ const AdminDashboardWidgets = () => {
   });
   const [drillData, setDrillData] = useState<{ title: string; rows: any[] } | null>(null);
   const [rawData, setRawData] = useState<{ orders: any[]; events: any[]; customers: any[]; enquiries: any[] }>({ orders: [], events: [], customers: [], enquiries: [] });
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const fetchStats = async () => {
     const today = new Date().toISOString().split("T")[0];
@@ -80,49 +81,82 @@ const AdminDashboardWidgets = () => {
     setDrillData({ title, rows });
   };
 
-  const widgets: { icon: any; label: string; value: string | number; color: string; bg: string; glow: string; trend?: { value: string; up: boolean }; drill?: string }[] = [
-    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), color: "text-emerald-600", bg: "from-emerald-400 to-teal-500", glow: "shadow-emerald-200/60", trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
-    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), color: "text-amber-600", bg: "from-amber-400 to-orange-500", glow: "shadow-amber-200/60", drill: "revenue" },
-    { icon: Package, label: "Total Orders", value: stats.totalOrders, color: "text-blue-600", bg: "from-blue-400 to-indigo-500", glow: "shadow-blue-200/60", drill: "orders" },
-    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, color: "text-violet-600", bg: "from-violet-400 to-purple-500", glow: "shadow-violet-200/60", trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
-    { icon: Clock, label: "Pending", value: stats.pendingOrders, color: "text-orange-600", bg: "from-orange-400 to-red-500", glow: "shadow-orange-200/60" },
-    { icon: Star, label: "Delivered", value: stats.completedOrders, color: "text-green-600", bg: "from-green-400 to-emerald-500", glow: "shadow-green-200/60" },
-    { icon: Calendar, label: "Total Events", value: stats.totalEvents, color: "text-indigo-600", bg: "from-indigo-400 to-blue-500", glow: "shadow-indigo-200/60", drill: "events" },
-    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, color: "text-cyan-600", bg: "from-cyan-400 to-teal-500", glow: "shadow-cyan-200/60" },
-    { icon: Users, label: "Customers", value: stats.totalCustomers, color: "text-pink-600", bg: "from-pink-400 to-rose-500", glow: "shadow-pink-200/60", trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
-    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, color: "text-teal-600", bg: "from-teal-400 to-cyan-500", glow: "shadow-teal-200/60", drill: "enquiries" },
-    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, color: "text-purple-600", bg: "from-purple-400 to-violet-500", glow: "shadow-purple-200/60" },
-    { icon: Activity, label: "Sessions", value: stats.activeSessions, color: "text-rose-600", bg: "from-rose-400 to-red-500", glow: "shadow-rose-200/60" },
+  const widgets: { icon: any; label: string; value: string | number; gradient: string; iconBg: string; trend?: { value: string; up: boolean }; drill?: string }[] = [
+    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), gradient: "from-emerald-500 via-teal-500 to-cyan-500", iconBg: "from-emerald-400 to-teal-500", trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
+    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), gradient: "from-amber-500 via-orange-500 to-red-400", iconBg: "from-amber-400 to-orange-500", drill: "revenue" },
+    { icon: Package, label: "Total Orders", value: stats.totalOrders, gradient: "from-blue-500 via-indigo-500 to-violet-500", iconBg: "from-blue-400 to-indigo-500", drill: "orders" },
+    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, gradient: "from-violet-500 via-purple-500 to-fuchsia-500", iconBg: "from-violet-400 to-purple-500", trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
+    { icon: Clock, label: "Pending", value: stats.pendingOrders, gradient: "from-orange-500 via-red-400 to-pink-500", iconBg: "from-orange-400 to-red-500" },
+    { icon: Star, label: "Delivered", value: stats.completedOrders, gradient: "from-green-500 via-emerald-500 to-teal-500", iconBg: "from-green-400 to-emerald-500" },
+    { icon: Calendar, label: "Total Events", value: stats.totalEvents, gradient: "from-indigo-500 via-blue-500 to-sky-500", iconBg: "from-indigo-400 to-blue-500", drill: "events" },
+    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, gradient: "from-cyan-500 via-sky-500 to-blue-400", iconBg: "from-cyan-400 to-teal-500" },
+    { icon: Users, label: "Customers", value: stats.totalCustomers, gradient: "from-pink-500 via-rose-500 to-red-400", iconBg: "from-pink-400 to-rose-500", trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
+    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, gradient: "from-teal-500 via-emerald-400 to-green-400", iconBg: "from-teal-400 to-cyan-500", drill: "enquiries" },
+    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, gradient: "from-purple-500 via-violet-500 to-indigo-500", iconBg: "from-purple-400 to-violet-500" },
+    { icon: Activity, label: "Sessions", value: stats.activeSessions, gradient: "from-rose-500 via-pink-500 to-fuchsia-500", iconBg: "from-rose-400 to-red-500" },
   ];
 
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
         {widgets.map((w, i) => (
-          <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: i * 0.04, duration: 0.4, type: "spring", stiffness: 260, damping: 22 }}
-            whileHover={{ y: -8, scale: 1.05, transition: { duration: 0.2 } }}
+          <motion.div key={w.label}
+            initial={{ opacity: 0, y: 30, scale: 0.85, rotateX: 15 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.5, type: "spring", stiffness: 200, damping: 20 }}
+            whileHover={{ y: -10, scale: 1.06, rotateY: 5, transition: { duration: 0.25 } }}
+            whileTap={{ scale: 0.97 }}
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
             onClick={() => w.drill && openDrill(w.drill)}
-            className={`cursor-pointer group ${w.drill ? "" : "cursor-default"}`}>
-            <div className={`relative overflow-hidden rounded-2xl bg-white border border-white/60 p-3.5 shadow-lg ${w.glow} hover:shadow-xl transition-all duration-300`}
-              style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8))", backdropFilter: "blur(20px)" }}>
-              {/* Decorative gradient blob */}
-              <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-br ${w.bg} opacity-20 blur-xl group-hover:opacity-30 transition-opacity`} />
+            className={`cursor-pointer group ${w.drill ? "" : "cursor-default"}`}
+            style={{ perspective: "600px" }}>
+            <div className="relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300"
+              style={{
+                background: "rgba(255,255,255,0.95)",
+                backdropFilter: "blur(20px)",
+                boxShadow: hoveredIdx === i
+                  ? "0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8) inset, 0 -2px 5px rgba(0,0,0,0.03) inset"
+                  : "0 8px 25px -8px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.6) inset"
+              }}>
+              {/* Animated gradient blob */}
+              <motion.div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} blur-2xl`}
+                animate={hoveredIdx === i ? { opacity: 0.35, scale: 1.3 } : { opacity: 0.15, scale: 1 }}
+                transition={{ duration: 0.3 }} />
+              
+              {/* Shimmer on hover */}
+              {hoveredIdx === i && (
+                <motion.div className="absolute inset-0 pointer-events-none z-10"
+                  style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 55%, transparent 70%)" }}
+                  initial={{ x: "-100%" }} animate={{ x: "200%" }} transition={{ duration: 0.7 }} />
+              )}
+
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-2.5">
-                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${w.bg} flex items-center justify-center shadow-lg`}>
+                  <motion.div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center`}
+                    animate={hoveredIdx === i ? { rotate: [0, -8, 8, 0], scale: 1.1 } : { rotate: 0, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    style={{ boxShadow: "0 6px 20px -4px rgba(0,0,0,0.2)" }}>
                     <w.icon className="w-5 h-5 text-white" />
-                  </div>
+                  </motion.div>
                   {w.trend && (
-                    <div className={`flex items-center gap-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full ${w.trend.up ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.05 + 0.3, type: "spring" }}
+                      className={`flex items-center gap-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full ${w.trend.up ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                       {w.trend.up ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
                       {w.trend.value}
-                    </div>
+                    </motion.div>
                   )}
-                  {w.drill && !w.trend && <Eye className="w-3.5 h-3.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                  {w.drill && !w.trend && (
+                    <motion.div animate={hoveredIdx === i ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }} transition={{ duration: 0.2 }}>
+                      <Eye className="w-3.5 h-3.5 text-gray-400" />
+                    </motion.div>
+                  )}
                 </div>
-                <p className="text-xl font-extrabold text-foreground leading-tight tracking-tight">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold uppercase tracking-wider">{w.label}</p>
+                <motion.p className="text-xl font-extrabold text-gray-900 leading-tight tracking-tight"
+                  animate={hoveredIdx === i ? { scale: 1.05 } : { scale: 1 }} transition={{ duration: 0.2 }}>
+                  {w.value}
+                </motion.p>
+                <p className="text-[10px] text-gray-500 mt-0.5 font-semibold uppercase tracking-wider">{w.label}</p>
               </div>
             </div>
           </motion.div>
@@ -132,10 +166,10 @@ const AdminDashboardWidgets = () => {
       {/* Drilldown */}
       <Dialog open={!!drillData} onOpenChange={() => setDrillData(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader><DialogTitle>{drillData?.title}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-bold">{drillData?.title}</DialogTitle></DialogHeader>
           <ScrollArea className="h-[60vh]">
             <Table>
-              <TableHeader><TableRow>{drillData?.rows[0] && Object.keys(drillData.rows[0]).map(k => <TableHead key={k} className="text-xs">{k}</TableHead>)}</TableRow></TableHeader>
+              <TableHeader><TableRow>{drillData?.rows[0] && Object.keys(drillData.rows[0]).map(k => <TableHead key={k} className="text-xs font-bold">{k}</TableHead>)}</TableRow></TableHeader>
               <TableBody>
                 {(drillData?.rows || []).slice(0, 100).map((row, i) => (
                   <TableRow key={i}>{Object.values(row).map((v: any, j) => <TableCell key={j} className="text-xs">{String(v ?? "—")}</TableCell>)}</TableRow>
