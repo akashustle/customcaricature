@@ -190,6 +190,8 @@ const Register = () => {
   const stepValid = (s: number) => s === 1 ? !!canGoStep2 : s === 2 ? !!canGoStep3 : s === 3 ? !!canGoStep4 : false;
 
   return (
+    <>
+    <SEOHead title="Register" description="Create your Creative Caricature Club account to order caricatures, book events and join workshops." canonical="/register" noindex />
     <div className="min-h-[100dvh] flex items-center justify-center px-4 py-6 pb-24 md:pb-6 relative overflow-hidden bg-background">
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 30% 0%, hsl(var(--primary) / 0.05), transparent 50%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.04), transparent 50%)" }} />
