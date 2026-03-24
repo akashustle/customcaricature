@@ -1802,6 +1802,10 @@ const Admin = () => {
             <AdminCalendar />
           </TabsContent>
 
+          <TabsContent value="website-analytics">
+            <AdminWebsiteAnalytics />
+          </TabsContent>
+
           <TabsContent value="maintenance">
             <AdminMaintenance />
           </TabsContent>
