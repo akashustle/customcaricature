@@ -581,27 +581,27 @@ const WorkshopAdmin = () => {
 
   // Theme
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-background";
-  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-card/80 border-border/60";
+  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-slate-50 via-white to-violet-50/30";
+  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-white/90 border-violet-100/60";
   const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
   const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
-  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-card/90 border-border/60";
-  const activeTabClass = "bg-primary text-primary-foreground shadow-lg font-bold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-secondary/60";
-  const btnPrimary = "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md font-bold";
-  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-background border-border text-foreground font-medium placeholder:text-muted-foreground";
+  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-violet-100/60";
+  const activeTabClass = "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-300/30 font-bold";
+  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-violet-50";
+  const btnPrimary = "bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-md font-bold";
+  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-white border-violet-100 text-foreground font-medium placeholder:text-muted-foreground rounded-xl";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm transition-all ${className}`}>
+      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-lg shadow-violet-100/20 hover:shadow-xl transition-all ${className}`}>
       {children}
     </motion.div>
   );
 
   const RefreshButton = () => (
     <Button variant="outline" size="sm" onClick={fetchAll} disabled={refreshing}
-      className={`rounded-xl ${dm ? "border-white/20 text-white/60 hover:bg-white/5" : "border-[#d4c4b4] text-[#6a5a4a]"}`}>
+      className={`rounded-xl ${dm ? "border-white/20 text-white/60 hover:bg-white/5" : "border-violet-200 text-violet-600 hover:bg-violet-50"}`}>
       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${refreshing ? "animate-spin" : ""}`} />
       Refresh
     </Button>
