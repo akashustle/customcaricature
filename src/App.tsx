@@ -13,6 +13,7 @@ import AppUpdateBanner from "./components/AppUpdateBanner";
 import PermissionGate from "./components/PermissionGate";
 import AppOnboarding from "./components/AppOnboarding";
 import LiveChatWrapper from "./components/LiveChatWrapper";
+import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
