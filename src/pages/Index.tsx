@@ -130,6 +130,12 @@ const Index = () => {
 
   const hero = content.homepage_hero || {};
   const sections = content.homepage_sections || {};
+  const sectionOrder: string[] = sections._order || [
+    "instant_quote", "social_proof", "video", "enquiry_funnel", "portfolio_gallery",
+    "what_you_get", "how_it_works", "scroll_events", "services", "use_cases",
+    "styles", "why_us", "reviews", "trusted_brands", "event_gallery",
+    "caricature_gallery", "before_after", "smart_help"
+  ];
   const isSectionVisible = (id: string) => sections[id]?.visible !== false;
   const getSectionMessage = (id: string) => sections[id]?.message || "";
   const handleOrderClick = () => navigate(user ? "/order" : "/login");
