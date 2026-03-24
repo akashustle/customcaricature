@@ -206,9 +206,13 @@ const AdminColleagues = () => {
               {/* Chat header */}
               <CardHeader className="py-3 px-4 border-b flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary/60" />
-                  </div>
+                  {adminAvatars[selectedColleague] ? (
+                    <img src={adminAvatars[selectedColleague]} alt={selectedColleagueInfo.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary/60">{selectedColleagueInfo.name.charAt(0)}</span>
+                    </div>
+                  )}
                   <div>
                     <p className="font-bold text-sm">{selectedColleagueInfo.name}</p>
                     <p className="text-[10px] text-indigo-600">{selectedColleagueInfo.designation}</p>
