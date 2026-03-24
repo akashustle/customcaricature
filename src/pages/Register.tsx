@@ -21,13 +21,16 @@ const STEPS = [
   { id: 4, title: "Security", desc: "Secure your account", emoji: "🔒" },
 ];
 
+const REGISTER_STORAGE_KEY = "ccc_register_form_draft";
+
 const Register = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const savedData = (() => { try { return JSON.parse(localStorage.getItem(REGISTER_STORAGE_KEY) || "{}"); } catch { return {}; } })();
+  const [step, setStep] = useState(savedData._step || 1);
   const [form, setForm] = useState({
-    fullName: "", mobile: "", email: "", instagramId: "",
-    address: "", city: "", state: "", district: "", pincode: "",
-    password: "", confirmPassword: "", age: "", gender: "",
+    fullName: savedData.fullName || "", mobile: savedData.mobile || "", email: savedData.email || "", instagramId: savedData.instagramId || "",
+    address: savedData.address || "", city: savedData.city || "", state: savedData.state || "", district: savedData.district || "", pincode: savedData.pincode || "",
+    password: "", confirmPassword: "", age: savedData.age || "", gender: savedData.gender || "",
   });
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
