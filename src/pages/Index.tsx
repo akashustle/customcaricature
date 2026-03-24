@@ -8,6 +8,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
 import { useState, useCallback, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
+import { toast } from "@/hooks/use-toast";
 import JsonLd from "@/components/JsonLd";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
@@ -676,7 +677,19 @@ const Index = () => {
           </div>
           <div className="border-t border-border/30 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              {(settings as any).pwa_install_link?.enabled && (
+                <button 
+                  onClick={() => {
+                    const deferredPrompt = (window as any).__pwaInstallPrompt;
+                    if (deferredPrompt) { deferredPrompt.prompt(); }
+                    else { toast({ title: "Install App", description: "Use your browser menu → 'Add to Home Screen' to install this app" }); }
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:text-primary/80 transition-colors"
+                >
+                  📲 Install App (PWA)
+                </button>
+              )}
               {settings.app_download_link?.enabled === true && (
                 <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:text-primary/80 transition-colors">
                   📱 Download Android App

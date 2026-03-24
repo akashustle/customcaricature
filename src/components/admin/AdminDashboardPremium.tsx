@@ -227,19 +227,19 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       {/* ROW 1: Top 4 KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Revenue" value={formatPrice(stats.totalRevenue)} change={revenueGrowth}
-          icon={<DollarSign className="w-5 h-5" />} gradient="from-indigo-600 to-blue-500"
+          icon={<DollarSign className="w-5 h-5" />} gradient="from-indigo-600 to-blue-500" index={0}
           onClick={() => setDrillDown({ metric: "revenue", title: "Total Revenue" })}
           sparkData={monthlyData.map(d => d.total)} sparkColor="#818CF8" />
         <KPICard title="Total Orders" value={stats.totalOrders.toString()} sub={`${stats.todayOrders} today`}
-          icon={<Package className="w-5 h-5" />} gradient="from-cyan-500 to-teal-400"
+          icon={<Package className="w-5 h-5" />} gradient="from-cyan-500 to-teal-400" index={1}
           onClick={() => setDrillDown({ metric: "orders", title: "Orders" })}
           sparkData={weeklyData.map(d => d.orders)} sparkColor="#22D3EE" />
         <KPICard title="Total Events" value={stats.totalEvents.toString()} sub={`${stats.upcomingEvents} upcoming`}
-          icon={<Calendar className="w-5 h-5" />} gradient="from-violet-600 to-purple-500"
+          icon={<Calendar className="w-5 h-5" />} gradient="from-violet-600 to-purple-500" index={2}
           onClick={() => setDrillDown({ metric: "events", title: "Events" })}
           sparkData={weeklyData.map(d => d.events)} sparkColor="#A78BFA" />
         <KPICard title="Pending Revenue" value={formatPrice(stats.pendingRevenue)} sub={`${stats.pendingPayments} pending`}
-          icon={<Clock className="w-5 h-5" />} gradient="from-amber-500 to-orange-400"
+          icon={<Clock className="w-5 h-5" />} gradient="from-amber-500 to-orange-400" index={3}
           onClick={() => setDrillDown({ metric: "pending", title: "Pending Revenue" })} sparkColor="#FBBF24" />
       </div>
 
@@ -562,23 +562,37 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
 
 /* ===== Admin Card — Clean 3D White with dark mode support ===== */
 const AdminCard = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
-  <Card className={`bg-card border-border shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] transition-shadow ${className || ""}`} onClick={onClick}>
-    <CardContent className="p-5">{children}</CardContent>
-  </Card>
+  <motion.div whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+    <Card className={`bg-card border-border/50 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_16px_-4px_rgba(0,0,0,0.4)] dark:border-border/30 dark:bg-card/80 hover:shadow-[0_8px_28px_-4px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_8px_28px_-4px_rgba(0,0,0,0.5)] transition-all duration-300 ${className || ""}`} onClick={onClick}>
+      <CardContent className="p-5">{children}</CardContent>
+    </Card>
+  </motion.div>
 );
 
-/* ===== KPI Card ===== */
-const KPICard = ({ title, value, change, sub, icon, gradient, onClick, sparkData, sparkColor }: {
+/* ===== KPI Card with staggered animations ===== */
+const KPICard = ({ title, value, change, sub, icon, gradient, onClick, sparkData, sparkColor, index }: {
   title: string; value: string; change?: number; sub?: string; icon: React.ReactNode;
-  gradient: string; onClick?: () => void; sparkData?: number[]; sparkColor?: string;
+  gradient: string; onClick?: () => void; sparkData?: number[]; sparkColor?: string; index?: number;
 }) => (
-  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -3 }}>
-    <Card className="bg-card border-border shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.3)] cursor-pointer hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.4)] transition-all" onClick={onClick}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}>
+  <motion.div 
+    initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+    animate={{ opacity: 1, y: 0, scale: 1 }} 
+    transition={{ delay: (index || 0) * 0.08, type: "spring", stiffness: 260, damping: 20 }}
+    whileHover={{ y: -4, scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <Card className="bg-card border-border/50 dark:border-border/30 dark:bg-card/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_16px_-4px_rgba(0,0,0,0.4)] cursor-pointer hover:shadow-[0_8px_28px_-6px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_8px_28px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 overflow-hidden group" onClick={onClick}>
+      <CardContent className="p-4 relative">
+        {/* Subtle gradient overlay on hover */}
+        <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity bg-gradient-to-br ${gradient}`} />
+        <div className="flex items-center justify-between mb-3 relative">
+          <motion.div 
+            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-lg`}
+            whileHover={{ rotate: 6, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
             {icon}
-          </div>
+          </motion.div>
           {change !== undefined && (
             <Badge className={`text-[10px] border-0 font-medium font-sans ${change >= 0 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-600 dark:text-red-400"}`}>
               {change >= 0 ? <ArrowUp className="w-3 h-3 mr-0.5" /> : <ArrowDown className="w-3 h-3 mr-0.5" />}

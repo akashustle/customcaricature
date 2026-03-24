@@ -2113,6 +2113,30 @@ const Admin = () => {
                     </div>
                     <Switch checked={settings.app_download_link?.enabled !== false} onCheckedChange={async (checked) => { await updateSetting("app_download_link", { enabled: checked }); toast({ title: checked ? "App download link visible" : "App download link hidden" }); }} />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show PWA Install Link</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show "Install App" link in website footer for PWA installation</p>
+                    </div>
+                    <Switch checked={(settings as any).pwa_install_link?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("pwa_install_link", { enabled: checked }); toast({ title: checked ? "PWA install link visible" : "PWA install link hidden" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Default Website Theme</p>
+                      <p className="text-xs text-muted-foreground font-sans">Set default theme for all visitors (light or dark)</p>
+                    </div>
+                    <Select
+                      value={(settings as any).default_theme?.mode || "light"}
+                      onValueChange={async (val) => { await updateSetting("default_theme", { mode: val }); toast({ title: `Default theme set to ${val}` }); }}
+                    >
+                      <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">☀️ Light</SelectItem>
+                        <SelectItem value="dark">🌙 Dark</SelectItem>
+                        <SelectItem value="system">💻 System</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardContent>
               </div>
 

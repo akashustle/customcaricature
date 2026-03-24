@@ -18,7 +18,7 @@ const FloatingButtons = () => {
     <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[140px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
       {/* Theme Toggle */}
       <button
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        onClick={() => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("theme-user-override", "true"); }}
         className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-card border border-border text-foreground flex items-center justify-center hover:bg-accent/10 transition-all shadow-lg"
         aria-label="Toggle theme"
       >

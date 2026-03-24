@@ -13,6 +13,8 @@ import AppUpdateBanner from "./components/AppUpdateBanner";
 import PermissionGate from "./components/PermissionGate";
 import AppOnboarding from "./components/AppOnboarding";
 import LiveChatWrapper from "./components/LiveChatWrapper";
+import OfflineDetector from "./components/OfflineDetector";
+import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
@@ -136,10 +138,12 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
+        <DefaultThemeApplier />
         <OneSignalInit />
         <WebPushInit />
+        <OfflineDetector />
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
