@@ -175,11 +175,15 @@ const AdminHomepageControl = () => {
               <p className="text-xs text-muted-foreground mb-3">Toggle homepage sections on/off. Add a message to show when hidden.</p>
               {SECTION_LIST.map((s, i) => (
                 <div key={s.id} className="flex items-center justify-between py-2 px-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{i + 1}</span>
-                      <span className="text-sm font-semibold text-foreground">{s.label}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex flex-col">
+                      <button onClick={() => moveSection(i, "up")} disabled={i === 0} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => moveSection(i, "down")} disabled={i === SECTION_LIST.length - 1} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
                     </div>
+                    <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{i + 1}</span>
+                  </div>
+                  <div className="flex-1 min-w-0 ml-2">
+                    <span className="text-sm font-semibold text-foreground">{s.label}</span>
                     <p className="text-[10px] text-muted-foreground mt-0.5">ID: <code className="text-primary">{s.id}</code> — {s.hint}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -187,7 +191,7 @@ const AdminHomepageControl = () => {
                       placeholder="Hidden message (optional)"
                       value={homepageSections[s.id]?.message || ""}
                       onChange={e => setSectionMessage(s.id, e.target.value)}
-                      className="w-48 h-8 text-xs"
+                      className="w-48 h-8 text-xs hidden sm:block"
                     />
                     <Switch
                       checked={homepageSections[s.id]?.visible !== false}
