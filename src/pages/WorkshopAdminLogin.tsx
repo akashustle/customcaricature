@@ -35,6 +35,7 @@ const WorkshopAdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<"password" | "secret_code" | "otp">("password");
+  const [failedAttempts, setFailedAttempts] = useState(0);
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
