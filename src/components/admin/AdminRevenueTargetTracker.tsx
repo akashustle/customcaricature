@@ -66,6 +66,10 @@ const AdminRevenueTargetTracker = () => {
   };
 
   const now = new Date();
+  const MONTHLY_TARGET = monthlyTarget;
+  const DAILY_TARGET = Math.round(MONTHLY_TARGET / 30);
+  const WEEKLY_TARGET = Math.round(MONTHLY_TARGET / 4.3);
+
   const todayStr = now.toISOString().slice(0, 10);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay());
