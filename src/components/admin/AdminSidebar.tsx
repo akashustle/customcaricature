@@ -138,6 +138,13 @@ const NAV_SECTIONS = [
       { id: "settings", icon: Settings, label: "Settings", color: "from-slate-500 to-gray-500" },
     ],
   },
+  {
+    label: "Other Panels",
+    items: [
+      { id: "link-workshop-admin", icon: CalendarDays, label: "Workshop Admin", color: "from-violet-500 to-fuchsia-500" },
+      { id: "link-shop-admin", icon: Package, label: "Shop Admin", color: "from-emerald-500 to-teal-500" },
+    ],
+  },
 ];
 
 const SHOP_RELATED_TABS = ["shop", "shop-orders", "shop-products", "shop-categories", "shop-settings"];
@@ -199,10 +206,15 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             )}
             {section.items.map((item) => {
               const isActive = activeTab === item.id;
+              const handleClick = () => {
+                if (item.id === "link-workshop-admin") { navigate("/cccworkshop2006"); return; }
+                if (item.id === "link-shop-admin") { navigate("/CFCAdmin936"); return; }
+                onTabChange(item.id);
+              };
               return (
                 <motion.button
                   key={item.id}
-                  onClick={() => onTabChange(item.id)}
+                  onClick={handleClick}
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.97 }}
                   className={cn(
@@ -251,26 +263,6 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             <Home className="w-3.5 h-3.5" />
           </div>
           {!collapsed && <span>Website</span>}
-        </button>
-        <button
-          onClick={() => navigate("/cccworkshop2006")}
-          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
-          title={collapsed ? "Workshop Admin" : undefined}
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-            <CalendarDays className="w-3.5 h-3.5 text-white" />
-          </div>
-          {!collapsed && <span>Workshop Admin</span>}
-        </button>
-        <button
-          onClick={() => navigate("/CFCAdmin936")}
-          className="w-full flex items-center gap-2.5 px-2.5 py-[8px] rounded-xl text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-sans"
-          title={collapsed ? "Shop Admin" : undefined}
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-            <Package className="w-3.5 h-3.5 text-white" />
-          </div>
-          {!collapsed && <span>Shop Admin</span>}
         </button>
         <button
           onClick={async () => { await supabase.auth.signOut(); navigate("/customcad75"); }}

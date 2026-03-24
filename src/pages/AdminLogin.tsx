@@ -17,14 +17,15 @@ interface AdminInfo {
   email: string;
   mobile: string;
   designation: string;
+  emoji: string;
 }
 
 const ADMIN_LIST: AdminInfo[] = [
-  { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer" },
-  { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271", designation: "Chief Operating Officer (COO)" },
-  { name: "Ritesh", email: "ritesh@gmail.com", mobile: "9967047351", designation: "Founder & Chief Executive Officer (CEO)" },
-  { name: "Kaushik", email: "kaushik@gmail.com", mobile: "9833067656", designation: "Senior Operations & Client Relations Manager" },
-  { name: "Manashvi", email: "manashvi@gmail.com", mobile: "8433843725", designation: "Creative Director & Content Lead" },
+  { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer", emoji: "🧠" },
+  { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271", designation: "Chief Operating Officer (COO)", emoji: "⚙️" },
+  { name: "Ritesh", email: "ritesh@gmail.com", mobile: "9967047351", designation: "Founder & Chief Executive Officer (CEO)", emoji: "👑" },
+  { name: "Kaushik", email: "kaushik@gmail.com", mobile: "9833067656", designation: "Senior Operations & Client Relations Manager", emoji: "🤝" },
+  { name: "Manashvi", email: "manashvi@gmail.com", mobile: "8433843725", designation: "Creative Director & Content Lead", emoji: "🎨" },
 ];
 
 const maskEmail = (email: string) => {
@@ -152,35 +153,44 @@ const AdminLogin = () => {
     if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
       setLoading(true);
       try {
-        const { error } = await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } });
+        // Generate a 4-digit OTP and store it via edge function
+        const generatedOtp = String(Math.floor(1000 + Math.random() * 9000));
+        const { data, error } = await supabase.functions.invoke("send-otp-email", {
+          body: { to: "akashxbhavans@gmail.com", otp: generatedOtp, admin_email: selectedAdmin.email },
+        });
         if (error) throw error;
         setOtpSent(true); startResendCooldown();
-        toast({ title: "OTP Sent! 📧", description: "Check akashxbhavans@gmail.com" });
+        toast({ title: "OTP Generated! 🔑", description: "Check with main admin for the 4-digit OTP code" });
       } catch (err: any) { toast({ title: "Failed", description: err?.message, variant: "destructive" }); }
       finally { setLoading(false); }
       return;
     }
-    if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
+    if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 4) { toast({ title: "Enter 4-digit OTP", variant: "destructive" }); return; }
 
     setLoading(true);
     try {
       if (authMethod === "otp" || failedAttempts >= 3) {
-        const { error } = await supabase.auth.verifyOtp({ email: "akashxbhavans@gmail.com", token: otpCode, type: "email" });
-        if (error) throw error;
-        if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
-          await supabase.auth.signOut();
-          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", {
-            body: { email: selectedAdmin.email, secret_code: adminMasterSecret.slice(0, 4) },
-          });
-          if (scErr || !data?.success) throw new Error("Could not sign in as " + selectedAdmin.name);
-          const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
-          if (vErr) throw vErr;
+        // Verify OTP against admin_login_tracking table
+        const { data: trackData } = await supabase.from("admin_login_tracking" as any)
+          .select("otp_code, otp_expires_at")
+          .eq("user_id", (await supabase.from("profiles").select("user_id").eq("email", selectedAdmin.email).maybeSingle()).data?.user_id || "")
+          .maybeSingle() as any;
+        
+        if (!trackData || trackData.otp_code !== otpCode || new Date(trackData.otp_expires_at) < new Date()) {
+          throw new Error("Invalid or expired OTP");
         }
+        // OTP verified, now login via secret code mechanism
+        const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
+          body: { email: selectedAdmin.email, secret_code: adminMasterSecret },
+        });
+        if (error || !data?.success) throw new Error(data?.error || "Login failed after OTP verification");
+        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
+        if (vErr) throw vErr;
       } else if (authMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) },
+          body: { email: selectedAdmin.email, secret_code: secretCode },
         });
-        if (error || !data?.success) throw new Error("Secret code login failed");
+        if (error || !data?.success) throw new Error(data?.error || "Secret code login failed");
         const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
         if (vErr) throw vErr;
       } else {
@@ -381,12 +391,21 @@ const AdminLogin = () => {
                           <SelectItem key={admin.email} value={admin.email}
                             className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
                             style={{ color: BRAND.primary }}>
-                            <div className="flex flex-col gap-0.5 py-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                            <div className="flex items-center gap-3 py-1">
+                              {adminAvatars[admin.email] ? (
+                                <img src={adminAvatars[admin.email]} alt={admin.name} className="w-8 h-8 rounded-full object-cover border-2" style={{ borderColor: BRAND.light }} />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>
+                                  {admin.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
+                                  <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                                </div>
+                                <span className="text-[10px] font-semibold flex items-center gap-1" style={{ color: BRAND.accent }}>{admin.emoji} {admin.designation}</span>
                               </div>
-                              <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -537,13 +556,18 @@ const AdminLogin = () => {
                             </div>
                           ) : (
                             <>
-                              <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Enter 6-digit OTP</Label>
-                              <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
-                                placeholder="• • • • • •" maxLength={6}
+                              <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Enter 4-digit OTP</Label>
+                              <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 4) setOtpCode(v); }}
+                                placeholder="• • • •" maxLength={4}
                                 className="h-16 text-center text-3xl tracking-[0.5em] font-black rounded-xl border"
                                 style={{ background: BRAND.cream, borderColor: BRAND.light }} />
                               <button type="button" disabled={resendCooldown > 0}
-                                onClick={async () => { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); }}
+                                onClick={async () => {
+                                  const newOtp = String(Math.floor(1000 + Math.random() * 9000));
+                                  await supabase.functions.invoke("send-otp-email", { body: { to: "akashxbhavans@gmail.com", otp: newOtp, admin_email: selectedAdmin?.email } });
+                                  startResendCooldown();
+                                  toast({ title: "New OTP generated" });
+                                }}
                                 className="text-sm hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto font-semibold"
                                 style={{ color: BRAND.accent }}>
                                 <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
