@@ -8,10 +8,11 @@ import {
   Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface AdminSidebarProps {
   activeTab: string;
