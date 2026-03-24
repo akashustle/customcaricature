@@ -81,9 +81,19 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
     };
     check();
 
-    // Re-check every 10s for auto-disable
-    const iv = setInterval(check, 10000);
-    return () => clearInterval(iv);
+    // Re-check every 60s for auto-disable (reduced from 10s for performance)
+    const iv = setInterval(check, 60000);
+
+    // Also subscribe to realtime changes for instant updates
+    const channel = supabase
+      .channel(`maintenance-${pageId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "maintenance_settings" }, () => check())
+      .subscribe();
+
+    return () => {
+      clearInterval(iv);
+      supabase.removeChannel(channel);
+    };
   }, [pageId, user]);
 
   return { ...state, loading };
