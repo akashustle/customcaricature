@@ -129,6 +129,9 @@ const Index = () => {
   const maintenance = useMaintenanceCheck("home");
 
   const hero = content.homepage_hero || {};
+  const sections = content.homepage_sections || {};
+  const isSectionVisible = (id: string) => sections[id]?.visible !== false;
+  const getSectionMessage = (id: string) => sections[id]?.message || "";
   const handleOrderClick = () => navigate(user ? "/order" : "/login");
   const handleEventClick = () => {
     if (!user) { navigate("/login"); return; }
