@@ -101,7 +101,7 @@ const AdminColleagues = () => {
 
   const deleteMessage = async (msgId: string) => {
     const updated = messages.filter(m => m.id !== msgId);
-    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: updated } });
+    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: updated } } as any);
     setMessages(updated);
     toast({ title: "Message deleted" });
   };
