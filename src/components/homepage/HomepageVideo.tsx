@@ -8,15 +8,11 @@ const HomepageVideo = ({ config }: { config: any }) => {
   const youtubeUrl = config?.youtube_url;
   const customUrl = config?.custom_video_url;
 
-  if (customUrl) {
-    return <CustomVideoPlayer url={customUrl} />;
-  }
-
-  if (youtubeUrl) {
-    return <YouTubeMinimalPlayer url={youtubeUrl} />;
-  }
-
-  return null;
+  return (
+    <>
+      {customUrl ? <CustomVideoPlayer url={customUrl} /> : youtubeUrl ? <YouTubeMinimalPlayer url={youtubeUrl} /> : null}
+    </>
+  );
 };
 
 const VideoHeader = () => (
