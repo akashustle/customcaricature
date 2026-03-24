@@ -1,21 +1,19 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause } from "lucide-react";
-import defaultThumbnail from "@/assets/video-thumbnail.jpeg";
+import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
 const HomepageVideo = ({ config }: { config: any }) => {
   if (!config?.enabled) return null;
 
   const youtubeUrl = config?.youtube_url;
   const customUrl = config?.custom_video_url;
-  const thumbnailUrl = config?.thumbnail_url || defaultThumbnail;
 
   if (customUrl) {
-    return <CustomVideoPlayer url={customUrl} thumbnailUrl={thumbnailUrl} />;
+    return <CustomVideoPlayer url={customUrl} />;
   }
 
   if (youtubeUrl) {
-    return <YouTubeMinimalPlayer url={youtubeUrl} thumbnailUrl={thumbnailUrl} />;
+    return <YouTubeMinimalPlayer url={youtubeUrl} />;
   }
 
   return null;
@@ -33,35 +31,31 @@ const VideoHeader = () => (
   </motion.div>
 );
 
-const ThumbnailOverlay = ({ thumbnailUrl, playing }: { thumbnailUrl: string; playing: boolean }) => (
-  <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
-    <img src={thumbnailUrl} alt="CCC event video thumbnail" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-    <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-background/10 to-background/70" />
-    <div className="relative flex flex-col items-center gap-4 px-6 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 shadow-lg ring-4 ring-background/40">
-        {playing ? <Pause className="h-7 w-7 text-primary-foreground" /> : <Play className="ml-1 h-7 w-7 text-primary-foreground" />}
-      </div>
-      <div>
-        <p className="text-lg font-semibold text-primary-foreground">Play to view one of our events</p>
-        <p className="text-sm text-primary-foreground/80">Creative Caricature Club live moments</p>
-      </div>
-    </div>
-  </div>
-);
-
-const CustomVideoPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl: string }) => {
+const CustomVideoPlayer = ({ url }: { url: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, []);
 
   const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setPlaying(false);
-    }
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
   };
 
   return (
@@ -80,18 +74,31 @@ const CustomVideoPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl: s
             src={url}
             className="w-full aspect-video object-cover"
             playsInline
+            autoPlay
+            loop
+            muted
             preload="metadata"
-            poster={thumbnailUrl}
-            onEnded={() => setPlaying(false)}
           />
-          <ThumbnailOverlay thumbnailUrl={thumbnailUrl} playing={playing} />
+          {/* Controls overlay */}
+          <div className={`absolute inset-0 flex items-center justify-center bg-foreground/10 transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg">
+              {playing ? <Pause className="h-6 w-6 text-foreground" /> : <Play className="ml-0.5 h-6 w-6 text-foreground" />}
+            </div>
+          </div>
+          {/* Mute button */}
+          <button
+            onClick={toggleMute}
+            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-md z-10 hover:bg-background transition-colors"
+          >
+            {muted ? <VolumeX className="h-4 w-4 text-foreground" /> : <Volume2 className="h-4 w-4 text-foreground" />}
+          </button>
         </motion.div>
       </div>
     </section>
   );
 };
 
-const YouTubeMinimalPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl: string }) => {
+const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
   const [started, setStarted] = useState(false);
 
   const getYouTubeId = (u: string) => {
@@ -115,14 +122,16 @@ const YouTubeMinimalPlayer = ({ url, thumbnailUrl }: { url: string; thumbnailUrl
           <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
             {!started ? (
               <div
-                className="absolute inset-0 cursor-pointer group"
+                className="absolute inset-0 cursor-pointer group bg-muted flex items-center justify-center"
                 onClick={() => setStarted(true)}
               >
-                <ThumbnailOverlay thumbnailUrl={thumbnailUrl} playing={false} />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 shadow-lg">
+                  <Play className="ml-1 h-7 w-7 text-primary-foreground" />
+                </div>
               </div>
             ) : (
               <iframe
-                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&cc_load_policy=0`}
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&cc_load_policy=0&loop=1&playlist=${videoId}`}
                 title="Experience Video"
                 className="absolute inset-0 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"

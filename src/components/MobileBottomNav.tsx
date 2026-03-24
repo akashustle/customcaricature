@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Search, User, ShoppingBag, Compass } from "lucide-react";
+import { Home, Search, User, ShoppingBag, Compass, GraduationCap, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -12,15 +12,18 @@ const MobileBottomNav = () => {
   const isMobile = useIsMobile();
   const { settings } = useSiteSettings();
 
-  const shopNavVisible = settings.shop_nav_visible?.enabled !== false;
+  const shopVisible = settings.shop_nav_visible?.enabled === true;
+  const workshopVisible = settings.show_workshop?.enabled === true;
+  const supportVisible = settings.support_button_visible?.enabled === true;
 
-  const hiddenPaths = ["/dashboard", "/admin", "/customcad75", "/order", "/artist-dashboard", "/artistlogin", "/book-event", "/shop-admin", "/CFCAdmin936", "/workshop-admin", "/workshop/dashboard", "/cccworkshop2006", "/workshop-admin-panel", "/workshop/", "/live-chat"];
-  if (location.pathname.startsWith("/workshop/")) return null;
-  if (!isMobile || hiddenPaths.some(p => location.pathname.startsWith(p))) return null;
+  // Hide on admin paths only
+  const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
+  if (!isMobile || adminPaths.some(p => location.pathname.startsWith(p))) return null;
 
-  const items = [
+  const items: { icon: any; label: string; path: string }[] = [
     { icon: Home, label: "Home", path: "/" },
-    ...(shopNavVisible ? [{ icon: ShoppingBag, label: "Shop", path: "/shop" }] : []),
+    ...(shopVisible ? [{ icon: ShoppingBag, label: "Shop", path: "/shop" }] : []),
+    ...(workshopVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop" }] : []),
     { icon: Compass, label: "Explore", path: "/about" },
     { icon: Search, label: "Track", path: "/track-order" },
     ...(user
@@ -28,11 +31,14 @@ const MobileBottomNav = () => {
       : [{ icon: User, label: "Login", path: "/login" }]),
   ];
 
+  // Limit to 5 items max for clean layout
+  const visibleItems = items.slice(0, 5);
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
       <div className="glass-crystal" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
         <div className="flex items-stretch justify-evenly px-2 max-w-lg mx-auto">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const active = location.pathname === item.path;
             return (
               <motion.button
