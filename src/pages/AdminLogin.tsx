@@ -399,8 +399,9 @@ const AdminLogin = () => {
                         email: email.trim().toLowerCase(), password,
                       });
                       if (error) throw error;
-                      sessionStorage.removeItem("admin_entered_name");
-                      toast({ title: "Session limit extended! Welcome back! 🔓" });
+                      const su = (await supabase.auth.getUser()).data.user;
+                      if (su) await setAdminSessionName(su.id);
+                      toast({ title: `Session limit extended! Welcome back, ${adminGreetName || "admin"}! 🔓` });
                       navigate("/admin-panel", { replace: true });
                     } catch (err: any) {
                       toast({ title: "Login Failed", description: err?.message, variant: "destructive" });
