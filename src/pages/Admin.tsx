@@ -102,6 +102,7 @@ import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
 import AdminCalendar from "@/components/admin/AdminCalendar";
 import AdminWebsiteAnalytics from "@/components/admin/AdminWebsiteAnalytics";
 import AdminQuickQuestions from "@/components/admin/AdminQuickQuestions";
+import AdminColleagues from "@/components/admin/AdminColleagues";
 
 const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
   const [unreadCount, setUnreadCount] = useState(0);
