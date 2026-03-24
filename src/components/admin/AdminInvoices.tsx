@@ -250,6 +250,36 @@ const AdminInvoices = () => {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Widget Drill-Down Dialog */}
+      <Dialog open={!!widgetDrill} onOpenChange={() => setWidgetDrill(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader><DialogTitle className="font-display">{widgetDrill?.title} Details</DialogTitle></DialogHeader>
+          <div className="overflow-auto max-h-[60vh]">
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead className="font-sans text-xs">Invoice #</TableHead>
+                <TableHead className="font-sans text-xs">Customer</TableHead>
+                <TableHead className="font-sans text-xs">Amount</TableHead>
+                <TableHead className="font-sans text-xs">Status</TableHead>
+                <TableHead className="font-sans text-xs">Date</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {widgetDrill?.data.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">No records</TableCell></TableRow>
+                ) : widgetDrill?.data.map(inv => (
+                  <TableRow key={inv.id}>
+                    <TableCell className="font-mono text-xs">{inv.invoice_number}</TableCell>
+                    <TableCell className="font-sans text-sm">{inv.customer_name}</TableCell>
+                    <TableCell className="font-sans font-medium">{formatPrice(inv.total_amount)}</TableCell>
+                    <TableCell><Badge className={`${STATUS_COLORS[inv.status] || ""} capitalize text-[10px]`}>{inv.status}</Badge></TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <SecureDeleteConfirm open={!!deleteId} onClose={() => setDeleteId(null)} onConfirm={handleDelete} title="Delete Invoice" description="This invoice will be permanently deleted." />
     </div>
