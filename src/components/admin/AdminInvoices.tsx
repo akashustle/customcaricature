@@ -108,6 +108,8 @@ const AdminInvoices = () => {
   const totalRevenue = invoices.filter(i => i.status === "paid").reduce((s, i) => s + i.total_amount, 0);
   const draftCount = invoices.filter(i => i.status === "draft").length;
 
+  const [widgetDrill, setWidgetDrill] = useState<{ title: string; data: Invoice[] } | null>(null);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -121,18 +123,30 @@ const AdminInvoices = () => {
         </div>
       </div>
 
+      {/* 3D Widgets with drill-down */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Invoices", value: invoices.length, color: "text-blue-600" },
-          { label: "Paid", value: invoices.filter(i => i.status === "paid").length, color: "text-emerald-600" },
-          { label: "Draft", value: draftCount, color: "text-amber-600" },
-          { label: "Revenue", value: formatPrice(totalRevenue), color: "text-primary" },
+          { label: "Total Invoices", value: invoices.length, gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", border: "border-l-blue-500", icon: FileText, data: invoices },
+          { label: "Paid", value: invoices.filter(i => i.status === "paid").length, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", border: "border-l-emerald-500", icon: DollarSign, data: invoices.filter(i => i.status === "paid") },
+          { label: "Draft", value: draftCount, gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", border: "border-l-amber-500", icon: Edit2, data: invoices.filter(i => i.status === "draft") },
+          { label: "Revenue", value: formatPrice(totalRevenue), gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", border: "border-l-violet-500", icon: TrendingUp, data: invoices.filter(i => i.status === "paid") },
         ].map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Card><CardContent className="p-4 text-center">
-              <p className={`text-2xl font-bold font-display ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-muted-foreground font-sans">{s.label}</p>
-            </CardContent></Card>
+          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            whileHover={{ y: -4, scale: 1.03 }}
+            onClick={() => setWidgetDrill({ title: s.label, data: s.data })}
+            className="cursor-pointer">
+            <div className={`admin-widget-3d bg-gradient-to-br ${s.gradient} border-l-4 ${s.border}`}>
+              <div className="p-3 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.iconBg} flex items-center justify-center shadow-lg`}>
+                    <s.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <Eye className="w-3 h-3 text-muted-foreground/50" />
+                </div>
+                <p className="text-xl font-extrabold text-foreground leading-tight">{s.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{s.label}</p>
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
