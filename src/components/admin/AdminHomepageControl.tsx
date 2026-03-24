@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Plus, Trash2, GripVertical, Upload, Image } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, Upload, Image, ChevronUp, ChevronDown, Film } from "lucide-react";
 
 const ThumbnailUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; onUploaded: (url: string) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
