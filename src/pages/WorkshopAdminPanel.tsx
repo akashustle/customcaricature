@@ -866,24 +866,23 @@ const WorkshopAdmin = () => {
         </div>
       </div>
 
-      {/* Mobile Header */}
+      {/* Mobile Header — Premium */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className="bg-white/90 backdrop-blur-xl border-b border-violet-100/60 shadow-sm">
+        <div className={`${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} backdrop-blur-xl border-b`}>
           <div className="flex items-center justify-between px-3 py-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-violet-200/40">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight text-foreground">Workshop Console</span>
+              <span className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</span>
             </div>
             <div className="flex gap-1 items-center">
-              {/* Admin Profile Avatar */}
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
                 {adminInfo?.name?.[0]?.toUpperCase() || "A"}
               </button>
-              <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={fetchAll} className={`h-8 w-8 p-0 ${textMuted}`}><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-red-500"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
           <div className="px-3 pb-2">
@@ -895,7 +894,7 @@ const WorkshopAdmin = () => {
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-violet-100 text-violet-700 font-semibold" : "text-muted-foreground"}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold" : textMuted}`}>
                 <item.icon className="w-3.5 h-3.5" />{item.label}
               </button>
             ))}
