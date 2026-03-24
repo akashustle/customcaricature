@@ -52,7 +52,7 @@ const AdminHomepageControl = () => {
         "homepage_hero", "homepage_video", "homepage_social_proof",
         "homepage_what_you_get", "homepage_why_us", "homepage_use_cases",
         "homepage_smart_help", "homepage_sticky_cta", "homepage_urgency",
-        "homepage_instant_quote"
+        "homepage_instant_quote", "homepage_sections", "homepage_funnel_config"
       ];
       const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", keys);
       if (data) {
@@ -91,6 +91,39 @@ const AdminHomepageControl = () => {
   const stickyCta = settings.homepage_sticky_cta || {};
   const urgency = settings.homepage_urgency || {};
   const instantQuote = settings.homepage_instant_quote || {};
+  const homepageSections = settings.homepage_sections || {};
+  const funnelConfig = settings.homepage_funnel_config || {};
+
+  const SECTION_LIST = [
+    { id: "instant_quote", label: "Instant Quote", hint: "CTA card with pricing link" },
+    { id: "social_proof", label: "Social Proof", hint: "Stats counters (events, clients)" },
+    { id: "video", label: "Video Section", hint: "YouTube or custom video" },
+    { id: "enquiry_funnel", label: "Smart Enquiry Funnel", hint: "Step-by-step booking flow" },
+    { id: "portfolio_gallery", label: "Portfolio Gallery", hint: "Infinite scroll artwork" },
+    { id: "what_you_get", label: "What You Get", hint: "Service benefits list" },
+    { id: "how_it_works", label: "How It Works", hint: "3-step process cards" },
+    { id: "scroll_events", label: "Scroll Event Gallery", hint: "Auto-scrolling event photos" },
+    { id: "services", label: "Our Services", hint: "Service cards with CTAs" },
+    { id: "use_cases", label: "Use Cases", hint: "Wedding, Birthday, Corporate" },
+    { id: "styles", label: "Our Styles", hint: "Caricature style cards" },
+    { id: "why_us", label: "Why Choose Us", hint: "Trust points list" },
+    { id: "reviews", label: "Reviews", hint: "Customer testimonials" },
+    { id: "trusted_brands", label: "Trusted Brands", hint: "Brand logos carousel" },
+    { id: "event_gallery", label: "Event Gallery Page", hint: "Dedicated event gallery" },
+    { id: "caricature_gallery", label: "Caricature Gallery", hint: "Custom art gallery" },
+    { id: "before_after", label: "Before & After", hint: "Photo vs caricature slider" },
+    { id: "smart_help", label: "Smart Help", hint: "WhatsApp + Instagram links" },
+  ];
+
+  const toggleSection = (sectionId: string, visible: boolean) => {
+    const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), visible } };
+    updateSetting("homepage_sections", updated);
+  };
+
+  const setSectionMessage = (sectionId: string, message: string) => {
+    const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), message } };
+    updateSetting("homepage_sections", updated);
+  };
 
   return (
     <div className="space-y-6 admin-panel-font">
@@ -104,11 +137,13 @@ const AdminHomepageControl = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="hero" className="space-y-4">
+      <Tabs defaultValue="sections" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="sections" className="text-xs">Sections</TabsTrigger>
           <TabsTrigger value="hero" className="text-xs">Hero</TabsTrigger>
           <TabsTrigger value="urgency" className="text-xs">Urgency</TabsTrigger>
           <TabsTrigger value="quote" className="text-xs">Quote</TabsTrigger>
+          <TabsTrigger value="funnel" className="text-xs">Funnel Data</TabsTrigger>
           <TabsTrigger value="video" className="text-xs">Video</TabsTrigger>
           <TabsTrigger value="social" className="text-xs">Social Proof</TabsTrigger>
           <TabsTrigger value="whatyouget" className="text-xs">What You Get</TabsTrigger>
@@ -117,6 +152,103 @@ const AdminHomepageControl = () => {
           <TabsTrigger value="help" className="text-xs">Smart Help</TabsTrigger>
           <TabsTrigger value="sticky" className="text-xs">Sticky CTA</TabsTrigger>
         </TabsList>
+
+        {/* Sections Visibility */}
+        <TabsContent value="sections">
+          <Card className="admin-glass-card">
+            <CardHeader><CardTitle className="text-base">Section Visibility Controls</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-xs text-muted-foreground mb-3">Toggle homepage sections on/off. Add a message to show when hidden.</p>
+              {SECTION_LIST.map((s, i) => (
+                <div key={s.id} className="flex items-center justify-between py-2 px-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{i + 1}</span>
+                      <span className="text-sm font-semibold text-foreground">{s.label}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">ID: <code className="text-primary">{s.id}</code> — {s.hint}</p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <Input
+                      placeholder="Hidden message (optional)"
+                      value={homepageSections[s.id]?.message || ""}
+                      onChange={e => setSectionMessage(s.id, e.target.value)}
+                      className="w-48 h-8 text-xs"
+                    />
+                    <Switch
+                      checked={homepageSections[s.id]?.visible !== false}
+                      onCheckedChange={v => toggleSection(s.id, v)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Funnel Data Editor */}
+        <TabsContent value="funnel">
+          <Card className="admin-glass-card">
+            <CardHeader><CardTitle className="text-base">Enquiry Funnel Data</CardTitle></CardHeader>
+            <CardContent className="space-y-6">
+              {/* Event Types */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Event Types</label>
+                {(funnelConfig.event_types || []).map((t: any, i: number) => (
+                  <div key={i} className="flex gap-2 items-center mb-2">
+                    <Input className="w-16" value={t.emoji || ""} onChange={e => { const n = [...(funnelConfig.event_types || [])]; n[i] = { ...t, emoji: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: n }); }} placeholder="💍" />
+                    <Input className="w-24" value={t.id || ""} onChange={e => { const n = [...(funnelConfig.event_types || [])]; n[i] = { ...t, id: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: n }); }} placeholder="id" />
+                    <Input className="flex-1" value={t.label || ""} onChange={e => { const n = [...(funnelConfig.event_types || [])]; n[i] = { ...t, label: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: n }); }} placeholder="Label" />
+                    <Switch checked={t.hot || false} onCheckedChange={v => { const n = [...(funnelConfig.event_types || [])]; n[i] = { ...t, hot: v }; updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: n }); }} />
+                    <Button variant="ghost" size="icon" onClick={() => { const n = (funnelConfig.event_types || []).filter((_: any, j: number) => j !== i); updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: n }); }}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateSetting("homepage_funnel_config", { ...funnelConfig, event_types: [...(funnelConfig.event_types || []), { id: "", label: "", emoji: "", hot: false }] })}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Event Type
+                </Button>
+              </div>
+
+              {/* Cities */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Cities</label>
+                {(funnelConfig.cities || []).map((c: any, i: number) => (
+                  <div key={i} className="flex gap-2 items-center mb-2">
+                    <Input className="w-24" value={c.id || ""} onChange={e => { const n = [...(funnelConfig.cities || [])]; n[i] = { ...c, id: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, cities: n }); }} placeholder="id" />
+                    <Input className="flex-1" value={c.label || ""} onChange={e => { const n = [...(funnelConfig.cities || [])]; n[i] = { ...c, label: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, cities: n }); }} placeholder="Label" />
+                    <Switch checked={c.trending || false} onCheckedChange={v => { const n = [...(funnelConfig.cities || [])]; n[i] = { ...c, trending: v }; updateSetting("homepage_funnel_config", { ...funnelConfig, cities: n }); }} />
+                    <Button variant="ghost" size="icon" onClick={() => { const n = (funnelConfig.cities || []).filter((_: any, j: number) => j !== i); updateSetting("homepage_funnel_config", { ...funnelConfig, cities: n }); }}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateSetting("homepage_funnel_config", { ...funnelConfig, cities: [...(funnelConfig.cities || []), { id: "", label: "", trending: false }] })}>
+                  <Plus className="w-4 h-4 mr-1" /> Add City
+                </Button>
+              </div>
+
+              {/* Budget Ranges */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Budget Ranges</label>
+                {(funnelConfig.budgets || []).map((b: any, i: number) => (
+                  <div key={i} className="flex gap-2 items-center mb-2">
+                    <Input className="w-24" value={b.id || ""} onChange={e => { const n = [...(funnelConfig.budgets || [])]; n[i] = { ...b, id: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: n }); }} placeholder="id" />
+                    <Input className="flex-1" value={b.label || ""} onChange={e => { const n = [...(funnelConfig.budgets || [])]; n[i] = { ...b, label: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: n }); }} placeholder="₹15K – ₹25K" />
+                    <Input className="w-32" value={b.desc || ""} onChange={e => { const n = [...(funnelConfig.budgets || [])]; n[i] = { ...b, desc: e.target.value }; updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: n }); }} placeholder="1 Artist • 2hrs" />
+                    <Switch checked={b.popular || false} onCheckedChange={v => { const n = [...(funnelConfig.budgets || [])]; n[i] = { ...b, popular: v }; updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: n }); }} />
+                    <Button variant="ghost" size="icon" onClick={() => { const n = (funnelConfig.budgets || []).filter((_: any, j: number) => j !== i); updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: n }); }}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateSetting("homepage_funnel_config", { ...funnelConfig, budgets: [...(funnelConfig.budgets || []), { id: "", label: "", desc: "", popular: false }] })}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Budget Range
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Hero */}
         <TabsContent value="hero">
