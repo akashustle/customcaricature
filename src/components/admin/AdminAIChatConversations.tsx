@@ -38,6 +38,9 @@ const AdminAIChatConversations = () => {
   const [adminReply, setAdminReply] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [adminName, setAdminName] = useState("");
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
