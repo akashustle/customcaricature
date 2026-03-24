@@ -178,9 +178,21 @@ const AdminRevenueTargetTracker = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
-            <Target className="w-6 h-6 text-primary" /> ₹10L/Month Revenue Engine
+            <Target className="w-6 h-6 text-primary" /> {formatPrice(MONTHLY_TARGET)}/Month Revenue Engine
           </h2>
-          <p className="text-sm text-muted-foreground">Track daily, weekly & monthly targets in real-time</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            Track daily, weekly & monthly targets in real-time
+            <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 rounded-full" onClick={() => { setTargetInput(String(MONTHLY_TARGET)); setEditingTarget(true); }}>
+              <Edit2 className="w-3 h-3 mr-1" /> Set Target
+            </Button>
+          </p>
+          {editingTarget && (
+            <div className="flex items-center gap-2 mt-2">
+              <Input type="number" value={targetInput} onChange={e => setTargetInput(e.target.value)} placeholder="Enter monthly target (₹)" className="h-8 w-48 text-sm" />
+              <Button size="sm" className="h-8 text-xs" onClick={saveTarget}>Save</Button>
+              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setEditingTarget(false)}>Cancel</Button>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {streak > 0 && (
