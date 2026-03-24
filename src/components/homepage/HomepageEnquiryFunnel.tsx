@@ -129,9 +129,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {EVENT_TYPES.map(t => (
-                      <button
+                       <button
                         key={t.id}
-                        onClick={() => setData({ ...data, event: t.id })}
+                        onClick={() => { setData({ ...data, event: t.id }); setTimeout(() => setStep(1), 300); }}
                         className={cn(
                           "relative p-4 rounded-xl border-2 text-left transition-all font-body",
                           data.event === t.id
@@ -161,9 +161,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {CITIES.map(c => (
-                      <button
+                       <button
                         key={c.id}
-                        onClick={() => setData({ ...data, city: c.id })}
+                        onClick={() => { setData({ ...data, city: c.id }); setTimeout(() => setStep(2), 300); }}
                         className={cn(
                           "relative p-3.5 rounded-xl border-2 text-left transition-all font-body",
                           data.city === c.id
@@ -190,10 +190,10 @@ const HomepageEnquiryFunnel = () => {
                     <Clock className="w-5 h-5 text-accent" />
                     <h3 className="font-body font-bold text-lg text-foreground">When is your event?</h3>
                   </div>
-                  <Input
+                   <Input
                     type="date"
                     value={data.date}
-                    onChange={e => setData({ ...data, date: e.target.value })}
+                    onChange={e => { setData({ ...data, date: e.target.value }); if (e.target.value) setTimeout(() => setStep(3), 300); }}
                     min={new Date().toISOString().split("T")[0]}
                     className="font-body text-base h-12"
                   />
@@ -213,9 +213,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {BUDGET_RANGES.map(b => (
-                      <button
+                       <button
                         key={b.id}
-                        onClick={() => setData({ ...data, budget: b.id })}
+                        onClick={() => { setData({ ...data, budget: b.id }); setTimeout(() => setStep(4), 300); }}
                         className={cn(
                           "relative p-4 rounded-xl border-2 text-left transition-all font-body",
                           data.budget === b.id
