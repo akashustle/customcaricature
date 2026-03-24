@@ -94,7 +94,7 @@ const AdminHomepageControl = () => {
   const homepageSections = settings.homepage_sections || {};
   const funnelConfig = settings.homepage_funnel_config || {};
 
-  const SECTION_LIST = [
+  const DEFAULT_SECTION_ORDER = [
     { id: "instant_quote", label: "Instant Quote", hint: "CTA card with pricing link" },
     { id: "social_proof", label: "Social Proof", hint: "Stats counters (events, clients)" },
     { id: "video", label: "Video Section", hint: "YouTube or custom video" },
@@ -114,6 +114,20 @@ const AdminHomepageControl = () => {
     { id: "before_after", label: "Before & After", hint: "Photo vs caricature slider" },
     { id: "smart_help", label: "Smart Help", hint: "WhatsApp + Instagram links" },
   ];
+
+  // Use saved order or default
+  const sectionOrder: string[] = homepageSections._order || DEFAULT_SECTION_ORDER.map(s => s.id);
+  const SECTION_LIST = sectionOrder.map(id => DEFAULT_SECTION_ORDER.find(s => s.id === id)!).filter(Boolean);
+  // Add any new sections not in saved order
+  DEFAULT_SECTION_ORDER.forEach(s => { if (!sectionOrder.includes(s.id)) SECTION_LIST.push(s); });
+
+  const moveSection = (index: number, direction: "up" | "down") => {
+    const newOrder = [...sectionOrder];
+    const swapIdx = direction === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+    [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+    updateSetting("homepage_sections", { ...homepageSections, _order: newOrder });
+  };
 
   const toggleSection = (sectionId: string, visible: boolean) => {
     const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), visible } };
