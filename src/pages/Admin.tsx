@@ -101,7 +101,38 @@ import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
 import AdminCalendar from "@/components/admin/AdminCalendar";
 import AdminWebsiteAnalytics from "@/components/admin/AdminWebsiteAnalytics";
 
-type Order = {
+const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    const fetchUnread = async () => {
+      const { count } = await supabase.from("chat_messages").select("id", { count: "exact", head: true }).eq("is_admin", false).eq("read", false);
+      const { count: aiCount } = await supabase.from("ai_chat_sessions").select("id", { count: "exact", head: true }).eq("admin_joined", false).eq("status", "active");
+      setUnreadCount((count || 0) + (aiCount || 0));
+    };
+    fetchUnread();
+    const ch = supabase.channel("admin-chat-float")
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, fetchUnread)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ai_chat_sessions" }, fetchUnread)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center text-white"
+    >
+      <MessageCircle className="w-5 h-5" />
+      {unreadCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </motion.button>
+  );
+};
+
   id: string;
   caricature_type: string;
   order_type: string;
