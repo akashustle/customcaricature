@@ -43,22 +43,25 @@ const LiveChatWrapper = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0 }}
-        className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40"
       >
-        <Button
+        <button
           onClick={() => navigate("/live-chat")}
-          className="rounded-full w-12 h-12 p-0 shadow-lg shadow-primary/25 relative"
+          className="group relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.5)] hover:shadow-[0_12px_40px_-4px_hsl(var(--primary)/0.6)] hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center"
         >
-          <MessageCircle className="w-5 h-5" />
+          {/* Pulse ring */}
+          <span className="absolute inset-0 rounded-2xl animate-ping bg-primary/20 opacity-75" style={{ animationDuration: "3s" }} />
+          <MessageCircle className="w-6 h-6 relative z-10 group-hover:rotate-12 transition-transform" />
           {unread > 0 && (
-            <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
-              {unread}
+            <span className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground text-[10px] font-bold min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center animate-bounce shadow-lg z-20">
+              {unread > 9 ? "9+" : unread}
             </span>
           )}
-        </Button>
+        </button>
       </motion.div>
     </AnimatePresence>
   );

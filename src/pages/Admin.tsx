@@ -200,6 +200,20 @@ const Admin = () => {
   useAutoLogout(true);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Auto-set admin name from profile (bypass name gate)
+  useEffect(() => {
+    if (user && !adminEnteredName) {
+      const autoSetName = async () => {
+        const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).maybeSingle();
+        if (profile?.full_name) {
+          sessionStorage.setItem("admin_entered_name", profile.full_name);
+          setAdminEnteredName(profile.full_name);
+        }
+      };
+      autoSetName();
+    }
+  }, [user, adminEnteredName]);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -603,6 +617,28 @@ const Admin = () => {
   };
 
   const deleteCustomer = async (userId: string) => {
+    // Fetch profile & orders BEFORE deleting for reversal logging
+    const { data: profileData } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
+    const { data: ordersData } = await supabase.from("orders").select("*").eq("user_id", userId);
+
+    // Log to reversal system
+    const { logReversalAction } = await import("@/hooks/useReversalLog");
+    const adminName = sessionStorage.getItem("admin_entered_name") || sessionStorage.getItem("admin_action_name") || "Admin";
+    
+    if (profileData) {
+      await logReversalAction({
+        entityType: "customer",
+        entityId: userId,
+        actionType: "delete",
+        sourcePanel: "main_admin",
+        performedBy: adminName,
+        role: "admin",
+        previousData: profileData,
+        newData: null,
+        fullSnapshot: { profile: profileData, orders: ordersData || [] },
+      });
+    }
+
     await supabase.from("orders").delete().eq("user_id", userId);
     await supabase.from("profiles").delete().eq("user_id", userId);
     toast({ title: "Customer & their orders deleted" });

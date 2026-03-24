@@ -25,6 +25,8 @@ const AdminLogin = () => {
   const [otpVerifyMethod, setOtpVerifyMethod] = useState<"otp" | "secret">("otp");
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
+  const [loginField, setLoginField] = useState<"email" | "mobile">("email");
+  const [adminGreetName, setAdminGreetName] = useState<string | null>(null);
   const [resendingOtp, setResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [sessionLimitReached, setSessionLimitReached] = useState(false);
@@ -41,6 +43,27 @@ const AdminLogin = () => {
     };
     fetchSecret();
   }, []);
+
+  // Lookup admin name on email/mobile blur
+  const lookupAdminName = async (val: string) => {
+    if (!val.trim()) { setAdminGreetName(null); return; }
+    const field = loginField === "email" ? "email" : "mobile";
+    const { data } = await supabase.from("profiles").select("full_name, email").eq(field, val.trim().toLowerCase()).maybeSingle();
+    if (data?.full_name) {
+      setAdminGreetName(data.full_name);
+      if (loginField === "mobile" && data.email) setEmail(data.email); // auto-fill email for auth
+    } else {
+      setAdminGreetName(null);
+    }
+  };
+
+  // Helper to set admin name in session after successful login
+  const setAdminSessionName = async (userId: string) => {
+    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
+    const name = profile?.full_name || "Admin";
+    sessionStorage.setItem("admin_entered_name", name);
+    sessionStorage.setItem("admin_action_name", name);
+  };
 
   const startResendCooldown = () => {
     setResendCooldown(60);
@@ -62,9 +85,17 @@ const AdminLogin = () => {
     }
     setLoading(true);
     try {
+      // If logged in with mobile, resolve email first
+      let loginEmail = email.trim().toLowerCase();
+      if (loginField === "mobile") {
+        const { data: prof } = await supabase.from("profiles").select("email").eq("mobile", loginEmail).maybeSingle();
+        if (prof?.email) { loginEmail = prof.email; } 
+        else { toast({ title: "No admin found with this mobile", variant: "destructive" }); setLoading(false); return; }
+      }
+
       if (loginMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: email.trim().toLowerCase(), secret_code: secretCode },
+          body: { email: loginEmail, secret_code: secretCode },
         });
         if (error) { toast({ title: "Login failed", description: "Could not connect.", variant: "destructive" }); setLoading(false); return; }
         if (!data?.success) { toast({ title: "Login failed", description: data?.error || "Invalid credentials", variant: "destructive" }); setLoading(false); return; }
@@ -78,14 +109,14 @@ const AdminLogin = () => {
           toast({ title: "Access Denied", description: "Not authorized for admin.", variant: "destructive" });
           setLoading(false); return;
         }
-        sessionStorage.removeItem("admin_entered_name");
-        toast({ title: "Welcome back, admin!" });
+        await setAdminSessionName(userData.user.id);
+        toast({ title: `Welcome back, ${adminGreetName || "admin"}! 🎉` });
         navigate("/admin-panel", { replace: true });
         setLoading(false); return;
       }
 
       const { data: authData, error: authError } = await withTimeout(
-        supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
+        supabase.auth.signInWithPassword({ email: loginEmail, password })
       );
       if (authError || !authData.user) throw authError || new Error("Login failed");
       const { data: roles, error: roleError } = await withTimeout(
@@ -138,8 +169,9 @@ const AdminLogin = () => {
         return;
       }
 
-      sessionStorage.removeItem("admin_entered_name");
-      toast({ title: "Welcome back, admin!" });
+      const currentUser = (await supabase.auth.getUser()).data.user;
+      if (currentUser) await setAdminSessionName(currentUser.id);
+      toast({ title: `Welcome back, ${adminGreetName || "admin"}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       try {
@@ -209,8 +241,8 @@ const AdminLogin = () => {
           } as any).eq("user_id", pendingUserId);
         }
 
-        sessionStorage.removeItem("admin_entered_name");
-        toast({ title: "Secret Code Verified! Welcome back, admin! 🔐" });
+        if (pendingUserId) await setAdminSessionName(pendingUserId);
+        toast({ title: `Secret Code Verified! Welcome back, ${adminGreetName || "admin"}! 🔐` });
         navigate("/admin-panel", { replace: true });
       } catch (err: any) {
         toast({ title: "Verification Failed", description: err?.message, variant: "destructive" });
@@ -244,8 +276,9 @@ const AdminLogin = () => {
         } as any).eq("user_id", pendingUserId);
       }
 
-      sessionStorage.removeItem("admin_entered_name");
-      toast({ title: "OTP Verified! Welcome back, admin! ✅" });
+      const verifiedUser = (await supabase.auth.getUser()).data.user;
+      if (verifiedUser) await setAdminSessionName(verifiedUser.id);
+      toast({ title: `OTP Verified! Welcome back, ${adminGreetName || "admin"}! ✅` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       toast({ title: "Verification Failed", description: err?.message, variant: "destructive" });
@@ -374,8 +407,9 @@ const AdminLogin = () => {
                         email: email.trim().toLowerCase(), password,
                       });
                       if (error) throw error;
-                      sessionStorage.removeItem("admin_entered_name");
-                      toast({ title: "Session limit extended! Welcome back! 🔓" });
+                      const su = (await supabase.auth.getUser()).data.user;
+                      if (su) await setAdminSessionName(su.id);
+                      toast({ title: `Session limit extended! Welcome back, ${adminGreetName || "admin"}! 🔓` });
                       navigate("/admin-panel", { replace: true });
                     } catch (err: any) {
                       toast({ title: "Login Failed", description: err?.message, variant: "destructive" });
@@ -395,11 +429,42 @@ const AdminLogin = () => {
             </div>
           ) : !otpStep ? (
             <form onSubmit={handleLogin} className="space-y-4">
+              {/* Admin greeting */}
+              {adminGreetName && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-2 px-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-sm font-medium text-foreground">
+                    👋 Hey <span className="text-primary font-bold">{adminGreetName}</span>, welcome back!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Please enter your credentials to continue</p>
+                </motion.div>
+              )}
+
+              {/* Login with Email or Mobile */}
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground font-medium">Email</Label>
+                <Label className="text-sm text-muted-foreground font-medium">Login With</Label>
+                <Select value={loginField} onValueChange={(v: any) => { setLoginField(v); setAdminGreetName(null); setEmail(""); }}>
+                  <SelectTrigger className="h-10 rounded-xl bg-background/60 border-border/60">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email"><span className="flex items-center gap-2"><Mail className="w-4 h-4" /> Email</span></SelectItem>
+                    <SelectItem value="mobile"><span className="flex items-center gap-2">📱 Mobile Number</span></SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground font-medium">{loginField === "email" ? "Email" : "Mobile Number"}</Label>
                 <div className="relative group">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com" required
+                  <Input 
+                    type={loginField === "email" ? "email" : "tel"} 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    onBlur={(e) => lookupAdminName(e.target.value)}
+                    placeholder={loginField === "email" ? "admin@email.com" : "10-digit mobile"} 
+                    required
                     className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                 </div>
               </div>
