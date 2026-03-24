@@ -248,14 +248,15 @@ const Index = () => {
             </div>
 
             {/* Left: Text content */}
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="flex-1 text-center lg:text-left max-w-2xl">
+              {/* Desktop badge */}
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
-                className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
+                className="hidden lg:inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-body font-semibold text-primary tracking-wide">India's #1 Premium Caricature Studio</span>
               </motion.div>
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="font-calligraphy text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-6 leading-[1.05]">
+              <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
+                className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]">
                 {hero.headline || (<>Turn Moments Into <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
               </motion.h1>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
