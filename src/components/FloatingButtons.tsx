@@ -6,13 +6,32 @@ import { useTheme } from "next-themes";
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://instagram.com/creativecaricatureclub";
 
+const PAGE_MESSAGES: Record<string, string> = {
+  "/": "Hi! I'm interested in your caricature services. Can you tell me more?",
+  "/about": "Hi! I visited your About page and want to learn more about Creative Caricature Club.",
+  "/order": "Hi! I'd like to place a custom caricature order.",
+  "/book-event": "Hi! I'm interested in booking a caricature artist for my event.",
+  "/enquiry": "Hi! I have an enquiry about your caricature services.",
+  "/shop": "Hi! I'm browsing your shop and have a question about a product.",
+  "/track-order": "Hi! I need help tracking my order.",
+  "/support": "Hi! I need support with my order/booking.",
+  "/blog": "Hi! I read your blog and have a question.",
+  "/terms": "Hi! I have a question about your terms of service.",
+  "/privacy": "Hi! I have a question about your privacy policy.",
+  "/refund": "Hi! I have a question about your refund policy.",
+  "/shipping": "Hi! I have a question about shipping.",
+  "/event-policy": "Hi! I have a question about your event booking policy.",
+};
+
 const FloatingButtons = () => {
   const isMobile = useIsMobile();
   const location = useLocation();
   const { theme, setTheme } = useTheme();
 
-  const allowedPaths = ["/", "/about", "/terms", "/privacy", "/refund", "/shipping", "/track-order", "/event-policy", "/blog", "/enquiry", "/support", "/shop", "/book-event", "/order"];
+  const allowedPaths = Object.keys(PAGE_MESSAGES);
   if (!allowedPaths.includes(location.pathname)) return null;
+
+  const message = encodeURIComponent(PAGE_MESSAGES[location.pathname] || PAGE_MESSAGES["/"]);
 
   return (
     <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[140px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
@@ -38,7 +57,7 @@ const FloatingButtons = () => {
       </a>
       {/* WhatsApp */}
       <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi! I need help with my caricature order.`}
+        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
         target="_blank"
         rel="noopener noreferrer"
         className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition-opacity shadow-lg"

@@ -84,12 +84,21 @@ const AdminGlobalSearch = ({ onNavigate }: AdminGlobalSearchProps) => {
     <div ref={ref} className="relative w-full max-w-md">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
+        <input
+          type="text"
           value={query}
           onChange={e => { setQuery(e.target.value); if (e.target.value) setOpen(true); }}
           onFocus={() => { if (query && results.length) setOpen(true); }}
           placeholder="Search orders, users, events, workshop..."
-          className="pl-9 pr-8 h-10 rounded-xl bg-card border-border text-sm"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-lpignore="true"
+          data-form-type="other"
+          data-1p-ignore="true"
+          name={`gsearch_${Date.now()}`}
+          className="flex h-10 w-full rounded-xl border border-border bg-card pl-9 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
         {query && (
           <button onClick={() => { setQuery(""); setResults([]); setOpen(false); }} className="absolute right-3 top-1/2 -translate-y-1/2">
