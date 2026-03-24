@@ -52,9 +52,16 @@ const WorkshopAdminLogin = () => {
   }, []);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(() => setLocationGranted(true), () => setLocationGranted(false), { enableHighAccuracy: true, timeout: 5000 });
-    }
+    if (!navigator.geolocation) return;
+    const requestLocation = () => {
+      navigator.geolocation.getCurrentPosition(() => setLocationGranted(true), () => {
+        setLocationGranted(false);
+        setTimeout(() => {
+          navigator.geolocation.getCurrentPosition(() => setLocationGranted(true), () => setLocationGranted(false), { enableHighAccuracy: true, timeout: 10000 });
+        }, 2000);
+      }, { enableHighAccuracy: true, timeout: 5000 });
+    };
+    requestLocation();
   }, []);
 
   const startResendCooldown = () => {
