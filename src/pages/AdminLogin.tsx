@@ -68,18 +68,30 @@ const AdminLogin = () => {
     fetchAvatars();
   }, []);
 
-  // Request location on mount
+  // Request location immediately on mount
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (!navigator.geolocation) return;
+    const requestLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setLocationGranted(true);
           setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         },
-        () => setLocationGranted(false),
+        () => {
+          setLocationGranted(false);
+          // Prompt again after short delay
+          setTimeout(() => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+              () => setLocationGranted(false),
+              { enableHighAccuracy: true, timeout: 10000 }
+            );
+          }, 2000);
+        },
         { enableHighAccuracy: true, timeout: 5000 }
       );
-    }
+    };
+    requestLocation();
   }, []);
 
   const startResendCooldown = () => {
@@ -123,8 +135,8 @@ const AdminLogin = () => {
     if (authMethod === "password" && !password) {
       toast({ title: "Enter password", variant: "destructive" }); return;
     }
-    if (authMethod === "secret_code" && secretCode.length !== 6) {
-      toast({ title: "Enter 6-digit secret code", variant: "destructive" }); return;
+    if (authMethod === "secret_code" && secretCode.length !== 8) {
+      toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return;
     }
     if (authMethod === "otp" && !otpSent) {
       // Send OTP to main admin email
@@ -431,12 +443,12 @@ const AdminLogin = () => {
 
                     {authMethod === "secret_code" && (
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground font-medium">6-Digit Secret Code</Label>
+                        <Label className="text-sm text-muted-foreground font-medium">8-Digit Secret Code</Label>
                         <div className="relative group">
                           <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input type="password" value={secretCode}
                             onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
-                            placeholder="• • • • • •" maxLength={8}
+                            placeholder="• • • • • • • •" maxLength={8}
                             className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-primary"
                             />
                         </div>
