@@ -47,8 +47,8 @@ const HomepageEnquiryFunnel = () => {
   const [data, setData] = useState({ event: "", city: "", date: "", budget: "", otherDetails: "" });
   const [blockedDates, setBlockedDates] = useState<Array<{ blocked_date: string; reason: string | null }>>([]);
   const [funnelConfig, setFunnelConfig] = useState<any>(null);
+  const [pricingInfo, setPricingInfo] = useState<any>(null);
 
-  // Fetch blocked dates and funnel config
   useEffect(() => {
     const fetchBlockedDates = async () => {
       const { data: bd } = await supabase.from("event_blocked_dates").select("blocked_date, reason");
@@ -58,8 +58,13 @@ const HomepageEnquiryFunnel = () => {
       const { data: cfg } = await supabase.from("admin_site_settings").select("value").eq("id", "homepage_funnel_config").maybeSingle();
       if (cfg?.value) setFunnelConfig(cfg.value);
     };
+    const fetchPricing = async () => {
+      const { data: pr } = await supabase.from("event_pricing").select("*");
+      if (pr) setPricingInfo(pr);
+    };
     fetchBlockedDates();
     fetchConfig();
+    fetchPricing();
   }, []);
 
   const eventTypes = funnelConfig?.event_types?.length ? funnelConfig.event_types : DEFAULT_EVENT_TYPES;
