@@ -819,16 +819,16 @@ const WorkshopAdmin = () => {
 
   return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
-      {/* Sidebar - Desktop — Apple-grade */}
-      <div className={`hidden lg:flex flex-col admin-glass-sidebar sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"}`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-border/20">
+      {/* Sidebar - Desktop */}
+      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"} bg-white/80 backdrop-blur-xl border-r border-violet-100/60 shadow-sm`}>
+        <div className="flex items-center justify-between px-4 py-4 border-b border-violet-100/40">
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-border/40">
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-violet-200/50">
               <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <div><p className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</p><p className="text-[10px] text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>CCC Academy</p></div>}
+            {!collapsed && <div><p className="text-sm font-bold tracking-tight text-foreground">Workshop Console</p><p className="text-[10px] text-muted-foreground">CCC Academy</p></div>}
           </div>
-          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-accent/10 transition-colors flex-shrink-0">
+          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-violet-50 transition-colors flex-shrink-0">
             {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
           </button>
         </div>
@@ -836,74 +836,63 @@ const WorkshopAdmin = () => {
           {sidebarItems.map((item) => (
             <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
               className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150",
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-150",
                 tab === item.key
-                  ? "bg-foreground/[0.06] font-semibold text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03]"
-              )} style={{ fontFamily: 'Inter, sans-serif' }}>
+                  ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 font-semibold text-violet-700 border border-violet-200/50"
+                  : "text-muted-foreground hover:text-foreground hover:bg-violet-50/60"
+              )}>
               <div className={cn(
                 "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                tab === item.key ? "bg-primary text-primary-foreground shadow-sm" : ""
+                tab === item.key ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm" : "text-muted-foreground"
               )}>
                 <item.icon className="w-3.5 h-3.5" />
               </div>
               {!collapsed && <span className="truncate">{item.label}</span>}
-              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500" />}
             </button>
           ))}
         </nav>
-        <div className="p-2 border-t border-border/20 space-y-0.5">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.03] transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="p-2 border-t border-violet-100/40 space-y-0.5">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-muted-foreground hover:text-foreground hover:bg-violet-50/60 transition-all">
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-destructive hover:bg-destructive/5 transition-all" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-destructive hover:bg-destructive/5 transition-all">
             <LogOut className="w-4 h-4" />{!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </div>
 
-      {/* Mobile Header — Apple-grade */}
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className="admin-header-premium">
+        <div className="bg-white/90 backdrop-blur-xl border-b border-violet-100/60 shadow-sm">
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-border/40">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm border border-violet-200/40">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <span className="text-sm font-bold tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Workshop Console</span>
+              <span className="text-sm font-bold tracking-tight text-foreground">Workshop Console</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 items-center">
+              {/* Admin Profile Avatar */}
+              <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                {adminInfo?.name?.[0]?.toUpperCase() || "A"}
+              </button>
               <Button variant="ghost" size="sm" onClick={fetchAll} className="h-8 w-8 p-0"><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
-              <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className="h-8 w-8 p-0">{darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="h-8 w-8 p-0 text-destructive"><LogOut className="w-4 h-4" /></Button>
             </div>
           </div>
           <div className="px-3 pb-2">
-            <AdminSmartSearch
-              panelType="workshop"
-              tabs={[
-                { id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" },
-                { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" },
-                { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
-                { id: "live", label: "Live Sessions" },
-              ]}
-              onNavigate={(tab, highlightId) => {
-                setTab(tab);
-                if (highlightId) {
-                  setTimeout(() => {
-                    const el = document.querySelector(`[data-search-id="${highlightId}"]`);
-                    if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
-                  }, 300);
-                }
-              }}
+            <AdminSmartSearch panelType="workshop"
+              tabs={[{ id: "all-users", label: "All Users" }, { id: "registered", label: "Registered" }, { id: "manual", label: "Manual" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
+              onNavigate={(tab, highlightId) => { setTab(tab); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
             />
           </div>
           <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
             {sidebarItems.map((item) => (
               <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-foreground/[0.08] text-foreground font-semibold" : "text-muted-foreground"}`}
-                style={{ fontFamily: 'Inter, sans-serif' }}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? "bg-violet-100 text-violet-700 font-semibold" : "text-muted-foreground"}`}>
                 <item.icon className="w-3.5 h-3.5" />{item.label}
               </button>
             ))}
