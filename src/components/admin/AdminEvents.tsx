@@ -357,7 +357,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [drillDown, setDrillDown] = useState<{ title: string; data: EventBooking[] } | null>(null);
 
   const drillDownSets = [
-    { label: "Total Events", icon: CalendarIcon, value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500", filter: () => true },
+    { label: "Total", icon: CalendarIcon, value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500", filter: () => true },
     { label: "Upcoming", icon: TrendingUp, value: upcoming, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500", filter: (e: EventBooking) => e.status === "upcoming" },
     { label: "Completed", icon: Settings, value: completed, gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500", filter: (e: EventBooking) => e.status === "completed" },
     { label: "Cancelled", icon: X, value: cancelled, gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500", filter: (e: EventBooking) => e.status === "cancelled" },
