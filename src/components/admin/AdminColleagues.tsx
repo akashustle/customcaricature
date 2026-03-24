@@ -93,7 +93,7 @@ const AdminColleagues = () => {
       read: false,
     };
     const allMessages = [...messages, msg];
-    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: allMessages.slice(-500) } });
+    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: allMessages.slice(-500) } } as any);
     setMessages(allMessages);
     setNewMessage("");
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
