@@ -142,8 +142,8 @@ const WorkshopDashboard = () => {
   if (!workshopUser) return null;
 
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-background";
-  const headerBg = dm ? "bg-[#1a1710]/95 border-white/10" : "bg-card/80 border-border";
+  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-violet-50/30 via-white to-fuchsia-50/20";
+  const headerBg = dm ? "bg-[#1a1710]/95 border-white/10" : "bg-white/90 border-violet-100/60";
   const textPrimary = dm ? "text-white font-bold" : "text-foreground font-bold";
   const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
   const activeClass = `text-white shadow-lg font-bold`;
