@@ -166,7 +166,7 @@ const Login = () => {
                   {loginWith === "email" ? (
                     <div>
                       <Label className="font-sans text-sm">Email Address</Label>
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl" autoFocus />
+                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl" />
                     </div>
                   ) : (
                     <div>
