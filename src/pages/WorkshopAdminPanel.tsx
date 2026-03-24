@@ -819,45 +819,48 @@ const WorkshopAdmin = () => {
 
   return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
-      {/* Sidebar - Desktop */}
-      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[260px]"} bg-white/80 backdrop-blur-xl border-r border-violet-100/60 shadow-sm`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-violet-100/40">
+      {/* Sidebar - Desktop — Premium SaaS */}
+      <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[68px]" : "w-[250px]"} ${dm ? "bg-[#0e0e18] border-white/[0.06]" : "bg-white border-slate-200/60"} border-r`}>
+        <div className={`flex items-center justify-between px-4 py-5 border-b ${dm ? "border-white/[0.06]" : "border-slate-100"}`}>
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-violet-200/50">
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-black/[0.04]">
               <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <div><p className="text-sm font-bold tracking-tight text-foreground">Workshop Console</p><p className="text-[10px] text-muted-foreground">CCC Academy</p></div>}
+            {!collapsed && <div><p className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</p><p className={`text-[10px] ${dm ? "text-white/40" : "text-slate-400"}`}>CCC Academy</p></div>}
           </div>
-          <button onClick={() => setCollapsed(!collapsed)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-violet-50 transition-colors flex-shrink-0">
-            {collapsed ? <ChevronRight className="w-4 h-4 text-muted-foreground" /> : <ChevronLeft className="w-4 h-4 text-muted-foreground" />}
+          <button onClick={() => setCollapsed(!collapsed)} className={`w-7 h-7 rounded-lg flex items-center justify-center ${dm ? "hover:bg-white/[0.04]" : "hover:bg-slate-100"} transition-colors flex-shrink-0`}>
+            {collapsed ? <ChevronRight className={`w-4 h-4 ${textMuted}`} /> : <ChevronLeft className={`w-4 h-4 ${textMuted}`} />}
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5">
-          {sidebarItems.map((item) => (
-            <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
-              className={cn(
-                "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-150",
-                tab === item.key
-                  ? "bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 font-semibold text-violet-700 border border-violet-200/50"
-                  : "text-muted-foreground hover:text-foreground hover:bg-violet-50/60"
-              )}>
-              <div className={cn(
-                "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
-                tab === item.key ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm" : "text-muted-foreground"
-              )}>
-                <item.icon className="w-3.5 h-3.5" />
-              </div>
-              {!collapsed && <span className="truncate">{item.label}</span>}
-              {tab === item.key && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500" />}
-            </button>
-          ))}
+        <nav className="flex-1 px-2 py-3 space-y-0.5">
+          {sidebarItems.map((item) => {
+            const isActive = tab === item.key;
+            return (
+              <button key={item.key} onClick={() => setTab(item.key)} title={collapsed ? item.label : undefined}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
+                  isActive
+                    ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold"
+                    : dm ? "text-white/40 hover:text-white/70 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                )}>
+                <div className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
+                  isActive ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/30" : dm ? "text-white/40 group-hover:text-white/60" : "text-slate-400 group-hover:text-slate-600"
+                )}>
+                  <item.icon className="w-3.5 h-3.5" />
+                </div>
+                {!collapsed && <span className="truncate">{item.label}</span>}
+                {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />}
+              </button>
+            );
+          })}
         </nav>
-        <div className="p-2 border-t border-violet-100/40 space-y-0.5">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-muted-foreground hover:text-foreground hover:bg-violet-50/60 transition-all">
+        <div className={`px-2 py-3 border-t ${dm ? "border-white/[0.06]" : "border-slate-100"} space-y-0.5`}>
+          <button onClick={() => setDarkMode(!darkMode)} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] ${inactiveTab} transition-all`}>
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] text-destructive hover:bg-destructive/5 transition-all">
+          <button onClick={handleLogout} className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] ${dm ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50"} transition-all`}>
             <LogOut className="w-4 h-4" />{!collapsed && <span>Sign Out</span>}
           </button>
         </div>
