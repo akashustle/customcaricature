@@ -5,7 +5,8 @@ import {
   Radio, Bell, Monitor, Home as HomeIcon, FileText, Image,
   Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
   Calculator, FileQuestion, Layers, TrendingUp, UserCheck,
-  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt
+  Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt,
+  CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
