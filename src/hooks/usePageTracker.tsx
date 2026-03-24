@@ -1,25 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Tracks page views with device/browser/IP/location for web analytics.
+ * Tracks page views with device/browser info for web analytics.
  * Works for both logged-in and anonymous users.
  */
 const usePageTracker = () => {
   const location = useLocation();
-  const ipRef = useRef<string | null>(null);
-  const locationRef = useRef<{ city?: string; country?: string } | null>(null);
+  const dataRef = useRef<{ ip: string | null; city: string | null; country: string | null }>({
+    ip: null, city: null, country: null
+  });
+  const fetchedRef = useRef(false);
 
-  // Fetch IP & location once per session
   useEffect(() => {
-    if (ipRef.current) return;
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetch("https://ipapi.co/json/")
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data) {
-          ipRef.current = data.ip || null;
-          locationRef.current = { city: data.city, country: data.country_name };
+          dataRef.current = { ip: data.ip || null, city: data.city || null, country: data.country_name || null };
         }
       })
       .catch(() => {});
@@ -27,32 +28,34 @@ const usePageTracker = () => {
 
   useEffect(() => {
     const trackPageView = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const ua = navigator.userAgent;
-      const isMobile = /mobile|android|iphone/i.test(ua);
-      let browser = "Unknown";
-      if (ua.includes("Firefox")) browser = "Firefox";
-      else if (ua.includes("Edg")) browser = "Edge";
-      else if (ua.includes("Chrome")) browser = "Chrome";
-      else if (ua.includes("Safari")) browser = "Safari";
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const ua = navigator.userAgent;
+        const isMobile = /mobile|android|iphone/i.test(ua);
+        let browser = "Unknown";
+        if (ua.includes("Firefox")) browser = "Firefox";
+        else if (ua.includes("Edg")) browser = "Edge";
+        else if (ua.includes("Chrome")) browser = "Chrome";
+        else if (ua.includes("Safari")) browser = "Safari";
 
-      await supabase.from("app_actions").insert({
-        action_type: "page_view",
-        screen: location.pathname,
-        user_id: user?.id || null,
-        device_info: isMobile ? "mobile" : "desktop",
-        metadata: {
-          referrer: document.referrer || null,
-          userAgent: ua.slice(0, 150),
-          browser,
-          ip: ipRef.current,
-          city: locationRef.current?.city,
-          country: locationRef.current?.country,
-          screenSize: `${screen.width}x${screen.height}`,
-          language: navigator.language,
-          timestamp: new Date().toISOString(),
-        },
-      } as any);
+        await supabase.from("app_actions").insert({
+          action_type: "page_view",
+          screen: location.pathname,
+          user_id: user?.id || null,
+          device_info: isMobile ? "mobile" : "desktop",
+          metadata: {
+            referrer: document.referrer || null,
+            browser,
+            ip: dataRef.current.ip,
+            city: dataRef.current.city,
+            country: dataRef.current.country,
+            screenSize: `${screen.width}x${screen.height}`,
+            timestamp: new Date().toISOString(),
+          },
+        } as any);
+      } catch {
+        // silently fail
+      }
     };
 
     trackPageView();
