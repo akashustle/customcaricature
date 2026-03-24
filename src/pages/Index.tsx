@@ -241,6 +241,11 @@ const Index = () => {
         ))}
         <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-28 lg:py-36 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-24">
+            {/* Mobile: Logo - above text */}
+            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-border bg-card p-1 shadow-lg lg:hidden"
+              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+
             {/* Left: Text content */}
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
