@@ -44,7 +44,27 @@ const AdminLogin = () => {
     fetchSecret();
   }, []);
 
-  const startResendCooldown = () => {
+  // Lookup admin name on email/mobile blur
+  const lookupAdminName = async (val: string) => {
+    if (!val.trim()) { setAdminGreetName(null); return; }
+    const field = loginField === "email" ? "email" : "mobile";
+    const { data } = await supabase.from("profiles").select("full_name, email").eq(field, val.trim().toLowerCase()).maybeSingle();
+    if (data?.full_name) {
+      setAdminGreetName(data.full_name);
+      if (loginField === "mobile" && data.email) setEmail(data.email); // auto-fill email for auth
+    } else {
+      setAdminGreetName(null);
+    }
+  };
+
+  // Helper to set admin name in session after successful login
+  const setAdminSessionName = async (userId: string) => {
+    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
+    const name = profile?.full_name || "Admin";
+    sessionStorage.setItem("admin_entered_name", name);
+    sessionStorage.setItem("admin_action_name", name);
+  };
+
     setResendCooldown(60);
     const interval = setInterval(() => {
       setResendCooldown(p => {
