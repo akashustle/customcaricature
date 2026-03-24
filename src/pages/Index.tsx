@@ -592,96 +592,95 @@ const Index = () => {
 
       </main>
 
-      {/* Footer - Modern Vibrant */}
-      <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(99,102,241,0.15),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(236,72,153,0.1),transparent_50%)]" />
-        <div className="container mx-auto px-4 py-12 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
+      {/* Footer - Clean Ivory/White */}
+      <footer className="relative overflow-hidden bg-[#fdf8f3] border-t border-border/40">
+        <div className="container mx-auto px-4 py-10 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 cursor-pointer mb-4" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-12 h-12 rounded-xl border-2 border-white/20 shadow-lg" />
+              <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
+                <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" />
                 <div>
-                  <span className="font-calligraphy text-xl font-bold text-white block">CCC</span>
-                  <span className="text-[10px] text-white/50">Creative Caricature Club</span>
+                  <span className="font-calligraphy text-lg font-bold text-foreground block">CCC</span>
+                  <span className="text-[10px] text-muted-foreground">Creative Caricature Club</span>
                 </div>
               </div>
-              <p className="text-sm text-white/60 font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
-              <p className="font-calligraphy text-sm text-pink-300/80 mt-3">Drawn with love & laughter ✏️</p>
-              <div className="flex gap-2.5 mt-5 flex-wrap">
+              <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
+              <p className="font-calligraphy text-sm text-primary/70 mt-2">Drawn with love & laughter ✏️</p>
+              <div className="flex gap-2 mt-4 flex-wrap">
                 {socialLinks.map((link) => (
                   <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all hover:scale-110 border border-white/10"
+                    className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center hover:bg-primary/15 transition-all hover:scale-110 border border-border/50"
                     aria-label={link.platform}>
                     {link.icon_svg ? (
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: link.icon_svg }} />
+                      <svg className="w-4 h-4 text-foreground" fill="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: link.icon_svg }} />
                     ) : (
-                      <span className="text-xs font-bold text-white">{link.platform[0].toUpperCase()}</span>
+                      <span className="text-xs font-bold text-foreground">{link.platform[0].toUpperCase()}</span>
                     )}
                   </a>
                 ))}
                 {socialLinks.length === 0 && (
                   <>
-                    <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center hover:bg-green-500/30 transition-all border border-green-500/20" aria-label="WhatsApp">
-                      <MessageCircle className="w-4 h-4 text-green-400" />
+                    <a href={content.homepage_smart_help?.instagram_url || "https://www.instagram.com/creativecaricatureclub"} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/20 transition-all border border-pink-200/50" aria-label="Instagram">
+                      <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                     </a>
-                    <a href={content.homepage_smart_help?.instagram_url || "https://www.instagram.com/creativecaricatureclub"} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center hover:bg-pink-500/30 transition-all border border-pink-500/20" aria-label="Instagram">
-                      <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    <a href="https://www.youtube.com/@creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-all border border-red-200/50" aria-label="YouTube">
+                      <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                    <a href={`https://wa.me/${content.homepage_smart_help?.whatsapp_number || "918369594271"}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center hover:bg-green-500/20 transition-all border border-green-200/50" aria-label="WhatsApp">
+                      <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </a>
+                    <a href="https://www.threads.net/@creativecaricatureclub" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-foreground/5 flex items-center justify-center hover:bg-foreground/10 transition-all border border-border/50" aria-label="Threads">
+                      <svg className="w-4 h-4 text-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.96-.065-1.17.408-2.22 1.332-2.96.834-.666 1.98-1.044 3.227-1.065.901-.015 1.747.098 2.524.336.012-.574-.003-1.122-.046-1.625-.194-2.236-1.09-3.326-2.737-3.326h-.077c-.996.018-1.794.396-2.308 1.094l-1.61-1.178C8.62 4.16 9.94 3.5 11.586 3.465h.11c1.217.02 2.225.376 2.993 1.058.869.77 1.392 1.91 1.556 3.39.047.434.075.9.082 1.396 1.017.479 1.832 1.15 2.418 2.004.876 1.275 1.084 2.858.589 4.47-.72 2.34-2.836 3.972-5.96 4.598-.53.106-1.09.167-1.674.188h-.514zm-.264-8.72c-.88.015-1.592.227-2.068.607-.37.295-.548.65-.53 1.055.033.608.356 1.087.961 1.427.641.36 1.432.505 2.22.462 1.083-.06 1.904-.455 2.44-1.174.364-.488.625-1.108.782-1.856-.818-.328-1.77-.513-2.805-.522z"/></svg>
                     </a>
                   </>
                 )}
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> Quick Links
-              </h4>
-              <div className="flex flex-col gap-2.5">
-                <Link to="/about" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">About Us</Link>
-                <Link to="/enquiry" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Enquiry</Link>
-                <Link to="/track-order" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Track Order</Link>
-                <Link to="/blog" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Blog</Link>
-                <Link to="/support" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Support</Link>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Quick Links</h4>
+              <div className="flex flex-col gap-1.5">
+                <Link to="/about" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">About Us</Link>
+                <Link to="/enquiry" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Enquiry</Link>
+                <Link to="/track-order" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Track Order</Link>
+                <Link to="/blog" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Blog</Link>
+                <Link to="/support" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Support</Link>
+                <Link to="/live-chat" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors flex items-center gap-1"><MessageCircle className="w-3 h-3" /> Live Chat</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-pink-400" /> Policies
-              </h4>
-              <div className="flex flex-col gap-2.5">
-                <Link to="/terms" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Terms & Conditions</Link>
-                <Link to="/privacy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Privacy Policy</Link>
-                <Link to="/refund" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Refund Policy</Link>
-                <Link to="/shipping" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Shipping Policy</Link>
-                <Link to="/cancellation" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Cancellation</Link>
-                <Link to="/event-policy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Event Policy</Link>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">Policies</h4>
+              <div className="flex flex-col gap-1.5">
+                <Link to="/terms" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Terms & Conditions</Link>
+                <Link to="/privacy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Privacy Policy</Link>
+                <Link to="/refund" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Refund Policy</Link>
+                <Link to="/shipping" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Shipping Policy</Link>
+                <Link to="/cancellation" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Cancellation</Link>
+                <Link to="/event-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Event Policy</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-body font-bold text-white text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> More
-              </h4>
-              <div className="flex flex-col gap-2.5">
-                <Link to="/intellectual-property" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">IP Policy</Link>
-                <Link to="/workshop-policy" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Workshop Policy</Link>
-                <Link to="/disclaimer" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Disclaimer</Link>
-                <Link to="/caricature-budgeting" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">Caricature Budgeting</Link>
+              <h4 className="font-body font-bold text-foreground text-sm mb-3 uppercase tracking-wider">More</h4>
+              <div className="flex flex-col gap-1.5">
+                <Link to="/intellectual-property" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">IP Policy</Link>
+                <Link to="/workshop-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Workshop Policy</Link>
+                <Link to="/disclaimer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Disclaimer</Link>
+                <Link to="/caricature-budgeting" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Caricature Budgeting</Link>
                 {settings.workshop_button?.enabled && (
-                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-white/60 font-body hover:text-white hover:translate-x-1 transition-all">{settings.workshop_button.label}</a>
+                  <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">{settings.workshop_button.label}</a>
                 )}
               </div>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-white/40 font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
+          <div className="border-t border-border/30 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
             <div className="flex items-center gap-4">
               {settings.app_download_link?.enabled === true && (
-                <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-indigo-300 hover:text-white transition-colors">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 2.223a.5.5 0 0 0-.866.5l1.39 2.412a9.481 9.481 0 0 0-4.047-.913 9.481 9.481 0 0 0-4.047.913l1.39-2.412a.5.5 0 0 0-.866-.5L9.084 4.636A9.5 9.5 0 0 0 4 13h16a9.5 9.5 0 0 0-5.084-8.364l1.607-2.413zM8.5 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm7 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM4 14h16v1a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-1z"/></svg>
-                  Download Android App
+                <a href="/app/ccc-app.apk" download className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-primary hover:text-primary/80 transition-colors">
+                  📱 Download Android App
                 </a>
               )}
-              <p className="text-xs text-white/40 font-body">
-                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:text-white font-semibold transition-colors">Akash</a>
+              <p className="text-xs text-muted-foreground font-body">
+                Design & Prompted by <a href="https://www.instagram.com/akashustle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold transition-colors">Akash</a>
               </p>
             </div>
           </div>

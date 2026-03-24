@@ -36,7 +36,7 @@ const MobileBottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
-      <div className="glass-crystal" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
+      <div className="bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
         <div className="flex items-stretch justify-evenly px-2 max-w-lg mx-auto">
           {visibleItems.map((item) => {
             const active = location.pathname === item.path;
