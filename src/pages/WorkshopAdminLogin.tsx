@@ -57,13 +57,41 @@ const WorkshopAdminLogin = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-[#f8fafc]">
-      {/* Subtle animated background */}
-      <motion.div className="absolute top-10 left-10 w-96 h-96 rounded-full opacity-[0.06] blur-[100px] bg-violet-500"
-        animate={{ scale: [1, 1.2, 1], x: [0, 40, 0] }} transition={{ duration: 12, repeat: Infinity }} />
-      <motion.div className="absolute bottom-10 right-10 w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[120px] bg-indigo-500"
-        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 14, repeat: Infinity }} />
-      <motion.div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full opacity-[0.04] blur-[80px] bg-blue-400"
-        animate={{ y: [0, -30, 0] }} transition={{ duration: 8, repeat: Infinity }} />
+      {/* Animated gradient mesh */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div className="absolute -top-1/3 -left-1/4 w-[700px] h-[700px] rounded-full opacity-[0.08] blur-[140px]"
+          style={{ background: "conic-gradient(from 0deg, #7c3aed, #6366f1, #3b82f6, #7c3aed)" }}
+          animate={{ rotate: [0, 360] }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} />
+        <motion.div className="absolute -bottom-1/3 -right-1/4 w-[600px] h-[600px] rounded-full opacity-[0.06] blur-[120px]"
+          style={{ background: "conic-gradient(from 180deg, #a855f7, #ec4899, #8b5cf6, #a855f7)" }}
+          animate={{ rotate: [360, 0] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} />
+        <motion.div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px] bg-indigo-400"
+          animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 8, repeat: Infinity }} />
+      </div>
+
+      {/* Grid dots */}
+      <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: "radial-gradient(circle, #7c3aed 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+
+      {/* Floating particles */}
+      {[...Array(10)].map((_, i) => (
+        <motion.div key={i} className="absolute pointer-events-none"
+          style={{ top: `${8 + (i * 9) % 84}%`, left: `${4 + (i * 11) % 92}%` }}
+          animate={{ y: [0, -(20 + i * 3), 0], x: [0, (i % 2 ? 10 : -10), 0], opacity: [0.1, 0.4, 0.1] }}
+          transition={{ duration: 4 + i * 0.6, repeat: Infinity, delay: i * 0.25 }}>
+          <div className="rounded-full bg-violet-500/30 shadow-[0_0_10px_rgba(124,58,237,0.2)]"
+            style={{ width: `${5 + (i % 4) * 3}px`, height: `${5 + (i % 4) * 3}px` }} />
+        </motion.div>
+      ))}
+
+      {/* Floating emojis */}
+      {["🎓", "✨", "🎨", "🌟", "📚"].map((e, i) => (
+        <motion.span key={i} className="absolute text-xl pointer-events-none select-none opacity-15"
+          style={{ top: `${15 + i * 16}%`, right: `${6 + i * 10}%` }}
+          animate={{ y: [0, -18, 0], rotate: [0, 12, -12, 0] }}
+          transition={{ duration: 5 + i, repeat: Infinity, delay: i * 0.6 }}>
+          {e}
+        </motion.span>
+      ))}
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: "easeOut" }} className="w-full max-w-md relative z-10">
         <div className="bg-white border border-slate-200/60 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden">
