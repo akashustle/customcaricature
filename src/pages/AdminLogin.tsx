@@ -421,11 +421,42 @@ const AdminLogin = () => {
             </div>
           ) : !otpStep ? (
             <form onSubmit={handleLogin} className="space-y-4">
+              {/* Admin greeting */}
+              {adminGreetName && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-2 px-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-sm font-medium text-foreground">
+                    👋 Hey <span className="text-primary font-bold">{adminGreetName}</span>, welcome back!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Please enter your credentials to continue</p>
+                </motion.div>
+              )}
+
+              {/* Login with Email or Mobile */}
               <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground font-medium">Email</Label>
+                <Label className="text-sm text-muted-foreground font-medium">Login With</Label>
+                <Select value={loginField} onValueChange={(v: any) => { setLoginField(v); setAdminGreetName(null); setEmail(""); }}>
+                  <SelectTrigger className="h-10 rounded-xl bg-background/60 border-border/60">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email"><span className="flex items-center gap-2"><Mail className="w-4 h-4" /> Email</span></SelectItem>
+                    <SelectItem value="mobile"><span className="flex items-center gap-2">📱 Mobile Number</span></SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground font-medium">{loginField === "email" ? "Email" : "Mobile Number"}</Label>
                 <div className="relative group">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@email.com" required
+                  <Input 
+                    type={loginField === "email" ? "email" : "tel"} 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    onBlur={(e) => lookupAdminName(e.target.value)}
+                    placeholder={loginField === "email" ? "admin@email.com" : "10-digit mobile"} 
+                    required
                     className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
                 </div>
               </div>
