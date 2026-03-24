@@ -917,59 +917,56 @@ const WorkshopAdmin = () => {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
                     <div className="flex items-center gap-2">
+                      {/* Admin Profile - Desktop */}
+                      <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
+                        className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-200/50 hover:shadow-md transition-all">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                          {adminInfo?.name?.[0]?.toUpperCase() || "A"}
+                        </div>
+                        <div className="text-left">
+                          <p className="text-xs font-semibold text-foreground leading-none">{adminInfo?.name || "Admin"}</p>
+                          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{adminInfo?.email}</p>
+                        </div>
+                      </button>
                       <div className="hidden lg:block w-72">
-                        <AdminSmartSearch
-                          panelType="workshop"
-                          tabs={[
-                            { id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" },
-                            { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" },
-                            { id: "live", label: "Live Sessions" },
-                          ]}
-                          onNavigate={(t, highlightId) => {
-                            setTab(t);
-                            if (highlightId) {
-                              setTimeout(() => {
-                                const el = document.querySelector(`[data-search-id="${highlightId}"]`);
-                                if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); }
-                              }, 300);
-                            }
-                          }}
+                        <AdminSmartSearch panelType="workshop"
+                          tabs={[{ id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
+                          onNavigate={(t, highlightId) => { setTab(t); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
                         />
                       </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
-                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}>
-                          <SelectValue placeholder="Select Workshop" />
-                        </SelectTrigger>
+                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="current">Current (Active)</SelectItem>
                           {allWorkshops.map((ws: any) => (
-                            <SelectItem key={ws.id} value={ws.id}>
-                              {ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}
-                            </SelectItem>
+                            <SelectItem key={ws.id} value={ws.id}>{ws.title} {ws.is_active ? "✅" : ws.status === "upcoming" ? "🔜" : "📦"}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <RefreshButton />
                     </div>
                   </div>
+                  {/* 3D Stat Widgets */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Users", value: filteredUsers.length, icon: Users, color: "from-[#b08d57] to-[#c9a96e]" },
-                      { label: "Online Reg", value: registeredOnline.length, icon: Users, color: "from-[#7c9885] to-[#a8c0a0]" },
-                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, color: "from-[#d4a574] to-[#e8c9a8]" },
-                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, color: "from-[#c9a96e] to-[#e0c590]" },
-                      { label: "Videos", value: filteredVideos.length, icon: Video, color: "from-[#7c9885] to-[#9bb5a5]" },
-                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, color: "from-[#d98c8c] to-[#e8a8a8]" },
-                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, color: "from-[#8fa3bf] to-[#b0c4d8]" },
-                      { label: "Certificates", value: filteredCertificates.length, icon: Award, color: "from-[#a09080] to-[#c0b0a0]" },
+                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-500 to-violet-600", light: "from-violet-50 to-violet-100", accent: "border-l-violet-500" },
+                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-500 to-emerald-600", light: "from-emerald-50 to-emerald-100", accent: "border-l-emerald-500" },
+                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-amber-600", light: "from-amber-50 to-amber-100", accent: "border-l-amber-500" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-500 to-blue-600", light: "from-blue-50 to-blue-100", accent: "border-l-blue-500" },
+                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-500 to-pink-600", light: "from-pink-50 to-pink-100", accent: "border-l-pink-500" },
+                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-500 to-red-600", light: "from-red-50 to-red-100", accent: "border-l-red-500" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-500 to-indigo-600", light: "from-indigo-50 to-indigo-100", accent: "border-l-indigo-500" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-500 to-fuchsia-600", light: "from-fuchsia-50 to-fuchsia-100", accent: "border-l-fuchsia-500" },
                     ].map((s) => (
-                      <GlassCard key={s.label} className="!p-4">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-2`}>
+                      <motion.div key={s.label} whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}
+                        className={`bg-gradient-to-br ${s.light} border border-l-4 ${s.accent} rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all`}>
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-2 shadow-md`}>
                           <s.icon className="w-5 h-5 text-white" />
                         </div>
-                        <p className={`text-2xl ${textPrimary}`}>{s.value}</p>
-                        <p className={`${textSecondary} text-xs`}>{s.label}</p>
-                      </GlassCard>
+                        <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                        <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+                      </motion.div>
+                    ))}
                     ))}
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
