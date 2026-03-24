@@ -52,7 +52,7 @@ const AdminHomepageControl = () => {
         "homepage_hero", "homepage_video", "homepage_social_proof",
         "homepage_what_you_get", "homepage_why_us", "homepage_use_cases",
         "homepage_smart_help", "homepage_sticky_cta", "homepage_urgency",
-        "homepage_instant_quote"
+        "homepage_instant_quote", "homepage_sections", "homepage_funnel_config"
       ];
       const { data } = await supabase.from("admin_site_settings").select("id, value").in("id", keys);
       if (data) {
