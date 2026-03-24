@@ -256,22 +256,31 @@ const Dashboard = () => {
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full shadow-md" />
-            <h1 className="font-calligraphy text-xl font-bold text-gradient">My Dashboard</h1>
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      {/* App-style header */}
+      <header className="sticky top-0 z-40 app-header border-b border-border/30">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-2xl shadow-md border border-border/30" />
+            <div>
+              <h1 className="font-display text-lg font-bold text-foreground leading-tight">Dashboard</h1>
+              <p className="text-[10px] text-muted-foreground font-sans leading-none">Welcome back!</p>
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <NotificationBell />
-            <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans"><RefreshCw className="w-4 h-4" /></Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans"><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
+            <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans h-9 w-9 p-0 rounded-xl">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans h-9 w-9 p-0 rounded-xl md:w-auto md:px-3">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:inline ml-1">Logout</span>
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-2xl">
         <LiveGreeting name={profile?.full_name} />
 
         {/* Payment Reminders */}
@@ -280,30 +289,28 @@ const Dashboard = () => {
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        {/* Stat cards — app-style */}
+        <div className="grid grid-cols-3 gap-2.5 mb-5">
           {[
-            { label: "Total Orders", value: orders.length, icon: Package, gradient: "from-blue-500 to-indigo-500", bgGradient: "from-blue-500/10 to-indigo-500/5" },
-            { label: "Events", value: events.length, icon: CalIcon, gradient: "from-violet-500 to-purple-500", bgGradient: "from-violet-500/10 to-purple-500/5" },
-            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, gradient: "from-emerald-500 to-green-500", bgGradient: "from-emerald-500/10 to-green-500/5" },
+            { label: "Orders", value: orders.length, icon: Package, color: "from-blue-500/15 to-indigo-500/5", iconBg: "bg-blue-500" },
+            { label: "Events", value: events.length, icon: CalIcon, color: "from-violet-500/15 to-purple-500/5", iconBg: "bg-violet-500" },
+            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, color: "from-emerald-500/15 to-green-500/5", iconBg: "bg-emerald-500" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
+              transition={{ delay: i * 0.06 }}
             >
-              <Card className="overflow-hidden relative border border-border/60 hover:border-border transition-all hover:shadow-md">
-                <div className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} pointer-events-none`} />
-                <CardContent className="p-3 relative">
-                  <div className="text-center">
-                    <div className={`w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center bg-gradient-to-br ${s.gradient} shadow-md`}>
-                      <s.icon className="w-4 h-4 text-white" />
-                    </div>
-                    <p className="text-2xl font-bold font-display animate-count-up">{s.value}</p>
-                    <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+              <div className={`app-card p-3 bg-gradient-to-br ${s.color}`}>
+                <div className="text-center">
+                  <div className={`w-8 h-8 rounded-xl mx-auto mb-2 flex items-center justify-center ${s.iconBg} shadow-md`}>
+                    <s.icon className="w-3.5 h-3.5 text-white" />
                   </div>
-                </CardContent>
-              </Card>
+                  <p className="text-xl font-bold font-display">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
