@@ -829,6 +829,7 @@ const Admin = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans rounded-xl">
