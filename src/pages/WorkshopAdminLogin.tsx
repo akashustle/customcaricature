@@ -294,12 +294,21 @@ const WorkshopAdminLogin = () => {
                           <SelectItem key={admin.email} value={admin.email}
                             className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
                             style={{ color: BRAND.primary }}>
-                            <div className="flex flex-col gap-0.5 py-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                            <div className="flex items-center gap-3 py-1">
+                              {adminAvatars[admin.email] ? (
+                                <img src={adminAvatars[admin.email]} alt={admin.name} className="w-8 h-8 rounded-full object-cover border-2" style={{ borderColor: BRAND.light }} />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>
+                                  {admin.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
+                                  <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                                </div>
+                                <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                               </div>
-                              <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
