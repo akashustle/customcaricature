@@ -178,9 +178,9 @@ const AdminLogin = () => {
         }
       } else if (authMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) },
+          body: { email: selectedAdmin.email, secret_code: secretCode },
         });
-        if (error || !data?.success) throw new Error("Secret code login failed");
+        if (error || !data?.success) throw new Error(data?.error || "Secret code login failed");
         const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
         if (vErr) throw vErr;
       } else {
