@@ -83,18 +83,31 @@ const DatabaseEntryReversal = () => {
     if (attempts >= 3) { setLocked(true); setLockTimer(600); toast({ title: "Locked for 10 minutes", variant: "destructive" }); return; }
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { toast({ title: "Login required", variant: "destructive" }); setLoading(false); return; }
-      const res = await supabase.functions.invoke("reversal-restore", {
-        body: { action: "verify_access", code: accessCode },
-      });
-      if (res.data?.success) {
+      // Verify access code client-side (code: 01022006)
+      const normalizedCode = accessCode.replace(/[-\s]/g, "");
+      if (normalizedCode === "01022006") {
+        // Try to log access attempt (non-blocking)
+        try {
+          await supabase.from("reversal_access_logs" as any).insert({
+            ip_address: "client",
+            device: navigator.userAgent?.slice(0, 200) || "unknown",
+            status: "success",
+          });
+        } catch {}
         setAuthenticated(true);
         setSessionTimer(900);
         fetchLogs();
         fetchAccessLogs();
         toast({ title: "Access Granted ✅" });
       } else {
+        // Log failed attempt (non-blocking)
+        try {
+          await supabase.from("reversal_access_logs" as any).insert({
+            ip_address: "client",
+            device: navigator.userAgent?.slice(0, 200) || "unknown",
+            status: "fail",
+          });
+        } catch {}
         setAttempts(p => p + 1);
         toast({ title: `Invalid code (${3 - attempts - 1} attempts left)`, variant: "destructive" });
       }
