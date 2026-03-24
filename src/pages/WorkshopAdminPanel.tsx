@@ -579,22 +579,22 @@ const WorkshopAdmin = () => {
   const marksDistribution = [{ name: "0-40", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 <= 40).length }, { name: "41-60", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 40 && (a.marks/(a.total_marks||100))*100 <= 60).length }, { name: "61-80", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 60 && (a.marks/(a.total_marks||100))*100 <= 80).length }, { name: "81-100", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 80).length }].filter(d => d.value > 0);
   const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: filteredUsers.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
 
-  // Theme
+  // Theme — Premium SaaS aesthetic
   const dm = darkMode;
-  const bg = dm ? "bg-[#0f0d08]" : "bg-gradient-to-br from-slate-50 via-white to-violet-50/30";
-  const cardBg = dm ? "bg-[#1e1b16]/90 border-[#3a3428]/60" : "bg-white/90 border-violet-100/60";
-  const textPrimary = dm ? "text-white font-semibold" : "text-foreground font-semibold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-muted-foreground font-medium";
-  const textMuted = dm ? "text-white/40" : "text-muted-foreground/70";
-  const sidebarBg = dm ? "bg-[#16111f]/95 border-[#2a2040]" : "bg-white/90 border-violet-100/60";
-  const activeTabClass = "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-300/30 font-bold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-violet-50";
-  const btnPrimary = "bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-md font-bold";
-  const inputClass = dm ? "bg-white/10 border-white/20 text-white font-medium placeholder:text-white/30" : "bg-white border-violet-100 text-foreground font-medium placeholder:text-muted-foreground rounded-xl";
+  const bg = dm ? "bg-[#0a0a0f]" : "bg-[#f8fafc]";
+  const cardBg = dm ? "bg-[#141420]/95 border-white/[0.06]" : "bg-white border-slate-200/60";
+  const textPrimary = dm ? "text-white font-semibold" : "text-slate-900 font-semibold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-slate-500 font-medium";
+  const textMuted = dm ? "text-white/35" : "text-slate-400";
+  const sidebarBg = dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/95 border-slate-200/60";
+  const activeTabClass = "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold";
+  const inactiveTab = dm ? "text-white/40 hover:text-white/80 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50";
+  const btnPrimary = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 font-semibold";
+  const inputClass = dm ? "bg-white/[0.06] border-white/[0.08] text-white font-medium placeholder:text-white/25 rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20" : "bg-slate-50/80 border-slate-200 text-slate-900 font-medium placeholder:text-slate-400 rounded-xl focus:border-violet-500 focus:ring-violet-500/20";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-      className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-lg shadow-violet-100/20 hover:shadow-xl transition-all ${className}`}>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}
+      className={`${cardBg} border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 ${className}`}>
       {children}
     </motion.div>
   );
