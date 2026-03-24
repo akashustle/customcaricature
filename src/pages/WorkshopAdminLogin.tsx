@@ -127,7 +127,7 @@ const WorkshopAdminLogin = () => {
         if (error) throw error;
         if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
           await supabase.auth.signOut();
-          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: adminMasterSecret.slice(0, 4) } });
+          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: adminMasterSecret } });
           if (scErr || !data?.success) throw new Error("Could not sign in");
           const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
           if (vErr) throw vErr;
