@@ -378,12 +378,12 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
       {/* Stats Widgets - 3D Flashcard Style */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {[
-          { icon: Calendar, label: "Total Events", value: String(events.length), gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500" },
-          { icon: TrendingUp, label: "Upcoming", value: String(upcoming), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
-          { icon: Settings, label: "Completed", value: String(completed), gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500" },
-          { icon: X, label: "Cancelled", value: String(cancelled), gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500" },
-          { icon: MapPin, label: "Mumbai", value: String(mumbaiEvents), gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500" },
-          { icon: MapPin, label: "Outside", value: String(outsideEvents), gradient: "from-cyan-50 to-teal-50", iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500" },
+          { icon: Calendar, label: "Total Events", value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500" },
+          { icon: TrendingUp, label: "Upcoming", value: upcoming, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
+          { icon: Settings, label: "Completed", value: completed, gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500" },
+          { icon: X, label: "Cancelled", value: cancelled, gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500" },
+          { icon: MapPin, label: "Mumbai", value: mumbaiEvents, gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500" },
+          { icon: MapPin, label: "Pan India", value: outsideEvents, gradient: "from-cyan-50 to-teal-50", iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500" },
         ].map((w, i) => (
           <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
@@ -396,8 +396,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <w.icon className="w-4 h-4 text-white" />
                   </div>
                 </div>
-                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
+                <p className="text-lg font-extrabold text-foreground leading-tight truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
               </div>
             </div>
           </motion.div>

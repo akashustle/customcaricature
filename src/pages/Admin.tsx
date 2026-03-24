@@ -98,6 +98,7 @@ import AdminCoupons from "@/components/admin/AdminCoupons";
 import AdminMaintenance from "@/components/admin/AdminMaintenance";
 import AdminInvoices from "@/components/admin/AdminInvoices";
 import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
+import AdminCalendar from "@/components/admin/AdminCalendar";
 
 type Order = {
   id: string;
@@ -1794,6 +1795,10 @@ const Admin = () => {
 
           <TabsContent value="feature-gating">
             <AdminFeatureGating />
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <AdminCalendar />
           </TabsContent>
 
           <TabsContent value="maintenance">
