@@ -41,6 +41,7 @@ const WorkshopPolicy = () => {
         <motion.p {...fadeUp(0.37)}>For workshop queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a> or WhatsApp at <a href="https://wa.me/918369594271" className="text-primary hover:underline">+91 8369594271</a>.</motion.p>
       </motion.div>
     </div>
+    </>
   );
 };
 

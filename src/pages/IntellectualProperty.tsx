@@ -39,6 +39,7 @@ const IntellectualProperty = () => {
         <motion.p {...fadeUp(0.32)}>For IP-related queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a>.</motion.p>
       </motion.div>
     </div>
+    </>
   );
 };
 
