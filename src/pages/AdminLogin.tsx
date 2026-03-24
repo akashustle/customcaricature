@@ -420,7 +420,7 @@ const AdminLogin = () => {
                           <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••" required
                             className="pl-10 pr-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            autoFocus />
+                            />
                           <button type="button" onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -438,7 +438,7 @@ const AdminLogin = () => {
                             onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
                             placeholder="• • • • • •" maxLength={8}
                             className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-primary"
-                            autoFocus />
+                            />
                         </div>
                       </div>
                     )}
@@ -461,7 +461,7 @@ const AdminLogin = () => {
                                 onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
                                 placeholder="• • • • • •" maxLength={6}
                                 className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-background/60 border-border/60 rounded-xl"
-                                autoFocus />
+                                />
                             </div>
                             <div className="text-center">
                               <button type="button" onClick={async () => {
