@@ -47,7 +47,15 @@ const Register = () => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  const update = (field: string, value: string) => {
+  // Persist form data to localStorage (exclude passwords)
+  useEffect(() => {
+    const { password, confirmPassword, ...safe } = form;
+    localStorage.setItem(REGISTER_STORAGE_KEY, JSON.stringify({ ...safe, _step: step }));
+  }, [form, step]);
+
+  // Clear draft on successful registration
+  const clearDraft = () => localStorage.removeItem(REGISTER_STORAGE_KEY);
+
     setForm(prev => ({ ...prev, [field]: value }));
     if (field === "email") {
       setEmailError(validateEmailFormat(value) || "");
