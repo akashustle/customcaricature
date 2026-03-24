@@ -25,6 +25,8 @@ const AdminLogin = () => {
   const [otpVerifyMethod, setOtpVerifyMethod] = useState<"otp" | "secret">("otp");
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
+  const [loginField, setLoginField] = useState<"email" | "mobile">("email");
+  const [adminGreetName, setAdminGreetName] = useState<string | null>(null);
   const [resendingOtp, setResendingOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [sessionLimitReached, setSessionLimitReached] = useState(false);
