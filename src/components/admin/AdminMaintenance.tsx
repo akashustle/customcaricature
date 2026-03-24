@@ -55,22 +55,26 @@ const AdminMaintenance = () => {
 
   useEffect(() => { fetchSettings(); }, []);
 
-  // Auto-disable maintenance when estimated_end passes
+  // Auto-disable maintenance when estimated_end passes - check every 10 seconds
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(async () => {
       const now = new Date();
+      let changed = false;
       for (const s of settings) {
         if (s.is_enabled && s.estimated_end) {
           const end = new Date(s.estimated_end);
           if (end <= now) {
-            await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: now.toISOString() } as any).eq("id", s.id);
-            toast({ title: `${s.id} maintenance auto-disabled`, description: "Scheduled end time reached." });
-            fetchSettings();
+            const { error } = await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: now.toISOString() } as any).eq("id", s.id);
+            if (!error) {
+              toast({ title: `✅ ${s.id} maintenance auto-disabled`, description: "Scheduled end time reached." });
+              changed = true;
+            }
           }
         }
       }
-    }, 30000); // check every 30s
+      if (changed) fetchSettings();
+    }, 10000); // check every 10s for faster response
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [settings]);
 

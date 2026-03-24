@@ -81,8 +81,8 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
     };
     check();
 
-    // Re-check periodically for auto-disable
-    const iv = setInterval(check, 30000);
+    // Re-check every 10s for auto-disable
+    const iv = setInterval(check, 10000);
     return () => clearInterval(iv);
   }, [pageId, user]);
 
