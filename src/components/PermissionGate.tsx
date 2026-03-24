@@ -61,42 +61,45 @@ const PermissionGate = () => {
   const handleAllow = async () => {
     setRequesting(true);
 
-    // Request all permissions in parallel where possible
-    const locationPromise = new Promise<void>((resolve) => {
-      setCurrentStep("location");
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocationStatus("granted");
-          try {
-            localStorage.setItem("ccc_user_location", JSON.stringify({
-              lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now()
-            }));
-          } catch {}
-          resolve();
-        },
-        () => { setLocationStatus("denied"); resolve(); },
-        { timeout: 5000, enableHighAccuracy: false } // Faster with lower accuracy
-      );
-    });
-
-    await locationPromise;
-
-    // Notifications
-    setCurrentStep("notifications");
-    try {
-      const perm = await requestBrowserNotificationPermission(user?.id);
-      setNotificationStatus(perm === "unsupported" ? "unsupported" : perm);
-    } catch {}
-
-    // Microphone
-    setCurrentStep("microphone");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setMicStatus("granted");
-      stream.getTracks().forEach(t => t.stop());
-    } catch {
-      setMicStatus("denied");
-    }
+    // Request all permissions in parallel for speed
+    const results = await Promise.allSettled([
+      // Location
+      new Promise<void>((resolve) => {
+        setCurrentStep("location");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setLocationStatus("granted");
+            try {
+              localStorage.setItem("ccc_user_location", JSON.stringify({
+                lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: Date.now()
+              }));
+            } catch {}
+            resolve();
+          },
+          () => { setLocationStatus("denied"); resolve(); },
+          { timeout: 3000, enableHighAccuracy: false }
+        );
+      }),
+      // Notifications
+      (async () => {
+        setCurrentStep("notifications");
+        try {
+          const perm = await requestBrowserNotificationPermission(user?.id);
+          setNotificationStatus(perm === "unsupported" ? "unsupported" : perm);
+        } catch {}
+      })(),
+      // Microphone
+      (async () => {
+        setCurrentStep("microphone");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          setMicStatus("granted");
+          stream.getTracks().forEach(t => t.stop());
+        } catch {
+          setMicStatus("denied");
+        }
+      })(),
+    ]);
 
     setCurrentStep(null);
     setRequesting(false);

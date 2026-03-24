@@ -144,10 +144,6 @@ const AdminLogin = () => {
     if (authMethod === "secret_code") {
       const norm = secretCode.replace(/[-\s]/g, "");
       if (norm.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
-      if (norm !== adminMasterSecret) {
-        setFailedAttempts(p => p + 1);
-        toast({ title: "Invalid secret code", variant: "destructive" }); return;
-      }
     }
     if (failedAttempts >= 3 && authMethod !== "otp") { setAuthMethod("otp"); return; }
     if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
@@ -188,9 +184,12 @@ const AdminLogin = () => {
         if (vErr) throw vErr;
       } else if (authMethod === "secret_code") {
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: selectedAdmin.email, secret_code: secretCode },
+          body: { email: selectedAdmin.email, secret_code: secretCode.replace(/[-\s]/g, "") },
         });
-        if (error || !data?.success) throw new Error(data?.error || "Secret code login failed");
+        if (error || !data?.success) {
+          setFailedAttempts(p => p + 1);
+          throw new Error(data?.error || "Secret code login failed");
+        }
         const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
         if (vErr) throw vErr;
       } else {

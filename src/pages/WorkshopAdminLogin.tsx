@@ -49,6 +49,19 @@ const WorkshopAdminLogin = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
   const [locationGranted, setLocationGranted] = useState(false);
+  const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const avatars: Record<string, string> = {};
+      for (const admin of ADMIN_LIST) {
+        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
+        if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
+      }
+      setAdminAvatars(avatars);
+    };
+    fetchAvatars();
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_admin");
@@ -105,7 +118,6 @@ const WorkshopAdminLogin = () => {
     if (authMethod === "secret_code") {
       const norm = secretCode.replace(/[-\s]/g, "");
       if (norm.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
-      if (norm !== adminMasterSecret) { setFailedAttempts(p => p + 1); toast({ title: "Invalid secret code", variant: "destructive" }); return; }
     }
     if (failedAttempts >= 3 && authMethod !== "otp") { setAuthMethod("otp"); return; }
     if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
@@ -128,14 +140,14 @@ const WorkshopAdminLogin = () => {
         if (error) throw error;
         if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
           await supabase.auth.signOut();
-          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: adminMasterSecret.slice(0, 4) } });
+          const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: adminMasterSecret } });
           if (scErr || !data?.success) throw new Error("Could not sign in");
           const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
           if (vErr) throw vErr;
         }
       } else if (authMethod === "secret_code") {
-        const { data, error } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) } });
-        if (error || !data?.success) throw new Error("Secret code login failed");
+        const { data, error } = await supabase.functions.invoke("login-with-secret-code", { body: { email: selectedAdmin.email, secret_code: secretCode.replace(/[-\s]/g, "") } });
+        if (error || !data?.success) { setFailedAttempts(p => p + 1); throw new Error(data?.error || "Secret code login failed"); }
         const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
         if (vErr) throw vErr;
       } else {
@@ -282,12 +294,21 @@ const WorkshopAdminLogin = () => {
                           <SelectItem key={admin.email} value={admin.email}
                             className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
                             style={{ color: BRAND.primary }}>
-                            <div className="flex flex-col gap-0.5 py-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                            <div className="flex items-center gap-3 py-1">
+                              {adminAvatars[admin.email] ? (
+                                <img src={adminAvatars[admin.email]} alt={admin.name} className="w-8 h-8 rounded-full object-cover border-2" style={{ borderColor: BRAND.light }} />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>
+                                  {admin.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
+                                  <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                                </div>
+                                <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                               </div>
-                              <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -343,7 +364,11 @@ const WorkshopAdminLogin = () => {
                           <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.light})` }} />
                           <div className="relative w-full h-full rounded-full overflow-hidden shadow-xl flex items-center justify-center"
                             style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 15px ${BRAND.accent}25` }}>
-                            <User className="w-8 h-8" style={{ color: BRAND.accent }} />
+                            {adminAvatars[selectedAdmin.email] ? (
+                              <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-8 h-8" style={{ color: BRAND.accent }} />
+                            )}
                           </div>
                         </motion.div>
                         <p className="text-lg font-black" style={{ color: BRAND.primary }}>Welcome, {selectedAdmin.name}! 🎓</p>
