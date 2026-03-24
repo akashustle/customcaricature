@@ -136,8 +136,25 @@ const AdminAIChatConversations = () => {
 
   if (loading) return <p className="text-center text-muted-foreground py-10 font-sans">Loading...</p>;
 
-  // Session detail view
-  if (selectedSession) {
+  return (
+    <>
+      {/* Admin Name Prompt Dialog */}
+      <Dialog open={showNamePrompt} onOpenChange={setShowNamePrompt}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><LogIn className="w-5 h-5" /> Join Chat as Admin</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Enter your name to join this conversation. A message will be shown to the user.</p>
+            <Input value={adminName} onChange={e => setAdminName(e.target.value)} placeholder="Your name (e.g. Akash)" className="h-10"
+              onKeyDown={e => { if (e.key === "Enter") confirmJoinChat(); }} autoFocus />
+            <Button onClick={confirmJoinChat} disabled={!adminName.trim()} className="w-full gap-2">
+              <MessageCircle className="w-4 h-4" /> Join Chat
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Session detail view */}
+      {selectedSession ? (() => {
     const session = sessions.find(s => s.id === selectedSession);
     return (
       <div className="space-y-4">
