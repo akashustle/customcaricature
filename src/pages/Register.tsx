@@ -56,6 +56,7 @@ const Register = () => {
   // Clear draft on successful registration
   const clearDraft = () => localStorage.removeItem(REGISTER_STORAGE_KEY);
 
+  const update = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     if (field === "email") {
       setEmailError(validateEmailFormat(value) || "");
