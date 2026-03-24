@@ -8,7 +8,7 @@ import { requestBrowserNotificationPermission } from "@/lib/webpush";
 import { motion, AnimatePresence } from "framer-motion";
 
 const GATE_KEY = "ccc_permissions_gate_v3";
-const DELAY_MS = 2500; // Reduced from 5s to 2.5s for faster UX
+const DELAY_MS = 20000; // 20 seconds delay as requested
 
 const PermissionGate = () => {
   const { user } = useAuth();
