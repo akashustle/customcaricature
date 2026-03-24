@@ -224,7 +224,7 @@ const WorkshopDashboard = () => {
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-card/60 border-border/40"} border rounded-2xl p-1.5 flex gap-1 shadow-sm`}>
+        <div className={`backdrop-blur-xl ${dm ? "bg-white/5 border-white/10" : "bg-white/70 border-violet-100/50"} border rounded-2xl p-1.5 flex gap-1 shadow-sm`}>
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
