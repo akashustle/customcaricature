@@ -1327,6 +1327,21 @@ const WorkshopAdmin = () => {
                                 </div>
                               </DialogContent>
                             </Dialog>
+
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs text-destructive hover:bg-destructive/10"
+                              onClick={async () => {
+                                const { error } = await supabase.from("workshop_live_session_requests" as any).delete().eq("id", r.id);
+                                if (error) { toast({ title: "Delete failed", variant: "destructive" }); return; }
+                                await logAction("delete_live_request", `Deleted request from ${u?.name || r.user_id}`);
+                                toast({ title: "Request deleted" });
+                                fetchLiveRequests();
+                              }}
+                            >
+                              🗑️ Delete
+                            </Button>
                           </div>
                         </div>
                       </GlassCard>
