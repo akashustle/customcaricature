@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +9,8 @@ const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { 
 const WorkshopPolicy = () => {
   const navigate = useNavigate();
   return (
+    <>
+    <SEOHead title="Workshop Policy" description="Workshop terms, conditions and policies for Creative Caricature Club caricature workshops." canonical="/workshop-policy" />
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
@@ -38,6 +41,7 @@ const WorkshopPolicy = () => {
         <motion.p {...fadeUp(0.37)}>For workshop queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a> or WhatsApp at <a href="https://wa.me/918369594271" className="text-primary hover:underline">+91 8369594271</a>.</motion.p>
       </motion.div>
     </div>
+    </>
   );
 };
 

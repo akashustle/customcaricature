@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -116,6 +117,8 @@ const Login = () => {
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 1)); };
 
   return (
+    <>
+    <SEOHead title="Login" description="Login to Creative Caricature Club to manage orders, events and workshops." canonical="/login" noindex />
     <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-background">
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.06), transparent 60%)" }} />
 
@@ -247,6 +250,7 @@ const Login = () => {
         <p className="text-center text-xs text-muted-foreground/60 mt-3 font-sans">Creative Caricature Club © {new Date().getFullYear()}</p>
       </motion.div>
     </div>
+    </>
   );
 };
 

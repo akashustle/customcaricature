@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +9,8 @@ const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { 
 const IntellectualProperty = () => {
   const navigate = useNavigate();
   return (
+    <>
+    <SEOHead title="Intellectual Property" description="Intellectual property policy for Creative Caricature Club artwork and designs." canonical="/intellectual-property" />
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
@@ -36,6 +39,7 @@ const IntellectualProperty = () => {
         <motion.p {...fadeUp(0.32)}>For IP-related queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a>.</motion.p>
       </motion.div>
     </div>
+    </>
   );
 };
 
