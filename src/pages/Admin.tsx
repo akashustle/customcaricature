@@ -1797,6 +1797,10 @@ const Admin = () => {
             <AdminFeatureGating />
           </TabsContent>
 
+          <TabsContent value="calendar">
+            <AdminCalendar />
+          </TabsContent>
+
           <TabsContent value="maintenance">
             <AdminMaintenance />
           </TabsContent>

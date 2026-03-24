@@ -396,8 +396,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                     <w.icon className="w-4 h-4 text-white" />
                   </div>
                 </div>
-                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
+                <p className="text-lg font-extrabold text-foreground leading-tight truncate">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium truncate">{w.label}</p>
               </div>
             </div>
           </motion.div>
