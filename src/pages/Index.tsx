@@ -359,10 +359,6 @@ const Index = () => {
               </motion.div>
             </motion.div>
 
-            {/* Mobile: Logo */}
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-border bg-card p-1 shadow-lg lg:hidden"
-              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
           </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
