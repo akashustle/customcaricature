@@ -91,6 +91,39 @@ const AdminHomepageControl = () => {
   const stickyCta = settings.homepage_sticky_cta || {};
   const urgency = settings.homepage_urgency || {};
   const instantQuote = settings.homepage_instant_quote || {};
+  const homepageSections = settings.homepage_sections || {};
+  const funnelConfig = settings.homepage_funnel_config || {};
+
+  const SECTION_LIST = [
+    { id: "instant_quote", label: "Instant Quote", hint: "CTA card with pricing link" },
+    { id: "social_proof", label: "Social Proof", hint: "Stats counters (events, clients)" },
+    { id: "video", label: "Video Section", hint: "YouTube or custom video" },
+    { id: "enquiry_funnel", label: "Smart Enquiry Funnel", hint: "Step-by-step booking flow" },
+    { id: "portfolio_gallery", label: "Portfolio Gallery", hint: "Infinite scroll artwork" },
+    { id: "what_you_get", label: "What You Get", hint: "Service benefits list" },
+    { id: "how_it_works", label: "How It Works", hint: "3-step process cards" },
+    { id: "scroll_events", label: "Scroll Event Gallery", hint: "Auto-scrolling event photos" },
+    { id: "services", label: "Our Services", hint: "Service cards with CTAs" },
+    { id: "use_cases", label: "Use Cases", hint: "Wedding, Birthday, Corporate" },
+    { id: "styles", label: "Our Styles", hint: "Caricature style cards" },
+    { id: "why_us", label: "Why Choose Us", hint: "Trust points list" },
+    { id: "reviews", label: "Reviews", hint: "Customer testimonials" },
+    { id: "trusted_brands", label: "Trusted Brands", hint: "Brand logos carousel" },
+    { id: "event_gallery", label: "Event Gallery Page", hint: "Dedicated event gallery" },
+    { id: "caricature_gallery", label: "Caricature Gallery", hint: "Custom art gallery" },
+    { id: "before_after", label: "Before & After", hint: "Photo vs caricature slider" },
+    { id: "smart_help", label: "Smart Help", hint: "WhatsApp + Instagram links" },
+  ];
+
+  const toggleSection = (sectionId: string, visible: boolean) => {
+    const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), visible } };
+    updateSetting("homepage_sections", updated);
+  };
+
+  const setSectionMessage = (sectionId: string, message: string) => {
+    const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), message } };
+    updateSetting("homepage_sections", updated);
+  };
 
   return (
     <div className="space-y-6 admin-panel-font">
