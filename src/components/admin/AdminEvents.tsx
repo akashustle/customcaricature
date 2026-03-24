@@ -357,7 +357,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [drillDown, setDrillDown] = useState<{ title: string; data: EventBooking[] } | null>(null);
 
   const drillDownSets = [
-    { label: "Total Events", icon: CalendarIcon, value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500", filter: () => true },
+    { label: "Total", icon: CalendarIcon, value: events.length, gradient: "from-indigo-50 to-blue-50", iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500", filter: () => true },
     { label: "Upcoming", icon: TrendingUp, value: upcoming, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500", filter: (e: EventBooking) => e.status === "upcoming" },
     { label: "Completed", icon: Settings, value: completed, gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500", filter: (e: EventBooking) => e.status === "completed" },
     { label: "Cancelled", icon: X, value: cancelled, gradient: "from-rose-50 to-red-50", iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500", filter: (e: EventBooking) => e.status === "cancelled" },
@@ -435,15 +435,15 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
             onClick={() => setDrillDown({ title: w.label, data: events.filter(w.filter) })}>
             <div className="relative overflow-hidden rounded-2xl bg-white border border-white/60 shadow-lg hover:shadow-xl transition-all" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,255,255,0.88))" }}>
               <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} opacity-10 blur-xl`} />
-              <div className="p-4 relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
-                    <w.icon className="w-5 h-5 text-white" />
+              <div className="p-3 relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-4 h-4 text-white" />
                   </div>
-                  <Eye className="w-3.5 h-3.5 text-muted-foreground/30" />
+                  <Eye className="w-3 h-3 text-muted-foreground/30" />
                 </div>
-                <p className="text-2xl font-extrabold text-foreground tracking-tight">{w.value}</p>
-                <p className="text-[10px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider truncate">{w.label}</p>
+                <p className="text-xl font-extrabold text-foreground tracking-tight leading-none">{w.value}</p>
+                <p className="text-[9px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider truncate overflow-hidden whitespace-nowrap">{w.label}</p>
               </div>
             </div>
           </motion.div>
