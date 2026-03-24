@@ -36,6 +36,7 @@ const NAV_SECTIONS = [
       { id: "revenue", icon: DollarSign, label: "Revenue", color: "from-emerald-500 to-teal-500" },
       { id: "revenue-target", icon: Target, label: "₹10L Target", color: "from-amber-500 to-yellow-500" },
       { id: "ai-intelligence", icon: Zap, label: "AI Insights", color: "from-purple-500 to-pink-500" },
+      { id: "calendar", icon: CalendarDays, label: "Calendar", color: "from-rose-500 to-pink-500" },
     ],
   },
   {
