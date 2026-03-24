@@ -109,11 +109,16 @@ const WorkshopAdminLogin = () => {
 
           <div className="relative p-8 space-y-6">
             <div className="text-center space-y-3">
-              <motion.div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-black/[0.04] shadow-lg"
-                animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity }}>
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")} />
+              <motion.div className="mx-auto w-18 h-18 rounded-2xl overflow-hidden relative"
+                animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity }}
+                whileHover={{ scale: 1.1, rotateY: 15 }}>
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-violet-500/40 to-indigo-500/30 blur-sm" />
+                <img src="/logo.png" alt="CCC" className="relative w-16 h-16 object-cover cursor-pointer rounded-2xl ring-2 ring-white/50 shadow-lg" onClick={() => navigate("/")} />
               </motion.div>
-              <p className="text-sm font-medium text-violet-600">{getGreeting()}</p>
+              <motion.p className="text-sm font-semibold text-violet-600"
+                initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                {getGreeting()}
+              </motion.p>
               <div className="flex items-center justify-center gap-2">
                 <GraduationCap className="w-5 h-5 text-violet-600" />
                 <h1 className="text-xl font-bold text-slate-900 tracking-tight">Workshop Admin</h1>
