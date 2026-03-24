@@ -214,10 +214,12 @@ const WorkshopAdminLogin = () => {
                       <SelectContent>
                         {ADMIN_LIST.map(admin => (
                           <SelectItem key={admin.email} value={admin.email}>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold">{admin.name}</span>
-                              <span className="text-muted-foreground text-xs">({maskEmail(admin.email)})</span>
-                              {admin.tag && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{admin.tag}</span>}
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">{admin.name}</span>
+                                <span className="text-muted-foreground text-xs">({maskEmail(admin.email)})</span>
+                              </div>
+                              <span className="text-[10px] text-primary font-medium">{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
