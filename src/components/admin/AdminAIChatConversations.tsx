@@ -81,28 +81,52 @@ const AdminAIChatConversations = () => {
   };
 
   const openSession = async (sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    // If admin hasn't joined yet, prompt for name
+    if (!session?.admin_joined) {
+      setPendingSessionId(sessionId);
+      setShowNamePrompt(true);
+      return;
+    }
     setSelectedSession(sessionId);
     await fetchMessages(sessionId);
+  };
+
+  const confirmJoinChat = async () => {
+    if (!adminName.trim() || !pendingSessionId) return;
+    setShowNamePrompt(false);
+
+    // Send "X joined the chat" system message
+    await supabase.from("ai_chat_messages").insert({
+      session_id: pendingSessionId,
+      role: "assistant",
+      content: `🟢 ${adminName.trim()} joined the chat`,
+      sender_name: "System",
+    } as any);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("ai_chat_sessions").update({
+      admin_joined: true,
+      admin_user_id: user?.id,
+    } as any).eq("id", pendingSessionId);
+
+    setSelectedSession(pendingSessionId);
+    await fetchMessages(pendingSessionId);
+    setPendingSessionId(null);
+    toast({ title: `Joined as ${adminName.trim()}` });
   };
 
   const sendAdminMessage = async () => {
     if (!adminReply.trim() || !selectedSession || sending) return;
     setSending(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", user?.id || "").maybeSingle();
+    const senderName = adminName.trim() || "Admin";
 
     await supabase.from("ai_chat_messages").insert({
       session_id: selectedSession,
       role: "admin",
       content: adminReply.trim(),
-      sender_name: profile?.full_name || "Admin",
+      sender_name: senderName,
     } as any);
-
-    // Mark session as admin joined
-    await supabase.from("ai_chat_sessions").update({
-      admin_joined: true,
-      admin_user_id: user?.id,
-    } as any).eq("id", selectedSession);
 
     setAdminReply("");
     setSending(false);
