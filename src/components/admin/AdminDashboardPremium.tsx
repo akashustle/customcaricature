@@ -227,19 +227,19 @@ const AdminDashboardPremium = ({ onNavigate }: DashboardProps) => {
       {/* ROW 1: Top 4 KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Revenue" value={formatPrice(stats.totalRevenue)} change={revenueGrowth}
-          icon={<DollarSign className="w-5 h-5" />} gradient="from-indigo-600 to-blue-500"
+          icon={<DollarSign className="w-5 h-5" />} gradient="from-indigo-600 to-blue-500" index={0}
           onClick={() => setDrillDown({ metric: "revenue", title: "Total Revenue" })}
           sparkData={monthlyData.map(d => d.total)} sparkColor="#818CF8" />
         <KPICard title="Total Orders" value={stats.totalOrders.toString()} sub={`${stats.todayOrders} today`}
-          icon={<Package className="w-5 h-5" />} gradient="from-cyan-500 to-teal-400"
+          icon={<Package className="w-5 h-5" />} gradient="from-cyan-500 to-teal-400" index={1}
           onClick={() => setDrillDown({ metric: "orders", title: "Orders" })}
           sparkData={weeklyData.map(d => d.orders)} sparkColor="#22D3EE" />
         <KPICard title="Total Events" value={stats.totalEvents.toString()} sub={`${stats.upcomingEvents} upcoming`}
-          icon={<Calendar className="w-5 h-5" />} gradient="from-violet-600 to-purple-500"
+          icon={<Calendar className="w-5 h-5" />} gradient="from-violet-600 to-purple-500" index={2}
           onClick={() => setDrillDown({ metric: "events", title: "Events" })}
           sparkData={weeklyData.map(d => d.events)} sparkColor="#A78BFA" />
         <KPICard title="Pending Revenue" value={formatPrice(stats.pendingRevenue)} sub={`${stats.pendingPayments} pending`}
-          icon={<Clock className="w-5 h-5" />} gradient="from-amber-500 to-orange-400"
+          icon={<Clock className="w-5 h-5" />} gradient="from-amber-500 to-orange-400" index={3}
           onClick={() => setDrillDown({ metric: "pending", title: "Pending Revenue" })} sparkColor="#FBBF24" />
       </div>
 
