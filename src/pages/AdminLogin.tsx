@@ -448,7 +448,7 @@ const AdminLogin = () => {
                           <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input type="password" value={secretCode}
                             onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
-                            placeholder="• • • • • •" maxLength={8}
+                            placeholder="• • • • • • • •" maxLength={8}
                             className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-primary"
                             />
                         </div>
