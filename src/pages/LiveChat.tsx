@@ -14,9 +14,18 @@ type ChatMessage = {
   id: string; sender_id: string; receiver_id: string | null; message: string;
   is_admin: boolean; read: boolean; created_at: string;
   file_url?: string | null; file_name?: string | null; edited_at?: string | null; deleted?: boolean;
+  sender_name?: string | null;
 };
 
 const GUEST_MSG_LIMIT = 5;
+
+const QUICK_QUESTIONS = [
+  { q: "How to book an event?", a: "Visit our event booking page to book your event!" },
+  { q: "Custom caricature details", a: "Check our order page for all caricature types and pricing." },
+  { q: "How to login/register?", a: "Click the Login or Register button from the menu." },
+  { q: "Delivery time?", a: "Custom caricatures are typically delivered within 5-7 working days." },
+  { q: "Workshop details", a: "Our workshops are held on weekends. Check the Workshop section for upcoming dates!" },
+];
 
 const playDing = () => {
   try {
@@ -44,6 +53,7 @@ const LiveChat = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevCount = useRef(0);
+  const [quickQs, setQuickQs] = useState<{ q: string; a: string }[]>(QUICK_QUESTIONS);
 
   // Guest state
   const [guestName, setGuestName] = useState("");
@@ -54,6 +64,14 @@ const LiveChat = () => {
 
   const isGuest = !user;
   const isGuestLimited = isGuest && guestMsgCount >= GUEST_MSG_LIMIT;
+
+  // Fetch admin-configured quick questions
+  useEffect(() => {
+    supabase.from("admin_site_settings").select("value").eq("id", "chat_quick_questions").single()
+      .then(({ data }) => {
+        if (data?.value && Array.isArray(data.value)) setQuickQs(data.value as any);
+      });
+  }, []);
 
   // For logged-in users
   const fetchMessages = async () => {
@@ -80,12 +98,7 @@ const LiveChat = () => {
     const ch = supabase.channel(`live-chat-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchMessages())
       .subscribe();
-    const presenceCh = supabase.channel(`typing-${user.id}`);
-    presenceCh.on("presence", { event: "sync" }, () => {
-      const state = presenceCh.presenceState();
-      setAdminTyping(Object.values(state).flat().some((p: any) => p.is_admin && p.typing));
-    }).subscribe();
-    return () => { supabase.removeChannel(ch); supabase.removeChannel(presenceCh); };
+    return () => { supabase.removeChannel(ch); };
   }, [user?.id]);
 
   // For guest AI chat sessions
@@ -95,7 +108,7 @@ const LiveChat = () => {
       const mapped: ChatMessage[] = data.map((m: any) => ({
         id: m.id, sender_id: m.role === "user" ? "guest" : "admin",
         receiver_id: null, message: m.content, is_admin: m.role === "assistant",
-        read: true, created_at: m.created_at, deleted: false,
+        read: true, created_at: m.created_at, deleted: false, sender_name: m.sender_name,
       }));
       setMessages(mapped);
     }
@@ -114,41 +127,36 @@ const LiveChat = () => {
   }, [messages]);
 
   const startGuestChat = async () => {
-    if (!guestName.trim() || !guestEmail.trim()) return;
+    if (!guestName.trim() || !guestEmail.trim()) {
+      toast({ title: "Please enter name and email", variant: "destructive" });
+      return;
+    }
     try {
-      // Get guest IP for tracking
       let guestIp: string | null = null;
       try { const r = await fetch("https://ipapi.co/json/"); if (r.ok) { const g = await r.json(); guestIp = g.ip || null; } } catch {}
-      
       const { data, error } = await supabase.from("ai_chat_sessions").insert({
         guest_name: guestName.trim(), guest_email: guestEmail.trim(), status: "active", guest_ip: guestIp,
       } as any).select("id").single();
-      
-      if (error) {
-        console.error("Chat session error:", error);
-        toast({ title: "Could not start chat", description: "Please try again.", variant: "destructive" });
-        return;
-      }
+      if (error) { toast({ title: "Could not start chat", description: error.message, variant: "destructive" }); return; }
       if (data) {
         setGuestSessionId(data.id);
         setGuestStarted(true);
-        // Send welcome
-        await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Hi ${guestName}! 👋 How can we help you today? (${GUEST_MSG_LIMIT} messages as guest, sign up for unlimited)`, sender_name: "CCC Team" } as any);
+        await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Hi ${guestName}! 👋 How can we help you today? You have ${GUEST_MSG_LIMIT} messages as guest. Sign up for unlimited chat!`, sender_name: "CCC Team" } as any);
         fetchGuestMessages(data.id);
       }
     } catch (err: any) {
-      console.error("Start chat error:", err);
       toast({ title: "Chat Error", description: err.message, variant: "destructive" });
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMsg.trim() || sending) return;
+  const sendMessage = async (text?: string) => {
+    const msg = (text || newMsg).trim();
+    if (!msg || sending) return;
     setSending(true);
     if (user) {
-      await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: newMsg.trim(), is_admin: false, is_artist_chat: false } as any);
+      await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
     } else if (guestSessionId) {
-      await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "user", content: newMsg.trim(), sender_name: guestName } as any);
+      await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "user", content: msg, sender_name: guestName } as any);
       setGuestMsgCount(c => c + 1);
       fetchGuestMessages(guestSessionId);
     }
@@ -183,7 +191,7 @@ const LiveChat = () => {
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
-  // Guest gate - collect name & email
+  // Guest gate
   if (isGuest && !guestStarted) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 bg-background">
@@ -203,7 +211,8 @@ const LiveChat = () => {
               </div>
               <div>
                 <label className="text-sm font-sans font-medium text-foreground">Email Address</label>
-                <Input type="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl mt-1" />
+                <Input type="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl mt-1"
+                  onKeyDown={e => { if (e.key === "Enter") startGuestChat(); }} />
               </div>
               <Button onClick={startGuestChat} disabled={!guestName.trim() || !guestEmail.trim()} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
                 <MessageCircle className="w-4 h-4" /> Start Chat
@@ -245,7 +254,22 @@ const LiveChat = () => {
         </div>
       </header>
 
-      {/* Messages */}
+      {/* Quick Questions */}
+      {messages.length <= 2 && (
+        <div className="px-4 py-3 border-b border-border/40 bg-muted/30">
+          <p className="text-xs text-muted-foreground mb-2 font-semibold">Quick Questions:</p>
+          <div className="flex flex-wrap gap-2">
+            {quickQs.map((qq, i) => (
+              <Button key={i} variant="outline" size="sm" className="text-xs rounded-full h-7 px-3"
+                onClick={() => sendMessage(qq.q)}>
+                {qq.q}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Messages — USER on RIGHT, ADMIN on LEFT */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-48">
         {messages.length === 0 && (
           <div className="text-center py-16">
@@ -256,12 +280,35 @@ const LiveChat = () => {
         )}
         <AnimatePresence>
           {messages.map(msg => {
-            const isMine = msg.sender_id === currentUserId || (!user && !msg.is_admin);
+            // User messages on RIGHT, admin/team messages on LEFT
+            const isUserMsg = !msg.is_admin;
             const isDeleted = msg.deleted;
+
+            // Check for system messages like "X joined the chat"
+            const isSystemMsg = msg.message?.includes("joined the chat");
+
+            if (isSystemMsg) {
+              return (
+                <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
+                  <span className="text-[10px] bg-muted/50 text-muted-foreground px-3 py-1 rounded-full">{msg.message}</span>
+                </motion.div>
+              );
+            }
+
             return (
-              <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
-                <div className={`max-w-[80%] md:max-w-[65%] rounded-2xl px-4 py-3 text-sm font-sans relative ${isMine ? "bg-primary text-primary-foreground rounded-br-sm shadow-md" : "bg-card border border-border rounded-bl-sm shadow-sm"} ${isDeleted ? "opacity-50 italic" : ""}`}>
-                  {msg.is_admin && <p className="text-[10px] font-bold mb-1 opacity-70 flex items-center gap-1"><Bot className="w-3 h-3" /> CCC Team</p>}
+              <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className={`flex ${isUserMsg ? "justify-end" : "justify-start"} group`}>
+                <div className={`max-w-[80%] md:max-w-[65%] rounded-2xl px-4 py-3 text-sm font-sans relative ${
+                  isUserMsg
+                    ? "bg-primary text-primary-foreground rounded-br-sm shadow-md"
+                    : "bg-card border border-border rounded-bl-sm shadow-sm"
+                } ${isDeleted ? "opacity-50 italic" : ""}`}>
+                  {/* Admin label */}
+                  {!isUserMsg && (
+                    <p className="text-[10px] font-bold mb-1 opacity-70 flex items-center gap-1">
+                      <Bot className="w-3 h-3" /> {msg.sender_name || "CCC Team"}
+                    </p>
+                  )}
                   {editingId === msg.id ? (
                     <div className="flex items-center gap-1">
                       <Input value={editText} onChange={e => setEditText(e.target.value)} className="h-7 text-xs bg-background text-foreground" autoFocus onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingId(null); }} />
@@ -280,13 +327,13 @@ const LiveChat = () => {
                     </>
                   )}
                   <div className="flex items-center gap-1 mt-1">
-                    <p className={`text-[9px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                    <p className={`text-[9px] ${isUserMsg ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                       {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
                       {msg.edited_at && " · edited"}
                     </p>
-                    {isMine && msg.read && <span className="text-[9px] text-primary-foreground/50">✓✓</span>}
+                    {isUserMsg && msg.read && <span className="text-[9px] text-primary-foreground/50">✓✓</span>}
                   </div>
-                  {isMine && !isDeleted && editingId !== msg.id && user && (
+                  {isUserMsg && !isDeleted && editingId !== msg.id && user && (
                     <div className="absolute -top-3 right-0 hidden group-hover:flex gap-0.5 bg-card border border-border rounded-full px-1 py-0.5 shadow-sm">
                       <button onClick={() => { setEditingId(msg.id); setEditText(msg.message); }} className="p-0.5 hover:bg-muted rounded"><Pencil className="w-2.5 h-2.5 text-muted-foreground" /></button>
                       <button onClick={() => deleteMessage(msg.id)} className="p-0.5 hover:bg-muted rounded"><Trash2 className="w-2.5 h-2.5 text-destructive" /></button>
@@ -299,14 +346,12 @@ const LiveChat = () => {
         </AnimatePresence>
       </div>
 
-      {/* Emoji Picker */}
       {showEmoji && (
         <div className="border-t border-border bg-card">
           <EmojiPicker onEmojiClick={(d: any) => setNewMsg(p => p + d.emoji)} width="100%" height={280} searchPlaceholder="Search emoji..." previewConfig={{ showPreview: false }} />
         </div>
       )}
 
-      {/* Guest limit banner */}
       {isGuestLimited && (
         <div className="bg-primary/10 border-t border-primary/20 p-4 text-center">
           <p className="text-sm font-sans font-medium text-foreground mb-2">Guest message limit reached</p>
@@ -314,7 +359,6 @@ const LiveChat = () => {
         </div>
       )}
 
-      {/* Input */}
       {!isGuestLimited && (
         <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-50">
           <div className="container mx-auto max-w-2xl">
