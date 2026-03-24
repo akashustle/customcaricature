@@ -141,7 +141,8 @@ const LiveChat = () => {
       if (data) {
         setGuestSessionId(data.id);
         setGuestStarted(true);
-        await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Hi ${guestName}! 👋 How can we help you today? You have ${GUEST_MSG_LIMIT} messages as guest. Sign up for unlimited chat!`, sender_name: "CCC Team" } as any);
+        // Welcome message with specialist info
+        await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Welcome ${guestName}! 👋\n\nThank you for reaching out. Please leave your message here — one of our super specialists will join and respond shortly.\n\nYou have ${GUEST_MSG_LIMIT} messages as a guest. Sign up for unlimited chat!`, sender_name: "CCC Team" } as any);
         fetchGuestMessages(data.id);
       }
     } catch (err: any) {
@@ -153,8 +154,21 @@ const LiveChat = () => {
     const msg = (text || newMsg).trim();
     if (!msg || sending) return;
     setSending(true);
+
     if (user) {
-      await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+      // For logged-in users: send welcome on first message
+      if (messages.length === 0) {
+        await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+        // Auto-welcome from system
+        setTimeout(async () => {
+          await supabase.from("chat_messages").insert({
+            sender_id: "system", receiver_id: user.id, message: "Welcome! 👋 Your message has been received. One of our super specialists will join and respond shortly. Please stay connected!",
+            is_admin: true, is_artist_chat: false,
+          } as any);
+        }, 500);
+      } else {
+        await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+      }
     } else if (guestSessionId) {
       await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "user", content: msg, sender_name: guestName } as any);
       setGuestMsgCount(c => c + 1);
