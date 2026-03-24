@@ -376,10 +376,11 @@ const AdminLogin = () => {
                         style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}>
                         <SelectValue placeholder="Choose admin profile..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border rounded-xl shadow-2xl" style={{ borderColor: BRAND.light }}>
+                      <SelectContent className="border rounded-xl shadow-2xl overflow-hidden" style={{ borderColor: BRAND.light, background: '#FFFFFF' }}>
                         {ADMIN_LIST.map(admin => (
-                          <SelectItem key={admin.email} value={admin.email} className="rounded-lg"
-                            style={{ ['--tw-bg-opacity' as any]: 1 }}>
+                          <SelectItem key={admin.email} value={admin.email}
+                            className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
+                            style={{ color: BRAND.primary }}>
                             <div className="flex flex-col gap-0.5 py-1">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
