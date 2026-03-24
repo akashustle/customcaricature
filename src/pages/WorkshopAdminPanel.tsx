@@ -593,9 +593,11 @@ const WorkshopAdmin = () => {
   const inputClass = dm ? "bg-white/[0.06] border-white/[0.08] text-white font-medium placeholder:text-white/25 rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20" : "bg-slate-50/80 border-slate-200 text-slate-900 font-medium placeholder:text-slate-400 rounded-xl focus:border-violet-500 focus:ring-violet-500/20";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}
-      className={`${cardBg} border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 ${className}`}>
-      {children}
+    <motion.div initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ y: -2, boxShadow: dm ? "0 20px 40px -12px rgba(124,58,237,0.15)" : "0 20px 40px -12px rgba(0,0,0,0.1)" }}
+      className={`${cardBg} border rounded-2xl p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_30px_-8px_rgba(0,0,0,0.1)] transition-all duration-300 relative overflow-hidden ${className}`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+      <div className="relative z-10">{children}</div>
     </motion.div>
   );
 
