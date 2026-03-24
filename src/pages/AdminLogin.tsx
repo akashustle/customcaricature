@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Eye, EyeOff, Shield, Lock, Mail, KeyRound, RefreshCw, Sparkles, ArrowRight, ArrowLeft, User, MapPin, CheckCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff, Shield, Lock, Mail, KeyRound, RefreshCw, Sparkles, ArrowLeft, User, MapPin, Phone } from "lucide-react";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
@@ -15,8 +16,6 @@ interface AdminInfo {
   name: string;
   email: string;
   mobile: string;
-  avatar_url?: string | null;
-  user_id?: string;
   tag?: string;
 }
 
@@ -28,12 +27,25 @@ const ADMIN_LIST: AdminInfo[] = [
   { name: "Manashvi", email: "manashvi@gmail.com", mobile: "8433843725" },
 ];
 
+const maskEmail = (email: string) => {
+  const [local, domain] = email.split("@");
+  const prefix = local.slice(0, 3);
+  return `${prefix}${"•".repeat(Math.max(local.length - 3, 2))}@${domain}`;
+};
+
+const maskMobile = (mobile: string) => {
+  return `${mobile.slice(0, 2)}••••${mobile.slice(-2)}`;
+};
+
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1=select admin, 2=auth
+  const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
+  const [selectedAdminEmail, setSelectedAdminEmail] = useState("");
   const [selectedAdmin, setSelectedAdmin] = useState<AdminInfo | null>(null);
   const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
+  const [verifyMethod, setVerifyMethod] = useState<"email" | "mobile">("email");
+  const [verifyInput, setVerifyInput] = useState("");
   const [password, setPassword] = useState("");
   const [secretCode, setSecretCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,9 +56,8 @@ const AdminLogin = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
   const [locationGranted, setLocationGranted] = useState(false);
-  const [locationData, setLocationData] = useState<{lat: number, lng: number} | null>(null);
+  const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Fetch admin secret code from DB
   useEffect(() => {
     const fetchSecret = async () => {
       const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "admin_secret_code").maybeSingle();
@@ -55,12 +66,11 @@ const AdminLogin = () => {
     fetchSecret();
   }, []);
 
-  // Fetch admin avatars from profiles
   useEffect(() => {
     const fetchAvatars = async () => {
       const avatars: Record<string, string> = {};
       for (const admin of ADMIN_LIST) {
-      const { data } = await supabase.from("profiles" as any).select("avatar_url, full_name").eq("email", admin.email).maybeSingle() as any;
+        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
         if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
       }
       setAdminAvatars(avatars);
@@ -68,37 +78,69 @@ const AdminLogin = () => {
     fetchAvatars();
   }, []);
 
-  // Request location immediately on mount
   useEffect(() => {
     if (!navigator.geolocation) return;
-    const requestLocation = () => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocationGranted(true);
-          setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        () => {
-          setLocationGranted(false);
-          // Prompt again after short delay
-          setTimeout(() => {
-            navigator.geolocation.getCurrentPosition(
-              (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-              () => setLocationGranted(false),
-              { enableHighAccuracy: true, timeout: 10000 }
-            );
-          }, 2000);
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    };
-    requestLocation();
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+      () => {
+        setLocationGranted(false);
+        setTimeout(() => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+            () => setLocationGranted(false),
+            { enableHighAccuracy: true, timeout: 10000 }
+          );
+        }, 2000);
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
   }, []);
 
   const startResendCooldown = () => {
     setResendCooldown(60);
-    const interval = setInterval(() => {
-      setResendCooldown(p => { if (p <= 1) { clearInterval(interval); return 0; } return p - 1; });
-    }, 1000);
+    const iv = setInterval(() => { setResendCooldown(p => { if (p <= 1) { clearInterval(iv); return 0; } return p - 1; }); }, 1000);
+  };
+
+  const handleProfileSelect = (email: string) => {
+    if (!locationGranted) {
+      toast({ title: "Location Required", description: "Allow location access to continue.", variant: "destructive" });
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+        () => {}
+      );
+      return;
+    }
+    setSelectedAdminEmail(email);
+    const admin = ADMIN_LIST.find(a => a.email === email);
+    if (admin) {
+      setSelectedAdmin(admin);
+      setVerifyInput("");
+      setVerifyMethod("email");
+      setDirection(1);
+      setStep(2);
+    }
+  };
+
+  const handleVerifyIdentity = () => {
+    if (!selectedAdmin || !verifyInput.trim()) {
+      toast({ title: "Please enter your " + verifyMethod, variant: "destructive" });
+      return;
+    }
+    const match = verifyMethod === "email"
+      ? verifyInput.toLowerCase() === selectedAdmin.email.toLowerCase()
+      : verifyInput.replace(/\s/g, "") === selectedAdmin.mobile;
+
+    if (!match) {
+      toast({ title: "Identity not matched", description: `The ${verifyMethod} doesn't match the selected profile.`, variant: "destructive" });
+      return;
+    }
+    setDirection(1);
+    setStep(3);
+    setPassword("");
+    setSecretCode("");
+    setOtpCode("");
+    setOtpSent(false);
+    setAuthMethod("password");
   };
 
   const setAdminSessionName = async (userId: string) => {
@@ -108,95 +150,50 @@ const AdminLogin = () => {
     sessionStorage.setItem("admin_action_name", name);
   };
 
-  const handleSelectAdmin = (admin: AdminInfo) => {
-    if (!locationGranted) {
-      toast({ title: "Location Required", description: "Please allow location access to continue.", variant: "destructive" });
-      navigator.geolocation?.getCurrentPosition(
-        (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-        () => toast({ title: "Location denied", description: "Location is mandatory for admin login.", variant: "destructive" }),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-      return;
-    }
-    setSelectedAdmin(admin);
-    setDirection(1);
-    setStep(2);
-    setPassword("");
-    setSecretCode("");
-    setOtpCode("");
-    setOtpSent(false);
-    setAuthMethod("password");
-  };
-
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!selectedAdmin) return;
 
-    if (authMethod === "password" && !password) {
-      toast({ title: "Enter password", variant: "destructive" }); return;
-    }
-    if (authMethod === "secret_code" && secretCode.length !== 8) {
-      toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return;
-    }
+    if (authMethod === "password" && !password) { toast({ title: "Enter password", variant: "destructive" }); return; }
+    if (authMethod === "secret_code" && secretCode.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
+
     if (authMethod === "otp" && !otpSent) {
-      // Send OTP to main admin email
       setLoading(true);
       try {
-        const { error } = await supabase.auth.signInWithOtp({
-          email: "akashxbhavans@gmail.com",
-          options: { shouldCreateUser: false },
-        });
+        const { error } = await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } });
         if (error) throw error;
         setOtpSent(true);
         startResendCooldown();
-        toast({ title: "OTP Sent! 📧", description: "Check akashxbhavans@gmail.com for 6-digit code." });
+        toast({ title: "OTP Sent! 📧", description: "Check akashxbhavans@gmail.com" });
       } catch (err: any) {
-        toast({ title: "Failed to send OTP", description: err?.message, variant: "destructive" });
+        toast({ title: "Failed", description: err?.message, variant: "destructive" });
       } finally { setLoading(false); }
       return;
     }
-    if (authMethod === "otp" && otpCode.length !== 6) {
-      toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return;
-    }
+    if (authMethod === "otp" && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
 
     setLoading(true);
     try {
       if (authMethod === "secret_code") {
-        const normalizedCode = secretCode.replace(/[-\s]/g, "");
-        if (normalizedCode !== adminMasterSecret) {
-          toast({ title: "Invalid secret code", variant: "destructive" }); setLoading(false); return;
-        }
-        // Login with secret code function
+        const norm = secretCode.replace(/[-\s]/g, "");
+        if (norm !== adminMasterSecret) { toast({ title: "Invalid secret code", variant: "destructive" }); setLoading(false); return; }
         const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
           body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) },
         });
         if (error || !data?.success) {
-          // Fallback: try password-based if secret code func fails
-          toast({ title: "Secret verified locally", description: "Proceeding..." });
-          // Use magic link approach
           const { error: otpErr } = await supabase.auth.signInWithOtp({ email: selectedAdmin.email, options: { shouldCreateUser: false } });
           if (otpErr) throw otpErr;
-          setAuthMethod("otp");
-          setOtpSent(true);
-          startResendCooldown();
-          toast({ title: "OTP sent for verification", description: "Check akashxbhavans@gmail.com" });
+          setAuthMethod("otp"); setOtpSent(true); startResendCooldown();
+          toast({ title: "Verification needed", description: "Check akashxbhavans@gmail.com" });
           setLoading(false); return;
         }
-        const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
-        if (verifyError) throw verifyError;
+        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
+        if (vErr) throw vErr;
       } else if (authMethod === "otp") {
-        // Verify OTP - sent to main admin email
-        const { error } = await supabase.auth.verifyOtp({
-          email: "akashxbhavans@gmail.com",
-          token: otpCode,
-          type: "email",
-        });
+        const { error } = await supabase.auth.verifyOtp({ email: "akashxbhavans@gmail.com", token: otpCode, type: "email" });
         if (error) throw error;
-        // If this isn't the main admin, sign out and sign in as the actual admin
         if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
           await supabase.auth.signOut();
-          // We need to use the secret code function to log in the actual admin
-          toast({ title: "OTP verified! Signing in as " + selectedAdmin.name });
           const { data, error: scErr } = await supabase.functions.invoke("login-with-secret-code", {
             body: { email: selectedAdmin.email, secret_code: adminMasterSecret.slice(0, 4) },
           });
@@ -205,54 +202,38 @@ const AdminLogin = () => {
           if (vErr) throw vErr;
         }
       } else {
-        // Password login
         const { data: authData, error: authError } = await withTimeout(
           supabase.auth.signInWithPassword({ email: selectedAdmin.email, password })
         );
         if (authError || !authData.user) throw authError || new Error("Login failed");
       }
 
-      // Verify admin role
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) throw new Error("Auth failed");
-
       const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userData.user.id) as any;
       if (!roles || roles.length === 0) {
         await supabase.auth.signOut();
-        toast({ title: "Access Denied", description: "Not authorized for admin.", variant: "destructive" });
-        setLoading(false); return;
+        toast({ title: "Access Denied", variant: "destructive" }); setLoading(false); return;
       }
-
       await setAdminSessionName(userData.user.id);
-
-      // Log location for security
       if (locationData) {
         try {
           await supabase.from("admin_sessions" as any).insert({
-            user_id: userData.user.id,
-            admin_name: selectedAdmin.name,
-            entered_name: selectedAdmin.name,
-            device_info: navigator.userAgent.slice(0, 200),
-            ip_address: null,
-            location_info: JSON.stringify(locationData),
-            is_active: true,
+            user_id: userData.user.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name,
+            device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true,
           } as any);
         } catch {}
       }
-
       toast({ title: `Welcome back, ${selectedAdmin.name}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       try {
         await supabase.from("admin_failed_logins" as any).insert({
-          email: selectedAdmin.email, reason: "invalid_credentials",
-          ip_address: null, device_info: navigator.userAgent.slice(0, 200),
+          email: selectedAdmin.email, reason: "invalid_credentials", device_info: navigator.userAgent.slice(0, 200),
         });
       } catch {}
-      toast({ title: "Login Failed", description: err?.message || "Invalid credentials", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: "Login Failed", description: err?.message, variant: "destructive" });
+    } finally { setLoading(false); }
   };
 
   const getGreeting = () => {
@@ -261,14 +242,19 @@ const AdminLogin = () => {
   };
 
   const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? 250 : -250, opacity: 0 }),
+    enter: (d: number) => ({ x: d > 0 ? 200 : -200, opacity: 0 }),
     center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? -250 : 250, opacity: 0 }),
+    exit: (d: number) => ({ x: d > 0 ? -200 : 200, opacity: 0 }),
+  };
+
+  const goBack = () => {
+    setDirection(-1);
+    if (step === 3) { setStep(2); }
+    else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); }
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-background">
-      {/* Animated gradient mesh background */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div className="absolute -top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
           style={{ background: "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(260 80% 60%), hsl(var(--primary)))" }}
@@ -277,7 +263,6 @@ const AdminLogin = () => {
           style={{ background: "conic-gradient(from 180deg, hsl(var(--accent)), hsl(var(--primary)), hsl(320 70% 55%), hsl(var(--accent)))" }}
           animate={{ rotate: [360, 0] }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} />
       </div>
-
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
 
       {[...Array(6)].map((_, i) => (
@@ -292,7 +277,6 @@ const AdminLogin = () => {
 
       <motion.div initial={{ opacity: 0, y: 40, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.7, type: "spring" }} className="w-full max-w-md relative z-10">
-
         <motion.div className="absolute -inset-1 rounded-[28px] opacity-40 blur-sm"
           style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.4), hsl(var(--accent)/0.3))" }}
           animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 3, repeat: Infinity }} />
@@ -302,139 +286,164 @@ const AdminLogin = () => {
             style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary)/0.05) 45%, hsl(var(--primary)/0.08) 50%, hsl(var(--primary)/0.05) 55%, transparent 60%)" }}
             animate={{ x: ["-100%", "200%"] }} transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }} />
 
-          {/* Header */}
           <div className="text-center space-y-3 relative">
-            <motion.div className="mx-auto w-18 h-18 rounded-2xl overflow-hidden relative"
-              animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity }}
+            <motion.div className="mx-auto relative" animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity }}
               whileHover={{ scale: 1.1, rotateY: 15 }}>
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/50 to-accent/30 blur-sm" />
               <img src="/logo.png" alt="CCC" className="relative w-16 h-16 object-cover cursor-pointer rounded-2xl ring-2 ring-white/20" onClick={() => navigate("/")} />
             </motion.div>
             <div className="flex items-center justify-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-foreground via-primary/80 to-foreground/60 bg-clip-text text-transparent">
-                Admin Console
-              </h1>
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-foreground via-primary/80 to-foreground/60 bg-clip-text text-transparent">Admin Console</h1>
               <Sparkles className="w-4 h-4 text-primary/70" />
             </div>
             <p className="text-sm text-muted-foreground">{getGreeting()}</p>
-
-            {/* Step indicator */}
             <div className="flex items-center justify-center gap-2 mt-2">
-              {[1, 2].map(s => (
+              {[1, 2, 3].map(s => (
                 <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${
-                  s === step ? "w-12 bg-gradient-to-r from-primary to-accent" : s < step ? "w-8 bg-primary/40" : "w-8 bg-muted"
+                  s === step ? "w-10 bg-gradient-to-r from-primary to-accent" : s < step ? "w-6 bg-primary/40" : "w-6 bg-muted"
                 }`} />
               ))}
             </div>
-
-            {/* Location status */}
             <div className="flex items-center justify-center gap-1.5">
               <MapPin className={`w-3 h-3 ${locationGranted ? "text-green-500" : "text-destructive"}`} />
               <span className={`text-[10px] ${locationGranted ? "text-green-600" : "text-destructive"}`}>
-                {locationGranted ? "Location verified" : "Location required"}
+                {locationGranted ? "Location verified" : "Location required — tap to allow"}
               </span>
             </div>
           </div>
 
-          <div className="min-h-[280px] relative">
+          <div className="min-h-[260px] relative">
             <AnimatePresence mode="wait" custom={direction}>
-              {/* STEP 1: Select Admin */}
+              {/* STEP 1: Select Profile Dropdown */}
               {step === 1 && (
-                <motion.div key="step1" custom={direction} variants={slideVariants}
-                  initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}
-                  className="space-y-3">
-                  <p className="text-sm font-medium text-muted-foreground text-center">Select your profile</p>
-                  <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
-                    {ADMIN_LIST.map((admin) => (
-                      <motion.button key={admin.email}
-                        whileHover={{ scale: 1.02, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleSelectAdmin(admin)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-background/60 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-border/30 group-hover:ring-primary/30">
-                          {adminAvatars[admin.email] ? (
-                            <img src={adminAvatars[admin.email]} alt={admin.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <User className="w-5 h-5 text-primary/60" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
+                <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
+                  <Label className="text-sm font-medium text-muted-foreground">Select Your Profile</Label>
+                  <Select value={selectedAdminEmail} onValueChange={handleProfileSelect}>
+                    <SelectTrigger className="h-12 rounded-xl bg-background/60 border-border/60 text-base">
+                      <SelectValue placeholder="Choose admin profile..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ADMIN_LIST.map(admin => (
+                        <SelectItem key={admin.email} value={admin.email}>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-foreground">{admin.name}</p>
-                            {admin.tag && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                {admin.tag}
-                              </span>
-                            )}
+                            <span className="font-semibold">{admin.name}</span>
+                            <span className="text-muted-foreground text-xs">({maskEmail(admin.email)})</span>
+                            {admin.tag && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{admin.tag}</span>}
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">{admin.email}</p>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </motion.button>
-                    ))}
-                  </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground text-center mt-2">Select your profile to proceed with authentication</p>
                 </motion.div>
               )}
 
-              {/* STEP 2: Authentication */}
+              {/* STEP 2: Verify Identity */}
               {step === 2 && selectedAdmin && (
-                <motion.div key="step2" custom={direction} variants={slideVariants}
-                  initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
+                <motion.div key="s2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
+                  <div className="text-center py-3 px-4 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20">
+                    <p className="text-sm font-semibold text-foreground">Hi {selectedAdmin.name}! 👋</p>
+                    <p className="text-xs text-muted-foreground mt-1">Verify your identity to continue</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-muted-foreground">Authenticate With</Label>
+                    <Select value={verifyMethod} onValueChange={(v) => { setVerifyMethod(v as "email" | "mobile"); setVerifyInput(""); }}>
+                      <SelectTrigger className="h-11 rounded-xl bg-background/60 border-border/60">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="email">
+                          <div className="flex items-center gap-2"><Mail className="w-4 h-4" /> Email Address</div>
+                        </SelectItem>
+                        <SelectItem value="mobile">
+                          <div className="flex items-center gap-2"><Phone className="w-4 h-4" /> Mobile Number</div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <div>
+                      <Label className="text-xs text-muted-foreground">
+                        Enter your {verifyMethod === "email" ? "email" : "mobile number"}
+                        <span className="ml-1 opacity-60">
+                          (hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})
+                        </span>
+                      </Label>
+                      <div className="relative mt-1.5 group">
+                        {verifyMethod === "email" ? (
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        ) : (
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        )}
+                        <Input
+                          type={verifyMethod === "email" ? "email" : "tel"}
+                          value={verifyInput}
+                          onChange={(e) => setVerifyInput(e.target.value)}
+                          placeholder={verifyMethod === "email" ? "Enter email address" : "Enter mobile number"}
+                          className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary"
+                          onKeyDown={(e) => e.key === "Enter" && handleVerifyIdentity()}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button onClick={handleVerifyIdentity} className="w-full h-11 rounded-xl font-semibold">
+                      Verify & Continue
+                    </Button>
+                  </motion.div>
+                  <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-muted-foreground gap-1">
+                    <ArrowLeft className="w-3 h-3" /> Back
+                  </Button>
+                </motion.div>
+              )}
+
+              {/* STEP 3: Login with credentials */}
+              {step === 3 && selectedAdmin && (
+                <motion.div key="s3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
                   <form onSubmit={handleLogin} className="space-y-4">
-                    {/* Admin greeting card */}
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                       className="text-center py-4 px-4 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20">
-                      <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center overflow-hidden ring-2 ring-primary/20 mb-2">
+                      <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center overflow-hidden ring-2 ring-primary/20 mb-2">
                         {adminAvatars[selectedAdmin.email] ? (
-                          <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                          <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover rounded-full" />
                         ) : (
                           <User className="w-7 h-7 text-primary/60" />
                         )}
                       </div>
-                      <p className="text-base font-bold text-foreground">
-                        👋 Hey {selectedAdmin.name}!
-                      </p>
+                      <p className="text-base font-bold text-foreground">Welcome, {selectedAdmin.name}! 🎉</p>
                       {selectedAdmin.tag && (
-                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 mt-1">
-                          {selectedAdmin.tag}
-                        </span>
+                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 mt-1">{selectedAdmin.tag}</span>
                       )}
-                      <p className="text-xs text-muted-foreground mt-1">Choose your login method below</p>
+                      <p className="text-xs text-muted-foreground mt-1">Choose your login method</p>
                     </motion.div>
 
-                    {/* Auth method selector */}
                     <div className="grid grid-cols-3 gap-1.5">
-                      {[
+                      {([
                         { key: "password" as const, icon: Lock, label: "Password" },
                         { key: "secret_code" as const, icon: KeyRound, label: "Secret Code" },
                         { key: "otp" as const, icon: Mail, label: "OTP on Mail" },
-                      ].map(m => (
+                      ]).map(m => (
                         <button key={m.key} type="button"
                           onClick={() => { setAuthMethod(m.key); setOtpSent(false); setOtpCode(""); setSecretCode(""); setPassword(""); }}
                           className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs font-medium transition-all ${
-                            authMethod === m.key
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border/60 bg-background/60 text-muted-foreground hover:border-primary/30"
+                            authMethod === m.key ? "border-primary bg-primary/10 text-primary" : "border-border/60 bg-background/60 text-muted-foreground hover:border-primary/30"
                           }`}>
-                          <m.icon className="w-4 h-4" />
-                          {m.label}
+                          <m.icon className="w-4 h-4" /> {m.label}
                         </button>
                       ))}
                     </div>
 
-                    {/* Auth inputs */}
                     {authMethod === "password" && (
                       <div className="space-y-2">
                         <Label className="text-sm text-muted-foreground font-medium">Password</Label>
                         <div className="relative group">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••" required
-                            className="pl-10 pr-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            />
-                          <button type="button" onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                            placeholder="••••••••"
+                            className="pl-10 pr-10 h-12 bg-background/60 border-border/60 rounded-xl focus:border-primary" />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
@@ -449,8 +458,7 @@ const AdminLogin = () => {
                           <Input type="password" value={secretCode}
                             onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
                             placeholder="• • • • • • • •" maxLength={8}
-                            className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-primary"
-                            />
+                            className="pl-10 h-12 bg-background/60 border-border/60 rounded-xl text-center text-xl tracking-[0.4em] font-bold focus:border-primary" />
                         </div>
                       </div>
                     )}
@@ -460,34 +468,22 @@ const AdminLogin = () => {
                         {!otpSent ? (
                           <div className="text-center py-3 px-4 rounded-xl bg-muted/50 border border-border/60">
                             <Mail className="w-8 h-8 text-primary/60 mx-auto mb-2" />
-                            <p className="text-xs text-muted-foreground">
-                              OTP will be sent to <strong className="text-foreground">akashxbhavans@gmail.com</strong>
-                            </p>
+                            <p className="text-xs text-muted-foreground">OTP will be sent to <strong className="text-foreground">akashxbhavans@gmail.com</strong></p>
                           </div>
                         ) : (
                           <>
-                            <div className="space-y-2">
-                              <Label className="text-sm text-muted-foreground font-medium">Enter 6-digit OTP</Label>
-                              <p className="text-xs text-muted-foreground">Sent to akashxbhavans@gmail.com</p>
-                              <Input value={otpCode}
-                                onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
-                                placeholder="• • • • • •" maxLength={6}
-                                className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-background/60 border-border/60 rounded-xl"
-                                />
-                            </div>
+                            <Label className="text-sm text-muted-foreground font-medium">Enter 6-digit OTP</Label>
+                            <Input value={otpCode}
+                              onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
+                              placeholder="• • • • • •" maxLength={6}
+                              className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-background/60 border-border/60 rounded-xl" />
                             <div className="text-center">
-                              <button type="button" onClick={async () => {
-                                if (resendCooldown > 0) return;
-                                try {
-                                  await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } });
-                                  startResendCooldown();
-                                  toast({ title: "OTP Resent ✅" });
-                                } catch { toast({ title: "Failed to resend", variant: "destructive" }); }
-                              }}
-                                disabled={resendCooldown > 0}
+                              <button type="button" disabled={resendCooldown > 0}
+                                onClick={async () => {
+                                  try { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); toast({ title: "OTP Resent ✅" }); } catch {}
+                                }}
                                 className="text-sm text-primary hover:underline disabled:text-muted-foreground inline-flex items-center gap-1.5">
-                                <RefreshCw className="w-3 h-3" />
-                                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
+                                <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
                               </button>
                             </div>
                           </>
@@ -495,19 +491,13 @@ const AdminLogin = () => {
                       </div>
                     )}
 
-                    <motion.div whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }}>
-                      <Button type="submit" disabled={loading}
-                        className="w-full h-12 rounded-xl text-base font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.4)]">
-                        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {authMethod === "otp" && !otpSent ? "Sending OTP..." : "Verifying..."}
-                        </> : authMethod === "otp" && !otpSent ? "Send OTP" : "Sign In"}
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-base font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.4)]">
+                        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{authMethod === "otp" && !otpSent ? "Sending OTP..." : "Verifying..."}</> : authMethod === "otp" && !otpSent ? "Send OTP" : "Sign In"}
                       </Button>
                     </motion.div>
-
-                    <Button type="button" variant="ghost"
-                      onClick={() => { setDirection(-1); setStep(1); setSelectedAdmin(null); }}
-                      className="w-full text-xs text-muted-foreground gap-1">
-                      <ArrowLeft className="w-3 h-3" /> Back to admin list
+                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-muted-foreground gap-1">
+                      <ArrowLeft className="w-3 h-3" /> Back
                     </Button>
                   </form>
                 </motion.div>
