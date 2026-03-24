@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Package, Calendar, Users, DollarSign, TrendingUp, Clock, Star, Zap, ShoppingBag, MessageCircle, Globe, Activity, ArrowUp, ArrowDown } from "lucide-react";
@@ -84,72 +83,72 @@ const AdminDashboardWidgets = () => {
 
   const widgets: {
     icon: any; label: string; value: string | number;
-    gradient: string; iconGradient: string; glowClass: string;
+    gradient: string; iconBg: string; borderAccent: string;
     trend?: { value: string; positive: boolean };
   }[] = [
     {
       icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue),
-      gradient: "from-emerald-500/10 to-emerald-500/5", iconGradient: "from-emerald-500 to-green-400",
-      glowClass: "revenue-glow",
+      gradient: "from-emerald-50 to-green-50 dark:from-emerald-500/10 dark:to-green-500/5",
+      iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500",
       trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " this week", positive: true } : undefined,
     },
     {
       icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue),
-      gradient: "from-amber-500/10 to-orange-500/5", iconGradient: "from-amber-500 to-orange-400",
-      glowClass: "alert-glow",
+      gradient: "from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5",
+      iconBg: "from-amber-500 to-orange-500", borderAccent: "border-l-amber-500",
       trend: stats.pendingRevenue > 0 ? { value: "Collect now", positive: false } : undefined,
     },
     {
       icon: Package, label: "Total Orders", value: stats.totalOrders,
-      gradient: "from-blue-500/10 to-indigo-500/5", iconGradient: "from-blue-500 to-indigo-400",
-      glowClass: "analytics-glow",
+      gradient: "from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/5",
+      iconBg: "from-blue-500 to-indigo-500", borderAccent: "border-l-blue-500",
     },
     {
       icon: Zap, label: "Today's Orders", value: stats.todayOrders,
-      gradient: "from-violet-500/10 to-purple-500/5", iconGradient: "from-violet-500 to-purple-400",
-      glowClass: "ai-glow",
+      gradient: "from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/5",
+      iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500",
       trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), positive: true } : undefined,
     },
     {
       icon: Clock, label: "Pending", value: stats.pendingOrders,
-      gradient: "from-orange-500/10 to-red-500/5", iconGradient: "from-orange-500 to-red-400",
-      glowClass: "alert-glow",
+      gradient: "from-orange-50 to-red-50 dark:from-orange-500/10 dark:to-red-500/5",
+      iconBg: "from-orange-500 to-red-500", borderAccent: "border-l-orange-500",
     },
     {
       icon: Star, label: "Delivered", value: stats.completedOrders,
-      gradient: "from-green-500/10 to-emerald-500/5", iconGradient: "from-green-500 to-emerald-400",
-      glowClass: "revenue-glow",
+      gradient: "from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/5",
+      iconBg: "from-green-500 to-emerald-500", borderAccent: "border-l-green-500",
     },
     {
       icon: Calendar, label: "Total Events", value: stats.totalEvents,
-      gradient: "from-indigo-500/10 to-blue-500/5", iconGradient: "from-indigo-500 to-blue-400",
-      glowClass: "analytics-glow",
+      gradient: "from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/5",
+      iconBg: "from-indigo-500 to-blue-500", borderAccent: "border-l-indigo-500",
     },
     {
       icon: Globe, label: "Upcoming", value: stats.upcomingEvents,
-      gradient: "from-cyan-500/10 to-teal-500/5", iconGradient: "from-cyan-500 to-teal-400",
-      glowClass: "analytics-glow",
+      gradient: "from-cyan-50 to-teal-50 dark:from-cyan-500/10 dark:to-teal-500/5",
+      iconBg: "from-cyan-500 to-teal-500", borderAccent: "border-l-cyan-500",
     },
     {
       icon: Users, label: "Customers", value: stats.totalCustomers,
-      gradient: "from-pink-500/10 to-rose-500/5", iconGradient: "from-pink-500 to-rose-400",
-      glowClass: "",
+      gradient: "from-pink-50 to-rose-50 dark:from-pink-500/10 dark:to-rose-500/5",
+      iconBg: "from-pink-500 to-rose-500", borderAccent: "border-l-pink-500",
       trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, positive: true } : undefined,
     },
     {
       icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries} / ${stats.totalEnquiries}`,
-      gradient: "from-teal-500/10 to-cyan-500/5", iconGradient: "from-teal-500 to-cyan-400",
-      glowClass: "",
+      gradient: "from-teal-50 to-cyan-50 dark:from-teal-500/10 dark:to-cyan-500/5",
+      iconBg: "from-teal-500 to-cyan-500", borderAccent: "border-l-teal-500",
     },
     {
       icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers,
-      gradient: "from-purple-500/10 to-violet-500/5", iconGradient: "from-purple-500 to-violet-400",
-      glowClass: "ai-glow",
+      gradient: "from-purple-50 to-violet-50 dark:from-purple-500/10 dark:to-violet-500/5",
+      iconBg: "from-purple-500 to-violet-500", borderAccent: "border-l-purple-500",
     },
     {
       icon: Activity, label: "Sessions", value: stats.activeSessions,
-      gradient: "from-red-500/10 to-rose-500/5", iconGradient: "from-red-500 to-rose-400",
-      glowClass: stats.activeSessions > 3 ? "alert-glow" : "",
+      gradient: "from-rose-50 to-red-50 dark:from-rose-500/10 dark:to-red-500/5",
+      iconBg: "from-rose-500 to-red-500", borderAccent: "border-l-rose-500",
     },
   ];
 
@@ -161,30 +160,30 @@ const AdminDashboardWidgets = () => {
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
-          whileHover={{ y: -4, scale: 1.03, transition: { duration: 0.2 } }}
+          whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
+          className="cursor-pointer"
         >
-          <Card className={`border border-border/60 hover:border-border transition-all overflow-hidden relative ${w.glowClass}`}>
-            <div className={`absolute inset-0 bg-gradient-to-br ${w.gradient} pointer-events-none`} />
-            <CardContent className="p-3 relative">
+          <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
+            <div className="p-3 relative">
               <div className="flex items-center justify-between mb-2">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${w.iconGradient} flex items-center justify-center shadow-md`}>
+                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
                   <w.icon className="w-4 h-4 text-white" />
                 </div>
                 {w.trend && (
-                  <div className={`flex items-center gap-0.5 text-[9px] font-semibold ${w.trend.positive ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  <div className={`flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${w.trend.positive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'}`}>
                     {w.trend.positive ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
                   </div>
                 )}
               </div>
-              <p className="text-lg font-bold text-foreground leading-tight">{w.value}</p>
-              <p className="text-[10px] text-muted-foreground font-sans mt-0.5">{w.label}</p>
+              <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
+              <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
               {w.trend && (
-                <p className={`text-[8px] mt-1 font-medium ${w.trend.positive ? 'text-emerald-600' : 'text-amber-600'}`}>
+                <p className={`text-[8px] mt-1 font-bold ${w.trend.positive ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                   {w.trend.value}
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       ))}
     </div>
