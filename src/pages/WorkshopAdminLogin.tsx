@@ -49,6 +49,19 @@ const WorkshopAdminLogin = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
   const [locationGranted, setLocationGranted] = useState(false);
+  const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const avatars: Record<string, string> = {};
+      for (const admin of ADMIN_LIST) {
+        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
+        if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
+      }
+      setAdminAvatars(avatars);
+    };
+    fetchAvatars();
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_admin");
