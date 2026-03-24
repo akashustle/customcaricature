@@ -2875,6 +2875,139 @@ export type Database = {
         }
         Relationships: []
       }
+      reversal_access_logs: {
+        Row: {
+          created_at: string
+          device: string | null
+          id: string
+          ip_address: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      reversal_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          log_id: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          log_id: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          log_id?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reversal_actions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "reversal_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reversal_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          device_info: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          performed_by: string | null
+          role: string | null
+          source_panel: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          device_info?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          performed_by?: string | null
+          role?: string | null
+          source_panel?: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          device_info?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          performed_by?: string | null
+          role?: string | null
+          source_panel?: string
+        }
+        Relationships: []
+      }
+      reversal_snapshots: {
+        Row: {
+          created_at: string
+          full_snapshot: Json | null
+          id: string
+          log_id: string
+          new_data: Json | null
+          previous_data: Json | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          full_snapshot?: Json | null
+          id?: string
+          log_id: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          full_snapshot?: Json | null
+          id?: string
+          log_id?: string
+          new_data?: Json | null
+          previous_data?: Json | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reversal_snapshots_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "reversal_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           admin_replied_at: string | null
