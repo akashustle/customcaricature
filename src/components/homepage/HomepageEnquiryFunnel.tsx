@@ -213,9 +213,9 @@ const HomepageEnquiryFunnel = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {BUDGET_RANGES.map(b => (
-                      <button
+                       <button
                         key={b.id}
-                        onClick={() => setData({ ...data, budget: b.id })}
+                        onClick={() => { setData({ ...data, budget: b.id }); setTimeout(() => setStep(4), 300); }}
                         className={cn(
                           "relative p-4 rounded-xl border-2 text-left transition-all font-body",
                           data.budget === b.id

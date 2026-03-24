@@ -559,13 +559,13 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
-              <Button size="xl" onClick={handleOrderClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
-                Start Your Order <ArrowRight className="w-5 h-5 ml-2" />
+              <Button size="xl" onClick={handleEventClick} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20">
+                <Calendar className="w-5 h-5 mr-2" /> Book Your Event
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
-              <Button size="xl" variant="outline" onClick={() => navigate("/track-order")} className="rounded-full font-body font-semibold border-border hover:bg-card">
-                <Search className="w-5 h-5 mr-2" /> Track Order
+              <Button size="xl" variant="outline" onClick={handleOrderClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                <Palette className="w-5 h-5 mr-2" /> Start Your Order
               </Button>
             </motion.div>
           </div>
