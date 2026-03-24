@@ -5,7 +5,7 @@ import {
   HelpCircle, Shield, Zap, PenTool, Image, FileText, Calculator, Target,
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
   Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle,
-  Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays
+  Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays, LineChart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
