@@ -531,6 +531,74 @@
     background: hsl(225, 15%, 22%);
   }
 
+  /* Vibrant light sidebar for admin */
+  .admin-sidebar-vibrant {
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
+    border-right: 1px solid hsl(var(--border) / 0.5);
+    box-shadow: 4px 0 30px hsl(var(--foreground) / 0.04);
+  }
+
+  /* 3D Widget Card */
+  .admin-widget-3d {
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow:
+      0 2px 4px hsl(var(--foreground) / 0.03),
+      0 8px 20px hsl(var(--foreground) / 0.05),
+      inset 0 1px 0 hsl(var(--card) / 0.8);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .admin-widget-3d:hover {
+    box-shadow:
+      0 8px 16px hsl(var(--foreground) / 0.06),
+      0 20px 40px hsl(var(--foreground) / 0.08),
+      inset 0 1px 0 hsl(var(--card) / 0.8);
+    border-color: hsl(var(--primary) / 0.2);
+  }
+
+  /* Admin settings card - premium 3D */
+  .admin-settings-card {
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--background)));
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 1px 3px hsl(var(--foreground) / 0.03),
+      0 6px 24px hsl(var(--foreground) / 0.06),
+      inset 0 1px 0 hsl(var(--card));
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .admin-settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 24px hsl(var(--foreground) / 0.08),
+      0 16px 40px hsl(var(--foreground) / 0.04),
+      inset 0 1px 0 hsl(var(--card));
+  }
+
+  /* Admin profile avatar */
+  .admin-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary-foreground));
+    font-weight: 700;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.25);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .admin-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px hsl(var(--primary) / 0.35);
+  }
+
   /* Premium content area */
   .admin-content-area {
     background: linear-gradient(180deg, hsl(220, 14%, 96%) 0%, hsl(220, 14%, 98%) 100%);
