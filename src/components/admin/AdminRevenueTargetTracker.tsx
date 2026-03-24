@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/pricing";
+import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Target, TrendingUp, Flame, Trophy, Zap, Calendar, Clock,
-  ArrowUpRight, DollarSign, Star, Award, ChevronRight, BarChart3
+  ArrowUpRight, DollarSign, Star, Award, ChevronRight, BarChart3, Edit2
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -15,9 +17,7 @@ import {
 } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const MONTHLY_TARGET = 1000000; // ₹10L
-const DAILY_TARGET = Math.round(MONTHLY_TARGET / 30);
-const WEEKLY_TARGET = Math.round(MONTHLY_TARGET / 4.3);
+const DEFAULT_TARGET = 1000000; // ₹10L
 
 const AdminRevenueTargetTracker = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -25,15 +25,36 @@ const AdminRevenueTargetTracker = () => {
   const [shopOrders, setShopOrders] = useState<any[]>([]);
   const [streak, setStreak] = useState(0);
   const [drillDown, setDrillDown] = useState<string | null>(null);
+  const [monthlyTarget, setMonthlyTarget] = useState(DEFAULT_TARGET);
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [targetInput, setTargetInput] = useState("");
 
   useEffect(() => {
     fetchData();
+    fetchTarget();
     const ch = supabase.channel("target-tracker-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, fetchData)
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, fetchData)
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, fetchTarget)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  const fetchTarget = async () => {
+    const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "revenue_target").maybeSingle();
+    if (data?.value && (data.value as any).monthly_target) {
+      setMonthlyTarget((data.value as any).monthly_target);
+    }
+  };
+
+  const saveTarget = async () => {
+    const val = parseInt(targetInput);
+    if (!val || val < 10000) return;
+    await supabase.from("admin_site_settings").upsert({ id: "revenue_target", value: { monthly_target: val } as any });
+    setMonthlyTarget(val);
+    setEditingTarget(false);
+    toast({ title: "Revenue target updated! 🎯" });
+  };
 
   const fetchData = async () => {
     const [o, e, s] = await Promise.all([
@@ -47,6 +68,10 @@ const AdminRevenueTargetTracker = () => {
   };
 
   const now = new Date();
+  const MONTHLY_TARGET = monthlyTarget;
+  const DAILY_TARGET = Math.round(MONTHLY_TARGET / 30);
+  const WEEKLY_TARGET = Math.round(MONTHLY_TARGET / 4.3);
+
   const todayStr = now.toISOString().slice(0, 10);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay());
@@ -155,9 +180,21 @@ const AdminRevenueTargetTracker = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
-            <Target className="w-6 h-6 text-primary" /> ₹10L/Month Revenue Engine
+            <Target className="w-6 h-6 text-primary" /> {formatPrice(MONTHLY_TARGET)}/Month Revenue Engine
           </h2>
-          <p className="text-sm text-muted-foreground">Track daily, weekly & monthly targets in real-time</p>
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            Track daily, weekly & monthly targets in real-time
+            <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 rounded-full" onClick={() => { setTargetInput(String(MONTHLY_TARGET)); setEditingTarget(true); }}>
+              <Edit2 className="w-3 h-3 mr-1" /> Set Target
+            </Button>
+          </p>
+          {editingTarget && (
+            <div className="flex items-center gap-2 mt-2">
+              <Input type="number" value={targetInput} onChange={e => setTargetInput(e.target.value)} placeholder="Enter monthly target (₹)" className="h-8 w-48 text-sm" />
+              <Button size="sm" className="h-8 text-xs" onClick={saveTarget}>Save</Button>
+              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setEditingTarget(false)}>Cancel</Button>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {streak > 0 && (
