@@ -32,7 +32,6 @@ const FIELD_TYPES = [
   { id: "radio", label: "Radio Group" },
 ];
 
-// Default fields that exist on frontend forms — auto-seeded if DB is empty
 const DEFAULT_FIELDS: Record<string, Partial<FormField>[]> = {
   registration: [
     { field_key: "full_name", label: "Full Name", field_type: "text", placeholder: "Enter your full name", is_required: true },
@@ -114,7 +113,6 @@ const AdminFormBuilder = () => {
   const [editData, setEditData] = useState<any>({});
   const [seeding, setSeeding] = useState(false);
 
-  // Auto-seed default fields if DB is empty for this form
   const seedDefaults = async () => {
     if (seeding) return;
     setSeeding(true);
@@ -174,19 +172,18 @@ const AdminFormBuilder = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-bold flex items-center gap-2 text-white font-sans">
-            <FormInput className="w-5 h-5 text-indigo-400" /> Form Builder
+          <h2 className="text-lg font-bold flex items-center gap-2 text-foreground font-sans">
+            <FormInput className="w-5 h-5 text-primary" /> Form Builder
           </h2>
-          <p className="text-xs text-slate-400 font-sans">Add, remove, and reorder fields on any form</p>
+          <p className="text-xs text-muted-foreground font-sans">Add, remove, and reorder fields on any form</p>
         </div>
         <div className="flex gap-2">
           {allFields.length === 0 && !fieldsLoading && (
-            <Button size="sm" variant="outline" onClick={seedDefaults} disabled={seeding}
-              className="border-[#2a3654] bg-transparent text-slate-300 hover:bg-[#1e2a4a] font-sans">
+            <Button size="sm" variant="outline" onClick={seedDefaults} disabled={seeding}>
               <RefreshCw className={`w-4 h-4 mr-1 ${seeding ? "animate-spin" : ""}`} /> Load Defaults
             </Button>
           )}
-          <Button size="sm" onClick={() => setShowAdd(!showAdd)} className="bg-indigo-600 hover:bg-indigo-700 text-white font-sans">
+          <Button size="sm" onClick={() => setShowAdd(!showAdd)} className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans">
             <Plus className="w-4 h-4 mr-1" /> Add Field
           </Button>
         </div>
@@ -196,10 +193,7 @@ const AdminFormBuilder = () => {
       <div className="flex gap-2 flex-wrap">
         {FORMS.map(f => (
           <Button key={f.id} variant={activeForm === f.id ? "default" : "outline"} size="sm"
-            onClick={() => { setActiveForm(f.id); setEditingId(null); }}
-            className={activeForm === f.id 
-              ? "bg-indigo-600 hover:bg-indigo-700 text-white font-sans" 
-              : "border-[#2a3654] bg-transparent text-slate-300 hover:bg-[#1e2a4a] font-sans"}>
+            onClick={() => { setActiveForm(f.id); setEditingId(null); }}>
             {f.label}
           </Button>
         ))}
@@ -207,24 +201,24 @@ const AdminFormBuilder = () => {
 
       {/* Add Field Form */}
       {showAdd && (
-        <Card className="bg-[#131b2e] border-indigo-500/30">
+        <Card className="bg-card border-primary/20">
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input placeholder="Field key (e.g. company_name)" value={newField.field_key} onChange={e => setNewField(p => ({ ...p, field_key: e.target.value }))} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
-              <Input placeholder="Label (e.g. Company Name)" value={newField.label} onChange={e => setNewField(p => ({ ...p, label: e.target.value }))} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+              <Input placeholder="Field key (e.g. company_name)" value={newField.field_key} onChange={e => setNewField(p => ({ ...p, field_key: e.target.value }))} className="bg-background border-border text-foreground font-sans" />
+              <Input placeholder="Label (e.g. Company Name)" value={newField.label} onChange={e => setNewField(p => ({ ...p, label: e.target.value }))} className="bg-background border-border text-foreground font-sans" />
               <Select value={newField.field_type} onValueChange={v => setNewField(p => ({ ...p, field_type: v }))}>
-                <SelectTrigger className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground font-sans"><SelectValue /></SelectTrigger>
                 <SelectContent>{FIELD_TYPES.map(t => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
-              <Input placeholder="Placeholder text" value={newField.placeholder} onChange={e => setNewField(p => ({ ...p, placeholder: e.target.value }))} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+              <Input placeholder="Placeholder text" value={newField.placeholder} onChange={e => setNewField(p => ({ ...p, placeholder: e.target.value }))} className="bg-background border-border text-foreground font-sans" />
             </div>
             {(newField.field_type === "select" || newField.field_type === "radio") && (
-              <Input placeholder="Options (comma-separated)" value={newField.options} onChange={e => setNewField(p => ({ ...p, options: e.target.value }))} className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+              <Input placeholder="Options (comma-separated)" value={newField.options} onChange={e => setNewField(p => ({ ...p, options: e.target.value }))} className="bg-background border-border text-foreground font-sans" />
             )}
             <div className="flex items-center gap-3">
               <Switch checked={newField.is_required} onCheckedChange={v => setNewField(p => ({ ...p, is_required: v }))} />
-              <span className="text-sm text-slate-300 font-sans">Required</span>
-              <Button size="sm" onClick={handleAdd} className="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white font-sans"><Save className="w-4 h-4 mr-1" /> Add</Button>
+              <span className="text-sm text-foreground font-sans">Required</span>
+              <Button size="sm" onClick={handleAdd} className="ml-auto bg-primary hover:bg-primary/90 text-primary-foreground font-sans"><Save className="w-4 h-4 mr-1" /> Add</Button>
             </div>
           </CardContent>
         </Card>
@@ -232,67 +226,67 @@ const AdminFormBuilder = () => {
 
       {/* Fields List */}
       {allFields.length === 0 && !fieldsLoading && (
-        <Card className="bg-[#131b2e] border-[#1e2a4a]">
+        <Card className="bg-card border-border">
           <CardContent className="py-12 text-center">
-            <FormInput className="w-10 h-10 mx-auto mb-3 text-slate-600" />
-            <p className="text-sm font-medium text-slate-400 font-sans">No fields for this form yet</p>
-            <p className="text-xs mt-1 text-slate-500 font-sans">Click "Load Defaults" to populate with current frontend fields, or add custom fields</p>
+            <FormInput className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+            <p className="text-sm font-medium text-muted-foreground font-sans">No fields for this form yet</p>
+            <p className="text-xs mt-1 text-muted-foreground/70 font-sans">Click "Load Defaults" to populate with current frontend fields, or add custom fields</p>
           </CardContent>
         </Card>
       )}
 
       <div className="space-y-2">
         {allFields.map((field, idx) => (
-          <Card key={field.id} className={`bg-[#131b2e] border-[#1e2a4a] transition-all ${!field.is_visible ? "opacity-50" : ""}`}>
+          <Card key={field.id} className={`bg-card border-border transition-all ${!field.is_visible ? "opacity-50" : ""}`}>
             <CardContent className="py-3 px-4">
               {editingId === field.id ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Input value={editData.label || ""} onChange={e => setEditData((p: any) => ({ ...p, label: e.target.value }))} placeholder="Label" className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+                    <Input value={editData.label || ""} onChange={e => setEditData((p: any) => ({ ...p, label: e.target.value }))} placeholder="Label" className="bg-background border-border text-foreground font-sans" />
                     <Select value={editData.field_type || "text"} onValueChange={v => setEditData((p: any) => ({ ...p, field_type: v }))}>
-                      <SelectTrigger className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="bg-background border-border text-foreground font-sans"><SelectValue /></SelectTrigger>
                       <SelectContent>{FIELD_TYPES.map(t => <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>)}</SelectContent>
                     </Select>
-                    <Input value={editData.placeholder || ""} onChange={e => setEditData((p: any) => ({ ...p, placeholder: e.target.value }))} placeholder="Placeholder" className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+                    <Input value={editData.placeholder || ""} onChange={e => setEditData((p: any) => ({ ...p, placeholder: e.target.value }))} placeholder="Placeholder" className="bg-background border-border text-foreground font-sans" />
                     {(editData.field_type === "select" || editData.field_type === "radio") && (
-                      <Input value={editData.optionsStr || ""} onChange={e => setEditData((p: any) => ({ ...p, optionsStr: e.target.value }))} placeholder="Options (comma-separated)" className="bg-[#0a0f1e] border-[#2a3654] text-slate-200 font-sans" />
+                      <Input value={editData.optionsStr || ""} onChange={e => setEditData((p: any) => ({ ...p, optionsStr: e.target.value }))} placeholder="Options (comma-separated)" className="bg-background border-border text-foreground font-sans" />
                     )}
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <Switch checked={editData.is_required} onCheckedChange={v => setEditData((p: any) => ({ ...p, is_required: v }))} />
-                      <span className="text-xs text-slate-300 font-sans">Required</span>
+                      <span className="text-xs text-foreground font-sans">Required</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch checked={editData.is_visible} onCheckedChange={v => setEditData((p: any) => ({ ...p, is_visible: v }))} />
-                      <span className="text-xs text-slate-300 font-sans">Visible</span>
+                      <span className="text-xs text-foreground font-sans">Visible</span>
                     </div>
                     <div className="ml-auto flex gap-2">
-                      <Button size="sm" onClick={handleSaveEdit} className="bg-indigo-600 hover:bg-indigo-700 text-white font-sans"><Save className="w-3 h-3 mr-1" /> Save</Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="text-slate-400 font-sans">Cancel</Button>
+                      <Button size="sm" onClick={handleSaveEdit} className="bg-primary hover:bg-primary/90 text-primary-foreground font-sans"><Save className="w-3 h-3 mr-1" /> Save</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="text-muted-foreground font-sans">Cancel</Button>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col gap-0.5">
-                    <button onClick={() => moveField(idx, -1)} disabled={idx === 0} className="text-slate-500 hover:text-slate-300 disabled:opacity-20"><ArrowUp className="w-3 h-3" /></button>
-                    <button onClick={() => moveField(idx, 1)} disabled={idx === allFields.length - 1} className="text-slate-500 hover:text-slate-300 disabled:opacity-20"><ArrowDown className="w-3 h-3" /></button>
+                    <button onClick={() => moveField(idx, -1)} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20"><ArrowUp className="w-3 h-3" /></button>
+                    <button onClick={() => moveField(idx, 1)} disabled={idx === allFields.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20"><ArrowDown className="w-3 h-3" /></button>
                   </div>
-                  <GripVertical className="w-4 h-4 text-slate-600" />
+                  <GripVertical className="w-4 h-4 text-muted-foreground" />
                   <div className="flex-1 min-w-0 cursor-pointer" onClick={() => {
                     setEditingId(field.id);
                     setEditData({ ...field, optionsStr: field.options?.items?.join(", ") || "" });
                   }}>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-slate-200 font-sans">{field.label}</span>
-                      <code className="text-[10px] font-mono bg-[#1e2a4a] text-indigo-300 px-1.5 py-0.5 rounded">{field.field_key}</code>
-                      <Badge className="text-[10px] bg-[#1e2a4a] text-slate-300 border-0 font-sans">{FIELD_TYPES.find(t => t.id === field.field_type)?.label || field.field_type}</Badge>
-                      {field.is_required && <Badge className="text-[10px] bg-red-500/15 text-red-400 border-0 font-sans">Required</Badge>}
+                      <span className="text-sm font-medium text-foreground font-sans">{field.label}</span>
+                      <code className="text-[10px] font-mono bg-muted text-primary px-1.5 py-0.5 rounded">{field.field_key}</code>
+                      <Badge variant="secondary" className="text-[10px] font-sans">{FIELD_TYPES.find(t => t.id === field.field_type)?.label || field.field_type}</Badge>
+                      {field.is_required && <Badge className="text-[10px] bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400 border-0 font-sans">Required</Badge>}
                     </div>
-                    {field.placeholder && <p className="text-xs text-slate-500 mt-0.5 font-sans">{field.placeholder}</p>}
+                    {field.placeholder && <p className="text-xs text-muted-foreground mt-0.5 font-sans">{field.placeholder}</p>}
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => {
+                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => {
                     deleteField(field.id);
                     toast({ title: "Field removed" });
                   }}>

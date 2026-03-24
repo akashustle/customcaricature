@@ -138,6 +138,13 @@ const NAV_SECTIONS = [
       { id: "settings", icon: Settings, label: "Settings", color: "from-slate-500 to-gray-500" },
     ],
   },
+  {
+    label: "Other Panels",
+    items: [
+      { id: "link-workshop-admin", icon: CalendarDays, label: "Workshop Admin", color: "from-violet-500 to-fuchsia-500" },
+      { id: "link-shop-admin", icon: Package, label: "Shop Admin", color: "from-emerald-500 to-teal-500" },
+    ],
+  },
 ];
 
 const SHOP_RELATED_TABS = ["shop", "shop-orders", "shop-products", "shop-categories", "shop-settings"];
