@@ -9,6 +9,8 @@ const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { 
 const WorkshopPolicy = () => {
   const navigate = useNavigate();
   return (
+    <>
+    <SEOHead title="Workshop Policy" description="Workshop terms, conditions and policies for Creative Caricature Club caricature workshops." canonical="/workshop-policy" />
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
