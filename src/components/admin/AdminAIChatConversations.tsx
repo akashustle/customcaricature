@@ -136,8 +136,10 @@ const AdminAIChatConversations = () => {
 
   if (loading) return <p className="text-center text-muted-foreground py-10 font-sans">Loading...</p>;
 
+  const session = selectedSession ? sessions.find(s => s.id === selectedSession) : null;
+
   return (
-    <>
+    <div className="space-y-4">
       {/* Admin Name Prompt Dialog */}
       <Dialog open={showNamePrompt} onOpenChange={setShowNamePrompt}>
         <DialogContent className="max-w-sm">
@@ -153,139 +155,133 @@ const AdminAIChatConversations = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Session detail view */}
-      {selectedSession ? (() => {
-    const session = sessions.find(s => s.id === selectedSession);
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => { setSelectedSession(null); setMessages([]); }}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div>
-            <h3 className="font-display text-lg font-bold">
-              {session?.guest_name || (session?.user_id ? "Logged-in User" : "Guest")}
-            </h3>
-            <p className="text-xs text-muted-foreground font-sans">
-              {session?.guest_email && `${session.guest_email} · `}
-              {session?.guest_city && `${session.guest_city} · `}
-              {new Date(session?.created_at || "").toLocaleString("en-IN")}
-            </p>
-          </div>
-          <div className="ml-auto flex gap-1">
-            {session?.admin_joined && <Badge className="bg-primary/20 text-primary border-none text-[10px]">Admin Joined</Badge>}
-            <Badge className={`border-none text-[10px] ${session?.status === "active" ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"}`}>
-              {session?.status}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <Card>
-          <CardContent className="p-0">
-            <div ref={scrollRef} className="max-h-[500px] overflow-y-auto p-4 space-y-3">
-              {messages.map(msg => (
-                <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm font-sans ${
-                    msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" :
-                    msg.role === "admin" ? "bg-blue-100 text-blue-900 rounded-bl-sm border border-blue-200" :
-                    "bg-card border border-border rounded-bl-sm"
-                  }`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      {msg.role === "assistant" && <Bot className="w-3 h-3 text-primary" />}
-                      {msg.role === "admin" && <MessageCircle className="w-3 h-3 text-blue-600" />}
-                      {msg.role === "user" && <User className="w-3 h-3" />}
-                      <span className="text-[10px] font-medium opacity-70">
-                        {msg.role === "user" ? (msg.sender_name || "User") :
-                         msg.role === "admin" ? (msg.sender_name || "Admin") : "AI Bot"}
-                      </span>
-                      <span className="text-[9px] opacity-50 ml-auto">
-                        {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                    </div>
-                    <div className="leading-relaxed prose prose-sm max-w-none prose-p:my-1">
-                      {msg.role === "assistant" ? <ReactMarkdown>{msg.content}</ReactMarkdown> : <span className="whitespace-pre-wrap">{msg.content}</span>}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {messages.length === 0 && (
-                <p className="text-center text-muted-foreground text-sm font-sans py-10">No messages in this conversation</p>
-              )}
+      {selectedSession && session ? (
+        <>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => { setSelectedSession(null); setMessages([]); }}>
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div>
+              <h3 className="font-display text-lg font-bold">
+                {session.guest_name || (session.user_id ? "Logged-in User" : "Guest")}
+              </h3>
+              <p className="text-xs text-muted-foreground font-sans">
+                {session.guest_email && `${session.guest_email} · `}
+                {session.guest_city && `${session.guest_city} · `}
+                {new Date(session.created_at).toLocaleString("en-IN")}
+              </p>
             </div>
-
-            {/* Admin reply input */}
-            <div className="border-t border-border p-3">
-              <form onSubmit={(e) => { e.preventDefault(); sendAdminMessage(); }} className="flex gap-2">
-                <Input
-                  value={adminReply}
-                  onChange={(e) => setAdminReply(e.target.value)}
-                  placeholder="Reply as admin..."
-                  className="flex-1 font-sans"
-                  disabled={sending}
-                />
-                <Button type="submit" size="icon" disabled={sending || !adminReply.trim()}>
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </Button>
-              </form>
+            <div className="ml-auto flex gap-1">
+              {session.admin_joined && <Badge className="bg-primary/20 text-primary border-none text-[10px]">Admin Joined</Badge>}
+              <Badge className={`border-none text-[10px] ${session.status === "active" ? "bg-emerald-100 text-emerald-800" : "bg-muted text-muted-foreground"}`}>
+                {session.status}
+              </Badge>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+          </div>
 
-  // Sessions list
-  return (
-    <div className="space-y-4">
-      <h2 className="font-display text-xl font-bold flex items-center gap-2">
-        <Bot className="w-5 h-5 text-primary" /> AI Chat Conversations ({sessions.length})
-      </h2>
-
-      {sessions.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="font-sans text-muted-foreground">No AI chat conversations yet</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-2">
-          {sessions.map(session => {
-            const timeAgo = getTimeAgo(session.updated_at);
-            return (
-              <Card key={session.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openSession(session.id)}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-sans font-semibold text-sm truncate">
-                          {session.guest_name || (session.user_id ? "Logged-in User" : "Guest")}
-                        </p>
-                        {session.admin_joined && <Badge className="bg-blue-100 text-blue-800 border-none text-[10px]">Admin Joined</Badge>}
-                        <Badge className={`border-none text-[10px] ${session.status === "active" ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"}`}>
-                          {session.status}
-                        </Badge>
+          <Card>
+            <CardContent className="p-0">
+              <div ref={scrollRef} className="max-h-[500px] overflow-y-auto p-4 space-y-3">
+                {messages.map(msg => {
+                  const isSystem = msg.content?.includes("joined the chat");
+                  if (isSystem) {
+                    return (
+                      <div key={msg.id} className="flex justify-center">
+                        <span className="text-[10px] bg-muted/50 text-muted-foreground px-3 py-1 rounded-full">{msg.content}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground font-sans mt-0.5">
-                        {session.guest_email && `${session.guest_email} · `}
-                        {session.guest_city && `${session.guest_city} · `}
-                        {timeAgo}
-                      </p>
+                    );
+                  }
+                  return (
+                    <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm font-sans ${
+                        msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" :
+                        msg.role === "admin" ? "bg-accent/30 border border-accent/20 rounded-bl-sm" :
+                        "bg-card border border-border rounded-bl-sm"
+                      }`}>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          {msg.role === "assistant" && <Bot className="w-3 h-3 text-primary" />}
+                          {msg.role === "admin" && <MessageCircle className="w-3 h-3 text-primary" />}
+                          {msg.role === "user" && <User className="w-3 h-3" />}
+                          <span className="text-[10px] font-medium opacity-70">
+                            {msg.role === "user" ? (msg.sender_name || "User") :
+                             msg.role === "admin" ? (msg.sender_name || "Admin") : "AI Bot"}
+                          </span>
+                          <span className="text-[9px] opacity-50 ml-auto">
+                            {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        <div className="leading-relaxed prose prose-sm max-w-none prose-p:my-1">
+                          {msg.role === "assistant" ? <ReactMarkdown>{msg.content}</ReactMarkdown> : <span className="whitespace-pre-wrap">{msg.content}</span>}
+                        </div>
+                      </div>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  );
+                })}
+                {messages.length === 0 && (
+                  <p className="text-center text-muted-foreground text-sm font-sans py-10">No messages in this conversation</p>
+                )}
+              </div>
+
+              <div className="border-t border-border p-3">
+                <form onSubmit={(e) => { e.preventDefault(); sendAdminMessage(); }} className="flex gap-2">
+                  <Input value={adminReply} onChange={(e) => setAdminReply(e.target.value)}
+                    placeholder="Reply as admin..." className="flex-1 font-sans" disabled={sending} />
+                  <Button type="submit" size="icon" disabled={sending || !adminReply.trim()}>
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <>
+          <h2 className="font-display text-xl font-bold flex items-center gap-2">
+            <Bot className="w-5 h-5 text-primary" /> AI Chat Conversations ({sessions.length})
+          </h2>
+          {sessions.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="font-sans text-muted-foreground">No AI chat conversations yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {sessions.map(s => {
+                const timeAgo = getTimeAgo(s.updated_at);
+                return (
+                  <Card key={s.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openSession(s.id)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-sans font-semibold text-sm truncate">
+                              {s.guest_name || (s.user_id ? "Logged-in User" : "Guest")}
+                            </p>
+                            {s.admin_joined && <Badge className="bg-primary/20 text-primary border-none text-[10px]">Admin Joined</Badge>}
+                            <Badge className={`border-none text-[10px] ${s.status === "active" ? "bg-emerald-100 text-emerald-800" : "bg-muted text-muted-foreground"}`}>
+                              {s.status}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                            {s.guest_email && `${s.guest_email} · `}
+                            {s.guest_city && `${s.guest_city} · `}
+                            {timeAgo}
+                          </p>
+                        </div>
+                        <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
-};
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
