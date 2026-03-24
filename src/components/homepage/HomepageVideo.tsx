@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
@@ -8,15 +8,13 @@ const HomepageVideo = ({ config }: { config: any }) => {
   const youtubeUrl = config?.youtube_url;
   const customUrl = config?.custom_video_url;
 
-  return (
-    <>
-      {customUrl ? <CustomVideoPlayer url={customUrl} /> : youtubeUrl ? <YouTubeMinimalPlayer url={youtubeUrl} /> : null}
-    </>
-  );
+  if (customUrl) return <CustomVideoPlayer url={customUrl} />;
+  if (youtubeUrl) return <YouTubeMinimalPlayer url={youtubeUrl} />;
+  return null;
 };
 
-const VideoHeader = () => (
-  <div className="text-center mb-10">
+const VideoHeader = forwardRef<HTMLDivElement>((_, ref) => (
+  <div ref={ref} className="text-center mb-10">
     <motion.p
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -30,9 +28,10 @@ const VideoHeader = () => (
       className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground"
     >See the Experience Live 🎨</motion.h2>
   </div>
-);
+));
+VideoHeader.displayName = "VideoHeader";
 
-const CustomVideoPlayer = ({ url }: { url: string }) => {
+const CustomVideoPlayer = forwardRef<HTMLElement, { url: string }>(({ url }, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -60,7 +59,7 @@ const CustomVideoPlayer = ({ url }: { url: string }) => {
   };
 
   return (
-    <section className="py-16 md:py-24">
+    <section ref={ref as React.Ref<HTMLElement>} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <VideoHeader />
         <motion.div
@@ -80,13 +79,11 @@ const CustomVideoPlayer = ({ url }: { url: string }) => {
             muted
             preload="metadata"
           />
-          {/* Controls overlay */}
           <div className={`absolute inset-0 flex items-center justify-center bg-foreground/10 transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg">
               {playing ? <Pause className="h-6 w-6 text-foreground" /> : <Play className="ml-0.5 h-6 w-6 text-foreground" />}
             </div>
           </div>
-          {/* Mute button */}
           <button
             onClick={toggleMute}
             className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-md z-10 hover:bg-background transition-colors"
@@ -97,9 +94,10 @@ const CustomVideoPlayer = ({ url }: { url: string }) => {
       </div>
     </section>
   );
-};
+});
+CustomVideoPlayer.displayName = "CustomVideoPlayer";
 
-const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
+const YouTubeMinimalPlayer = forwardRef<HTMLElement, { url: string }>(({ url }, ref) => {
   const [started, setStarted] = useState(false);
 
   const getYouTubeId = (u: string) => {
@@ -111,7 +109,7 @@ const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
   if (!videoId) return null;
 
   return (
-    <section className="py-16 md:py-24">
+    <section ref={ref as React.Ref<HTMLElement>} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <VideoHeader />
         <motion.div
@@ -144,6 +142,7 @@ const YouTubeMinimalPlayer = ({ url }: { url: string }) => {
       </div>
     </section>
   );
-};
+});
+YouTubeMinimalPlayer.displayName = "YouTubeMinimalPlayer";
 
 export default HomepageVideo;
