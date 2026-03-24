@@ -915,29 +915,31 @@ const WorkshopAdmin = () => {
 
               {/* DASHBOARD */}
               {tab === "dashboard" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h1 className={`text-2xl ${textPrimary}`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                      <h1 className={`text-2xl ${textPrimary} tracking-tight`}>{getGreeting()} {adminInfo?.name?.split(" ")[0]}</h1>
+                      <p className={`${textMuted} text-sm mt-0.5`}>Here's your workshop overview</p>
+                    </div>
                     <div className="flex items-center gap-2">
-                      {/* Admin Profile - Desktop */}
                       <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                        className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-200/50 hover:shadow-md transition-all">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        className={`hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-xl ${dm ? "bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.06]" : "bg-slate-50 border-slate-200/60 hover:bg-slate-100"} border transition-all`}>
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
                           {adminInfo?.name?.[0]?.toUpperCase() || "A"}
                         </div>
                         <div className="text-left">
-                          <p className="text-xs font-semibold text-foreground leading-none">{adminInfo?.name || "Admin"}</p>
-                          <p className="text-[10px] text-muted-foreground leading-none mt-0.5">{adminInfo?.email}</p>
+                          <p className={`text-xs font-semibold ${textPrimary} leading-none`}>{adminInfo?.name || "Admin"}</p>
+                          <p className={`text-[10px] ${textMuted} leading-none mt-0.5`}>{adminInfo?.email}</p>
                         </div>
                       </button>
-                      <div className="hidden lg:block w-72">
+                      <div className="hidden lg:block w-64">
                         <AdminSmartSearch panelType="workshop"
                           tabs={[{ id: "all-users", label: "All Users" }, { id: "videos", label: "Videos" }, { id: "assignments", label: "Assignments" }, { id: "feedback", label: "Feedback" }, { id: "live", label: "Live Sessions" }]}
                           onNavigate={(t, highlightId) => { setTab(t); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
                         />
                       </div>
                       <Select value={selectedWorkshopId} onValueChange={(v) => setSelectedWorkshopId(v)}>
-                        <SelectTrigger className={`w-[200px] h-9 text-sm rounded-xl ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
+                        <SelectTrigger className={`w-[180px] h-9 text-sm ${inputClass}`}><SelectValue placeholder="Select Workshop" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="current">Current (Active)</SelectItem>
                           {allWorkshops.map((ws: any) => (
