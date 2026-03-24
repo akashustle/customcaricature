@@ -189,34 +189,20 @@ const Register = () => {
   const stepValid = (s: number) => s === 1 ? !!canGoStep2 : s === 2 ? !!canGoStep3 : s === 3 ? !!canGoStep4 : false;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-24 md:pb-8 relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,hsl(var(--primary)/0.1),transparent_50%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08),transparent_50%)] bg-background">
-      <motion.div className="absolute top-0 left-0 w-80 h-80 opacity-15 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.2), hsl(var(--accent)/0.15))" }}
-        animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 7, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.2), hsl(var(--primary)/0.1))" }}
-        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 9, repeat: Infinity }} />
+    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-6 pb-24 md:pb-6 relative overflow-hidden bg-background">
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 30% 0%, hsl(var(--primary) / 0.05), transparent 50%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.04), transparent 50%)" }} />
 
-      {[...Array(3)].map((_, i) => (
-        <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-primary/20 pointer-events-none"
-          style={{ top: `${20 + i * 25}%`, right: `${5 + i * 10}%` }}
-          animate={{ y: [0, -15, 0], opacity: [0.1, 0.5, 0.1] }}
-          transition={{ duration: 4 + i, repeat: Infinity }} />
-      ))}
-
-      <motion.div initial={{ y: 20, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="w-full max-w-md relative z-10">
-        <Card className="border border-border/50 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.15)] backdrop-blur-xl bg-card/90">
-          <CardHeader className="text-center pb-3">
-            <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-              <div className="w-18 h-18 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" style={{ width: 72, height: 72 }} onClick={() => navigate("/")}>
+      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }} className="w-full max-w-md relative z-10">
+        <Card className="app-card border-border/30 overflow-hidden">
+          <CardHeader className="text-center pb-2 pt-6">
+            <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -3, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+              <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden mx-auto shadow-xl ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <motion.div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent flex items-center justify-center" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                <UserPlus className="w-3 h-3 text-accent-foreground" />
-              </motion.div>
             </motion.div>
             <CardTitle className="font-display text-2xl text-foreground">Create Account</CardTitle>
-            <CardDescription className="font-sans text-sm">Join our caricature community</CardDescription>
+            <CardDescription className="font-sans text-sm text-muted-foreground">Join our caricature community</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Progress */}

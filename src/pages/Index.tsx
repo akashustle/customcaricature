@@ -227,43 +227,36 @@ const Index = () => {
       {/* Hero Section */}
       <main>
       <section className="relative overflow-hidden" ref={heroRef}>
-        {/* Animated gradient background for desktop */}
+        {/* Soft gradient — no harsh animations on mobile */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card/30 to-background" />
         <div className="absolute inset-0 hidden lg:block">
           <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
           <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand-gold/3 blur-[150px]" />
         </div>
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute rounded-full bg-primary/15 hidden lg:block"
-            style={{
-              left: `${5 + i * 8}%`,
-              top: `${10 + (i % 5) * 16}%`,
-              width: `${4 + (i % 3) * 3}px`,
-              height: `${4 + (i % 3) * 3}px`,
-            }}
-            animate={{ y: [0, -40, 0], opacity: [0.05, 0.4, 0.05], scale: [1, 1.8, 1] }}
-            transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: i * 0.3, ease: "easeInOut" }}
-          />
-        ))}
-        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 py-20 md:py-28 lg:py-36 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 xl:gap-24">
-            {/* Mobile: Logo - above text */}
-            <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-border bg-card p-1 shadow-lg lg:hidden"
-              animate={{ y: [0, -8, 0], rotateZ: [0, 2, -2, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
+            {/* Mobile: Compact logo + branding */}
+            <div className="flex flex-col items-center lg:hidden w-full">
+              <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-full px-3 py-1 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[11px] font-sans font-semibold text-primary">India's #1 Caricature Studio</span>
+              </motion.div>
+            </div>
 
             {/* Left: Text content */}
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="flex-1 text-center lg:text-left max-w-2xl">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="flex-1 text-center lg:text-left max-w-2xl">
+              {/* Desktop badge */}
               <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }}
-                className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
+                className="hidden lg:inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 <span className="text-xs font-body font-semibold text-primary tracking-wide">India's #1 Premium Caricature Studio</span>
               </motion.div>
-              <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="font-calligraphy text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-6 leading-[1.05]">
+              <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
+                className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]">
                 {hero.headline || (<>Turn Moments Into <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
               </motion.h1>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
@@ -282,16 +275,16 @@ const Index = () => {
                   {hero.urgency_text}
                 </motion.p>
               )}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 mb-8">
-                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="xl" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-xl shadow-primary/25 text-base px-8">
-                    {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-5 h-5 ml-2" />
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}
+                className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-6">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button size="lg" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
+                    {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="xl" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card text-base px-8">
-                    <Zap className="w-5 h-5 mr-2" /> {hero.secondary_cta || "Book for Event"}
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Button size="lg" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
+                    <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Book for Event"}
                   </Button>
                 </motion.div>
               </motion.div>

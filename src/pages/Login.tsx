@@ -128,34 +128,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.12),transparent_60%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08),transparent_50%)] bg-background">
-      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.2), hsl(var(--accent)/0.15))" }}
-        animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.2), hsl(var(--primary)/0.1))" }}
-        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
+    <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-background">
+      {/* Soft ambient gradient — no harsh visuals */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.06), transparent 60%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.04), transparent 50%)" }} />
 
-      {[...Array(4)].map((_, i) => (
-        <motion.div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-primary/25 pointer-events-none"
-          style={{ top: `${15 + i * 20}%`, left: `${8 + i * 22}%` }}
-          animate={{ y: [0, -12, 0], opacity: [0.2, 0.6, 0.2] }}
-          transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.5 }} />
-      ))}
-
-      <motion.div initial={{ y: 30, opacity: 0, scale: 0.95 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ duration: 0.6, type: "spring", bounce: 0.3 }} className="w-full max-w-sm relative z-10">
-        <Card className="border border-border/50 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.2)] backdrop-blur-xl bg-card/92">
-          <CardHeader className="text-center pb-4">
-            <motion.div className="relative mx-auto mb-3" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-              <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto shadow-lg ring-2 ring-primary/20 cursor-pointer" onClick={() => navigate("/")}>
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, type: "spring", bounce: 0.2 }} className="w-full max-w-sm relative z-10">
+        <Card className="app-card border-border/30 overflow-hidden">
+          <CardHeader className="text-center pb-3 pt-8">
+            <motion.div className="relative mx-auto mb-3" animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+              <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden mx-auto shadow-xl ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
-              <motion.div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                <Sparkles className="w-3 h-3 text-primary-foreground" />
-              </motion.div>
             </motion.div>
             <CardTitle className="font-display text-2xl text-foreground">Welcome Back</CardTitle>
-            <CardDescription className="font-sans text-sm">Sign in to your caricature studio</CardDescription>
+            <CardDescription className="font-sans text-sm text-muted-foreground">Sign in to your caricature studio</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Google Login Button */}
