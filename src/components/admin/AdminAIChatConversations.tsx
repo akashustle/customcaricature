@@ -292,6 +292,16 @@ const AdminAIChatConversations = () => {
               </div>
 
               <div className="border-t border-border p-3">
+                {sending && (
+                  <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-sans">
+                    <div className="flex gap-0.5">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                    Admin is typing...
+                  </div>
+                )}
                 <form onSubmit={(e) => { e.preventDefault(); sendAdminMessage(); }} className="flex gap-2">
                   <Input value={adminReply} onChange={(e) => setAdminReply(e.target.value)}
                     placeholder="Reply as admin..." className="flex-1 font-sans" disabled={sending} />
