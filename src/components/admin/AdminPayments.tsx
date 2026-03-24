@@ -145,21 +145,35 @@ const AdminPayments = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-3 justify-between">
-        <h2 className="font-display text-xl font-bold text-foreground">All Payments ({payments.length})</h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-3 group hover:border-emerald-500/30 transition-all">
-            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 opacity-10" />
-            <div className="flex items-center gap-2 relative z-10">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
-                <CreditCard className="w-4 h-4 text-foreground" />
-              </div>
-              <div>
-                <span className="text-[11px] text-muted-foreground">Total Revenue</span>
-                <p className="font-bold text-foreground">{formatPrice(totalRevenue)}</p>
+      {/* 3D Revenue Widget */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-2">
+        {[
+          { icon: CreditCard, label: "Total Revenue", value: formatPrice(totalRevenue), gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", borderAccent: "border-l-emerald-500" },
+          { icon: CreditCard, label: "Total Payments", value: String(payments.length), gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", borderAccent: "border-l-blue-500" },
+          { icon: CreditCard, label: "Confirmed", value: String(payments.filter(p => p.status === "confirmed").length), gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", borderAccent: "border-l-violet-500" },
+        ].map((w, i) => (
+          <motion.div key={w.label} initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.03, duration: 0.35, type: "spring", stiffness: 300, damping: 25 }}
+            whileHover={{ y: -6, scale: 1.04, transition: { duration: 0.2 } }}
+            className="cursor-pointer">
+            <div className={`admin-widget-3d bg-gradient-to-br ${w.gradient} border-l-4 ${w.borderAccent}`}>
+              <div className="p-3 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center shadow-lg`}>
+                    <w.icon className="w-4 h-4 text-white" />
+                  </div>
+                </div>
+                <p className="text-lg font-extrabold text-foreground leading-tight">{w.value}</p>
+                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{w.label}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-3 justify-between">
+        <h2 className="font-display text-xl font-bold text-foreground">All Payments</h2>
+        <div className="flex items-center gap-2 flex-wrap">
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
