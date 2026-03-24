@@ -171,7 +171,7 @@ const Login = () => {
                   ) : (
                     <div>
                       <Label className="font-sans text-sm">Phone Number</Label>
-                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" className="h-11 rounded-xl" maxLength={13} autoFocus />
+                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" className="h-11 rounded-xl" maxLength={13} />
                     </div>
                   )}
                   <Button onClick={goNext} disabled={!canProceedStep1} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
