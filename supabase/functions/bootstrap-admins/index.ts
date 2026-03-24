@@ -45,32 +45,37 @@ Deno.serve(async (req) => {
 
       for (const admin of admins) {
         try {
-          // Check if email already exists
-          const { data: existingList } = await adminClient.auth.admin.listUsers();
-          const existing = existingList?.users?.find((u: any) => u.email === admin.email);
-          
+          // Try to create, if exists update
           let userId: string;
           
-          if (existing) {
-            userId = existing.id;
-            // Update password
-            await adminClient.auth.admin.updateUser(userId, { password: admin.password });
-          } else {
-            // Create new user
-            const { data: authData, error: createError } = await adminClient.auth.admin.createUser({
-              email: admin.email,
-              password: admin.password,
-              email_confirm: true,
-              user_metadata: {
-                full_name: admin.full_name,
-                mobile: admin.mobile,
-                age: admin.age,
-              },
-            });
-            if (createError || !authData.user) {
-              results.push({ email: admin.email, success: false, error: createError?.message });
+          const { data: authData, error: createError } = await adminClient.auth.admin.createUser({
+            email: admin.email,
+            password: admin.password,
+            email_confirm: true,
+            user_metadata: {
+              full_name: admin.full_name,
+              mobile: admin.mobile,
+              age: admin.age,
+            },
+          });
+          
+          if (createError && createError.message?.includes("already been registered")) {
+            // Find existing user and update
+            const { data: { users } } = await adminClient.auth.admin.listUsers();
+            const existingUser = users?.find((u: any) => u.email === admin.email);
+            if (!existingUser) {
+              results.push({ email: admin.email, success: false, error: "User exists but not found" });
               continue;
             }
+            userId = existingUser.id;
+            await adminClient.auth.admin.updateUser(userId, { 
+              password: admin.password,
+              user_metadata: { full_name: admin.full_name, mobile: admin.mobile, age: admin.age }
+            });
+          } else if (createError || !authData?.user) {
+            results.push({ email: admin.email, success: false, error: createError?.message });
+            continue;
+          } else {
             userId = authData.user.id;
           }
 
