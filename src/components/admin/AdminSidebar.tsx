@@ -206,10 +206,15 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             )}
             {section.items.map((item) => {
               const isActive = activeTab === item.id;
+              const handleClick = () => {
+                if (item.id === "link-workshop-admin") { navigate("/cccworkshop2006"); return; }
+                if (item.id === "link-shop-admin") { navigate("/CFCAdmin936"); return; }
+                onTabChange(item.id);
+              };
               return (
                 <motion.button
                   key={item.id}
-                  onClick={() => onTabChange(item.id)}
+                  onClick={handleClick}
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.97 }}
                   className={cn(
