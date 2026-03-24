@@ -152,15 +152,19 @@ const AdminLogin = () => {
     if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
       setLoading(true);
       try {
-        const { error } = await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } });
+        // Generate a 4-digit OTP and store it via edge function
+        const generatedOtp = String(Math.floor(1000 + Math.random() * 9000));
+        const { data, error } = await supabase.functions.invoke("send-otp-email", {
+          body: { to: "akashxbhavans@gmail.com", otp: generatedOtp, admin_email: selectedAdmin.email },
+        });
         if (error) throw error;
         setOtpSent(true); startResendCooldown();
-        toast({ title: "OTP Sent! 📧", description: "Check akashxbhavans@gmail.com" });
+        toast({ title: "OTP Generated! 🔑", description: "Check with main admin for the 4-digit OTP code" });
       } catch (err: any) { toast({ title: "Failed", description: err?.message, variant: "destructive" }); }
       finally { setLoading(false); }
       return;
     }
-    if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
+    if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 4) { toast({ title: "Enter 4-digit OTP", variant: "destructive" }); return; }
 
     setLoading(true);
     try {
