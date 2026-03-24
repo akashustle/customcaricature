@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import EventRevenueWidget from "@/components/EventRevenueWidget";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type EventBooking = {
   id: string; user_id: string | null; client_name: string; client_mobile: string;
