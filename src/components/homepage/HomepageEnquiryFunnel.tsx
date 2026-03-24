@@ -190,10 +190,10 @@ const HomepageEnquiryFunnel = () => {
                     <Clock className="w-5 h-5 text-accent" />
                     <h3 className="font-body font-bold text-lg text-foreground">When is your event?</h3>
                   </div>
-                  <Input
+                   <Input
                     type="date"
                     value={data.date}
-                    onChange={e => setData({ ...data, date: e.target.value })}
+                    onChange={e => { setData({ ...data, date: e.target.value }); if (e.target.value) setTimeout(() => setStep(3), 300); }}
                     min={new Date().toISOString().split("T")[0]}
                     className="font-body text-base h-12"
                   />
