@@ -967,7 +967,6 @@ const WorkshopAdmin = () => {
                         <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
                       </motion.div>
                     ))}
-                    ))}
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <GlassCard>
