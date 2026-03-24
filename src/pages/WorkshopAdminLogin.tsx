@@ -9,14 +9,14 @@ import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, GraduationCap, Phone } from "lucide-react";
 
-interface AdminInfo { name: string; email: string; mobile: string; tag?: string; }
+interface AdminInfo { name: string; email: string; mobile: string; designation: string; }
 
 const ADMIN_LIST: AdminInfo[] = [
-  { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", tag: "Main Admin" },
-  { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271" },
-  { name: "Ritesh", email: "ritesh@gmail.com", mobile: "9967047351" },
-  { name: "Kaushik", email: "kaushik@gmail.com", mobile: "9833067656" },
-  { name: "Manashvi", email: "manashvi@gmail.com", mobile: "8433843725" },
+  { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer" },
+  { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271", designation: "Chief Operating Officer (COO)" },
+  { name: "Ritesh", email: "ritesh@gmail.com", mobile: "9967047351", designation: "Founder & Chief Executive Officer (CEO)" },
+  { name: "Kaushik", email: "kaushik@gmail.com", mobile: "9833067656", designation: "Senior Operations & Client Relations Manager" },
+  { name: "Manashvi", email: "manashvi@gmail.com", mobile: "8433843725", designation: "Creative Director & Content Lead" },
 ];
 
 const maskEmail = (email: string) => { const [l, d] = email.split("@"); return `${l.slice(0, 3)}${"•".repeat(Math.max(l.length - 3, 2))}@${d}`; };
