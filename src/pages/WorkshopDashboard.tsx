@@ -173,34 +173,59 @@ const WorkshopDashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300`}>
+    <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300 relative`}>
+      {/* Background animated orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <motion.div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px]"
+          style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }}
+          animate={{ scale: [1, 1.2, 1], x: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity }} />
+        <motion.div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.03] blur-[80px]"
+          style={{ background: `linear-gradient(225deg, ${accent.secondary}, ${accent.primary})` }}
+          animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 12, repeat: Infinity }} />
+      </div>
+
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
       <WorkshopCountdownOverlay user={workshopUser} />
 
-      {/* Header */}
-      <div className={`sticky top-0 z-40 backdrop-blur-xl ${headerBg} border-b`}>
+      {/* Header - Premium Glassmorphism */}
+      <motion.div className={`sticky top-0 z-40 backdrop-blur-2xl ${headerBg} border-b`}
+        initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}>
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <motion.img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-xl shadow-sm ring-1 ring-black/[0.04]"
-              animate={{ y: [0, -2, 0] }} transition={{ duration: 4, repeat: Infinity }} />
+            <motion.div className="relative"
+              whileHover={{ scale: 1.1, rotateY: 15 }}>
+              <div className="absolute -inset-0.5 rounded-xl blur-sm opacity-40"
+                style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }} />
+              <img src="/logo.png" alt="CCC" className="relative w-9 h-9 rounded-xl shadow-sm ring-1 ring-black/[0.04]" />
+            </motion.div>
             <div>
-              <h1 className={`${textPrimary} text-sm md:text-base tracking-tight`}>{getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨</h1>
-              <p className={`${textSecondary} text-[10px] md:text-xs`}>CCC Workshop {workshopUser.roll_number && `· Roll #${workshopUser.roll_number}`}</p>
+              <motion.h1 className={`${textPrimary} text-sm md:text-base tracking-tight`}
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+                {getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨
+              </motion.h1>
+              <motion.p className={`${textSecondary} text-[10px] md:text-xs`}
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+                CCC Workshop {workshopUser.roll_number && `· Roll #${workshopUser.roll_number}`}
+              </motion.p>
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className={`${textSecondary} rounded-xl`} title="Back to Dashboard">
-              <Home className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowColorPicker(!showColorPicker)} className={`${textSecondary} rounded-xl`}>
-              <Palette className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} className={`${textSecondary} rounded-xl`}>
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
-              <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
-            </Button>
+            {[
+              { icon: Home, action: () => navigate("/dashboard"), tip: "Dashboard" },
+              { icon: Palette, action: () => setShowColorPicker(!showColorPicker), tip: "Theme" },
+              { icon: darkMode ? Sun : Moon, action: () => setDarkMode(!darkMode), tip: "Mode" },
+            ].map((btn, i) => (
+              <motion.div key={i} whileHover={{ scale: 1.1, y: -1 }} whileTap={{ scale: 0.9 }}>
+                <Button variant="ghost" size="sm" onClick={btn.action} className={`${textSecondary} rounded-xl`} title={btn.tip}>
+                  <btn.icon className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            ))}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
+                <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -210,8 +235,9 @@ const WorkshopDashboard = () => {
               <div className="max-w-5xl mx-auto px-4 pb-3 flex gap-2 items-center">
                 <span className={`${textSecondary} text-xs`}>Theme:</span>
                 {ACCENT_COLORS.map((c, i) => (
-                  <button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent hover:scale-110"}`}
+                  <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
+                    whileHover={{ scale: 1.2, y: -2 }} whileTap={{ scale: 0.9 }}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent"}`}
                     style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
                     title={c.name} />
                 ))}
@@ -219,7 +245,7 @@ const WorkshopDashboard = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
@@ -234,48 +260,57 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content with stagger animation */}
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
         <AnimatePresence mode="wait">
           <motion.div key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {renderContent()}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav - 3D Glass */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} border-t`}>
+        <div className={`backdrop-blur-2xl ${dm ? "bg-[#0e0e18]/95 border-white/[0.06]" : "bg-white/95 border-slate-200/50"} border-t shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]`}>
           <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
-            {visibleTabs.map((tab) => {
+            {visibleTabs.map((tab, idx) => {
               const isActive = activeTab === tab.key;
               return (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                <motion.button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  whileTap={{ scale: 0.85 }}
                   className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${isActive ? "bg-primary/10" : ""}`}>
+                  <motion.div
+                    animate={isActive ? { y: -4, scale: 1.15 } : { y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200`}
+                    style={isActive ? { background: `linear-gradient(135deg, ${accent.primary}20, ${accent.secondary}15)`, boxShadow: `0 4px 12px ${accent.primary}25` } : {}}>
                     <tab.icon className={`w-[20px] h-[20px] transition-all duration-200 ${isActive ? "" : dm ? "text-white/30" : "text-slate-400"}`}
                       strokeWidth={isActive ? 2.5 : 1.8}
                       style={isActive ? { color: accent.primary } : {}} />
-                  </div>
+                  </motion.div>
                   <span className={`text-[9px] leading-none font-medium transition-all duration-200 ${isActive ? "font-bold" : dm ? "text-white/30" : "text-slate-400"}`}
                     style={isActive ? { color: accent.primary } : {}}>
                     {tab.label}
                   </span>
-                </button>
+                  {isActive && (
+                    <motion.div layoutId="activeTabDot" className="absolute -top-0.5 w-5 h-0.5 rounded-full"
+                      style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.secondary})` }} />
+                  )}
+                </motion.button>
               );
             })}
-            <button onClick={() => navigate("/dashboard")}
+            <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.85 }}
               className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
-              <div className="flex items-center justify-center w-8 h-8 rounded-xl">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl">
                 <LayoutDashboard className={`w-[20px] h-[20px] ${dm ? "text-white/30" : "text-slate-400"}`} strokeWidth={1.8} />
               </div>
               <span className={`text-[9px] leading-none font-medium ${dm ? "text-white/30" : "text-slate-400"}`}>Dashboard</span>
-            </button>
+            </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
