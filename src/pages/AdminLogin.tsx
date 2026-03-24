@@ -65,6 +65,7 @@ const AdminLogin = () => {
     sessionStorage.setItem("admin_action_name", name);
   };
 
+  const startResendCooldown = () => {
     setResendCooldown(60);
     const interval = setInterval(() => {
       setResendCooldown(p => {
