@@ -116,7 +116,7 @@ const AdminLogin = () => {
       }
 
       const { data: authData, error: authError } = await withTimeout(
-        supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
+        supabase.auth.signInWithPassword({ email: loginEmail, password })
       );
       if (authError || !authData.user) throw authError || new Error("Login failed");
       const { data: roles, error: roleError } = await withTimeout(
