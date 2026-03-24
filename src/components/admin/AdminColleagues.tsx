@@ -108,7 +108,7 @@ const AdminColleagues = () => {
 
   const togglePin = async (msgId: string) => {
     const updated = messages.map(m => m.id === msgId ? { ...m, is_pinned: !m.is_pinned } : m);
-    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: updated } });
+    await supabase.from("admin_site_settings").upsert({ id: "colleague_messages", value: { messages: updated } } as any);
     setMessages(updated);
   };
 
