@@ -128,13 +128,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.12),transparent_60%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.08),transparent_50%)] bg-background">
-      <motion.div className="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.2), hsl(var(--accent)/0.15))" }}
-        animate={{ scale: [1, 1.15, 1], rotate: [0, 5, 0] }} transition={{ duration: 8, repeat: Infinity }} />
-      <motion.div className="absolute bottom-0 left-0 w-80 h-80 opacity-15 pointer-events-none blur-3xl rounded-full"
-        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.2), hsl(var(--primary)/0.1))" }}
-        animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 6, repeat: Infinity }} />
+    <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-background">
+      {/* Soft ambient gradient — no harsh visuals */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.06), transparent 60%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.04), transparent 50%)" }} />
 
       {[...Array(4)].map((_, i) => (
         <motion.div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-primary/25 pointer-events-none"
