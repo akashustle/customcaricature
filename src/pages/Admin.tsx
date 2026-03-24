@@ -1910,14 +1910,27 @@ const Admin = () => {
               {/* Admin Profile Section */}
               <div className="admin-settings-card p-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-xl shadow-primary/20">
-                    {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+                  {/* Avatar with upload */}
+                  <div className="relative group">
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-xl shadow-primary/20">
+                      {(adminProfile as any)?.avatar_url ? (
+                        <img src={(adminProfile as any).avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        (adminProfile?.full_name || "A").charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <Upload className="w-5 h-5 text-white" />
+                      <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                    </label>
                   </div>
                   <div className="flex-1">
                     {editingAdminProfile ? (
                       <div className="space-y-2">
                         <Input value={adminEditData.full_name || ""} onChange={e => setAdminEditData({...adminEditData, full_name: e.target.value})} placeholder="Full Name" className="font-sans" />
+                        <Input value={adminEditData.email || ""} onChange={e => setAdminEditData({...adminEditData, email: e.target.value})} placeholder="Email Address" className="font-sans" />
                         <Input value={adminEditData.mobile || ""} onChange={e => setAdminEditData({...adminEditData, mobile: e.target.value})} placeholder="Mobile" className="font-sans" />
+                        <Input type="number" value={adminEditData.age ?? ""} onChange={e => setAdminEditData({...adminEditData, age: e.target.value ? Number(e.target.value) : null} as any)} placeholder="Age" className="font-sans" />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={saveAdminProfile} className="font-sans rounded-xl"><Save className="w-3 h-3 mr-1" />Save</Button>
                           <Button size="sm" variant="ghost" onClick={() => setEditingAdminProfile(false)} className="rounded-xl">Cancel</Button>
@@ -1926,7 +1939,9 @@ const Admin = () => {
                     ) : (
                       <>
                         <h3 className="font-sans font-bold text-lg text-foreground">{adminProfile?.full_name || "Admin"}</h3>
-                        <p className="text-sm text-muted-foreground font-sans">{user?.email}</p>
+                        <p className="text-sm text-muted-foreground font-sans">{adminProfile?.email || user?.email}</p>
+                        {(adminProfile as any)?.age && <p className="text-xs text-muted-foreground font-sans">Age: {(adminProfile as any).age}</p>}
+                        <p className="text-xs text-muted-foreground font-sans">📱 {adminProfile?.mobile || "Not set"}</p>
                         <Button size="sm" variant="outline" className="mt-2 rounded-xl text-xs font-sans" onClick={() => setEditingAdminProfile(true)}>
                           <Edit2 className="w-3 h-3 mr-1" />Edit Profile
                         </Button>
