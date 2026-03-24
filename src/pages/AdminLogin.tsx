@@ -255,46 +255,87 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.15),transparent_60%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.1),transparent_50%)] bg-background">
-      {/* Animated 3D blobs */}
-      <motion.div className="absolute top-10 left-10 w-80 h-80 rounded-full opacity-25 blur-3xl"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.3), hsl(var(--accent)/0.2))" }}
-        animate={{ scale: [1, 1.3, 1], x: [0, 40, 0], rotate: [0, 90, 0] }} transition={{ duration: 12, repeat: Infinity }} />
-      <motion.div className="absolute bottom-10 right-10 w-96 h-96 rounded-full opacity-15 blur-3xl"
-        style={{ background: "linear-gradient(225deg, hsl(var(--accent)/0.3), hsl(var(--primary)/0.15))" }}
-        animate={{ scale: [1.2, 1, 1.2], rotate: [0, -60, 0] }} transition={{ duration: 10, repeat: Infinity }} />
-      <motion.div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full opacity-10 blur-3xl bg-primary/20"
-        animate={{ y: [0, -30, 0] }} transition={{ duration: 7, repeat: Infinity }} />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-background">
+      {/* Animated gradient mesh background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div className="absolute -top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
+          style={{ background: "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(260 80% 60%), hsl(var(--primary)))" }}
+          animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} />
+        <motion.div className="absolute -bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full opacity-15 blur-[100px]"
+          style={{ background: "conic-gradient(from 180deg, hsl(var(--accent)), hsl(var(--primary)), hsl(320 70% 55%), hsl(var(--accent)))" }}
+          animate={{ rotate: [360, 0] }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} />
+        <motion.div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] rounded-full opacity-10 blur-[80px] bg-primary/30"
+          animate={{ scale: [1, 1.4, 1], y: [0, -50, 0] }} transition={{ duration: 8, repeat: Infinity }} />
+      </div>
 
-      {/* Floating particles */}
-      {[...Array(5)].map((_, i) => (
-        <motion.div key={i} className="absolute w-2 h-2 rounded-full bg-primary/30"
-          style={{ top: `${15 + i * 18}%`, left: `${10 + i * 20}%` }}
-          animate={{ y: [0, -20, 0], opacity: [0.2, 0.6, 0.2] }}
-          transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.5 }} />
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+
+      {/* Floating orbs with glow */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div key={i} className="absolute pointer-events-none"
+          style={{ top: `${10 + (i * 11) % 80}%`, left: `${5 + (i * 13) % 90}%` }}
+          animate={{ y: [0, -30 - i * 5, 0], x: [0, (i % 2 ? 15 : -15), 0], opacity: [0.15, 0.5, 0.15] }}
+          transition={{ duration: 4 + i * 0.7, repeat: Infinity, delay: i * 0.3 }}>
+          <div className={`rounded-full bg-primary/30 shadow-[0_0_15px_hsl(var(--primary)/0.3)]`}
+            style={{ width: `${6 + (i % 3) * 4}px`, height: `${6 + (i % 3) * 4}px` }} />
+        </motion.div>
       ))}
 
-      <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, type: "spring" }} className="w-full max-w-md relative z-10">
-        <div className="backdrop-blur-2xl bg-card/85 border border-border/50 rounded-3xl shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.25),0_0_0_1px_hsl(var(--border)/0.5)] p-8 space-y-6">
+      {/* Floating emoji decorations */}
+      {["🎨", "✨", "🖌️", "🌟"].map((emoji, i) => (
+        <motion.span key={i} className="absolute text-2xl pointer-events-none select-none opacity-20"
+          style={{ top: `${20 + i * 20}%`, right: `${8 + i * 12}%` }}
+          animate={{ y: [0, -20, 0], rotate: [0, 15, -15, 0], scale: [0.8, 1.1, 0.8] }}
+          transition={{ duration: 5 + i, repeat: Infinity, delay: i * 0.8 }}>
+          {emoji}
+        </motion.span>
+      ))}
+
+      <motion.div initial={{ opacity: 0, y: 40, scale: 0.9, rotateX: 10 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.8, type: "spring", bounce: 0.3 }} className="w-full max-w-md relative z-10" style={{ perspective: "1200px" }}>
+        
+        {/* Outer glow ring */}
+        <motion.div className="absolute -inset-1 rounded-[28px] opacity-40 blur-sm"
+          style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.4), hsl(var(--accent)/0.3), hsl(var(--primary)/0.2))" }}
+          animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 3, repeat: Infinity }} />
+
+        <div className="relative backdrop-blur-2xl bg-card/90 border border-border/40 rounded-3xl shadow-[0_25px_80px_-15px_hsl(var(--primary)/0.3),0_0_0_1px_hsl(var(--border)/0.3),inset_0_1px_0_hsl(var(--card)/0.8)] p-8 space-y-6 overflow-hidden">
+          {/* Inner shimmer effect */}
+          <motion.div className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(105deg, transparent 40%, hsl(var(--primary)/0.05) 45%, hsl(var(--primary)/0.08) 50%, hsl(var(--primary)/0.05) 55%, transparent 60%)" }}
+            animate={{ x: ["-100%", "200%"] }} transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }} />
+
           {/* Header */}
-          <div className="text-center space-y-3">
-            <motion.div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-primary/30 shadow-[0_8px_30px_-5px_hsl(var(--primary)/0.3)]"
-              animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")} />
+          <div className="text-center space-y-4 relative">
+            <motion.div className="mx-auto w-20 h-20 rounded-2xl overflow-hidden relative"
+              animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity }}
+              whileHover={{ scale: 1.1, rotateY: 15, rotateX: -5 }}>
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/50 to-accent/30 blur-sm" />
+              <img src="/logo.png" alt="CCC" className="relative w-full h-full object-cover cursor-pointer rounded-2xl ring-2 ring-white/20" onClick={() => navigate("/")} />
             </motion.div>
+
             <div className="flex items-center justify-center gap-2">
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 4, repeat: Infinity }}>
+              <motion.div animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.15, 1] }} transition={{ duration: 4, repeat: Infinity }}>
                 <Shield className="w-5 h-5 text-primary" />
               </motion.div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-foreground via-primary/80 to-foreground/60 bg-clip-text text-transparent">
                 Admin Console
               </h1>
-              <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                <Sparkles className="w-4 h-4 text-primary/60" />
+              <motion.div animate={{ scale: [1, 1.4, 1], rotate: [0, 180, 360] }} transition={{ duration: 3, repeat: Infinity }}>
+                <Sparkles className="w-4 h-4 text-primary/70" />
               </motion.div>
             </div>
-            <p className="text-sm text-muted-foreground">Creative Caricature Club • Secure Access</p>
+            <motion.p className="text-sm text-muted-foreground" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+              Creative Caricature Club • Secure Access
+            </motion.p>
+
+            {/* Animated security badge */}
+            <motion.div className="mx-auto flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit"
+              animate={{ scale: [1, 1.03, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+              <motion.div className="w-2 h-2 rounded-full bg-green-500" animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+              <span className="text-[10px] font-semibold text-primary">256-bit Encrypted</span>
+            </motion.div>
           </div>
 
           {sessionLimitReached ? (
