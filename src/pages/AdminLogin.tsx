@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone } from "lucide-react";
+import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone, Shield, Sparkles } from "lucide-react";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
@@ -100,7 +100,7 @@ const AdminLogin = () => {
 
   const handleProfileSelect = (email: string) => {
     if (!locationGranted) {
-      toast({ title: "📍 Location Required", description: "Allow location access to continue.", variant: "destructive" });
+      toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
       navigator.geolocation?.getCurrentPosition(
         (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
         () => {}
@@ -109,91 +109,53 @@ const AdminLogin = () => {
     }
     setSelectedAdminEmail(email);
     const admin = ADMIN_LIST.find(a => a.email === email);
-    if (admin) {
-      setSelectedAdmin(admin);
-      setVerifyInput("");
-      setVerifyMethod("email");
-      setDirection(1);
-      setStep(2);
-    }
+    if (admin) { setSelectedAdmin(admin); setVerifyInput(""); setVerifyMethod("email"); setDirection(1); setStep(2); }
   };
 
   const handleVerifyIdentity = () => {
-    if (!selectedAdmin || !verifyInput.trim()) {
-      toast({ title: "Please enter your " + verifyMethod, variant: "destructive" });
-      return;
-    }
+    if (!selectedAdmin || !verifyInput.trim()) { toast({ title: "Enter your " + verifyMethod, variant: "destructive" }); return; }
     const match = verifyMethod === "email"
       ? verifyInput.toLowerCase() === selectedAdmin.email.toLowerCase()
       : verifyInput.replace(/\s/g, "") === selectedAdmin.mobile;
-    if (!match) {
-      toast({ title: "Identity not matched", variant: "destructive" });
-      return;
-    }
-    setDirection(1);
-    setStep(3);
-    setPassword("");
-    setSecretCode("");
-    setOtpCode("");
-    setOtpSent(false);
-    setAuthMethod("password");
+    if (!match) { toast({ title: "Identity not matched", variant: "destructive" }); return; }
+    setDirection(1); setStep(3); setPassword(""); setSecretCode(""); setOtpCode(""); setOtpSent(false); setAuthMethod("password");
   };
 
   const setAdminSessionName = async (userId: string) => {
-    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
-    const name = profile?.full_name || selectedAdmin?.name || "Admin";
-    sessionStorage.setItem("admin_entered_name", name);
-    sessionStorage.setItem("admin_action_name", name);
+    try {
+      await supabase.from("admin_sessions" as any).update({ entered_name: selectedAdmin?.name || "Admin" } as any).eq("user_id", userId).eq("is_active", true);
+    } catch {}
   };
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!selectedAdmin) return;
-
-    // If 3+ failed attempts, force OTP
-    if (failedAttempts >= 3 && authMethod !== "otp") {
-      toast({ title: "Too many failed attempts", description: "OTP verification is now required.", variant: "destructive" });
-      setAuthMethod("otp");
-      return;
-    }
-
     if (authMethod === "password" && !password) { toast({ title: "Enter password", variant: "destructive" }); return; }
-    if (authMethod === "secret_code" && secretCode.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
-
-    // OTP flow - send OTP first
-    if (authMethod === "otp" && !otpSent) {
+    if (authMethod === "secret_code") {
+      const norm = secretCode.replace(/[-\s]/g, "");
+      if (norm.length !== 8) { toast({ title: "Enter 8-digit secret code", variant: "destructive" }); return; }
+      if (norm !== adminMasterSecret) {
+        setFailedAttempts(p => p + 1);
+        toast({ title: "Invalid secret code", variant: "destructive" }); return;
+      }
+    }
+    if (failedAttempts >= 3 && authMethod !== "otp") { setAuthMethod("otp"); return; }
+    if ((authMethod === "otp" || failedAttempts >= 3) && !otpSent) {
       setLoading(true);
       try {
         const { error } = await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } });
         if (error) throw error;
-        setOtpSent(true);
-        startResendCooldown();
+        setOtpSent(true); startResendCooldown();
         toast({ title: "OTP Sent! 📧", description: "Check akashxbhavans@gmail.com" });
-      } catch (err: any) {
-        toast({ title: "Failed", description: err?.message, variant: "destructive" });
-      } finally { setLoading(false); }
+      } catch (err: any) { toast({ title: "Failed", description: err?.message, variant: "destructive" }); }
+      finally { setLoading(false); }
       return;
     }
-    if (authMethod === "otp" && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
+    if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
 
     setLoading(true);
     try {
-      if (authMethod === "secret_code") {
-        const norm = secretCode.replace(/[-\s]/g, "");
-        if (norm !== adminMasterSecret) {
-          setFailedAttempts(p => p + 1);
-          toast({ title: "Invalid secret code", variant: "destructive" });
-          setLoading(false);
-          return;
-        }
-        // Secret code matched - login directly
-        const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
-          body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) },
-        });
-        if (error || !data?.success) throw new Error("Secret code login failed");
-        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
-        if (vErr) throw vErr;
-      } else if (authMethod === "otp") {
+      if (authMethod === "otp" || failedAttempts >= 3) {
         const { error } = await supabase.auth.verifyOtp({ email: "akashxbhavans@gmail.com", token: otpCode, type: "email" });
         if (error) throw error;
         if (selectedAdmin.email !== "akashxbhavans@gmail.com") {
@@ -205,6 +167,13 @@ const AdminLogin = () => {
           const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
           if (vErr) throw vErr;
         }
+      } else if (authMethod === "secret_code") {
+        const { data, error } = await supabase.functions.invoke("login-with-secret-code", {
+          body: { email: selectedAdmin.email, secret_code: secretCode.slice(0, 4) },
+        });
+        if (error || !data?.success) throw new Error("Secret code login failed");
+        const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "magiclink" });
+        if (vErr) throw vErr;
       } else {
         const { data: authData, error: authError } = await withTimeout(
           supabase.auth.signInWithPassword({ email: selectedAdmin.email, password })
@@ -252,9 +221,9 @@ const AdminLogin = () => {
   };
 
   const slideVariants = {
-    enter: (d: number) => ({ x: d > 0 ? 200 : -200, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (d: number) => ({ x: d > 0 ? -200 : 200, opacity: 0 }),
+    enter: (d: number) => ({ x: d > 0 ? 200 : -200, opacity: 0, scale: 0.9 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -200 : 200, opacity: 0, scale: 0.9 }),
   };
 
   const goBack = () => {
@@ -264,85 +233,125 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #f1f5f9 60%, #e0e7ff 100%)" }}>
-      {/* Animated background orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div className="absolute -top-1/3 -left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.12] blur-[120px]"
-          style={{ background: "radial-gradient(circle, #818cf8, #c084fc, #f0abfc)" }}
-          animate={{ scale: [1, 1.15, 1], x: [0, 30, 0] }} transition={{ duration: 12, repeat: Infinity }} />
-        <motion.div className="absolute -bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.10] blur-[100px]"
-          style={{ background: "radial-gradient(circle, #67e8f9, #a78bfa, #f472b6)" }}
-          animate={{ scale: [1, 1.1, 1], y: [0, -20, 0] }} transition={{ duration: 15, repeat: Infinity }} />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Vibrant animated background */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)", backgroundSize: "400% 400%" }}>
+        <motion.div className="absolute inset-0" animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+          style={{ background: "inherit", backgroundSize: "400% 400%" }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }} />
       </div>
 
-      {/* Dot pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #6366f1 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+      {/* Floating 3D orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[
+          { size: 300, x: "-10%", y: "-15%", color: "rgba(255,255,255,0.08)", dur: 20 },
+          { size: 250, x: "70%", y: "60%", color: "rgba(255,255,255,0.06)", dur: 25 },
+          { size: 200, x: "40%", y: "-20%", color: "rgba(255,255,255,0.05)", dur: 18 },
+          { size: 180, x: "80%", y: "10%", color: "rgba(255,255,255,0.07)", dur: 22 },
+          { size: 120, x: "20%", y: "70%", color: "rgba(255,255,255,0.09)", dur: 16 },
+        ].map((orb, i) => (
+          <motion.div key={i} className="absolute rounded-full"
+            style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y, background: orb.color, backdropFilter: "blur(40px)" }}
+            animate={{ y: [0, -30, 0], x: [0, 15, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: orb.dur, repeat: Infinity, ease: "easeInOut", delay: i * 1.5 }} />
+        ))}
+      </div>
 
-      {/* Floating particles */}
-      {[...Array(5)].map((_, i) => (
-        <motion.div key={i} className="absolute pointer-events-none rounded-full"
-          style={{ top: `${15 + i * 15}%`, left: `${8 + i * 18}%`, width: `${5 + i % 3 * 2}px`, height: `${5 + i % 3 * 2}px`, background: "linear-gradient(135deg, #818cf8, #c084fc)" }}
-          animate={{ y: [0, -20, 0], opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: i * 0.4 }} />
+      {/* Floating sparkles */}
+      {[...Array(12)].map((_, i) => (
+        <motion.div key={`sp-${i}`} className="absolute pointer-events-none"
+          style={{ top: `${10 + (i * 7) % 80}%`, left: `${5 + (i * 13) % 90}%` }}
+          animate={{ y: [0, -25, 0], opacity: [0, 0.8, 0], rotate: [0, 180, 360], scale: [0.5, 1, 0.5] }}
+          transition={{ duration: 3 + i * 0.3, repeat: Infinity, delay: i * 0.5 }}>
+          <Sparkles className="w-3 h-3 text-white/40" />
+        </motion.div>
       ))}
 
-      <motion.div initial={{ opacity: 0, y: 40, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, type: "spring", bounce: 0.3 }} className="w-full max-w-md relative z-10">
+      {/* Glass pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+
+      <motion.div initial={{ opacity: 0, y: 60, scale: 0.85, rotateX: 10 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.8, type: "spring", bounce: 0.25 }} className="w-full max-w-md relative z-10" style={{ perspective: "1000px" }}>
         
-        {/* 3D card glow */}
-        <div className="absolute -inset-1 rounded-[28px] opacity-30 blur-md" style={{ background: "linear-gradient(135deg, #818cf8, #c084fc, #f0abfc)" }} />
+        {/* Outer glow ring */}
+        <motion.div className="absolute -inset-2 rounded-[32px] opacity-60 blur-xl"
+          style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1), rgba(255,255,255,0.3))" }}
+          animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ duration: 3, repeat: Infinity }} />
 
-        {/* Main card - white vibrant 3D */}
-        <div className="relative bg-white rounded-3xl overflow-hidden" style={{ boxShadow: "0 25px 60px -12px rgba(99, 102, 241, 0.25), 0 12px 30px -8px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)" }}>
+        {/* Main glass card */}
+        <div className="relative rounded-3xl overflow-hidden" style={{
+          background: "rgba(255, 255, 255, 0.92)",
+          backdropFilter: "blur(40px) saturate(180%)",
+          boxShadow: "0 30px 80px -15px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.4) inset, 0 -2px 6px rgba(0,0,0,0.05) inset"
+        }}>
           
-          {/* Shimmer effect */}
-          <motion.div className="absolute inset-0 pointer-events-none z-10"
-            style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.4) 45%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 55%, transparent 60%)" }}
-            animate={{ x: ["-100%", "200%"] }} transition={{ duration: 4, repeat: Infinity, repeatDelay: 4 }} />
+          {/* Animated shimmer */}
+          <motion.div className="absolute inset-0 pointer-events-none z-20"
+            style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.6) 40%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.6) 60%, transparent 65%)" }}
+            animate={{ x: ["-200%", "300%"] }} transition={{ duration: 5, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} />
 
-          {/* Top gradient strip */}
-          <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, #818cf8, #c084fc, #f472b6, #fb923c)" }} />
+          {/* Top rainbow strip */}
+          <motion.div className="h-1.5 w-full"
+            style={{ background: "linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #667eea)", backgroundSize: "200% 100%" }}
+            animate={{ backgroundPosition: ["0% 0%", "200% 0%"] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
 
           <div className="relative p-8 space-y-6">
             {/* Logo + Header */}
-            <div className="text-center space-y-3">
-              <motion.div className="mx-auto w-[72px] h-[72px] relative" animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                <div className="absolute -inset-1.5 rounded-2xl opacity-50 blur-sm" style={{ background: "linear-gradient(135deg, #818cf8, #c084fc)" }} />
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center" style={{ boxShadow: "0 8px 25px -5px rgba(99,102,241,0.3)" }}>
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")} 
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div className="text-center space-y-4">
+              <motion.div className="mx-auto w-20 h-20 relative"
+                animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                {/* Logo glow */}
+                <motion.div className="absolute -inset-3 rounded-2xl blur-lg"
+                  style={{ background: "linear-gradient(135deg, #667eea, #764ba2, #f093fb)" }}
+                  animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
+                  transition={{ duration: 3, repeat: Infinity }} />
+                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-2xl ring-2 ring-white/60">
+                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")}
+                    onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; t.parentElement!.innerHTML = '<div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-black text-2xl">C</div>'; }} />
                 </div>
               </motion.div>
 
-              <div>
-                <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Admin Console</h1>
-                <p className="text-sm text-gray-500 mt-0.5">{getGreeting()}</p>
-              </div>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Shield className="w-5 h-5 text-indigo-500" />
+                  <h1 className="text-2xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                    Admin Console
+                  </h1>
+                </div>
+                <p className="text-sm text-gray-500 font-medium">{getGreeting()}</p>
+              </motion.div>
 
-              {/* Step indicators */}
-              <div className="flex items-center justify-center gap-2 mt-2">
+              {/* Step indicators with animation */}
+              <div className="flex items-center justify-center gap-3 mt-3">
                 {[1, 2, 3].map(s => (
-                  <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${
-                    s === step ? "w-10" : s < step ? "w-6" : "w-6"
-                  }`} style={{
-                    background: s === step ? "linear-gradient(90deg, #818cf8, #c084fc)" : s < step ? "rgba(129,140,248,0.4)" : "#e2e8f0"
-                  }} />
+                  <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+                    <div className={`h-2 rounded-full transition-all duration-500 ${
+                      s === step ? "w-12" : s < step ? "w-8" : "w-6"
+                    }`} style={{
+                      background: s === step ? "linear-gradient(90deg, #667eea, #764ba2, #f093fb)" : s < step ? "rgba(102,126,234,0.4)" : "#e2e8f0"
+                    }} />
+                    {s === step && (
+                      <motion.div className="absolute inset-0 rounded-full blur-sm"
+                        style={{ background: "linear-gradient(90deg, #667eea, #f093fb)" }}
+                        animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                    )}
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Location status */}
-              <div className="flex items-center justify-center gap-1.5">
-                <MapPin className={`w-3 h-3 ${locationGranted ? "text-emerald-500" : "text-red-400"}`} />
-                <span className={`text-[10px] font-medium ${locationGranted ? "text-emerald-600" : "text-red-500"}`}>
-                  {locationGranted ? "Location verified" : "Location required"}
-                </span>
-              </div>
+              {/* Location chip */}
+              <motion.div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
+                locationGranted ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"
+              }`} animate={locationGranted ? {} : { scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <MapPin className="w-3 h-3" />
+                {locationGranted ? "Location verified ✓" : "Location required"}
+              </motion.div>
 
-              {/* Failed attempts warning */}
               {failedAttempts >= 2 && (
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                  className="text-xs text-red-500 font-medium bg-red-50 rounded-lg px-3 py-1.5">
-                  ⚠️ {failedAttempts} failed attempt{failedAttempts > 1 ? "s" : ""}. {failedAttempts >= 3 ? "OTP required." : "1 more and OTP will be required."}
+                  className="text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-4 py-2 border border-red-200">
+                  ⚠️ {failedAttempts} failed attempts. {failedAttempts >= 3 ? "OTP required." : "1 more → OTP required."}
                 </motion.div>
               )}
             </div>
@@ -350,166 +359,193 @@ const AdminLogin = () => {
             {/* Steps */}
             <div className="min-h-[280px] relative">
               <AnimatePresence mode="wait" custom={direction}>
-                {/* STEP 1: Profile Selection */}
+                {/* STEP 1 */}
                 {step === 1 && (
-                  <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
-                    <Label className="text-sm font-semibold text-gray-600">Select Your Profile</Label>
+                  <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                    transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-5">
+                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                      <User className="w-4 h-4 text-indigo-500" /> Select Your Profile
+                    </Label>
                     <Select value={selectedAdminEmail} onValueChange={handleProfileSelect}>
-                      <SelectTrigger className="h-12 rounded-xl bg-gray-50 border-gray-200 text-base hover:bg-gray-100 transition-colors">
+                      <SelectTrigger className="h-14 rounded-2xl bg-gradient-to-r from-gray-50 to-indigo-50/30 border-gray-200/80 text-base hover:shadow-md transition-all">
                         <SelectValue placeholder="Choose admin profile..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-gray-200">
+                      <SelectContent className="bg-white/95 backdrop-blur-xl border-gray-200 rounded-xl shadow-2xl">
                         {ADMIN_LIST.map(admin => (
-                          <SelectItem key={admin.email} value={admin.email}>
-                            <div className="flex flex-col gap-0.5 py-0.5">
+                          <SelectItem key={admin.email} value={admin.email} className="rounded-lg hover:bg-indigo-50/50">
+                            <div className="flex flex-col gap-0.5 py-1">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-gray-900">{admin.name}</span>
                                 <span className="text-gray-400 text-xs">({maskEmail(admin.email)})</span>
                               </div>
-                              <span className="text-[10px] text-indigo-600 font-medium">{admin.designation}</span>
+                              <span className="text-[10px] font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-gray-400 text-center">Select your profile to proceed</p>
+                    <p className="text-xs text-gray-400 text-center font-medium">Select your profile to proceed securely</p>
                   </motion.div>
                 )}
 
-                {/* STEP 2: Verify Identity */}
+                {/* STEP 2 */}
                 {step === 2 && selectedAdmin && (
-                  <motion.div key="s2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
-                    <div className="text-center py-3 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
-                      <p className="text-sm font-bold text-gray-900">Hi {selectedAdmin.name}! 👋</p>
-                      <p className="text-[10px] text-indigo-600 font-medium mt-0.5">{selectedAdmin.designation}</p>
-                      <p className="text-xs text-gray-500 mt-1">Verify your identity to continue</p>
-                    </div>
+                  <motion.div key="s2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                    transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-4">
+                    <motion.div className="text-center py-4 rounded-2xl border border-indigo-100"
+                      style={{ background: "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05), rgba(240,147,251,0.05))" }}>
+                      <p className="text-lg font-bold text-gray-900">Hi {selectedAdmin.name}! 👋</p>
+                      <p className="text-[11px] font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mt-0.5">{selectedAdmin.designation}</p>
+                      <p className="text-xs text-gray-500 mt-1.5">Verify your identity to continue</p>
+                    </motion.div>
 
                     <div className="space-y-3">
-                      <Label className="text-sm font-semibold text-gray-600">Authenticate With</Label>
+                      <Label className="text-sm font-bold text-gray-700">Authenticate With</Label>
                       <Select value={verifyMethod} onValueChange={(v) => { setVerifyMethod(v as "email" | "mobile"); setVerifyInput(""); }}>
-                        <SelectTrigger className="h-11 rounded-xl bg-gray-50 border-gray-200">
+                        <SelectTrigger className="h-12 rounded-xl bg-gray-50/80 border-gray-200/80 hover:shadow-sm transition-all">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
-                          <SelectItem value="email"><div className="flex items-center gap-2"><Mail className="w-4 h-4" /> Email Address</div></SelectItem>
-                          <SelectItem value="mobile"><div className="flex items-center gap-2"><Phone className="w-4 h-4" /> Mobile Number</div></SelectItem>
+                        <SelectContent className="bg-white/95 backdrop-blur-xl rounded-xl">
+                          <SelectItem value="email"><div className="flex items-center gap-2"><Mail className="w-4 h-4 text-indigo-500" /> Email Address</div></SelectItem>
+                          <SelectItem value="mobile"><div className="flex items-center gap-2"><Phone className="w-4 h-4 text-indigo-500" /> Mobile Number</div></SelectItem>
                         </SelectContent>
                       </Select>
 
                       <div>
-                        <Label className="text-xs text-gray-500">
+                        <Label className="text-xs text-gray-500 font-medium">
                           Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span>
                         </Label>
                         <div className="relative mt-1.5">
-                          {verifyMethod === "email" ? <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" /> : <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />}
+                          {verifyMethod === "email" ? <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" /> : <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />}
                           <Input type={verifyMethod === "email" ? "email" : "tel"} value={verifyInput} onChange={(e) => setVerifyInput(e.target.value)}
-                            placeholder={verifyMethod === "email" ? "Enter email" : "Enter mobile"}
-                            className="pl-10 h-12 bg-gray-50 border-gray-200 rounded-xl"
+                            placeholder={verifyMethod === "email" ? "Enter your email" : "Enter your mobile"}
+                            className="pl-11 h-13 bg-gray-50/80 border-gray-200/80 rounded-xl focus:ring-2 focus:ring-indigo-300 transition-all"
                             onKeyDown={(e) => e.key === "Enter" && handleVerifyIdentity()} />
                         </div>
                       </div>
                     </div>
 
-                    <Button onClick={handleVerifyIdentity} className="w-full h-11 rounded-xl font-semibold text-white" style={{ background: "linear-gradient(135deg, #818cf8, #a78bfa)" }}>
-                      Verify & Continue
+                    <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg hover:shadow-xl transition-all"
+                      style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                      Verify & Continue →
                     </Button>
-                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1"><ArrowLeft className="w-3 h-3" /> Back</Button>
+                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1 hover:text-indigo-500">
+                      <ArrowLeft className="w-3 h-3" /> Back
+                    </Button>
                   </motion.div>
                 )}
 
-                {/* STEP 3: Login */}
+                {/* STEP 3 */}
                 {step === 3 && selectedAdmin && (
-                  <motion.div key="s3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }}>
+                  <motion.div key="s3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
+                    transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }}>
                     <form onSubmit={handleLogin} className="space-y-4">
-                      <div className="text-center py-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
-                        <div className="w-16 h-16 mx-auto rounded-full overflow-hidden ring-2 ring-indigo-200 mb-2 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #e0e7ff, #ede9fe)" }}>
-                          {adminAvatars[selectedAdmin.email] ? (
-                            <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <User className="w-7 h-7 text-indigo-400" />
-                          )}
-                        </div>
-                        <p className="text-base font-bold text-gray-900">Welcome, {selectedAdmin.name}! 🎉</p>
-                        <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full mt-1 text-indigo-700" style={{ background: "linear-gradient(135deg, #e0e7ff, #ede9fe)" }}>
+                      <motion.div className="text-center py-5 rounded-2xl border border-indigo-100"
+                        style={{ background: "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05), rgba(240,147,251,0.05))" }}>
+                        <motion.div className="w-18 h-18 mx-auto rounded-full overflow-hidden mb-3 relative"
+                          style={{ width: 72, height: 72 }}
+                          animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }}>
+                          <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: "linear-gradient(135deg, #667eea, #764ba2, #f093fb)" }} />
+                          <div className="relative w-full h-full rounded-full overflow-hidden ring-3 ring-white shadow-xl flex items-center justify-center"
+                            style={{ background: "linear-gradient(135deg, #e0e7ff, #ede9fe)" }}>
+                            {adminAvatars[selectedAdmin.email] ? (
+                              <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-8 h-8 text-indigo-400" />
+                            )}
+                          </div>
+                        </motion.div>
+                        <p className="text-lg font-black text-gray-900">Welcome, {selectedAdmin.name}! 🎉</p>
+                        <span className="inline-block text-[10px] font-bold px-3 py-1 rounded-full mt-1.5 text-white"
+                          style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
                           {selectedAdmin.designation}
                         </span>
-                      </div>
+                      </motion.div>
 
-                      {/* Auth method selector - hide OTP unless forced */}
-                      <div className={`grid ${failedAttempts >= 3 ? "grid-cols-1" : "grid-cols-3"} gap-1.5`}>
+                      {/* Auth method selector */}
+                      <div className={`grid ${failedAttempts >= 3 ? "grid-cols-1" : "grid-cols-3"} gap-2`}>
                         {failedAttempts >= 3 ? (
-                          <div className="text-center py-2 px-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-medium">
-                            🔒 OTP verification required due to failed attempts
-                          </div>
+                          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                            className="text-center py-3 px-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold">
+                            🔒 OTP verification required
+                          </motion.div>
                         ) : ([
-                          { key: "password" as const, icon: Lock, label: "Password" },
-                          { key: "secret_code" as const, icon: KeyRound, label: "Secret Code" },
-                          { key: "otp" as const, icon: Mail, label: "OTP" },
+                          { key: "password" as const, icon: Lock, label: "Password", gradient: "from-indigo-500 to-blue-500" },
+                          { key: "secret_code" as const, icon: KeyRound, label: "Secret Code", gradient: "from-purple-500 to-violet-500" },
+                          { key: "otp" as const, icon: Mail, label: "Email OTP", gradient: "from-pink-500 to-rose-500" },
                         ]).map(m => (
-                          <button key={m.key} type="button"
+                          <motion.button key={m.key} type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                             onClick={() => { setAuthMethod(m.key); setOtpSent(false); setOtpCode(""); setSecretCode(""); setPassword(""); }}
-                            className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs font-medium transition-all ${
-                              authMethod === m.key ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-gray-200 bg-gray-50 text-gray-500 hover:border-indigo-200"
-                            }`}>
+                            className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-xs font-bold transition-all ${
+                              authMethod === m.key
+                                ? "border-transparent text-white shadow-lg"
+                                : "border-gray-200 bg-gray-50 text-gray-500 hover:border-indigo-200"
+                            }`}
+                            style={authMethod === m.key ? { background: `linear-gradient(135deg, var(--tw-gradient-stops))`, backgroundImage: `linear-gradient(135deg, ${m.gradient.split(" ").filter(s => s.startsWith("from-") || s.startsWith("to-")).map(s => { const c = s.replace("from-", "").replace("to-", ""); return c; }).join(", ")})` } : {}}
+                            {...(authMethod === m.key ? { style: { background: m.key === "password" ? "linear-gradient(135deg, #667eea, #4f46e5)" : m.key === "secret_code" ? "linear-gradient(135deg, #a855f7, #7c3aed)" : "linear-gradient(135deg, #ec4899, #f43f5e)" } } : {})}>
                             <m.icon className="w-4 h-4" /> {m.label}
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
 
                       {authMethod === "password" && failedAttempts < 3 && (
-                        <div className="space-y-2">
-                          <Label className="text-sm text-gray-600 font-medium">Password</Label>
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+                          <Label className="text-sm text-gray-600 font-bold">Password</Label>
                           <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
                             <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                              placeholder="••••••••" className="pl-10 pr-10 h-12 bg-gray-50 border-gray-200 rounded-xl" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                              placeholder="••••••••" className="pl-11 pr-11 h-13 bg-gray-50/80 border-gray-200/80 rounded-xl" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition-colors">
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
-                        </div>
+                        </motion.div>
                       )}
 
                       {authMethod === "secret_code" && failedAttempts < 3 && (
-                        <div className="space-y-2">
-                          <Label className="text-sm text-gray-600 font-medium">8-Digit Secret Code</Label>
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+                          <Label className="text-sm text-gray-600 font-bold">8-Digit Secret Code</Label>
                           <Input type="password" value={secretCode}
                             onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
                             placeholder="• • • • • • • •" maxLength={8}
-                            className="h-12 bg-gray-50 border-gray-200 rounded-xl text-center text-xl tracking-[0.4em] font-bold" />
-                        </div>
+                            className="h-14 bg-gray-50/80 border-gray-200/80 rounded-xl text-center text-2xl tracking-[0.4em] font-black" />
+                        </motion.div>
                       )}
 
                       {(authMethod === "otp" || failedAttempts >= 3) && (
-                        <div className="space-y-3">
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
                           {!otpSent ? (
-                            <div className="text-center py-3 rounded-xl bg-gray-50 border border-gray-200">
-                              <Mail className="w-8 h-8 text-indigo-400 mx-auto mb-2" />
-                              <p className="text-xs text-gray-500">OTP → <strong className="text-gray-900">akashxbhavans@gmail.com</strong></p>
+                            <div className="text-center py-4 rounded-xl border border-indigo-100" style={{ background: "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(240,147,251,0.03))" }}>
+                              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                                <Mail className="w-10 h-10 text-indigo-400 mx-auto mb-2" />
+                              </motion.div>
+                              <p className="text-xs text-gray-500">OTP will be sent to</p>
+                              <p className="text-sm font-bold text-gray-900 mt-0.5">akashxbhavans@gmail.com</p>
                             </div>
                           ) : (
                             <>
-                              <Label className="text-sm text-gray-600 font-medium">Enter 6-digit OTP</Label>
+                              <Label className="text-sm text-gray-600 font-bold">Enter 6-digit OTP</Label>
                               <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
                                 placeholder="• • • • • •" maxLength={6}
-                                className="h-14 text-center text-2xl tracking-[0.5em] font-bold bg-gray-50 border-gray-200 rounded-xl" />
+                                className="h-16 text-center text-3xl tracking-[0.5em] font-black bg-gray-50/80 border-gray-200/80 rounded-xl" />
                               <button type="button" disabled={resendCooldown > 0}
                                 onClick={async () => { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); }}
-                                className="text-sm text-indigo-600 hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto">
-                                <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
+                                className="text-sm text-indigo-600 hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto font-semibold">
+                                <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
                               </button>
                             </>
                           )}
-                        </div>
+                        </motion.div>
                       )}
 
-                      <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-base font-semibold text-white border-0"
-                        style={{ background: "linear-gradient(135deg, #818cf8, #a78bfa, #c084fc)", boxShadow: "0 4px 15px -3px rgba(129,140,248,0.4)" }}>
-                        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{(authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Sending OTP..." : "Verifying..."}</> :
-                          (authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Send OTP" : "Sign In"}
-                      </Button>
-                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1">
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button type="submit" disabled={loading} className="w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl hover:shadow-2xl transition-all"
+                          style={{ background: "linear-gradient(135deg, #667eea, #764ba2, #f093fb)", backgroundSize: "200% 100%" }}>
+                          {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />{(authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Sending OTP..." : "Verifying..."}</> :
+                            (authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Send OTP →" : "Sign In →"}
+                        </Button>
+                      </motion.div>
+                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1 hover:text-indigo-500">
                         <ArrowLeft className="w-3 h-3" /> Back
                       </Button>
                     </form>
@@ -519,7 +555,7 @@ const AdminLogin = () => {
             </div>
 
             <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">← Back to Home</button>
+              <button onClick={() => navigate("/")} className="text-xs text-gray-400 hover:text-indigo-500 transition-colors font-medium">← Back to Home</button>
             </div>
           </div>
         </div>
