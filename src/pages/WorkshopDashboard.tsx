@@ -16,7 +16,7 @@ import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineA
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 
 const ACCENT_COLORS = [
-  { name: "Default", primary: "#2d2518", secondary: "#3a3020" },
+  { name: "Violet", primary: "#7c3aed", secondary: "#a855f7" },
   { name: "Terracotta", primary: "#c2703e", secondary: "#d4854f" },
   { name: "Teal", primary: "#0d9488", secondary: "#14b8a6" },
   { name: "Rose", primary: "#be123c", secondary: "#e11d48" },
