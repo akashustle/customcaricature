@@ -14,14 +14,13 @@ Deno.serve(async (req) => {
     const { email, secret_code } = await req.json();
 
     if (!email || !secret_code) {
-      // Always return 200 with error in body so supabase.functions.invoke doesn't throw
       return new Response(JSON.stringify({ success: false, error: "Email and secret code are required" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (typeof email !== "string" || email.length > 255 || typeof secret_code !== "string" || secret_code.length > 10) {
+    if (typeof email !== "string" || email.length > 255 || typeof secret_code !== "string" || secret_code.length > 20) {
       return new Response(JSON.stringify({ success: false, error: "Invalid input" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -45,10 +44,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Secret code login is available for all users who have a secret code
-    // No need to check secret_code_login_enabled flag anymore
+    // Check against master admin secret code from site settings
+    let masterCode = "01022006";
+    const { data: settingData } = await supabase
+      .from("admin_site_settings")
+      .select("value")
+      .eq("id", "admin_secret_code")
+      .maybeSingle();
+    if (settingData?.value && (settingData.value as any).code) {
+      masterCode = (settingData.value as any).code;
+    }
 
-    if (!profile.secret_code || profile.secret_code !== secret_code.trim()) {
+    const inputCode = secret_code.trim();
+    const profileCode = profile.secret_code || "";
+
+    // Accept if matches master code OR profile's own secret code
+    const codeMatch = inputCode === masterCode || inputCode === profileCode;
+
+    if (!codeMatch) {
       return new Response(JSON.stringify({ success: false, error: "Invalid credentials" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
