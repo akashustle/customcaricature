@@ -268,7 +268,7 @@ const WorkshopAdminLogin = () => {
                           <User className="w-6 h-6 text-primary/60" />
                         </div>
                         <p className="text-base font-bold text-foreground">Welcome, {selectedAdmin.name}! 🎉</p>
-                        {selectedAdmin.tag && <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary mt-1">{selectedAdmin.tag}</span>}
+                        <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary mt-1">{selectedAdmin.designation}</span>
                       </div>
 
                       <div className="grid grid-cols-3 gap-1.5">
