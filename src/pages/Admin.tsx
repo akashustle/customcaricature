@@ -118,19 +118,17 @@ const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
     return () => { supabase.removeChannel(ch); };
   }, []);
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center text-white"
+      className="relative h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white hover:shadow-lg hover:shadow-indigo-500/25 transition-all"
     >
-      <MessageCircle className="w-5 h-5" />
+      <MessageCircle className="w-4 h-4" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
-    </motion.button>
+    </button>
   );
 };
 
