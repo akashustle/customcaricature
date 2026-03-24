@@ -22,6 +22,14 @@ const ADMIN_LIST: AdminInfo[] = [
 const maskEmail = (email: string) => { const [l, d] = email.split("@"); return `${l.slice(0, 3)}${"•".repeat(Math.max(l.length - 3, 2))}@${d}`; };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
+const BRAND = {
+  primary: "#5C4033",
+  accent: "#C17B4A",
+  light: "#E8D5C4",
+  highlight: "#D4956A",
+  cream: "#FDF8F3",
+};
+
 const WorkshopAdminLogin = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -160,91 +168,90 @@ const WorkshopAdminLogin = () => {
   const goBack = () => { setDirection(-1); if (step === 3) setStep(2); else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); } };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-      {/* Vibrant gradient background */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #d946ef 100%)", backgroundSize: "400% 400%" }}>
-        <motion.div className="absolute inset-0" animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
-          style={{ background: "inherit", backgroundSize: "400% 400%" }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }} />
-      </div>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+      style={{ background: `linear-gradient(135deg, #FFFFFF 0%, ${BRAND.cream} 40%, #FFF5EB 70%, #FFFFFF 100%)` }}>
 
-      {/* Floating orbs */}
+      {/* Soft floating shapes */}
       <div className="absolute inset-0 overflow-hidden">
         {[
-          { size: 280, x: "-5%", y: "-10%", color: "rgba(255,255,255,0.07)", dur: 22 },
-          { size: 220, x: "65%", y: "55%", color: "rgba(255,255,255,0.05)", dur: 28 },
-          { size: 180, x: "35%", y: "-15%", color: "rgba(255,255,255,0.06)", dur: 20 },
-          { size: 150, x: "85%", y: "15%", color: "rgba(255,255,255,0.08)", dur: 24 },
+          { size: 320, x: "-6%", y: "-10%", color: `${BRAND.light}35`, dur: 24 },
+          { size: 260, x: "68%", y: "55%", color: `${BRAND.accent}12`, dur: 30 },
+          { size: 200, x: "38%", y: "-15%", color: `${BRAND.highlight}10`, dur: 22 },
+          { size: 170, x: "84%", y: "12%", color: `${BRAND.light}20`, dur: 26 },
         ].map((orb, i) => (
           <motion.div key={i} className="absolute rounded-full"
-            style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y, background: orb.color, backdropFilter: "blur(30px)" }}
-            animate={{ y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.08, 1] }}
-            transition={{ duration: orb.dur, repeat: Infinity, ease: "easeInOut", delay: i * 1.2 }} />
+            style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y, background: orb.color, filter: "blur(50px)" }}
+            animate={{ y: [0, -18, 0], x: [0, 8, 0], scale: [1, 1.06, 1] }}
+            transition={{ duration: orb.dur, repeat: Infinity, ease: "easeInOut", delay: i * 1.3 }} />
         ))}
       </div>
 
       {/* Sparkles */}
-      {[...Array(10)].map((_, i) => (
+      {[...Array(6)].map((_, i) => (
         <motion.div key={`sp-${i}`} className="absolute pointer-events-none"
-          style={{ top: `${12 + (i * 8) % 76}%`, left: `${5 + (i * 11) % 88}%` }}
-          animate={{ y: [0, -20, 0], opacity: [0, 0.7, 0], rotate: [0, 180, 360] }}
-          transition={{ duration: 3.5 + i * 0.3, repeat: Infinity, delay: i * 0.6 }}>
-          <Sparkles className="w-3 h-3 text-white/30" />
+          style={{ top: `${15 + (i * 10) % 70}%`, left: `${10 + (i * 15) % 80}%` }}
+          animate={{ y: [0, -18, 0], opacity: [0, 0.4, 0], rotate: [0, 180, 360] }}
+          transition={{ duration: 4 + i * 0.4, repeat: Infinity, delay: i * 0.7 }}>
+          <Sparkles className="w-3 h-3" style={{ color: BRAND.accent }} />
         </motion.div>
       ))}
 
-      <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: `radial-gradient(circle, ${BRAND.primary} 1px, transparent 1px)`, backgroundSize: "34px 34px" }} />
 
-      <motion.div initial={{ opacity: 0, y: 50, scale: 0.85, rotateX: 8 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-        transition={{ duration: 0.8, type: "spring", bounce: 0.2 }} className="w-full max-w-md relative z-10">
-        
-        <motion.div className="absolute -inset-2 rounded-[32px] opacity-50 blur-xl"
-          style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08), rgba(255,255,255,0.25))" }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 3, repeat: Infinity }} />
+      <motion.div initial={{ opacity: 0, y: 50, scale: 0.88, rotateX: 8 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.8, type: "spring", bounce: 0.2 }} className="w-full max-w-md relative z-10" style={{ perspective: "1200px" }}>
 
-        <div className="relative rounded-3xl overflow-hidden" style={{
-          background: "rgba(255, 255, 255, 0.92)",
-          backdropFilter: "blur(40px) saturate(180%)",
-          boxShadow: "0 30px 80px -15px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.4) inset"
-        }}>
-          
+        <motion.div className="absolute -inset-3 rounded-[32px] blur-2xl"
+          style={{ background: `linear-gradient(135deg, ${BRAND.light}50, ${BRAND.accent}15, ${BRAND.light}35)` }}
+          animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 4, repeat: Infinity }} />
+
+        <motion.div className="relative rounded-3xl overflow-hidden"
+          whileHover={{ rotateY: 1, rotateX: -1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          style={{
+            background: "#FFFFFF",
+            boxShadow: `0 25px 60px -12px ${BRAND.primary}15, 0 12px 30px -8px ${BRAND.accent}10, 0 0 0 1px ${BRAND.light}80 inset`,
+            transformStyle: "preserve-3d",
+          }}>
+
           <motion.div className="absolute inset-0 pointer-events-none z-20"
-            style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.5) 40%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.5) 60%, transparent 65%)" }}
-            animate={{ x: ["-200%", "300%"] }} transition={{ duration: 5, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }} />
+            style={{ background: `linear-gradient(105deg, transparent 35%, ${BRAND.cream}90 42%, #FFFFFF 50%, ${BRAND.cream}90 58%, transparent 65%)` }}
+            animate={{ x: ["-200%", "300%"] }} transition={{ duration: 6, repeat: Infinity, repeatDelay: 6, ease: "easeInOut" }} />
 
           <motion.div className="h-1.5 w-full"
-            style={{ background: "linear-gradient(90deg, #0ea5e9, #6366f1, #8b5cf6, #a855f7, #d946ef, #0ea5e9)", backgroundSize: "200% 100%" }}
+            style={{ background: `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.accent}, ${BRAND.primary})`, backgroundSize: "200% 100%" }}
             animate={{ backgroundPosition: ["0% 0%", "200% 0%"] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear" }} />
+            transition={{ duration: 5, repeat: Infinity, ease: "linear" }} />
 
           <div className="relative p-8 space-y-6">
             <div className="text-center space-y-4">
-              <motion.div className="mx-auto w-20 h-20 relative" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity }}>
+              <motion.div className="mx-auto w-20 h-20 relative" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }}>
                 <motion.div className="absolute -inset-3 rounded-2xl blur-lg"
-                  style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)" }}
-                  animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
+                  style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30, ${BRAND.light}50)` }}
+                  animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.08, 1] }}
                   transition={{ duration: 3, repeat: Infinity }} />
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-2xl ring-2 ring-white/60">
+                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-xl"
+                  style={{ boxShadow: `0 8px 25px -5px ${BRAND.accent}30, 0 0 0 2px ${BRAND.light}` }}>
                   <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")}
-                    onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; t.parentElement!.innerHTML = '<div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-violet-500 to-purple-600 text-white font-black text-2xl">W</div>'; }} />
+                    onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; t.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-2xl font-black" style="background: linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}); color: white;">W</div>`; }} />
                 </div>
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <GraduationCap className="w-5 h-5 text-violet-500" />
-                  <h1 className="text-2xl font-black bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-500 bg-clip-text text-transparent">
+                  <GraduationCap className="w-5 h-5" style={{ color: BRAND.accent }} />
+                  <h1 className="text-2xl font-black" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     Workshop Admin
                   </h1>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">{getGreeting()}</p>
+                <p className="text-sm font-medium" style={{ color: "#9B8B7A" }}>{getGreeting()}</p>
               </motion.div>
 
               <div className="flex items-center justify-center gap-3 mt-3">
                 {[1, 2, 3].map(s => (
-                  <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
+                  <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
                     <div className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-12" : s < step ? "w-8" : "w-6"}`}
-                      style={{ background: s === step ? "linear-gradient(90deg, #6366f1, #8b5cf6, #d946ef)" : s < step ? "rgba(139,92,246,0.4)" : "#e2e8f0" }} />
+                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#E8E0D8" }} />
                   </motion.div>
                 ))}
               </div>
@@ -262,22 +269,23 @@ const WorkshopAdminLogin = () => {
                 {step === 1 && (
                   <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-5">
-                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                      <User className="w-4 h-4 text-violet-500" /> Select Your Profile
+                    <Label className="text-sm font-bold flex items-center gap-2" style={{ color: BRAND.primary }}>
+                      <User className="w-4 h-4" style={{ color: BRAND.accent }} /> Select Your Profile
                     </Label>
                     <Select value={selectedAdminEmail} onValueChange={handleProfileSelect}>
-                      <SelectTrigger className="h-14 rounded-2xl bg-gradient-to-r from-gray-50 to-violet-50/30 border-gray-200/80 text-base hover:shadow-md transition-all">
+                      <SelectTrigger className="h-14 rounded-2xl text-base transition-all border"
+                        style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}>
                         <SelectValue placeholder="Choose admin profile..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/95 backdrop-blur-xl border-gray-200 rounded-xl shadow-2xl">
+                      <SelectContent className="bg-white border rounded-xl shadow-2xl" style={{ borderColor: BRAND.light }}>
                         {ADMIN_LIST.map(admin => (
-                          <SelectItem key={admin.email} value={admin.email} className="rounded-lg hover:bg-violet-50/50">
+                          <SelectItem key={admin.email} value={admin.email} className="rounded-lg">
                             <div className="flex flex-col gap-0.5 py-1">
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-gray-900">{admin.name}</span>
-                                <span className="text-gray-400 text-xs">({maskEmail(admin.email)})</span>
+                                <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
+                                <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
                               </div>
-                              <span className="text-[10px] font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">{admin.designation}</span>
+                              <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -289,35 +297,36 @@ const WorkshopAdminLogin = () => {
                 {step === 2 && selectedAdmin && (
                   <motion.div key="s2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-4">
-                    <motion.div className="text-center py-4 rounded-2xl border border-violet-100"
-                      style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05), rgba(217,70,239,0.05))" }}>
-                      <p className="text-lg font-bold text-gray-900">Hi {selectedAdmin.name}! 👋</p>
-                      <p className="text-[11px] font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">{selectedAdmin.designation}</p>
-                      <p className="text-xs text-gray-500 mt-1.5">Verify your identity</p>
+                    <motion.div className="text-center py-4 rounded-2xl border"
+                      style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}>
+                      <p className="text-lg font-bold" style={{ color: BRAND.primary }}>Hi {selectedAdmin.name}! 👋</p>
+                      <p className="text-[11px] font-semibold" style={{ color: BRAND.accent }}>{selectedAdmin.designation}</p>
+                      <p className="text-xs mt-1.5" style={{ color: "#9B8B7A" }}>Verify your identity</p>
                     </motion.div>
                     <div className="space-y-3">
-                      <Label className="text-sm font-bold text-gray-700">Authenticate With</Label>
+                      <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Authenticate With</Label>
                       <Select value={verifyMethod} onValueChange={(v) => { setVerifyMethod(v as "email" | "mobile"); setVerifyInput(""); }}>
-                        <SelectTrigger className="h-12 rounded-xl bg-gray-50/80 border-gray-200/80"><SelectValue /></SelectTrigger>
-                        <SelectContent className="bg-white/95 backdrop-blur-xl rounded-xl">
-                          <SelectItem value="email"><div className="flex items-center gap-2"><Mail className="w-4 h-4 text-violet-500" /> Email</div></SelectItem>
-                          <SelectItem value="mobile"><div className="flex items-center gap-2"><Phone className="w-4 h-4 text-violet-500" /> Mobile</div></SelectItem>
+                        <SelectTrigger className="h-12 rounded-xl border" style={{ background: BRAND.cream, borderColor: BRAND.light }}><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white rounded-xl">
+                          <SelectItem value="email"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email</div></SelectItem>
+                          <SelectItem value="mobile"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile</div></SelectItem>
                         </SelectContent>
                       </Select>
                       <div>
-                        <Label className="text-xs text-gray-500">Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span></Label>
+                        <Label className="text-xs" style={{ color: "#9B8B7A" }}>Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span></Label>
                         <div className="relative mt-1.5">
-                          {verifyMethod === "email" ? <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" /> : <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />}
+                          {verifyMethod === "email" ? <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} /> : <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} />}
                           <Input type={verifyMethod === "email" ? "email" : "tel"} value={verifyInput} onChange={(e) => setVerifyInput(e.target.value)}
                             placeholder={verifyMethod === "email" ? "Enter email" : "Enter mobile"}
-                            className="pl-11 h-13 bg-gray-50/80 border-gray-200/80 rounded-xl"
+                            className="pl-11 h-13 rounded-xl border"
+                            style={{ background: BRAND.cream, borderColor: BRAND.light }}
                             onKeyDown={(e) => e.key === "Enter" && handleVerifyIdentity()} />
                         </div>
                       </div>
                     </div>
-                    <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg"
-                      style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>Verify & Continue →</Button>
-                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1"><ArrowLeft className="w-3 h-3" /> Back</Button>
+                    <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg hover:brightness-110"
+                      style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>Verify & Continue →</Button>
+                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
                   </motion.div>
                 )}
 
@@ -325,31 +334,32 @@ const WorkshopAdminLogin = () => {
                   <motion.div key="s3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }}>
                     <form onSubmit={handleLogin} className="space-y-4">
-                      <motion.div className="text-center py-5 rounded-2xl border border-violet-100"
-                        style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05), rgba(217,70,239,0.05))" }}>
+                      <motion.div className="text-center py-5 rounded-2xl border"
+                        style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}>
                         <motion.div className="mx-auto rounded-full overflow-hidden mb-3 relative"
                           style={{ width: 72, height: 72 }} animate={{ y: [0, -4, 0] }} transition={{ duration: 3, repeat: Infinity }}>
-                          <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)" }} />
-                          <div className="relative w-full h-full rounded-full overflow-hidden ring-3 ring-white shadow-xl flex items-center justify-center bg-gradient-to-br from-violet-100 to-purple-100">
-                            <User className="w-8 h-8 text-violet-400" />
+                          <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.light})` }} />
+                          <div className="relative w-full h-full rounded-full overflow-hidden shadow-xl flex items-center justify-center"
+                            style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 15px ${BRAND.accent}25` }}>
+                            <User className="w-8 h-8" style={{ color: BRAND.accent }} />
                           </div>
                         </motion.div>
-                        <p className="text-lg font-black text-gray-900">Welcome, {selectedAdmin.name}! 🎓</p>
+                        <p className="text-lg font-black" style={{ color: BRAND.primary }}>Welcome, {selectedAdmin.name}! 🎓</p>
                         <span className="inline-block text-[10px] font-bold px-3 py-1 rounded-full mt-1.5 text-white"
-                          style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>{selectedAdmin.designation}</span>
+                          style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>{selectedAdmin.designation}</span>
                       </motion.div>
 
                       <div className="grid grid-cols-3 gap-2">
                         {([
-                          { key: "password" as const, icon: Lock, label: "Password", bg: "linear-gradient(135deg, #6366f1, #4f46e5)" },
-                          { key: "secret_code" as const, icon: KeyRound, label: "Secret", bg: "linear-gradient(135deg, #8b5cf6, #7c3aed)" },
-                          { key: "otp" as const, icon: Mail, label: "OTP", bg: "linear-gradient(135deg, #d946ef, #c026d3)" },
+                          { key: "password" as const, icon: Lock, label: "Password", bg: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.primary}DD)` },
+                          { key: "secret_code" as const, icon: KeyRound, label: "Secret", bg: `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.highlight})` },
+                          { key: "otp" as const, icon: Mail, label: "OTP", bg: `linear-gradient(135deg, ${BRAND.highlight}, ${BRAND.accent})` },
                         ]).map(m => (
-                          <motion.button key={m.key} type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                          <motion.button key={m.key} type="button" whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}
                             onClick={() => { setAuthMethod(m.key); setOtpSent(false); }}
                             className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-xs font-bold transition-all ${
-                              authMethod === m.key ? "border-transparent text-white shadow-lg" : "border-gray-200 bg-gray-50 text-gray-500"
-                            }`} style={authMethod === m.key ? { background: m.bg } : {}}>
+                              authMethod === m.key ? "border-transparent text-white shadow-lg" : "bg-white text-gray-500"
+                            }`} style={authMethod === m.key ? { background: m.bg } : { borderColor: BRAND.light }}>
                             <m.icon className="w-4 h-4" /> {m.label}
                           </motion.button>
                         ))}
@@ -357,12 +367,12 @@ const WorkshopAdminLogin = () => {
 
                       {authMethod === "password" && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-                          <Label className="text-sm text-gray-600 font-bold">Password</Label>
+                          <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Password</Label>
                           <div className="relative">
-                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400" />
+                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} />
                             <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                              placeholder="••••••••" className="pl-11 pr-11 h-13 bg-gray-50/80 border-gray-200/80 rounded-xl" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                              placeholder="••••••••" className="pl-11 pr-11 h-13 rounded-xl border" style={{ background: BRAND.cream, borderColor: BRAND.light }} />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2" style={{ color: "#B5A89A" }}>
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
@@ -370,28 +380,31 @@ const WorkshopAdminLogin = () => {
                       )}
                       {authMethod === "secret_code" && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-                          <Label className="text-sm text-gray-600 font-bold">8-Digit Secret Code</Label>
+                          <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>8-Digit Secret Code</Label>
                           <Input type="password" value={secretCode} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 8) setSecretCode(d); }}
-                            placeholder="• • • • • • • •" className="h-14 bg-gray-50/80 border-gray-200/80 rounded-xl text-center text-2xl tracking-[0.4em] font-black" />
+                            placeholder="• • • • • • • •" className="h-14 rounded-xl text-center text-2xl tracking-[0.4em] font-black border"
+                            style={{ background: BRAND.cream, borderColor: BRAND.light }} />
                         </motion.div>
                       )}
                       {authMethod === "otp" && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
                           {!otpSent ? (
-                            <div className="text-center py-4 rounded-xl border border-violet-100" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.03), rgba(217,70,239,0.03))" }}>
+                            <div className="text-center py-4 rounded-xl border" style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, borderColor: BRAND.light }}>
                               <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                <Mail className="w-10 h-10 text-violet-400 mx-auto mb-2" />
+                                <Mail className="w-10 h-10 mx-auto mb-2" style={{ color: BRAND.accent }} />
                               </motion.div>
-                              <p className="text-xs text-gray-500">OTP → <strong className="text-gray-900">akashxbhavans@gmail.com</strong></p>
+                              <p className="text-xs" style={{ color: "#9B8B7A" }}>OTP → <strong style={{ color: BRAND.primary }}>akashxbhavans@gmail.com</strong></p>
                             </div>
                           ) : (
                             <>
-                              <Label className="text-sm text-gray-600 font-bold">Enter 6-digit OTP</Label>
+                              <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Enter 6-digit OTP</Label>
                               <Input value={otpCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setOtpCode(v); }}
-                                placeholder="• • • • • •" className="h-16 text-center text-3xl tracking-[0.5em] font-black bg-gray-50/80 border-gray-200/80 rounded-xl" />
+                                placeholder="• • • • • •" className="h-16 text-center text-3xl tracking-[0.5em] font-black rounded-xl border"
+                                style={{ background: BRAND.cream, borderColor: BRAND.light }} />
                               <button type="button" disabled={resendCooldown > 0}
                                 onClick={async () => { await supabase.auth.signInWithOtp({ email: "akashxbhavans@gmail.com", options: { shouldCreateUser: false } }); startResendCooldown(); }}
-                                className="text-sm text-violet-600 hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto font-semibold">
+                                className="text-sm hover:underline disabled:text-gray-400 flex items-center gap-1 mx-auto font-semibold"
+                                style={{ color: BRAND.accent }}>
                                 <RefreshCw className="w-3 h-3" /> {resendCooldown > 0 ? `${resendCooldown}s` : "Resend"}
                               </button>
                             </>
@@ -399,13 +412,13 @@ const WorkshopAdminLogin = () => {
                         </motion.div>
                       )}
 
-                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Button type="submit" disabled={loading} className="w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl"
-                          style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef)" }}>
+                      <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
+                        <Button type="submit" disabled={loading} className="w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl hover:brightness-110"
+                          style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` }}>
                           {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />{authMethod === "otp" && !otpSent ? "Sending..." : "Verifying..."}</> : authMethod === "otp" && !otpSent ? "Send OTP →" : "Sign In →"}
                         </Button>
                       </motion.div>
-                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs text-gray-400 gap-1"><ArrowLeft className="w-3 h-3" /> Back</Button>
+                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
                     </form>
                   </motion.div>
                 )}
@@ -413,10 +426,10 @@ const WorkshopAdminLogin = () => {
             </div>
 
             <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs text-gray-400 hover:text-violet-500 transition-colors font-medium">← Back to Home</button>
+              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#B5A89A" }}>← Back to Home</button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
