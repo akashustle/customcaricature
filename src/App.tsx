@@ -138,10 +138,12 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
+        <DefaultThemeApplier />
         <OneSignalInit />
         <WebPushInit />
+        <OfflineDetector />
         <Toaster />
         <Sonner />
         {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
