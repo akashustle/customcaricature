@@ -31,13 +31,27 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    const normalizedEmail = email.trim().toLowerCase();
+    console.log("Login attempt for:", normalizedEmail);
+
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("user_id, secret_code, secret_code_login_enabled")
-      .eq("email", email.trim().toLowerCase())
+      .select("user_id, secret_code")
+      .eq("email", normalizedEmail)
       .maybeSingle();
 
-    if (profileError || !profile) {
+    console.log("Profile lookup result:", { found: !!profile, error: profileError?.message });
+
+    if (profileError) {
+      console.error("Profile query error:", profileError);
+      return new Response(JSON.stringify({ success: false, error: "Invalid credentials" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!profile) {
+      console.log("No profile found for email:", normalizedEmail);
       return new Response(JSON.stringify({ success: false, error: "Invalid credentials" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -51,12 +65,14 @@ Deno.serve(async (req) => {
       .select("value")
       .eq("id", "admin_secret_code")
       .maybeSingle();
-    if (settingData?.value && (settingData.value as any).code) {
-      masterCode = (settingData.value as any).code;
+    if (settingData?.value && typeof settingData.value === 'object' && 'code' in (settingData.value as Record<string, unknown>)) {
+      masterCode = String((settingData.value as Record<string, unknown>).code);
     }
 
     const inputCode = secret_code.trim();
     const profileCode = profile.secret_code || "";
+
+    console.log("Code comparison:", { inputLen: inputCode.length, masterLen: masterCode.length, profileCodeLen: profileCode.length, match: inputCode === masterCode || inputCode === profileCode });
 
     // Accept if matches master code OR profile's own secret code
     const codeMatch = inputCode === masterCode || inputCode === profileCode;
@@ -71,7 +87,7 @@ Deno.serve(async (req) => {
     // Generate a magic link for the user
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: "magiclink",
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
     });
 
     if (linkError || !linkData) {
@@ -82,10 +98,12 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log("Login successful for:", normalizedEmail);
+
     return new Response(JSON.stringify({ 
       success: true,
       token_hash: linkData.properties.hashed_token,
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
