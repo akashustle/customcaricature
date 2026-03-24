@@ -189,7 +189,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 scrollbar-thin">
-        {NAV_SECTIONS.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.label} className="mb-1">
             {!collapsed && (
               <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 px-2.5 mb-1.5 mt-3 font-sans">
