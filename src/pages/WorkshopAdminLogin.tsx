@@ -364,7 +364,11 @@ const WorkshopAdminLogin = () => {
                           <div className="absolute -inset-1 rounded-full blur-sm" style={{ background: `linear-gradient(135deg, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.light})` }} />
                           <div className="relative w-full h-full rounded-full overflow-hidden shadow-xl flex items-center justify-center"
                             style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 15px ${BRAND.accent}25` }}>
-                            <User className="w-8 h-8" style={{ color: BRAND.accent }} />
+                            {adminAvatars[selectedAdmin.email] ? (
+                              <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-8 h-8" style={{ color: BRAND.accent }} />
+                            )}
                           </div>
                         </motion.div>
                         <p className="text-lg font-black" style={{ color: BRAND.primary }}>Welcome, {selectedAdmin.name}! 🎓</p>
