@@ -15,7 +15,7 @@ const FloatingButtons = () => {
   if (!allowedPaths.includes(location.pathname)) return null;
 
   return (
-    <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[140px] right-4" : "bottom-6 right-6"}`}>
+    <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[140px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
       {/* Theme Toggle */}
       <button
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
