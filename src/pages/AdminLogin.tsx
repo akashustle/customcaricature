@@ -161,8 +161,9 @@ const AdminLogin = () => {
         return;
       }
 
-      sessionStorage.removeItem("admin_entered_name");
-      toast({ title: "Welcome back, admin!" });
+      const currentUser = (await supabase.auth.getUser()).data.user;
+      if (currentUser) await setAdminSessionName(currentUser.id);
+      toast({ title: `Welcome back, ${adminGreetName || "admin"}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
       try {
