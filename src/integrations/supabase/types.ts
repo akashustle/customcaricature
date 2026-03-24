@@ -2595,6 +2595,7 @@ export type Database = {
         Row: {
           address: string | null
           age: number | null
+          avatar_url: string | null
           city: string | null
           created_at: string
           display_id: string | null
@@ -2624,6 +2625,7 @@ export type Database = {
         Insert: {
           address?: string | null
           age?: number | null
+          avatar_url?: string | null
           city?: string | null
           created_at?: string
           display_id?: string | null
@@ -2653,6 +2655,7 @@ export type Database = {
         Update: {
           address?: string | null
           age?: number | null
+          avatar_url?: string | null
           city?: string | null
           created_at?: string
           display_id?: string | null
