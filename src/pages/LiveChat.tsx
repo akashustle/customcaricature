@@ -114,15 +114,30 @@ const LiveChat = () => {
 
   const startGuestChat = async () => {
     if (!guestName.trim() || !guestEmail.trim()) return;
-    const { data, error } = await supabase.from("ai_chat_sessions").insert({
-      guest_name: guestName.trim(), guest_email: guestEmail.trim(), status: "active",
-    } as any).select().single();
-    if (data) {
-      setGuestSessionId(data.id);
-      setGuestStarted(true);
-      // Send welcome
-      await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Hi ${guestName}! 👋 How can we help you today? (${GUEST_MSG_LIMIT} messages as guest, sign up for unlimited)`, sender_name: "CCC Team" } as any);
-      fetchGuestMessages(data.id);
+    try {
+      // Get guest IP for tracking
+      let guestIp: string | null = null;
+      try { const r = await fetch("https://ipapi.co/json/"); if (r.ok) { const g = await r.json(); guestIp = g.ip || null; } } catch {}
+      
+      const { data, error } = await supabase.from("ai_chat_sessions").insert({
+        guest_name: guestName.trim(), guest_email: guestEmail.trim(), status: "active", guest_ip: guestIp,
+      } as any).select("id").single();
+      
+      if (error) {
+        console.error("Chat session error:", error);
+        toast({ title: "Could not start chat", description: "Please try again.", variant: "destructive" });
+        return;
+      }
+      if (data) {
+        setGuestSessionId(data.id);
+        setGuestStarted(true);
+        // Send welcome
+        await supabase.from("ai_chat_messages").insert({ session_id: data.id, role: "assistant", content: `Hi ${guestName}! 👋 How can we help you today? (${GUEST_MSG_LIMIT} messages as guest, sign up for unlimited)`, sender_name: "CCC Team" } as any);
+        fetchGuestMessages(data.id);
+      }
+    } catch (err: any) {
+      console.error("Start chat error:", err);
+      toast({ title: "Chat Error", description: err.message, variant: "destructive" });
     }
   };
 
