@@ -754,19 +754,19 @@ const Admin = () => {
       }} />
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-[hsl(220,15%,97%)] dark:bg-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
-        <header className="sticky top-0 z-40 bg-white/90 dark:bg-card/90 backdrop-blur-xl border-b border-border/50 shadow-sm shadow-foreground/[0.02]">
+      <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-1 ring-border">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10">
                 <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-medium text-muted-foreground font-sans">Live</span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 font-sans">Live</span>
               </div>
               <div className="w-px h-4 bg-border" />
               <LiveGreeting name={adminProfile?.full_name} />
@@ -792,12 +792,20 @@ const Admin = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"><RefreshCw className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans">
+              <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex h-7 gap-1 text-[11px] text-muted-foreground hover:text-foreground font-sans rounded-xl">
                 <LogOut className="w-3 h-3" /> Sign Out
               </Button>
+              {/* Admin Profile Avatar */}
+              <div 
+                className="admin-avatar hidden md:flex" 
+                onClick={() => setActiveTab("settings")}
+                title={adminProfile?.full_name || "Admin Profile"}
+              >
+                {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+              </div>
             </div>
           </div>
         </header>
@@ -1793,11 +1801,54 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="settings">
-            <div className="space-y-6 max-w-lg">
+            <div className="space-y-6 max-w-2xl">
+              {/* Admin Profile Section */}
+              <div className="admin-settings-card p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-xl shadow-primary/20">
+                    {(adminProfile?.full_name || "A").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    {editingAdminProfile ? (
+                      <div className="space-y-2">
+                        <Input value={adminEditData.full_name || ""} onChange={e => setAdminEditData({...adminEditData, full_name: e.target.value})} placeholder="Full Name" className="font-sans" />
+                        <Input value={adminEditData.mobile || ""} onChange={e => setAdminEditData({...adminEditData, mobile: e.target.value})} placeholder="Mobile" className="font-sans" />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={saveAdminProfile} className="font-sans rounded-xl"><Save className="w-3 h-3 mr-1" />Save</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingAdminProfile(false)} className="rounded-xl">Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="font-sans font-bold text-lg text-foreground">{adminProfile?.full_name || "Admin"}</h3>
+                        <p className="text-sm text-muted-foreground font-sans">{user?.email}</p>
+                        <Button size="sm" variant="outline" className="mt-2 rounded-xl text-xs font-sans" onClick={() => setEditingAdminProfile(true)}>
+                          <Edit2 className="w-3 h-3 mr-1" />Edit Profile
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {/* Password Change */}
+                <div className="border-t border-border/40 pt-4 mt-4 space-y-3">
+                  <p className="font-sans font-semibold text-sm flex items-center gap-2"><Lock className="w-4 h-4 text-primary" />Change Password</p>
+                  <Input type="password" placeholder="Current Password" value={adminCurrentPassword} onChange={e => setAdminCurrentPassword(e.target.value)} className="font-sans" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input type="password" placeholder="New Password" value={adminNewPassword} onChange={e => setAdminNewPassword(e.target.value)} className="font-sans" />
+                    <Input type="password" placeholder="Confirm" value={adminConfirmPassword} onChange={e => setAdminConfirmPassword(e.target.value)} className="font-sans" />
+                  </div>
+                  <Button size="sm" onClick={changeAdminPassword} disabled={changingAdminPassword} className="rounded-xl font-sans">
+                    <KeyRound className="w-3 h-3 mr-1" />{changingAdminPassword ? "Changing..." : "Update Password"}
+                  </Button>
+                </div>
+              </div>
+
               {/* Site Controls */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Globe className="w-5 h-5 text-primary" />Site Controls</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />Site Controls</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   {/* Global Event Booking Toggle */}
                   <div className="flex items-center justify-between">
                     <div>
@@ -1870,12 +1921,14 @@ const Admin = () => {
                     )}
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Artwork Bypass Setting */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Image className="w-5 h-5 text-primary" />Artwork Upload Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Image className="w-5 h-5 text-violet-600 dark:text-violet-400" />Artwork Upload Settings</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-sans font-medium text-sm">Allow Status Change Without Artwork</p>
@@ -1890,12 +1943,14 @@ const Admin = () => {
                     />
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Admin Action Prompt Toggle */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Lock className="w-5 h-5 text-primary" />Admin Action Confirmation</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />Admin Action Confirmation</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-sans font-medium text-sm">Require Name for Crucial Actions</p>
@@ -1910,260 +1965,157 @@ const Admin = () => {
                     />
                   </div>
                 </CardContent>
-              </Card>
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Navigation Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              </div>
+
+              {/* Navigation & Visibility Settings */}
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-500/10 dark:to-teal-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Home className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />Navigation & Visibility</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-sans font-medium text-sm">Show Shop Tab in Nav</p>
                       <p className="text-xs text-muted-foreground font-sans">Display Shop link in website navigation bar</p>
                     </div>
-                    <Switch
-                      checked={settings.shop_nav_visible?.enabled !== false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("shop_nav_visible", { enabled: checked });
-                        toast({ title: checked ? "Shop tab visible in nav" : "Shop tab hidden from nav" });
-                      }}
-                    />
+                    <Switch checked={settings.shop_nav_visible?.enabled !== false} onCheckedChange={async (checked) => { await updateSetting("shop_nav_visible", { enabled: checked }); toast({ title: checked ? "Shop tab visible in nav" : "Shop tab hidden from nav" }); }} />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Workshop Login Tab in Mobile Nav */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Home className="w-5 h-5 text-primary" />Workshop in Mobile Nav</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
                     <div>
                       <p className="font-sans font-medium text-sm">Show Workshop Login in Mobile Nav</p>
                       <p className="text-xs text-muted-foreground font-sans">Display Workshop login button on the mobile bottom navigation bar</p>
                     </div>
-                    <Switch
-                      checked={(settings as any).workshop_mobile_nav?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("workshop_mobile_nav", { enabled: checked });
-                        toast({ title: checked ? "Workshop shown in mobile nav" : "Workshop hidden from mobile nav" });
-                      }}
-                    />
+                    <Switch checked={(settings as any).workshop_mobile_nav?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("workshop_mobile_nav", { enabled: checked }); toast({ title: checked ? "Workshop shown in mobile nav" : "Workshop hidden from mobile nav" }); }} />
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Shop Tracking Toggle */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><Package className="w-5 h-5 text-primary" />Shop in Track Order</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
                     <div>
                       <p className="font-sans font-medium text-sm">Show Shop Tab in Tracking</p>
                       <p className="text-xs text-muted-foreground font-sans">Display shop order tracking section on the Track Order page</p>
                     </div>
-                    <Switch
-                      checked={(settings as any).shop_tracking_visible?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("shop_tracking_visible", { enabled: checked });
-                        toast({ title: checked ? "Shop tracking visible" : "Shop tracking hidden" });
-                      }}
-                    />
+                    <Switch checked={(settings as any).shop_tracking_visible?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("shop_tracking_visible", { enabled: checked }); toast({ title: checked ? "Shop tracking visible" : "Shop tracking hidden" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Support Button Visible</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show/hide support button on main website</p>
+                    </div>
+                    <Switch checked={settings.support_button_visible?.enabled !== false} onCheckedChange={async (checked) => { await updateSetting("support_button_visible", { enabled: checked }); toast({ title: checked ? "Support button visible" : "Support button hidden" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Support in Mobile Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show support tab in mobile bottom navigation</p>
+                    </div>
+                    <Switch checked={(settings as any).support_mobile_nav?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("support_mobile_nav", { enabled: checked }); toast({ title: checked ? "Support added to mobile nav" : "Support removed from mobile nav" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Workshop in User Dashboard</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show workshop registration tab on user dashboard</p>
+                    </div>
+                    <Switch checked={(settings as any).workshop_dashboard_visible?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("workshop_dashboard_visible", { enabled: checked }); toast({ title: checked ? "Workshop visible on dashboard" : "Workshop hidden from dashboard" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Allow International Workshop Registration</p>
+                      <p className="text-xs text-muted-foreground font-sans">Let users from other countries register for workshops</p>
+                    </div>
+                    <Switch checked={(settings as any).allow_international_registration?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("allow_international_registration", { enabled: checked }); toast({ title: checked ? "International registration enabled" : "International registration disabled" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show App Download Link</p>
+                      <p className="text-xs text-muted-foreground font-sans">Show/hide Android APK download link in footer</p>
+                    </div>
+                    <Switch checked={settings.app_download_link?.enabled !== false} onCheckedChange={async (checked) => { await updateSetting("app_download_link", { enabled: checked }); toast({ title: checked ? "App download link visible" : "App download link hidden" }); }} />
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
-              {/* Gateway Charge Settings */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" />Gateway Charges</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              {/* Gateway Charges */}
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-500/10 dark:to-green-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />Gateway Charges</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div>
                     <Label className="font-sans text-sm">Gateway Charge Percentage (%)</Label>
                     <p className="text-xs text-muted-foreground font-sans mb-2">Applied to users with gateway charges enabled</p>
                     <div className="flex gap-2">
                       <Input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="10"
+                        type="number" step="0.1" min="0" max="10"
                         value={settings.gateway_charge_percentage?.percentage ?? 2.6}
-                        onChange={async (e) => {
-                          const val = parseFloat(e.target.value);
-                          if (!isNaN(val) && val >= 0 && val <= 10) {
-                            await updateSetting("gateway_charge_percentage", { percentage: val });
-                            toast({ title: `Gateway charge set to ${val}%` });
-                          }
-                        }}
+                        onChange={async (e) => { const val = parseFloat(e.target.value); if (!isNaN(val) && val >= 0 && val <= 10) { await updateSetting("gateway_charge_percentage", { percentage: val }); toast({ title: `Gateway charge set to ${val}%` }); } }}
                         className="max-w-[120px] font-sans"
                       />
                       <span className="text-sm text-muted-foreground font-sans self-center">%</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Support Button Visible</p>
-                      <p className="text-xs text-muted-foreground font-sans">Show/hide support button on main website</p>
-                    </div>
-                    <Switch
-                      checked={settings.support_button_visible?.enabled !== false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("support_button_visible", { enabled: checked });
-                        toast({ title: checked ? "Support button visible" : "Support button hidden" });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Support in Mobile Nav</p>
-                      <p className="text-xs text-muted-foreground font-sans">Show support tab in mobile bottom navigation</p>
-                    </div>
-                    <Switch
-                      checked={(settings as any).support_mobile_nav?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("support_mobile_nav", { enabled: checked });
-                        toast({ title: checked ? "Support added to mobile nav" : "Support removed from mobile nav" });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Workshop in User Dashboard</p>
-                      <p className="text-xs text-muted-foreground font-sans">Show workshop registration tab on user dashboard</p>
-                    </div>
-                    <Switch
-                      checked={(settings as any).workshop_dashboard_visible?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("workshop_dashboard_visible", { enabled: checked });
-                        toast({ title: checked ? "Workshop visible on dashboard" : "Workshop hidden from dashboard" });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Allow International Workshop Registration</p>
-                      <p className="text-xs text-muted-foreground font-sans">Let users from other countries register for workshops</p>
-                    </div>
-                    <Switch
-                      checked={(settings as any).allow_international_registration?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("allow_international_registration", { enabled: checked });
-                        toast({ title: checked ? "International registration enabled" : "International registration disabled" });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
-                    <div>
-                      <p className="font-sans font-medium text-sm">Show App Download Link</p>
-                      <p className="text-xs text-muted-foreground font-sans">Show/hide Android APK download link in footer</p>
-                    </div>
-                    <Switch
-                      checked={settings.app_download_link?.enabled !== false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("app_download_link", { enabled: checked });
-                        toast({ title: checked ? "App download link visible" : "App download link hidden" });
-                      }}
-                    />
-                  </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Admin Secret Code */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><KeyRound className="w-5 h-5 text-primary" />Admin Secret Code</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-500/10 dark:to-pink-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><KeyRound className="w-5 h-5 text-rose-600 dark:text-rose-400" />Admin Secret Code</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div>
                     <Label className="font-sans text-sm">Admin Secret Code (used for OTP bypass & session unlock)</Label>
                     <p className="text-xs text-muted-foreground font-sans mb-2">Change the master admin secret code</p>
                     <Input
-                      type="text"
-                      maxLength={8}
+                      type="text" maxLength={8}
                       value={(settings as any).admin_secret_code?.code || "01022006"}
-                      onChange={async (e) => {
-                        const val = e.target.value.replace(/\D/g, "");
-                        if (val.length <= 8) {
-                          await updateSetting("admin_secret_code", { code: val, enabled: (settings as any).admin_secret_code?.enabled !== false });
-                        }
-                      }}
+                      onChange={async (e) => { const val = e.target.value.replace(/\D/g, ""); if (val.length <= 8) { await updateSetting("admin_secret_code", { code: val, enabled: (settings as any).admin_secret_code?.enabled !== false }); } }}
                       className="max-w-[200px] font-sans text-center text-lg tracking-widest font-bold"
                       placeholder="01022006"
                     />
                   </div>
-                  <div className="flex items-center justify-between border-t border-border pt-4">
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
                     <div>
                       <p className="font-sans font-medium text-sm">Enable Secret Code Login</p>
                       <p className="text-xs text-muted-foreground font-sans">Allow admins to use the secret code to bypass OTP</p>
                     </div>
                     <Switch
                       checked={(settings as any).admin_secret_code?.enabled !== false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("admin_secret_code", { code: (settings as any).admin_secret_code?.code || "01022006", enabled: checked });
-                        toast({ title: checked ? "Secret code login enabled" : "Secret code login disabled" });
-                      }}
+                      onCheckedChange={async (checked) => { await updateSetting("admin_secret_code", { code: (settings as any).admin_secret_code?.code || "01022006", enabled: checked }); toast({ title: checked ? "Secret code login enabled" : "Secret code login disabled" }); }}
                     />
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Live Chat Toggle */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Live Chat Widget</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-500/10 dark:to-cyan-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><MessageCircle className="w-5 h-5 text-teal-600 dark:text-teal-400" />Live Chat Widget</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-sans font-medium text-sm">Show Live Chat on Website</p>
-                      <p className="text-xs text-muted-foreground font-sans">Display the WhatsApp-style live chat widget for logged-in users in the footer</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display the live chat widget for logged-in users in the footer</p>
                     </div>
                     <Switch
                       checked={(settings as any).live_chat_visible?.enabled || false}
-                      onCheckedChange={async (checked) => {
-                        await updateSetting("live_chat_visible", { enabled: checked });
-                        toast({ title: checked ? "Live chat enabled on website" : "Live chat hidden from website" });
-                      }}
+                      onCheckedChange={async (checked) => { await updateSetting("live_chat_visible", { enabled: checked }); toast({ title: checked ? "Live chat enabled on website" : "Live chat hidden from website" }); }}
                     />
                   </div>
                 </CardContent>
-              </Card>
-
-              {/* SEO Settings moved to dedicated tab */}
-
-              {/* Admin Profile */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="font-display text-lg">Admin Profile</CardTitle>
-                  {!editingAdminProfile ? (
-                    <Button variant="outline" size="sm" onClick={() => { setAdminEditData(adminProfile || {}); setEditingAdminProfile(true); }} className="font-sans"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={saveAdminProfile} className="font-sans bg-primary hover:bg-primary/90"><Save className="w-4 h-4 mr-1" />Save</Button>
-                      <Button variant="ghost" size="sm" onClick={() => setEditingAdminProfile(false)}><X className="w-4 h-4" /></Button>
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {editingAdminProfile ? (
-                    <>
-                      <div><Label>Name</Label><Input value={adminEditData.full_name || ""} onChange={(e) => setAdminEditData({ ...adminEditData, full_name: e.target.value })} /></div>
-                      <div><Label>Email (read-only)</Label><Input value={adminProfile?.email || ""} disabled className="opacity-60" /></div>
-                      <div><Label>Mobile</Label><Input value={adminEditData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setAdminEditData({ ...adminEditData, mobile: d }); }} maxLength={10} /></div>
-                    </>
-                  ) : adminProfile ? (
-                    <div className="space-y-2 font-sans text-sm">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Name</span><span className="font-medium">{adminProfile.full_name}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{adminProfile.email}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Mobile</span><span className="font-medium">{adminProfile.mobile}</span></div>
-                    </div>
-                  ) : <p className="text-muted-foreground font-sans text-sm">Loading...</p>}
-                </CardContent>
-              </Card>
+              </div>
 
               {/* Add New Admin */}
-              <Card>
-                <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><UserPlus className="w-5 h-5 text-primary" />Add New Admin</CardTitle></CardHeader>
-                <CardContent className="space-y-3">
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />Add New Admin</h3>
+                </div>
+                <CardContent className="space-y-3 p-6">
                   <div><Label>Full Name *</Label><Input value={newAdminName} onChange={(e) => setNewAdminName(e.target.value)} placeholder="Admin name" /></div>
                   <div><Label>Email *</Label><Input type="email" value={newAdminEmail} onChange={(e) => setNewAdminEmail(e.target.value)} placeholder="admin@email.com" /></div>
                   <div><Label>Mobile *</Label><Input value={newAdminMobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setNewAdminMobile(d); }} maxLength={10} placeholder="10 digits" /></div>
                   <div><Label>Password *</Label><Input type="password" value={newAdminPassword} onChange={(e) => setNewAdminPassword(e.target.value)} placeholder="Min 6 characters" /></div>
 
                   {/* Permission Controls */}
-                  <div className="border-t border-border pt-3 space-y-3">
+                  <div className="border-t border-border/30 pt-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-sans font-medium text-sm">Allow Everything</p>
@@ -2195,11 +2147,11 @@ const Admin = () => {
                     )}
                   </div>
 
-                  <Button onClick={addNewAdmin} disabled={!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile || addingAdmin} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
+                  <Button onClick={addNewAdmin} disabled={!newAdminEmail || !newAdminPassword || !newAdminName || !newAdminMobile || addingAdmin} className="w-full rounded-xl font-sans">
                     {addingAdmin ? "Adding Admin..." : "Add Admin"}
                   </Button>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Push App Update */}
               <AdminPushUpdate />
