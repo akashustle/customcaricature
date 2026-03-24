@@ -2,12 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/lib/pricing";
+import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Target, TrendingUp, Flame, Trophy, Zap, Calendar, Clock,
-  ArrowUpRight, DollarSign, Star, Award, ChevronRight, BarChart3
+  ArrowUpRight, DollarSign, Star, Award, ChevronRight, BarChart3, Edit2
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,

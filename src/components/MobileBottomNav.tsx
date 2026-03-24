@@ -20,12 +20,14 @@ const MobileBottomNav = () => {
   const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
   if (!isMobile || adminPaths.some(p => location.pathname.startsWith(p))) return null;
 
+  const chatVisible = settings.live_chat_visible?.enabled === true;
+
   const items: { icon: any; label: string; path: string }[] = [
     { icon: Home, label: "Home", path: "/" },
     ...(shopVisible ? [{ icon: ShoppingBag, label: "Shop", path: "/shop" }] : []),
     ...(workshopVisible ? [{ icon: GraduationCap, label: "Workshop", path: "/workshop" }] : []),
+    ...(chatVisible ? [{ icon: MessageCircle, label: "Chat", path: "/live-chat" }] : []),
     { icon: Compass, label: "Explore", path: "/about" },
-    { icon: Search, label: "Track", path: "/track-order" },
     ...(user
       ? [{ icon: User, label: "You", path: "/dashboard" }]
       : [{ icon: User, label: "Login", path: "/login" }]),
