@@ -948,25 +948,26 @@ const WorkshopAdmin = () => {
                       <RefreshButton />
                     </div>
                   </div>
-                  {/* 3D Stat Widgets */}
+                  {/* Premium Stat Widgets */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-500 to-violet-600", light: "from-violet-50 to-violet-100", accent: "border-l-violet-500" },
-                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-500 to-emerald-600", light: "from-emerald-50 to-emerald-100", accent: "border-l-emerald-500" },
-                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-amber-600", light: "from-amber-50 to-amber-100", accent: "border-l-amber-500" },
-                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-500 to-blue-600", light: "from-blue-50 to-blue-100", accent: "border-l-blue-500" },
-                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-500 to-pink-600", light: "from-pink-50 to-pink-100", accent: "border-l-pink-500" },
-                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-500 to-red-600", light: "from-red-50 to-red-100", accent: "border-l-red-500" },
-                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-500 to-indigo-600", light: "from-indigo-50 to-indigo-100", accent: "border-l-indigo-500" },
-                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-500 to-fuchsia-600", light: "from-fuchsia-50 to-fuchsia-100", accent: "border-l-fuchsia-500" },
+                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-600 to-indigo-600", bgGlow: "bg-violet-500" },
+                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-600 to-teal-600", bgGlow: "bg-emerald-500" },
+                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-orange-500", bgGlow: "bg-amber-500" },
+                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-600 to-cyan-600", bgGlow: "bg-blue-500" },
+                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-600 to-rose-600", bgGlow: "bg-pink-500" },
+                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-600 to-orange-600", bgGlow: "bg-red-500" },
+                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-600 to-purple-600", bgGlow: "bg-indigo-500" },
+                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-600 to-pink-600", bgGlow: "bg-fuchsia-500" },
                     ].map((s) => (
-                      <motion.div key={s.label} whileHover={{ y: -4, scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}
-                        className={`bg-gradient-to-br ${s.light} border border-l-4 ${s.accent} rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all`}>
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-2 shadow-md`}>
+                      <motion.div key={s.label} whileHover={{ y: -3, scale: 1.02 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className={`${dm ? "bg-white/[0.04] border-white/[0.06]" : "bg-white border-slate-200/60"} border rounded-2xl p-4 cursor-pointer group relative overflow-hidden`}>
+                        <div className={`absolute top-0 right-0 w-20 h-20 ${s.bgGlow} opacity-[0.04] rounded-full blur-2xl translate-x-6 -translate-y-6 group-hover:opacity-[0.08] transition-opacity`} />
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-3 shadow-lg`}>
                           <s.icon className="w-5 h-5 text-white" />
                         </div>
-                        <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                        <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+                        <p className={`text-2xl font-bold ${textPrimary} tracking-tight`}>{s.value}</p>
+                        <p className={`text-xs ${textMuted} mt-0.5`}>{s.label}</p>
                       </motion.div>
                     ))}
                   </div>
