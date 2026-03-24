@@ -99,6 +99,7 @@ import AdminMaintenance from "@/components/admin/AdminMaintenance";
 import AdminInvoices from "@/components/admin/AdminInvoices";
 import AdminFeatureGating from "@/components/admin/AdminFeatureGating";
 import AdminCalendar from "@/components/admin/AdminCalendar";
+import AdminWebsiteAnalytics from "@/components/admin/AdminWebsiteAnalytics";
 
 type Order = {
   id: string;
