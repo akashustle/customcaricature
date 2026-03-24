@@ -143,8 +143,9 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
       <div className="flex gap-1.5">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
+          <input
             ref={inputRef}
+            type="text"
             value={query}
             onChange={e => { setQuery(e.target.value); if (e.target.value) setOpen(true); else setShowRecent(false); }}
             onFocus={() => { if (query && results.length) setOpen(true); else if (!query && recent.length) setShowRecent(true); }}
@@ -154,8 +155,12 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            name="admin-smart-search-nofill"
-            className="pl-9 pr-8 h-9 rounded-xl bg-card border-border text-sm"
+            data-lpignore="true"
+            data-form-type="other"
+            data-1p-ignore="true"
+            name={`search_${Date.now()}`}
+            id={`search_${Math.random().toString(36).slice(2)}`}
+            className="flex h-9 w-full rounded-xl border border-border bg-card pl-9 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           {query && (
             <button onClick={() => { setQuery(""); setResults([]); setOpen(false); }} className="absolute right-3 top-1/2 -translate-y-1/2">
