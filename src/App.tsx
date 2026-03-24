@@ -94,6 +94,7 @@ const WebPushInit = () => {
 
 const RouteMemoryTracker = () => {
   useRouteMemory();
+  usePageTracker();
   return null;
 };
 
