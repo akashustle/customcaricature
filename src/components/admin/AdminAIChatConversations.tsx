@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Bot, User, Send, ArrowLeft, MessageCircle, Loader2, Eye } from "lucide-react";
+import { Bot, User, Send, ArrowLeft, MessageCircle, Loader2, Eye, LogIn } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 
