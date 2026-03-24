@@ -202,6 +202,7 @@ const App = () => {
                 <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
+                <Route path="/database-entry-reversal" element={<DatabaseEntryReversal />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
