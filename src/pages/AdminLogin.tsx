@@ -233,8 +233,8 @@ const AdminLogin = () => {
           } as any).eq("user_id", pendingUserId);
         }
 
-        sessionStorage.removeItem("admin_entered_name");
-        toast({ title: "Secret Code Verified! Welcome back, admin! 🔐" });
+        if (pendingUserId) await setAdminSessionName(pendingUserId);
+        toast({ title: `Secret Code Verified! Welcome back, ${adminGreetName || "admin"}! 🔐` });
         navigate("/admin-panel", { replace: true });
       } catch (err: any) {
         toast({ title: "Verification Failed", description: err?.message, variant: "destructive" });
