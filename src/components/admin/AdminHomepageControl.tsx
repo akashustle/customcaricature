@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Plus, Trash2, GripVertical, Upload, Image } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, Upload, Image, ChevronUp, ChevronDown, Film } from "lucide-react";
 
 const ThumbnailUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; onUploaded: (url: string) => void }) => {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -37,6 +37,39 @@ const ThumbnailUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; on
       <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={() => fileRef.current?.click()} disabled={uploading}>
         <Image className="w-4 h-4" />
         {uploading ? "Uploading..." : "Choose Thumbnail Image"}
+      </Button>
+    </div>
+  );
+};
+
+const VideoUploader = ({ currentUrl, onUploaded }: { currentUrl?: string; onUploaded: (url: string) => void }) => {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "mp4";
+      const path = `videos/homepage-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("blog-images").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
+      onUploaded(urlData.publicUrl);
+      toast({ title: "✅ Video uploaded!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div>
+      <input ref={fileRef} type="file" accept="video/*" className="hidden" onChange={handleUpload} />
+      <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={() => fileRef.current?.click()} disabled={uploading}>
+        <Upload className="w-4 h-4" />
+        {uploading ? "Uploading..." : "Upload Video from Device"}
       </Button>
     </div>
   );
@@ -94,7 +127,7 @@ const AdminHomepageControl = () => {
   const homepageSections = settings.homepage_sections || {};
   const funnelConfig = settings.homepage_funnel_config || {};
 
-  const SECTION_LIST = [
+  const DEFAULT_SECTION_ORDER = [
     { id: "instant_quote", label: "Instant Quote", hint: "CTA card with pricing link" },
     { id: "social_proof", label: "Social Proof", hint: "Stats counters (events, clients)" },
     { id: "video", label: "Video Section", hint: "YouTube or custom video" },
@@ -114,6 +147,20 @@ const AdminHomepageControl = () => {
     { id: "before_after", label: "Before & After", hint: "Photo vs caricature slider" },
     { id: "smart_help", label: "Smart Help", hint: "WhatsApp + Instagram links" },
   ];
+
+  // Use saved order or default
+  const sectionOrder: string[] = homepageSections._order || DEFAULT_SECTION_ORDER.map(s => s.id);
+  const SECTION_LIST = sectionOrder.map(id => DEFAULT_SECTION_ORDER.find(s => s.id === id)!).filter(Boolean);
+  // Add any new sections not in saved order
+  DEFAULT_SECTION_ORDER.forEach(s => { if (!sectionOrder.includes(s.id)) SECTION_LIST.push(s); });
+
+  const moveSection = (index: number, direction: "up" | "down") => {
+    const newOrder = [...sectionOrder];
+    const swapIdx = direction === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+    [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+    updateSetting("homepage_sections", { ...homepageSections, _order: newOrder });
+  };
 
   const toggleSection = (sectionId: string, visible: boolean) => {
     const updated = { ...homepageSections, [sectionId]: { ...(homepageSections[sectionId] || {}), visible } };
@@ -161,11 +208,15 @@ const AdminHomepageControl = () => {
               <p className="text-xs text-muted-foreground mb-3">Toggle homepage sections on/off. Add a message to show when hidden.</p>
               {SECTION_LIST.map((s, i) => (
                 <div key={s.id} className="flex items-center justify-between py-2 px-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{i + 1}</span>
-                      <span className="text-sm font-semibold text-foreground">{s.label}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex flex-col">
+                      <button onClick={() => moveSection(i, "up")} disabled={i === 0} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => moveSection(i, "down")} disabled={i === SECTION_LIST.length - 1} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
                     </div>
+                    <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">#{i + 1}</span>
+                  </div>
+                  <div className="flex-1 min-w-0 ml-2">
+                    <span className="text-sm font-semibold text-foreground">{s.label}</span>
                     <p className="text-[10px] text-muted-foreground mt-0.5">ID: <code className="text-primary">{s.id}</code> — {s.hint}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -173,7 +224,7 @@ const AdminHomepageControl = () => {
                       placeholder="Hidden message (optional)"
                       value={homepageSections[s.id]?.message || ""}
                       onChange={e => setSectionMessage(s.id, e.target.value)}
-                      className="w-48 h-8 text-xs"
+                      className="w-48 h-8 text-xs hidden sm:block"
                     />
                     <Switch
                       checked={homepageSections[s.id]?.visible !== false}
@@ -345,9 +396,15 @@ const AdminHomepageControl = () => {
                 <Input value={video.youtube_url || ""} onChange={e => updateSetting("homepage_video", { ...video, youtube_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
               </div>
               <div className="border-t border-border pt-4 mt-2">
-                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Custom Video URL (MP4 / direct link from any platform)</label>
+                <label className="text-xs font-semibold text-muted-foreground mb-1 block">Custom Video URL (MP4 / direct link)</label>
                 <Input value={video.custom_video_url || ""} onChange={e => updateSetting("homepage_video", { ...video, custom_video_url: e.target.value })} placeholder="https://your-cloud.com/video.mp4" />
                 <p className="text-xs text-muted-foreground mt-1">If both YouTube and custom URL are set, custom URL takes priority.</p>
+                <div className="mt-3">
+                  <label className="text-xs font-semibold text-muted-foreground mb-2 block flex items-center gap-2">
+                    <Film className="w-4 h-4" /> Upload Video File
+                  </label>
+                  <VideoUploader currentUrl={video.custom_video_url} onUploaded={(url) => updateSetting("homepage_video", { ...video, custom_video_url: url })} />
+                </div>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground mb-1 block">Thumbnail URL</label>
