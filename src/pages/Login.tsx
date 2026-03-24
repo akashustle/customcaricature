@@ -225,7 +225,7 @@ const Login = () => {
                     <form onSubmit={handleSecretCodeLogin} className="space-y-4">
                       <div>
                         <Label className="font-sans text-sm">Secret Code (4-digit)</Label>
-                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" autoFocus />
+                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" />
                       </div>
                       <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Sign In with Code
