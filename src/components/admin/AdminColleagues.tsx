@@ -40,6 +40,7 @@ const AdminColleagues = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [tab, setTab] = useState("chats");
   const [onlineAdmins, setOnlineAdmins] = useState<string[]>([]);
+  const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +51,16 @@ const AdminColleagues = () => {
     };
     fetchProfile();
     fetchOnlineAdmins();
+    // Fetch avatars for all admins
+    const fetchAvatars = async () => {
+      const avatars: Record<string, string> = {};
+      for (const admin of ADMIN_LIST) {
+        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
+        if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
+      }
+      setAdminAvatars(avatars);
+    };
+    fetchAvatars();
   }, [user]);
 
   useEffect(() => {
