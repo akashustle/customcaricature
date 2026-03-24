@@ -1921,7 +1921,7 @@ const Admin = () => {
                     )}
                   </div>
                 </CardContent>
-              </Card>
+              </div>
 
               {/* Artwork Bypass Setting */}
               <Card>
