@@ -260,48 +260,57 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content with stagger animation */}
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
         <AnimatePresence mode="wait">
           <motion.div key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {renderContent()}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav - 3D Glass */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} border-t`}>
+        <div className={`backdrop-blur-2xl ${dm ? "bg-[#0e0e18]/95 border-white/[0.06]" : "bg-white/95 border-slate-200/50"} border-t shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]`}>
           <div className="flex items-stretch overflow-x-auto no-scrollbar px-1 max-w-lg mx-auto">
-            {visibleTabs.map((tab) => {
+            {visibleTabs.map((tab, idx) => {
               const isActive = activeTab === tab.key;
               return (
-                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                <motion.button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  whileTap={{ scale: 0.85 }}
                   className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${isActive ? "bg-primary/10" : ""}`}>
+                  <motion.div
+                    animate={isActive ? { y: -4, scale: 1.15 } : { y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200`}
+                    style={isActive ? { background: `linear-gradient(135deg, ${accent.primary}20, ${accent.secondary}15)`, boxShadow: `0 4px 12px ${accent.primary}25` } : {}}>
                     <tab.icon className={`w-[20px] h-[20px] transition-all duration-200 ${isActive ? "" : dm ? "text-white/30" : "text-slate-400"}`}
                       strokeWidth={isActive ? 2.5 : 1.8}
                       style={isActive ? { color: accent.primary } : {}} />
-                  </div>
+                  </motion.div>
                   <span className={`text-[9px] leading-none font-medium transition-all duration-200 ${isActive ? "font-bold" : dm ? "text-white/30" : "text-slate-400"}`}
                     style={isActive ? { color: accent.primary } : {}}>
                     {tab.label}
                   </span>
-                </button>
+                  {isActive && (
+                    <motion.div layoutId="activeTabDot" className="absolute -top-0.5 w-5 h-0.5 rounded-full"
+                      style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.secondary})` }} />
+                  )}
+                </motion.button>
               );
             })}
-            <button onClick={() => navigate("/dashboard")}
+            <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.85 }}
               className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
-              <div className="flex items-center justify-center w-8 h-8 rounded-xl">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl">
                 <LayoutDashboard className={`w-[20px] h-[20px] ${dm ? "text-white/30" : "text-slate-400"}`} strokeWidth={1.8} />
               </div>
               <span className={`text-[9px] leading-none font-medium ${dm ? "text-white/30" : "text-slate-400"}`}>Dashboard</span>
-            </button>
+            </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
