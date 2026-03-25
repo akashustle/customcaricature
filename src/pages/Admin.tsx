@@ -2274,6 +2274,29 @@ const Admin = () => {
                 </CardContent>
               </div>
 
+              {/* Floating Buttons Control */}
+              <div className="admin-settings-card overflow-hidden">
+                <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-500/10 dark:to-fuchsia-500/5 border-b border-border/30">
+                  <h3 className="font-sans font-bold text-base flex items-center gap-2"><Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />Floating Buttons</h3>
+                </div>
+                <CardContent className="space-y-4 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show WhatsApp Float</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display floating WhatsApp button (default: off)</p>
+                    </div>
+                    <Switch checked={(settings as any).floating_whatsapp?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_whatsapp", { enabled: checked }); toast({ title: checked ? "WhatsApp float enabled" : "WhatsApp float hidden" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Instagram Float</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display floating Instagram button (default: off)</p>
+                    </div>
+                    <Switch checked={(settings as any).floating_instagram?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_instagram", { enabled: checked }); toast({ title: checked ? "Instagram float enabled" : "Instagram float hidden" }); }} />
+                  </div>
+                </CardContent>
+              </div>
+
               {/* Hide Shop from Admin Panel */}
               <div className="admin-settings-card overflow-hidden">
                 <div className="px-6 py-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/5 border-b border-border/30">

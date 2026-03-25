@@ -142,13 +142,13 @@ const WorkshopDashboard = () => {
   if (!workshopUser) return null;
 
   const dm = darkMode;
-  const bg = dm ? "bg-[#0a0a0f]" : "bg-[#f8fafc]";
-  const headerBg = dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60";
-  const textPrimary = dm ? "text-white font-bold" : "text-slate-900 font-bold";
-  const textSecondary = dm ? "text-white/50 font-medium" : "text-slate-500 font-medium";
+  const bg = dm ? "bg-background" : "bg-[#f8fafc]";
+  const headerBg = dm ? "bg-card/98 border-border" : "bg-white/98 border-slate-200/60";
+  const textPrimary = dm ? "text-foreground font-bold" : "text-slate-900 font-bold";
+  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-slate-500 font-medium";
   const activeClass = `text-white shadow-lg font-semibold`;
   const activeStyle = { background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})`, boxShadow: `0 4px 15px ${accent.primary}30` };
-  const inactiveClass = dm ? "text-white/40 font-medium" : "text-slate-400 font-medium";
+  const inactiveClass = dm ? "text-muted-foreground font-medium" : "text-slate-400 font-medium";
 
   const visibleTabs = allTabs.filter(tab => {
     if (!tab.settingKey) return true;
@@ -276,7 +276,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - Instagram Style */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-lg ${dm ? "bg-[#0e0e18]/95 border-white/[0.06]" : "bg-white/95 border-slate-200/30"} border-t`}>
+        <div className={`backdrop-blur-lg ${dm ? "bg-card/95 border-border" : "bg-white/95 border-slate-200/30"} border-t`}>
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
@@ -285,14 +285,14 @@ const WorkshopDashboard = () => {
                   whileTap={{ scale: 0.75 }}
                   className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
                   <tab.icon
-                    className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/30" : "text-slate-400"}`}
+                    className={`transition-all duration-200 ${isActive ? (dm ? "text-foreground" : "text-slate-900") : dm ? "text-muted-foreground" : "text-slate-400"}`}
                     size={isActive ? 26 : 22}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && tab.icon === Home ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div layoutId="ws-dash-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-foreground" : "bg-slate-900"}`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
@@ -300,7 +300,7 @@ const WorkshopDashboard = () => {
             })}
             <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.75 }}
               className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-white/30" : "text-slate-400"}`} strokeWidth={1.4} />
+              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-muted-foreground" : "text-slate-400"}`} strokeWidth={1.4} />
             </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />

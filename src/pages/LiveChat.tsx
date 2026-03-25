@@ -152,56 +152,55 @@ const LiveChat = () => {
 
   const sendMessage = async (text?: string) => {
     const msg = (text || newMsg).trim();
-    if (!msg || sending) return;
+    if (!msg) return;
+    if (sending) return;
     setSending(true);
 
     // Check if this is a quick question click
     const matchedQQ = quickQs.find(qq => qq.q === msg);
+    // Capture refs for closures
+    const currentUser = user;
+    const currentSessionId = guestSessionId;
+    const currentGuestName = guestName;
+    const isFirstMsg = messages.length === 0;
 
-    if (user) {
-      // For logged-in users: send welcome on first message
-      if (messages.length === 0) {
-        await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
-        // Auto-welcome from system
-        setTimeout(async () => {
+    try {
+      if (currentUser) {
+        await supabase.from("chat_messages").insert({ sender_id: currentUser.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+        
+        if (isFirstMsg) {
+          // Auto-welcome from system
+          await new Promise(r => setTimeout(r, 500));
           await supabase.from("chat_messages").insert({
-            sender_id: "system", receiver_id: user.id, message: "Welcome! 👋 Your message has been received. One of our super specialists will join and respond shortly. Please stay connected!",
+            sender_id: "system", receiver_id: currentUser.id, message: "Welcome! 👋 Your message has been received. One of our super specialists will join and respond shortly. Please stay connected!",
             is_admin: true, is_artist_chat: false,
           } as any);
-          // If quick question, auto-reply with answer
-          if (matchedQQ) {
-            setTimeout(async () => {
-              await supabase.from("chat_messages").insert({
-                sender_id: "system", receiver_id: user.id, message: matchedQQ.a,
-                is_admin: true, is_artist_chat: false,
-              } as any);
-            }, 800);
-          }
-        }, 500);
-      } else {
-        await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+        }
+        
         // If quick question, auto-reply with answer
         if (matchedQQ) {
-          setTimeout(async () => {
-            await supabase.from("chat_messages").insert({
-              sender_id: "system", receiver_id: user.id, message: matchedQQ.a,
-              is_admin: true, is_artist_chat: false,
-            } as any);
-          }, 800);
+          await new Promise(r => setTimeout(r, 800));
+          await supabase.from("chat_messages").insert({
+            sender_id: "system", receiver_id: currentUser.id, message: matchedQQ.a,
+            is_admin: true, is_artist_chat: false,
+          } as any);
+          fetchMessages();
         }
+      } else if (currentSessionId) {
+        await supabase.from("ai_chat_messages").insert({ session_id: currentSessionId, role: "user", content: msg, sender_name: currentGuestName } as any);
+        
+        // If quick question, auto-reply with answer for guest
+        if (matchedQQ) {
+          await new Promise(r => setTimeout(r, 800));
+          await supabase.from("ai_chat_messages").insert({ session_id: currentSessionId, role: "assistant", content: matchedQQ.a, sender_name: "CCC Team" } as any);
+        }
+        setGuestMsgCount(c => c + 1);
+        fetchGuestMessages(currentSessionId);
       }
-    } else if (guestSessionId) {
-      await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "user", content: msg, sender_name: guestName } as any);
-      // If quick question, auto-reply with answer for guest
-      if (matchedQQ) {
-        setTimeout(async () => {
-          await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "assistant", content: matchedQQ.a, sender_name: "CCC Team" } as any);
-          fetchGuestMessages(guestSessionId);
-        }, 800);
-      }
-      setGuestMsgCount(c => c + 1);
-      fetchGuestMessages(guestSessionId);
+    } catch (err) {
+      console.error("Send message error:", err);
     }
+    
     setNewMsg(""); setSending(false); setShowEmoji(false);
   };
 

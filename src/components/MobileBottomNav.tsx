@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Search, User, ShoppingBag, Compass, GraduationCap, MessageCircle, Play } from "lucide-react";
+import { Home, Search, User, ShoppingBag, Compass, GraduationCap, MessageCircle, Play, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -24,7 +24,7 @@ const MobileBottomNav = () => {
     { icon: Home, label: "", path: "/" },
     ...(shopVisible ? [{ icon: ShoppingBag, label: "", path: "/shop" }] : []),
     ...(workshopVisible ? [{ icon: GraduationCap, label: "", path: "/workshop" }] : []),
-    ...(chatVisible ? [{ icon: MessageCircle, label: "", path: "/live-chat" }] : []),
+    ...(chatVisible ? [{ icon: Sparkles, label: "", path: "/live-chat" }] : []),
     ...(exploreVisible ? [{ icon: Compass, label: "", path: "/about" }] : []),
     ...(user
       ? [{ icon: User, label: "", path: "/dashboard" }]
@@ -49,7 +49,7 @@ const MobileBottomNav = () => {
                 <item.icon
                   className={`transition-all duration-200 ${
                     active ? "text-foreground" : "text-muted-foreground/40"
-                  }`}
+                  } ${item.icon === Sparkles && !active ? "animate-pulse text-primary/60" : ""}`}
                   size={active ? 26 : 22}
                   strokeWidth={active ? 2.2 : 1.4}
                   fill={active && item.icon === Home ? "currentColor" : "none"}
