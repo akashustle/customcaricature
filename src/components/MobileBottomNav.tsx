@@ -31,7 +31,7 @@ const MobileBottomNav = () => {
       : [{ icon: User, label: "", path: "/login" }]),
   ];
 
-  const visibleItems = items.slice(0, 5);
+  const visibleItems = items;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
