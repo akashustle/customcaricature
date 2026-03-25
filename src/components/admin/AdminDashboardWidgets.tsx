@@ -151,11 +151,11 @@ const AdminDashboardWidgets = () => {
                     </motion.div>
                   )}
                 </div>
-                <motion.p className="text-xl font-extrabold text-gray-900 leading-tight tracking-tight"
+                <motion.p className="text-xl font-extrabold text-foreground leading-tight tracking-tight"
                   animate={hoveredIdx === i ? { scale: 1.05 } : { scale: 1 }} transition={{ duration: 0.2 }}>
                   {w.value}
                 </motion.p>
-                <p className="text-[10px] text-gray-500 mt-0.5 font-semibold uppercase tracking-wider">{w.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold uppercase tracking-wider">{w.label}</p>
               </div>
             </div>
           </motion.div>

@@ -101,6 +101,7 @@ const NAV_SECTIONS = [
       { id: "hp-reviews", icon: Star, label: "HP Reviews", color: "from-yellow-500 to-amber-500" },
       { id: "brands", icon: Shield, label: "Brands", color: "from-cyan-500 to-teal-500" },
       { id: "pages", icon: FileQuestion, label: "Pages", color: "from-rose-500 to-pink-500" },
+      { id: "faqs", icon: FileQuestion, label: "FAQs", color: "from-teal-500 to-emerald-500" },
       { id: "files", icon: Layers, label: "Files", color: "from-emerald-500 to-green-500" },
       { id: "seo", icon: TrendingUp, label: "SEO", color: "from-indigo-500 to-violet-500" },
       { id: "calculator", icon: Calculator, label: "Calculator", color: "from-amber-500 to-yellow-500" },
