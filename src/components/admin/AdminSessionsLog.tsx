@@ -256,6 +256,7 @@ const AdminSessionsLog = () => {
       <Tabs value={sessionTab} onValueChange={setSessionTab}>
         <TabsList className="w-full mb-4 flex-wrap">
           <TabsTrigger value="admins" className="flex-1 font-sans"><Users className="w-4 h-4 mr-1" />Admins</TabsTrigger>
+          <TabsTrigger value="artists" className="flex-1 font-sans"><Tag className="w-4 h-4 mr-1" />Artist Login</TabsTrigger>
           <TabsTrigger value="sessions" className="flex-1 font-sans"><Globe className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
           {isMainAdmin && <TabsTrigger value="requests" className="flex-1 font-sans"><Send className="w-4 h-4 mr-1" />Requests{requests.filter(r => r.status === "pending").length > 0 ? ` (${requests.filter(r => r.status === "pending").length})` : ""}</TabsTrigger>}
           <TabsTrigger value="security" className="flex-1 font-sans"><ShieldOff className="w-4 h-4 mr-1" />Security</TabsTrigger>
