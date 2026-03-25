@@ -47,7 +47,7 @@ const LiveChatWrapper = () => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="fixed bottom-24 right-4 md:bottom-[280px] md:right-6 z-40"
+        className="fixed bottom-[240px] right-4 md:bottom-[280px] md:right-6 z-40"
       >
         <button
           onClick={() => navigate("/live-chat")}
