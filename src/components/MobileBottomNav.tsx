@@ -15,6 +15,7 @@ const MobileBottomNav = () => {
   const shopVisible = settings.shop_nav_visible?.enabled === true;
   const workshopVisible = settings.workshop_mobile_nav?.enabled === true;
   const chatVisible = settings.live_chat_visible?.enabled === true;
+  const exploreVisible = (settings as any).explore_mobile_nav?.enabled !== false;
 
   const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
   if (!isMobile || adminPaths.some(p => location.pathname.startsWith(p))) return null;
