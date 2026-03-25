@@ -225,7 +225,7 @@ const Admin = () => {
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual" | "artist">("all");
+  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual">("all");
   const [artistProfiles, setArtistProfiles] = useState<any[]>([]);
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
