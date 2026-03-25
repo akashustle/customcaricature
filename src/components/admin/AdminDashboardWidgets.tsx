@@ -111,13 +111,12 @@ const AdminDashboardWidgets = () => {
             onClick={() => w.drill && openDrill(w.drill)}
             className={`cursor-pointer group ${w.drill ? "" : "cursor-default"}`}
             style={{ perspective: "600px" }}>
-            <div className="relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300"
+            <div className="relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300 bg-card dark:bg-card"
               style={{
-                background: "rgba(255,255,255,0.95)",
                 backdropFilter: "blur(20px)",
                 boxShadow: hoveredIdx === i
-                  ? "0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8) inset, 0 -2px 5px rgba(0,0,0,0.03) inset"
-                  : "0 8px 25px -8px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.6) inset"
+                  ? "0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px hsl(var(--border)) inset"
+                  : "0 8px 25px -8px rgba(0,0,0,0.08), 0 0 0 1px hsl(var(--border)) inset"
               }}>
               {/* Animated gradient blob */}
               <motion.div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} blur-2xl`}
