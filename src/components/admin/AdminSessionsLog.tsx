@@ -364,6 +364,11 @@ const AdminSessionsLog = () => {
           </div>
         </TabsContent>
 
+        {/* Artist Login Tab */}
+        <TabsContent value="artists">
+          <ArtistLoginList isMainAdmin={isMainAdmin} />
+        </TabsContent>
+
         {/* Sessions Tab */}
         <TabsContent value="sessions">
           <Card>
