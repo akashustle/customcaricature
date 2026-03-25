@@ -103,6 +103,7 @@ import AdminCalendar from "@/components/admin/AdminCalendar";
 import AdminWebsiteAnalytics from "@/components/admin/AdminWebsiteAnalytics";
 import AdminQuickQuestions from "@/components/admin/AdminQuickQuestions";
 import AdminColleagues from "@/components/admin/AdminColleagues";
+import AdminFAQs from "@/components/admin/AdminFAQs";
 
 const AdminFloatingChatButton = ({ onClick }: { onClick: () => void }) => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -1837,6 +1838,10 @@ const Admin = () => {
             <AdminSEOSettings />
           </TabsContent>
 
+          <TabsContent value="faqs">
+            <AdminFAQs />
+          </TabsContent>
+
           <TabsContent value="pages">
             <AdminPages />
           </TabsContent>
@@ -2180,6 +2185,20 @@ const Admin = () => {
                         <SelectItem value="system">💻 System</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Explore (About) in Mobile Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display the Explore/About tab in mobile bottom navigation</p>
+                    </div>
+                    <Switch checked={(settings as any).explore_mobile_nav?.enabled !== false} onCheckedChange={async (checked) => { await updateSetting("explore_mobile_nav", { enabled: checked }); toast({ title: checked ? "Explore shown in mobile nav" : "Explore hidden from mobile nav" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Live Chat in Mobile Nav</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display the Live Chat tab in mobile bottom navigation</p>
+                    </div>
+                    <Switch checked={(settings as any).live_chat_visible?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("live_chat_visible", { enabled: checked }); toast({ title: checked ? "Live Chat shown in mobile nav" : "Live Chat hidden from mobile nav" }); }} />
                   </div>
                 </CardContent>
               </div>

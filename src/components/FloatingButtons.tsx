@@ -34,7 +34,7 @@ const FloatingButtons = () => {
   const message = encodeURIComponent(PAGE_MESSAGES[location.pathname] || PAGE_MESSAGES["/"]);
 
   return (
-    <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[140px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
+    <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[76px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
       {/* Theme Toggle */}
       <button
         onClick={() => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("theme-user-override", "true"); }}

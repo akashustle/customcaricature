@@ -3,7 +3,7 @@ import { useTheme } from "next-themes";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const DefaultThemeApplier = () => {
-  const { setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { settings } = useSiteSettings();
 
   useEffect(() => {
@@ -16,6 +16,14 @@ const DefaultThemeApplier = () => {
       setTheme(defaultMode);
     }
   }, [(settings as any)?.default_theme?.mode]);
+
+  // Update browser theme-color meta tag to match current theme
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute("content", resolvedTheme === "dark" ? "#0a0a0a" : "#fdf8f3");
+    }
+  }, [resolvedTheme]);
 
   return null;
 };

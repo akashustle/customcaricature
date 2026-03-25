@@ -155,6 +155,9 @@ const LiveChat = () => {
     if (!msg || sending) return;
     setSending(true);
 
+    // Check if this is a quick question click
+    const matchedQQ = quickQs.find(qq => qq.q === msg);
+
     if (user) {
       // For logged-in users: send welcome on first message
       if (messages.length === 0) {
@@ -165,12 +168,37 @@ const LiveChat = () => {
             sender_id: "system", receiver_id: user.id, message: "Welcome! 👋 Your message has been received. One of our super specialists will join and respond shortly. Please stay connected!",
             is_admin: true, is_artist_chat: false,
           } as any);
+          // If quick question, auto-reply with answer
+          if (matchedQQ) {
+            setTimeout(async () => {
+              await supabase.from("chat_messages").insert({
+                sender_id: "system", receiver_id: user.id, message: matchedQQ.a,
+                is_admin: true, is_artist_chat: false,
+              } as any);
+            }, 800);
+          }
         }, 500);
       } else {
         await supabase.from("chat_messages").insert({ sender_id: user.id, receiver_id: null, message: msg, is_admin: false, is_artist_chat: false } as any);
+        // If quick question, auto-reply with answer
+        if (matchedQQ) {
+          setTimeout(async () => {
+            await supabase.from("chat_messages").insert({
+              sender_id: "system", receiver_id: user.id, message: matchedQQ.a,
+              is_admin: true, is_artist_chat: false,
+            } as any);
+          }, 800);
+        }
       }
     } else if (guestSessionId) {
       await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "user", content: msg, sender_name: guestName } as any);
+      // If quick question, auto-reply with answer for guest
+      if (matchedQQ) {
+        setTimeout(async () => {
+          await supabase.from("ai_chat_messages").insert({ session_id: guestSessionId, role: "assistant", content: matchedQQ.a, sender_name: "CCC Team" } as any);
+          fetchGuestMessages(guestSessionId);
+        }, 800);
+      }
       setGuestMsgCount(c => c + 1);
       fetchGuestMessages(guestSessionId);
     }
