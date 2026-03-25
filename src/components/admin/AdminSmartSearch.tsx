@@ -151,8 +151,8 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
   return (
     <div ref={ref} className="relative w-full max-w-lg">
       {/* Hidden honeypot to trap password managers */}
-      <input type="text" name="fake_email_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="username" />
-      <input type="password" name="fake_pwd_trap2" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="current-password" />
+      <input type="text" name="fake_email_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="username" />
+      <input type="password" name="fake_pwd_trap2" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="current-password" />
       <div className="flex gap-1.5">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

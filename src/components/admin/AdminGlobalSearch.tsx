@@ -94,8 +94,8 @@ const AdminGlobalSearch = ({ onNavigate }: AdminGlobalSearchProps) => {
   return (
     <div ref={ref} className="relative w-full max-w-md">
       {/* Hidden honeypot to trap password managers */}
-      <input type="text" name="fake_search_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="username" />
-      <input type="password" name="fake_pwd_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="current-password" />
+      <input type="text" name="fake_search_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="username" />
+      <input type="password" name="fake_pwd_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="current-password" />
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
