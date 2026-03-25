@@ -594,7 +594,7 @@ const Index = () => {
       </main>
 
       {/* Footer - Clean Ivory/White */}
-      <footer className="relative overflow-hidden bg-[#fdf8f3] border-t border-border/40">
+      <footer className="relative overflow-hidden bg-card border-t border-border/40">
         <div className="container mx-auto px-4 py-10 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             <div className="col-span-2 md:col-span-1">
