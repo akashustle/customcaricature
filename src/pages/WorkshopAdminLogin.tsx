@@ -293,7 +293,7 @@ const WorkshopAdminLogin = () => {
                       <SelectContent className="border rounded-xl shadow-2xl overflow-hidden" style={{ borderColor: BRAND.light, background: '#FFFFFF' }}>
                         {ADMIN_LIST.map(admin => (
                           <SelectItem key={admin.email} value={admin.email}
-                            className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
+                            className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#F5F3FF] focus:!text-[#4C1D95] hover:!bg-[#F5F3FF] data-[highlighted]:!bg-[#F5F3FF] data-[highlighted]:!text-[#4C1D95]"
                             style={{ color: BRAND.primary }}>
                             <div className="flex items-center gap-3 py-1">
                               {adminAvatars[admin.email] ? (
@@ -344,8 +344,8 @@ const WorkshopAdminLogin = () => {
                       <Select value={verifyMethod} onValueChange={(v) => { setVerifyMethod(v as "email" | "mobile"); setVerifyInput(""); }}>
                         <SelectTrigger className="h-12 rounded-xl border" style={{ background: BRAND.cream, borderColor: BRAND.light }}><SelectValue /></SelectTrigger>
                         <SelectContent className="rounded-xl shadow-xl" style={{ background: '#FFFFFF', borderColor: BRAND.light }}>
-                          <SelectItem value="email" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email</div></SelectItem>
-                          <SelectItem value="mobile" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile</div></SelectItem>
+                          <SelectItem value="email" className="rounded-lg cursor-pointer focus:!bg-[#F5F3FF] focus:!text-[#4C1D95] data-[highlighted]:!bg-[#F5F3FF]"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email</div></SelectItem>
+                          <SelectItem value="mobile" className="rounded-lg cursor-pointer focus:!bg-[#F5F3FF] focus:!text-[#4C1D95] data-[highlighted]:!bg-[#F5F3FF]"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile</div></SelectItem>
                         </SelectContent>
                       </Select>
                       <div>
