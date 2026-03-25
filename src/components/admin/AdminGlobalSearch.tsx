@@ -80,24 +80,42 @@ const AdminGlobalSearch = ({ onNavigate }: AdminGlobalSearchProps) => {
     setOpen(true);
   };
 
+  // Prevent browser autofill by making input readonly on mount
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const el = inputRef.current;
+    if (el) {
+      el.setAttribute("readonly", "true");
+      const timer = setTimeout(() => el.removeAttribute("readonly"), 600);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <div ref={ref} className="relative w-full max-w-md">
+      {/* Hidden honeypot to trap password managers */}
+      <input type="text" name="fake_search_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="username" />
+      <input type="password" name="fake_pwd_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none", tabIndex: -1 }} tabIndex={-1} autoComplete="current-password" />
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
-          type="text"
+          ref={inputRef}
+          type="search"
+          role="searchbox"
           value={query}
           onChange={e => { setQuery(e.target.value); if (e.target.value) setOpen(true); }}
           onFocus={() => { if (query && results.length) setOpen(true); }}
           placeholder="Search orders, users, events, workshop..."
-          autoComplete="off"
+          autoComplete="new-password"
           autoCorrect="off"
           autoCapitalize="off"
           spellCheck={false}
           data-lpignore="true"
           data-form-type="other"
           data-1p-ignore="true"
-          name={`gsearch_${Date.now()}`}
+          aria-autocomplete="none"
+          name="admin_global_search_query"
+          id="admin_global_search_input"
           className="flex h-10 w-full rounded-xl border border-border bg-card pl-9 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         />
         {query && (
