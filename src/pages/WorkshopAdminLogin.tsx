@@ -22,12 +22,13 @@ const ADMIN_LIST: AdminInfo[] = [
 const maskEmail = (email: string) => { const [l, d] = email.split("@"); return `${l.slice(0, 3)}${"•".repeat(Math.max(l.length - 3, 2))}@${d}`; };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
+// Vibrant violet-purple palette
 const BRAND = {
-  primary: "#5C4033",
-  accent: "#C17B4A",
-  light: "#E8D5C4",
-  highlight: "#D4956A",
-  cream: "#FDF8F3",
+  primary: "#4C1D95",
+  accent: "#7C3AED",
+  light: "#DDD6FE",
+  highlight: "#A78BFA",
+  cream: "#F5F3FF",
 };
 
 const WorkshopAdminLogin = () => {

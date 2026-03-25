@@ -34,13 +34,13 @@ const maskEmail = (email: string) => {
 };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
-// Brand colors from logo: warm brown/amber tones
+// Vibrant blue-teal palette for a fresh modern look
 const BRAND = {
-  primary: "#5C4033",      // warm brown
-  accent: "#C17B4A",       // warm amber
-  light: "#E8D5C4",        // light tan
-  highlight: "#D4956A",    // soft rose-brown
-  cream: "#FDF8F3",        // warm ivory
+  primary: "#1E3A5F",      // deep navy
+  accent: "#0EA5E9",       // vivid sky blue
+  light: "#BAE6FD",        // light sky
+  highlight: "#38BDF8",    // bright blue
+  cream: "#F0F9FF",        // ice blue white
 };
 
 const AdminLogin = () => {
