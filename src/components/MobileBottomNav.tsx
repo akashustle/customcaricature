@@ -25,7 +25,7 @@ const MobileBottomNav = () => {
     ...(shopVisible ? [{ icon: ShoppingBag, label: "", path: "/shop" }] : []),
     ...(workshopVisible ? [{ icon: GraduationCap, label: "", path: "/workshop" }] : []),
     ...(chatVisible ? [{ icon: MessageCircle, label: "", path: "/live-chat" }] : []),
-    { icon: Compass, label: "", path: "/about" },
+    ...(exploreVisible ? [{ icon: Compass, label: "", path: "/about" }] : []),
     ...(user
       ? [{ icon: User, label: "", path: "/dashboard" }]
       : [{ icon: User, label: "", path: "/login" }]),
