@@ -34,13 +34,13 @@ const maskEmail = (email: string) => {
 };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
-// Brand colors from logo: warm brown/amber tones
+// Vibrant blue-teal palette for a fresh modern look
 const BRAND = {
-  primary: "#5C4033",      // warm brown
-  accent: "#C17B4A",       // warm amber
-  light: "#E8D5C4",        // light tan
-  highlight: "#D4956A",    // soft rose-brown
-  cream: "#FDF8F3",        // warm ivory
+  primary: "#1E3A5F",      // deep navy
+  accent: "#0EA5E9",       // vivid sky blue
+  light: "#BAE6FD",        // light sky
+  highlight: "#38BDF8",    // bright blue
+  cream: "#F0F9FF",        // ice blue white
 };
 
 const AdminLogin = () => {
@@ -336,7 +336,7 @@ const AdminLogin = () => {
                     Admin Console
                   </h1>
                 </div>
-                <p className="text-sm font-medium" style={{ color: "#9B8B7A" }}>{getGreeting()}</p>
+                <p className="text-sm font-medium" style={{ color: "#64748B" }}>{getGreeting()}</p>
               </motion.div>
 
               {/* Step indicators */}
@@ -344,7 +344,7 @@ const AdminLogin = () => {
                 {[1, 2, 3].map(s => (
                   <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
                     <div className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-12" : s < step ? "w-8" : "w-6"}`}
-                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#E8E0D8" }} />
+                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#CBD5E1" }} />
                     {s === step && (
                       <motion.div className="absolute inset-0 rounded-full blur-sm"
                         style={{ background: `linear-gradient(90deg, ${BRAND.accent}, ${BRAND.highlight})` }}
@@ -388,7 +388,7 @@ const AdminLogin = () => {
                       <SelectContent className="border rounded-xl shadow-2xl overflow-hidden" style={{ borderColor: BRAND.light, background: '#FFFFFF' }}>
                         {ADMIN_LIST.map(admin => (
                           <SelectItem key={admin.email} value={admin.email}
-                            className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#FDF8F3] focus:!text-[#5C4033] hover:!bg-[#FDF8F3] data-[highlighted]:!bg-[#FDF8F3] data-[highlighted]:!text-[#5C4033]"
+                            className="rounded-lg cursor-pointer transition-all duration-200 focus:!bg-[#F0F9FF] focus:!text-[#1E3A5F] hover:!bg-[#F0F9FF] data-[highlighted]:!bg-[#F0F9FF] data-[highlighted]:!text-[#1E3A5F]"
                             style={{ color: BRAND.primary }}>
                             <div className="flex items-center gap-3 py-1">
                               {adminAvatars[admin.email] ? (
@@ -401,7 +401,7 @@ const AdminLogin = () => {
                               <div className="flex flex-col gap-0.5">
                                 <div className="flex items-center gap-1.5">
                                   <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                  <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                                  <span className="text-xs" style={{ color: "#94A3B8" }}>({maskEmail(admin.email)})</span>
                                 </div>
                                 <span className="text-[10px] font-semibold flex items-center gap-1" style={{ color: BRAND.accent }}>{admin.emoji} {admin.designation}</span>
                               </div>
@@ -410,7 +410,7 @@ const AdminLogin = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-center font-medium" style={{ color: "#B5A89A" }}>Select your profile to proceed securely</p>
+                    <p className="text-xs text-center font-medium" style={{ color: "#94A3B8" }}>Select your profile to proceed securely</p>
                   </motion.div>
                 )}
 
@@ -434,7 +434,7 @@ const AdminLogin = () => {
                       </motion.div>
                       <p className="text-lg font-bold" style={{ color: BRAND.primary }}>Hi {selectedAdmin.name}! 👋</p>
                       <p className="text-[11px] font-semibold mt-0.5" style={{ color: BRAND.accent }}>{selectedAdmin.emoji} {selectedAdmin.designation}</p>
-                      <p className="text-xs mt-1.5" style={{ color: "#9B8B7A" }}>Verify your identity to continue</p>
+                      <p className="text-xs mt-1.5" style={{ color: "#64748B" }}>Verify your identity to continue</p>
                     </motion.div>
 
                     <div className="space-y-3">
@@ -445,13 +445,13 @@ const AdminLogin = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl shadow-xl" style={{ background: '#FFFFFF', borderColor: BRAND.light }}>
-                          <SelectItem value="email" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email Address</div></SelectItem>
-                          <SelectItem value="mobile" className="rounded-lg cursor-pointer focus:!bg-[#FDF8F3] focus:!text-[#5C4033] data-[highlighted]:!bg-[#FDF8F3]"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile Number</div></SelectItem>
+                          <SelectItem value="email" className="rounded-lg cursor-pointer focus:!bg-[#F0F9FF] focus:!text-[#1E3A5F] data-[highlighted]:!bg-[#F0F9FF]"><div className="flex items-center gap-2"><Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Email Address</div></SelectItem>
+                          <SelectItem value="mobile" className="rounded-lg cursor-pointer focus:!bg-[#F0F9FF] focus:!text-[#1E3A5F] data-[highlighted]:!bg-[#F0F9FF]"><div className="flex items-center gap-2"><Phone className="w-4 h-4" style={{ color: BRAND.accent }} /> Mobile Number</div></SelectItem>
                         </SelectContent>
                       </Select>
 
                       <div>
-                        <Label className="text-xs font-medium" style={{ color: "#9B8B7A" }}>
+                        <Label className="text-xs font-medium" style={{ color: "#64748B" }}>
                           Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span>
                         </Label>
                         <div className="relative mt-1.5">
@@ -471,7 +471,7 @@ const AdminLogin = () => {
                       style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>
                       Verify & Continue →
                     </Button>
-                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}>
+                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#94A3B8" }}>
                       <ArrowLeft className="w-3 h-3" /> Back
                     </Button>
                   </motion.div>
@@ -536,7 +536,7 @@ const AdminLogin = () => {
                               placeholder="••••••••" className="pl-11 pr-11 h-13 rounded-xl border"
                               style={{ background: BRAND.cream, borderColor: BRAND.light }} />
                             <button type="button" onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "#B5A89A" }}>
+                              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "#94A3B8" }}>
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
@@ -562,7 +562,7 @@ const AdminLogin = () => {
                               <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
                                 <Mail className="w-10 h-10 mx-auto mb-2" style={{ color: BRAND.accent }} />
                               </motion.div>
-                              <p className="text-xs" style={{ color: "#9B8B7A" }}>OTP will be sent to</p>
+                              <p className="text-xs" style={{ color: "#64748B" }}>OTP will be sent to</p>
                               <p className="text-sm font-bold mt-0.5" style={{ color: BRAND.primary }}>akashxbhavans@gmail.com</p>
                             </div>
                           ) : (
@@ -595,7 +595,7 @@ const AdminLogin = () => {
                             (authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Send OTP →" : "Sign In →"}
                         </Button>
                       </motion.div>
-                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}>
+                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#94A3B8" }}>
                         <ArrowLeft className="w-3 h-3" /> Back
                       </Button>
                     </form>
@@ -605,7 +605,7 @@ const AdminLogin = () => {
             </div>
 
             <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#B5A89A" }}>← Back to Home</button>
+              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#94A3B8" }}>← Back to Home</button>
             </div>
           </div>
         </motion.div>
