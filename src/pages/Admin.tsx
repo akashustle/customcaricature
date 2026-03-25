@@ -1838,6 +1838,10 @@ const Admin = () => {
             <AdminSEOSettings />
           </TabsContent>
 
+          <TabsContent value="faqs">
+            <AdminFAQs />
+          </TabsContent>
+
           <TabsContent value="pages">
             <AdminPages />
           </TabsContent>
