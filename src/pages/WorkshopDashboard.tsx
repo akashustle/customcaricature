@@ -300,7 +300,7 @@ const WorkshopDashboard = () => {
             })}
             <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.75 }}
               className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-white/30" : "text-slate-400"}`} strokeWidth={1.4} />
+              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-muted-foreground" : "text-slate-400"}`} strokeWidth={1.4} />
             </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
