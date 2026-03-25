@@ -285,7 +285,7 @@ const WorkshopDashboard = () => {
                   whileTap={{ scale: 0.75 }}
                   className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
                   <tab.icon
-                    className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/30" : "text-slate-400"}`}
+                    className={`transition-all duration-200 ${isActive ? (dm ? "text-foreground" : "text-slate-900") : dm ? "text-muted-foreground" : "text-slate-400"}`}
                     size={isActive ? 26 : 22}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && tab.icon === Home ? "currentColor" : "none"}
