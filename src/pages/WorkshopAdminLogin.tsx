@@ -257,14 +257,14 @@ const WorkshopAdminLogin = () => {
                     Workshop Admin
                   </h1>
                 </div>
-                <p className="text-sm font-medium" style={{ color: "#9B8B7A" }}>{getGreeting()}</p>
+                <p className="text-sm font-medium" style={{ color: "#6B7280" }}>{getGreeting()}</p>
               </motion.div>
 
               <div className="flex items-center justify-center gap-3 mt-3">
                 {[1, 2, 3].map(s => (
                   <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
                     <div className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-12" : s < step ? "w-8" : "w-6"}`}
-                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#E8E0D8" }} />
+                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#D1D5DB" }} />
                   </motion.div>
                 ))}
               </div>
@@ -306,7 +306,7 @@ const WorkshopAdminLogin = () => {
                               <div className="flex flex-col gap-0.5">
                                 <div className="flex items-center gap-1.5">
                                   <span className="font-bold" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                  <span className="text-xs" style={{ color: "#B5A89A" }}>({maskEmail(admin.email)})</span>
+                                  <span className="text-xs" style={{ color: "#9CA3AF" }}>({maskEmail(admin.email)})</span>
                                 </div>
                                 <span className="text-[10px] font-semibold" style={{ color: BRAND.accent }}>{admin.designation}</span>
                               </div>
@@ -337,7 +337,7 @@ const WorkshopAdminLogin = () => {
                       </motion.div>
                       <p className="text-lg font-bold" style={{ color: BRAND.primary }}>Hi {selectedAdmin.name}! 👋</p>
                       <p className="text-[11px] font-semibold" style={{ color: BRAND.accent }}>{selectedAdmin.designation}</p>
-                      <p className="text-xs mt-1.5" style={{ color: "#9B8B7A" }}>Verify your identity</p>
+                      <p className="text-xs mt-1.5" style={{ color: "#6B7280" }}>Verify your identity</p>
                     </motion.div>
                     <div className="space-y-3">
                       <Label className="text-sm font-bold" style={{ color: BRAND.primary }}>Authenticate With</Label>
@@ -349,7 +349,7 @@ const WorkshopAdminLogin = () => {
                         </SelectContent>
                       </Select>
                       <div>
-                        <Label className="text-xs" style={{ color: "#9B8B7A" }}>Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span></Label>
+                        <Label className="text-xs" style={{ color: "#6B7280" }}>Enter {verifyMethod} <span className="opacity-60">(hint: {verifyMethod === "email" ? maskEmail(selectedAdmin.email) : maskMobile(selectedAdmin.mobile)})</span></Label>
                         <div className="relative mt-1.5">
                           {verifyMethod === "email" ? <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} /> : <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} />}
                           <Input type={verifyMethod === "email" ? "email" : "tel"} value={verifyInput} onChange={(e) => setVerifyInput(e.target.value)}
@@ -362,7 +362,7 @@ const WorkshopAdminLogin = () => {
                     </div>
                     <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg hover:brightness-110"
                       style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>Verify & Continue →</Button>
-                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
+                    <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#9CA3AF" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
                   </motion.div>
                 )}
 
@@ -412,7 +412,7 @@ const WorkshopAdminLogin = () => {
                             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: BRAND.accent }} />
                             <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                               placeholder="••••••••" className="pl-11 pr-11 h-13 rounded-xl border" style={{ background: BRAND.cream, borderColor: BRAND.light }} />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2" style={{ color: "#B5A89A" }}>
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2" style={{ color: "#9CA3AF" }}>
                               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
@@ -433,7 +433,7 @@ const WorkshopAdminLogin = () => {
                               <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
                                 <Mail className="w-10 h-10 mx-auto mb-2" style={{ color: BRAND.accent }} />
                               </motion.div>
-                              <p className="text-xs" style={{ color: "#9B8B7A" }}>OTP → <strong style={{ color: BRAND.primary }}>akashxbhavans@gmail.com</strong></p>
+                              <p className="text-xs" style={{ color: "#6B7280" }}>OTP → <strong style={{ color: BRAND.primary }}>akashxbhavans@gmail.com</strong></p>
                             </div>
                           ) : (
                             <>
@@ -458,7 +458,7 @@ const WorkshopAdminLogin = () => {
                           {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />{authMethod === "otp" && !otpSent ? "Sending..." : "Verifying..."}</> : authMethod === "otp" && !otpSent ? "Send OTP →" : "Sign In →"}
                         </Button>
                       </motion.div>
-                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#B5A89A" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
+                      <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#9CA3AF" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
                     </form>
                   </motion.div>
                 )}
@@ -466,7 +466,7 @@ const WorkshopAdminLogin = () => {
             </div>
 
             <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#B5A89A" }}>← Back to Home</button>
+              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#9CA3AF" }}>← Back to Home</button>
             </div>
           </div>
         </motion.div>
