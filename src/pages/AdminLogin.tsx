@@ -76,9 +76,12 @@ const AdminLogin = () => {
   useEffect(() => {
     const fetchAvatars = async () => {
       const avatars: Record<string, string> = {};
-      for (const admin of ADMIN_LIST) {
-        const { data } = await supabase.from("profiles" as any).select("avatar_url").eq("email", admin.email).maybeSingle() as any;
-        if (data?.avatar_url) avatars[admin.email] = data.avatar_url;
+      const emails = ADMIN_LIST.map(a => a.email);
+      const { data } = await supabase.from("profiles").select("email, avatar_url").in("email", emails);
+      if (data) {
+        (data as any[]).forEach((p: any) => {
+          if (p.avatar_url) avatars[p.email] = p.avatar_url;
+        });
       }
       setAdminAvatars(avatars);
     };
