@@ -292,7 +292,7 @@ const WorkshopDashboard = () => {
                   />
                   {isActive && (
                     <motion.div layoutId="ws-dash-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-foreground" : "bg-slate-900"}`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
