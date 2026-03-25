@@ -443,14 +443,8 @@ const Dashboard = () => {
   );
 };
 
-const DashNavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) => (
-  <button onClick={onClick} className="flex flex-col items-center gap-0.5 flex-1 min-w-[52px] py-2 relative flex-shrink-0">
-    <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${active ? "bg-primary/10" : ""}`}>
-      <Icon className={`w-[20px] h-[20px] transition-all duration-200 ${active ? "text-primary" : "text-muted-foreground/60"}`} strokeWidth={active ? 2.5 : 1.8} />
-    </div>
-    <span className={`text-[9px] leading-none font-medium transition-all duration-200 ${active ? "text-primary font-bold" : "text-muted-foreground/50"}`}>{label}</span>
-  </button>
-);
+
+
 
 const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, changingSecret, currentPassword, setCurrentPassword, newPassword, setNewPassword, confirmNewPassword, setConfirmNewPassword, changePassword, changingPassword }: any) => (
   <div className="space-y-4">
