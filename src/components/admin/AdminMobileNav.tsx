@@ -20,30 +20,31 @@ interface AdminMobileNavProps {
 }
 
 const PRIMARY_TABS = [
-  { id: "dashboard", icon: LayoutDashboard, label: "Home" },
-  { id: "orders", icon: Package, label: "Orders" },
-  { id: "events", icon: Calendar, label: "Events" },
-  { id: "customers", icon: Users, label: "Users" },
-  { id: "analytics", icon: BarChart3, label: "Stats" },
+  { id: "dashboard", icon: LayoutDashboard },
+  { id: "orders", icon: Package },
+  { id: "events", icon: Calendar },
+  { id: "customers", icon: Users },
+  { id: "analytics", icon: BarChart3 },
+  { id: "payments", icon: DollarSign },
+  { id: "revenue", icon: TrendingUp },
+  { id: "ai-conversations", icon: Bot },
+  { id: "crm-pipeline", icon: Target },
+  { id: "settings", icon: Settings },
 ];
 
 const MORE_SECTIONS = [
   { section: "Analytics", icon: TrendingUp, items: [
-    { id: "payments", label: "Payments", icon: DollarSign },
     { id: "invoices", label: "Invoices", icon: Receipt },
-    { id: "revenue", label: "Revenue", icon: DollarSign },
     { id: "revenue-target", label: "₹10L Target", icon: Target },
     { id: "ai-intelligence", label: "AI Insights", icon: Zap },
     { id: "calendar", label: "Calendar", icon: CalendarDays },
     { id: "website-analytics", label: "Web Analytics", icon: LineChart },
   ]},
   { section: "AI & Chat", icon: Bot, items: [
-    { id: "ai-conversations", label: "AI Chats", icon: Bot },
     { id: "chatbot", label: "AI Training", icon: Settings },
     { id: "live-chat", label: "Live Chat", icon: MessageCircle },
   ]},
   { section: "CRM", icon: Target, items: [
-    { id: "crm-pipeline", label: "Pipeline", icon: Target },
     { id: "enquiries", label: "Enquiries", icon: ClipboardList },
     { id: "support", label: "Support", icon: HelpCircle },
   ]},
@@ -78,6 +79,7 @@ const MORE_SECTIONS = [
     { id: "files", label: "Files", icon: Layers },
     { id: "seo", label: "SEO", icon: TrendingUp },
     { id: "calculator", label: "Calculator", icon: Calculator },
+    { id: "faqs", label: "FAQs", icon: FileQuestion },
   ]},
   { section: "Security", icon: ShieldCheck, items: [
     { id: "admin-monitoring", label: "AI Monitor", icon: Brain },
@@ -94,7 +96,6 @@ const MORE_SECTIONS = [
     { id: "automation", label: "Automation", icon: Zap },
     { id: "integrations", label: "Integrations", icon: Shield },
     { id: "maintenance", label: "Maintenance", icon: AlertTriangle },
-    { id: "settings", label: "Settings", icon: Settings },
   ]},
 ];
 
@@ -104,39 +105,32 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-      <div className="bg-background/95 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
-        <div className="flex items-stretch justify-evenly px-1 max-w-lg mx-auto">
+      <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
+        <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
           {PRIMARY_TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <motion.button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                whileTap={{ scale: 0.88 }}
-                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-2.5 relative"
+                whileTap={{ scale: 0.75 }}
+                className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0"
               >
+                <tab.icon
+                  className={`transition-all duration-200 ${
+                    isActive ? "text-foreground" : "text-muted-foreground/40"
+                  }`}
+                  size={isActive ? 26 : 22}
+                  strokeWidth={isActive ? 2.2 : 1.4}
+                  fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
+                />
                 {isActive && (
                   <motion.div
-                    layoutId="admin-nav-bar"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
+                    layoutId="admin-insta-dot"
+                    className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
-                <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
-                  isActive ? "bg-primary/10" : ""
-                }`}>
-                  <tab.icon
-                    className={`w-[22px] h-[22px] transition-all duration-200 ${
-                      isActive ? "text-primary" : "text-muted-foreground/60"
-                    }`}
-                    strokeWidth={isActive ? 2.5 : 1.8}
-                  />
-                </div>
-                <span className={`text-[10px] leading-none font-medium transition-all duration-200 ${
-                  isActive ? "text-primary font-bold" : "text-muted-foreground/50"
-                }`}>
-                  {tab.label}
-                </span>
               </motion.button>
             );
           })}
@@ -145,24 +139,23 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
           <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
             <SheetTrigger asChild>
               <motion.button
-                whileTap={{ scale: 0.88 }}
-                className="flex flex-col items-center gap-0.5 flex-1 min-w-0 py-2.5 relative"
+                whileTap={{ scale: 0.75 }}
+                className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0"
               >
+                <MoreHorizontal
+                  className={`transition-all duration-200 ${
+                    !isPrimaryActive ? "text-foreground" : "text-muted-foreground/40"
+                  }`}
+                  size={!isPrimaryActive ? 26 : 22}
+                  strokeWidth={!isPrimaryActive ? 2.2 : 1.4}
+                />
                 {!isPrimaryActive && (
                   <motion.div
-                    layoutId="admin-nav-bar"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
+                    layoutId="admin-insta-dot"
+                    className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 )}
-                <div className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 ${
-                  !isPrimaryActive ? "bg-primary/10" : ""
-                }`}>
-                  <MoreHorizontal className={`w-[22px] h-[22px] ${!isPrimaryActive ? "text-primary" : "text-muted-foreground/60"}`} />
-                </div>
-                <span className={`text-[10px] leading-none font-medium ${!isPrimaryActive ? "text-primary font-bold" : "text-muted-foreground/50"}`}>
-                  More
-                </span>
               </motion.button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[75vh] rounded-t-3xl px-0 bg-background border-border">
