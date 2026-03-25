@@ -801,10 +801,6 @@ const Admin = () => {
       list = list.filter(c => !(c as any).is_manual);
     } else if (customerTab === "manual") {
       list = list.filter(c => (c as any).is_manual);
-    } else if (customerTab === "artist") {
-      // Show artists with auth credentials from artist profiles
-      const artistUserIds = artistProfiles.filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id);
-      list = list.filter(c => artistUserIds.includes(c.user_id));
     }
     return list;
   };
