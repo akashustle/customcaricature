@@ -49,7 +49,7 @@ const MobileBottomNav = () => {
                 <item.icon
                   className={`transition-all duration-200 ${
                     active ? "text-foreground" : "text-muted-foreground/40"
-                  }`}
+                  } ${item.icon === Sparkles && !active ? "animate-pulse text-primary/60" : ""}`}
                   size={active ? 26 : 22}
                   strokeWidth={active ? 2.2 : 1.4}
                   fill={active && item.icon === Home ? "currentColor" : "none"}

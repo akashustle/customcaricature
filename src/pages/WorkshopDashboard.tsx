@@ -276,7 +276,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - Instagram Style */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-lg ${dm ? "bg-[#0e0e18]/95 border-white/[0.06]" : "bg-white/95 border-slate-200/30"} border-t`}>
+        <div className={`backdrop-blur-lg ${dm ? "bg-card/95 border-border" : "bg-white/95 border-slate-200/30"} border-t`}>
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
