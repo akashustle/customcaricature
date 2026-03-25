@@ -1469,7 +1469,6 @@ const Admin = () => {
                 { value: "all" as const, label: `All (${customers.length})` },
                 { value: "registered" as const, label: "Registered" },
                 { value: "manual" as const, label: "Manual" },
-                { value: "artist" as const, label: `Artists (${artistProfiles.filter((a: any) => a.auth_user_id).length})` },
               ].map((tab) => (
                 <Button
                   key={tab.value}
