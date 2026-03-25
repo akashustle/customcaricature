@@ -225,7 +225,7 @@ const Admin = () => {
   const [caricatureTypes, setCaricatureTypes] = useState<CaricatureType[]>([]);
   const [customers, setCustomers] = useState<Profile[]>([]);
   const [customerSearch, setCustomerSearch] = useState("");
-  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual" | "artist">("all");
+  const [customerTab, setCustomerTab] = useState<"all" | "registered" | "manual">("all");
   const [artistProfiles, setArtistProfiles] = useState<any[]>([]);
   const [editingType, setEditingType] = useState<string | null>(null);
   const [editTypeData, setEditTypeData] = useState<Partial<CaricatureType>>({});
@@ -518,7 +518,16 @@ const Admin = () => {
     if (error) {
       console.error("Error fetching customers:", error);
     }
-    if (data) setCustomers(data as any);
+    if (data) {
+      // Fetch admin and artist user IDs to exclude from customer list
+      const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+      const adminUserIds = new Set((roles || []).filter(r => r.role === "admin" || r.role === "shop_admin").map(r => r.user_id));
+      const { data: artists } = await supabase.from("artists").select("auth_user_id");
+      const artistUserIds = new Set((artists || []).filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id));
+      
+      const filtered = data.filter((c: any) => !adminUserIds.has(c.user_id) && !artistUserIds.has(c.user_id));
+      setCustomers(filtered as any);
+    }
   };
 
   const updateStatus = async (orderId: string, status: string) => {
@@ -792,10 +801,6 @@ const Admin = () => {
       list = list.filter(c => !(c as any).is_manual);
     } else if (customerTab === "manual") {
       list = list.filter(c => (c as any).is_manual);
-    } else if (customerTab === "artist") {
-      // Show artists with auth credentials from artist profiles
-      const artistUserIds = artistProfiles.filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id);
-      list = list.filter(c => artistUserIds.includes(c.user_id));
     }
     return list;
   };
@@ -1460,7 +1465,6 @@ const Admin = () => {
                 { value: "all" as const, label: `All (${customers.length})` },
                 { value: "registered" as const, label: "Registered" },
                 { value: "manual" as const, label: "Manual" },
-                { value: "artist" as const, label: `Artists (${artistProfiles.filter((a: any) => a.auth_user_id).length})` },
               ].map((tab) => (
                 <Button
                   key={tab.value}

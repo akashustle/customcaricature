@@ -138,28 +138,43 @@ const AdminSmartSearch = ({ panelType, tabs, onNavigate }: AdminSmartSearchProps
   const recent = getRecent();
   let flatIdx = -1;
 
+  // Prevent browser autofill
+  useEffect(() => {
+    const el = inputRef.current;
+    if (el) {
+      el.setAttribute("readonly", "true");
+      const timer = setTimeout(() => el.removeAttribute("readonly"), 600);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <div ref={ref} className="relative w-full max-w-lg">
+      {/* Hidden honeypot to trap password managers */}
+      <input type="text" name="fake_email_trap" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="username" />
+      <input type="password" name="fake_pwd_trap2" style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }} tabIndex={-1} autoComplete="current-password" />
       <div className="flex gap-1.5">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             ref={inputRef}
-            type="text"
+            type="search"
+            role="searchbox"
             value={query}
             onChange={e => { setQuery(e.target.value); if (e.target.value) setOpen(true); else setShowRecent(false); }}
             onFocus={() => { if (query && results.length) setOpen(true); else if (!query && recent.length) setShowRecent(true); }}
             onKeyDown={handleKeyDown}
             placeholder="Search everything..."
-            autoComplete="off"
+            autoComplete="new-password"
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
             data-lpignore="true"
             data-form-type="other"
             data-1p-ignore="true"
-            name={`search_${Date.now()}`}
-            id={`search_${Math.random().toString(36).slice(2)}`}
+            aria-autocomplete="none"
+            name="admin_smart_search_query"
+            id="admin_smart_search_input"
             className="flex h-9 w-full rounded-xl border border-border bg-card pl-9 pr-8 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           {query && (

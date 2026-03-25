@@ -82,18 +82,18 @@ const AdminDashboardWidgets = () => {
   };
 
   const widgets: { icon: any; label: string; value: string | number; gradient: string; iconBg: string; trend?: { value: string; up: boolean }; drill?: string }[] = [
-    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), gradient: "from-emerald-500 via-teal-500 to-cyan-500", iconBg: "from-emerald-400 to-teal-500", trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
-    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), gradient: "from-amber-500 via-orange-500 to-red-400", iconBg: "from-amber-400 to-orange-500", drill: "revenue" },
-    { icon: Package, label: "Total Orders", value: stats.totalOrders, gradient: "from-blue-500 via-indigo-500 to-violet-500", iconBg: "from-blue-400 to-indigo-500", drill: "orders" },
-    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, gradient: "from-violet-500 via-purple-500 to-fuchsia-500", iconBg: "from-violet-400 to-purple-500", trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
-    { icon: Clock, label: "Pending", value: stats.pendingOrders, gradient: "from-orange-500 via-red-400 to-pink-500", iconBg: "from-orange-400 to-red-500" },
-    { icon: Star, label: "Delivered", value: stats.completedOrders, gradient: "from-green-500 via-emerald-500 to-teal-500", iconBg: "from-green-400 to-emerald-500" },
-    { icon: Calendar, label: "Total Events", value: stats.totalEvents, gradient: "from-indigo-500 via-blue-500 to-sky-500", iconBg: "from-indigo-400 to-blue-500", drill: "events" },
-    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, gradient: "from-cyan-500 via-sky-500 to-blue-400", iconBg: "from-cyan-400 to-teal-500" },
-    { icon: Users, label: "Customers", value: stats.totalCustomers, gradient: "from-pink-500 via-rose-500 to-red-400", iconBg: "from-pink-400 to-rose-500", trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
-    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, gradient: "from-teal-500 via-emerald-400 to-green-400", iconBg: "from-teal-400 to-cyan-500", drill: "enquiries" },
-    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, gradient: "from-purple-500 via-violet-500 to-indigo-500", iconBg: "from-purple-400 to-violet-500" },
-    { icon: Activity, label: "Sessions", value: stats.activeSessions, gradient: "from-rose-500 via-pink-500 to-fuchsia-500", iconBg: "from-rose-400 to-red-500" },
+    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), gradient: "from-blue-500 to-blue-600", iconBg: "from-blue-500 to-blue-600", trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
+    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), gradient: "from-sky-400 to-blue-500", iconBg: "from-sky-400 to-blue-500", drill: "revenue" },
+    { icon: Package, label: "Total Orders", value: stats.totalOrders, gradient: "from-indigo-500 to-indigo-600", iconBg: "from-indigo-500 to-indigo-600", drill: "orders" },
+    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, gradient: "from-violet-500 to-indigo-500", iconBg: "from-violet-500 to-indigo-500", trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
+    { icon: Clock, label: "Pending", value: stats.pendingOrders, gradient: "from-amber-500 to-orange-500", iconBg: "from-amber-500 to-orange-500" },
+    { icon: Star, label: "Delivered", value: stats.completedOrders, gradient: "from-emerald-500 to-green-500", iconBg: "from-emerald-500 to-green-500" },
+    { icon: Calendar, label: "Total Events", value: stats.totalEvents, gradient: "from-blue-600 to-indigo-600", iconBg: "from-blue-600 to-indigo-600", drill: "events" },
+    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, gradient: "from-cyan-500 to-blue-500", iconBg: "from-cyan-500 to-blue-500" },
+    { icon: Users, label: "Customers", value: stats.totalCustomers, gradient: "from-blue-400 to-sky-500", iconBg: "from-blue-400 to-sky-500", trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
+    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, gradient: "from-teal-500 to-cyan-500", iconBg: "from-teal-500 to-cyan-500", drill: "enquiries" },
+    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, gradient: "from-purple-500 to-indigo-500", iconBg: "from-purple-500 to-indigo-500" },
+    { icon: Activity, label: "Sessions", value: stats.activeSessions, gradient: "from-slate-500 to-gray-600", iconBg: "from-slate-500 to-gray-600" },
   ];
 
   return (

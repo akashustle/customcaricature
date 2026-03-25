@@ -256,6 +256,7 @@ const AdminSessionsLog = () => {
       <Tabs value={sessionTab} onValueChange={setSessionTab}>
         <TabsList className="w-full mb-4 flex-wrap">
           <TabsTrigger value="admins" className="flex-1 font-sans"><Users className="w-4 h-4 mr-1" />Admins</TabsTrigger>
+          <TabsTrigger value="artists" className="flex-1 font-sans"><Tag className="w-4 h-4 mr-1" />Artist Login</TabsTrigger>
           <TabsTrigger value="sessions" className="flex-1 font-sans"><Globe className="w-4 h-4 mr-1" />Sessions</TabsTrigger>
           {isMainAdmin && <TabsTrigger value="requests" className="flex-1 font-sans"><Send className="w-4 h-4 mr-1" />Requests{requests.filter(r => r.status === "pending").length > 0 ? ` (${requests.filter(r => r.status === "pending").length})` : ""}</TabsTrigger>}
           <TabsTrigger value="security" className="flex-1 font-sans"><ShieldOff className="w-4 h-4 mr-1" />Security</TabsTrigger>
@@ -361,6 +362,11 @@ const AdminSessionsLog = () => {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* Artist Login Tab */}
+        <TabsContent value="artists">
+          <ArtistLoginList isMainAdmin={isMainAdmin} />
         </TabsContent>
 
         {/* Sessions Tab */}
@@ -517,6 +523,81 @@ const AdminSessionsLog = () => {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+// Artist Login List sub-component
+const ArtistLoginList = ({ isMainAdmin }: { isMainAdmin: boolean }) => {
+  const [artists, setArtists] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchArtists();
+    const ch = supabase.channel("artist-login-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "artists" }, fetchArtists)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  const fetchArtists = async () => {
+    const { data } = await supabase.from("artists").select("id, name, email, mobile, auth_user_id, created_at");
+    if (data) {
+      // Fetch profiles for artists with auth accounts
+      const withAuth = data.filter((a: any) => a.auth_user_id);
+      const profileIds = withAuth.map((a: any) => a.auth_user_id);
+      let profiles: any[] = [];
+      if (profileIds.length > 0) {
+        const { data: pData } = await supabase.from("profiles").select("user_id, full_name, email, mobile, avatar_url").in("user_id", profileIds);
+        profiles = pData || [];
+      }
+      setArtists(data.map((a: any) => ({
+        ...a,
+        profile: profiles.find((p: any) => p.user_id === a.auth_user_id),
+      })));
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <h3 className="font-display text-lg font-bold flex items-center gap-2">
+        <Tag className="w-5 h-5 text-primary" /> Artist Logins ({artists.filter(a => a.auth_user_id).length})
+      </h3>
+      {artists.filter(a => a.auth_user_id).length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground font-sans">No artist login accounts created yet</p>
+          </CardContent>
+        </Card>
+      ) : (
+        artists.filter(a => a.auth_user_id).map(artist => (
+          <Card key={artist.id}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-sans font-semibold">{artist.name}</p>
+                  <p className="text-xs text-muted-foreground font-sans">{artist.email || artist.profile?.email || "No email"}</p>
+                  <p className="text-xs text-muted-foreground font-sans">📱 {artist.mobile || artist.profile?.mobile || "N/A"}</p>
+                  <p className="text-xs text-muted-foreground font-sans">Created: {new Date(artist.created_at).toLocaleDateString("en-IN")}</p>
+                </div>
+                <Badge className="bg-primary/10 text-primary border-none">Artist</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))
+      )}
+      {artists.filter(a => !a.auth_user_id).length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold text-muted-foreground mb-2">Artists without Login ({artists.filter(a => !a.auth_user_id).length})</h4>
+          {artists.filter(a => !a.auth_user_id).map(artist => (
+            <Card key={artist.id} className="mb-2 opacity-60">
+              <CardContent className="p-3">
+                <p className="text-sm font-sans">{artist.name} — <span className="text-muted-foreground">No login credentials</span></p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

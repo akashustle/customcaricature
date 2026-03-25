@@ -113,23 +113,48 @@ export const useAdminVoiceListener = () => {
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const listeningToRef = useRef<string | null>(null);
   const [listeningTo, setListeningTo] = useState<string | null>(null);
   const [status, setStatus] = useState<StreamStatus>("idle");
 
+  const doCleanup = useCallback(() => {
+    try {
+      if (channelRef.current && listeningToRef.current) {
+        channelRef.current.send({ type: "broadcast", event: "stop", payload: {} });
+      }
+    } catch {}
+    audioRef.current?.pause();
+    audioRef.current = null;
+    pcRef.current?.close();
+    pcRef.current = null;
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+    listeningToRef.current = null;
+    setListeningTo(null);
+    setStatus("idle");
+  }, []);
+
   const startListening = useCallback(async (targetUserId: string) => {
-    // Cleanup previous
-    stopListening();
+    // Always cleanup previous connection first
+    doCleanup();
+
+    // Small delay to ensure channel cleanup completes
+    await new Promise(r => setTimeout(r, 300));
 
     setStatus("connecting");
     setListeningTo(targetUserId);
+    listeningToRef.current = targetUserId;
 
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     pcRef.current = pc;
 
-    // We need to add a transceiver to receive audio
     pc.addTransceiver("audio", { direction: "recvonly" });
 
-    const signalingCh = supabase.channel(`voice-signal-${targetUserId}`);
+    // Use a unique channel name to avoid conflicts
+    const channelName = `voice-signal-${targetUserId}`;
+    const signalingCh = supabase.channel(channelName, { config: { broadcast: { self: false } } });
     channelRef.current = signalingCh;
 
     pc.ontrack = (e) => {
@@ -148,13 +173,13 @@ export const useAdminVoiceListener = () => {
 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
-        stopListening();
+        doCleanup();
       }
     };
 
     signalingCh.on("broadcast", { event: "answer" }, async ({ payload }) => {
       try {
-        if (pcRef.current) {
+        if (pcRef.current && pcRef.current.signalingState !== "closed") {
           await pcRef.current.setRemoteDescription(new RTCSessionDescription(payload.sdp));
         }
       } catch (err) {
@@ -164,7 +189,7 @@ export const useAdminVoiceListener = () => {
 
     signalingCh.on("broadcast", { event: "ice-candidate-user" }, async ({ payload }) => {
       try {
-        if (pcRef.current && payload.candidate) {
+        if (pcRef.current && pcRef.current.signalingState !== "closed" && payload.candidate) {
           await pcRef.current.addIceCandidate(new RTCIceCandidate(payload.candidate));
         }
       } catch (err) {
@@ -174,29 +199,16 @@ export const useAdminVoiceListener = () => {
 
     await signalingCh.subscribe();
 
-    // Create offer
+    // Create offer after subscribe completes
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    // Send offer to user
     signalingCh.send({ type: "broadcast", event: "offer", payload: { sdp: offer } });
-  }, []);
+  }, [doCleanup]);
 
   const stopListening = useCallback(() => {
-    if (channelRef.current && listeningTo) {
-      channelRef.current.send({ type: "broadcast", event: "stop", payload: {} });
-    }
-    audioRef.current?.pause();
-    audioRef.current = null;
-    pcRef.current?.close();
-    pcRef.current = null;
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-    setListeningTo(null);
-    setStatus("idle");
-  }, [listeningTo]);
+    doCleanup();
+  }, [doCleanup]);
 
   return { startListening, stopListening, listeningTo, status };
 };
