@@ -114,46 +114,6 @@ const getMonthKey = (date: Date) => `${date.getFullYear()}-${String(date.getMont
 const formatMonthLabel = (monthKey: string) => { const [y, m] = monthKey.split("-"); return `${MONTH_NAMES[Number(m) - 1]} ${y}`; };
 const matchesMonth = (dateValue: string, monthKey: string) => getMonthKey(new Date(dateValue)) === monthKey;
 const parseCurrencyValue = (value: string) => Number((value || "").replace(/[^\d.-]/g, "")) || 0;
-const isSheetEventRow = (row: string[]) => row.slice(1).some((cell) => String(cell || "").trim().length > 0);
-
-const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] => {
-  return Object.entries(tabs).flatMap(([tabTitle, rows]) => {
-    const summary = rows || [];
-    const tabMonthKey = (() => {
-      const match = tabTitle.trim().match(/^([A-Za-z]+)\s+(\d{4})$/);
-      if (!match) return null;
-      const monthIndex = MONTH_NAMES.findIndex((month) => month.toLowerCase() === match[1].toLowerCase());
-      return monthIndex >= 0 ? `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}` : null;
-    })();
-
-    // New structure: row 0 = header, data starts at row 1
-    return summary.slice(1).flatMap((rawRow) => {
-      const row = Array.from({ length: 21 }, (_, index) => String(rawRow?.[index] || "").trim());
-      if (!row.some((cell) => cell.length > 0)) return [];
-
-      return [{
-        tabTitle, monthKey: tabMonthKey,
-        dateLabel: row[2], // Event Date
-        venue: row[7], // Event Location
-        time: row[11], // Duration
-        artist: row[16], // Artist Assigned
-        payment: row[15], // Payment Status
-        pending: row[14], // Remaining Amount
-        bookingId: row[0], // Booking ID
-        clientName: row[3], // Customer Name
-        mobile: row[4], // Phone Number
-        email: row[5], // Email ID
-        city: row[7], // Location
-        state: "",
-        eventType: row[6], // Event Type
-        bookingStatus: row[17], // Booking Status
-        totalPrice: row[12], // Total Amount
-        source: (row[18] || "website").toLowerCase(),
-        address: row[19], // Notes
-      } satisfies ParsedSheetEvent];
-    });
-  });
-};
 
 /* ─────────── 3D Flash Card Widget ─────────── */
 const FlashWidget = ({ title, value, icon: Icon, note, trend }: {
