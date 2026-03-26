@@ -12,6 +12,8 @@ const ACTIONS = [
   { id: "add-order", icon: Package, label: "Add Order", color: "bg-blue-500" },
   { id: "add-event", icon: Calendar, label: "Add Event", color: "bg-emerald-500" },
   { id: "add-enquiry", icon: MessageCircle, label: "Add Lead", color: "bg-violet-500" },
+  { id: "add-user", icon: UserPlus, label: "Add User", color: "bg-cyan-500" },
+  { id: "assign-artist", icon: Palette, label: "Assign Artist", color: "bg-rose-500" },
   { id: "send-notification", icon: Bell, label: "Send Reminder", color: "bg-amber-500" },
 ];
 
