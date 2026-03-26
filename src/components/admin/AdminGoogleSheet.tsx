@@ -96,10 +96,10 @@ const CHART_COLORS = [
   "hsl(var(--accent))",
   "hsl(var(--secondary))",
   "hsl(var(--muted-foreground))",
-  "#6366f1",
-  "#f59e0b",
-  "#10b981",
-  "#ef4444",
+  "hsl(var(--primary) / 0.7)",
+  "hsl(var(--accent) / 0.75)",
+  "hsl(var(--secondary) / 0.75)",
+  "hsl(var(--foreground) / 0.55)",
 ];
 
 const initialManualEvent: ManualEventForm = {
@@ -131,6 +131,14 @@ const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] 
       if (row[0]) currentDate = row[0];
       if (!currentDate || !isSheetEventRow(row)) return [];
 
+      const inferredSource = (() => {
+        if (row[15]) return row[15].toLowerCase();
+        const venueText = row[1].toLowerCase();
+        if (venueText.includes("web pushed") || row[6]) return "website";
+        if (venueText.includes("manual")) return "manual";
+        return "manual";
+      })();
+
       return [{
         tabTitle,
         monthKey: tabMonthKey,
@@ -149,7 +157,7 @@ const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] 
         eventType: row[12],
         bookingStatus: row[13],
         totalPrice: row[14],
-        source: row[15] || "manual",
+        source: inferredSource,
         address: row[16],
       } satisfies ParsedSheetEvent];
     });
@@ -175,7 +183,7 @@ const FlashWidget = ({ title, value, icon: Icon, note, color = "primary", trend 
           <div className="flex items-center gap-1.5">
             {trend && (
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                trend.startsWith("+") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                trend.startsWith("+") ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
               }`}>{trend}</span>
             )}
             <p className="text-[11px] text-muted-foreground">{note}</p>
