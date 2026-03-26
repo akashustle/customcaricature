@@ -377,7 +377,8 @@ const Index = () => {
         </motion.div>
       </section>
 
-      {/* Dynamic Sections — rendered in admin-configured order */}
+      {/* Dynamic Sections — rendered in admin-configured order, lazy loaded */}
+      <Suspense fallback={null}>
       {sectionOrder.map((sectionId) => {
         const renderHiddenMessage = () => {
           const msg = getSectionMessage(sectionId);
