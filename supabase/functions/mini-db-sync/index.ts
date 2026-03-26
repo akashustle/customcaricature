@@ -180,7 +180,7 @@ async function syncPaymentHistory(token: string, sheetId: string, tabs: any[], s
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.13, g: 0.55, b: 0.13 }, [40, 120, 120, 100, 100, 120, 160, 160, 120, 120, 80, 200, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.16, g: 0.62, b: 0.28 }, [40, 280, 130, 110, 120, 130, 200, 200, 130, 130, 90, 240, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
