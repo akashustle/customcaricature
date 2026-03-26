@@ -973,7 +973,7 @@ const WorkshopAdmin = () => {
       </Dialog>
 
       {/* Content */}
-      <div className="flex-1 p-3 lg:p-6 pt-[100px] lg:pt-6 pb-6 overflow-auto">
+      <div className="flex-1 p-3 lg:p-6 pt-[68px] lg:pt-6 pb-24 lg:pb-6 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
