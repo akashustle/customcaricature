@@ -960,6 +960,7 @@ const Admin = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
           {/* Page transition wrapper */}
+          <Suspense fallback={<AdminTabLoader />}>
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 8 }}
