@@ -130,9 +130,26 @@ const WorkshopAdmin = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem("workshop_admin");
-    if (!stored) { navigate("/cccworkshop2006"); return; }
-    setAdminInfo(JSON.parse(stored));
-    fetchAll();
+    if (stored) {
+      setAdminInfo(JSON.parse(stored));
+      fetchAll();
+    } else {
+      // Check if user has an active admin session from main admin (shared auth)
+      const checkSharedAuth = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { navigate("/cccworkshop2006"); return; }
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin");
+        if (!roles || (roles as any[]).length === 0) { navigate("/cccworkshop2006"); return; }
+        // User is admin, auto-set workshop_admin
+        const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
+        const info = { id: user.id, email: profile?.email || user.email, name: profile?.full_name || "Admin" };
+        localStorage.setItem("workshop_admin", JSON.stringify(info));
+        setAdminInfo(info);
+        fetchAll();
+      };
+      checkSharedAuth();
+      return; // Skip channel setup until auth verified
+    }
     const ch = supabase.channel("ws-admin")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_users" }, fetchUsers)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
