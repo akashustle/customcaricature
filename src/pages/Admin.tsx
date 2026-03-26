@@ -887,7 +887,7 @@ const Admin = () => {
       {/* Chat button moved to header */}
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+      <div className="flex-1 min-h-screen admin-content-premium pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
         <AdminOfflineBanner />
         <AdminLocationPrompt />
         <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
