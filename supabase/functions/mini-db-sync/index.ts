@@ -159,7 +159,7 @@ async function syncUsers(token: string, sheetId: string, tabs: any[], supabase: 
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.1, g: 0.46, b: 0.82 }, [40, 120, 150, 200, 120, 120, 80, 80, 100, 100, 80, 200, 40, 60, 100, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.18, g: 0.5, b: 0.88 }, [40, 280, 160, 220, 130, 130, 90, 80, 110, 110, 90, 240, 50, 70, 110, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
