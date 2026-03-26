@@ -269,16 +269,35 @@ async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, ta
   await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
 }
 
+async function fetchArtistNames(supabase: any, eventId: string): Promise<string[]> {
+  try {
+    const { data } = await supabase
+      .from("event_artist_assignments")
+      .select("artist_id, artists(name)")
+      .eq("event_id", eventId);
+    if (data && data.length > 0) {
+      return data.map((a: any) => a.artists?.name).filter(Boolean);
+    }
+  } catch (_) {}
+  return [];
+}
+
 async function pushEventToSheet(
   accessToken: string, spreadsheetId: string,
   tabs: {title: string, sheetId: number}[],
-  event: any, label: string
+  event: any, label: string, supabase?: any
 ) {
   const tabName = getMonthTabName(event.event_date);
   const tab = findTab(tabs, tabName);
   if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
 
   await ensureSheetHeaders(accessToken, spreadsheetId, tab.title);
+
+  // Fetch artist names if supabase client available
+  let artistNames: string[] = [];
+  if (supabase && event.id) {
+    artistNames = await fetchArtistNames(supabase, event.id);
+  }
 
   const dayNumber = new Date(event.event_date).getDate();
   const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:Q500`);
@@ -294,7 +313,7 @@ async function pushEventToSheet(
   }
 
   if (existingRow > 0) {
-    const row = formatSheetRow(event, !!rows[existingRow - 1]?.[0]?.toString().trim(), label);
+    const row = formatSheetRow(event, !!rows[existingRow - 1]?.[0]?.toString().trim(), label, artistNames);
     await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}:Q${existingRow}`, [row]);
     return { tab: tab.title, action: "updated", row: existingRow };
   }
@@ -303,13 +322,13 @@ async function pushEventToSheet(
   if (dateRow < 0) throw new Error(`Date ${dayNumber} not found in ${tab.title}`);
 
   if (isEmpty) {
-    const row = formatSheetRow(event, true, label);
+    const row = formatSheetRow(event, true, label, artistNames);
     row[0] = String(dayNumber);
     await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}:Q${dateRow}`, [row]);
     return { tab: tab.title, action: "written", row: dateRow };
   } else {
     await insertRowAfter(accessToken, spreadsheetId, tab.sheetId, lastGroupRow);
-    const row = formatSheetRow(event, false, label);
+    const row = formatSheetRow(event, false, label, artistNames);
     await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}:Q${lastGroupRow + 1}`, [row]);
     return { tab: tab.title, action: "inserted", row: lastGroupRow + 1 };
   }
