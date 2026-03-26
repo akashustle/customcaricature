@@ -269,7 +269,7 @@ async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, ta
   await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
   // Auto-resize columns with proper widths
   if (tabSheetId !== undefined) {
-    const colWidths = [50, 120, 130, 150, 160, 110, 100, 140, 120, 180, 90, 90, 100, 110, 100, 80, 200];
+    const colWidths = [60, 140, 150, 170, 180, 130, 280, 160, 140, 210, 110, 110, 130, 130, 120, 100, 240];
     const requests: any[] = [];
     colWidths.forEach((px, i) => {
       requests.push({

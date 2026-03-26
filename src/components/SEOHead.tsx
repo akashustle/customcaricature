@@ -11,7 +11,7 @@ interface SEOHeadProps {
 
 const SITE_NAME = "Creative Caricature Club";
 const DEFAULT_DESC = "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online with Creative Caricature Club. India's #1 caricature studio.";
-const BASE_URL = "https://customcaricature.lovable.app";
+const BASE_URL = "https://portal.creativecaricatureclub.com";
 
 const SEOHead = ({
   title,
