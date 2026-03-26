@@ -965,7 +965,7 @@ const Admin = () => {
           >
 
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard" forceMount={activeTab === "dashboard" ? true : undefined} className={activeTab !== "dashboard" ? "hidden" : ""}>
+          <TabsContent value="dashboard">
             <AdminDashboardPremium onNavigate={setActiveTab} />
           </TabsContent>
 
