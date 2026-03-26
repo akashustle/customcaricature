@@ -48,6 +48,7 @@ const NAV_SECTIONS = [
       { id: "ai-intelligence", icon: Zap, label: "AI Insights" },
       { id: "revenue-target", icon: Target, label: "Targets" },
       { id: "calendar", icon: CalendarDays, label: "Calendar" },
+      { id: "heatmap", icon: Map, label: "Heatmap" },
     ],
   },
   {
