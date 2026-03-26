@@ -90,7 +90,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
                 className="h-full rounded-full bg-primary/50"
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
-                transition={{ duration: 2, ease: "easeInOut" }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
               />
             </div>
           </motion.div>
