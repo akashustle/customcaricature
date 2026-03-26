@@ -540,7 +540,7 @@ serve(async (req) => {
     // APPEND EVENT (from DB trigger)
     if (action === "append_event" && event_data) {
       try {
-        await pushEventToSheet(accessToken, sheetId, tabs, event_data, "web pushed");
+        await pushEventToSheet(accessToken, sheetId, tabs, event_data, "web pushed", supabase);
         if (event_data.id) {
           await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_data.id);
         }
