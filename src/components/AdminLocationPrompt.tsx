@@ -33,11 +33,10 @@ const AdminLocationPrompt = () => {
     );
   };
 
-  if (status === "granted" || dismissed) return null;
-
   return (
     <AnimatePresence>
-      <motion.div
+      {status !== "granted" && !dismissed && (
+      <motion.div key="admin-loc-prompt"
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -40, opacity: 0 }}
@@ -55,6 +54,7 @@ const AdminLocationPrompt = () => {
           <X className="w-3.5 h-3.5" />
         </button>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 };

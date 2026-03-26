@@ -137,11 +137,11 @@ const PermissionGate = () => {
     [locationStatus, notificationStatus, micStatus, cameraStatus]
   );
 
-  if (!visible) return null;
-
   return (
     <AnimatePresence>
+      {visible && (
       <motion.div
+        key="permission-gate"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -219,6 +219,7 @@ const PermissionGate = () => {
           </Card>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 };
