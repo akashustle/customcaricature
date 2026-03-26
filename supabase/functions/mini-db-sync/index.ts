@@ -78,20 +78,51 @@ async function formatSheet(token: string, spreadId: string, sheetId: number, hea
   colWidths.forEach((px, i) => {
     requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: i, endIndex: i + 1 }, properties: { pixelSize: px }, fields: "pixelSize" } });
   });
+  // Header row: vibrant color, bold white text, center-aligned
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
-      fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment)"
+      cell: { userEnteredFormat: {
+        backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
+        textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
+        horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
+        wrapStrategy: "WRAP",
+      } },
+      fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy)"
+    }
+  });
+  // Header row height
+  requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "ROWS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 36 }, fields: "pixelSize" } });
+  // Data rows: wrap text, vertical middle
+  requests.push({
+    repeatCell: {
+      range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
+      cell: { userEnteredFormat: {
+        verticalAlignment: "MIDDLE",
+        wrapStrategy: "CLIP",
+        textFormat: { fontSize: 10 },
+      } },
+      fields: "userEnteredFormat(verticalAlignment,wrapStrategy,textFormat.fontSize)"
     }
   });
   requests.push({ updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: frozenRows } }, fields: "gridProperties.frozenRowCount" } });
-  // Alternate row colors
+  // Alternate row banding with soft pastel
   requests.push({
     addBanding: {
       bandedRange: { sheetId, range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-        rowProperties: { firstBandColor: { red: 1, green: 1, blue: 1 }, secondBandColor: { red: 0.95, green: 0.96, blue: 0.98 } }
+        rowProperties: {
+          headerColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
+          firstBandColor: { red: 1, green: 1, blue: 1 },
+          secondBandColor: { red: 0.94, green: 0.96, blue: 0.99 }
+        }
       }
+    }
+  });
+  // Borders on header
+  requests.push({
+    updateBorders: {
+      range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
+      bottom: { style: "SOLID_MEDIUM", color: { red: headerColor.r * 0.7, green: headerColor.g * 0.7, blue: headerColor.b * 0.7 } }
     }
   });
   try {
@@ -128,7 +159,7 @@ async function syncUsers(token: string, sheetId: string, tabs: any[], supabase: 
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.1, g: 0.46, b: 0.82 }, [40, 120, 150, 200, 120, 120, 80, 80, 100, 100, 80, 200, 40, 60, 100, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.18, g: 0.5, b: 0.88 }, [40, 280, 160, 220, 130, 130, 90, 80, 110, 110, 90, 240, 50, 70, 110, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -149,7 +180,7 @@ async function syncPaymentHistory(token: string, sheetId: string, tabs: any[], s
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.13, g: 0.55, b: 0.13 }, [40, 120, 120, 100, 100, 120, 160, 160, 120, 120, 80, 200, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.16, g: 0.62, b: 0.28 }, [40, 280, 130, 110, 120, 130, 200, 200, 130, 130, 90, 240, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -176,7 +207,7 @@ async function syncEvents(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.6, g: 0.2, b: 0.8 }, [40, 120, 140, 120, 180, 120, 100, 80, 80, 100, 100, 80, 80, 120, 200, 80, 50, 100, 100, 100, 100, 100, 80, 50, 50, 50, 200, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.55, g: 0.24, b: 0.86 }, [40, 280, 150, 130, 200, 130, 110, 90, 90, 120, 110, 90, 90, 140, 240, 90, 60, 110, 110, 110, 110, 110, 90, 60, 60, 60, 240, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -200,7 +231,7 @@ async function syncOrders(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.85, g: 0.33, b: 0.1 }, [40, 120, 140, 180, 120, 120, 80, 50, 80, 100, 140, 80, 100, 200, 100, 80, 80, 200, 160, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.9, g: 0.45, b: 0.15 }, [40, 280, 160, 200, 130, 130, 90, 60, 100, 120, 200, 90, 110, 240, 110, 90, 90, 240, 170, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -224,7 +255,7 @@ async function syncEnquiries(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.8, g: 0.6, b: 0.0 }, [40, 100, 140, 120, 180, 120, 100, 120, 100, 100, 100, 80, 80, 80, 80, 80, 80, 80, 200, 100, 60, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.55, b: 0.08 }, [40, 110, 150, 130, 200, 130, 110, 130, 110, 120, 110, 90, 90, 90, 90, 90, 90, 90, 240, 110, 70, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -299,7 +330,7 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z100`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, dashboardData);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.25, g: 0.4, b: 0.7 }, [200, 140, 200, 140]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.22, g: 0.52, b: 0.72 }, [220, 160, 220, 160]);
   return { sheet: tabTitle, rows: dashboardData.length };
 }
 
@@ -355,7 +386,7 @@ async function syncWorkshopData(token: string, sheetId: string, tab: any, tabTit
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.9, g: 0.3, b: 0.5 }, [40, 60, 140, 180, 120, 40, 60, 100, 80, 80, 80, 120, 100, 80, 120, 80, 80, 100, 80, 80, 140, 200, 80, 60, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.25, b: 0.45 }, [40, 70, 150, 200, 130, 50, 70, 110, 90, 90, 90, 130, 110, 100, 140, 100, 90, 110, 100, 100, 200, 240, 80, 70, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
