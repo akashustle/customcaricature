@@ -92,12 +92,19 @@ const PageLoader = () => (
   </div>
 );
 
-const OneSignalInit = () => {
-  useOneSignal();
-  return null;
-};
+const DeferredInit = memo(() => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestIdleCallback ? requestIdleCallback(() => setReady(true)) : setTimeout(() => setReady(true), 2000);
+    return () => { if (typeof cancelIdleCallback !== "undefined") cancelIdleCallback(id as number); };
+  }, []);
+  if (!ready) return null;
+  return <DeferredInitInner />;
+});
+DeferredInit.displayName = "DeferredInit";
 
-const WebPushInit = () => {
+const DeferredInitInner = () => {
+  useOneSignal();
   useWebPush();
   return null;
 };
