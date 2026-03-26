@@ -733,7 +733,7 @@ const AdminGoogleSheet = () => {
                       <AnimatePresence>
                         {expandedEventId === event.id && (
                           <TableRow key={`${event.id}-detail`}>
-                            <TableCell colSpan={11} className="p-0">
+                            <TableCell colSpan={12} className="p-0">
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
