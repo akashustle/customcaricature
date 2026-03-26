@@ -25,6 +25,7 @@ const PermissionGate = () => {
 
   const isAdminRoute = typeof window !== "undefined" && ADMIN_ROUTES.some(r => window.location.pathname.startsWith(r));
   const isStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
+  const requiredPermissionsGranted = locationStatus === "granted" && (notificationStatus === "granted" || notificationStatus === "unsupported");
 
   // Check existing permissions immediately on mount
   useEffect(() => {
@@ -58,7 +59,7 @@ const PermissionGate = () => {
     if (done) return;
 
     // If all already granted, mark done and skip — do NOT re-show
-    const allGranted = (typeof Notification !== "undefined" && Notification.permission === "granted") && locationStatus === "granted";
+    const allGranted = locationStatus === "granted" && (typeof Notification === "undefined" || Notification.permission === "granted");
     if (allGranted) {
       localStorage.setItem(GATE_KEY, "done");
       setVisible(false);
@@ -74,6 +75,12 @@ const PermissionGate = () => {
     }, delayMs);
     return () => clearTimeout(timer);
   }, [user?.id, isAdminRoute, isStandalone, locationStatus]);
+
+  useEffect(() => {
+    if (!requesting && visible && requiredPermissionsGranted) {
+      completeGate();
+    }
+  }, [requesting, visible, requiredPermissionsGranted]);
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
@@ -134,12 +141,25 @@ const PermissionGate = () => {
       })(),
     ]);
 
+    const finalLocationStatus = await (async () => {
+      if (!navigator.permissions) return locationStatus;
+      try {
+        const result = await navigator.permissions.query({ name: "geolocation" });
+        return result.state;
+      } catch {
+        return locationStatus;
+      }
+    })();
+
+    const finalNotificationStatus = typeof Notification === "undefined" ? "unsupported" : Notification.permission;
+    setLocationStatus(finalLocationStatus);
+    setNotificationStatus(finalNotificationStatus);
     setCurrentStep(null);
     setRequesting(false);
-    // Small delay to let state settle before hiding
-    setTimeout(() => {
+
+    if (finalLocationStatus === "granted" && (finalNotificationStatus === "granted" || finalNotificationStatus === "unsupported")) {
       completeGate();
-    }, 300);
+    }
   };
 
   const statuses = useMemo(
