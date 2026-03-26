@@ -153,6 +153,34 @@ function formatTime(t: string): string {
   return t;
 }
 
+function parseSheetEventCount(rows: any[][]): number {
+  const value = rows?.[1]?.[1];
+  const parsed = Number.parseInt(String(value ?? "0"), 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function parseMonthKeyFromTab(title: string): string | null {
+  const normalized = title.trim().toUpperCase();
+  const match = normalized.match(/^([A-Z]+)\s+(\d{4})$/);
+  if (!match) return null;
+  const monthIndex = MONTHS.indexOf(match[1]);
+  if (monthIndex < 0) return null;
+  return `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}`;
+}
+
+async function getTabSummary(accessToken: string, sheetId: string, tab: { title: string; sheetId: number }) {
+  const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:B2`);
+  const rows = data.values || [];
+
+  return {
+    title: tab.title,
+    sheetId: tab.sheetId,
+    normalizedTitle: tab.title.trim(),
+    monthKey: parseMonthKeyFromTab(tab.title),
+    eventCount: parseSheetEventCount(rows),
+  };
+}
+
 // Format event for the sheet row: [date/empty, venue, time, artist, payment, pending, bookingId]
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
@@ -270,6 +298,50 @@ serve(async (req) => {
     const body = await req.json();
     const { action, event_data, event_id } = body;
     const supabase = getSupabaseClient();
+
+    // READ overview only (lightweight for admin UI)
+    if (action === "read_overview") {
+      const summaries = [];
+      for (const tab of tabs) {
+        try {
+          summaries.push(await getTabSummary(accessToken, sheetId, tab));
+        } catch (_) {
+          summaries.push({
+            title: tab.title,
+            sheetId: tab.sheetId,
+            normalizedTitle: tab.title.trim(),
+            monthKey: parseMonthKeyFromTab(tab.title),
+            eventCount: 0,
+          });
+        }
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        tabNames: tabs.map((t) => t.title),
+        tabSummaries: summaries,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // READ single tab
+    if (action === "read_tab") {
+      const requestedTab = typeof body.tab_name === "string" ? body.tab_name : "";
+      if (!requestedTab) throw new Error("Tab name is required");
+
+      const tab = findTab(tabs, requestedTab);
+      if (!tab) throw new Error(`Sheet tab "${requestedTab}" not found`);
+
+      const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:G500`);
+      return new Response(JSON.stringify({
+        success: true,
+        tabName: tab.title,
+        rows: data.values || [],
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // READ all tabs
     if (action === "read") {
