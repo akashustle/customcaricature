@@ -1912,6 +1912,10 @@ const Admin = () => {
             <AdminGoogleSheet />
           </TabsContent>
 
+          <TabsContent value="mini-database">
+            <Suspense fallback={<AdminTabLoader />}><AdminMiniDatabase /></Suspense>
+          </TabsContent>
+
           <TabsContent value="pages">
             <AdminPages />
           </TabsContent>
