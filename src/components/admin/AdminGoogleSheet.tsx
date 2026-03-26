@@ -438,10 +438,9 @@ const AdminGoogleSheet = () => {
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie data={analytics.sourceChart} dataKey="value" nameKey="name" innerRadius={54} outerRadius={84}>
-                  {analytics.sourceChart.map((_, index) => <cell key={index} />)}
+                  {analytics.sourceChart.map((_, index) => <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                 </Pie>
-                {analytics.sourceChart.map((_, index) => <></>)}
-              </PieChart>
+                              </PieChart>
             </ResponsiveContainer>
             <div className="mt-3 flex flex-wrap gap-3">
               {analytics.sourceChart.map((item, index) => (
