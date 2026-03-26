@@ -386,7 +386,7 @@ async function syncWorkshopData(token: string, sheetId: string, tab: any, tabTit
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.9, g: 0.3, b: 0.5 }, [40, 60, 140, 180, 120, 40, 60, 100, 80, 80, 80, 120, 100, 80, 120, 80, 80, 100, 80, 80, 140, 200, 80, 60, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.25, b: 0.45 }, [40, 70, 150, 200, 130, 50, 70, 110, 90, 90, 90, 130, 110, 100, 140, 100, 90, 110, 100, 100, 200, 240, 80, 70, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
