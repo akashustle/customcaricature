@@ -18,6 +18,7 @@ type SiteSettings = {
   app_download_link: { enabled: boolean };
   admin_secret_code: { code: string; enabled: boolean };
   live_chat_visible: { enabled: boolean };
+  auto_assign_artist: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
