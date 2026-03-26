@@ -1880,6 +1880,10 @@ const Admin = () => {
             <AdminHomepageControl />
           </TabsContent>
 
+          <TabsContent value="explore-editor">
+            <AdminExploreEditor />
+          </TabsContent>
+
           <TabsContent value="files">
             <AdminFileExplorer />
           </TabsContent>
