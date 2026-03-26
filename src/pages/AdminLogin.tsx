@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone, Shield, Sparkles } from "lucide-react";
+import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone, Shield, Sparkles, Download } from "lucide-react";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
@@ -607,8 +607,21 @@ const AdminLogin = () => {
               </AnimatePresence>
             </div>
 
-            <div className="text-center">
-              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium" style={{ color: "#94A3B8" }}>← Back to Home</button>
+            <div className="text-center space-y-3">
+              <button onClick={() => navigate("/cccworkshop2006")} className="text-xs font-semibold transition-colors block mx-auto" style={{ color: BRAND.accent }}>
+                🎓 Switch to Workshop Admin
+              </button>
+              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
+              <button
+                onClick={() => {
+                  const p = (window as any).__pwaInstallPrompt;
+                  if (p) { p.prompt(); } else { toast({ title: "Open in browser & use 'Add to Home Screen'", description: "For the best admin experience, install the CCC Admin app" }); }
+                }}
+                className="text-xs font-bold flex items-center gap-1.5 mx-auto px-4 py-2 rounded-full border transition-all hover:shadow-md"
+                style={{ color: BRAND.primary, borderColor: BRAND.light, background: BRAND.cream }}
+              >
+                <Download className="w-3.5 h-3.5" /> Install Admin App
+              </button>
             </div>
           </div>
         </motion.div>

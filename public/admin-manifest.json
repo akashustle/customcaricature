@@ -1,15 +1,16 @@
 {
-  "name": "CCC Admin Panel",
+  "name": "CCC Admin Console",
   "short_name": "CCC Admin",
   "description": "Creative Caricature Club — Admin Management Console",
   "theme_color": "#1E3A5F",
-  "background_color": "#f8fafc",
+  "background_color": "#0f172a",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
   "start_url": "/customcad75",
-  "id": "/admin",
+  "id": "/admin-panel",
   "categories": ["business", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/admin-icon-512.png",
@@ -25,9 +26,15 @@
   ],
   "shortcuts": [
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
+      "name": "Main Admin",
+      "short_name": "Admin",
       "url": "/admin-panel",
+      "icons": [{"src": "/admin-icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Workshop Admin",
+      "short_name": "Workshop",
+      "url": "/workshop-admin-panel",
       "icons": [{"src": "/admin-icon-192.png", "sizes": "192x192"}]
     },
     {

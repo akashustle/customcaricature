@@ -863,11 +863,17 @@ const Admin = () => {
       <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
         <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-3 md:hidden cursor-pointer" onClick={() => navigate("/")}>
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10">
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+            <div className="flex items-center gap-3 md:hidden">
+              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
+                <img src="/admin-icon-192.png" alt="CCC Admin" className="w-full h-full object-cover" />
               </div>
               <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
+              <button
+                onClick={() => navigate("/workshop-admin-panel")}
+                className="text-[10px] font-bold px-2 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 hover:bg-violet-200 transition-all"
+              >
+                🎓 Workshop
+              </button>
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
