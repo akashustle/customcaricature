@@ -730,6 +730,7 @@ export type Database = {
           mobile: string | null
           name: string
           portfolio_url: string | null
+          secret_code: string | null
           updated_at: string
         }
         Insert: {
@@ -741,6 +742,7 @@ export type Database = {
           mobile?: string | null
           name: string
           portfolio_url?: string | null
+          secret_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -752,6 +754,7 @@ export type Database = {
           mobile?: string | null
           name?: string
           portfolio_url?: string | null
+          secret_code?: string | null
           updated_at?: string
         }
         Relationships: []
