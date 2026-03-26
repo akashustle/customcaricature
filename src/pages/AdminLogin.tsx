@@ -100,7 +100,11 @@ const AdminLogin = () => {
       const { data } = await supabase.from("profiles").select("email, avatar_url").in("email", emails);
       if (data) {
         (data as any[]).forEach((p: any) => {
-          if (p.avatar_url) avatars[p.email] = p.avatar_url;
+          if (p.avatar_url) {
+            // Add cache buster to avoid stale cached images
+            const sep = p.avatar_url.includes("?") ? "&" : "?";
+            avatars[p.email] = `${p.avatar_url}${sep}v=${Date.now()}`;
+          }
         });
       }
       setAdminAvatars(avatars);
