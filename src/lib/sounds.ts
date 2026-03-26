@@ -142,21 +142,3 @@ export const playEnterSound = () => {
     });
   } catch {}
 };
-  try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const now = ctx.currentTime;
-    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, now + i * 0.12);
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.setValueAtTime(0.1, now + i * 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + i * 0.12);
-      osc.stop(now + i * 0.12 + 0.5);
-    });
-  } catch {}
-};
