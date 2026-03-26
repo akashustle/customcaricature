@@ -97,6 +97,7 @@ const MORE_ITEMS = [
     { id: "feature-gating", label: "Feature Gates", icon: ToggleLeft },
   ]},
   { section: "System", items: [
+    { id: "google-sheet", label: "G-Sheet", icon: Globe },
     { id: "automation", label: "Automation", icon: Zap },
     { id: "integrations", label: "Integrations", icon: Shield },
     { id: "maintenance", label: "Maintenance", icon: AlertTriangle },
