@@ -463,8 +463,8 @@ const AdminGoogleSheet = () => {
                   <Sheet className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Google Sheet Sync</CardTitle>
-                  <p className="text-xs text-muted-foreground">Real-time event sync &amp; analytics from sheet data</p>
+                  <CardTitle className="text-lg">Event Bookings Sheet</CardTitle>
+                  <p className="text-xs text-muted-foreground">Live sync with Website Event Booking spreadsheet</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
