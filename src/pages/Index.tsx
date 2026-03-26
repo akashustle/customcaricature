@@ -132,6 +132,7 @@ const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { settings } = useSiteSettings();
   const socialLinks = useSocialLinks();
+  const galleryImages = useGalleryImages();
   const { content } = useHomepageContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
