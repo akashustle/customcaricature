@@ -95,6 +95,7 @@ import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
 import AdminRevenueTargetTracker from "@/components/admin/AdminRevenueTargetTracker";
 import AdminDrillDownDialog from "@/components/admin/AdminDrillDownDialog";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
+import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import AdminReferrals from "@/components/admin/AdminReferrals";
 import AdminCoupons from "@/components/admin/AdminCoupons";
 import AdminMaintenance from "@/components/admin/AdminMaintenance";
