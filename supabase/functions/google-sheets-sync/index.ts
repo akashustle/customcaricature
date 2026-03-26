@@ -145,12 +145,19 @@ function formatPendingAmount(event: any): string {
   return `₹${remaining.toLocaleString("en-IN")}`;
 }
 
+// Strip seconds from time like "16:00:00" → "16:00"
+function formatTime(t: string): string {
+  if (!t) return "";
+  const parts = t.split(":");
+  if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
+  return t;
+}
+
 // Format event for the sheet row: [date/empty, venue, time, artist, payment, pending, bookingId]
-// Column A is left empty when adding as sub-row, or has date number when writing to date row
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
-  const timeStr = event.event_start_time && event.event_end_time
-    ? `${event.event_start_time} - ${event.event_end_time}`
-    : event.event_start_time || "";
+  const startTime = formatTime(event.event_start_time || "");
+  const endTime = formatTime(event.event_end_time || "");
+  const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : startTime;
   const venueName = event.venue_name || "";
   const venueWithLabel = label ? `${venueName} (${label})` : venueName;
   return [
