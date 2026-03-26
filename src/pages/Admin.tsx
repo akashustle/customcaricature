@@ -447,6 +447,12 @@ const Admin = () => {
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
       .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {
+        toast({ title: "📅 Event booking updated" });
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "enquiries" }, (payload) => {
+        toast({ title: "📝 New Enquiry", description: (payload.new as any).name });
+      })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user, authLoading]);
