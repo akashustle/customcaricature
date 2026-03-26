@@ -444,7 +444,7 @@ const Index = () => {
                     <p className="text-muted-foreground font-body">Every stroke tells a story — tap to view fullscreen</p>
                   </motion.div>
                 </div>
-                <InfiniteScrollGallery onImageClick={openLightbox} />
+                <InfiniteScrollGallery images={galleryImages} onImageClick={openLightbox} />
               </section>
             );
           case "what_you_get":
