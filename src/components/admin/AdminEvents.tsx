@@ -118,7 +118,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
         const [endH, endM] = ev.event_end_time.split(":").map(Number);
         const eventEnd = new Date(year, month - 1, day, endH, endM);
         if (now > eventEnd) {
-          await supabase.from("event_bookings").update({ status: "completed" } as any).eq("id", ev.id);
+          await supabase.from("event_bookings").update({ status: "completed", payment_status: "fully_paid" } as any).eq("id", ev.id);
           toast({ title: `Event auto-completed: ${ev.client_name}` });
         }
       });

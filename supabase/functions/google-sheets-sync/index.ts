@@ -181,8 +181,9 @@ function parseMonthKeyFromTab(title: string): string | null {
 
 function formatPaymentStatus(event: any): string {
   const ps = event.payment_status || "pending";
+  const status = event.status || "";
+  if (status === "completed" || ps === "fully_paid" || ps === "full_paid") return `✅ Full Paid ₹${(event.total_price || 0).toLocaleString("en-IN")}`;
   if (ps === "confirmed" || ps === "paid") return `Advance ₹${(event.advance_amount || 0).toLocaleString("en-IN")}`;
-  if (ps === "full_paid") return `Full Paid ₹${(event.total_price || 0).toLocaleString("en-IN")}`;
   return ps.charAt(0).toUpperCase() + ps.slice(1);
 }
 
@@ -197,6 +198,15 @@ function formatTime(t: string): string {
   const parts = t.split(":");
   if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
   return t;
+}
+
+function getTimeLabel(startTime: string): string {
+  if (!startTime) return "Morning";
+  const hour = parseInt(startTime.split(":")[0], 10);
+  if (isNaN(hour)) return "Morning";
+  if (hour < 12) return "Morning";
+  if (hour < 17) return "Afternoon";
+  return "Evening";
 }
 
 function countSheetEvents(rows: any[][]): number {
@@ -218,9 +228,9 @@ function countSheetEvents(rows: any[][]): number {
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
-  const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : startTime;
-  // Venue = full_address or venue_name (NOT client_name)
-  const venueRaw = event.full_address || event.venue_name || event.address || "";
+  const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || getTimeLabel(event.event_start_time || ""));
+  // Venue = city name only (short)
+  const venueRaw = event.city || event.venue_name || "";
   const venueWithLabel = label ? `${venueRaw} (${label})` : venueRaw;
   // Artist count display
   const artistCount = event.artist_count || 1;

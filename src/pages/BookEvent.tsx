@@ -221,9 +221,8 @@ const BookEvent = () => {
       .from("event_bookings")
       .select("id")
       .eq("event_date", dateStr)
-      .eq("city", checkCity)
       .neq("status", "cancelled");
-    const available = (!blocked || blocked.length === 0) && (!existing || existing.length < 2);
+    const available = (!blocked || blocked.length === 0) && (!existing || existing.length < 3);
     setIsAvailable(available);
     setAvailabilityChecked(true);
     setCheckingAvailability(false);
