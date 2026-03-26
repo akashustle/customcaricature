@@ -626,7 +626,7 @@ const AdminGoogleSheet = () => {
                       <TableCell><Badge variant={event.source === "manual" ? "secondary" : "default"} className="text-[10px]">{event.source || "website"}</Badge></TableCell>
                       <TableCell>
                         {event.sheet_pushed ? (
-                          <Badge className="bg-green-100 text-green-700 text-[10px]">✓ Pushed</Badge>
+                          <Badge className="bg-primary/10 text-primary text-[10px]">✓ Pushed</Badge>
                         ) : (
                           <Badge variant="outline" className="text-[10px] text-muted-foreground">Not pushed</Badge>
                         )}
