@@ -351,6 +351,7 @@ const Dashboard = () => {
               {settings.shop_nav_visible?.enabled !== false && (
                 <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
               )}
+              <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-2" />Chat</TabsTrigger>
               <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
               <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>
               <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>
