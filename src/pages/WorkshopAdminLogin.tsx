@@ -472,7 +472,9 @@ const WorkshopAdminLogin = () => {
               <button onClick={() => navigate("/customcad75")} className="text-xs font-semibold transition-colors block mx-auto" style={{ color: BRAND.accent }}>
                 🛡️ Switch to Main Admin
               </button>
-              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#9CA3AF" }}>← Back to Home</button>
+              {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
+                <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#9CA3AF" }}>← Back to Home</button>
+              )}
               <button
                 onClick={() => {
                   const p = (window as any).__pwaInstallPrompt;

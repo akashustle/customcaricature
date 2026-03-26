@@ -26,6 +26,8 @@ const PRIMARY_TABS = [
   { id: "customers", icon: Users },
   { id: "payments", icon: DollarSign },
   { id: "analytics", icon: BarChart3 },
+  { id: "crm-pipeline", icon: Target },
+  { id: "ai-conversations", icon: Bot },
 ];
 
 const ALL_SECTIONS = [
@@ -76,6 +78,8 @@ const ALL_SECTIONS = [
     { id: "content-editor", label: "Text Editor", icon: Type },
     { id: "form-builder", label: "Forms", icon: FormInput },
     { id: "design-control", label: "Design", icon: Palette },
+    { id: "before-after", label: "Before/After", icon: Image },
+    { id: "social-links", label: "Social Links", icon: Globe },
   ]},
   { section: "Content", items: [
     { id: "homepage", label: "Homepage", icon: HomeIcon },
@@ -115,117 +119,120 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const isPrimaryActive = PRIMARY_TABS.some(t => t.id === activeTab);
 
-  // Find active section label for "More" sheet
   const activeSection = !isPrimaryActive
     ? ALL_SECTIONS.find(s => s.items.some(i => i.id === activeTab))?.section
     : null;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-      <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-        <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-2">
-          {PRIMARY_TABS.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <motion.button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                whileTap={{ scale: 0.75 }}
-                className="flex items-center justify-center min-w-[52px] w-[52px] h-14 relative flex-shrink-0"
-              >
-                <tab.icon
-                  className={`transition-all duration-200 ${
-                    isActive ? "text-foreground" : "text-muted-foreground/40"
-                  }`}
-                  size={isActive ? 24 : 20}
-                  strokeWidth={isActive ? 2.2 : 1.4}
-                  fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
-                />
-                {isActive && (
-                  <motion.div
-                    layoutId="admin-insta-dot"
-                    className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      <div className="bg-background/95 backdrop-blur-xl border-t border-border/20">
+        {/* Scrollable nav - NO visible scrollbar */}
+        <div className="flex items-center h-[60px] overflow-x-auto px-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+          <style>{`.admin-mnav::-webkit-scrollbar { display: none; }`}</style>
+          <div className="admin-mnav flex items-center overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            {PRIMARY_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id)}
+                  whileTap={{ scale: 0.8 }}
+                  className="flex items-center justify-center min-w-[56px] w-[56px] h-[60px] relative flex-shrink-0"
+                >
+                  <tab.icon
+                    className={`transition-all duration-200 ${
+                      isActive ? "text-foreground" : "text-muted-foreground/35"
+                    }`}
+                    size={isActive ? 26 : 22}
+                    strokeWidth={isActive ? 2.2 : 1.3}
+                    fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
                   />
-                )}
-              </motion.button>
-            );
-          })}
+                  {isActive && (
+                    <motion.div
+                      layoutId="admin-insta-dot"
+                      className="absolute bottom-2 w-1 h-1 rounded-full bg-foreground"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </motion.button>
+              );
+            })}
 
-          {/* More button - opens full section sheet */}
-          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-            <SheetTrigger asChild>
-              <motion.button
-                whileTap={{ scale: 0.75 }}
-                className="flex items-center justify-center min-w-[52px] w-[52px] h-14 relative flex-shrink-0"
-              >
-                <GripHorizontal
-                  className={`transition-all duration-200 ${
-                    !isPrimaryActive ? "text-foreground" : "text-muted-foreground/40"
-                  }`}
-                  size={!isPrimaryActive ? 24 : 20}
-                  strokeWidth={!isPrimaryActive ? 2.2 : 1.4}
-                />
-                {!isPrimaryActive && (
-                  <motion.div
-                    layoutId="admin-insta-dot"
-                    className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            {/* More button */}
+            <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+              <SheetTrigger asChild>
+                <motion.button
+                  whileTap={{ scale: 0.8 }}
+                  className="flex items-center justify-center min-w-[56px] w-[56px] h-[60px] relative flex-shrink-0"
+                >
+                  <GripHorizontal
+                    className={`transition-all duration-200 ${
+                      !isPrimaryActive ? "text-foreground" : "text-muted-foreground/35"
+                    }`}
+                    size={!isPrimaryActive ? 26 : 22}
+                    strokeWidth={!isPrimaryActive ? 2.2 : 1.3}
                   />
-                )}
-              </motion.button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl px-0 bg-background border-border">
-              <ScrollArea className="h-full px-4 pt-2 pb-8">
-                <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4" />
-                <h3 className="text-base font-bold text-foreground mb-1 px-1">All Admin Sections</h3>
-                <p className="text-[11px] text-muted-foreground mb-4 px-1">
-                  {activeSection && <span>Current: <span className="text-primary font-medium">{activeSection}</span></span>}
-                </p>
-                {ALL_SECTIONS.map((section) => {
-                  const sectionHasActive = section.items.some(i => i.id === activeTab);
-                  return (
-                    <div key={section.section} className="mb-5">
-                      <div className={cn(
-                        "flex items-center gap-2 px-1 mb-2 pb-1 border-b",
-                        sectionHasActive ? "border-primary/30" : "border-border/30"
-                      )}>
-                        <p className={cn(
-                          "text-[11px] font-bold uppercase tracking-wider",
-                          sectionHasActive ? "text-primary" : "text-muted-foreground/60"
+                  {!isPrimaryActive && (
+                    <motion.div
+                      layoutId="admin-insta-dot"
+                      className="absolute bottom-2 w-1 h-1 rounded-full bg-foreground"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </motion.button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl px-0 bg-background border-border">
+                <ScrollArea className="h-full px-4 pt-2 pb-8">
+                  <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4" />
+                  <h3 className="text-base font-bold text-foreground mb-1 px-1">All Admin Sections</h3>
+                  <p className="text-[11px] text-muted-foreground mb-4 px-1">
+                    {activeSection && <span>Current: <span className="text-primary font-medium">{activeSection}</span></span>}
+                  </p>
+                  {ALL_SECTIONS.map((section) => {
+                    const sectionHasActive = section.items.some(i => i.id === activeTab);
+                    return (
+                      <div key={section.section} className="mb-5">
+                        <div className={cn(
+                          "flex items-center gap-2 px-1 mb-2 pb-1 border-b",
+                          sectionHasActive ? "border-primary/30" : "border-border/30"
                         )}>
-                          {section.section}
-                        </p>
+                          <p className={cn(
+                            "text-[11px] font-bold uppercase tracking-wider",
+                            sectionHasActive ? "text-primary" : "text-muted-foreground/60"
+                          )}>
+                            {section.section}
+                          </p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {section.items.map((item) => {
+                            const isActive = activeTab === item.id;
+                            return (
+                              <button
+                                key={item.id}
+                                className={cn(
+                                  "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all text-center min-h-[72px] justify-center",
+                                  isActive
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                    : "bg-card border border-border/50 hover:bg-muted/60 active:scale-95"
+                                )}
+                                onClick={() => { onTabChange(item.id); setMoreOpen(false); }}
+                              >
+                                <item.icon className={cn("w-5 h-5", isActive ? "text-primary-foreground" : "text-muted-foreground")} strokeWidth={1.5} />
+                                <span className={cn("text-[10px] font-semibold leading-tight", isActive ? "text-primary-foreground" : "text-muted-foreground")}>
+                                  {item.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {section.items.map((item) => {
-                          const isActive = activeTab === item.id;
-                          return (
-                            <button
-                              key={item.id}
-                              className={cn(
-                                "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all text-center min-h-[72px] justify-center",
-                                isActive
-                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                  : "bg-card border border-border/50 hover:bg-muted/60 active:scale-95"
-                              )}
-                              onClick={() => { onTabChange(item.id); setMoreOpen(false); }}
-                            >
-                              <item.icon className={cn("w-5 h-5", isActive ? "text-primary-foreground" : "text-muted-foreground")} strokeWidth={1.5} />
-                              <span className={cn("text-[10px] font-semibold leading-tight", isActive ? "text-primary-foreground" : "text-muted-foreground")}>
-                                {item.label}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="h-8" />
-              </ScrollArea>
-            </SheetContent>
-          </Sheet>
+                    );
+                  })}
+                  <div className="h-8" />
+                </ScrollArea>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
         <div className="h-[env(safe-area-inset-bottom)]" />
       </div>

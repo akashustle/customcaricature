@@ -611,7 +611,9 @@ const AdminLogin = () => {
               <button onClick={() => navigate("/cccworkshop2006")} className="text-xs font-semibold transition-colors block mx-auto" style={{ color: BRAND.accent }}>
                 🎓 Switch to Workshop Admin
               </button>
-              <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
+              {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
+                <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
+              )}
               <button
                 onClick={() => {
                   const p = (window as any).__pwaInstallPrompt;
