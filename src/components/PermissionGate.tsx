@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, MapPin, Mic, ShieldCheck, Loader2, X } from "lucide-react";
+import { Bell, MapPin, Mic, ShieldCheck, Loader2, X, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { requestBrowserNotificationPermission } from "@/lib/webpush";
 import { motion, AnimatePresence } from "framer-motion";
 
 const GATE_KEY = "ccc_permissions_gate_v3";
-const DELAY_MS = 20000; // 20 seconds delay as requested
+const ADMIN_ROUTES = ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel"];
 
 const PermissionGate = () => {
   const { user } = useAuth();
@@ -21,6 +21,10 @@ const PermissionGate = () => {
     typeof Notification === "undefined" ? "unsupported" : Notification.permission
   );
   const [micStatus, setMicStatus] = useState<string>("prompt");
+  const [cameraStatus, setCameraStatus] = useState<string>("prompt");
+
+  const isAdminRoute = typeof window !== "undefined" && ADMIN_ROUTES.some(r => window.location.pathname.startsWith(r));
+  const isStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
 
   // Check existing permissions immediately on mount
   useEffect(() => {
@@ -33,6 +37,10 @@ const PermissionGate = () => {
         setMicStatus(r.state);
         r.addEventListener("change", () => setMicStatus(r.state));
       }).catch(() => {});
+      navigator.permissions.query({ name: "camera" as PermissionName }).then(r => {
+        setCameraStatus(r.state);
+        r.addEventListener("change", () => setCameraStatus(r.state));
+      }).catch(() => {});
     }
     if (typeof Notification !== "undefined") {
       setNotificationStatus(Notification.permission);
@@ -44,14 +52,16 @@ const PermissionGate = () => {
     if (done) return;
 
     // If all already granted, skip
-    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+    if (typeof Notification !== "undefined" && Notification.permission === "granted" && locationStatus === "granted") {
       requestBrowserNotificationPermission(user?.id);
       return;
     }
 
-    const timer = setTimeout(() => setVisible(true), DELAY_MS);
+    // Shorter delay for admin PWA (3s), normal delay for website (20s)
+    const delayMs = (isAdminRoute || isStandalone) ? 3000 : 20000;
+    const timer = setTimeout(() => setVisible(true), delayMs);
     return () => clearTimeout(timer);
-  }, [user?.id]);
+  }, [user?.id, isAdminRoute, isStandalone, locationStatus]);
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
@@ -62,7 +72,7 @@ const PermissionGate = () => {
     setRequesting(true);
 
     // Request all permissions in parallel for speed
-    const results = await Promise.allSettled([
+    await Promise.allSettled([
       // Location
       new Promise<void>((resolve) => {
         setCurrentStep("location");
@@ -77,7 +87,7 @@ const PermissionGate = () => {
             resolve();
           },
           () => { setLocationStatus("denied"); resolve(); },
-          { timeout: 3000, enableHighAccuracy: false }
+          { timeout: 5000, enableHighAccuracy: false }
         );
       }),
       // Notifications
@@ -99,6 +109,17 @@ const PermissionGate = () => {
           setMicStatus("denied");
         }
       })(),
+      // Camera
+      (async () => {
+        setCurrentStep("camera");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          setCameraStatus("granted");
+          stream.getTracks().forEach(t => t.stop());
+        } catch {
+          setCameraStatus("denied");
+        }
+      })(),
     ]);
 
     setCurrentStep(null);
@@ -111,8 +132,9 @@ const PermissionGate = () => {
       { label: "Location", value: locationStatus, icon: MapPin, step: "location" },
       { label: "Notifications", value: notificationStatus, icon: Bell, step: "notifications" },
       { label: "Microphone", value: micStatus, icon: Mic, step: "microphone" },
+      { label: "Camera", value: cameraStatus, icon: Camera, step: "camera" },
     ],
-    [locationStatus, notificationStatus, micStatus]
+    [locationStatus, notificationStatus, micStatus, cameraStatus]
   );
 
   if (!visible) return null;
@@ -134,10 +156,12 @@ const PermissionGate = () => {
             <CardContent className="space-y-6 p-6 md:p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-border">
-                  <img src="/logo.png" alt="CCC logo" className="h-10 w-10 object-contain" />
+                  <img src={isAdminRoute ? "/admin-favicon.jpeg" : "/logo.png"} alt="CCC" className="h-10 w-10 object-contain rounded-full" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">CCC Access Setup</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                    {isAdminRoute ? "Admin App Setup" : "CCC Access Setup"}
+                  </p>
                   <h2 className="font-display text-2xl font-bold text-foreground">For a better experience</h2>
                   <p className="mt-1 text-sm text-muted-foreground">Allow permissions for updates, live features, and location services.</p>
                 </div>
@@ -188,7 +212,7 @@ const PermissionGate = () => {
                 </Button>
                 <Button className="rounded-full" onClick={handleAllow} disabled={requesting}>
                   {requesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-                  Allow
+                  Allow All
                 </Button>
               </div>
             </CardContent>
