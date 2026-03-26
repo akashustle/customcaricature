@@ -231,7 +231,7 @@ async function syncOrders(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.85, g: 0.33, b: 0.1 }, [40, 120, 140, 180, 120, 120, 80, 50, 80, 100, 140, 80, 100, 200, 100, 80, 80, 200, 160, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.9, g: 0.45, b: 0.15 }, [40, 280, 160, 200, 130, 130, 90, 60, 100, 120, 200, 90, 110, 240, 110, 90, 90, 240, 170, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
