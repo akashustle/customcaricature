@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.admin-ai-monitor]
 verify_jwt = false
+
+[functions.mini-db-sync]
+verify_jwt = false
