@@ -14,7 +14,7 @@ self.addEventListener('message', function(event) {
 });
 
 self.addEventListener('push', function(event) {
-  let data = { title: 'Creative Caricature Club', body: 'You have a new notification', icon: '/logo.png', badge: '/logo.png', url: '/notifications' };
+  let data = { title: 'Creative Caricature Club', body: 'You have a new notification', icon: '/logo.png', badge: '/badge-96.png', url: '/notifications' };
 
   if (event.data) {
     try {
@@ -55,7 +55,7 @@ self.addEventListener('push', function(event) {
   const options = {
     body: data.body,
     icon: data.icon || '/logo.png',
-    badge: data.badge || '/logo.png',
+    badge: data.badge || '/badge-96.png',
     tag: tag,
     renotify: false,
     data: { url: data.url || '/notifications' },
@@ -78,14 +78,17 @@ self.addEventListener('notificationclick', function(event) {
 
   if (event.action === 'dismiss') return;
 
+  // Always open within the PWA scope — never open external browser
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      // Try to find an existing PWA/browser window and navigate it
       for (const client of clientList) {
-        if (client.url.includes(self.registration.scope) && 'focus' in client) {
+        if ('focus' in client) {
           client.navigate(url);
           return client.focus();
         }
       }
+      // If no window found, open one within scope
       return clients.openWindow(url);
     })
   );
