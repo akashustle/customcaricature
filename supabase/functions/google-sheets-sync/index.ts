@@ -553,7 +553,7 @@ serve(async (req) => {
     // UPDATE EVENT (from DB trigger)
     if (action === "update_event" && event_data && event_id) {
       try {
-        await pushEventToSheet(accessToken, sheetId, tabs, { ...event_data, id: event_id }, "web pushed");
+        await pushEventToSheet(accessToken, sheetId, tabs, { ...event_data, id: event_id }, "web pushed", supabase);
       } catch (e: any) {
         console.warn("Auto-update failed (non-fatal):", e.message);
       }
