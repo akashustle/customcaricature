@@ -11,25 +11,25 @@ const MONTHS = ["January","February","March","April","May","June","July","August
 
 const SHEET_HEADERS = [
   "Booking ID",
-  "Date of Booking",
   "Event Date",
-  "Customer Name",
-  "Phone Number",
-  "Email ID",
-  "Event Type",
-  "Event Location (City + Venue)",
-  "Number of Guests",
-  "Package / Service Selected",
-  "Number of Artists",
-  "Duration (Hours)",
+  "Venue",
+  "Artist Assigned",
   "Total Amount",
   "Advance Paid",
   "Remaining Amount",
+  "Full Address",
+  "Customer Name",
+  "Phone Number",
+  "Email",
+  "Event Type",
+  "Number of Artists",
+  "Duration (Hours)",
   "Payment Status",
-  "Artist Assigned",
   "Booking Status",
   "Lead Source",
-  "Notes / Special Requirements",
+  "Date of Booking",
+  "Package / Service",
+  "Notes",
   "Created At",
 ];
 
@@ -150,13 +150,13 @@ async function fetchArtistNames(supabase: any, eventId: string): Promise<string[
   return [];
 }
 
-// ── Format a row for the new 21-column structure ──
+// ── Format a row for the new rearranged 21-column structure ──
+// Order: Booking ID | Event Date | Venue | Artist | Total | Advance | Remaining | Full Address | Name | Phone | Email | Event Type | Artist Count | Duration | Payment Status | Booking Status | Lead Source | Date of Booking | Package | Notes | Created At
 function formatSheetRow(event: any, artistNames: string[]): any[] {
   const totalPrice = Number(event.total_price) || 0;
   const advancePaid = Number(event.advance_amount) || 0;
   const negotiatedTotal = event.negotiated ? (Number(event.negotiated_total) || totalPrice) : totalPrice;
   const negotiatedAdvance = event.negotiated ? (Number(event.negotiated_advance) || advancePaid) : advancePaid;
-  const remaining = Math.max(0, negotiatedTotal - negotiatedAdvance);
 
   const ps = event.payment_status || "pending";
   const status = event.status || "upcoming";
@@ -183,30 +183,31 @@ function formatSheetRow(event: any, artistNames: string[]): any[] {
     }
   }
 
-  const locationStr = [event.city, event.venue_name].filter(Boolean).join(" - ");
+  const venueStr = [event.city, event.venue_name].filter(Boolean).join(" - ");
+  const fullAddress = event.full_address || [event.venue_name, event.city, event.state, event.pincode].filter(Boolean).join(", ");
 
   return [
-    event.id || "",
-    event.created_at ? new Date(event.created_at).toLocaleDateString("en-IN") : "",
-    event.event_date || "",
-    event.client_name || "",
-    event.client_mobile || "",
-    event.client_email || "",
-    event.event_type || "",
-    locationStr,
-    "", // guests - not tracked in current schema
-    event.is_international ? "International" : (event.is_mumbai ? "Mumbai Package" : "Pan India"),
-    String(event.artist_count || 1),
-    durationHours,
-    `₹${negotiatedTotal.toLocaleString("en-IN")}`,
-    `₹${negotiatedAdvance.toLocaleString("en-IN")}`,
-    `=M{ROW}-N{ROW}`, // formula placeholder, will be replaced
-    paymentLabel,
-    artistLabel,
-    bookingStatus,
-    event.source || "Website",
-    event.notes || "",
-    event.created_at ? new Date(event.created_at).toLocaleString("en-IN") : "",
+    event.id || "",                                                             // A: Booking ID
+    event.event_date || "",                                                     // B: Event Date
+    venueStr,                                                                   // C: Venue
+    artistLabel,                                                                // D: Artist Assigned
+    negotiatedTotal,                                                            // E: Total Amount (raw number)
+    negotiatedAdvance,                                                          // F: Advance Paid (raw number)
+    `=IF(E{ROW}-F{ROW}<0,0,E{ROW}-F{ROW})`,                                   // G: Remaining Amount (formula)
+    fullAddress,                                                                // H: Full Address
+    event.client_name || "",                                                    // I: Customer Name
+    event.client_mobile || "",                                                  // J: Phone Number
+    event.client_email || "",                                                   // K: Email
+    event.event_type || "",                                                     // L: Event Type
+    String(event.artist_count || 1),                                            // M: Number of Artists
+    durationHours,                                                              // N: Duration
+    paymentLabel,                                                               // O: Payment Status
+    bookingStatus,                                                              // P: Booking Status
+    event.source || "Website",                                                  // Q: Lead Source
+    event.created_at ? new Date(event.created_at).toLocaleDateString("en-IN") : "", // R: Date of Booking
+    event.is_international ? "International" : (event.is_mumbai ? "Mumbai Package" : "Pan India"), // S: Package
+    event.notes || "",                                                          // T: Notes
+    event.created_at ? new Date(event.created_at).toLocaleString("en-IN") : "", // U: Created At
   ];
 }
 
@@ -220,14 +221,13 @@ function fixRowFormulas(row: any[], rowNum: number): any[] {
   });
 }
 
-// ── Setup all monthly sheets with formatting ──
+// ── Setup all monthly sheets with light formatting ──
 async function setupSheets(accessToken: string, spreadsheetId: string) {
   const existingTabs = await getSheetTabs(accessToken, spreadsheetId);
   const tabsToCreate: string[] = [];
 
-  // April 2026 - December 2027
   for (let year = 2026; year <= 2027; year++) {
-    const startMonth = year === 2026 ? 3 : 0; // April=3 for 2026, Jan=0 for 2027
+    const startMonth = year === 2026 ? 3 : 0;
     for (let m = startMonth; m < 12; m++) {
       const name = `${MONTHS[m]} ${year}`;
       if (!findTab(existingTabs, name)) tabsToCreate.push(name);
@@ -236,7 +236,6 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
 
   if (tabsToCreate.length === 0) return { created: 0, message: "All tabs already exist" };
 
-  // Create all tabs
   const requests: any[] = tabsToCreate.map((title, i) => ({
     addSheet: { properties: { title, index: i } },
   }));
@@ -253,26 +252,25 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
     if (r.addSheet?.properties) newTabIds[tabsToCreate[i]] = r.addSheet.properties.sheetId;
   });
 
-  // Write headers to all new tabs
   const headerValues = [SHEET_HEADERS];
   for (const tabName of tabsToCreate) {
     await updateSheet(accessToken, spreadsheetId, `'${tabName}'!A1:U1`, headerValues);
   }
 
-  // Apply premium formatting to all new tabs
+  // Apply light premium formatting
   const formatRequests: any[] = [];
   for (const tabName of tabsToCreate) {
     const sid = newTabIds[tabName];
     if (sid === undefined) continue;
 
-    // Header styling - dark navy with white bold text
+    // Header styling - soft teal/sage with dark text
     formatRequests.push({
       repeatCell: {
         range: { sheetId: sid, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: COL_COUNT },
         cell: {
           userEnteredFormat: {
-            backgroundColor: { red: 0.11, green: 0.17, blue: 0.33 },
-            textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10, fontFamily: "Arial" },
+            backgroundColor: { red: 0.85, green: 0.93, blue: 0.91 },
+            textFormat: { bold: true, foregroundColor: { red: 0.15, green: 0.22, blue: 0.25 }, fontSize: 10, fontFamily: "Google Sans" },
             horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
             padding: { top: 6, bottom: 6, left: 4, right: 4 },
             wrapStrategy: "WRAP",
@@ -282,7 +280,6 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       },
     });
 
-    // Freeze header row
     formatRequests.push({
       updateSheetProperties: {
         properties: { sheetId: sid, gridProperties: { frozenRowCount: 1 } },
@@ -290,8 +287,8 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       },
     });
 
-    // Column widths
-    const widths = [240, 110, 100, 160, 130, 200, 110, 200, 90, 160, 90, 80, 120, 120, 130, 110, 180, 110, 100, 220, 160];
+    // Column widths (rearranged)
+    const widths = [240, 100, 180, 180, 110, 110, 120, 250, 160, 130, 200, 110, 80, 80, 100, 100, 100, 110, 140, 220, 160];
     widths.forEach((px, i) => {
       formatRequests.push({
         updateDimensionProperties: {
@@ -301,24 +298,24 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       });
     });
 
-    // Alternating row colors (banding)
+    // Light alternating row colors
     formatRequests.push({
       addBanding: {
         bandedRange: {
           range: { sheetId: sid, startRowIndex: 0, endRowIndex: 100, startColumnIndex: 0, endColumnIndex: COL_COUNT },
           rowProperties: {
-            headerColor: { red: 0.11, green: 0.17, blue: 0.33 },
+            headerColor: { red: 0.85, green: 0.93, blue: 0.91 },
             firstBandColor: { red: 1, green: 1, blue: 1 },
-            secondBandColor: { red: 0.93, green: 0.95, blue: 0.98 },
+            secondBandColor: { red: 0.96, green: 0.98, blue: 0.97 },
           },
         },
       },
     });
 
-    // Data validation: Payment Status dropdown (column P = index 15)
+    // Payment Status dropdown (column O = index 14)
     formatRequests.push({
       setDataValidation: {
-        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 15, endColumnIndex: 16 },
+        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 14, endColumnIndex: 15 },
         rule: {
           condition: { type: "ONE_OF_LIST", values: [{ userEnteredValue: "Pending" }, { userEnteredValue: "Partial" }, { userEnteredValue: "Paid" }] },
           showCustomUi: true, strict: false,
@@ -326,10 +323,10 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       },
     });
 
-    // Data validation: Booking Status dropdown (column R = index 17)
+    // Booking Status dropdown (column P = index 15)
     formatRequests.push({
       setDataValidation: {
-        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 17, endColumnIndex: 18 },
+        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 15, endColumnIndex: 16 },
         rule: {
           condition: { type: "ONE_OF_LIST", values: [{ userEnteredValue: "New" }, { userEnteredValue: "Confirmed" }, { userEnteredValue: "Completed" }, { userEnteredValue: "Cancelled" }] },
           showCustomUi: true, strict: false,
@@ -337,10 +334,10 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       },
     });
 
-    // Data validation: Lead Source dropdown (column S = index 18)
+    // Lead Source dropdown (column Q = index 16)
     formatRequests.push({
       setDataValidation: {
-        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 18, endColumnIndex: 19 },
+        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 16, endColumnIndex: 17 },
         rule: {
           condition: { type: "ONE_OF_LIST", values: [{ userEnteredValue: "Instagram" }, { userEnteredValue: "WhatsApp" }, { userEnteredValue: "Website" }, { userEnteredValue: "Referral" }, { userEnteredValue: "Manual" }] },
           showCustomUi: true, strict: false,
@@ -348,45 +345,58 @@ async function setupSheets(accessToken: string, spreadsheetId: string) {
       },
     });
 
-    // Conditional formatting: Pending = red bg
+    // Conditional: Pending = soft red
     formatRequests.push({
       addConditionalFormatRule: {
         rule: {
-          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 15, endColumnIndex: 16 }],
+          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 14, endColumnIndex: 15 }],
           booleanRule: {
             condition: { type: "TEXT_EQ", values: [{ userEnteredValue: "Pending" }] },
-            format: { backgroundColor: { red: 0.96, green: 0.8, blue: 0.8 }, textFormat: { foregroundColor: { red: 0.7, green: 0.1, blue: 0.1 }, bold: true } },
+            format: { backgroundColor: { red: 0.98, green: 0.88, blue: 0.88 }, textFormat: { foregroundColor: { red: 0.7, green: 0.15, blue: 0.15 }, bold: true } },
           },
         },
         index: 0,
       },
     });
 
-    // Conditional formatting: Paid = green bg
+    // Conditional: Paid = soft green
     formatRequests.push({
       addConditionalFormatRule: {
         rule: {
-          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 15, endColumnIndex: 16 }],
+          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 14, endColumnIndex: 15 }],
           booleanRule: {
             condition: { type: "TEXT_EQ", values: [{ userEnteredValue: "Paid" }] },
-            format: { backgroundColor: { red: 0.78, green: 0.93, blue: 0.78 }, textFormat: { foregroundColor: { red: 0.1, green: 0.5, blue: 0.1 }, bold: true } },
+            format: { backgroundColor: { red: 0.86, green: 0.95, blue: 0.87 }, textFormat: { foregroundColor: { red: 0.15, green: 0.55, blue: 0.2 }, bold: true } },
           },
         },
         index: 1,
       },
     });
 
-    // Conditional formatting: Partial = orange bg
+    // Conditional: Partial = soft amber
     formatRequests.push({
       addConditionalFormatRule: {
         rule: {
-          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 15, endColumnIndex: 16 }],
+          ranges: [{ sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 14, endColumnIndex: 15 }],
           booleanRule: {
             condition: { type: "TEXT_EQ", values: [{ userEnteredValue: "Partial" }] },
-            format: { backgroundColor: { red: 1, green: 0.93, blue: 0.78 }, textFormat: { foregroundColor: { red: 0.8, green: 0.5, blue: 0 }, bold: true } },
+            format: { backgroundColor: { red: 1, green: 0.95, blue: 0.85 }, textFormat: { foregroundColor: { red: 0.75, green: 0.5, blue: 0.05 }, bold: true } },
           },
         },
         index: 2,
+      },
+    });
+
+    // Number format for Total (E) and Advance (F) columns - Indian Rupee
+    formatRequests.push({
+      repeatCell: {
+        range: { sheetId: sid, startRowIndex: 1, endRowIndex: 200, startColumnIndex: 4, endColumnIndex: 7 },
+        cell: {
+          userEnteredFormat: {
+            numberFormat: { type: "NUMBER", pattern: "₹#,##0" },
+          },
+        },
+        fields: "userEnteredFormat.numberFormat",
       },
     });
   }
@@ -410,7 +420,6 @@ async function pushEventToSheet(
   const tabName = getMonthTabName(event.event_date);
   let tab = findTab(tabs, tabName);
 
-  // Auto-create tab if missing
   if (!tab) {
     const createRes = await fetchWithRetry(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
       method: "POST", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
@@ -427,7 +436,6 @@ async function pushEventToSheet(
   let artistNames: string[] = [];
   if (supabase && event.id) artistNames = await fetchArtistNames(supabase, event.id);
 
-  // Check for duplicate
   const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:U500`);
   const rows = data.values || [];
 
@@ -443,7 +451,6 @@ async function pushEventToSheet(
     await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}:U${existingRow}`, [fixed]);
     return { tab: tab.title, action: "updated", row: existingRow };
   } else {
-    // Find next empty row
     const nextRow = rows.length + 1;
     const fixed = fixRowFormulas(row, nextRow);
     await appendSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:U1`, [fixed]);
@@ -468,7 +475,7 @@ async function removeEventFromSheet(accessToken: string, spreadsheetId: string, 
 }
 
 function countSheetEvents(rows: any[][]): number {
-  return Math.max(0, rows.length - 1); // minus header
+  return Math.max(0, rows.length - 1);
 }
 
 // ── Main handler ──
@@ -495,13 +502,11 @@ serve(async (req) => {
     const { action, event_data, event_id } = body;
     const supabase = getSupabaseClient();
 
-    // ── SETUP SHEETS: create all monthly tabs with formatting ──
     if (action === "setup_sheets") {
       const result = await setupSheets(accessToken, sheetId);
       return ok({ success: true, ...result });
     }
 
-    // ── READ ALL ──
     if (action === "read_all" || action === "read") {
       const allData: Record<string, any[][]> = {};
       const summaries: any[] = [];
@@ -550,7 +555,6 @@ serve(async (req) => {
       return ok({ success: true, tabName: tab.title, rows: data.values || [] });
     }
 
-    // ── PUSH SINGLE EVENT ──
     if ((action === "push_single" || action === "update_pushed") && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (error || !event) return ok({ success: false, error: "Event not found" });
@@ -559,7 +563,6 @@ serve(async (req) => {
       return ok({ success: true, ...result });
     }
 
-    // ── DELETE FROM SHEET ──
     if (action === "delete_from_sheet" && event_id) {
       const { data: event } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (!event) return ok({ success: false, error: "Event not found" });
@@ -568,7 +571,6 @@ serve(async (req) => {
       return ok({ success: true, ...result });
     }
 
-    // ── SYNC ALL ──
     if (action === "sync_all") {
       const { data: events, error } = await supabase.from("event_bookings").select("*").or("sheet_pushed.is.null,sheet_pushed.eq.false").order("event_date", { ascending: true });
       if (error) return ok({ success: false, error: error.message });
@@ -587,7 +589,6 @@ serve(async (req) => {
       return ok({ success: true, synced: totalSynced, skipped: totalSkipped });
     }
 
-    // ── APPEND EVENT (from DB trigger) ──
     if (action === "append_event" && event_data) {
       try {
         await pushEventToSheet(accessToken, sheetId, tabs, event_data, supabase);
@@ -596,7 +597,6 @@ serve(async (req) => {
       return ok({ success: true });
     }
 
-    // ── UPDATE EVENT (from DB trigger) ──
     if (action === "update_event" && event_data && event_id) {
       try {
         await pushEventToSheet(accessToken, sheetId, tabs, { ...event_data, id: event_id }, supabase);
@@ -604,7 +604,6 @@ serve(async (req) => {
       return ok({ success: true });
     }
 
-    // ── ADD MANUAL EVENT ──
     if (action === "add_manual_event" && event_data) {
       const { data: inserted, error } = await supabase.from("event_bookings").insert({
         event_date: event_data.event_date, venue_name: event_data.venue_name || null,
@@ -622,17 +621,17 @@ serve(async (req) => {
       return ok({ success: true, event: inserted, ...result });
     }
 
-    // ── UPDATE DESIGN ──
     if (action === "update_design") {
       const formatReqs: any[] = [];
       for (const tab of tabs) {
+        // Update headers to new column order
         formatReqs.push({
           repeatCell: {
             range: { sheetId: tab.sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: COL_COUNT },
             cell: {
               userEnteredFormat: {
-                backgroundColor: { red: 0.11, green: 0.17, blue: 0.33 },
-                textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10, fontFamily: "Arial" },
+                backgroundColor: { red: 0.85, green: 0.93, blue: 0.91 },
+                textFormat: { bold: true, foregroundColor: { red: 0.15, green: 0.22, blue: 0.25 }, fontSize: 10, fontFamily: "Google Sans" },
                 horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
               },
             },
@@ -646,7 +645,13 @@ serve(async (req) => {
           body: JSON.stringify({ requests: formatReqs }),
         });
       }
-      return ok({ success: true, message: "Design updated", tabs: tabs.length });
+      // Also update header text for all existing tabs
+      for (const tab of tabs) {
+        try {
+          await updateSheet(accessToken, sheetId, `'${tab.title}'!A1:U1`, [SHEET_HEADERS]);
+        } catch (_) {}
+      }
+      return ok({ success: true, message: "Design & headers updated", tabs: tabs.length });
     }
 
     return ok({ success: false, error: "Invalid action" });
