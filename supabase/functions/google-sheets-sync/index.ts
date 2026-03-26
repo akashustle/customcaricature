@@ -181,8 +181,9 @@ function parseMonthKeyFromTab(title: string): string | null {
 
 function formatPaymentStatus(event: any): string {
   const ps = event.payment_status || "pending";
+  const status = event.status || "";
+  if (status === "completed" || ps === "fully_paid" || ps === "full_paid") return `✅ Full Paid ₹${(event.total_price || 0).toLocaleString("en-IN")}`;
   if (ps === "confirmed" || ps === "paid") return `Advance ₹${(event.advance_amount || 0).toLocaleString("en-IN")}`;
-  if (ps === "full_paid") return `Full Paid ₹${(event.total_price || 0).toLocaleString("en-IN")}`;
   return ps.charAt(0).toUpperCase() + ps.slice(1);
 }
 
