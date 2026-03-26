@@ -330,7 +330,7 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z100`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, dashboardData);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.25, g: 0.4, b: 0.7 }, [200, 140, 200, 140]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.22, g: 0.52, b: 0.72 }, [220, 160, 220, 160]);
   return { sheet: tabTitle, rows: dashboardData.length };
 }
 
