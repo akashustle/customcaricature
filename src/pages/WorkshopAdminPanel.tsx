@@ -24,7 +24,7 @@ import {
   MapPin, History, Shield, BarChart3, ChevronDown, ChevronUp, TrendingUp,
   PieChart, Activity, Moon, Sun, ChevronLeft, ChevronRight, AlertTriangle,
   ExternalLink, UsersRound, Download, RefreshCw, Search, Hash, MonitorPlay,
-  Bell, Send, Lock, Reply, Monitor, GraduationCap,
+  Bell, Send, Lock, Reply, Monitor, GraduationCap, MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ExportButton from "@/components/admin/ExportButton";
