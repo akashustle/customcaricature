@@ -366,6 +366,7 @@ const Dashboard = () => {
             {settings.shop_nav_visible?.enabled !== false && (
               <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             )}
+            <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>
             <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
