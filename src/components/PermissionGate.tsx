@@ -130,7 +130,10 @@ const PermissionGate = () => {
 
     setCurrentStep(null);
     setRequesting(false);
-    completeGate();
+    // Small delay to let state settle before hiding
+    setTimeout(() => {
+      completeGate();
+    }, 300);
   };
 
   const statuses = useMemo(
