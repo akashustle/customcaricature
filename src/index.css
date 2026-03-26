@@ -1267,6 +1267,13 @@
     transform: translateY(-2px);
   }
 
+  /* Live activity ticker */
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  }
+
   /* Subtle blur-up for images */
   @keyframes blurUp {
     from { opacity: 0; filter: blur(8px); transform: scale(1.02); }

@@ -265,8 +265,54 @@ function getSupabaseClient() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
-async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, tabTitle: string) {
+async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, tabTitle: string, tabSheetId?: number) {
   await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
+  // Auto-resize columns with proper widths
+  if (tabSheetId !== undefined) {
+    const colWidths = [50, 120, 130, 150, 160, 110, 100, 140, 120, 180, 90, 90, 100, 110, 100, 80, 200];
+    const requests: any[] = [];
+    colWidths.forEach((px, i) => {
+      requests.push({
+        updateDimensionProperties: {
+          range: { sheetId: tabSheetId, dimension: "COLUMNS", startIndex: i, endIndex: i + 1 },
+          properties: { pixelSize: px },
+          fields: "pixelSize",
+        },
+      });
+    });
+    // Bold + background for header row (row 3 = index 2)
+    requests.push({
+      repeatCell: {
+        range: { sheetId: tabSheetId, startRowIndex: 2, endRowIndex: 3, startColumnIndex: 0, endColumnIndex: 17 },
+        cell: {
+          userEnteredFormat: {
+            backgroundColor: { red: 0.16, green: 0.16, blue: 0.2 },
+            textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10 },
+            horizontalAlignment: "CENTER",
+            verticalAlignment: "MIDDLE",
+            padding: { top: 4, bottom: 4, left: 4, right: 4 },
+          },
+        },
+        fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,padding)",
+      },
+    });
+    // Freeze header rows
+    requests.push({
+      updateSheetProperties: {
+        properties: { sheetId: tabSheetId, gridProperties: { frozenRowCount: 3 } },
+        fields: "gridProperties.frozenRowCount",
+      },
+    });
+    try {
+      await fetchWithRetry(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ requests }),
+      });
+    } catch (e: any) {
+      console.warn("Column formatting failed (non-fatal):", e.message);
+    }
+  }
 }
 
 async function fetchArtistNames(supabase: any, eventId: string): Promise<string[]> {
@@ -291,7 +337,7 @@ async function pushEventToSheet(
   const tab = findTab(tabs, tabName);
   if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
 
-  await ensureSheetHeaders(accessToken, spreadsheetId, tab.title);
+  await ensureSheetHeaders(accessToken, spreadsheetId, tab.title, tab.sheetId);
 
   // Fetch artist names if supabase client available
   let artistNames: string[] = [];
