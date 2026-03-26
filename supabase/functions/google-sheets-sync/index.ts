@@ -337,7 +337,7 @@ async function pushEventToSheet(
   const tab = findTab(tabs, tabName);
   if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
 
-  await ensureSheetHeaders(accessToken, spreadsheetId, tab.title);
+  await ensureSheetHeaders(accessToken, spreadsheetId, tab.title, tab.sheetId);
 
   // Fetch artist names if supabase client available
   let artistNames: string[] = [];
