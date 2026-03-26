@@ -212,6 +212,7 @@ const App = () => {
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
                 <Route path="/database-entry-reversal" element={<DatabaseEntryReversal />} />
                 <Route path="/faqs" element={<FAQs />} />
+                <Route path="/explore" element={<Explore />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
