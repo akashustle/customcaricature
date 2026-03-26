@@ -2417,6 +2417,7 @@ const Admin = () => {
               <AdminPushUpdate />
             </div>
           </TabsContent>
+          </motion.div>
         </Tabs>
         </div>
 
