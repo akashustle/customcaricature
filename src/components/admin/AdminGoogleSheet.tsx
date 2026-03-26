@@ -193,7 +193,7 @@ const AdminGoogleSheet = () => {
   const [sheetTabs, setSheetTabs] = useState<Record<string, string[][]>>({});
   const [activeTab, setActiveTab] = useState("");
   const [sheetFilter, setSheetFilter] = useState("this_month");
-  const [eventFilter, setEventFilter] = useState("this_month");
+  const [eventFilter, setEventFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
