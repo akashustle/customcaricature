@@ -9,6 +9,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const isAdminRoute = typeof window !== "undefined" && ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel"].some(r => window.location.pathname.startsWith(r));
 
   useEffect(() => {
+    if (isAdminRoute) { setShow(false); onComplete(); return; }
     const t1 = setTimeout(() => setStep(1), 100);
     const t2 = setTimeout(() => setStep(2), 500);
     const t3 = setTimeout(() => setStep(3), 1100);
