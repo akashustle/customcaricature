@@ -23,10 +23,10 @@ import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRoute
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 
-// Eagerly loaded core pages
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+// All pages lazy loaded for performance
+const Index = lazy(() => import("./pages/Index"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
 
 // Lazy loaded pages for performance
 const Order = lazy(() => import("./pages/Order"));
