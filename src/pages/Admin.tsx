@@ -1891,6 +1891,10 @@ const Admin = () => {
             <AdminFAQs />
           </TabsContent>
 
+          <TabsContent value="google-sheet">
+            <AdminGoogleSheet />
+          </TabsContent>
+
           <TabsContent value="pages">
             <AdminPages />
           </TabsContent>

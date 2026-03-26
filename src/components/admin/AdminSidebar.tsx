@@ -103,6 +103,7 @@ const NAV_SECTIONS = [
   {
     label: "System",
     items: [
+      { id: "google-sheet", icon: Globe, label: "Google Sheet" },
       { id: "security-dashboard", icon: ShieldCheck, label: "Security" },
       { id: "activity-logs", icon: Activity, label: "Activity Logs" },
       { id: "integrations", icon: Shield, label: "Integrations" },
