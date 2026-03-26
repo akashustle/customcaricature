@@ -15,6 +15,7 @@ const PermissionGate = () => {
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
+  const [stuckTimer, setStuckTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const [locationStatus, setLocationStatus] = useState<string>("prompt");
   const [notificationStatus, setNotificationStatus] = useState<string>(
