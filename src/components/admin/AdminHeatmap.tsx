@@ -7,44 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { MapPin, Calendar, Users, Filter, RefreshCw, Eye, TrendingUp, Globe } from "lucide-react";
-import { format } from "date-fns";
+import type { EventPin, UserPin } from "./AdminHeatmapMap";
 
-// Lazy load the heavy leaflet map part
 const LeafletMap = lazy(() => import("./AdminHeatmapMap"));
-
-interface EventPin {
-  id: string;
-  lat: number;
-  lng: number;
-  client_name: string;
-  event_date: string;
-  event_type: string;
-  city: string;
-  state: string;
-  status: string;
-  payment_status: string;
-  total_price: number;
-  artist_count: number;
-  venue_name: string;
-  event_start_time: string;
-  event_end_time: string;
-  client_mobile: string;
-  client_email: string;
-}
-
-interface UserPin {
-  id: string;
-  lat: number;
-  lng: number;
-  full_name: string;
-  email: string;
-  city: string | null;
-  state: string | null;
-  created_at: string;
-}
-
-// Geocode cache to avoid re-geocoding
-const geocodeCache: Record<string, { lat: number; lng: number } | null> = {};
 
 const INDIA_CITY_COORDS: Record<string, [number, number]> = {
   mumbai: [19.076, 72.8777], delhi: [28.6139, 77.209], bangalore: [12.9716, 77.5946],
@@ -56,38 +21,24 @@ const INDIA_CITY_COORDS: Record<string, [number, number]> = {
   patna: [25.6093, 85.1376], vadodara: [22.3072, 73.1812], goa: [15.2993, 74.124],
   panaji: [15.4909, 73.8278], kochi: [9.9312, 76.2673], coimbatore: [11.0168, 76.9558],
   chandigarh: [30.7333, 76.7794], gurgaon: [28.4595, 77.0266], gurugram: [28.4595, 77.0266],
-  noida: [28.5355, 77.391], ghaziabad: [28.6692, 77.4538], navi_mumbai: [19.033, 73.0297],
-  "navi mumbai": [19.033, 73.0297], rajkot: [22.3039, 70.8022], amritsar: [31.634, 74.8723],
-  dehradun: [30.3165, 78.0322], ranchi: [23.3441, 85.3096], mysore: [12.2958, 76.6394],
-  mysuru: [12.2958, 76.6394], udaipur: [24.5854, 73.7125], varanasi: [25.3176, 82.9739],
-  agra: [27.1767, 78.0081], nashik: [19.9975, 73.7898], mangalore: [12.9141, 74.856],
-  thiruvananthapuram: [8.5241, 76.9366], bhubaneswar: [20.2961, 85.8245],
-  raipur: [21.2514, 81.6296], aurangabad: [19.8762, 75.3433], jodhpur: [26.2389, 73.0243],
-  guwahati: [26.1445, 91.7362], vijayawada: [16.5062, 80.6480],
+  noida: [28.5355, 77.391], ghaziabad: [28.6692, 77.4538], "navi mumbai": [19.033, 73.0297],
+  rajkot: [22.3039, 70.8022], amritsar: [31.634, 74.8723], dehradun: [30.3165, 78.0322],
+  ranchi: [23.3441, 85.3096], mysore: [12.2958, 76.6394], mysuru: [12.2958, 76.6394],
+  udaipur: [24.5854, 73.7125], varanasi: [25.3176, 82.9739], agra: [27.1767, 78.0081],
+  nashik: [19.9975, 73.7898], mangalore: [12.9141, 74.856], thiruvananthapuram: [8.5241, 76.9366],
+  bhubaneswar: [20.2961, 85.8245], raipur: [21.2514, 81.6296], aurangabad: [19.8762, 75.3433],
+  jodhpur: [26.2389, 73.0243], guwahati: [26.1445, 91.7362], vijayawada: [16.5062, 80.648],
 };
 
 function getCoordsByCity(city: string): { lat: number; lng: number } | null {
   const key = city.toLowerCase().trim();
   const coords = INDIA_CITY_COORDS[key];
   if (coords) return { lat: coords[0], lng: coords[1] };
-  // fuzzy match
   for (const [k, v] of Object.entries(INDIA_CITY_COORDS)) {
     if (key.includes(k) || k.includes(key)) return { lat: v[0], lng: v[1] };
   }
   return null;
 }
-
-// Component to fit bounds
-const FitBounds = ({ pins }: { pins: { lat: number; lng: number }[] }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (pins.length > 0) {
-      const bounds = L.latLngBounds(pins.map(p => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
-    }
-  }, [pins, map]);
-  return null;
-};
 
 const AdminHeatmap = () => {
   const [events, setEvents] = useState<EventPin[]>([]);
@@ -97,12 +48,12 @@ const AdminHeatmap = () => {
   const [showUsers, setShowUsers] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState<EventPin | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const fetchEvents = async () => {
     const { data } = await supabase
       .from("event_bookings")
-      .select("id, client_name, event_date, event_type, city, state, status, payment_status, total_price, artist_count, venue_name, event_start_time, event_end_time, client_mobile, client_email, registration_lat, registration_lng, country")
+      .select("id, client_name, event_date, event_type, city, state, status, payment_status, total_price, artist_count, venue_name, event_start_time, event_end_time, client_mobile, client_email, registration_lat, registration_lng")
       .order("event_date", { ascending: true });
 
     if (data) {
@@ -115,7 +66,6 @@ const AdminHeatmap = () => {
           if (coords) { lat = coords.lat; lng = coords.lng; }
         }
         if (lat && lng) {
-          // Add small jitter to avoid overlapping pins
           const jitter = () => (Math.random() - 0.5) * 0.01;
           pins.push({
             id: ev.id, lat: lat + jitter(), lng: lng + jitter(),
@@ -155,6 +105,9 @@ const AdminHeatmap = () => {
 
   useEffect(() => {
     Promise.all([fetchEvents(), fetchUsers()]).finally(() => setLoading(false));
+    // Delay map mount slightly to avoid blocking the UI thread
+    const t = setTimeout(() => setMapReady(true), 100);
+    return () => clearTimeout(t);
   }, []);
 
   const filteredEvents = useMemo(() => {
@@ -170,7 +123,7 @@ const AdminHeatmap = () => {
     const pins: { lat: number; lng: number }[] = [];
     if (showEvents) pins.push(...filteredEvents);
     if (showUsers) pins.push(...users);
-    return pins.length > 0 ? pins : [{ lat: 20.5937, lng: 78.9629 }]; // India center default
+    return pins.length > 0 ? pins : [{ lat: 20.5937, lng: 78.9629 }];
   }, [filteredEvents, users, showEvents, showUsers]);
 
   const stats = useMemo(() => ({
@@ -181,12 +134,6 @@ const AdminHeatmap = () => {
     totalRevenue: events.reduce((s, e) => s + (e.total_price || 0), 0),
     usersWithLocation: users.length,
   }), [events, users]);
-
-  const getEventIcon = (ev: EventPin) => {
-    if (ev.status === "completed") return completedIcon;
-    if (new Date(ev.event_date) >= new Date()) return eventIcon;
-    return completedIcon;
-  };
 
   return (
     <div className="space-y-4">
@@ -202,15 +149,15 @@ const AdminHeatmap = () => {
         </Button>
       </div>
 
-      {/* Stats widgets */}
+      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         {[
-          { label: "Total Events", value: stats.total, icon: Calendar, color: "text-blue-600 bg-blue-50" },
-          { label: "Upcoming", value: stats.upcoming, icon: TrendingUp, color: "text-amber-600 bg-amber-50" },
-          { label: "Completed", value: stats.completed, icon: Eye, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Cities", value: stats.cities, icon: Globe, color: "text-violet-600 bg-violet-50" },
-          { label: "Revenue", value: `₹${(stats.totalRevenue / 1000).toFixed(0)}K`, icon: TrendingUp, color: "text-rose-600 bg-rose-50" },
-          { label: "User Locations", value: stats.usersWithLocation, icon: Users, color: "text-sky-600 bg-sky-50" },
+          { label: "Total Events", value: stats.total, icon: Calendar, color: "text-primary bg-primary/10" },
+          { label: "Upcoming", value: stats.upcoming, icon: TrendingUp, color: "text-accent-foreground bg-accent" },
+          { label: "Completed", value: stats.completed, icon: Eye, color: "text-primary bg-primary/10" },
+          { label: "Cities", value: stats.cities, icon: Globe, color: "text-accent-foreground bg-accent" },
+          { label: "Revenue", value: `₹${(stats.totalRevenue / 1000).toFixed(0)}K`, icon: TrendingUp, color: "text-primary bg-primary/10" },
+          { label: "User Locations", value: stats.usersWithLocation, icon: Users, color: "text-accent-foreground bg-accent" },
         ].map(s => (
           <Card key={s.label} className="border-border/50">
             <CardContent className="p-3 flex items-center gap-2">
@@ -249,13 +196,13 @@ const AdminHeatmap = () => {
               <div className="flex items-center gap-1.5">
                 <Switch id="show-events" checked={showEvents} onCheckedChange={setShowEvents} />
                 <Label htmlFor="show-events" className="text-xs cursor-pointer flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Events ({filteredEvents.length})
+                  <div className="w-2.5 h-2.5 rounded-full bg-destructive" /> Events ({filteredEvents.length})
                 </Label>
               </div>
               <div className="flex items-center gap-1.5">
                 <Switch id="show-users" checked={showUsers} onCheckedChange={setShowUsers} />
                 <Label htmlFor="show-users" className="text-xs cursor-pointer flex items-center gap-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Users ({users.length})
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary" /> Users ({users.length})
                 </Label>
               </div>
             </div>
@@ -267,73 +214,39 @@ const AdminHeatmap = () => {
       <Card className="border-border/50 overflow-hidden">
         <CardContent className="p-0">
           <div className="h-[500px] md:h-[600px] relative">
-            {loading ? (
+            {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
                 <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
               </div>
-            ) : null}
-            <MapContainer
-              center={[20.5937, 78.9629]}
-              zoom={5}
-              style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <FitBounds pins={allPins} />
-
-              {showEvents && filteredEvents.map(ev => (
-                <Marker key={ev.id} position={[ev.lat, ev.lng]} icon={getEventIcon(ev)}>
-                  <Popup maxWidth={320} minWidth={260}>
-                    <div className="space-y-2 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm">{ev.client_name}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          ev.status === "completed" ? "bg-emerald-100 text-emerald-700" :
-                          ev.status === "confirmed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
-                        }`}>{ev.status}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-1 text-[11px]">
-                        <div><span className="text-gray-500">📅 Date:</span> {ev.event_date}</div>
-                        <div><span className="text-gray-500">🎪 Type:</span> {ev.event_type}</div>
-                        <div><span className="text-gray-500">📍 City:</span> {ev.city}, {ev.state}</div>
-                        <div><span className="text-gray-500">🏛️ Venue:</span> {ev.venue_name}</div>
-                        <div><span className="text-gray-500">🕐 Time:</span> {ev.event_start_time} - {ev.event_end_time}</div>
-                        <div><span className="text-gray-500">🎨 Artists:</span> {ev.artist_count}</div>
-                        <div><span className="text-gray-500">💰 Price:</span> ₹{ev.total_price?.toLocaleString()}</div>
-                        <div><span className="text-gray-500">💳 Payment:</span> {ev.payment_status}</div>
-                        <div><span className="text-gray-500">📞 Mobile:</span> {ev.client_mobile}</div>
-                        <div><span className="text-gray-500">✉️ Email:</span> {ev.client_email}</div>
-                      </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-
-              {showUsers && users.map(u => (
-                <Marker key={u.id} position={[u.lat, u.lng]} icon={userIcon}>
-                  <Popup maxWidth={250}>
-                    <div className="space-y-1 text-xs" style={{ fontFamily: "Inter, sans-serif" }}>
-                      <p className="font-bold text-sm">{u.full_name}</p>
-                      <p className="text-gray-500">{u.email}</p>
-                      <p className="text-gray-500">📍 {u.city}, {u.state}</p>
-                      <p className="text-gray-500">Joined: {format(new Date(u.created_at), "dd MMM yyyy")}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+            )}
+            {mapReady ? (
+              <Suspense fallback={
+                <div className="h-full flex items-center justify-center bg-muted/30">
+                  <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              }>
+                <LeafletMap
+                  filteredEvents={filteredEvents}
+                  users={users}
+                  showEvents={showEvents}
+                  showUsers={showUsers}
+                  allPins={allPins}
+                />
+              </Suspense>
+            ) : (
+              <div className="h-full flex items-center justify-center bg-muted/30">
+                <p className="text-xs text-muted-foreground">Loading map…</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500" /> Upcoming Events</div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500" /> Completed Events</div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500" /> Registered Users</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-destructive" /> Upcoming Events</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-primary" /> Completed Events</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-accent" /> Registered Users</div>
       </div>
     </div>
   );
