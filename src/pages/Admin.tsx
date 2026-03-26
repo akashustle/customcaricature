@@ -871,7 +871,15 @@ const Admin = () => {
               </div>
               <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
               <button
-                onClick={() => navigate("/workshop-admin-panel")}
+                onClick={async () => {
+                  // Auto-set workshop admin credentials from main admin session
+                  if (user) {
+                    const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
+                    const info = { id: user.id, email: profile?.email || user.email, name: profile?.full_name || adminEnteredName || "Admin" };
+                    localStorage.setItem("workshop_admin", JSON.stringify(info));
+                  }
+                  navigate("/workshop-admin-panel");
+                }}
                 className="text-[10px] font-bold px-2 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 hover:bg-violet-200 transition-all"
               >
                 🎓 Workshop

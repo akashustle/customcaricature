@@ -890,12 +890,22 @@ const WorkshopAdmin = () => {
          <div className={`${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} backdrop-blur-xl border-b`}>
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
-                <img src="/admin-icon-192.png" alt="CCC Admin" className="w-full h-full object-cover" />
+              <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
+                <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover" />
               </div>
               <span className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</span>
               <button
-                onClick={() => navigate("/admin-panel")}
+                onClick={async () => {
+                  // Auto-login to main admin — session is already active via Supabase auth
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).maybeSingle();
+                    if (profile?.full_name) {
+                      sessionStorage.setItem("admin_entered_name", profile.full_name);
+                    }
+                  }
+                  navigate("/admin-panel");
+                }}
                 className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${dm ? "bg-sky-500/20 text-sky-300 hover:bg-sky-500/30" : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
               >
                 🛡️ Main Admin
