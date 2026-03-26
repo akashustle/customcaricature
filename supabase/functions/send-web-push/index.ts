@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
       const payloadStr = JSON.stringify({
         title: title || "Creative Caricature Club",
         body: message || "You have a new notification",
-        icon: "/logo.png", badge: "/logo.png",
+        icon: "/logo.png", badge: "/badge-96.png",
         tag: `ccc-${Date.now()}`,
         url: link || "/notifications",
         image: image_url || undefined,
