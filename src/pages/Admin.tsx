@@ -1990,6 +1990,10 @@ const Admin = () => {
             <AdminWebsiteAnalytics />
           </TabsContent>
 
+          <TabsContent value="heatmap">
+            <AdminHeatmap />
+          </TabsContent>
+
           <TabsContent value="maintenance">
             <AdminMaintenance />
           </TabsContent>
