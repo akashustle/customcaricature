@@ -770,61 +770,108 @@ const AdminGoogleSheet = () => {
                       <AnimatePresence>
                         {expandedEventId === event.id && (
                           <TableRow key={`${event.id}-detail`}>
-                            <TableCell colSpan={11} className="bg-muted/20 p-0">
+                            <TableCell colSpan={11} className="p-0">
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
+                                transition={{ duration: 0.25 }}
                                 className="overflow-hidden"
                               >
-                                <div className="grid grid-cols-2 gap-x-6 gap-y-2 p-4 sm:grid-cols-4 text-xs">
-                                  <div><span className="text-muted-foreground">Mobile:</span> <span className="font-medium">{event.client_mobile || "—"}</span></div>
-                                  <div><span className="text-muted-foreground">Email:</span> <span className="font-medium">{event.client_email || "—"}</span></div>
-                                  <div><span className="text-muted-foreground">State:</span> <span className="font-medium">{event.state || "—"}</span></div>
-                                  <div><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{event.artist_count || 1}</span></div>
-                                  <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{event.event_start_time || "—"} – {event.event_end_time || "—"}</span></div>
-                                  <div><span className="text-muted-foreground">Advance:</span> <span className="font-medium">{event.advance_amount ? formatCurrency(event.advance_amount) : "—"}</span></div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-muted-foreground">Pending:</span>
-                                    {editingPendingId === event.id ? (
-                                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                        <Input
-                                          type="number"
-                                          value={pendingValue}
-                                          onChange={(e) => setPendingValue(e.target.value)}
-                                          className="h-6 w-24 text-xs"
-                                          min={0}
-                                        />
-                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleSavePending(event.id)} disabled={savingPending}>
-                                          {savingPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-primary" />}
-                                        </Button>
-                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { setEditingPendingId(null); setPendingValue(""); }}>
-                                          <XCircle className="h-3 w-3 text-muted-foreground" />
-                                        </Button>
+                                <div className="relative rounded-b-xl bg-gradient-to-br from-muted/40 to-muted/20 border-t border-border/40">
+                                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/30 rounded-bl-xl" />
+                                  <div className="pl-5 pr-4 py-4 space-y-3">
+                                    {/* Row 1: Contact */}
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Users className="h-3.5 w-3.5 text-primary" />
+                                      <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Contact & Location</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4">
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Mobile</p>
+                                        <p className="text-xs font-semibold">{event.client_mobile || "—"}</p>
                                       </div>
-                                    ) : (
-                                      <div className="flex items-center gap-1">
-                                        <span className="font-medium">{pendingAmt > 0 ? formatCurrency(pendingAmt) : "Nil"}</span>
-                                        <Button
-                                          size="sm" variant="ghost" className="h-5 w-5 p-0"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingPendingId(event.id);
-                                            setPendingValue(String(pendingAmt));
-                                          }}
-                                        >
-                                          <Edit2 className="h-3 w-3 text-muted-foreground" />
-                                        </Button>
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Email</p>
+                                        <p className="text-xs font-semibold truncate">{event.client_email || "—"}</p>
                                       </div>
-                                    )}
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">State</p>
+                                        <p className="text-xs font-semibold">{event.state || "—"}</p>
+                                      </div>
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Artists</p>
+                                        <p className="text-xs font-semibold">{(event.artist_count || 1) === 1 ? "1 Artist" : `${event.artist_count} Artists`}</p>
+                                      </div>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="border-t border-border/30" />
+
+                                    {/* Row 2: Booking & Payment */}
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <DollarSign className="h-3.5 w-3.5 text-primary" />
+                                      <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">Booking & Payment</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4">
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Time</p>
+                                        <p className="text-xs font-semibold">{event.event_start_time || "—"} – {event.event_end_time || "—"}</p>
+                                      </div>
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Advance</p>
+                                        <p className="text-xs font-semibold text-primary">{event.advance_amount ? formatCurrency(event.advance_amount) : "—"}</p>
+                                      </div>
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Pending</p>
+                                        <div className="flex items-center gap-1.5">
+                                          {editingPendingId === event.id ? (
+                                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                              <Input type="number" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} className="h-6 w-24 text-xs rounded-lg" min={0} />
+                                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleSavePending(event.id)} disabled={savingPending}>
+                                                {savingPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-primary" />}
+                                              </Button>
+                                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { setEditingPendingId(null); setPendingValue(""); }}>
+                                                <XCircle className="h-3 w-3 text-muted-foreground" />
+                                              </Button>
+                                            </div>
+                                          ) : (
+                                            <>
+                                              <span className={`text-xs font-semibold ${pendingAmt > 0 ? "text-destructive" : "text-primary"}`}>{pendingAmt > 0 ? formatCurrency(pendingAmt) : "Nil"}</span>
+                                              <Button size="sm" variant="ghost" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); setEditingPendingId(event.id); setPendingValue(String(pendingAmt)); }}>
+                                                <Edit2 className="h-3 w-3 text-muted-foreground hover:text-primary transition-colors" />
+                                              </Button>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Payment Status</p>
+                                        <Badge variant="outline" className="text-[10px]">{event.payment_status || "—"}</Badge>
+                                      </div>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="border-t border-border/30" />
+
+                                    {/* Row 3: Additional */}
+                                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4">
+                                      <div className="space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Booking Status</p>
+                                        <Badge variant="secondary" className="text-[10px]">{event.status || "—"}</Badge>
+                                      </div>
+                                      <div className="col-span-2 space-y-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-medium">Address / Venue</p>
+                                        <p className="text-xs font-semibold">{event.full_address || event.venue_name || "—"}</p>
+                                      </div>
+                                      {event.sheet_pushed_at && (
+                                        <div className="space-y-0.5">
+                                          <p className="text-[10px] text-muted-foreground font-medium">Last Pushed</p>
+                                          <p className="text-[10px] font-medium text-muted-foreground">{new Date(event.sheet_pushed_at).toLocaleString("en-IN")}</p>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div><span className="text-muted-foreground">Payment:</span> <span className="font-medium">{event.payment_status || "—"}</span></div>
-                                  <div><span className="text-muted-foreground">Status:</span> <span className="font-medium">{event.status || "—"}</span></div>
-                                  <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="font-medium">{event.full_address || "—"}</span></div>
-                                  {event.sheet_pushed_at && (
-                                    <div className="col-span-2"><span className="text-muted-foreground">Last pushed:</span> <span className="font-medium">{new Date(event.sheet_pushed_at).toLocaleString("en-IN")}</span></div>
-                                  )}
                                 </div>
                               </motion.div>
                             </TableCell>

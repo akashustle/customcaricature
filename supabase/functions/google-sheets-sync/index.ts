@@ -219,13 +219,17 @@ function formatSheetRow(event: any, includeDate: boolean, label?: string): any[]
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
   const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : startTime;
-  const venueName = event.venue_name || "";
-  const venueWithLabel = label ? `${venueName} (${label})` : venueName;
+  // Venue = full_address or venue_name (NOT client_name)
+  const venueRaw = event.full_address || event.venue_name || event.address || "";
+  const venueWithLabel = label ? `${venueRaw} (${label})` : venueRaw;
+  // Artist count display
+  const artistCount = event.artist_count || 1;
+  const artistLabel = artistCount === 1 ? "1 Artist" : `${artistCount} Artists`;
   return [
     includeDate ? String(new Date(event.event_date).getDate()) : "",
     venueWithLabel,
     timeStr,
-    "",
+    artistLabel,
     formatPaymentStatus(event),
     formatPendingAmount(event),
     event.id || "",
