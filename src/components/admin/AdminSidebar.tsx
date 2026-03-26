@@ -88,6 +88,7 @@ const NAV_SECTIONS = [
     label: "Content",
     items: [
       { id: "homepage", icon: Home, label: "Homepage" },
+      { id: "explore-editor", icon: Layers, label: "Explore Page" },
       { id: "blog", icon: FileText, label: "Blog" },
       { id: "gallery", icon: Image, label: "Gallery" },
       { id: "hp-reviews", icon: Star, label: "HP Reviews" },

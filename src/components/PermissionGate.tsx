@@ -49,11 +49,17 @@ const PermissionGate = () => {
 
   useEffect(() => {
     const done = localStorage.getItem(GATE_KEY) === "done";
+
+    // Always re-init web push if notification permission is granted (even if gate was completed)
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      requestBrowserNotificationPermission(user?.id);
+    }
+
     if (done) return;
 
-    // If all already granted, skip
+    // If all already granted, mark done and skip
     if (typeof Notification !== "undefined" && Notification.permission === "granted" && locationStatus === "granted") {
-      requestBrowserNotificationPermission(user?.id);
+      localStorage.setItem(GATE_KEY, "done");
       return;
     }
 

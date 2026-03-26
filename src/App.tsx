@@ -71,6 +71,7 @@ const CaricatureBudgeting = lazy(() => import("./pages/CaricatureBudgeting"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const DatabaseEntryReversal = lazy(() => import("./pages/DatabaseEntryReversal"));
 const FAQs = lazy(() => import("./pages/FAQs"));
+const Explore = lazy(() => import("./pages/Explore"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -211,6 +212,7 @@ const App = () => {
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
                 <Route path="/database-entry-reversal" element={<DatabaseEntryReversal />} />
                 <Route path="/faqs" element={<FAQs />} />
+                <Route path="/explore" element={<Explore />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

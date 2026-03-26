@@ -351,6 +351,7 @@ const Dashboard = () => {
               {settings.shop_nav_visible?.enabled !== false && (
                 <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
               )}
+              <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-2" />Chat</TabsTrigger>
               <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
               <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>
               <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>
@@ -365,6 +366,7 @@ const Dashboard = () => {
             {settings.shop_nav_visible?.enabled !== false && (
               <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             )}
+            <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>
             <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
@@ -386,6 +388,7 @@ const Dashboard = () => {
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
+          {activeTab === "chat" && user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
           {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
@@ -410,9 +413,11 @@ const Dashboard = () => {
               { icon: Package, key: "orders", action: () => setActiveTab("orders") },
               { icon: CalIcon, key: "events", action: () => setActiveTab("events") },
               ...(settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
+              { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
               { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
               { icon: Receipt, key: "invoices", action: () => setActiveTab("invoices") },
               { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
+              { icon: Download, key: "downloads", action: () => navigate("/notifications") },
               ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
               { icon: User, key: "profile", action: () => setActiveTab("profile") },
               { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
@@ -444,6 +449,62 @@ const Dashboard = () => {
 };
 
 
+const ChatSection = ({ userId, userName }: { userId: string; userName: string }) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMsg, setNewMsg] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data } = await supabase.from("chat_messages")
+        .select("*")
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .eq("deleted", false)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (data) setMessages(data);
+    };
+    fetchMessages();
+    const ch = supabase.channel("user-chat-" + userId)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchMessages())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
+
+  const sendMessage = async () => {
+    if (!newMsg.trim()) return;
+    setSending(true);
+    await supabase.from("chat_messages").insert({ sender_id: userId, message: newMsg.trim(), is_admin: false, is_artist_chat: false });
+    setNewMsg("");
+    setSending(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Chat with Admin</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 overflow-y-auto space-y-2 mb-4 border border-border rounded-xl p-3 bg-muted/20">
+          {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start a conversation!</p>}
+          {messages.map((m) => (
+            <div key={m.id} className={`flex ${m.sender_id === userId ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${m.sender_id === userId ? "bg-primary text-primary-foreground" : "bg-card border border-border text-foreground"}`}>
+                {m.message}
+                <p className="text-[10px] opacity-60 mt-1">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Input value={newMsg} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMsg(e.target.value)} placeholder="Type a message..."
+            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
+          <Button onClick={sendMessage} disabled={sending || !newMsg.trim()} size="sm" className="rounded-full px-4">Send</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 
 const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, changingSecret, currentPassword, setCurrentPassword, newPassword, setNewPassword, confirmNewPassword, setConfirmNewPassword, changePassword, changingPassword }: any) => (
