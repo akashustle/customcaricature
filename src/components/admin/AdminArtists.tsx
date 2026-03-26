@@ -409,6 +409,33 @@ const AdminArtists = () => {
                       )}
 
                       <p className="text-[10px] text-muted-foreground font-sans mt-2">Added: {new Date(artist.created_at).toLocaleDateString("en-IN")}</p>
+
+                      {/* Action Logs */}
+                      {artistLogs[artist.id] && artistLogs[artist.id].length > 0 && (
+                        <>
+                          <button onClick={() => setShowLogsFor(showLogsFor === artist.id ? null : artist.id)}
+                            className="w-full mt-1 flex items-center justify-center gap-1 text-[10px] text-muted-foreground font-sans py-1 hover:bg-muted/30 rounded-lg transition-colors">
+                            {showLogsFor === artist.id ? "▲ Hide" : "▼ View"} {artistLogs[artist.id].length} Actions
+                          </button>
+                          <AnimatePresence>
+                            {showLogsFor === artist.id && (
+                              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                <div className="space-y-1 mt-1 max-h-48 overflow-y-auto">
+                                  {artistLogs[artist.id].map(log => (
+                                    <div key={log.id} className="bg-muted/20 rounded px-2 py-1 text-[10px] font-sans flex justify-between">
+                                      <span>
+                                        <Badge className="text-[8px] mr-1 border-none bg-primary/10 text-primary">{log.action_type}</Badge>
+                                        {log.description}
+                                      </span>
+                                      <span className="text-muted-foreground flex-shrink-0 ml-2">{new Date(log.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
