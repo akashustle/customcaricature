@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "logo.png", "sw-push.js"],
+      includeAssets: ["favicon.png", "logo.png", "sw-push.js", "admin-icon-512.png", "admin-icon-192.png", "admin-manifest.json"],
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
