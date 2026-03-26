@@ -959,6 +959,7 @@ const Admin = () => {
             </div>
           </div>
         </header>
+        <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
 
         <div className="px-4 md:px-6 py-5">
           <div className="md:hidden mb-4">
