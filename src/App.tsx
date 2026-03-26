@@ -195,9 +195,8 @@ const App = () => {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <DefaultThemeApplier />
-        <OneSignalInit />
-        <WebPushInit />
-        <OfflineDetector />
+        <DeferredInit />
+        <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
         {showSplash && <Suspense fallback={null}><SplashScreen onComplete={() => setShowSplash(false)} /></Suspense>}
