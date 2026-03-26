@@ -32,6 +32,7 @@ import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
+import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
