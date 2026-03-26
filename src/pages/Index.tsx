@@ -6,32 +6,35 @@ import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, lazy, Suspense } from "react";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "@/hooks/use-toast";
 import JsonLd from "@/components/JsonLd";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
-import HomepageGallery from "@/components/HomepageGallery";
-import HomepageBeforeAfter from "@/components/HomepageBeforeAfter";
-import HomepageScrollEvents from "@/components/HomepageScrollEvents";
-import HomepageReviews from "@/components/HomepageReviews";
 import useSocialLinks from "@/hooks/useSocialLinks";
-import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
-import HomepageVideo from "@/components/homepage/HomepageVideo";
-import HomepageInstantQuote from "@/components/homepage/HomepageInstantQuote";
-import HomepageSocialProof from "@/components/homepage/HomepageSocialProof";
-import HomepageWhatYouGet from "@/components/homepage/HomepageWhatYouGet";
-import HomepageWhyUs from "@/components/homepage/HomepageWhyUs";
-import HomepageUseCases from "@/components/homepage/HomepageUseCases";
-import HomepageSmartHelp from "@/components/homepage/HomepageSmartHelp";
 import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageUrgencyStrip from "@/components/homepage/HomepageUrgencyStrip";
-import HomepageEnquiryFunnel from "@/components/homepage/HomepageEnquiryFunnel";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Lazy load below-the-fold homepage sections for faster initial paint
+const HomepageGallery = lazy(() => import("@/components/HomepageGallery"));
+const HomepageBeforeAfter = lazy(() => import("@/components/HomepageBeforeAfter"));
+const HomepageScrollEvents = lazy(() => import("@/components/HomepageScrollEvents"));
+const HomepageReviews = lazy(() => import("@/components/HomepageReviews"));
+const HomepageTrustedBrands = lazy(() => import("@/components/HomepageTrustedBrands"));
+const HomepageVideo = lazy(() => import("@/components/homepage/HomepageVideo"));
+const HomepageInstantQuote = lazy(() => import("@/components/homepage/HomepageInstantQuote"));
+const HomepageSocialProof = lazy(() => import("@/components/homepage/HomepageSocialProof"));
+const HomepageWhatYouGet = lazy(() => import("@/components/homepage/HomepageWhatYouGet"));
+const HomepageWhyUs = lazy(() => import("@/components/homepage/HomepageWhyUs"));
+const HomepageUseCases = lazy(() => import("@/components/homepage/HomepageUseCases"));
+const HomepageSmartHelp = lazy(() => import("@/components/homepage/HomepageSmartHelp"));
+const HomepageEnquiryFunnel = lazy(() => import("@/components/homepage/HomepageEnquiryFunnel"));
+
+// Only load first 4 gallery images eagerly, rest lazy
 import gallery1 from "@/assets/gallery/gallery-1.jpeg";
 import gallery2 from "@/assets/gallery/gallery-2.jpeg";
 import gallery3 from "@/assets/gallery/gallery-3.jpeg";
