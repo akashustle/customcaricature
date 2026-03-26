@@ -449,6 +449,62 @@ const Dashboard = () => {
 };
 
 
+const ChatSection = ({ userId, userName }: { userId: string; userName: string }) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMsg, setNewMsg] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data } = await supabase.from("chat_messages")
+        .select("*")
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        .eq("deleted", false)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (data) setMessages(data);
+    };
+    fetchMessages();
+    const ch = supabase.channel("user-chat-" + userId)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchMessages())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
+
+  const sendMessage = async () => {
+    if (!newMsg.trim()) return;
+    setSending(true);
+    await supabase.from("chat_messages").insert({ sender_id: userId, message: newMsg.trim(), is_admin: false, is_artist_chat: false });
+    setNewMsg("");
+    setSending(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Chat with Admin</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 overflow-y-auto space-y-2 mb-4 border border-border rounded-xl p-3 bg-muted/20">
+          {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start a conversation!</p>}
+          {messages.map((m) => (
+            <div key={m.id} className={`flex ${m.sender_id === userId ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${m.sender_id === userId ? "bg-primary text-primary-foreground" : "bg-card border border-border text-foreground"}`}>
+                {m.message}
+                <p className="text-[10px] opacity-60 mt-1">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Input value={newMsg} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMsg(e.target.value)} placeholder="Type a message..."
+            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
+          <Button onClick={sendMessage} disabled={sending || !newMsg.trim()} size="sm" className="rounded-full px-4">Send</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 
 const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, changingSecret, currentPassword, setCurrentPassword, newPassword, setNewPassword, confirmNewPassword, setConfirmNewPassword, changePassword, changingPassword }: any) => (
