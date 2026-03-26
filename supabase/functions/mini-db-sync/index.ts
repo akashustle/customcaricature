@@ -81,7 +81,7 @@ async function formatSheet(token: string, spreadId: string, sheetId: number, hea
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
+      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
       fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment)"
     }
   });
