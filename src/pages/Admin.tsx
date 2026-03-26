@@ -2430,6 +2430,7 @@ const Admin = () => {
             </div>
           </TabsContent>
           </motion.div>
+          </Suspense>
         </Tabs>
         </div>
 
