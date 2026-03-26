@@ -526,7 +526,7 @@ serve(async (req) => {
       let totalSkipped = 0;
       for (const event of (events || [])) {
         try {
-          await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
+          await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed", supabase);
           await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event.id);
           totalSynced++;
         } catch (e: any) {
