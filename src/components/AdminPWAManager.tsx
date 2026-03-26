@@ -37,7 +37,7 @@ const AdminPWAManager = () => {
     if (isAdminRoute) {
       link.href = "/admin-manifest.json";
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute("content", "#1E3A5F");
+      if (meta) meta.setAttribute("content", "#3a2e22");
       // Set admin favicon
       const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
       if (favicon) favicon.href = "/admin-favicon.jpeg";

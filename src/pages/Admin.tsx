@@ -200,7 +200,7 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
   usePermissions(true);
-  useAutoLogout(true);
+  useAutoLogout(false);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
@@ -217,6 +217,21 @@ const Admin = () => {
       autoSetName();
     }
   }, [user, adminEnteredName]);
+
+  useEffect(() => {
+    if (!user) return;
+    const syncSharedAdminState = async () => {
+      const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
+      const fullName = profile?.full_name || user.user_metadata?.full_name || "Admin";
+      sessionStorage.setItem("admin_entered_name", fullName);
+      localStorage.setItem("workshop_admin", JSON.stringify({
+        id: user.id,
+        email: profile?.email || user.email,
+        name: fullName,
+      }));
+    };
+    syncSharedAdminState();
+  }, [user]);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -714,6 +729,7 @@ const Admin = () => {
       }
     }
     sessionStorage.removeItem("admin_entered_name");
+    localStorage.removeItem("workshop_admin");
     await supabase.auth.signOut();
     navigate("/customcad75");
   };

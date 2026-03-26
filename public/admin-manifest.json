@@ -2,8 +2,8 @@
   "name": "CCC Admin Console",
   "short_name": "CCC Admin",
   "description": "Creative Caricature Club — Admin Management Console",
-  "theme_color": "#1E3A5F",
-  "background_color": "#0f172a",
+  "theme_color": "#3a2e22",
+  "background_color": "#fdf8f3",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
@@ -16,12 +16,13 @@
       "src": "/admin-favicon.jpeg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/admin-favicon.jpeg",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
