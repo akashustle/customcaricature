@@ -225,16 +225,21 @@ function countSheetEvents(rows: any[][]): number {
   return count;
 }
 
-function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
+function formatSheetRow(event: any, includeDate: boolean, label?: string, artistNames?: string[]): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
   const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || getTimeLabel(event.event_start_time || ""));
   // Venue = city name only (short)
   const venueRaw = event.city || event.venue_name || "";
   const venueWithLabel = label ? `${venueRaw} (${label})` : venueRaw;
-  // Artist count display
+  // Artist names display - use actual names if available, else count
   const artistCount = event.artist_count || 1;
-  const artistLabel = artistCount === 1 ? "1 Artist" : `${artistCount} Artists`;
+  let artistLabel: string;
+  if (artistNames && artistNames.length > 0) {
+    artistLabel = artistNames.join(", ");
+  } else {
+    artistLabel = artistCount === 1 ? "1 Artist" : `${artistCount} Artists`;
+  }
   return [
     includeDate ? String(new Date(event.event_date).getDate()) : "",
     venueWithLabel,
