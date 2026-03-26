@@ -462,8 +462,29 @@ const Enquiry = () => {
           </CardHeader>
 
           <CardContent className="space-y-5 pt-2">
+            {/* Duplicate enquiry blocked message */}
+            {dupBlocked && (
+              <div className="p-6 rounded-2xl bg-amber-50 border border-amber-200 text-center space-y-3 animate-in fade-in">
+                <div className="text-4xl">🔒</div>
+                <h3 className="font-display text-lg font-bold text-amber-800">You've Already Submitted an Enquiry</h3>
+                <p className="text-sm text-amber-700 font-sans">
+                  We already have your enquiry on file. Our team will get back to you soon!
+                </p>
+                <p className="text-xs text-amber-600 font-sans">
+                  Want to submit unlimited enquiries? Register or login to your account.
+                </p>
+                <div className="flex gap-2 justify-center pt-2">
+                  <Button onClick={() => window.location.href = "/register"} className="rounded-full font-sans" size="sm">
+                    Register Now
+                  </Button>
+                  <Button onClick={() => window.location.href = "/login"} variant="outline" className="rounded-full font-sans" size="sm">
+                    Login
+                  </Button>
+                </div>
+              </div>
+            )}
             {/* Pricing Psychology Banner - shows on first step */}
-            {step === "info" && (
+            {step === "info" && !dupBlocked && (
               <div className="space-y-4 animate-in fade-in duration-300">
                 {/* Pricing Range Display at Top */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">
