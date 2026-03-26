@@ -177,9 +177,8 @@ const LiveChat = () => {
           } as any);
         }
         
-        // If quick question, auto-reply with answer
+        // If quick question, auto-reply with answer instantly
         if (matchedQQ) {
-          await new Promise(r => setTimeout(r, 800));
           await supabase.from("chat_messages").insert({
             sender_id: "system", receiver_id: currentUser.id, message: matchedQQ.a,
             is_admin: true, is_artist_chat: false,
