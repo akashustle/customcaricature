@@ -32,7 +32,7 @@ const showLocalWelcomeNotification = async (registration: ServiceWorkerRegistrat
     await registration.showNotification("Welcome to Creative Caricature Club", {
       body: "Notifications enabled. You will receive order updates and event alerts.",
       icon: NOTIFICATION_ICON,
-      badge: NOTIFICATION_ICON,
+      badge: "/badge-96.png",
       tag: "ccc-welcome",
       renotify: false,
       data: { url: "/notifications" },

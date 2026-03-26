@@ -9,6 +9,9 @@
   "scope": "/",
   "start_url": "/",
   "id": "/",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "categories": ["entertainment", "lifestyle", "art", "shopping"],
   "icons": [
     {
@@ -21,6 +24,12 @@
       "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png"
+    },
+    {
+      "src": "/badge-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "monochrome"
     }
   ],
   "screenshots": [],
