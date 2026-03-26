@@ -497,16 +497,6 @@ const WorkshopAdminLogin = () => {
               {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
                 <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#9CA3AF" }}>← Back to Home</button>
               )}
-              <button
-                onClick={() => {
-                  const p = (window as any).__pwaInstallPrompt;
-                  if (p) { p.prompt(); } else { toast({ title: "Open in browser & use 'Add to Home Screen'", description: "Install the CCC Admin app for quick access" }); }
-                }}
-                className="text-xs font-bold flex items-center gap-1.5 mx-auto px-4 py-2 rounded-full border transition-all hover:shadow-md"
-                style={{ color: BRAND.primary, borderColor: BRAND.light, background: BRAND.cream }}
-              >
-                <Download className="w-3.5 h-3.5" /> Install Admin App
-              </button>
             </div>
           </div>
         </motion.div>

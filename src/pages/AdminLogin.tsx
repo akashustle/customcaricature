@@ -647,16 +647,6 @@ const AdminLogin = () => {
               {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
                 <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
               )}
-              <button
-                onClick={() => {
-                  const p = (window as any).__pwaInstallPrompt;
-                  if (p) { p.prompt(); } else { toast({ title: "Open in browser & use 'Add to Home Screen'", description: "For the best admin experience, install the CCC Admin app" }); }
-                }}
-                className="text-xs font-bold flex items-center gap-1.5 mx-auto px-4 py-2 rounded-full border transition-all hover:shadow-md"
-                style={{ color: BRAND.primary, borderColor: BRAND.light, background: BRAND.cream }}
-              >
-                <Download className="w-3.5 h-3.5" /> Install Admin App
-              </button>
             </div>
           </div>
         </motion.div>
