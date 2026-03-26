@@ -33,6 +33,7 @@ import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
 import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, CartesianGrid, ResponsiveContainer, AreaChart, Area, LineChart, Line, Tooltip, Legend, RadialBarChart, RadialBar } from "recharts";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminOfflineBanner from "@/components/AdminOfflineBanner";
+import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
 
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
@@ -1000,23 +1001,7 @@ const WorkshopAdmin = () => {
               <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
                 <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover" />
               </div>
-              <span className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</span>
-              <button
-                onClick={async () => {
-                  // Auto-login to main admin — session is already active via Supabase auth
-                  const { data: { user } } = await supabase.auth.getUser();
-                  if (user) {
-                    const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", user.id).maybeSingle();
-                    if (profile?.full_name) {
-                      sessionStorage.setItem("admin_entered_name", profile.full_name);
-                    }
-                  }
-                  navigate("/admin-panel", { replace: true });
-                }}
-                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${dm ? "bg-sky-500/20 text-sky-300 hover:bg-sky-500/30" : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
-              >
-                🛡️ Main Admin
-              </button>
+              <AdminWorkspaceSwitcher />
             </div>
             <div className="flex gap-1 items-center">
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}

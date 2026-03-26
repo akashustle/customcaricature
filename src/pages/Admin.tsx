@@ -84,6 +84,7 @@ import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
 import AdminQuickActions from "@/components/admin/AdminQuickActions";
+import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminLocationPrompt from "@/components/AdminLocationPrompt";
 import AdminContentEditor from "@/components/admin/AdminContentEditor";
@@ -895,21 +896,7 @@ const Admin = () => {
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
                 <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover rounded-full" />
               </div>
-              <span className="text-[13px] font-bold tracking-tight text-foreground font-sans">Admin</span>
-              <button
-                onClick={async () => {
-                  // Auto-set workshop admin credentials from main admin session
-                  if (user) {
-                    const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
-                    const info = { id: user.id, email: profile?.email || user.email, name: profile?.full_name || adminEnteredName || "Admin" };
-                    localStorage.setItem("workshop_admin", JSON.stringify(info));
-                  }
-                  navigate("/workshop-admin-panel");
-                }}
-                className="text-[10px] font-bold px-2 py-1 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 hover:bg-violet-200 transition-all"
-              >
-                🎓 Workshop
-              </button>
+              <AdminWorkspaceSwitcher />
             </div>
             <div className="hidden md:flex items-center gap-3 flex-1">
               <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-full">
