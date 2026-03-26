@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Bar, BarChart, CartesianGrid, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Calendar, Filter, Loader2, Plus, RefreshCw, RotateCcw, Search, Send, Sheet, TrendingUp } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
