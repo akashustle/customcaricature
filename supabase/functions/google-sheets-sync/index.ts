@@ -585,7 +585,7 @@ serve(async (req) => {
       } as any).select().single();
       if (error) return ok({ success: false, error: error.message });
 
-      const result = await pushEventToSheet(accessToken, sheetId, tabs, inserted, "manual");
+      const result = await pushEventToSheet(accessToken, sheetId, tabs, inserted, "manual", supabase);
       return ok({ success: true, event: inserted, ...result });
     }
 
