@@ -2077,6 +2077,21 @@ const Admin = () => {
                       }}
                     />
                   </div>
+                  {/* Auto Assign Artist Toggle */}
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">🤖 Auto-Assign Artist</p>
+                      <p className="text-xs text-muted-foreground font-sans">Automatically assign available artists to new event bookings based on their availability and blocked dates</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).auto_assign_artist?.enabled === true}
+                      onCheckedChange={async (checked) => {
+                        if (!confirm(`${checked ? "Enable" : "Disable"} automatic artist assignment?`)) return;
+                        await updateSetting("auto_assign_artist", { enabled: checked });
+                        toast({ title: checked ? "Auto-assign enabled — artists will be assigned automatically" : "Auto-assign disabled — manual assignment only" });
+                      }}
+                    />
+                  </div>
                   {/* Global International Booking Toggle */}
                   <div className="flex items-center justify-between border-t border-border pt-4">
                     <div>

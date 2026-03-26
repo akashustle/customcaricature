@@ -426,14 +426,35 @@ const ArtistDashboard = () => {
       reason: blockReason || null,
     }) as any);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else { toast({ title: "Date Blocked! 📅" }); setBlockDate(""); setBlockStartTime(""); setBlockEndTime(""); setBlockReason(""); fetchBlockedDates(artist.id); }
+    else {
+      toast({ title: "Date Blocked! 📅" });
+      // Log the action
+      await supabase.from("artist_action_logs" as any).insert({
+        artist_id: artist.id, artist_name: artist.name, action_type: "blocked_date",
+        description: `Blocked ${blockDate}${blockStartTime ? ` (${blockStartTime}-${blockEndTime})` : ""}${blockReason ? ` - ${blockReason}` : ""}`,
+        metadata: { date: blockDate, start_time: blockStartTime, end_time: blockEndTime, reason: blockReason },
+      } as any);
+      setBlockDate(""); setBlockStartTime(""); setBlockEndTime(""); setBlockReason(""); fetchBlockedDates(artist.id);
+    }
     setAddingBlock(false);
   };
 
   const handleDeleteBlock = async (id: string) => {
+    const bd = blockedDates.find(b => b.id === id);
     const { error } = await (supabase.from("artist_blocked_dates").delete() as any).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else { toast({ title: "Unblocked!" }); if (artist) fetchBlockedDates(artist.id); }
+    else {
+      toast({ title: "Unblocked!" });
+      if (artist) {
+        // Log the action
+        await supabase.from("artist_action_logs" as any).insert({
+          artist_id: artist.id, artist_name: artist.name, action_type: "unblocked_date",
+          description: `Unblocked ${bd?.blocked_date || "date"}`,
+          metadata: { date: bd?.blocked_date, reason: bd?.reason },
+        } as any);
+        fetchBlockedDates(artist.id);
+      }
+    }
   };
 
   const handleLogout = async () => { await signOut(); navigate("/artistlogin"); };

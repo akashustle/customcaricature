@@ -55,6 +55,7 @@ const Enquiry = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [enquiryId, setEnquiryId] = useState("");
+  const [dupBlocked, setDupBlocked] = useState(false);
 
   // Form data
   const [name, setName] = useState("");
@@ -175,7 +176,7 @@ const Enquiry = () => {
     info: 15, type: 30, caricature_select: 50, caricature_details: 75, event_details: 60, event_submitted: 100, help: 100,
   };
 
-  const handleSubmitInfo = () => {
+  const handleSubmitInfo = async () => {
     if (!name.trim() || !mobile.trim()) {
       toast({ title: "Please enter your name and mobile number", variant: "destructive" });
       return;
@@ -183,6 +184,22 @@ const Enquiry = () => {
     if (mobile.length < 10) {
       toast({ title: "Please enter a valid mobile number", variant: "destructive" });
       return;
+    }
+
+    // Check duplicate for non-logged-in users
+    const userId = (await supabase.auth.getUser()).data.user?.id || null;
+    if (!userId) {
+      const fingerprint = `${mobile.trim()}_${navigator.userAgent.slice(0, 50)}`;
+      const { data: existing } = await supabase.from("guest_enquiry_tracking" as any)
+        .select("id, enquiry_count, fingerprint")
+        .or(`fingerprint.eq.${fingerprint},mobile.eq.${mobile.trim()}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (existing && (existing as any).enquiry_count >= 1) {
+        setDupBlocked(true);
+        return;
+      }
     }
     setStep("type");
   };
@@ -192,6 +209,27 @@ const Enquiry = () => {
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id || null;
       const finalEventType = eventType === "other" ? customEventType : eventType;
+
+      // Track guest enquiry
+      if (!userId) {
+        const fingerprint = `${mobile.trim()}_${navigator.userAgent.slice(0, 50)}`;
+        const { data: existing } = await supabase.from("guest_enquiry_tracking" as any)
+          .select("id, enquiry_count")
+          .or(`fingerprint.eq.${fingerprint},mobile.eq.${mobile.trim()}`)
+          .limit(1)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase.from("guest_enquiry_tracking" as any)
+            .update({ enquiry_count: ((existing as any).enquiry_count || 0) + 1, last_enquiry_at: new Date().toISOString() } as any)
+            .eq("id", (existing as any).id);
+        } else {
+          await supabase.from("guest_enquiry_tracking" as any).insert({
+            fingerprint, mobile: mobile.trim(), enquiry_count: 1,
+          } as any);
+        }
+      }
+
       const { data, error } = await supabase.from("enquiries" as any).insert({
         name: name.trim(), mobile: mobile.trim(), email: email.trim() || null,
         instagram_id: instagramId.trim() || null, enquiry_type: enquiryType,
@@ -424,8 +462,29 @@ const Enquiry = () => {
           </CardHeader>
 
           <CardContent className="space-y-5 pt-2">
+            {/* Duplicate enquiry blocked message */}
+            {dupBlocked && (
+              <div className="p-6 rounded-2xl bg-amber-50 border border-amber-200 text-center space-y-3 animate-in fade-in">
+                <div className="text-4xl">🔒</div>
+                <h3 className="font-display text-lg font-bold text-amber-800">You've Already Submitted an Enquiry</h3>
+                <p className="text-sm text-amber-700 font-sans">
+                  We already have your enquiry on file. Our team will get back to you soon!
+                </p>
+                <p className="text-xs text-amber-600 font-sans">
+                  Want to submit unlimited enquiries? Register or login to your account.
+                </p>
+                <div className="flex gap-2 justify-center pt-2">
+                  <Button onClick={() => window.location.href = "/register"} className="rounded-full font-sans" size="sm">
+                    Register Now
+                  </Button>
+                  <Button onClick={() => window.location.href = "/login"} variant="outline" className="rounded-full font-sans" size="sm">
+                    Login
+                  </Button>
+                </div>
+              </div>
+            )}
             {/* Pricing Psychology Banner - shows on first step */}
-            {step === "info" && (
+            {step === "info" && !dupBlocked && (
               <div className="space-y-4 animate-in fade-in duration-300">
                 {/* Pricing Range Display at Top */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20">

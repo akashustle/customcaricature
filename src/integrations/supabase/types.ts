@@ -600,6 +600,44 @@ export type Database = {
         }
         Relationships: []
       }
+      artist_action_logs: {
+        Row: {
+          action_type: string
+          artist_id: string
+          artist_name: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action_type: string
+          artist_id: string
+          artist_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          action_type?: string
+          artist_id?: string
+          artist_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_action_logs_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_blocked_dates: {
         Row: {
           artist_id: string | null
@@ -1890,6 +1928,33 @@ export type Database = {
           session_id?: string | null
           source?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      guest_enquiry_tracking: {
+        Row: {
+          created_at: string
+          enquiry_count: number
+          fingerprint: string
+          id: string
+          last_enquiry_at: string
+          mobile: string | null
+        }
+        Insert: {
+          created_at?: string
+          enquiry_count?: number
+          fingerprint: string
+          id?: string
+          last_enquiry_at?: string
+          mobile?: string | null
+        }
+        Update: {
+          created_at?: string
+          enquiry_count?: number
+          fingerprint?: string
+          id?: string
+          last_enquiry_at?: string
+          mobile?: string | null
         }
         Relationships: []
       }

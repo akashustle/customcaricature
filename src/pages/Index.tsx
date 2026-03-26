@@ -4,9 +4,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight, Star, Users, Calendar, Award, Zap, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
-import { useState, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useCallback, useRef, useEffect, lazy, Suspense } from "react";
 import SEOHead from "@/components/SEOHead";
 import { toast } from "@/hooks/use-toast";
 import JsonLd from "@/components/JsonLd";
@@ -125,12 +126,33 @@ const Index = () => {
   const { content } = useHomepageContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [redirectChecked, setRedirectChecked] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
   const maintenance = useMaintenanceCheck("home");
+
+  // Smart redirect: logged-in users go to their dashboard
+  useEffect(() => {
+    if (loading || redirectChecked || !user) { setRedirectChecked(true); return; }
+    const checkRole = async () => {
+      // Check if admin
+      const { data: adminRole } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+      if (adminRole) {
+        const lastAdmin = sessionStorage.getItem("ccc_admin_session");
+        if (lastAdmin) { navigate("/admin-panel", { replace: true }); return; }
+      }
+      // Check if artist
+      const { data: artist } = await supabase.from("artists").select("id").eq("auth_user_id", user.id).maybeSingle() as any;
+      if (artist) { navigate("/artist-dashboard", { replace: true }); return; }
+      // Regular user → dashboard
+      navigate("/dashboard", { replace: true });
+    };
+    checkRole();
+    setRedirectChecked(true);
+  }, [user, loading, redirectChecked]);
 
   const hero = content.homepage_hero || {};
   const sections = content.homepage_sections || {};

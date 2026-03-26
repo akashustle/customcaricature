@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 type ArtistDocument = { id: string; artist_id: string; document_type: string; file_name: string; storage_path: string; created_at: string; };
 type Artist = { id: string; name: string; experience: string | null; portfolio_url: string | null; email: string | null; mobile: string | null; auth_user_id: string | null; created_at: string; };
 type ArtistEvent = { id: string; client_name: string; event_type: string; event_date: string; city: string; status: string; payment_status: string; total_price: number; artist_count: number; };
+type ArtistLog = { id: string; artist_id: string; artist_name: string; action_type: string; description: string | null; metadata: any; created_at: string; };
 
 const AdminArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -37,19 +38,35 @@ const AdminArtists = () => {
   const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [artistLogs, setArtistLogs] = useState<Record<string, ArtistLog[]>>({});
+  const [showLogsFor, setShowLogsFor] = useState<string | null>(null);
 
   useEffect(() => {
     fetchArtists();
     fetchAllDocs();
     fetchAllArtistEvents();
+    fetchAllLogs();
     const ch = supabase.channel("admin-artists-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "artists" }, () => fetchArtists())
       .on("postgres_changes", { event: "*", schema: "public", table: "artist_documents" }, () => fetchAllDocs())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchAllArtistEvents())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchAllArtistEvents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "artist_action_logs" }, () => fetchAllLogs())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  const fetchAllLogs = async () => {
+    const { data } = await supabase.from("artist_action_logs" as any).select("*").order("created_at", { ascending: false }).limit(200);
+    if (data) {
+      const map: Record<string, ArtistLog[]> = {};
+      (data as any[]).forEach(log => {
+        if (!map[log.artist_id]) map[log.artist_id] = [];
+        map[log.artist_id].push(log);
+      });
+      setArtistLogs(map);
+    }
+  };
 
   const fetchArtists = async () => {
     const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
@@ -392,6 +409,33 @@ const AdminArtists = () => {
                       )}
 
                       <p className="text-[10px] text-muted-foreground font-sans mt-2">Added: {new Date(artist.created_at).toLocaleDateString("en-IN")}</p>
+
+                      {/* Action Logs */}
+                      {artistLogs[artist.id] && artistLogs[artist.id].length > 0 && (
+                        <>
+                          <button onClick={() => setShowLogsFor(showLogsFor === artist.id ? null : artist.id)}
+                            className="w-full mt-1 flex items-center justify-center gap-1 text-[10px] text-muted-foreground font-sans py-1 hover:bg-muted/30 rounded-lg transition-colors">
+                            {showLogsFor === artist.id ? "▲ Hide" : "▼ View"} {artistLogs[artist.id].length} Actions
+                          </button>
+                          <AnimatePresence>
+                            {showLogsFor === artist.id && (
+                              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                <div className="space-y-1 mt-1 max-h-48 overflow-y-auto">
+                                  {artistLogs[artist.id].map(log => (
+                                    <div key={log.id} className="bg-muted/20 rounded px-2 py-1 text-[10px] font-sans flex justify-between">
+                                      <span>
+                                        <Badge className="text-[8px] mr-1 border-none bg-primary/10 text-primary">{log.action_type}</Badge>
+                                        {log.description}
+                                      </span>
+                                      <span className="text-muted-foreground flex-shrink-0 ml-2">{new Date(log.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
