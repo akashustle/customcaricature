@@ -200,6 +200,15 @@ function formatTime(t: string): string {
   return t;
 }
 
+function getTimeLabel(startTime: string): string {
+  if (!startTime) return "Morning";
+  const hour = parseInt(startTime.split(":")[0], 10);
+  if (isNaN(hour)) return "Morning";
+  if (hour < 12) return "Morning";
+  if (hour < 17) return "Afternoon";
+  return "Evening";
+}
+
 function countSheetEvents(rows: any[][]): number {
   let currentDay = "";
   let count = 0;
