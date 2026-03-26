@@ -22,13 +22,8 @@ const AppUpdateBanner = lazy(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
 const OfflineDetector = lazy(() => import("./components/OfflineDetector"));
 
-import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
-import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
-import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
-import MaintenanceScreen from "./components/MaintenanceScreen";
-import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
