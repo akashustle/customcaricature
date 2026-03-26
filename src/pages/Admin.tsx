@@ -65,6 +65,7 @@ import AdminIntegrations from "@/components/admin/AdminIntegrations";
 import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
 import { useAdminAction } from "@/hooks/useAdminAction";
 import AdminFileExplorer from "@/components/admin/AdminFileExplorer";
+import AdminExploreEditor from "@/components/admin/AdminExploreEditor";
 import AdminGallery from "@/components/admin/AdminGallery";
 import AdminBeforeAfter from "@/components/admin/AdminBeforeAfter";
 import AdminHomepageReviews from "@/components/admin/AdminHomepageReviews";
