@@ -743,7 +743,7 @@ const ArtistDashboard = () => {
         {/* Chat Tab (mobile) */}
         {activeTab === "chat" && user && artist && (
           <div className="bg-card rounded-xl border border-border p-1 min-h-[60vh]">
-            <ChatWidget userId={user.id} userName={artist.name} isArtistChat embedded />
+            <ChatWidget userId={user.id} userName={artist.name} isArtistChat />
           </div>
         )}
       </div>
