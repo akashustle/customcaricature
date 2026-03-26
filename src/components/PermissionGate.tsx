@@ -162,7 +162,7 @@ const PermissionGate = () => {
             <CardContent className="space-y-6 p-6 md:p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20 overflow-hidden flex-shrink-0">
-                  <img src={isAdminRoute ? "/admin-favicon.jpeg" : "/logo.png"} alt="CCC" className="h-14 w-14 object-cover rounded-full" />
+                  <img src="/logo.png" alt="CCC" className="h-14 w-14 object-cover rounded-full" />
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">

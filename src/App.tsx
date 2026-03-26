@@ -158,7 +158,7 @@ const App = () => {
             <ScrollToTop />
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
-            <AdminPWAManager />
+            
             <FloatingButtons />
             <LiveChatWrapper />
             <MobileBottomNav />

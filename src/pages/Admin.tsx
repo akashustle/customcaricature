@@ -889,7 +889,7 @@ const Admin = () => {
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden">
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
-                <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover rounded-full" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover rounded-full" />
               </div>
               <AdminWorkspaceSwitcher />
             </div>
