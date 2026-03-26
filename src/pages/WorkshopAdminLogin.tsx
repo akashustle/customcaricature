@@ -22,13 +22,13 @@ const ADMIN_LIST: AdminInfo[] = [
 const maskEmail = (email: string) => { const [l, d] = email.split("@"); return `${l.slice(0, 3)}${"•".repeat(Math.max(l.length - 3, 2))}@${d}`; };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
-// Vibrant violet-purple palette
+// Warm logo-aligned palette
 const BRAND = {
-  primary: "#4C1D95",
-  accent: "#7C3AED",
-  light: "#DDD6FE",
-  highlight: "#A78BFA",
-  cream: "#F5F3FF",
+  primary: "#3A2E22",
+  accent: "#A76C4E",
+  light: "#E8D6C3",
+  highlight: "#C49A6C",
+  cream: "#FDF8F3",
 };
 
 const WorkshopAdminLogin = () => {
@@ -51,6 +51,21 @@ const WorkshopAdminLogin = () => {
   const [adminMasterSecret, setAdminMasterSecret] = useState("01022006");
   const [locationGranted, setLocationGranted] = useState(false);
   const [adminAvatars, setAdminAvatars] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const resumeSharedSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data: roles } = await supabase.from("user_roles" as any).select("role").eq("user_id", session.user.id).eq("role", "admin");
+      if (!roles || (roles as any[]).length === 0) return;
+      const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
+      const info = { id: session.user.id, email: profile?.email || session.user.email, name: profile?.full_name || "Admin" };
+      localStorage.setItem("workshop_admin", JSON.stringify(info));
+      sessionStorage.setItem("admin_entered_name", info.name);
+      navigate("/workshop-admin-panel", { replace: true });
+    };
+    resumeSharedSession();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchAvatars = async () => {
@@ -89,6 +104,20 @@ const WorkshopAdminLogin = () => {
       }, 2000);
     }, { enableHighAccuracy: true, timeout: 5000 });
   }, []);
+
+  const requestLocationAccess = () => {
+    navigator.geolocation?.getCurrentPosition(
+      () => {
+        setLocationGranted(true);
+        toast({ title: "Location enabled" });
+      },
+      () => {
+        setLocationGranted(false);
+        toast({ title: "Location still blocked", description: "Tap again and allow location in browser settings.", variant: "destructive" });
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
 
   const startResendCooldown = () => {
     setResendCooldown(60);
@@ -168,6 +197,7 @@ const WorkshopAdminLogin = () => {
       }
       const adminInfo = { id: userData.user.id, email: selectedAdmin.email, name: selectedAdmin.name };
       localStorage.setItem("workshop_admin", JSON.stringify(adminInfo));
+      sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
       toast({ title: `Welcome, ${selectedAdmin.name}! 🎓` });
       navigate("/workshop-admin-panel");
     } catch (err: any) {
@@ -184,8 +214,7 @@ const WorkshopAdminLogin = () => {
   const goBack = () => { setDirection(-1); if (step === 3) setStep(2); else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); } };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ background: `linear-gradient(135deg, #FFFFFF 0%, ${BRAND.cream} 40%, #FFF5EB 70%, #FFFFFF 100%)` }}>
+    <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
 
       {/* Soft floating shapes */}
       <div className="absolute inset-0 overflow-hidden">
@@ -242,13 +271,12 @@ const WorkshopAdminLogin = () => {
           <div className="relative p-8 space-y-6">
             <div className="text-center space-y-4">
               <motion.div className="mx-auto w-20 h-20 relative" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }}>
-                <motion.div className="absolute -inset-3 rounded-2xl blur-lg"
+                <motion.div className="absolute -inset-4 rounded-full blur-lg"
                   style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30, ${BRAND.light}50)` }}
                   animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.08, 1] }}
                   transition={{ duration: 3, repeat: Infinity }} />
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-xl"
-                  style={{ boxShadow: `0 8px 25px -5px ${BRAND.accent}30, 0 0 0 2px ${BRAND.light}` }}>
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")}
+                <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-xl">
+                  <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover scale-[1.02]"
                     onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; t.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-2xl font-black" style="background: linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}); color: white;">W</div>`; }} />
                 </div>
               </motion.div>
@@ -272,12 +300,12 @@ const WorkshopAdminLogin = () => {
                 ))}
               </div>
 
-              <motion.div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
+              <motion.button type="button" onClick={requestLocationAccess} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold admin-3d-button ${
                 locationGranted ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"
               }`} animate={locationGranted ? {} : { scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
                 <MapPin className="w-3 h-3" />
-                {locationGranted ? "Location verified ✓" : "Location required"}
-              </motion.div>
+                {locationGranted ? "Location verified ✓" : "Location required — click here to allow"}
+              </motion.button>
             </div>
 
             <div className="min-h-[270px] relative">
@@ -363,7 +391,7 @@ const WorkshopAdminLogin = () => {
                         </div>
                       </div>
                     </div>
-                    <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg hover:brightness-110"
+                    <Button onClick={handleVerifyIdentity} className="admin-3d-button w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg hover:brightness-110"
                       style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>Verify & Continue →</Button>
                     <Button type="button" variant="ghost" onClick={goBack} className="w-full text-xs gap-1" style={{ color: "#9CA3AF" }}><ArrowLeft className="w-3 h-3" /> Back</Button>
                   </motion.div>
@@ -456,7 +484,7 @@ const WorkshopAdminLogin = () => {
                       )}
 
                       <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                        <Button type="submit" disabled={loading} className="w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl hover:brightness-110"
+                        <Button type="submit" disabled={loading} className="admin-3d-button w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl hover:brightness-110"
                           style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` }}>
                           {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />{authMethod === "otp" && !otpSent ? "Sending..." : "Verifying..."}</> : authMethod === "otp" && !otpSent ? "Send OTP →" : "Sign In →"}
                         </Button>

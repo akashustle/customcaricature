@@ -237,6 +237,8 @@ const WorkshopAdmin = () => {
   const handleLogout = async () => {
     await logAction("logout", "Logged out");
     localStorage.removeItem("workshop_admin");
+    sessionStorage.removeItem("admin_entered_name");
+    await supabase.auth.signOut();
     navigate("/cccworkshop2006");
   };
 

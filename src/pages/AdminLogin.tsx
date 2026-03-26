@@ -34,13 +34,13 @@ const maskEmail = (email: string) => {
 };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
-// Vibrant blue-teal palette for a fresh modern look
+// Warm logo-aligned palette for admin PWA
 const BRAND = {
-  primary: "#1E3A5F",      // deep navy
-  accent: "#0EA5E9",       // vivid sky blue
-  light: "#BAE6FD",        // light sky
-  highlight: "#38BDF8",    // bright blue
-  cream: "#F0F9FF",        // ice blue white
+  primary: "#3A2E22",
+  accent: "#A76C4E",
+  light: "#E8D6C3",
+  highlight: "#C49A6C",
+  cream: "#FDF8F3",
 };
 
 const AdminLogin = () => {
@@ -64,6 +64,26 @@ const AdminLogin = () => {
   const [locationGranted, setLocationGranted] = useState(false);
   const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
+
+  useEffect(() => {
+    const resumeAdminSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin") as any;
+      if (roles && roles.length > 0) {
+        const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
+        const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
+        sessionStorage.setItem("admin_entered_name", fullName);
+        localStorage.setItem("workshop_admin", JSON.stringify({
+          id: session.user.id,
+          email: profile?.email || session.user.email,
+          name: fullName,
+        }));
+        navigate("/admin-panel", { replace: true });
+      }
+    };
+    resumeAdminSession();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchSecret = async () => {
@@ -105,6 +125,21 @@ const AdminLogin = () => {
       { enableHighAccuracy: true, timeout: 5000 }
     );
   }, []);
+
+  const requestLocationAccess = () => {
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => {
+        setLocationGranted(true);
+        setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        toast({ title: "Location enabled" });
+      },
+      () => {
+        setLocationGranted(false);
+        toast({ title: "Location still blocked", description: "Tap again and allow location in browser settings.", variant: "destructive" });
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
 
   const startResendCooldown = () => {
     setResendCooldown(60);
@@ -224,6 +259,8 @@ const AdminLogin = () => {
         } catch {}
       }
       setFailedAttempts(0);
+      sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
+      localStorage.setItem("workshop_admin", JSON.stringify({ id: userData.user.id, email: selectedAdmin.email, name: selectedAdmin.name }));
       toast({ title: `Welcome back, ${selectedAdmin.name}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
@@ -254,8 +291,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ background: `linear-gradient(135deg, #FFFFFF 0%, ${BRAND.cream} 40%, #FFF5EB 70%, #FFFFFF 100%)` }}>
+    <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
 
       {/* Soft floating brand-colored shapes */}
       <div className="absolute inset-0 overflow-hidden">
@@ -318,16 +354,14 @@ const AdminLogin = () => {
           <div className="relative p-8 space-y-6">
             {/* Logo + Header */}
             <div className="text-center space-y-4">
-              <motion.div className="mx-auto w-20 h-20 relative"
+                <motion.div className="mx-auto w-20 h-20 relative"
                 animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-                {/* Logo glow in brand color */}
-                <motion.div className="absolute -inset-3 rounded-2xl blur-lg"
+                  <motion.div className="absolute -inset-4 rounded-full blur-lg"
                   style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30, ${BRAND.light}50)` }}
                   animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.08, 1] }}
                   transition={{ duration: 3, repeat: Infinity }} />
-                <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white flex items-center justify-center shadow-xl"
-                  style={{ boxShadow: `0 8px 25px -5px ${BRAND.accent}30, 0 0 0 2px ${BRAND.light}` }}>
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover cursor-pointer" onClick={() => navigate("/")}
+                  <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-xl">
+                    <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover scale-[1.02]" 
                     onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; t.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-2xl font-black" style="background: linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}); color: white;">C</div>`; }} />
                 </div>
               </motion.div>
@@ -358,12 +392,12 @@ const AdminLogin = () => {
               </div>
 
               {/* Location chip */}
-              <motion.div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold ${
+                <motion.button type="button" onClick={requestLocationAccess} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold admin-3d-button ${
                 locationGranted ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"
-              }`} animate={locationGranted ? {} : { scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                }`} animate={locationGranted ? {} : { scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
                 <MapPin className="w-3 h-3" />
-                {locationGranted ? "Location verified ✓" : "Location required"}
-              </motion.div>
+                  {locationGranted ? "Location verified ✓" : "Location required — click here to allow"}
+                </motion.button>
 
               {failedAttempts >= 2 && (
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -470,7 +504,7 @@ const AdminLogin = () => {
                       </div>
                     </div>
 
-                    <Button onClick={handleVerifyIdentity} className="w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg transition-all hover:shadow-xl hover:brightness-110"
+                    <Button onClick={handleVerifyIdentity} className="admin-3d-button w-full h-12 rounded-xl font-bold text-white border-0 shadow-lg transition-all hover:shadow-xl hover:brightness-110"
                       style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>
                       Verify & Continue →
                     </Button>
@@ -592,7 +626,7 @@ const AdminLogin = () => {
                       )}
 
                       <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                        <Button type="submit" disabled={loading} className="w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl transition-all hover:shadow-2xl hover:brightness-110"
+                        <Button type="submit" disabled={loading} className="admin-3d-button w-full h-13 rounded-xl text-base font-black text-white border-0 shadow-xl transition-all hover:shadow-2xl hover:brightness-110"
                           style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`, backgroundSize: "200% 100%" }}>
                           {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />{(authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Sending OTP..." : "Verifying..."}</> :
                             (authMethod === "otp" || failedAttempts >= 3) && !otpSent ? "Send OTP →" : "Sign In →"}
