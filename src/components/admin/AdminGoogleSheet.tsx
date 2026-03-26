@@ -119,35 +119,37 @@ const isSheetEventRow = (row: string[]) => row.slice(1).some((cell) => String(ce
 const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] => {
   return Object.entries(tabs).flatMap(([tabTitle, rows]) => {
     const summary = rows || [];
-    let currentDate = "";
     const tabMonthKey = (() => {
-      const match = tabTitle.trim().toUpperCase().match(/^([A-Z]+)\s+(\d{4})$/);
+      const match = tabTitle.trim().match(/^([A-Za-z]+)\s+(\d{4})$/);
       if (!match) return null;
-      const monthIndex = MONTH_NAMES.findIndex((month) => month.toUpperCase() === match[1]);
+      const monthIndex = MONTH_NAMES.findIndex((month) => month.toLowerCase() === match[1].toLowerCase());
       return monthIndex >= 0 ? `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}` : null;
     })();
 
-    return summary.slice(3).flatMap((rawRow) => {
-      const row = Array.from({ length: 17 }, (_, index) => String(rawRow?.[index] || "").trim());
-      if (row[0]) currentDate = row[0];
-      if (!currentDate || !isSheetEventRow(row)) return [];
-
-      const inferredSource = (() => {
-        if (row[15]) return row[15].toLowerCase();
-        const venueText = row[1].toLowerCase();
-        if (venueText.includes("web pushed") || row[6]) return "website";
-        if (venueText.includes("manual")) return "manual";
-        return "manual";
-      })();
+    // New structure: row 0 = header, data starts at row 1
+    return summary.slice(1).flatMap((rawRow) => {
+      const row = Array.from({ length: 21 }, (_, index) => String(rawRow?.[index] || "").trim());
+      if (!row.some((cell) => cell.length > 0)) return [];
 
       return [{
-        tabTitle, monthKey: tabMonthKey, dateLabel: currentDate,
-        venue: row[1], time: row[2], artist: row[3],
-        payment: row[4], pending: row[5], bookingId: row[6],
-        clientName: row[7], mobile: row[8], email: row[9],
-        city: row[10], state: row[11], eventType: row[12],
-        bookingStatus: row[13], totalPrice: row[14],
-        source: inferredSource, address: row[16],
+        tabTitle, monthKey: tabMonthKey,
+        dateLabel: row[2], // Event Date
+        venue: row[7], // Event Location
+        time: row[11], // Duration
+        artist: row[16], // Artist Assigned
+        payment: row[15], // Payment Status
+        pending: row[14], // Remaining Amount
+        bookingId: row[0], // Booking ID
+        clientName: row[3], // Customer Name
+        mobile: row[4], // Phone Number
+        email: row[5], // Email ID
+        city: row[7], // Location
+        state: "",
+        eventType: row[6], // Event Type
+        bookingStatus: row[17], // Booking Status
+        totalPrice: row[12], // Total Amount
+        source: (row[18] || "website").toLowerCase(),
+        address: row[19], // Notes
       } satisfies ParsedSheetEvent];
     });
   });
@@ -377,15 +379,30 @@ const AdminGoogleSheet = () => {
     };
   }, [events, parsedSheetEvents]);
 
-  // Active tab rows from cached data
+  // Active tab rows from cached data (new structure: header is row 0)
   const activeTabRows = useMemo(() => sheetTabs[activeTab] || [], [sheetTabs, activeTab]);
-  const sheetHeaders = activeTabRows[2] || [];
-  const sheetRows = activeTabRows.slice(3);
+  const sheetHeaders = activeTabRows[0] || [];
+  const sheetRows = activeTabRows.slice(1);
   const visibleRows = deferredSearch.trim()
     ? sheetRows.filter((row) => row.some((cell) => String(cell || "").toLowerCase().includes(deferredSearch.toLowerCase())))
     : sheetRows;
 
   /* ─────── Actions ─────── */
+  const [settingUp, setSettingUp] = useState(false);
+
+  const handleSetupSheets = async () => {
+    setSettingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "setup_sheets" } });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Setup failed");
+      toast({ title: "Sheets created!", description: `${data.created || 0} monthly tabs created with formatting, dropdowns & conditional colors.` });
+      await refreshAll();
+    } catch (error: any) {
+      toast({ title: "Setup failed", description: error.message, variant: "destructive" });
+    } finally { setSettingUp(false); }
+  };
+
   const handleSyncAll = async () => {
     setSyncing(true);
     try {
@@ -512,6 +529,10 @@ const AdminGoogleSheet = () => {
                 <Button variant="outline" size="sm" onClick={() => refreshAll()} disabled={loading} className="rounded-xl">
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                   Refresh
+                </Button>
+                <Button size="sm" onClick={handleSetupSheets} disabled={settingUp} className="rounded-xl" variant="outline">
+                  {settingUp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sheet className="mr-2 h-4 w-4" />}
+                  Setup Sheets
                 </Button>
                 <Button size="sm" onClick={handleSyncAll} disabled={syncing} className="rounded-xl">
                   {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
