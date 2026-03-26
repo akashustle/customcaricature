@@ -55,6 +55,7 @@ const Enquiry = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [enquiryId, setEnquiryId] = useState("");
+  const [dupBlocked, setDupBlocked] = useState(false);
 
   // Form data
   const [name, setName] = useState("");
