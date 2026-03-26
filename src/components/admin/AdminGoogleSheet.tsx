@@ -391,12 +391,12 @@ const AdminGoogleSheet = () => {
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { title: "Manual This Month", value: analytics.manualThisMonth.length, icon: Calendar, note: "manual events" },
-          { title: "Manual Next Month", value: analytics.manualNextMonth.length, icon: Filter, note: "manual upcoming" },
-          { title: "This Month Total", value: analytics.totalThisMonth.length, icon: Sheet, note: "all event sources" },
-          { title: "Upcoming Total", value: analytics.upcomingTotal.length, icon: TrendingUp, note: "future events" },
+          { title: "This Month Total", value: analytics.totalThisMonth.length, icon: Calendar, note: `${analytics.websiteThisMonth} website · ${analytics.manualThisMonthCount} manual` },
+          { title: "Next Month Total", value: analytics.totalNextMonth.length, icon: Filter, note: "all sources combined" },
+          { title: "Upcoming This Year", value: analytics.upcomingThisYear.length, icon: TrendingUp, note: `remaining in ${new Date().getFullYear()}` },
+          { title: "Website vs Manual", value: `${analytics.websiteThisMonth} / ${analytics.manualThisMonthCount}`, icon: Sheet, note: "website / manual this month" },
         ].map((item) => (
           <Card key={item.title} className="border-border/40 bg-card shadow-sm">
             <CardContent className="flex items-center justify-between p-4">
