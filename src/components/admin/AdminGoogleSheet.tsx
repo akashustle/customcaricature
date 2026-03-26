@@ -501,14 +501,25 @@ const AdminGoogleSheet = () => {
                   <TableCell>{event.client_name || "—"}</TableCell>
                   <TableCell><Badge variant="outline">{event.source || "website"}</Badge></TableCell>
                   <TableCell>{event.sheet_pushed ? "Yes" : "No"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
-                        {pushingId === event.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id || !event.sheet_pushed}>
-                        {reversingId === event.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                      </Button>
+                    <TableCell className="text-right">
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {!event.sheet_pushed ? (
+                        <Button size="sm" variant="default" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                          {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}
+                          Push
+                        </Button>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                            {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}
+                            Re-push
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
+                            {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}
+                            Remove
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
