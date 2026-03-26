@@ -1608,6 +1608,7 @@ export type Database = {
           registration_lng: number | null
           registration_location_name: string | null
           remaining_amount: number | null
+          source: string | null
           state: string
           status: string
           total_price: number
@@ -1649,6 +1650,7 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           remaining_amount?: number | null
+          source?: string | null
           state: string
           status?: string
           total_price: number
@@ -1690,6 +1692,7 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           remaining_amount?: number | null
+          source?: string | null
           state?: string
           status?: string
           total_price?: number
