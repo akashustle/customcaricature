@@ -114,6 +114,46 @@ const getMonthKey = (date: Date) => `${date.getFullYear()}-${String(date.getMont
 const formatMonthLabel = (monthKey: string) => { const [y, m] = monthKey.split("-"); return `${MONTH_NAMES[Number(m) - 1]} ${y}`; };
 const matchesMonth = (dateValue: string, monthKey: string) => getMonthKey(new Date(dateValue)) === monthKey;
 const parseCurrencyValue = (value: string) => Number((value || "").replace(/[^\d.-]/g, "")) || 0;
+const isSheetEventRow = (row: string[]) => row.slice(1).some((cell) => String(cell || "").trim().length > 0);
+
+const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] => {
+  return Object.entries(tabs).flatMap(([tabTitle, rows]) => {
+    const summary = rows || [];
+    const tabMonthKey = (() => {
+      const match = tabTitle.trim().match(/^([A-Za-z]+)\s+(\d{4})$/);
+      if (!match) return null;
+      const monthIndex = MONTH_NAMES.findIndex((month) => month.toLowerCase() === match[1].toLowerCase());
+      return monthIndex >= 0 ? `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}` : null;
+    })();
+
+    // New structure: row 0 = header, data starts at row 1
+    return summary.slice(1).flatMap((rawRow) => {
+      const row = Array.from({ length: 21 }, (_, index) => String(rawRow?.[index] || "").trim());
+      if (!row.some((cell) => cell.length > 0)) return [];
+
+      return [{
+        tabTitle, monthKey: tabMonthKey,
+        dateLabel: row[2], // Event Date
+        venue: row[7], // Event Location
+        time: row[11], // Duration
+        artist: row[16], // Artist Assigned
+        payment: row[15], // Payment Status
+        pending: row[14], // Remaining Amount
+        bookingId: row[0], // Booking ID
+        clientName: row[3], // Customer Name
+        mobile: row[4], // Phone Number
+        email: row[5], // Email ID
+        city: row[7], // Location
+        state: "",
+        eventType: row[6], // Event Type
+        bookingStatus: row[17], // Booking Status
+        totalPrice: row[12], // Total Amount
+        source: (row[18] || "website").toLowerCase(),
+        address: row[19], // Notes
+      } satisfies ParsedSheetEvent];
+    });
+  });
+};
 
 /* ─────────── 3D Flash Card Widget ─────────── */
 const FlashWidget = ({ title, value, icon: Icon, note, trend }: {
@@ -260,41 +300,62 @@ const AdminGoogleSheet = () => {
     return base;
   }, [deferredSearch, eventFilter, events]);
 
-  /* ─────── Analytics from DB bookings (website data only) ─────── */
+  /* ─────── Analytics from sheet data ─────── */
+  const parsedSheetEvents = useMemo(() => parseSheetEvents(sheetTabs), [sheetTabs]);
+
   const analytics = useMemo(() => {
     const now = new Date();
     const ck = getMonthKey(now);
     const nk = getMonthKey(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
 
-    const thisMonth = events.filter((e) => matchesMonth(e.event_date, ck));
-    const nextMonth = events.filter((e) => matchesMonth(e.event_date, nk));
-    const upcoming = events.filter((e) => new Date(e.event_date) >= new Date(now.toDateString()));
+    const thisMonth = parsedSheetEvents.filter((e) => e.monthKey === ck);
+    const nextMonth = parsedSheetEvents.filter((e) => e.monthKey === nk);
+    const upcoming = parsedSheetEvents.filter((e) => {
+      if (!e.monthKey || !e.dateLabel) return false;
+      const [year, month] = e.monthKey.split("-").map(Number);
+      const eventDate = new Date(year, month - 1, Number(e.dateLabel), 23, 59, 59);
+      return eventDate >= now && eventDate <= yearEnd;
+    });
+    const manual = parsedSheetEvents.filter((e) => e.source === "manual");
+    const website = parsedSheetEvents.filter((e) => e.source !== "manual");
     const pushed = events.filter((e) => e.sheet_pushed);
     const notPushed = events.filter((e) => !e.sheet_pushed);
-    const confirmed = events.filter((e) => e.payment_status === "confirmed" || e.payment_status === "paid" || e.payment_status === "fully_paid");
-    const paymentPending = events.filter((e) => !e.payment_status || e.payment_status === "pending");
+    const confirmed = parsedSheetEvents.filter((e) => e.bookingStatus.toLowerCase() === "confirmed");
 
-    const totalRevenue = events.reduce((s, e) => s + (e.total_price || 0), 0);
-    const totalPending = events.reduce((s, e) => {
+    // Pending amount: from sheet "PENDING AMOUNT" column or calculated
+    const totalRevenue = parsedSheetEvents.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
+    const totalPendingFromSheet = parsedSheetEvents.reduce((s, e) => {
+      const pendingVal = parseCurrencyValue(e.pending);
+      return s + pendingVal;
+    }, 0);
+    // Also calculate from DB for events
+    const totalPendingFromDB = events.reduce((s, e) => {
       if (e.remaining_amount != null && e.remaining_amount > 0) return s + e.remaining_amount;
       const remaining = (e.total_price || 0) - (e.advance_amount || 0);
       return s + (remaining > 0 ? remaining : 0);
     }, 0);
-    const thisMonthRevenue = thisMonth.reduce((s, e) => s + (e.total_price || 0), 0);
+    const totalPending = totalPendingFromSheet > 0 ? totalPendingFromSheet : totalPendingFromDB;
+
+    const thisMonthRevenue = thisMonth.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
+    const paymentPending = parsedSheetEvents.filter((e) => e.payment.toLowerCase().includes("pending"));
+
+    const webThisMonth = website.filter((e) => e.monthKey === ck).length;
+    const manThisMonth = manual.filter((e) => e.monthKey === ck).length;
 
     const cityMap: Record<string, number> = {};
-    events.forEach((e) => { const c = e.city || "Unknown"; cityMap[c] = (cityMap[c] || 0) + 1; });
+    parsedSheetEvents.forEach((e) => { const c = e.city || "Unknown"; cityMap[c] = (cityMap[c] || 0) + 1; });
     const cityChart = Object.entries(cityMap).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, value]) => ({ name, value }));
 
     const typeMap: Record<string, number> = {};
-    events.forEach((e) => { const t = e.event_type || "other"; typeMap[t] = (typeMap[t] || 0) + 1; });
+    parsedSheetEvents.forEach((e) => { const t = e.eventType || "other"; typeMap[t] = (typeMap[t] || 0) + 1; });
     const typeChart = Object.entries(typeMap).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
     const monthlyTrend: { name: string; website: number; manual: number; total: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const mk = getMonthKey(d);
-      const mEvents = events.filter((e) => matchesMonth(e.event_date, mk));
+      const mEvents = parsedSheetEvents.filter((e) => e.monthKey === mk);
       monthlyTrend.push({
         name: MONTH_NAMES[d.getMonth()].slice(0, 3),
         website: mEvents.filter((e) => e.source !== "manual").length,
@@ -304,22 +365,19 @@ const AdminGoogleSheet = () => {
     }
 
     return {
-      thisMonth, nextMonth, upcoming, manual: events.filter(e => e.source === "manual"),
-      website: events.filter(e => e.source !== "manual"), pushed, notPushed,
+      thisMonth, nextMonth, upcoming, manual, website, pushed, notPushed,
       confirmed, paymentPending, totalRevenue, thisMonthRevenue, totalPending,
-      webThisMonth: thisMonth.filter(e => e.source !== "manual").length,
-      manThisMonth: thisMonth.filter(e => e.source === "manual").length,
-      cityChart, typeChart, monthlyTrend,
+      webThisMonth, manThisMonth, cityChart, typeChart, monthlyTrend,
       sourceChart: [
-        { name: "Website", value: events.filter(e => e.source !== "manual").length },
-        { name: "Manual", value: events.filter(e => e.source === "manual").length },
+        { name: "Website", value: website.length },
+        { name: "Manual", value: manual.length },
       ],
       pushChart: [
         { name: "Pushed", value: pushed.length },
         { name: "Not Pushed", value: notPushed.length },
       ],
     };
-  }, [events]);
+  }, [events, parsedSheetEvents]);
 
   // Active tab rows from cached data (new structure: header is row 0)
   const activeTabRows = useMemo(() => sheetTabs[activeTab] || [], [sheetTabs, activeTab]);

@@ -641,7 +641,7 @@ serve(async (req) => {
         });
       }
       if (formatReqs.length) {
-        await fetchWithRetry(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
+        await fetchWithRetry(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
           method: "POST", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
           body: JSON.stringify({ requests: formatReqs }),
         });
