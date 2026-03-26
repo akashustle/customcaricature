@@ -545,6 +545,7 @@ const Index = () => {
             return null;
         }
       })}
+      </Suspense>
 
 
       {/* CTA */}
