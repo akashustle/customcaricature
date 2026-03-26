@@ -51,11 +51,15 @@ const AdminQuickActions = ({ onAction }: AdminQuickActionsProps) => {
           "w-12 h-12 rounded-full shadow-xl transition-all duration-300",
           open
             ? "bg-destructive hover:bg-destructive/90 rotate-45"
-            : "bg-primary hover:bg-primary/90"
+            : "hover:shadow-2xl"
         )}
+        style={!open ? {
+          background: "linear-gradient(135deg, hsl(25 30% 40%), hsl(18 40% 50%))",
+          boxShadow: "0 4px 20px hsla(25, 30%, 40%, 0.3), 0 0 0 4px hsla(0,0%,100%,0.4)",
+        } : undefined}
         onClick={() => setOpen(!open)}
       >
-        {open ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+        {open ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5 text-white" />}
       </Button>
     </div>
   );

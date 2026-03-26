@@ -126,7 +126,7 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
   return (
     <>
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-        <div className="bg-background/95 backdrop-blur-xl border-t border-border/20">
+        <div style={{ background: "hsla(0,0%,100%,0.82)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)", borderTop: "1px solid hsl(30 18% 92%)" }}>
           <div className="flex items-center justify-evenly h-[56px] px-1">
             {PRIMARY_ITEMS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -187,7 +187,8 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm"
+              className="md:hidden fixed inset-0 z-[60] backdrop-blur-sm"
+              style={{ background: "hsla(0,0%,0%,0.15)" }}
               onClick={() => setShowMore(false)}
             />
             <motion.div
@@ -195,7 +196,8 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="md:hidden fixed bottom-0 left-0 right-0 z-[61] bg-background border-t border-border rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col"
+              className="md:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col"
+              style={{ background: "hsla(0,0%,100%,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid hsl(30 18% 90%)" }}
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
                 <h3 className="text-sm font-bold text-foreground">All Modules</h3>

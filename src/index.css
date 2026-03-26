@@ -606,6 +606,72 @@
     box-shadow: 4px 0 30px hsl(var(--foreground) / 0.04);
   }
 
+  /* Premium floating sidebar — Apple/Stripe/Linear feel */
+  .admin-sidebar-premium {
+    background: hsl(0 0% 100% / 0.75);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid hsl(30 18% 90%);
+    box-shadow:
+      0 2px 8px hsl(0 0% 0% / 0.03),
+      0 8px 32px hsl(0 0% 0% / 0.05),
+      inset 0 1px 0 hsl(0 0% 100% / 0.8);
+  }
+
+  /* Sidebar nav item states */
+  .admin-sidebar-item-active {
+    background: linear-gradient(135deg, hsl(25 30% 96%), hsl(30 25% 94%));
+    color: hsl(25 20% 18%);
+    font-weight: 600;
+    box-shadow: 0 1px 3px hsl(25 25% 32% / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.6);
+  }
+  .admin-sidebar-item-idle {
+    color: hsl(25 10% 48%);
+  }
+  .admin-sidebar-item-idle:hover {
+    color: hsl(25 15% 28%);
+    background: hsl(30 15% 96%);
+  }
+
+  /* Sidebar icon states */
+  .admin-sidebar-icon-active {
+    background: linear-gradient(135deg, hsl(25 30% 40%), hsl(18 40% 50%));
+    color: white;
+    box-shadow: 0 2px 6px hsl(25 30% 40% / 0.25);
+  }
+  .admin-sidebar-icon-idle {
+    background: hsl(30 15% 94%);
+    color: hsl(25 10% 50%);
+  }
+  .admin-sidebar-item-idle:hover .admin-sidebar-icon-idle {
+    background: hsl(30 18% 90%);
+    color: hsl(25 15% 35%);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+  }
+
+  /* Sidebar search input */
+  .admin-sidebar-search:focus {
+    outline: none;
+    border-color: hsl(25 30% 75%);
+    box-shadow: 0 0 0 3px hsl(25 30% 80% / 0.2), 0 1px 3px hsl(0 0% 0% / 0.04);
+    background: hsl(0 0% 100%);
+  }
+
+  /* Premium admin header — glass blur */
+  .admin-header-glass {
+    background: hsl(0 0% 100% / 0.72);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border-bottom: 1px solid hsl(30 18% 92%);
+    box-shadow: 0 1px 2px hsl(0 0% 0% / 0.02), 0 4px 16px hsl(0 0% 0% / 0.03);
+  }
+
+  /* Admin content premium bg */
+  .admin-content-premium {
+    background: linear-gradient(180deg, hsl(30 20% 98%) 0%, hsl(0 0% 100%) 50%, hsl(30 15% 97%) 100%);
+  }
+
   /* 3D Widget Card */
   .admin-widget-3d {
     border-radius: 1rem;
