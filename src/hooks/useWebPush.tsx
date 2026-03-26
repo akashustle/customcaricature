@@ -20,9 +20,13 @@ export const useWebPush = () => {
       const config = data?.value as any;
       if (config?.enabled === false) return;
 
-      // Subscribe silently when permission is already granted
-      initWebPush(user?.id);
+      // Always try to init/re-subscribe when permission is granted
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+        await initWebPush(user?.id);
+      }
     };
     init();
+
+    // Also re-init when user changes (login/logout)
   }, [user?.id, loading]);
 };
