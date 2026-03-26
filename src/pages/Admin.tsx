@@ -84,6 +84,7 @@ import AdminAIIntelligence from "@/components/admin/AdminAIIntelligence";
 import AdminPushUpdate from "@/components/admin/AdminPushUpdate";
 import AdminDashboardPremium from "@/components/admin/AdminDashboardPremium";
 import AdminQuickActions from "@/components/admin/AdminQuickActions";
+import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminLocationPrompt from "@/components/AdminLocationPrompt";
 import AdminContentEditor from "@/components/admin/AdminContentEditor";
