@@ -255,7 +255,7 @@ async function syncEnquiries(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.8, g: 0.6, b: 0.0 }, [40, 100, 140, 120, 180, 120, 100, 120, 100, 100, 100, 80, 80, 80, 80, 80, 80, 80, 200, 100, 60, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.55, b: 0.08 }, [40, 110, 150, 130, 200, 130, 110, 130, 110, 120, 110, 90, 90, 90, 90, 90, 90, 90, 240, 110, 70, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
