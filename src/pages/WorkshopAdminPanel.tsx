@@ -870,13 +870,19 @@ const WorkshopAdmin = () => {
 
       {/* Mobile Header — Premium */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col">
-        <div className={`${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} backdrop-blur-xl border-b`}>
+         <div className={`${dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/98 border-slate-200/60"} backdrop-blur-xl border-b`}>
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                <img src="/admin-icon-192.png" alt="CCC Admin" className="w-full h-full object-cover" />
               </div>
               <span className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</span>
+              <button
+                onClick={() => navigate("/admin-panel")}
+                className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${dm ? "bg-sky-500/20 text-sky-300 hover:bg-sky-500/30" : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
+              >
+                🛡️ Main Admin
+              </button>
             </div>
             <div className="flex gap-1 items-center">
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
