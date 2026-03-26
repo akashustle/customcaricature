@@ -388,6 +388,7 @@ const Dashboard = () => {
           {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
+          {activeTab === "chat" && user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
           {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
