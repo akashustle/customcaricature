@@ -8,6 +8,25 @@ const corsHeaders = {
 };
 
 const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+const SHEET_HEADERS = [
+  "DATE",
+  "VENUE",
+  "TIME",
+  "ARTIST NAME",
+  "PAYMENT STATUS",
+  "PENDING AMOUNT",
+  "BOOKING ID",
+  "CLIENT NAME",
+  "MOBILE",
+  "EMAIL",
+  "CITY",
+  "STATE",
+  "EVENT TYPE",
+  "BOOKING STATUS",
+  "TOTAL PRICE",
+  "SOURCE",
+  "ADDRESS",
+];
 
 function getMonthTabName(dateStr: string): string {
   const d = new Date(dateStr);
@@ -152,6 +171,26 @@ function parseSheetEventCount(rows: any[][]): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function countSheetEvents(rows: any[][]): number {
+  let currentDay = "";
+  let count = 0;
+
+  for (let i = 3; i < rows.length; i++) {
+    const row = rows[i] || [];
+    const firstCell = row[0]?.toString().trim() || "";
+    if (firstCell) currentDay = firstCell;
+
+    const hasEventData = row.slice(1).some((cell: any) => {
+      const value = cell?.toString().trim() || "";
+      return value.length > 0;
+    });
+
+    if (currentDay && hasEventData) count += 1;
+  }
+
+  return count;
+}
+
 function parseMonthKeyFromTab(title: string): string | null {
   const normalized = title.trim().toUpperCase();
   const match = normalized.match(/^([A-Z]+)\s+(\d{4})$/);
@@ -162,18 +201,22 @@ function parseMonthKeyFromTab(title: string): string | null {
 }
 
 async function getTabSummary(accessToken: string, sheetId: string, tab: { title: string; sheetId: number }) {
-  const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:B2`);
+  const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
   const rows = data.values || [];
   return {
     title: tab.title,
     sheetId: tab.sheetId,
     normalizedTitle: tab.title.trim(),
     monthKey: parseMonthKeyFromTab(tab.title),
-    eventCount: parseSheetEventCount(rows),
+    eventCount: countSheetEvents(rows) || parseSheetEventCount(rows),
   };
 }
 
-// Extended row: [date, venue, time, artist, payment, pending, bookingId, client, mobile, city, eventType, status, totalPrice, source]
+async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, tabTitle: string) {
+  await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
+}
+
+// Extended row: [date, venue, time, artist, payment, pending, bookingId, client, mobile, email, city, state, eventType, status, totalPrice, source, address]
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
@@ -190,11 +233,14 @@ function formatSheetRow(event: any, includeDate: boolean, label?: string): any[]
     event.id || "",
     event.client_name || "",
     event.client_mobile || "",
+    event.client_email || "",
     event.city || "",
+    event.state || "",
     event.event_type || "",
     event.status || "",
     event.total_price ? `₹${Number(event.total_price).toLocaleString("en-IN")}` : "",
     event.source || "website",
+    event.full_address || event.address || "",
   ];
 }
 
@@ -211,8 +257,10 @@ async function pushEventToSheet(
   const tab = findTab(tabs, tabName);
   if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
 
+  await ensureSheetHeaders(accessToken, spreadsheetId, tab.title);
+
   const dayNumber = new Date(event.event_date).getDate();
-  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:N500`);
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:Q500`);
   const rows = data.values || [];
 
   // Check if event already exists by booking ID in column G (index 6)
@@ -226,7 +274,7 @@ async function pushEventToSheet(
 
   if (existingRow > 0) {
     const row = formatSheetRow(event, !!rows[existingRow - 1]?.[0]?.toString().trim(), label);
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}:N${existingRow}`, [row]);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}:Q${existingRow}`, [row]);
     return { tab: tab.title, action: "updated", row: existingRow };
   }
 
@@ -236,12 +284,12 @@ async function pushEventToSheet(
   if (isEmpty) {
     const row = formatSheetRow(event, true, label);
     row[0] = String(dayNumber);
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}:N${dateRow}`, [row]);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}:Q${dateRow}`, [row]);
     return { tab: tab.title, action: "written", row: dateRow };
   } else {
     await insertRowAfter(accessToken, spreadsheetId, tab.sheetId, lastGroupRow);
     const row = formatSheetRow(event, false, label);
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}:N${lastGroupRow + 1}`, [row]);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}:Q${lastGroupRow + 1}`, [row]);
     return { tab: tab.title, action: "inserted", row: lastGroupRow + 1 };
   }
 }
@@ -255,7 +303,7 @@ async function removeEventFromSheet(
   const tab = findTab(tabs, tabName);
   if (!tab) return { removed: false };
 
-  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:N500`);
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:Q500`);
   const rows = data.values || [];
 
   for (let i = 0; i < rows.length; i++) {
@@ -263,7 +311,7 @@ async function removeEventFromSheet(
       const rowIndex = i + 1;
       const hasDateNumber = !!rows[i]?.[0]?.toString().trim();
       if (hasDateNumber) {
-        await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!B${rowIndex}:N${rowIndex}`, [["","","","","","","","","","","","",""]]);
+        await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!B${rowIndex}:Q${rowIndex}`, [["","","","","","","","","","","","","","","",""]]);
       } else {
         await deleteSheetRow(accessToken, spreadsheetId, tab.sheetId, rowIndex);
       }
@@ -308,7 +356,7 @@ serve(async (req) => {
       if (!requestedTab) throw new Error("Tab name is required");
       const tab = findTab(tabs, requestedTab);
       if (!tab) throw new Error(`Sheet tab "${requestedTab}" not found`);
-      const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:N500`);
+      const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
       return new Response(JSON.stringify({ success: true, tabName: tab.title, rows: data.values || [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -318,7 +366,7 @@ serve(async (req) => {
       const allData: Record<string, any[][]> = {};
       for (const tab of tabs) {
         try {
-          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:N500`);
+          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
           allData[tab.title] = data.values || [];
         } catch (_) {}
       }
