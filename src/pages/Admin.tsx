@@ -110,6 +110,7 @@ const AdminQuickQuestions = lazy(() => import("@/components/admin/AdminQuickQues
 const AdminColleagues = lazy(() => import("@/components/admin/AdminColleagues"));
 const AdminFAQs = lazy(() => import("@/components/admin/AdminFAQs"));
 const AdminGoogleSheet = lazy(() => import("@/components/admin/AdminGoogleSheet"));
+const AdminMiniDatabase = lazy(() => import("@/components/admin/AdminMiniDatabase"));
 const AdminLiveActivityTicker = lazy(() => import("@/components/admin/AdminLiveActivityTicker"));
 
 const AdminTabLoader = () => (
@@ -1909,6 +1910,10 @@ const Admin = () => {
 
           <TabsContent value="google-sheet">
             <AdminGoogleSheet />
+          </TabsContent>
+
+          <TabsContent value="mini-database">
+            <Suspense fallback={<AdminTabLoader />}><AdminMiniDatabase /></Suspense>
           </TabsContent>
 
           <TabsContent value="pages">
