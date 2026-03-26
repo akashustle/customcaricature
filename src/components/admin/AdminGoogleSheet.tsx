@@ -388,6 +388,21 @@ const AdminGoogleSheet = () => {
     : sheetRows;
 
   /* ─────── Actions ─────── */
+  const [settingUp, setSettingUp] = useState(false);
+
+  const handleSetupSheets = async () => {
+    setSettingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "setup_sheets" } });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Setup failed");
+      toast({ title: "Sheets created!", description: `${data.created || 0} monthly tabs created with formatting, dropdowns & conditional colors.` });
+      await refreshAll();
+    } catch (error: any) {
+      toast({ title: "Setup failed", description: error.message, variant: "destructive" });
+    } finally { setSettingUp(false); }
+  };
+
   const handleSyncAll = async () => {
     setSyncing(true);
     try {
