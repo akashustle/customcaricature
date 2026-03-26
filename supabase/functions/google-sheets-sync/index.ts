@@ -228,9 +228,9 @@ function countSheetEvents(rows: any[][]): number {
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
-  const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : startTime;
-  // Venue = full_address or venue_name (NOT client_name)
-  const venueRaw = event.full_address || event.venue_name || event.address || "";
+  const timeStr = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || getTimeLabel(event.event_start_time || ""));
+  // Venue = city name only (short)
+  const venueRaw = event.city || event.venue_name || "";
   const venueWithLabel = label ? `${venueRaw} (${label})` : venueRaw;
   // Artist count display
   const artistCount = event.artist_count || 1;
