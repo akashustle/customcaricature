@@ -668,12 +668,13 @@ const AdminGoogleSheet = () => {
                   <TableHead className="w-8"></TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Venue</TableHead>
+                  <TableHead>Artist</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Paid</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead>Address</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>City</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Pending</TableHead>
-                  <TableHead>Source</TableHead>
+                  <TableHead>Phone</TableHead>
                   <TableHead>Pushed</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -688,11 +689,10 @@ const AdminGoogleSheet = () => {
                           {expandedEventId === event.id ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                         </TableCell>
                         <TableCell className="text-xs font-medium">{event.event_date}</TableCell>
-                        <TableCell className="text-xs">{event.venue_name || "—"}</TableCell>
-                        <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
-                        <TableCell className="text-xs">{event.city || "—"}</TableCell>
-                        <TableCell><Badge variant="outline" className="text-[10px]">{event.event_type || "—"}</Badge></TableCell>
+                        <TableCell className="text-xs">{[event.city, event.venue_name].filter(Boolean).join(" - ") || "—"}</TableCell>
+                        <TableCell className="text-xs">{(event.artist_count || 1) === 1 ? "1 Artist" : `${event.artist_count} Artists`}</TableCell>
                         <TableCell className="text-xs font-medium">{event.total_price ? formatCurrency(event.total_price) : "—"}</TableCell>
+                        <TableCell className="text-xs font-medium text-primary">{event.advance_amount ? formatCurrency(event.advance_amount) : "—"}</TableCell>
                         <TableCell className="text-xs font-medium">
                           {pendingAmt > 0 ? (
                             <span className="text-destructive">{formatCurrency(pendingAmt)}</span>
@@ -700,7 +700,9 @@ const AdminGoogleSheet = () => {
                             <span className="text-primary">Nil</span>
                           )}
                         </TableCell>
-                        <TableCell><Badge variant={event.source === "manual" ? "secondary" : "default"} className="text-[10px]">{event.source || "website"}</Badge></TableCell>
+                        <TableCell className="text-xs max-w-[160px] truncate" title={event.full_address || ""}>{event.full_address || [event.venue_name, event.city, event.state].filter(Boolean).join(", ") || "—"}</TableCell>
+                        <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
+                        <TableCell className="text-xs">{event.client_mobile || "—"}</TableCell>
                         <TableCell>
                           {event.sheet_pushed ? (
                             <Badge className="bg-primary/10 text-primary text-[10px]">✓ Pushed</Badge>
