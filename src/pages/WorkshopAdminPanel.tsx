@@ -129,28 +129,46 @@ const WorkshopAdmin = () => {
   useEffect(() => { localStorage.setItem("ws_dark", darkMode.toString()); }, [darkMode]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("workshop_admin");
-    if (stored) {
-      setAdminInfo(JSON.parse(stored));
-      fetchAll();
-    } else {
-      // Check if user has an active admin session from main admin (shared auth)
-      const checkSharedAuth = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { navigate("/cccworkshop2006"); return; }
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin");
-        if (!roles || (roles as any[]).length === 0) { navigate("/cccworkshop2006"); return; }
-        // User is admin, auto-set workshop_admin
-        const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
-        const info = { id: user.id, email: profile?.email || user.email, name: profile?.full_name || "Admin" };
-        localStorage.setItem("workshop_admin", JSON.stringify(info));
-        setAdminInfo(info);
-        fetchAll();
-      };
-      checkSharedAuth();
-      return; // Skip channel setup until auth verified
-    }
-    const ch = supabase.channel("ws-admin")
+    let mounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    const bootstrapWorkshopAdmin = async () => {
+      const stored = localStorage.getItem("workshop_admin");
+      if (stored && mounted) {
+        try {
+          setAdminInfo(JSON.parse(stored));
+        } catch {
+          localStorage.removeItem("workshop_admin");
+        }
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        localStorage.removeItem("workshop_admin");
+        if (mounted) navigate("/cccworkshop2006", { replace: true });
+        return;
+      }
+
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin");
+      if (!roles || (roles as any[]).length === 0) {
+        localStorage.removeItem("workshop_admin");
+        sessionStorage.removeItem("admin_entered_name");
+        await supabase.auth.signOut();
+        if (mounted) navigate("/cccworkshop2006", { replace: true });
+        return;
+      }
+
+      const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", user.id).maybeSingle();
+      const info = { id: user.id, email: profile?.email || user.email, name: profile?.full_name || "Admin" };
+
+      if (!mounted) return;
+
+      localStorage.setItem("workshop_admin", JSON.stringify(info));
+      sessionStorage.setItem("admin_entered_name", info.name);
+      setAdminInfo(info);
+      await fetchAll();
+
+      channel = supabase.channel("ws-admin")
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_users" }, fetchUsers)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
@@ -167,7 +185,14 @@ const WorkshopAdmin = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_live_session_requests" }, fetchLiveRequests)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_notifications" }, fetchWorkshopNotifications)
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    };
+
+    bootstrapWorkshopAdmin();
+
+    return () => {
+      mounted = false;
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchAll = async () => {
@@ -906,7 +931,7 @@ const WorkshopAdmin = () => {
                       sessionStorage.setItem("admin_entered_name", profile.full_name);
                     }
                   }
-                  navigate("/admin-panel");
+                  navigate("/admin-panel", { replace: true });
                 }}
                 className={`text-[10px] font-bold px-2 py-1 rounded-full transition-all ${dm ? "bg-sky-500/20 text-sky-300 hover:bg-sky-500/30" : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
               >
@@ -935,22 +960,22 @@ const WorkshopAdmin = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
         <div className={`backdrop-blur-xl ${dm ? "bg-[#0e0e18]/95 border-white/[0.04]" : "bg-white/95 border-slate-200/20"} border-t`}>
           <style>{`.ws-mnav::-webkit-scrollbar { display: none; }`}</style>
-          <div className="ws-mnav flex items-center h-[60px] overflow-x-auto px-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+          <div className="ws-mnav flex items-center h-[76px] overflow-x-auto px-2" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
             {sidebarItems.map((item) => {
               const isActive = tab === item.key;
               return (
                 <motion.button key={item.key} onClick={() => setTab(item.key)}
                   whileTap={{ scale: 0.8 }}
-                  className="flex items-center justify-center min-w-[56px] w-[56px] h-[60px] relative flex-shrink-0">
+                  className="flex items-center justify-center min-w-[68px] w-[68px] h-[76px] relative flex-shrink-0 rounded-2xl">
                   <item.icon
                     className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/25" : "text-slate-400/60"}`}
-                    size={isActive ? 26 : 22}
-                    strokeWidth={isActive ? 2.2 : 1.3}
+                    size={isActive ? 32 : 28}
+                    strokeWidth={isActive ? 2.1 : 1.6}
                     fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div layoutId="ws-admin-dot"
-                      className={`absolute bottom-2 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                      className={`absolute bottom-2.5 w-1.5 h-1.5 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>

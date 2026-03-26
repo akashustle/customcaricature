@@ -83,11 +83,6 @@ const WorkshopAdminLogin = () => {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem("workshop_admin");
-    if (stored) navigate("/workshop-admin-panel");
-  }, []);
-
-  useEffect(() => {
     const fetchSecret = async () => {
       const { data } = await supabase.from("admin_site_settings").select("value").eq("id", "admin_secret_code").maybeSingle();
       if (data?.value && (data.value as any).code) setAdminMasterSecret((data.value as any).code);
@@ -199,7 +194,7 @@ const WorkshopAdminLogin = () => {
       localStorage.setItem("workshop_admin", JSON.stringify(adminInfo));
       sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
       toast({ title: `Welcome, ${selectedAdmin.name}! 🎓` });
-      navigate("/workshop-admin-panel");
+      navigate("/workshop-admin-panel", { replace: true });
     } catch (err: any) {
       toast({ title: "Login Failed", description: err?.message, variant: "destructive" });
     } finally { setLoading(false); }

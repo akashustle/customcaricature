@@ -208,7 +208,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             {section.items.map((item) => {
               const isActive = activeTab === item.id;
               const handleClick = () => {
-                if (item.id === "link-workshop-admin") { navigate("/cccworkshop2006"); return; }
+                if (item.id === "link-workshop-admin") { navigate("/workshop-admin-panel"); return; }
                 if (item.id === "link-shop-admin") { navigate("/CFCAdmin936"); return; }
                 onTabChange(item.id);
               };
