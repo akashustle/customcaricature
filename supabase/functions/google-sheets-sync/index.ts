@@ -635,6 +635,33 @@ serve(async (req) => {
       return ok({ success: true, event: inserted, ...result });
     }
 
+    if (action === "update_design") {
+      // Re-apply vibrant header formatting to all tabs
+      const requests: any[] = [];
+      for (const tab of tabs) {
+        requests.push({
+          repeatCell: {
+            range: { sheetId: tab.sheetId, startRowIndex: 2, endRowIndex: 3, startColumnIndex: 0, endColumnIndex: 17 },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: { red: 0.22, green: 0.45, blue: 0.87 },
+                textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10 },
+                horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
+              },
+            },
+            fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment)",
+          },
+        });
+      }
+      if (requests.length) {
+        await fetchWithRetry(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
+          method: "POST", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ requests }),
+        });
+      }
+      return ok({ success: true, message: "Design updated with vibrant colors", tabs: tabs.length });
+    }
+
     return ok({ success: false, error: "Invalid action" });
   } catch (error: any) {
     console.error("Google Sheets sync error:", error);

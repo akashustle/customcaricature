@@ -435,7 +435,28 @@ serve(async (req) => {
       return ok({ success: true, results: [r1, r2] });
     }
 
-    return err("Invalid action. Use: sync_all, sync_table, sync_users, sync_payments, sync_events, sync_orders, sync_enquiries, sync_analytics, sync_workshop");
+    if (action === "update_design") {
+      // Re-sync all sheets which re-applies vibrant formatting
+      const results = [];
+      results.push(await syncUsers(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncPaymentHistory(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncEvents(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncOrders(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncEnquiries(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncAnalytics(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncWorkshopMarch(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncWorkshopJune(token, sheetId, tabs, supabase));
+      return ok({ success: true, message: "Design updated with vibrant colors", results });
+    }
+
+    return err("Invalid action. Use: sync_all, update_design, sync_table, sync_users, sync_payments, sync_events, sync_orders, sync_enquiries, sync_analytics, sync_workshop");
   } catch (e: any) {
     console.error("Mini DB sync error:", e);
     return ok({ success: false, error: e.message });
