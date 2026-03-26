@@ -374,6 +374,10 @@ const ArtistDashboard = () => {
     fetchBlockedDates((artistData as any).id);
     if (isR) fetchOrders((artistData as any).id);
 
+    // Init web push for artist notifications
+    requestBrowserNotificationPermission(userId).catch(() => {});
+    initWebPush(userId).catch(() => {});
+
     const ch = supabase.channel("artist-dashboard-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents((artistData as any).id))
