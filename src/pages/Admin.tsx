@@ -95,6 +95,7 @@ import AdminMonitoringAI from "@/components/admin/AdminMonitoringAI";
 import AdminRevenueTargetTracker from "@/components/admin/AdminRevenueTargetTracker";
 import AdminDrillDownDialog from "@/components/admin/AdminDrillDownDialog";
 import { useAutoLogout } from "@/hooks/useAutoLogout";
+import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import AdminReferrals from "@/components/admin/AdminReferrals";
 import AdminCoupons from "@/components/admin/AdminCoupons";
 import AdminMaintenance from "@/components/admin/AdminMaintenance";
@@ -255,7 +256,15 @@ const Admin = () => {
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem("admin_last_tab");
+    return saved || "dashboard";
+  });
+
+  // Persist last active tab
+  useEffect(() => {
+    localStorage.setItem("admin_last_tab", activeTab);
+  }, [activeTab]);
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
@@ -878,6 +887,7 @@ const Admin = () => {
 
       {/* Main Content */}
       <div className="flex-1 min-h-screen bg-gradient-to-b from-secondary/50 to-background pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+        <AdminOfflineBanner />
         <AdminLocationPrompt />
         <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
