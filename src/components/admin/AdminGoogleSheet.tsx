@@ -379,10 +379,10 @@ const AdminGoogleSheet = () => {
     };
   }, [events, parsedSheetEvents]);
 
-  // Active tab rows from cached data
+  // Active tab rows from cached data (new structure: header is row 0)
   const activeTabRows = useMemo(() => sheetTabs[activeTab] || [], [sheetTabs, activeTab]);
-  const sheetHeaders = activeTabRows[2] || [];
-  const sheetRows = activeTabRows.slice(3);
+  const sheetHeaders = activeTabRows[0] || [];
+  const sheetRows = activeTabRows.slice(1);
   const visibleRows = deferredSearch.trim()
     ? sheetRows.filter((row) => row.some((cell) => String(cell || "").toLowerCase().includes(deferredSearch.toLowerCase())))
     : sheetRows;
