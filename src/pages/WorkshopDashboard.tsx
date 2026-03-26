@@ -210,17 +210,20 @@ const WorkshopDashboard = () => {
             </div>
           </div>
           <div className="flex gap-1">
-            {[
-              { icon: Home, action: () => navigate("/dashboard"), tip: "Dashboard" },
-              { icon: Palette, action: () => setShowColorPicker(!showColorPicker), tip: "Theme" },
-              { icon: darkMode ? Sun : Moon, action: () => setDarkMode(!darkMode), tip: "Mode" },
-            ].map((btn, i) => (
-              <motion.div key={i} whileHover={{ scale: 1.1, y: -1 }} whileTap={{ scale: 0.9 }}>
-                <Button variant="ghost" size="sm" onClick={btn.action} className={`${textSecondary} rounded-xl`} title={btn.tip}>
-                  <btn.icon className="w-4 h-4" />
-                </Button>
-              </motion.div>
-            ))}
+            {/* Desktop only: Home, Theme, Dark Mode */}
+            <div className="hidden md:flex gap-1">
+              {[
+                { icon: Home, action: () => navigate("/dashboard"), tip: "Dashboard" },
+                { icon: Palette, action: () => setShowColorPicker(!showColorPicker), tip: "Theme" },
+                { icon: darkMode ? Sun : Moon, action: () => setDarkMode(!darkMode), tip: "Mode" },
+              ].map((btn, i) => (
+                <motion.div key={i} whileHover={{ scale: 1.1, y: -1 }} whileTap={{ scale: 0.9 }}>
+                  <Button variant="ghost" size="sm" onClick={btn.action} className={`${textSecondary} rounded-xl`} title={btn.tip}>
+                    <btn.icon className="w-4 h-4" />
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
                 <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
