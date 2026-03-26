@@ -1,17 +1,19 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
 
 const HomepageInstantQuote = ({ config }: { config: any }) => {
+  const navigate = useNavigate();
+
   if (!config) return null;
 
   const handleClick = () => {
-    const link = config.link || "https://porta.creativecaricatureclub.com/caricature-budgeting";
-    if (link.startsWith("http")) {
-      window.open(link, "_blank", "noopener,noreferrer");
-    } else {
-      window.location.href = link;
-    }
+    const link = config.link || "/caricature-budgeting";
+    const internalTarget = normalizeInternalNavigationTarget(link);
+    if (internalTarget) navigate(internalTarget);
+    else window.location.assign(link);
   };
 
   return (

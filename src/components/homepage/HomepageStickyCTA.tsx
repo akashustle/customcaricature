@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
 
 const HomepageStickyCTA = ({ config }: { config: any }) => {
   const navigate = useNavigate();
@@ -31,8 +32,9 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
       <Button
         onClick={() => {
           const link = config.link || "/enquiry";
-          if (link.startsWith("http")) window.open(link, "_blank");
-          else navigate(link);
+          const internalTarget = normalizeInternalNavigationTarget(link);
+          if (internalTarget) navigate(internalTarget);
+          else window.location.assign(link);
         }}
         className="flex-1 rounded-full font-body font-semibold gap-1"
         size="lg"
@@ -44,8 +46,9 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
           variant="outline"
           onClick={() => {
             const link = config.secondary_link || "/book-event";
-            if (link.startsWith("http")) window.open(link, "_blank");
-            else navigate(link);
+            const internalTarget = normalizeInternalNavigationTarget(link);
+            if (internalTarget) navigate(internalTarget);
+            else window.location.assign(link);
           }}
           className="flex-1 rounded-full font-body font-semibold"
           size="lg"

@@ -22,6 +22,7 @@ import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
+import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
@@ -121,6 +122,48 @@ const RouteMemoryRedirector = () => {
   return null;
 };
 
+const InternalNavigationBridge = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleInternalNavigation = (event: Event) => {
+      const target = (event as CustomEvent<{ to?: string }>).detail?.to;
+      if (!target) return;
+
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (target !== currentPath) {
+        navigate(target);
+      }
+    };
+
+    const handleAnchorClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const anchor = (event.target as Element | null)?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor || anchor.hasAttribute("download")) return;
+
+      const normalizedTarget = normalizeInternalNavigationTarget(anchor.getAttribute("href"));
+      if (!normalizedTarget) return;
+
+      event.preventDefault();
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (normalizedTarget !== currentPath) {
+        navigate(normalizedTarget);
+      }
+    };
+
+    window.addEventListener("ccc:navigate-internal", handleInternalNavigation as EventListener);
+    document.addEventListener("click", handleAnchorClick);
+
+    return () => {
+      window.removeEventListener("ccc:navigate-internal", handleInternalNavigation as EventListener);
+      document.removeEventListener("click", handleAnchorClick);
+    };
+  }, [navigate]);
+
+  return null;
+};
+
 /** Global Maintenance Gate — blocks ALL pages except admin paths when global maintenance is ON */
 const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -158,6 +201,7 @@ const App = () => {
             <ScrollToTop />
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
+            <InternalNavigationBridge />
             
             <FloatingButtons />
             <LiveChatWrapper />
