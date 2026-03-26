@@ -256,7 +256,15 @@ const Admin = () => {
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem("admin_last_tab");
+    return saved || "dashboard";
+  });
+
+  // Persist last active tab
+  useEffect(() => {
+    localStorage.setItem("admin_last_tab", activeTab);
+  }, [activeTab]);
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
