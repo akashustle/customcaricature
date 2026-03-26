@@ -21,8 +21,7 @@ async function getAccessToken(serviceAccountKey: any): Promise<string> {
     iss: serviceAccountKey.client_email,
     scope: "https://www.googleapis.com/auth/spreadsheets",
     aud: "https://oauth2.googleapis.com/token",
-    iat: now,
-    exp: now + 3600,
+    iat: now, exp: now + 3600,
   };
   const encoder = new TextEncoder();
   const headerB64 = btoa(JSON.stringify(header)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -44,7 +43,7 @@ async function getAccessToken(serviceAccountKey: any): Promise<string> {
   return tokenData.access_token;
 }
 
-async function getSheetTabs(accessToken: string, sheetId: string): Promise<{title: string, sheetId: number}[]> {
+async function getSheetTabs(accessToken: string, sheetId: string) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!res.ok) throw new Error(`Failed to get sheet info: ${await res.text()}`);
@@ -52,24 +51,10 @@ async function getSheetTabs(accessToken: string, sheetId: string): Promise<{titl
   return (data.sheets || []).map((s: any) => ({ title: s.properties.title, sheetId: s.properties.sheetId }));
 }
 
-async function createSheetTab(accessToken: string, spreadsheetId: string, tabTitle: string) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ requests: [{ addSheet: { properties: { title: tabTitle } } }] }),
-  });
-  if (!res.ok) throw new Error(`Create tab failed: ${await res.text()}`);
-  return await res.json();
-}
-
 async function readSheet(accessToken: string, sheetId: string, range: string) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Read failed: ${err}`);
-  }
+  if (!res.ok) throw new Error(`Read failed: ${await res.text()}`);
   return await res.json();
 }
 
@@ -84,15 +69,21 @@ async function updateSheet(accessToken: string, sheetId: string, range: string, 
   return await res.json();
 }
 
-async function appendToSheet(accessToken: string, sheetId: string, range: string, values: any[][]) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+async function insertRowAfter(accessToken: string, spreadsheetId: string, tabSheetId: number, afterRowIndex: number) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
   const res = await fetch(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ values }),
+    body: JSON.stringify({
+      requests: [{
+        insertDimension: {
+          range: { sheetId: tabSheetId, dimension: "ROWS", startIndex: afterRowIndex, endIndex: afterRowIndex + 1 },
+          inheritFromBefore: true,
+        }
+      }]
+    }),
   });
-  if (!res.ok) throw new Error(`Append failed: ${await res.text()}`);
-  return await res.json();
+  if (!res.ok) throw new Error(`Insert row failed: ${await res.text()}`);
 }
 
 async function deleteSheetRow(accessToken: string, spreadsheetId: string, tabSheetId: number, rowIndex: number) {
@@ -111,71 +102,150 @@ async function deleteSheetRow(accessToken: string, spreadsheetId: string, tabShe
   if (!res.ok) throw new Error(`Delete row failed: ${await res.text()}`);
 }
 
+// Find matching tab name (handles trailing spaces in sheet names)
+function findTab(tabs: {title: string, sheetId: number}[], targetName: string) {
+  return tabs.find(t => t.title.trim().toUpperCase() === targetName.trim().toUpperCase());
+}
+
+// Find the row index for a specific date in a month tab
+// Sheet structure: Row 1=title, Row 2=count, Row 3=headers, Row 4-5=empty, Row 6+=dates (1,2,3...)
+// Returns the 1-indexed row of the date, and the last row of that date's group
+function findDateRow(rows: any[][], dayNumber: number): { dateRow: number; lastGroupRow: number; isEmpty: boolean } {
+  const dayStr = String(dayNumber);
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i]?.[0]?.toString().trim() === dayStr) {
+      // Found the date row. Now find the last row in this group
+      let lastRow = i;
+      for (let j = i + 1; j < rows.length; j++) {
+        const cellA = rows[j]?.[0]?.toString().trim() || "";
+        if (cellA === "" && (rows[j]?.[1] || rows[j]?.[2])) {
+          // Sub-row of same date (empty A, has venue/time data)
+          lastRow = j;
+        } else {
+          break;
+        }
+      }
+      const isEmpty = !rows[i]?.[1] && !rows[i]?.[2]; // No venue or time = empty date
+      return { dateRow: i + 1, lastGroupRow: lastRow + 1, isEmpty }; // 1-indexed
+    }
+  }
+  return { dateRow: -1, lastGroupRow: -1, isEmpty: true };
+}
+
 function formatPaymentStatus(event: any): string {
   const ps = event.payment_status || "pending";
-  if (ps === "confirmed" || ps === "paid") {
-    return `Advance Paid ₹${(event.advance_amount || 0).toLocaleString("en-IN")}`;
-  }
+  if (ps === "confirmed" || ps === "paid") return `Advance ₹${(event.advance_amount || 0).toLocaleString("en-IN")}`;
   if (ps === "full_paid") return `Full Paid ₹${(event.total_price || 0).toLocaleString("en-IN")}`;
   return ps.charAt(0).toUpperCase() + ps.slice(1);
 }
 
-function formatEventRow(event: any, label?: string): any[] {
-  const dateObj = new Date(event.event_date);
-  const dateStr = dateObj.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+function formatPendingAmount(event: any): string {
+  const remaining = (event.total_price || 0) - (event.advance_amount || 0);
+  if (remaining <= 0) return "Nil";
+  return `₹${remaining.toLocaleString("en-IN")}`;
+}
+
+// Format event for the sheet row: [date/empty, venue, time, artist, payment, pending, bookingId]
+// Column A is left empty when adding as sub-row, or has date number when writing to date row
+function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const timeStr = event.event_start_time && event.event_end_time
     ? `${event.event_start_time} - ${event.event_end_time}`
     : event.event_start_time || "";
+  const venueName = event.venue_name || "";
+  const venueWithLabel = label ? `${venueName} (${label})` : venueName;
   return [
-    dateStr,
-    event.venue_name || "",
+    includeDate ? String(new Date(event.event_date).getDate()) : "",
+    venueWithLabel,
     timeStr,
-    "", // Artist Name - filled manually
+    "", // Artist name - filled manually
     formatPaymentStatus(event),
-    event.client_name || "",
-    event.client_mobile || "",
-    event.client_email || "",
-    event.city || "",
-    event.state || "",
-    event.event_type || "",
-    String(event.artist_count || 1),
-    `₹${(event.total_price || 0).toLocaleString("en-IN")}`,
-    `₹${(event.advance_amount || 0).toLocaleString("en-IN")}`,
-    event.status || "",
-    event.id || "",
-    event.notes || "",
-    label || event.source || "website",
+    formatPendingAmount(event),
+    event.id || "", // Booking ID in column G for tracking
   ];
-}
-
-const HEADERS = ["DATE", "VENUE", "TIME", "ARTIST NAME", "Payment Status", "Client Name", "Mobile", "Email", "City", "State", "Event Type", "Artist Count", "Total Price", "Advance", "Status", "Booking ID", "Notes", "Source"];
-
-async function ensureMonthTab(accessToken: string, spreadsheetId: string, tabName: string, tabs: {title: string, sheetId: number}[]): Promise<{title: string, sheetId: number}> {
-  const existing = tabs.find(t => t.title.toUpperCase() === tabName.toUpperCase());
-  if (existing) return existing;
-  const result = await createSheetTab(accessToken, spreadsheetId, tabName);
-  const newSheetId = result.replies?.[0]?.addSheet?.properties?.sheetId || 0;
-  // Add headers to new tab
-  await updateSheet(accessToken, spreadsheetId, `'${tabName}'!A1`, [
-    [`${tabName} - EVENT SCHEDULE`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", `Created: ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}`],
-    HEADERS,
-  ]);
-  return { title: tabName, sheetId: newSheetId };
-}
-
-async function findEventRowInTab(accessToken: string, spreadsheetId: string, tabName: string, eventId: string): Promise<number> {
-  try {
-    const data = await readSheet(accessToken, spreadsheetId, `'${tabName}'!A1:R500`);
-    const rows = data.values || [];
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i]?.[15] === eventId) return i + 1; // 1-indexed
-    }
-  } catch (_) {}
-  return -1;
 }
 
 function getSupabaseClient() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+}
+
+async function pushEventToSheet(
+  accessToken: string, spreadsheetId: string,
+  tabs: {title: string, sheetId: number}[],
+  event: any, label: string
+) {
+  const tabName = getMonthTabName(event.event_date);
+  const tab = findTab(tabs, tabName);
+  if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
+
+  const dayNumber = new Date(event.event_date).getDate();
+
+  // Read current tab data
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:G500`);
+  const rows = data.values || [];
+
+  // Check if event already exists by booking ID in column G
+  let existingRow = -1;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i]?.[6] === event.id) {
+      existingRow = i + 1; // 1-indexed
+      break;
+    }
+  }
+
+  if (existingRow > 0) {
+    // Update existing row in place
+    const row = formatSheetRow(event, !!rows[existingRow - 1]?.[0]?.toString().trim(), label);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}`, [row]);
+    return { tab: tab.title, action: "updated", row: existingRow };
+  }
+
+  // Find the date row
+  const { dateRow, lastGroupRow, isEmpty } = findDateRow(rows, dayNumber);
+  if (dateRow < 0) throw new Error(`Date ${dayNumber} not found in ${tab.title}`);
+
+  if (isEmpty) {
+    // Write directly to the date row (keep date number in A, fill B-G)
+    const row = formatSheetRow(event, true, label);
+    row[0] = String(dayNumber); // Keep date number
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}`, [row]);
+    return { tab: tab.title, action: "written", row: dateRow };
+  } else {
+    // Date row already has data - insert a new row below the group
+    await insertRowAfter(accessToken, spreadsheetId, tab.sheetId, lastGroupRow);
+    const row = formatSheetRow(event, false, label); // Empty column A for sub-row
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}`, [row]);
+    return { tab: tab.title, action: "inserted", row: lastGroupRow + 1 };
+  }
+}
+
+async function removeEventFromSheet(
+  accessToken: string, spreadsheetId: string,
+  tabs: {title: string, sheetId: number}[],
+  event: any
+) {
+  const tabName = getMonthTabName(event.event_date);
+  const tab = findTab(tabs, tabName);
+  if (!tab) return { removed: false };
+
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:G500`);
+  const rows = data.values || [];
+
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i]?.[6] === event.id) {
+      const rowIndex = i + 1; // 1-indexed
+      const hasDateNumber = !!rows[i]?.[0]?.toString().trim();
+
+      if (hasDateNumber) {
+        // This is a date row - just clear columns B-G, keep date number
+        await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!B${rowIndex}:G${rowIndex}`, [["", "", "", "", "", ""]]);
+      } else {
+        // This is a sub-row - delete the entire row
+        await deleteSheetRow(accessToken, spreadsheetId, tab.sheetId, rowIndex);
+      }
+      return { removed: true, row: rowIndex };
+    }
+  }
+  return { removed: false };
 }
 
 serve(async (req) => {
@@ -194,12 +264,12 @@ serve(async (req) => {
     const { action, event_data, event_id } = body;
     const supabase = getSupabaseClient();
 
-    // READ - read all tabs data
+    // READ all tabs
     if (action === "read") {
       const allData: Record<string, any[][]> = {};
       for (const tab of tabs) {
         try {
-          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:R500`);
+          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:G500`);
           allData[tab.title] = data.values || [];
         } catch (_) {}
       }
@@ -208,94 +278,56 @@ serve(async (req) => {
       });
     }
 
-    // PUSH SINGLE EVENT to correct month tab
+    // PUSH SINGLE EVENT
     if (action === "push_single" && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (error || !event) throw new Error("Event not found");
 
-      const tabName = getMonthTabName(event.event_date);
-      const tab = await ensureMonthTab(accessToken, sheetId, tabName, tabs);
+      const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
 
-      // Check if already exists
-      const existingRow = await findEventRowInTab(accessToken, sheetId, tabName, event_id);
-      const row = formatEventRow(event, "web pushed");
-
-      if (existingRow > 0) {
-        await updateSheet(accessToken, sheetId, `'${tabName}'!A${existingRow}`, [row]);
-      } else {
-        await appendToSheet(accessToken, sheetId, `'${tabName}'!A1`, [row]);
-      }
-
-      // Mark as pushed in DB
       await supabase.from("event_bookings").update({
         sheet_pushed: true,
         sheet_pushed_at: new Date().toISOString(),
       } as any).eq("id", event_id);
 
-      return new Response(JSON.stringify({ success: true, tab: tabName }), {
+      return new Response(JSON.stringify({ success: true, ...result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // DELETE from sheet (reverse push) - removes the row from sheet
+    // DELETE FROM SHEET (reverse push)
     if (action === "delete_from_sheet" && event_id) {
-      const { data: event } = await supabase.from("event_bookings").select("event_date").eq("id", event_id).single();
+      const { data: event } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (!event) throw new Error("Event not found");
 
-      const tabName = getMonthTabName(event.event_date);
-      const tab = tabs.find(t => t.title.toUpperCase() === tabName.toUpperCase());
-      if (!tab) throw new Error("Sheet tab not found");
+      const result = await removeEventFromSheet(accessToken, sheetId, tabs, event);
 
-      const rowIndex = await findEventRowInTab(accessToken, sheetId, tabName, event_id);
-      if (rowIndex > 0) {
-        await deleteSheetRow(accessToken, sheetId, tab.sheetId, rowIndex);
-      }
-
-      // Mark as not pushed
       await supabase.from("event_bookings").update({
         sheet_pushed: false,
         sheet_pushed_at: null,
       } as any).eq("id", event_id);
 
-      return new Response(JSON.stringify({ success: true, removed: rowIndex > 0 }), {
+      return new Response(JSON.stringify({ success: true, ...result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // SYNC ALL - push all events organized by month tabs
+    // SYNC ALL
     if (action === "sync_all") {
       const { data: events, error } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: true });
       if (error) throw error;
 
-      // Group events by month
-      const byMonth: Record<string, any[]> = {};
-      for (const e of (events || [])) {
-        const tabName = getMonthTabName(e.event_date);
-        if (!byMonth[tabName]) byMonth[tabName] = [];
-        byMonth[tabName].push(e);
-      }
-
       let totalSynced = 0;
-      for (const [tabName, monthEvents] of Object.entries(byMonth)) {
-        const tab = await ensureMonthTab(accessToken, sheetId, tabName, tabs);
-        // Don't overwrite existing manual data - only append/update web events
-        for (const event of monthEvents) {
-          const existingRow = await findEventRowInTab(accessToken, sheetId, tabName, event.id);
-          const row = formatEventRow(event, "web pushed");
-          if (existingRow > 0) {
-            await updateSheet(accessToken, sheetId, `'${tabName}'!A${existingRow}`, [row]);
-          } else {
-            await appendToSheet(accessToken, sheetId, `'${tabName}'!A1`, [row]);
-          }
-          totalSynced++;
-        }
-        // Update pushed status
-        const ids = monthEvents.map(e => e.id);
-        for (const id of ids) {
+      for (const event of (events || [])) {
+        try {
+          await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
           await supabase.from("event_bookings").update({
             sheet_pushed: true,
             sheet_pushed_at: new Date().toISOString(),
-          } as any).eq("id", id);
+          } as any).eq("id", event.id);
+          totalSynced++;
+        } catch (e) {
+          console.warn(`Failed to push event ${event.id}: ${e.message}`);
         }
       }
 
@@ -304,38 +336,32 @@ serve(async (req) => {
       });
     }
 
-    // APPEND EVENT (from trigger)
+    // APPEND EVENT (from DB trigger)
     if (action === "append_event" && event_data) {
-      const tabName = getMonthTabName(event_data.event_date);
-      await ensureMonthTab(accessToken, sheetId, tabName, tabs);
-      const row = formatEventRow(event_data, "web pushed");
-      await appendToSheet(accessToken, sheetId, `'${tabName}'!A1`, [row]);
-
-      if (event_data.id) {
-        await supabase.from("event_bookings").update({
-          sheet_pushed: true,
-          sheet_pushed_at: new Date().toISOString(),
-        } as any).eq("id", event_data.id);
+      try {
+        await pushEventToSheet(accessToken, sheetId, tabs, event_data, "web pushed");
+        if (event_data.id) {
+          await supabase.from("event_bookings").update({
+            sheet_pushed: true,
+            sheet_pushed_at: new Date().toISOString(),
+          } as any).eq("id", event_data.id);
+        }
+      } catch (e) {
+        console.warn("Auto-push failed (non-fatal):", e.message);
       }
-
-      return new Response(JSON.stringify({ success: true, tab: tabName }), {
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // UPDATE EVENT (from trigger)
+    // UPDATE EVENT (from DB trigger)
     if (action === "update_event" && event_data && event_id) {
-      const tabName = getMonthTabName(event_data.event_date);
-      await ensureMonthTab(accessToken, sheetId, tabName, tabs);
-      const existingRow = await findEventRowInTab(accessToken, sheetId, tabName, event_id);
-      const row = formatEventRow(event_data, "web pushed");
-      if (existingRow > 0) {
-        await updateSheet(accessToken, sheetId, `'${tabName}'!A${existingRow}`, [row]);
-      } else {
-        await appendToSheet(accessToken, sheetId, `'${tabName}'!A1`, [row]);
+      try {
+        await pushEventToSheet(accessToken, sheetId, tabs, { ...event_data, id: event_id }, "web pushed");
+      } catch (e) {
+        console.warn("Auto-update failed (non-fatal):", e.message);
       }
-
-      return new Response(JSON.stringify({ success: true, tab: tabName }), {
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -358,19 +384,16 @@ serve(async (req) => {
         advance_amount: event_data.advance_amount || 0,
         status: event_data.status || "confirmed",
         payment_status: event_data.payment_status || "pending",
-        notes: event_data.notes || "Manually added from admin",
+        notes: event_data.notes || "Manually added",
         source: "manual",
         sheet_pushed: true,
         sheet_pushed_at: new Date().toISOString(),
       } as any).select().single();
       if (error) throw error;
 
-      const tabName = getMonthTabName(inserted.event_date);
-      await ensureMonthTab(accessToken, sheetId, tabName, tabs);
-      const row = formatEventRow({ ...inserted, source: "manual" }, "manual");
-      await appendToSheet(accessToken, sheetId, `'${tabName}'!A1`, [row]);
+      const result = await pushEventToSheet(accessToken, sheetId, tabs, inserted, "manual");
 
-      return new Response(JSON.stringify({ success: true, event: inserted, tab: tabName }), {
+      return new Response(JSON.stringify({ success: true, event: inserted, ...result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
