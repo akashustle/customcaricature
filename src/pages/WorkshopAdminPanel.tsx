@@ -59,7 +59,15 @@ const sidebarItems = [
 
 const WorkshopAdmin = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("dashboard");
+  const [tab, setTab] = useState(() => {
+    const saved = localStorage.getItem("ws_admin_last_tab");
+    return saved || "dashboard";
+  });
+
+  // Persist last active tab
+  useEffect(() => {
+    localStorage.setItem("ws_admin_last_tab", tab);
+  }, [tab]);
   const [users, setUsers] = useState<any[]>([]);
   const [artists, setArtists] = useState<any[]>([]);
   const [videos, setVideos] = useState<any[]>([]);
