@@ -112,6 +112,7 @@ const AdminFAQs = lazy(() => import("@/components/admin/AdminFAQs"));
 const AdminGoogleSheet = lazy(() => import("@/components/admin/AdminGoogleSheet"));
 const AdminMiniDatabase = lazy(() => import("@/components/admin/AdminMiniDatabase"));
 const AdminLiveActivityTicker = lazy(() => import("@/components/admin/AdminLiveActivityTicker"));
+const AdminHeatmap = lazy(() => import("@/components/admin/AdminHeatmap"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -947,12 +948,13 @@ const Admin = () => {
               </Button>
               {/* Admin Profile Avatar */}
               <div 
-                className="admin-avatar hidden md:flex cursor-pointer overflow-hidden"
+                className="hidden md:flex w-9 h-9 rounded-xl cursor-pointer overflow-hidden ring-2 ring-primary/20 shadow-md items-center justify-center flex-shrink-0"
                 onClick={() => setActiveTab("settings")}
                 title={adminProfile?.full_name || "Admin Profile"}
+                style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))`, color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14 }}
               >
                 {(adminProfile as any)?.avatar_url ? (
-                  <img src={(adminProfile as any).avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  <img src={`${(adminProfile as any).avatar_url}?t=${Date.now()}`} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   (adminProfile?.full_name || "A").charAt(0).toUpperCase()
                 )}
@@ -1986,6 +1988,10 @@ const Admin = () => {
 
           <TabsContent value="website-analytics">
             <AdminWebsiteAnalytics />
+          </TabsContent>
+
+          <TabsContent value="heatmap">
+            <AdminHeatmap />
           </TabsContent>
 
           <TabsContent value="maintenance">

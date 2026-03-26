@@ -15,6 +15,7 @@ const PermissionGate = () => {
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
+  const [stuckTimer, setStuckTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const [locationStatus, setLocationStatus] = useState<string>("prompt");
   const [notificationStatus, setNotificationStatus] = useState<string>(
@@ -81,6 +82,21 @@ const PermissionGate = () => {
       completeGate();
     }
   }, [requesting, visible, requiredPermissionsGranted]);
+
+  // Safety: auto-dismiss if stuck for more than 15 seconds while requesting
+  useEffect(() => {
+    if (requesting) {
+      const timer = setTimeout(() => {
+        setRequesting(false);
+        setCurrentStep(null);
+      }, 15000);
+      setStuckTimer(timer);
+      return () => clearTimeout(timer);
+    } else if (stuckTimer) {
+      clearTimeout(stuckTimer);
+      setStuckTimer(null);
+    }
+  }, [requesting]);
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");

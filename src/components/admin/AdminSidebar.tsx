@@ -6,7 +6,7 @@ import {
   LayoutDashboard, TrendingUp, UserCheck, Layers, FileQuestion,
   Type, FormInput, Palette, Activity, ShieldCheck, Brain, MessageCircle,
   Gift, Ticket, AlertTriangle, ToggleLeft, CalendarDays, LineChart,
-  Search
+  Search, Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
@@ -48,6 +48,7 @@ const NAV_SECTIONS = [
       { id: "ai-intelligence", icon: Zap, label: "AI Insights" },
       { id: "revenue-target", icon: Target, label: "Targets" },
       { id: "calendar", icon: CalendarDays, label: "Calendar" },
+      { id: "heatmap", icon: Map, label: "Heatmap" },
     ],
   },
   {
