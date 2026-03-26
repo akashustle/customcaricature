@@ -83,6 +83,21 @@ const PermissionGate = () => {
     }
   }, [requesting, visible, requiredPermissionsGranted]);
 
+  // Safety: auto-dismiss if stuck for more than 15 seconds while requesting
+  useEffect(() => {
+    if (requesting) {
+      const timer = setTimeout(() => {
+        setRequesting(false);
+        setCurrentStep(null);
+      }, 15000);
+      setStuckTimer(timer);
+      return () => clearTimeout(timer);
+    } else if (stuckTimer) {
+      clearTimeout(stuckTimer);
+      setStuckTimer(null);
+    }
+  }, [requesting]);
+
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
     setVisible(false);
