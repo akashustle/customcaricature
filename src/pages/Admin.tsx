@@ -956,6 +956,14 @@ const Admin = () => {
           </div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
 
+          {/* Page transition wrapper */}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+
           {/* Dashboard Tab */}
           <TabsContent value="dashboard">
             <AdminDashboardPremium onNavigate={setActiveTab} />
@@ -2409,6 +2417,7 @@ const Admin = () => {
               <AdminPushUpdate />
             </div>
           </TabsContent>
+          </motion.div>
         </Tabs>
         </div>
 

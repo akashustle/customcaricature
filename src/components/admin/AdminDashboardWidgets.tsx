@@ -1,11 +1,41 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Package, Calendar, Users, DollarSign, TrendingUp, Clock, Star, Zap, ShoppingBag, MessageCircle, Globe, Activity, ArrowUp, ArrowDown, Eye, Sparkles } from "lucide-react";
+import { Package, Calendar, Users, DollarSign, TrendingUp, Clock, Star, Zap, ShoppingBag, MessageCircle, Globe, Activity, ArrowUp, ArrowDown, Eye } from "lucide-react";
 import { formatPrice } from "@/lib/pricing";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+const ICON_TINTS: Record<string, string> = {
+  "Total Revenue": "hsl(210 55% 50%)",
+  "Pending Revenue": "hsl(210 45% 60%)",
+  "Total Orders": "hsl(250 50% 55%)",
+  "Today's Orders": "hsl(270 45% 55%)",
+  "Pending": "hsl(38 75% 52%)",
+  "Delivered": "hsl(152 45% 42%)",
+  "Total Events": "hsl(220 55% 52%)",
+  "Upcoming": "hsl(195 60% 48%)",
+  "Customers": "hsl(200 50% 52%)",
+  "Enquiries": "hsl(175 50% 42%)",
+  "Workshop": "hsl(280 40% 55%)",
+  "Sessions": "hsl(220 10% 45%)",
+};
+
+const ICON_BG_TINTS: Record<string, string> = {
+  "Total Revenue": "hsl(210 55% 96%)",
+  "Pending Revenue": "hsl(210 45% 96%)",
+  "Total Orders": "hsl(250 50% 96%)",
+  "Today's Orders": "hsl(270 45% 96%)",
+  "Pending": "hsl(38 75% 96%)",
+  "Delivered": "hsl(152 45% 95%)",
+  "Total Events": "hsl(220 55% 96%)",
+  "Upcoming": "hsl(195 60% 96%)",
+  "Customers": "hsl(200 50% 96%)",
+  "Enquiries": "hsl(175 50% 95%)",
+  "Workshop": "hsl(280 40% 96%)",
+  "Sessions": "hsl(220 10% 95%)",
+};
 
 const AdminDashboardWidgets = () => {
   const [stats, setStats] = useState({
@@ -81,91 +111,102 @@ const AdminDashboardWidgets = () => {
     setDrillData({ title, rows });
   };
 
-  const widgets: { icon: any; label: string; value: string | number; gradient: string; iconBg: string; trend?: { value: string; up: boolean }; drill?: string }[] = [
-    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), gradient: "from-blue-500 to-blue-600", iconBg: "from-blue-500 to-blue-600", trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
-    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), gradient: "from-sky-400 to-blue-500", iconBg: "from-sky-400 to-blue-500", drill: "revenue" },
-    { icon: Package, label: "Total Orders", value: stats.totalOrders, gradient: "from-indigo-500 to-indigo-600", iconBg: "from-indigo-500 to-indigo-600", drill: "orders" },
-    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, gradient: "from-violet-500 to-indigo-500", iconBg: "from-violet-500 to-indigo-500", trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
-    { icon: Clock, label: "Pending", value: stats.pendingOrders, gradient: "from-amber-500 to-orange-500", iconBg: "from-amber-500 to-orange-500" },
-    { icon: Star, label: "Delivered", value: stats.completedOrders, gradient: "from-emerald-500 to-green-500", iconBg: "from-emerald-500 to-green-500" },
-    { icon: Calendar, label: "Total Events", value: stats.totalEvents, gradient: "from-blue-600 to-indigo-600", iconBg: "from-blue-600 to-indigo-600", drill: "events" },
-    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, gradient: "from-cyan-500 to-blue-500", iconBg: "from-cyan-500 to-blue-500" },
-    { icon: Users, label: "Customers", value: stats.totalCustomers, gradient: "from-blue-400 to-sky-500", iconBg: "from-blue-400 to-sky-500", trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
-    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, gradient: "from-teal-500 to-cyan-500", iconBg: "from-teal-500 to-cyan-500", drill: "enquiries" },
-    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, gradient: "from-purple-500 to-indigo-500", iconBg: "from-purple-500 to-indigo-500" },
-    { icon: Activity, label: "Sessions", value: stats.activeSessions, gradient: "from-slate-500 to-gray-600", iconBg: "from-slate-500 to-gray-600" },
+  const widgets: { icon: any; label: string; value: string | number; trend?: { value: string; up: boolean }; drill?: string }[] = [
+    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
+    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), drill: "revenue" },
+    { icon: Package, label: "Total Orders", value: stats.totalOrders, drill: "orders" },
+    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
+    { icon: Clock, label: "Pending", value: stats.pendingOrders },
+    { icon: Star, label: "Delivered", value: stats.completedOrders },
+    { icon: Calendar, label: "Total Events", value: stats.totalEvents, drill: "events" },
+    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents },
+    { icon: Users, label: "Customers", value: stats.totalCustomers, trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
+    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, drill: "enquiries" },
+    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers },
+    { icon: Activity, label: "Sessions", value: stats.activeSessions },
   ];
 
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
-        {widgets.map((w, i) => (
-          <motion.div key={w.label}
-            initial={{ opacity: 0, y: 30, scale: 0.85, rotateX: 15 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            transition={{ delay: i * 0.05, duration: 0.5, type: "spring", stiffness: 200, damping: 20 }}
-            whileHover={{ y: -10, scale: 1.06, rotateY: 5, transition: { duration: 0.25 } }}
-            whileTap={{ scale: 0.97 }}
-            onMouseEnter={() => setHoveredIdx(i)}
-            onMouseLeave={() => setHoveredIdx(null)}
-            onClick={() => w.drill && openDrill(w.drill)}
-            className={`cursor-pointer group ${w.drill ? "" : "cursor-default"}`}
-            style={{ perspective: "600px" }}>
-            <div className="relative overflow-hidden rounded-2xl p-3.5 transition-all duration-300 bg-card dark:bg-card"
-              style={{
-                backdropFilter: "blur(20px)",
-                boxShadow: hoveredIdx === i
-                  ? "0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px hsl(var(--border)) inset"
-                  : "0 8px 25px -8px rgba(0,0,0,0.08), 0 0 0 1px hsl(var(--border)) inset"
-              }}>
-              {/* Animated gradient blob */}
-              <motion.div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${w.iconBg} blur-2xl`}
-                animate={hoveredIdx === i ? { opacity: 0.35, scale: 1.3 } : { opacity: 0.15, scale: 1 }}
-                transition={{ duration: 0.3 }} />
-              
-              {/* Shimmer on hover */}
-              {hoveredIdx === i && (
-                <motion.div className="absolute inset-0 pointer-events-none z-10"
-                  style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 55%, transparent 70%)" }}
-                  initial={{ x: "-100%" }} animate={{ x: "200%" }} transition={{ duration: 0.7 }} />
-              )}
+        {widgets.map((w, i) => {
+          const tint = ICON_TINTS[w.label] || "hsl(var(--primary))";
+          const tintBg = ICON_BG_TINTS[w.label] || "hsl(var(--secondary))";
+          return (
+            <motion.div key={w.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.4, ease: "easeOut" }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.98 }}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              onClick={() => w.drill && openDrill(w.drill)}
+              className={`${w.drill ? "cursor-pointer" : "cursor-default"}`}>
+              <div
+                className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300"
+                style={{
+                  background: "hsl(0 0% 100%)",
+                  border: "1px solid hsl(0 0% 93%)",
+                  boxShadow: hoveredIdx === i
+                    ? "0 12px 40px -10px hsla(0,0%,0%,0.1), 0 0 0 1px hsla(0,0%,0%,0.03)"
+                    : "0 2px 8px -2px hsla(0,0%,0%,0.06), 0 0 0 1px hsla(0,0%,0%,0.02), inset 0 1px 0 hsla(0,0%,100%,0.8)",
+                }}
+              >
+                {/* Subtle glow on hover */}
+                {hoveredIdx === i && (
+                  <motion.div
+                    className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
+                    style={{ background: tintBg, filter: "blur(20px)", opacity: 0.6 }}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1.2, opacity: 0.6 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
 
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-2.5">
-                  <motion.div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${w.iconBg} flex items-center justify-center`}
-                    animate={hoveredIdx === i ? { rotate: [0, -8, 8, 0], scale: 1.1 } : { rotate: 0, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                    style={{ boxShadow: "0 6px 20px -4px rgba(0,0,0,0.2)" }}>
-                    <w.icon className="w-5 h-5 text-white" />
-                  </motion.div>
-                  {w.trend && (
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.05 + 0.3, type: "spring" }}
-                      className={`flex items-center gap-0.5 text-[9px] font-bold px-2 py-0.5 rounded-full ${w.trend.up ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {w.trend.up ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
-                      {w.trend.value}
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-3">
+                    <motion.div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: tintBg }}
+                      animate={hoveredIdx === i ? { scale: 1.08 } : { scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <w.icon className="w-[18px] h-[18px]" style={{ color: tint }} strokeWidth={1.8} />
                     </motion.div>
-                  )}
-                  {w.drill && !w.trend && (
-                    <motion.div animate={hoveredIdx === i ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }} transition={{ duration: 0.2 }}>
-                      <Eye className="w-3.5 h-3.5 text-gray-400" />
-                    </motion.div>
-                  )}
+                    {w.trend && (
+                      <div className={`flex items-center gap-0.5 text-[9px] font-semibold px-2 py-0.5 rounded-full ${w.trend.up ? 'text-emerald-600' : 'text-amber-600'}`}
+                        style={{ background: w.trend.up ? 'hsl(152 45% 95%)' : 'hsl(38 75% 95%)' }}>
+                        {w.trend.up ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
+                        {w.trend.value}
+                      </div>
+                    )}
+                    {w.drill && !w.trend && (
+                      <motion.div
+                        animate={hoveredIdx === i ? { opacity: 1 } : { opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <Eye className="w-3.5 h-3.5" style={{ color: "hsl(0 0% 72%)" }} />
+                      </motion.div>
+                    )}
+                  </div>
+                  <p className="text-xl font-bold tracking-tight admin-panel-font" style={{ color: "hsl(0 0% 12%)" }}>
+                    {w.value}
+                  </p>
+                  <p className="text-[10px] mt-0.5 font-medium uppercase tracking-wider" style={{ color: "hsl(0 0% 55%)" }}>
+                    {w.label}
+                  </p>
                 </div>
-                <motion.p className="text-xl font-extrabold text-foreground leading-tight tracking-tight"
-                  animate={hoveredIdx === i ? { scale: 1.05 } : { scale: 1 }} transition={{ duration: 0.2 }}>
-                  {w.value}
-                </motion.p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold uppercase tracking-wider">{w.label}</p>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Drilldown */}
       <Dialog open={!!drillData} onOpenChange={() => setDrillData(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader><DialogTitle className="font-bold">{drillData?.title}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-bold admin-panel-font">{drillData?.title}</DialogTitle></DialogHeader>
           <ScrollArea className="h-[60vh]">
             <Table>
               <TableHeader><TableRow>{drillData?.rows[0] && Object.keys(drillData.rows[0]).map(k => <TableHead key={k} className="text-xs font-bold">{k}</TableHead>)}</TableRow></TableHeader>
