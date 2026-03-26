@@ -893,19 +893,87 @@ const WorkshopAdmin = () => {
               onNavigate={(tab, highlightId) => { setTab(tab); if (highlightId) { setTimeout(() => { const el = document.querySelector(`[data-search-id="${highlightId}"]`); if (el) { el.classList.add("search-highlight"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.classList.remove("search-highlight"), 4000); } }, 300); } }}
             />
           </div>
-          <div className="flex overflow-x-auto scrollbar-thin px-2 pb-2 gap-0.5">
-            {sidebarItems.map((item) => (
-              <button key={item.key} onClick={() => setTab(item.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0 ${tab === item.key ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold" : textMuted}`}>
-                <item.icon className="w-3.5 h-3.5" />{item.label}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
+      {/* Mobile Bottom Nav - Instagram Style */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
+        <div className={`backdrop-blur-lg ${dm ? "bg-[#0e0e18]/95 border-white/[0.06]" : "bg-white/95 border-slate-200/30"} border-t`}>
+          <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1">
+            {sidebarItems.slice(0, 6).map((item) => {
+              const isActive = tab === item.key;
+              return (
+                <motion.button key={item.key} onClick={() => setTab(item.key)}
+                  whileTap={{ scale: 0.75 }}
+                  className="flex items-center justify-center min-w-[52px] w-[52px] h-14 relative flex-shrink-0">
+                  <item.icon
+                    className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/30" : "text-slate-400"}`}
+                    size={isActive ? 24 : 20}
+                    strokeWidth={isActive ? 2.2 : 1.4}
+                    fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"}
+                  />
+                  {isActive && (
+                    <motion.div layoutId="ws-admin-dot"
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+                  )}
+                </motion.button>
+              );
+            })}
+            {/* More sheet for remaining tabs */}
+            <motion.button
+              whileTap={{ scale: 0.75 }}
+              onClick={() => {
+                const el = document.getElementById("ws-admin-more-sheet");
+                if (el) el.click();
+              }}
+              className="flex items-center justify-center min-w-[52px] w-[52px] h-14 relative flex-shrink-0">
+              <Settings
+                className={`transition-all duration-200 ${!sidebarItems.slice(0, 6).some(i => i.key === tab) ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/30" : "text-slate-400"}`}
+                size={!sidebarItems.slice(0, 6).some(i => i.key === tab) ? 24 : 20}
+                strokeWidth={!sidebarItems.slice(0, 6).some(i => i.key === tab) ? 2.2 : 1.4}
+              />
+              {!sidebarItems.slice(0, 6).some(i => i.key === tab) && (
+                <motion.div layoutId="ws-admin-dot"
+                  className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+              )}
+            </motion.button>
+          </div>
+          <div className="h-[env(safe-area-inset-bottom)]" />
+        </div>
+      </div>
+
+      {/* Hidden sheet trigger for "More" tabs */}
+      <Dialog>
+        <DialogTrigger asChild>
+          <button id="ws-admin-more-sheet" className="hidden">More</button>
+        </DialogTrigger>
+        <DialogContent className={`max-w-sm max-h-[70vh] overflow-y-auto ${dm ? "bg-[#0e0e18] border-white/10" : "bg-white"}`}>
+          <DialogHeader><DialogTitle className={dm ? "text-white" : ""}>All Sections</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            {sidebarItems.map((item) => {
+              const isActive = tab === item.key;
+              return (
+                <button key={item.key}
+                  onClick={() => { setTab(item.key); const closeBtn = document.querySelector('[data-radix-collection-item]'); }}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all min-h-[68px] justify-center",
+                    isActive
+                      ? "bg-violet-500 text-white shadow-lg shadow-violet-500/20"
+                      : dm ? "bg-white/[0.04] border border-white/10 text-white/60" : "bg-slate-50 border border-slate-200 text-slate-600"
+                  )}>
+                  <item.icon className="w-5 h-5" strokeWidth={1.5} />
+                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Content */}
-      <div className="flex-1 p-3 lg:p-6 pt-[100px] lg:pt-6 pb-6 overflow-auto">
+      <div className="flex-1 p-3 lg:p-6 pt-[68px] lg:pt-6 pb-24 lg:pb-6 overflow-auto">
         <div className="max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
