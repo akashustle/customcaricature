@@ -530,6 +530,10 @@ const AdminGoogleSheet = () => {
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                   Refresh
                 </Button>
+                <Button size="sm" onClick={handleSetupSheets} disabled={settingUp} className="rounded-xl" variant="outline">
+                  {settingUp ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sheet className="mr-2 h-4 w-4" />}
+                  Setup Sheets
+                </Button>
                 <Button size="sm" onClick={handleSyncAll} disabled={syncing} className="rounded-xl">
                   {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                   Push Unpushed
