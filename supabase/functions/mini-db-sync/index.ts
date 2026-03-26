@@ -207,7 +207,7 @@ async function syncEvents(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.6, g: 0.2, b: 0.8 }, [40, 120, 140, 120, 180, 120, 100, 80, 80, 100, 100, 80, 80, 120, 200, 80, 50, 100, 100, 100, 100, 100, 80, 50, 50, 50, 200, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.55, g: 0.24, b: 0.86 }, [40, 280, 150, 130, 200, 130, 110, 90, 90, 120, 110, 90, 90, 140, 240, 90, 60, 110, 110, 110, 110, 110, 90, 60, 60, 60, 240, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
