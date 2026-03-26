@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 type ArtistDocument = { id: string; artist_id: string; document_type: string; file_name: string; storage_path: string; created_at: string; };
 type Artist = { id: string; name: string; experience: string | null; portfolio_url: string | null; email: string | null; mobile: string | null; auth_user_id: string | null; created_at: string; };
 type ArtistEvent = { id: string; client_name: string; event_type: string; event_date: string; city: string; status: string; payment_status: string; total_price: number; artist_count: number; };
+type ArtistLog = { id: string; artist_id: string; artist_name: string; action_type: string; description: string | null; metadata: any; created_at: string; };
 
 const AdminArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
