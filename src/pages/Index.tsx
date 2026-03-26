@@ -35,19 +35,28 @@ const HomepageUseCases = lazy(() => import("@/components/homepage/HomepageUseCas
 const HomepageSmartHelp = lazy(() => import("@/components/homepage/HomepageSmartHelp"));
 const HomepageEnquiryFunnel = lazy(() => import("@/components/homepage/HomepageEnquiryFunnel"));
 
-// Only load first 4 gallery images eagerly, rest lazy
+// Eagerly load first 4 gallery images for above-the-fold, lazy load rest
 import gallery1 from "@/assets/gallery/gallery-1.jpeg";
 import gallery2 from "@/assets/gallery/gallery-2.jpeg";
 import gallery3 from "@/assets/gallery/gallery-3.jpeg";
 import gallery4 from "@/assets/gallery/gallery-4.jpeg";
-import gallery5 from "@/assets/gallery/gallery-5.jpeg";
-import gallery6 from "@/assets/gallery/gallery-6.jpeg";
-import gallery7 from "@/assets/gallery/gallery-7.jpeg";
-import gallery8 from "@/assets/gallery/gallery-8.jpeg";
-import gallery9 from "@/assets/gallery/gallery-9.jpeg";
-import gallery10 from "@/assets/gallery/gallery-10.jpeg";
 
-const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6, gallery7, gallery8, gallery9, gallery10];
+const lazyGallery = () => Promise.all([
+  import("@/assets/gallery/gallery-5.jpeg"),
+  import("@/assets/gallery/gallery-6.jpeg"),
+  import("@/assets/gallery/gallery-7.jpeg"),
+  import("@/assets/gallery/gallery-8.jpeg"),
+  import("@/assets/gallery/gallery-9.jpeg"),
+  import("@/assets/gallery/gallery-10.jpeg"),
+]).then(mods => mods.map(m => m.default));
+
+const useGalleryImages = () => {
+  const [images, setImages] = useState([gallery1, gallery2, gallery3, gallery4]);
+  useEffect(() => {
+    lazyGallery().then(rest => setImages([gallery1, gallery2, gallery3, gallery4, ...rest]));
+  }, []);
+  return images;
+};
 
 const styles = [
   { icon: Palette, name: "Cute", desc: "Adorable & charming portraits" },
@@ -93,13 +102,13 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
   </AnimatePresence>
 );
 
-const InfiniteScrollGallery = ({ onImageClick }: { onImageClick: (idx: number) => void }) => {
-  const doubled = [...galleryImages, ...galleryImages];
+const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onImageClick: (idx: number) => void }) => {
+  const doubled = [...images, ...images];
   return (
     <div className="overflow-hidden py-8">
       <motion.div
         className="flex gap-4"
-        animate={{ x: [0, -(galleryImages.length * 280)] }}
+        animate={{ x: [0, -(images.length * 280)] }}
         transition={{ x: { repeat: Infinity, repeatType: "loop", duration: 30, ease: "linear" } }}
       >
         {doubled.map((img, i) => (
@@ -108,9 +117,9 @@ const InfiniteScrollGallery = ({ onImageClick }: { onImageClick: (idx: number) =
             className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md"
             whileHover={{ scale: 1.03, y: -4 }}
             transition={{ duration: 0.3 }}
-            onClick={() => onImageClick(i % galleryImages.length)}
+            onClick={() => onImageClick(i % images.length)}
           >
-            <img src={img} alt={`Caricature ${(i % galleryImages.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
+            <img src={img} alt={`Caricature ${(i % images.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
           </motion.div>
         ))}
       </motion.div>
@@ -123,6 +132,7 @@ const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { settings } = useSiteSettings();
   const socialLinks = useSocialLinks();
+  const galleryImages = useGalleryImages();
   const { content } = useHomepageContent();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -434,7 +444,7 @@ const Index = () => {
                     <p className="text-muted-foreground font-body">Every stroke tells a story — tap to view fullscreen</p>
                   </motion.div>
                 </div>
-                <InfiniteScrollGallery onImageClick={openLightbox} />
+                <InfiniteScrollGallery images={galleryImages} onImageClick={openLightbox} />
               </section>
             );
           case "what_you_get":

@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect } from "react";
+import { useState, lazy, Suspense, useEffect, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,23 +6,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
-import SplashScreen from "./components/SplashScreen";
-import FloatingButtons from "./components/FloatingButtons";
-import MobileBottomNav from "./components/MobileBottomNav";
-import AppUpdateBanner from "./components/AppUpdateBanner";
-import PermissionGate from "./components/PermissionGate";
-import AppOnboarding from "./components/AppOnboarding";
-import LiveChatWrapper from "./components/LiveChatWrapper";
-import OfflineDetector from "./components/OfflineDetector";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 
 import usePageTracker from "./hooks/usePageTracker";
-import { useOneSignal } from "./hooks/useOneSignal";
-import { useWebPush } from "./hooks/useWebPush";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
+
+// Lazy load non-critical shell components
+const SplashScreen = lazy(() => import("./components/SplashScreen"));
+const FloatingButtons = lazy(() => import("./components/FloatingButtons"));
+const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
+const AppUpdateBanner = lazy(() => import("./components/AppUpdateBanner"));
+const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
+const OfflineDetector = lazy(() => import("./components/OfflineDetector"));
+
+import { useOneSignal } from "./hooks/useOneSignal";
+import { useWebPush } from "./hooks/useWebPush";
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
@@ -91,12 +92,19 @@ const PageLoader = () => (
   </div>
 );
 
-const OneSignalInit = () => {
-  useOneSignal();
-  return null;
-};
+const DeferredInit = memo(() => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestIdleCallback ? requestIdleCallback(() => setReady(true)) : setTimeout(() => setReady(true), 2000);
+    return () => { if (typeof cancelIdleCallback !== "undefined") cancelIdleCallback(id as number); };
+  }, []);
+  if (!ready) return null;
+  return <DeferredInitInner />;
+});
+DeferredInit.displayName = "DeferredInit";
 
-const WebPushInit = () => {
+const DeferredInitInner = () => {
+  useOneSignal();
   useWebPush();
   return null;
 };
@@ -187,25 +195,22 @@ const App = () => {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <DefaultThemeApplier />
-        <OneSignalInit />
-        <WebPushInit />
-        <OfflineDetector />
+        <DeferredInit />
+        <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
-        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-        <AppUpdateBanner />
+        {showSplash && <Suspense fallback={null}><SplashScreen onComplete={() => setShowSplash(false)} /></Suspense>}
+        <Suspense fallback={null}><AppUpdateBanner /></Suspense>
         <BrowserRouter>
           <GlobalMaintenanceGate>
-            <AppOnboarding />
-            <PermissionGate />
+            <Suspense fallback={null}><AppOnboarding /></Suspense>
             <ScrollToTop />
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
             
-            <FloatingButtons />
-            <LiveChatWrapper />
-            <MobileBottomNav />
+            <Suspense fallback={null}><FloatingButtons /></Suspense>
+            <Suspense fallback={null}><MobileBottomNav /></Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
