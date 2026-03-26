@@ -57,15 +57,21 @@ const PermissionGate = () => {
 
     if (done) return;
 
-    // If all already granted, mark done and skip
-    if (typeof Notification !== "undefined" && Notification.permission === "granted" && locationStatus === "granted") {
+    // If all already granted, mark done and skip — do NOT re-show
+    const allGranted = (typeof Notification !== "undefined" && Notification.permission === "granted") && locationStatus === "granted";
+    if (allGranted) {
       localStorage.setItem(GATE_KEY, "done");
+      setVisible(false);
       return;
     }
 
     // Shorter delay for admin PWA (3s), normal delay for website (20s)
     const delayMs = (isAdminRoute || isStandalone) ? 3000 : 20000;
-    const timer = setTimeout(() => setVisible(true), delayMs);
+    const timer = setTimeout(() => {
+      // Double-check gate wasn't completed in the meantime
+      if (localStorage.getItem(GATE_KEY) === "done") return;
+      setVisible(true);
+    }, delayMs);
     return () => clearTimeout(timer);
   }, [user?.id, isAdminRoute, isStandalone, locationStatus]);
 
@@ -130,7 +136,10 @@ const PermissionGate = () => {
 
     setCurrentStep(null);
     setRequesting(false);
-    completeGate();
+    // Small delay to let state settle before hiding
+    setTimeout(() => {
+      completeGate();
+    }, 300);
   };
 
   const statuses = useMemo(

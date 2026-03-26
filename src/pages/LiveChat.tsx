@@ -293,20 +293,18 @@ const LiveChat = () => {
         </div>
       </header>
 
-      {/* Quick Questions */}
-      {messages.length <= 2 && (
-        <div className="px-4 py-3 border-b border-border/40 bg-muted/30">
-          <p className="text-xs text-muted-foreground mb-2 font-semibold">Quick Questions:</p>
-          <div className="flex flex-wrap gap-2">
-            {quickQs.map((qq, i) => (
-              <Button key={i} variant="outline" size="sm" className="text-xs rounded-full h-7 px-3"
-                onClick={() => sendMessage(qq.q)}>
-                {qq.q}
-              </Button>
-            ))}
-          </div>
+      {/* Quick Questions — always visible */}
+      <div className="px-4 py-3 border-b border-border/40 bg-muted/30">
+        <p className="text-xs text-muted-foreground mb-2 font-semibold">Quick Questions:</p>
+        <div className="flex flex-wrap gap-2">
+          {quickQs.map((qq, i) => (
+            <Button key={i} variant="outline" size="sm" className="text-xs rounded-full h-7 px-3"
+              onClick={() => sendMessage(qq.q)}>
+              {qq.q}
+            </Button>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Messages — USER on RIGHT, ADMIN on LEFT */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-48">

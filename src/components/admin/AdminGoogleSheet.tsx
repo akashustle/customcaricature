@@ -193,7 +193,7 @@ const AdminGoogleSheet = () => {
   const [sheetTabs, setSheetTabs] = useState<Record<string, string[][]>>({});
   const [activeTab, setActiveTab] = useState("");
   const [sheetFilter, setSheetFilter] = useState("this_month");
-  const [eventFilter, setEventFilter] = useState("this_month");
+  const [eventFilter, setEventFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -289,7 +289,7 @@ const AdminGoogleSheet = () => {
     let base = events;
     if (eventFilter === "this_month") base = events.filter((e) => matchesMonth(e.event_date, ck));
     else if (eventFilter === "next_month") base = events.filter((e) => matchesMonth(e.event_date, nk));
-    else if (eventFilter === "upcoming") base = events.filter((e) => new Date(e.event_date) >= now);
+    else if (eventFilter === "upcoming") base = events.filter((e) => new Date(e.event_date) >= new Date(now.toDateString()));
     else if (eventFilter === "manual") base = events.filter((e) => e.source === "manual");
     else if (eventFilter === "pushed") base = events.filter((e) => e.sheet_pushed);
     else if (eventFilter === "not_pushed") base = events.filter((e) => !e.sheet_pushed);
