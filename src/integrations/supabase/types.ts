@@ -1608,6 +1608,8 @@ export type Database = {
           registration_lng: number | null
           registration_location_name: string | null
           remaining_amount: number | null
+          sheet_pushed: boolean | null
+          sheet_pushed_at: string | null
           source: string | null
           state: string
           status: string
@@ -1650,6 +1652,8 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           remaining_amount?: number | null
+          sheet_pushed?: boolean | null
+          sheet_pushed_at?: string | null
           source?: string | null
           state: string
           status?: string
@@ -1692,6 +1696,8 @@ export type Database = {
           registration_lng?: number | null
           registration_location_name?: string | null
           remaining_amount?: number | null
+          sheet_pushed?: boolean | null
+          sheet_pushed_at?: string | null
           source?: string | null
           state?: string
           status?: string
