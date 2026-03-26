@@ -193,20 +193,18 @@ const App = () => {
         <OfflineDetector />
         <Toaster />
         <Sonner />
-        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-        <AppUpdateBanner />
+        {showSplash && <Suspense fallback={null}><SplashScreen onComplete={() => setShowSplash(false)} /></Suspense>}
+        <Suspense fallback={null}><AppUpdateBanner /></Suspense>
         <BrowserRouter>
           <GlobalMaintenanceGate>
-            <AppOnboarding />
-            <PermissionGate />
+            <Suspense fallback={null}><AppOnboarding /></Suspense>
             <ScrollToTop />
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
             
-            <FloatingButtons />
-            <LiveChatWrapper />
-            <MobileBottomNav />
+            <Suspense fallback={null}><FloatingButtons /></Suspense>
+            <Suspense fallback={null}><MobileBottomNav /></Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
