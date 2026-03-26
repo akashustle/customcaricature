@@ -999,7 +999,7 @@ const WorkshopAdmin = () => {
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
-                <img src="/admin-favicon.jpeg" alt="CCC Admin" className="w-full h-full object-cover" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
               </div>
               <AdminWorkspaceSwitcher />
             </div>

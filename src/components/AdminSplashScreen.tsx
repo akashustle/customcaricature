@@ -109,8 +109,8 @@ const AdminSplashScreen = ({ onComplete }: { onComplete: () => void }) => {
               transition={{ type: "spring", stiffness: 200, damping: 15 }}
             >
               <img
-                src="/admin-favicon.jpeg"
-                alt="CCC Admin"
+                src="/logo.png"
+                alt="CCC"
                 className="admin-logo-frame w-24 h-24 object-cover relative z-10"
                 style={{ boxShadow: "0 0 50px hsla(35,50%,60%,0.3), 0 0 100px hsla(18,40%,55%,0.1)" }}
               />
