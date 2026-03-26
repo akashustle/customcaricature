@@ -503,7 +503,7 @@ serve(async (req) => {
     if (action === "update_pushed" && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (error || !event) return ok({ success: false, error: "Event not found" });
-      const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
+      const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed", supabase);
       await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_id);
       return ok({ success: true, ...result });
     }
