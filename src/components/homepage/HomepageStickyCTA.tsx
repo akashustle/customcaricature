@@ -26,7 +26,7 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="fixed bottom-[72px] left-0 right-0 z-[45] md:hidden bg-background/95 backdrop-blur-lg border-t border-border p-3 flex items-center gap-2"
+      className="fixed bottom-[56px] left-0 right-0 z-[44] md:hidden bg-background/95 backdrop-blur-lg border-t border-border p-3 flex items-center gap-2"
     >
       <Button
         onClick={() => {

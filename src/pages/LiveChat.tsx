@@ -177,9 +177,8 @@ const LiveChat = () => {
           } as any);
         }
         
-        // If quick question, auto-reply with answer
+        // If quick question, auto-reply with answer instantly
         if (matchedQQ) {
-          await new Promise(r => setTimeout(r, 800));
           await supabase.from("chat_messages").insert({
             sender_id: "system", receiver_id: currentUser.id, message: matchedQQ.a,
             is_admin: true, is_artist_chat: false,
@@ -189,9 +188,8 @@ const LiveChat = () => {
       } else if (currentSessionId) {
         await supabase.from("ai_chat_messages").insert({ session_id: currentSessionId, role: "user", content: msg, sender_name: currentGuestName } as any);
         
-        // If quick question, auto-reply with answer for guest
+        // If quick question, auto-reply with answer instantly for guest
         if (matchedQQ) {
-          await new Promise(r => setTimeout(r, 800));
           await supabase.from("ai_chat_messages").insert({ session_id: currentSessionId, role: "assistant", content: matchedQQ.a, sender_name: "CCC Team" } as any);
         }
         setGuestMsgCount(c => c + 1);
