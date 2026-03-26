@@ -102,31 +102,25 @@ async function deleteSheetRow(accessToken: string, spreadsheetId: string, tabShe
   if (!res.ok) throw new Error(`Delete row failed: ${await res.text()}`);
 }
 
-// Find matching tab name (handles trailing spaces in sheet names)
 function findTab(tabs: {title: string, sheetId: number}[], targetName: string) {
   return tabs.find(t => t.title.trim().toUpperCase() === targetName.trim().toUpperCase());
 }
 
-// Find the row index for a specific date in a month tab
-// Sheet structure: Row 1=title, Row 2=count, Row 3=headers, Row 4-5=empty, Row 6+=dates (1,2,3...)
-// Returns the 1-indexed row of the date, and the last row of that date's group
 function findDateRow(rows: any[][], dayNumber: number): { dateRow: number; lastGroupRow: number; isEmpty: boolean } {
   const dayStr = String(dayNumber);
   for (let i = 0; i < rows.length; i++) {
     if (rows[i]?.[0]?.toString().trim() === dayStr) {
-      // Found the date row. Now find the last row in this group
       let lastRow = i;
       for (let j = i + 1; j < rows.length; j++) {
         const cellA = rows[j]?.[0]?.toString().trim() || "";
         if (cellA === "" && (rows[j]?.[1] || rows[j]?.[2])) {
-          // Sub-row of same date (empty A, has venue/time data)
           lastRow = j;
         } else {
           break;
         }
       }
-      const isEmpty = !rows[i]?.[1] && !rows[i]?.[2]; // No venue or time = empty date
-      return { dateRow: i + 1, lastGroupRow: lastRow + 1, isEmpty }; // 1-indexed
+      const isEmpty = !rows[i]?.[1] && !rows[i]?.[2];
+      return { dateRow: i + 1, lastGroupRow: lastRow + 1, isEmpty };
     }
   }
   return { dateRow: -1, lastGroupRow: -1, isEmpty: true };
@@ -145,7 +139,6 @@ function formatPendingAmount(event: any): string {
   return `₹${remaining.toLocaleString("en-IN")}`;
 }
 
-// Strip seconds from time like "16:00:00" → "16:00"
 function formatTime(t: string): string {
   if (!t) return "";
   const parts = t.split(":");
@@ -171,7 +164,6 @@ function parseMonthKeyFromTab(title: string): string | null {
 async function getTabSummary(accessToken: string, sheetId: string, tab: { title: string; sheetId: number }) {
   const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:B2`);
   const rows = data.values || [];
-
   return {
     title: tab.title,
     sheetId: tab.sheetId,
@@ -181,7 +173,7 @@ async function getTabSummary(accessToken: string, sheetId: string, tab: { title:
   };
 }
 
-// Format event for the sheet row: [date/empty, venue, time, artist, payment, pending, bookingId]
+// Extended row: [date, venue, time, artist, payment, pending, bookingId, client, mobile, city, eventType, status, totalPrice, source]
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
@@ -192,10 +184,17 @@ function formatSheetRow(event: any, includeDate: boolean, label?: string): any[]
     includeDate ? String(new Date(event.event_date).getDate()) : "",
     venueWithLabel,
     timeStr,
-    "", // Artist name - filled manually
+    "",
     formatPaymentStatus(event),
     formatPendingAmount(event),
-    event.id || "", // Booking ID in column G for tracking
+    event.id || "",
+    event.client_name || "",
+    event.client_mobile || "",
+    event.city || "",
+    event.event_type || "",
+    event.status || "",
+    event.total_price ? `₹${Number(event.total_price).toLocaleString("en-IN")}` : "",
+    event.source || "website",
   ];
 }
 
@@ -213,42 +212,36 @@ async function pushEventToSheet(
   if (!tab) throw new Error(`Sheet tab "${tabName}" not found. Please create it manually.`);
 
   const dayNumber = new Date(event.event_date).getDate();
-
-  // Read current tab data
-  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:G500`);
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:N500`);
   const rows = data.values || [];
 
-  // Check if event already exists by booking ID in column G
+  // Check if event already exists by booking ID in column G (index 6)
   let existingRow = -1;
   for (let i = 0; i < rows.length; i++) {
     if (rows[i]?.[6] === event.id) {
-      existingRow = i + 1; // 1-indexed
+      existingRow = i + 1;
       break;
     }
   }
 
   if (existingRow > 0) {
-    // Update existing row in place
     const row = formatSheetRow(event, !!rows[existingRow - 1]?.[0]?.toString().trim(), label);
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}`, [row]);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${existingRow}:N${existingRow}`, [row]);
     return { tab: tab.title, action: "updated", row: existingRow };
   }
 
-  // Find the date row
   const { dateRow, lastGroupRow, isEmpty } = findDateRow(rows, dayNumber);
   if (dateRow < 0) throw new Error(`Date ${dayNumber} not found in ${tab.title}`);
 
   if (isEmpty) {
-    // Write directly to the date row (keep date number in A, fill B-G)
     const row = formatSheetRow(event, true, label);
-    row[0] = String(dayNumber); // Keep date number
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}`, [row]);
+    row[0] = String(dayNumber);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${dateRow}:N${dateRow}`, [row]);
     return { tab: tab.title, action: "written", row: dateRow };
   } else {
-    // Date row already has data - insert a new row below the group
     await insertRowAfter(accessToken, spreadsheetId, tab.sheetId, lastGroupRow);
-    const row = formatSheetRow(event, false, label); // Empty column A for sub-row
-    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}`, [row]);
+    const row = formatSheetRow(event, false, label);
+    await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!A${lastGroupRow + 1}:N${lastGroupRow + 1}`, [row]);
     return { tab: tab.title, action: "inserted", row: lastGroupRow + 1 };
   }
 }
@@ -262,19 +255,16 @@ async function removeEventFromSheet(
   const tab = findTab(tabs, tabName);
   if (!tab) return { removed: false };
 
-  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:G500`);
+  const data = await readSheet(accessToken, spreadsheetId, `'${tab.title}'!A1:N500`);
   const rows = data.values || [];
 
   for (let i = 0; i < rows.length; i++) {
     if (rows[i]?.[6] === event.id) {
-      const rowIndex = i + 1; // 1-indexed
+      const rowIndex = i + 1;
       const hasDateNumber = !!rows[i]?.[0]?.toString().trim();
-
       if (hasDateNumber) {
-        // This is a date row - just clear columns B-G, keep date number
-        await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!B${rowIndex}:G${rowIndex}`, [["", "", "", "", "", ""]]);
+        await updateSheet(accessToken, spreadsheetId, `'${tab.title}'!B${rowIndex}:N${rowIndex}`, [["","","","","","","","","","","","",""]]);
       } else {
-        // This is a sub-row - delete the entire row
         await deleteSheetRow(accessToken, spreadsheetId, tab.sheetId, rowIndex);
       }
       return { removed: true, row: rowIndex };
@@ -299,56 +289,36 @@ serve(async (req) => {
     const { action, event_data, event_id } = body;
     const supabase = getSupabaseClient();
 
-    // READ overview only (lightweight for admin UI)
     if (action === "read_overview") {
       const summaries = [];
       for (const tab of tabs) {
         try {
           summaries.push(await getTabSummary(accessToken, sheetId, tab));
         } catch (_) {
-          summaries.push({
-            title: tab.title,
-            sheetId: tab.sheetId,
-            normalizedTitle: tab.title.trim(),
-            monthKey: parseMonthKeyFromTab(tab.title),
-            eventCount: 0,
-          });
+          summaries.push({ title: tab.title, sheetId: tab.sheetId, normalizedTitle: tab.title.trim(), monthKey: parseMonthKeyFromTab(tab.title), eventCount: 0 });
         }
       }
-
-      return new Response(JSON.stringify({
-        success: true,
-        tabNames: tabs.map((t) => t.title),
-        tabSummaries: summaries,
-      }), {
+      return new Response(JSON.stringify({ success: true, tabNames: tabs.map((t) => t.title), tabSummaries: summaries }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // READ single tab
     if (action === "read_tab") {
       const requestedTab = typeof body.tab_name === "string" ? body.tab_name : "";
       if (!requestedTab) throw new Error("Tab name is required");
-
       const tab = findTab(tabs, requestedTab);
       if (!tab) throw new Error(`Sheet tab "${requestedTab}" not found`);
-
-      const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:G500`);
-      return new Response(JSON.stringify({
-        success: true,
-        tabName: tab.title,
-        rows: data.values || [],
-      }), {
+      const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:N500`);
+      return new Response(JSON.stringify({ success: true, tabName: tab.title, rows: data.values || [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // READ all tabs
     if (action === "read") {
       const allData: Record<string, any[][]> = {};
       for (const tab of tabs) {
         try {
-          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:G500`);
+          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:N500`);
           allData[tab.title] = data.values || [];
         } catch (_) {}
       }
@@ -361,56 +331,47 @@ serve(async (req) => {
     if (action === "push_single" && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (error || !event) throw new Error("Event not found");
-
       const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
-
-      await supabase.from("event_bookings").update({
-        sheet_pushed: true,
-        sheet_pushed_at: new Date().toISOString(),
-      } as any).eq("id", event_id);
-
-      return new Response(JSON.stringify({ success: true, ...result }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_id);
+      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // DELETE FROM SHEET (reverse push)
+    // UPDATE SINGLE EVENT (partial update - re-reads from DB and updates sheet row)
+    if (action === "update_pushed" && event_id) {
+      const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
+      if (error || !event) throw new Error("Event not found");
+      const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
+      await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_id);
+      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // DELETE FROM SHEET
     if (action === "delete_from_sheet" && event_id) {
       const { data: event } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
       if (!event) throw new Error("Event not found");
-
       const result = await removeEventFromSheet(accessToken, sheetId, tabs, event);
-
-      await supabase.from("event_bookings").update({
-        sheet_pushed: false,
-        sheet_pushed_at: null,
-      } as any).eq("id", event_id);
-
-      return new Response(JSON.stringify({ success: true, ...result }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await supabase.from("event_bookings").update({ sheet_pushed: false, sheet_pushed_at: null } as any).eq("id", event_id);
+      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // SYNC ALL
+    // SYNC ALL - only push events that are NOT already pushed
     if (action === "sync_all") {
-      const { data: events, error } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: true });
+      const { data: events, error } = await supabase.from("event_bookings").select("*").or("sheet_pushed.is.null,sheet_pushed.eq.false").order("event_date", { ascending: true });
       if (error) throw error;
 
       let totalSynced = 0;
+      let totalSkipped = 0;
       for (const event of (events || [])) {
         try {
           await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
-          await supabase.from("event_bookings").update({
-            sheet_pushed: true,
-            sheet_pushed_at: new Date().toISOString(),
-          } as any).eq("id", event.id);
+          await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event.id);
           totalSynced++;
         } catch (e) {
           console.warn(`Failed to push event ${event.id}: ${e.message}`);
+          totalSkipped++;
         }
       }
-
-      return new Response(JSON.stringify({ success: true, synced: totalSynced }), {
+      return new Response(JSON.stringify({ success: true, synced: totalSynced, skipped: totalSkipped }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -420,17 +381,12 @@ serve(async (req) => {
       try {
         await pushEventToSheet(accessToken, sheetId, tabs, event_data, "web pushed");
         if (event_data.id) {
-          await supabase.from("event_bookings").update({
-            sheet_pushed: true,
-            sheet_pushed_at: new Date().toISOString(),
-          } as any).eq("id", event_data.id);
+          await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_data.id);
         }
       } catch (e) {
         console.warn("Auto-push failed (non-fatal):", e.message);
       }
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // UPDATE EVENT (from DB trigger)
@@ -440,9 +396,7 @@ serve(async (req) => {
       } catch (e) {
         console.warn("Auto-update failed (non-fatal):", e.message);
       }
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // ADD MANUAL EVENT
@@ -471,7 +425,6 @@ serve(async (req) => {
       if (error) throw error;
 
       const result = await pushEventToSheet(accessToken, sheetId, tabs, inserted, "manual");
-
       return new Response(JSON.stringify({ success: true, event: inserted, ...result }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
