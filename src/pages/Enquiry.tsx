@@ -176,7 +176,7 @@ const Enquiry = () => {
     info: 15, type: 30, caricature_select: 50, caricature_details: 75, event_details: 60, event_submitted: 100, help: 100,
   };
 
-  const handleSubmitInfo = () => {
+  const handleSubmitInfo = async () => {
     if (!name.trim() || !mobile.trim()) {
       toast({ title: "Please enter your name and mobile number", variant: "destructive" });
       return;
@@ -184,6 +184,22 @@ const Enquiry = () => {
     if (mobile.length < 10) {
       toast({ title: "Please enter a valid mobile number", variant: "destructive" });
       return;
+    }
+
+    // Check duplicate for non-logged-in users
+    const userId = (await supabase.auth.getUser()).data.user?.id || null;
+    if (!userId) {
+      const fingerprint = `${mobile.trim()}_${navigator.userAgent.slice(0, 50)}`;
+      const { data: existing } = await supabase.from("guest_enquiry_tracking" as any)
+        .select("id, enquiry_count, fingerprint")
+        .or(`fingerprint.eq.${fingerprint},mobile.eq.${mobile.trim()}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (existing && (existing as any).enquiry_count >= 1) {
+        setDupBlocked(true);
+        return;
+      }
     }
     setStep("type");
   };
@@ -193,6 +209,27 @@ const Enquiry = () => {
     try {
       const userId = (await supabase.auth.getUser()).data.user?.id || null;
       const finalEventType = eventType === "other" ? customEventType : eventType;
+
+      // Track guest enquiry
+      if (!userId) {
+        const fingerprint = `${mobile.trim()}_${navigator.userAgent.slice(0, 50)}`;
+        const { data: existing } = await supabase.from("guest_enquiry_tracking" as any)
+          .select("id, enquiry_count")
+          .or(`fingerprint.eq.${fingerprint},mobile.eq.${mobile.trim()}`)
+          .limit(1)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase.from("guest_enquiry_tracking" as any)
+            .update({ enquiry_count: ((existing as any).enquiry_count || 0) + 1, last_enquiry_at: new Date().toISOString() } as any)
+            .eq("id", (existing as any).id);
+        } else {
+          await supabase.from("guest_enquiry_tracking" as any).insert({
+            fingerprint, mobile: mobile.trim(), enquiry_count: 1,
+          } as any);
+        }
+      }
+
       const { data, error } = await supabase.from("enquiries" as any).insert({
         name: name.trim(), mobile: mobile.trim(), email: email.trim() || null,
         instagram_id: instagramId.trim() || null, enquiry_type: enquiryType,
