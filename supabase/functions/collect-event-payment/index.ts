@@ -30,7 +30,7 @@ serve(async (req) => {
       });
     }
 
-    const { event_id, collection_method } = await req.json();
+    const { event_id, collection_method, extra_hours, extra_amount } = await req.json();
     if (!event_id || !collection_method) {
       return new Response(JSON.stringify({ error: "Missing event_id or collection_method" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -41,7 +41,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Verify caller is an artist
-    const { data: artist } = await supabase.from("artists").select("id").eq("auth_user_id", user.id).single();
+    const { data: artist } = await supabase.from("artists").select("id, name").eq("auth_user_id", user.id).single();
     if (!artist) {
       return new Response(JSON.stringify({ error: "Not an artist" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ serve(async (req) => {
 
     const { data: booking } = await supabase
       .from("event_bookings")
-      .select("id, user_id, total_price, advance_amount, remaining_amount, negotiated, negotiated_total, negotiated_advance, assigned_artist_id, payment_status")
+      .select("id, user_id, total_price, advance_amount, remaining_amount, negotiated, negotiated_total, negotiated_advance, assigned_artist_id, payment_status, extra_hours, client_name")
       .eq("id", event_id)
       .single();
 
@@ -80,10 +80,27 @@ serve(async (req) => {
       });
     }
 
-    // Update payment status
+    // Calculate remaining
+    const totalAmount = booking.negotiated && booking.negotiated_total ? booking.negotiated_total : booking.total_price;
+    const advanceAmount = booking.negotiated && booking.negotiated_advance ? booking.negotiated_advance : booking.advance_amount;
+    const baseRemaining = booking.remaining_amount || (totalAmount - advanceAmount);
+    const extraHoursNum = extra_hours || 0;
+    const extraAmt = extra_amount || 0;
+    const totalCollected = baseRemaining + extraAmt;
+
+    // Update payment status and extra hours
+    const updateData: any = { payment_status: "fully_paid" };
+    if (extraHoursNum > 0) {
+      updateData.extra_hours = (booking.extra_hours || 0) + extraHoursNum;
+      // Update total price to include extra
+      updateData.remaining_amount = 0;
+    } else {
+      updateData.remaining_amount = 0;
+    }
+
     const { error: updateError } = await supabase
       .from("event_bookings")
-      .update({ payment_status: "fully_paid" })
+      .update(updateData)
       .eq("id", event_id);
 
     if (updateError) {
@@ -91,22 +108,53 @@ serve(async (req) => {
       throw new Error("Failed to update payment status");
     }
 
-    // Calculate remaining
-    const totalAmount = booking.negotiated && booking.negotiated_total ? booking.negotiated_total : booking.total_price;
-    const advanceAmount = booking.negotiated && booking.negotiated_advance ? booking.negotiated_advance : booking.advance_amount;
-    const remaining = booking.remaining_amount || (totalAmount - advanceAmount);
-
     // Record in payment_history
     await supabase.from("payment_history").insert({
       user_id: booking.user_id,
       booking_id: event_id,
       payment_type: "event_remaining",
-      amount: remaining,
+      amount: totalCollected,
       status: "confirmed",
-      description: `Remaining collected by artist (${collection_method})`,
+      description: `Remaining ₹${totalCollected} collected by artist ${artist.name} (${collection_method})${extraHoursNum > 0 ? ` + ${extraHoursNum} extra hrs (₹${extraAmt})` : ""}`,
     });
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Notify admin
+    const { data: admins } = await supabase.from("user_roles").select("user_id").eq("role", "admin");
+    if (admins) {
+      for (const admin of admins) {
+        await supabase.from("notifications").insert({
+          user_id: admin.user_id,
+          title: "💰 Payment Collected by Artist",
+          message: `${artist.name} collected ₹${totalCollected} for ${booking.client_name}'s event (${collection_method})`,
+          type: "payment",
+          link: "/admin-panel",
+        });
+      }
+    }
+
+    // Notify customer
+    if (booking.user_id) {
+      await supabase.from("notifications").insert({
+        user_id: booking.user_id,
+        title: "✅ Payment Received",
+        message: `Your remaining payment of ₹${totalCollected} has been collected. Event is fully paid!`,
+        type: "payment",
+        link: "/dashboard",
+      });
+    }
+
+    // Trigger Google Sheet sync
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/google-sheets-sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": supabaseAnonKey },
+        body: JSON.stringify({ action: "update_event", event_id, event_data: { ...booking, ...updateData, payment_status: "fully_paid" } }),
+      });
+    } catch (e) {
+      console.warn("Sheet sync failed (non-fatal):", e);
+    }
+
+    return new Response(JSON.stringify({ success: true, collected: totalCollected }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
