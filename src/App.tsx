@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect } from "react";
+import { useState, lazy, Suspense, useEffect, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,15 +6,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
-import SplashScreen from "./components/SplashScreen";
-import FloatingButtons from "./components/FloatingButtons";
-import MobileBottomNav from "./components/MobileBottomNav";
-import AppUpdateBanner from "./components/AppUpdateBanner";
-import PermissionGate from "./components/PermissionGate";
-import AppOnboarding from "./components/AppOnboarding";
-import LiveChatWrapper from "./components/LiveChatWrapper";
-import OfflineDetector from "./components/OfflineDetector";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
+
+import usePageTracker from "./hooks/usePageTracker";
+import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
+import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
+import MaintenanceScreen from "./components/MaintenanceScreen";
+import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
+
+// Lazy load non-critical shell components
+const SplashScreen = lazy(() => import("./components/SplashScreen"));
+const FloatingButtons = lazy(() => import("./components/FloatingButtons"));
+const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
+const AppUpdateBanner = lazy(() => import("./components/AppUpdateBanner"));
+const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
+const OfflineDetector = lazy(() => import("./components/OfflineDetector"));
 
 import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";

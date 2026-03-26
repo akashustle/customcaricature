@@ -10,13 +10,13 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
 
   useEffect(() => {
     if (isAdminRoute) { setShow(false); onComplete(); return; }
-    const t1 = setTimeout(() => setStep(1), 100);
-    const t2 = setTimeout(() => setStep(2), 500);
-    const t3 = setTimeout(() => setStep(3), 1100);
+    const t1 = setTimeout(() => setStep(1), 50);
+    const t2 = setTimeout(() => setStep(2), 300);
+    const t3 = setTimeout(() => setStep(3), 600);
     const t4 = setTimeout(() => {
       setShow(false);
-      setTimeout(onComplete, 400);
-    }, 2400);
+      setTimeout(onComplete, 300);
+    }, 1400);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, [onComplete]);
 
