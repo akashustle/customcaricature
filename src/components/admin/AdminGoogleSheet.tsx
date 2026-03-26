@@ -1,9 +1,9 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
-  ArrowUpRight, Calendar, CheckCircle2, ChevronDown, ChevronUp, Clock, DollarSign,
-  Filter, Loader2, MapPin, Plus, RefreshCw, RotateCcw, Search, Send, Sheet,
+  ArrowUpRight, Calendar, Check, CheckCircle2, ChevronDown, ChevronUp, Clock, DollarSign,
+  Edit2, Filter, Loader2, MapPin, Plus, RefreshCw, RotateCcw, Save, Search, Send, Sheet,
   TrendingUp, Upload, Users, XCircle,
 } from "lucide-react";
 
@@ -32,6 +32,7 @@ interface EventBooking {
   event_end_time: string | null;
   total_price: number | null;
   advance_amount: number | null;
+  remaining_amount: number | null;
   status: string | null;
   payment_status: string | null;
   source?: string | null;
@@ -140,33 +141,21 @@ const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] 
       })();
 
       return [{
-        tabTitle,
-        monthKey: tabMonthKey,
-        dateLabel: currentDate,
-        venue: row[1],
-        time: row[2],
-        artist: row[3],
-        payment: row[4],
-        pending: row[5],
-        bookingId: row[6],
-        clientName: row[7],
-        mobile: row[8],
-        email: row[9],
-        city: row[10],
-        state: row[11],
-        eventType: row[12],
-        bookingStatus: row[13],
-        totalPrice: row[14],
-        source: inferredSource,
-        address: row[16],
+        tabTitle, monthKey: tabMonthKey, dateLabel: currentDate,
+        venue: row[1], time: row[2], artist: row[3],
+        payment: row[4], pending: row[5], bookingId: row[6],
+        clientName: row[7], mobile: row[8], email: row[9],
+        city: row[10], state: row[11], eventType: row[12],
+        bookingStatus: row[13], totalPrice: row[14],
+        source: inferredSource, address: row[16],
       } satisfies ParsedSheetEvent];
     });
   });
 };
 
 /* ─────────── 3D Flash Card Widget ─────────── */
-const FlashWidget = ({ title, value, icon: Icon, note, color = "primary", trend }: {
-  title: string; value: string | number; icon: any; note: string; color?: string; trend?: string;
+const FlashWidget = ({ title, value, icon: Icon, note, trend }: {
+  title: string; value: string | number; icon: any; note: string; trend?: string;
 }) => (
   <motion.div
     whileHover={{ y: -4, scale: 1.02 }}
@@ -177,19 +166,19 @@ const FlashWidget = ({ title, value, icon: Icon, note, color = "primary", trend 
     <Card className="relative overflow-hidden rounded-2xl border-border/30 bg-card/80 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.2)] transition-shadow duration-300">
       <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full" />
       <CardContent className="flex items-center justify-between p-5">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/70">{title}</p>
-          <p className="text-3xl font-extrabold tracking-tight text-foreground">{value}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">{value}</p>
           <div className="flex items-center gap-1.5">
             {trend && (
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
                 trend.startsWith("+") ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
               }`}>{trend}</span>
             )}
-            <p className="text-[11px] text-muted-foreground">{note}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{note}</p>
           </div>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary shadow-inner">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary shadow-inner">
           <Icon className="h-5 w-5" />
         </div>
       </CardContent>
@@ -203,12 +192,10 @@ const AdminGoogleSheet = () => {
   const [tabSummaries, setTabSummaries] = useState<SheetTabSummary[]>([]);
   const [sheetTabs, setSheetTabs] = useState<Record<string, string[][]>>({});
   const [activeTab, setActiveTab] = useState("");
-  const [activeTabRows, setActiveTabRows] = useState<string[][]>([]);
   const [sheetFilter, setSheetFilter] = useState("this_month");
   const [eventFilter, setEventFilter] = useState("this_month");
   const [search, setSearch] = useState("");
-  const [loadingOverview, setLoadingOverview] = useState(false);
-  const [loadingTab, setLoadingTab] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [pushingId, setPushingId] = useState<string | null>(null);
   const [reversingId, setReversingId] = useState<string | null>(null);
@@ -217,72 +204,62 @@ const AdminGoogleSheet = () => {
   const [addingEvent, setAddingEvent] = useState(false);
   const [newEvent, setNewEvent] = useState<ManualEventForm>(initialManualEvent);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const [editingPendingId, setEditingPendingId] = useState<string | null>(null);
+  const [pendingValue, setPendingValue] = useState("");
+  const [savingPending, setSavingPending] = useState(false);
   const deferredSearch = useDeferredValue(search);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchEvents = useCallback(async () => {
-    const { data, error } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: true });
-    if (error) throw error;
+    const { data } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: true });
     setEvents((data || []) as EventBooking[]);
   }, []);
 
-  const fetchSheetOverview = useCallback(async () => {
-    setLoadingOverview(true);
+  const fetchSheetData = useCallback(async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "read_overview" } });
+      // Single API call for everything
+      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "read_all" } });
       if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || "Failed");
-      const summaries = (data.tabSummaries || []) as SheetTabSummary[];
+      if (data?.success === false && data?.error) {
+        toast({ title: "Sheet data issue", description: data.error, variant: "destructive" });
+      }
+      const summaries = (data?.tabSummaries || []) as SheetTabSummary[];
       setTabSummaries(summaries);
+      setSheetTabs((data?.tabs || {}) as Record<string, string[][]>);
       if (!activeTab && summaries.length > 0) {
         const currentKey = getMonthKey(new Date());
         setActiveTab(summaries.find((item) => item.monthKey === currentKey)?.title || summaries[0].title);
       }
     } catch (error: any) {
       toast({ title: "Failed to load sheet data", description: error.message, variant: "destructive" });
-    } finally { setLoadingOverview(false); }
+    } finally { setLoading(false); }
   }, [activeTab]);
 
-  const fetchSheetData = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "read" } });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || "Failed");
-      setSheetTabs((data.tabs || {}) as Record<string, string[][]>);
-    } catch (error: any) {
-      toast({ title: "Failed to read Google Sheet", description: error.message, variant: "destructive" });
-    }
-  }, []);
-
-  const fetchActiveTab = useCallback(async (tabName: string) => {
-    if (!tabName) return;
-    setLoadingTab(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "read_tab", tab_name: tabName } });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || "Failed");
-      setActiveTabRows((data.rows || []) as string[][]);
-      setActiveTab(data.tabName || tabName);
-    } catch (error: any) {
-      toast({ title: "Failed to load tab", description: error.message, variant: "destructive" });
-    } finally { setLoadingTab(false); }
-  }, []);
-
   const refreshAll = useCallback(async () => {
-    await Promise.all([fetchEvents(), fetchSheetOverview(), fetchSheetData()]);
-  }, [fetchEvents, fetchSheetOverview, fetchSheetData]);
+    await Promise.all([fetchEvents(), fetchSheetData()]);
+  }, [fetchEvents, fetchSheetData]);
 
-  useEffect(() => { refreshAll().catch(() => {}); }, [refreshAll]);
-  useEffect(() => { if (activeTab) fetchActiveTab(activeTab).catch(() => {}); }, [activeTab, fetchActiveTab]);
+  useEffect(() => { refreshAll().catch(() => {}); }, []);
+
+  // Debounced realtime refresh - prevents rate limiting
+  const debouncedRefresh = useCallback(() => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
+      fetchEvents().catch(() => {});
+    }, 3000); // Only refresh DB events on realtime, don't re-fetch sheet
+  }, [fetchEvents]);
 
   useEffect(() => {
     const channel = supabase
       .channel("admin-google-sheet-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, async () => {
-        await Promise.all([fetchEvents(), fetchSheetOverview(), fetchSheetData()]);
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, debouncedRefresh)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [fetchEvents, fetchSheetOverview, fetchSheetData]);
+    return () => {
+      supabase.removeChannel(channel);
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, [debouncedRefresh]);
 
   const availableMonthOptions = useMemo(() =>
     Array.from(new Set(events.map((e) => getMonthKey(new Date(e.event_date))))).sort(), [events]);
@@ -303,7 +280,7 @@ const AdminGoogleSheet = () => {
 
   useEffect(() => {
     if (filteredTabs.length && !filteredTabs.some((t) => t.title === activeTab)) setActiveTab(filteredTabs[0].title);
-  }, [activeTab, filteredTabs]);
+  }, [filteredTabs]);
 
   const filteredEvents = useMemo(() => {
     const ck = getMonthKey(new Date());
@@ -321,7 +298,7 @@ const AdminGoogleSheet = () => {
     return base;
   }, [deferredSearch, eventFilter, events]);
 
-  /* ─────── Analytics ─────── */
+  /* ─────── Analytics from sheet data ─────── */
   const parsedSheetEvents = useMemo(() => parseSheetEvents(sheetTabs), [sheetTabs]);
 
   const analytics = useMemo(() => {
@@ -338,20 +315,28 @@ const AdminGoogleSheet = () => {
       const eventDate = new Date(year, month - 1, Number(e.dateLabel), 23, 59, 59);
       return eventDate >= now && eventDate <= yearEnd;
     });
-    const manual = parsedSheetEvents.filter((e) => e.source.toLowerCase() === "manual");
-    const website = parsedSheetEvents.filter((e) => e.source.toLowerCase() !== "manual");
+    const manual = parsedSheetEvents.filter((e) => e.source === "manual");
+    const website = parsedSheetEvents.filter((e) => e.source !== "manual");
     const pushed = events.filter((e) => e.sheet_pushed);
     const notPushed = events.filter((e) => !e.sheet_pushed);
     const confirmed = parsedSheetEvents.filter((e) => e.bookingStatus.toLowerCase() === "confirmed");
-    const pending = parsedSheetEvents.filter((e) => e.payment.toLowerCase().includes("pending"));
 
+    // Pending amount: from sheet "PENDING AMOUNT" column or calculated
     const totalRevenue = parsedSheetEvents.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
-    const thisMonthRevenue = thisMonth.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
-    const totalAdvance = parsedSheetEvents.reduce((s, e) => {
-      const paymentText = e.payment.toLowerCase();
-      return paymentText.includes("advance") || paymentText.includes("full paid") ? s + parseCurrencyValue(e.payment) : s;
+    const totalPendingFromSheet = parsedSheetEvents.reduce((s, e) => {
+      const pendingVal = parseCurrencyValue(e.pending);
+      return s + pendingVal;
     }, 0);
-    const totalPending = totalRevenue - totalAdvance;
+    // Also calculate from DB for events
+    const totalPendingFromDB = events.reduce((s, e) => {
+      if (e.remaining_amount != null && e.remaining_amount > 0) return s + e.remaining_amount;
+      const remaining = (e.total_price || 0) - (e.advance_amount || 0);
+      return s + (remaining > 0 ? remaining : 0);
+    }, 0);
+    const totalPending = totalPendingFromSheet > 0 ? totalPendingFromSheet : totalPendingFromDB;
+
+    const thisMonthRevenue = thisMonth.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
+    const paymentPending = parsedSheetEvents.filter((e) => e.payment.toLowerCase().includes("pending"));
 
     const webThisMonth = website.filter((e) => e.monthKey === ck).length;
     const manThisMonth = manual.filter((e) => e.monthKey === ck).length;
@@ -371,15 +356,15 @@ const AdminGoogleSheet = () => {
       const mEvents = parsedSheetEvents.filter((e) => e.monthKey === mk);
       monthlyTrend.push({
         name: MONTH_NAMES[d.getMonth()].slice(0, 3),
-        website: mEvents.filter((e) => e.source.toLowerCase() !== "manual").length,
-        manual: mEvents.filter((e) => e.source.toLowerCase() === "manual").length,
+        website: mEvents.filter((e) => e.source !== "manual").length,
+        manual: mEvents.filter((e) => e.source === "manual").length,
         total: mEvents.length,
       });
     }
 
     return {
       thisMonth, nextMonth, upcoming, manual, website, pushed, notPushed,
-      confirmed, pending, totalRevenue, thisMonthRevenue, totalPending,
+      confirmed, paymentPending, totalRevenue, thisMonthRevenue, totalPending,
       webThisMonth, manThisMonth, cityChart, typeChart, monthlyTrend,
       sourceChart: [
         { name: "Website", value: website.length },
@@ -392,6 +377,8 @@ const AdminGoogleSheet = () => {
     };
   }, [events, parsedSheetEvents]);
 
+  // Active tab rows from cached data
+  const activeTabRows = useMemo(() => sheetTabs[activeTab] || [], [sheetTabs, activeTab]);
   const sheetHeaders = activeTabRows[2] || [];
   const sheetRows = activeTabRows.slice(3);
   const visibleRows = deferredSearch.trim()
@@ -407,7 +394,6 @@ const AdminGoogleSheet = () => {
       if (!data?.success) throw new Error(data?.error || "Sync failed");
       toast({ title: "Sync complete", description: `${data.synced || 0} new events pushed. ${data.skipped || 0} skipped.` });
       await refreshAll();
-      if (activeTab) await fetchActiveTab(activeTab);
     } catch (error: any) {
       toast({ title: "Sync failed", description: error.message, variant: "destructive" });
     } finally { setSyncing(false); }
@@ -421,7 +407,6 @@ const AdminGoogleSheet = () => {
       if (!data?.success) throw new Error(data?.error || "Push failed");
       toast({ title: "Event pushed", description: `${data.action === "updated" ? "Updated" : "Written"} in ${data.tab || "sheet"}.` });
       await refreshAll();
-      if (activeTab) await fetchActiveTab(activeTab);
     } catch (error: any) {
       toast({ title: "Push failed", description: error.message, variant: "destructive" });
     } finally { setPushingId(null); }
@@ -435,7 +420,6 @@ const AdminGoogleSheet = () => {
       if (!data?.success) throw new Error(data?.error || "Update failed");
       toast({ title: "Sheet updated", description: "Changed details synced to sheet." });
       await refreshAll();
-      if (activeTab) await fetchActiveTab(activeTab);
     } catch (error: any) {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
     } finally { setUpdatingId(null); }
@@ -449,10 +433,35 @@ const AdminGoogleSheet = () => {
       if (!data?.success) throw new Error(data?.error || "Reverse failed");
       toast({ title: "Removed from sheet", description: "Row cleared from Google Sheet." });
       await refreshAll();
-      if (activeTab) await fetchActiveTab(activeTab);
     } catch (error: any) {
       toast({ title: "Reverse failed", description: error.message, variant: "destructive" });
     } finally { setReversingId(null); }
+  };
+
+  const handleSavePending = async (eventId: string) => {
+    const numValue = Number(pendingValue);
+    if (isNaN(numValue) || numValue < 0) {
+      toast({ title: "Invalid amount", variant: "destructive" });
+      return;
+    }
+    setSavingPending(true);
+    try {
+      const event = events.find((e) => e.id === eventId);
+      if (!event) throw new Error("Event not found");
+      // remaining_amount = pending, advance = total - pending
+      const newAdvance = (event.total_price || 0) - numValue;
+      const { error } = await supabase.from("event_bookings").update({
+        advance_amount: Math.max(0, newAdvance),
+        remaining_amount: numValue,
+      }).eq("id", eventId);
+      if (error) throw error;
+      toast({ title: "Pending amount updated" });
+      setEditingPendingId(null);
+      setPendingValue("");
+      await fetchEvents();
+    } catch (error: any) {
+      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+    } finally { setSavingPending(false); }
   };
 
   const handleAddManualEvent = async () => {
@@ -469,10 +478,15 @@ const AdminGoogleSheet = () => {
       setNewEvent(initialManualEvent);
       setShowAddEvent(false);
       await refreshAll();
-      if (activeTab) await fetchActiveTab(activeTab);
     } catch (error: any) {
       toast({ title: "Failed", description: error.message, variant: "destructive" });
     } finally { setAddingEvent(false); }
+  };
+
+  const getPendingAmount = (event: EventBooking) => {
+    if (event.remaining_amount != null && event.remaining_amount > 0) return event.remaining_amount;
+    const remaining = (event.total_price || 0) - (event.advance_amount || 0);
+    return remaining > 0 ? remaining : 0;
   };
 
   const formatCurrency = (n: number) => `₹${n.toLocaleString("en-IN")}`;
@@ -491,12 +505,12 @@ const AdminGoogleSheet = () => {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Google Sheet Sync</CardTitle>
-                  <p className="text-xs text-muted-foreground">Real-time event sync with month tabs & analytics</p>
+                  <p className="text-xs text-muted-foreground">Real-time event sync &amp; analytics from sheet data</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => refreshAll()} disabled={loadingOverview} className="rounded-xl">
-                  {loadingOverview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                <Button variant="outline" size="sm" onClick={() => refreshAll()} disabled={loading} className="rounded-xl">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                   Refresh
                 </Button>
                 <Button size="sm" onClick={handleSyncAll} disabled={syncing} className="rounded-xl">
@@ -551,15 +565,14 @@ const AdminGoogleSheet = () => {
         <FlashWidget title="Upcoming Year" value={analytics.upcoming.length} icon={TrendingUp} note={`rest of ${new Date().getFullYear()}`} />
         <FlashWidget title="Pushed" value={analytics.pushed.length} icon={CheckCircle2} note={`${analytics.notPushed.length} not pushed`} />
         <FlashWidget title="Not Pushed" value={analytics.notPushed.length} icon={XCircle} note="awaiting push" />
-        <FlashWidget title="Total Revenue" value={formatCurrency(analytics.totalRevenue)} icon={DollarSign} note="all events" />
+        <FlashWidget title="Total Revenue" value={formatCurrency(analytics.totalRevenue)} icon={DollarSign} note="from sheet data" />
         <FlashWidget title="This Month Rev" value={formatCurrency(analytics.thisMonthRevenue)} icon={DollarSign} note="current month" />
         <FlashWidget title="Pending Amt" value={formatCurrency(analytics.totalPending)} icon={Clock} note="total remaining" />
-        <FlashWidget title="Confirmed" value={analytics.confirmed.length} icon={CheckCircle2} note={`${analytics.pending.length} payment pending`} />
+        <FlashWidget title="Confirmed" value={analytics.confirmed.length} icon={CheckCircle2} note={`${analytics.paymentPending.length} payment pending`} />
       </div>
 
       {/* ─────── Charts ─────── */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        {/* Monthly Trend */}
         <motion.div whileHover={{ y: -2 }}>
           <Card className="rounded-2xl border-border/30 bg-card/80 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
             <CardHeader><CardTitle className="text-sm">Monthly Trend (6 months)</CardTitle></CardHeader>
@@ -578,7 +591,6 @@ const AdminGoogleSheet = () => {
           </Card>
         </motion.div>
 
-        {/* Source + Push Pie */}
         <motion.div whileHover={{ y: -2 }}>
           <Card className="rounded-2xl border-border/30 bg-card/80 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
             <CardHeader><CardTitle className="text-sm">Source & Push Status</CardTitle></CardHeader>
@@ -623,14 +635,13 @@ const AdminGoogleSheet = () => {
           </Card>
         </motion.div>
 
-        {/* Top Cities + Event Types */}
         <motion.div whileHover={{ y: -2 }}>
           <Card className="rounded-2xl border-border/30 bg-card/80 backdrop-blur-xl shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
             <CardHeader><CardTitle className="text-sm">Top Cities & Event Types</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-[10px] text-muted-foreground mb-2">Cities</p>
-                {analytics.cityChart.slice(0, 4).map((c, i) => (
+                {analytics.cityChart.slice(0, 4).map((c) => (
                   <div key={c.name} className="flex items-center justify-between py-1">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -698,92 +709,134 @@ const AdminGoogleSheet = () => {
                   <TableHead>City</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Pending</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Pushed</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEvents.map((event) => (
-                  <>
-                    <TableRow key={event.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}>
-                      <TableCell>
-                        {expandedEventId === event.id ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </TableCell>
-                      <TableCell className="text-xs font-medium">{event.event_date}</TableCell>
-                      <TableCell className="text-xs">{event.venue_name || "—"}</TableCell>
-                      <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
-                      <TableCell className="text-xs">{event.city || "—"}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px]">{event.event_type || "—"}</Badge></TableCell>
-                      <TableCell className="text-xs font-medium">{event.total_price ? formatCurrency(event.total_price) : "—"}</TableCell>
-                      <TableCell><Badge variant={event.source === "manual" ? "secondary" : "default"} className="text-[10px]">{event.source || "website"}</Badge></TableCell>
-                      <TableCell>
-                        {event.sheet_pushed ? (
-                          <Badge className="bg-primary/10 text-primary text-[10px]">✓ Pushed</Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground">Not pushed</Badge>
-                        )}
-                      </TableCell>
-                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex flex-wrap justify-end gap-1">
-                          {!event.sheet_pushed ? (
-                            <Button size="sm" variant="default" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
-                              {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}Push
-                            </Button>
+                {filteredEvents.map((event) => {
+                  const pendingAmt = getPendingAmount(event);
+                  return (
+                    <Fragment key={event.id}>
+                      <TableRow className="cursor-pointer hover:bg-muted/30" onClick={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}>
+                        <TableCell>
+                          {expandedEventId === event.id ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                        </TableCell>
+                        <TableCell className="text-xs font-medium">{event.event_date}</TableCell>
+                        <TableCell className="text-xs">{event.venue_name || "—"}</TableCell>
+                        <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
+                        <TableCell className="text-xs">{event.city || "—"}</TableCell>
+                        <TableCell><Badge variant="outline" className="text-[10px]">{event.event_type || "—"}</Badge></TableCell>
+                        <TableCell className="text-xs font-medium">{event.total_price ? formatCurrency(event.total_price) : "—"}</TableCell>
+                        <TableCell className="text-xs font-medium">
+                          {pendingAmt > 0 ? (
+                            <span className="text-destructive">{formatCurrency(pendingAmt)}</span>
                           ) : (
-                            <>
-                              <Button size="sm" variant="outline" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
-                                {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}Re-push
-                              </Button>
-                              <Button size="sm" variant="secondary" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleUpdatePushed(event.id)} disabled={updatingId === event.id}>
-                                {updatingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}Update
-                              </Button>
-                                {(event.source || "website") !== "manual" && (
-                                  <Button size="sm" variant="destructive" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
-                                    {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}Reverse
-                                  </Button>
-                                )}
-                            </>
+                            <span className="text-primary">Nil</span>
                           )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <AnimatePresence>
-                      {expandedEventId === event.id && (
-                        <TableRow key={`${event.id}-detail`}>
-                          <TableCell colSpan={10} className="bg-muted/20 p-0">
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="grid grid-cols-2 gap-x-6 gap-y-2 p-4 sm:grid-cols-4 text-xs">
-                                <div><span className="text-muted-foreground">Mobile:</span> <span className="font-medium">{event.client_mobile || "—"}</span></div>
-                                <div><span className="text-muted-foreground">Email:</span> <span className="font-medium">{event.client_email || "—"}</span></div>
-                                <div><span className="text-muted-foreground">State:</span> <span className="font-medium">{event.state || "—"}</span></div>
-                                <div><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{event.artist_count || 1}</span></div>
-                                <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{event.event_start_time || "—"} – {event.event_end_time || "—"}</span></div>
-                                <div><span className="text-muted-foreground">Advance:</span> <span className="font-medium">{event.advance_amount ? formatCurrency(event.advance_amount) : "—"}</span></div>
-                                <div><span className="text-muted-foreground">Pending:</span> <span className="font-medium">{(event.total_price || 0) - (event.advance_amount || 0) > 0 ? formatCurrency((event.total_price || 0) - (event.advance_amount || 0)) : "Nil"}</span></div>
-                                <div><span className="text-muted-foreground">Payment:</span> <span className="font-medium">{event.payment_status || "—"}</span></div>
-                                <div><span className="text-muted-foreground">Status:</span> <span className="font-medium">{event.status || "—"}</span></div>
-                                <div><span className="text-muted-foreground">Address:</span> <span className="font-medium">{event.full_address || "—"}</span></div>
-                                {event.sheet_pushed_at && (
-                                  <div className="col-span-2"><span className="text-muted-foreground">Last pushed:</span> <span className="font-medium">{new Date(event.sheet_pushed_at).toLocaleString("en-IN")}</span></div>
-                                )}
-                              </div>
-                            </motion.div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </AnimatePresence>
-                  </>
-                ))}
+                        </TableCell>
+                        <TableCell><Badge variant={event.source === "manual" ? "secondary" : "default"} className="text-[10px]">{event.source || "website"}</Badge></TableCell>
+                        <TableCell>
+                          {event.sheet_pushed ? (
+                            <Badge className="bg-primary/10 text-primary text-[10px]">✓ Pushed</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">Not pushed</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-wrap justify-end gap-1">
+                            {!event.sheet_pushed ? (
+                              <Button size="sm" variant="default" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                                {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}Push
+                              </Button>
+                            ) : (
+                              <>
+                                <Button size="sm" variant="outline" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                                  {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}Re-push
+                                </Button>
+                                <Button size="sm" variant="secondary" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleUpdatePushed(event.id)} disabled={updatingId === event.id}>
+                                  {updatingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}Update
+                                </Button>
+                                <Button size="sm" variant="destructive" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
+                                  {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}Reverse
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      <AnimatePresence>
+                        {expandedEventId === event.id && (
+                          <TableRow key={`${event.id}-detail`}>
+                            <TableCell colSpan={11} className="bg-muted/20 p-0">
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-2 p-4 sm:grid-cols-4 text-xs">
+                                  <div><span className="text-muted-foreground">Mobile:</span> <span className="font-medium">{event.client_mobile || "—"}</span></div>
+                                  <div><span className="text-muted-foreground">Email:</span> <span className="font-medium">{event.client_email || "—"}</span></div>
+                                  <div><span className="text-muted-foreground">State:</span> <span className="font-medium">{event.state || "—"}</span></div>
+                                  <div><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{event.artist_count || 1}</span></div>
+                                  <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{event.event_start_time || "—"} – {event.event_end_time || "—"}</span></div>
+                                  <div><span className="text-muted-foreground">Advance:</span> <span className="font-medium">{event.advance_amount ? formatCurrency(event.advance_amount) : "—"}</span></div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">Pending:</span>
+                                    {editingPendingId === event.id ? (
+                                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                        <Input
+                                          type="number"
+                                          value={pendingValue}
+                                          onChange={(e) => setPendingValue(e.target.value)}
+                                          className="h-6 w-24 text-xs"
+                                          min={0}
+                                        />
+                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleSavePending(event.id)} disabled={savingPending}>
+                                          {savingPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 text-primary" />}
+                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { setEditingPendingId(null); setPendingValue(""); }}>
+                                          <XCircle className="h-3 w-3 text-muted-foreground" />
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-1">
+                                        <span className="font-medium">{pendingAmt > 0 ? formatCurrency(pendingAmt) : "Nil"}</span>
+                                        <Button
+                                          size="sm" variant="ghost" className="h-5 w-5 p-0"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingPendingId(event.id);
+                                            setPendingValue(String(pendingAmt));
+                                          }}
+                                        >
+                                          <Edit2 className="h-3 w-3 text-muted-foreground" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div><span className="text-muted-foreground">Payment:</span> <span className="font-medium">{event.payment_status || "—"}</span></div>
+                                  <div><span className="text-muted-foreground">Status:</span> <span className="font-medium">{event.status || "—"}</span></div>
+                                  <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="font-medium">{event.full_address || "—"}</span></div>
+                                  {event.sheet_pushed_at && (
+                                    <div className="col-span-2"><span className="text-muted-foreground">Last pushed:</span> <span className="font-medium">{new Date(event.sheet_pushed_at).toLocaleString("en-IN")}</span></div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </AnimatePresence>
+                    </Fragment>
+                  );
+                })}
                 {filteredEvents.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
+                    <TableCell colSpan={11} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -820,8 +873,8 @@ const AdminGoogleSheet = () => {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {loadingTab ? (
-              <div className="flex items-center justify-center py-16 text-muted-foreground"><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading tab...</div>
+            {loading ? (
+              <div className="flex items-center justify-center py-16 text-muted-foreground"><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading...</div>
             ) : visibleRows.length === 0 ? (
               <div className="py-16 text-center text-muted-foreground">No sheet rows found.</div>
             ) : (
@@ -835,7 +888,7 @@ const AdminGoogleSheet = () => {
                   </TableHeader>
                   <TableBody>
                     {visibleRows.map((row, ri) => (
-                      <TableRow key={`${ri}-${row.join("-")}`}>
+                      <TableRow key={ri}>
                         <TableCell className="text-[10px]">{ri + 1}</TableCell>
                         {sheetHeaders.map((_, ci) => <TableCell key={ci} className="text-[10px]">{row[ci] || ""}</TableCell>)}
                       </TableRow>
@@ -850,5 +903,6 @@ const AdminGoogleSheet = () => {
     </motion.div>
   );
 };
+
 
 export default AdminGoogleSheet;

@@ -9,24 +9,24 @@ const corsHeaders = {
 
 const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
 const SHEET_HEADERS = [
-  "DATE",
-  "VENUE",
-  "TIME",
-  "ARTIST NAME",
-  "PAYMENT STATUS",
-  "PENDING AMOUNT",
-  "BOOKING ID",
-  "CLIENT NAME",
-  "MOBILE",
-  "EMAIL",
-  "CITY",
-  "STATE",
-  "EVENT TYPE",
-  "BOOKING STATUS",
-  "TOTAL PRICE",
-  "SOURCE",
-  "ADDRESS",
+  "DATE","VENUE","TIME","ARTIST NAME","PAYMENT STATUS","PENDING AMOUNT",
+  "BOOKING ID","CLIENT NAME","MOBILE","EMAIL","CITY","STATE",
+  "EVENT TYPE","BOOKING STATUS","TOTAL PRICE","SOURCE","ADDRESS",
 ];
+
+function ok(body: any) {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function err(message: string, status = 500) {
+  return new Response(JSON.stringify({ success: false, error: message }), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 function getMonthTabName(dateStr: string): string {
   const d = new Date(dateStr);
@@ -62,9 +62,24 @@ async function getAccessToken(serviceAccountKey: any): Promise<string> {
   return tokenData.access_token;
 }
 
+/* ── retry wrapper for Google API calls (handles 429) ── */
+async function fetchWithRetry(url: string, opts: RequestInit = {}, retries = 3): Promise<Response> {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const res = await fetch(url, opts);
+    if (res.status === 429 && attempt < retries - 1) {
+      const wait = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
+      console.warn(`Rate limited (429), retrying in ${wait}ms...`);
+      await new Promise((r) => setTimeout(r, wait));
+      continue;
+    }
+    return res;
+  }
+  throw new Error("Max retries exceeded");
+}
+
 async function getSheetTabs(accessToken: string, sheetId: string) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const res = await fetchWithRetry(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!res.ok) throw new Error(`Failed to get sheet info: ${await res.text()}`);
   const data = await res.json();
   return (data.sheets || []).map((s: any) => ({ title: s.properties.title, sheetId: s.properties.sheetId }));
@@ -72,14 +87,24 @@ async function getSheetTabs(accessToken: string, sheetId: string) {
 
 async function readSheet(accessToken: string, sheetId: string, range: string) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const res = await fetchWithRetry(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!res.ok) throw new Error(`Read failed: ${await res.text()}`);
   return await res.json();
 }
 
+async function batchReadSheets(accessToken: string, sheetId: string, ranges: string[]) {
+  if (ranges.length === 0) return [];
+  const params = ranges.map((r) => `ranges=${encodeURIComponent(r)}`).join("&");
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?${params}`;
+  const res = await fetchWithRetry(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!res.ok) throw new Error(`Batch read failed: ${await res.text()}`);
+  const data = await res.json();
+  return data.valueRanges || [];
+}
+
 async function updateSheet(accessToken: string, sheetId: string, range: string, values: any[][]) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: "PUT",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({ values }),
@@ -90,7 +115,7 @@ async function updateSheet(accessToken: string, sheetId: string, range: string, 
 
 async function insertRowAfter(accessToken: string, spreadsheetId: string, tabSheetId: number, afterRowIndex: number) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -107,7 +132,7 @@ async function insertRowAfter(accessToken: string, spreadsheetId: string, tabShe
 
 async function deleteSheetRow(accessToken: string, spreadsheetId: string, tabSheetId: number, rowIndex: number) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -145,6 +170,15 @@ function findDateRow(rows: any[][], dayNumber: number): { dateRow: number; lastG
   return { dateRow: -1, lastGroupRow: -1, isEmpty: true };
 }
 
+function parseMonthKeyFromTab(title: string): string | null {
+  const normalized = title.trim().toUpperCase();
+  const match = normalized.match(/^([A-Z]+)\s+(\d{4})$/);
+  if (!match) return null;
+  const monthIndex = MONTHS.indexOf(match[1]);
+  if (monthIndex < 0) return null;
+  return `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}`;
+}
+
 function formatPaymentStatus(event: any): string {
   const ps = event.payment_status || "pending";
   if (ps === "confirmed" || ps === "paid") return `Advance ₹${(event.advance_amount || 0).toLocaleString("en-IN")}`;
@@ -165,58 +199,22 @@ function formatTime(t: string): string {
   return t;
 }
 
-function parseSheetEventCount(rows: any[][]): number {
-  const value = rows?.[1]?.[1];
-  const parsed = Number.parseInt(String(value ?? "0"), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function countSheetEvents(rows: any[][]): number {
   let currentDay = "";
   let count = 0;
-
   for (let i = 3; i < rows.length; i++) {
     const row = rows[i] || [];
     const firstCell = row[0]?.toString().trim() || "";
     if (firstCell) currentDay = firstCell;
-
     const hasEventData = row.slice(1).some((cell: any) => {
       const value = cell?.toString().trim() || "";
       return value.length > 0;
     });
-
     if (currentDay && hasEventData) count += 1;
   }
-
   return count;
 }
 
-function parseMonthKeyFromTab(title: string): string | null {
-  const normalized = title.trim().toUpperCase();
-  const match = normalized.match(/^([A-Z]+)\s+(\d{4})$/);
-  if (!match) return null;
-  const monthIndex = MONTHS.indexOf(match[1]);
-  if (monthIndex < 0) return null;
-  return `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}`;
-}
-
-async function getTabSummary(accessToken: string, sheetId: string, tab: { title: string; sheetId: number }) {
-  const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
-  const rows = data.values || [];
-  return {
-    title: tab.title,
-    sheetId: tab.sheetId,
-    normalizedTitle: tab.title.trim(),
-    monthKey: parseMonthKeyFromTab(tab.title),
-    eventCount: countSheetEvents(rows) || parseSheetEventCount(rows),
-  };
-}
-
-async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, tabTitle: string) {
-  await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
-}
-
-// Extended row: [date, venue, time, artist, payment, pending, bookingId, client, mobile, email, city, state, eventType, status, totalPrice, source, address]
 function formatSheetRow(event: any, includeDate: boolean, label?: string): any[] {
   const startTime = formatTime(event.event_start_time || "");
   const endTime = formatTime(event.event_end_time || "");
@@ -246,6 +244,10 @@ function formatSheetRow(event: any, includeDate: boolean, label?: string): any[]
 
 function getSupabaseClient() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+}
+
+async function ensureSheetHeaders(accessToken: string, spreadsheetId: string, tabTitle: string) {
+  await updateSheet(accessToken, spreadsheetId, `'${tabTitle}'!A3:Q3`, [SHEET_HEADERS]);
 }
 
 async function pushEventToSheet(
@@ -327,85 +329,160 @@ serve(async (req) => {
   try {
     const serviceAccountKeyRaw = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_KEY");
     const sheetId = Deno.env.get("GOOGLE_SHEET_ID");
-    if (!serviceAccountKeyRaw || !sheetId) throw new Error("Google Sheets credentials not configured");
+    if (!serviceAccountKeyRaw || !sheetId) return err("Google Sheets credentials not configured", 200);
 
     const serviceAccountKey = JSON.parse(serviceAccountKeyRaw);
     const accessToken = await getAccessToken(serviceAccountKey);
-    const tabs = await getSheetTabs(accessToken, sheetId);
+
+    let tabs: {title: string, sheetId: number}[];
+    try {
+      tabs = await getSheetTabs(accessToken, sheetId);
+    } catch (e: any) {
+      // Return 200 with error info so frontend doesn't break
+      console.error("Sheet tabs error:", e.message);
+      return ok({ success: false, error: e.message, tabs: {}, tabNames: [], tabSummaries: [] });
+    }
 
     const body = await req.json();
     const { action, event_data, event_id } = body;
     const supabase = getSupabaseClient();
 
+    /* ── read_all: single call that returns ALL tab data + summaries ── */
+    if (action === "read_all") {
+      const allData: Record<string, any[][]> = {};
+      const summaries: any[] = [];
+
+      // Use batchGet to read all tabs in ONE API call
+      const ranges = tabs.map((t) => `'${t.title}'!A1:Q500`);
+      try {
+        const batchResults = await batchReadSheets(accessToken, sheetId, ranges);
+        for (let i = 0; i < tabs.length; i++) {
+          const tab = tabs[i];
+          const rows = batchResults[i]?.values || [];
+          allData[tab.title] = rows;
+          summaries.push({
+            title: tab.title,
+            sheetId: tab.sheetId,
+            normalizedTitle: tab.title.trim(),
+            monthKey: parseMonthKeyFromTab(tab.title),
+            eventCount: countSheetEvents(rows),
+          });
+        }
+      } catch (e: any) {
+        console.warn("Batch read failed, falling back:", e.message);
+        // Fallback: read one by one
+        for (const tab of tabs) {
+          try {
+            const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
+            const rows = data.values || [];
+            allData[tab.title] = rows;
+            summaries.push({
+              title: tab.title, sheetId: tab.sheetId,
+              normalizedTitle: tab.title.trim(),
+              monthKey: parseMonthKeyFromTab(tab.title),
+              eventCount: countSheetEvents(rows),
+            });
+          } catch (_) {
+            summaries.push({
+              title: tab.title, sheetId: tab.sheetId,
+              normalizedTitle: tab.title.trim(),
+              monthKey: parseMonthKeyFromTab(tab.title),
+              eventCount: 0,
+            });
+          }
+        }
+      }
+
+      return ok({
+        success: true,
+        tabs: allData,
+        tabNames: tabs.map((t) => t.title),
+        tabSummaries: summaries,
+      });
+    }
+
+    // Legacy endpoints kept for backwards compat
     if (action === "read_overview") {
       const summaries = [];
-      for (const tab of tabs) {
-        try {
-          summaries.push(await getTabSummary(accessToken, sheetId, tab));
-        } catch (_) {
+      const ranges = tabs.map((t) => `'${t.title}'!A1:Q500`);
+      try {
+        const batchResults = await batchReadSheets(accessToken, sheetId, ranges);
+        for (let i = 0; i < tabs.length; i++) {
+          const rows = batchResults[i]?.values || [];
+          summaries.push({
+            title: tabs[i].title, sheetId: tabs[i].sheetId,
+            normalizedTitle: tabs[i].title.trim(),
+            monthKey: parseMonthKeyFromTab(tabs[i].title),
+            eventCount: countSheetEvents(rows),
+          });
+        }
+      } catch (_) {
+        for (const tab of tabs) {
           summaries.push({ title: tab.title, sheetId: tab.sheetId, normalizedTitle: tab.title.trim(), monthKey: parseMonthKeyFromTab(tab.title), eventCount: 0 });
         }
       }
-      return new Response(JSON.stringify({ success: true, tabNames: tabs.map((t) => t.title), tabSummaries: summaries }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return ok({ success: true, tabNames: tabs.map((t) => t.title), tabSummaries: summaries });
     }
 
     if (action === "read_tab") {
       const requestedTab = typeof body.tab_name === "string" ? body.tab_name : "";
-      if (!requestedTab) throw new Error("Tab name is required");
+      if (!requestedTab) return err("Tab name is required", 200);
       const tab = findTab(tabs, requestedTab);
-      if (!tab) throw new Error(`Sheet tab "${requestedTab}" not found`);
+      if (!tab) return ok({ success: false, error: `Sheet tab "${requestedTab}" not found` });
       const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
-      return new Response(JSON.stringify({ success: true, tabName: tab.title, rows: data.values || [] }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return ok({ success: true, tabName: tab.title, rows: data.values || [] });
     }
 
     if (action === "read") {
       const allData: Record<string, any[][]> = {};
-      for (const tab of tabs) {
-        try {
-          const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
-          allData[tab.title] = data.values || [];
-        } catch (_) {}
+      const ranges = tabs.map((t) => `'${t.title}'!A1:Q500`);
+      try {
+        const batchResults = await batchReadSheets(accessToken, sheetId, ranges);
+        for (let i = 0; i < tabs.length; i++) {
+          allData[tabs[i].title] = batchResults[i]?.values || [];
+        }
+      } catch (_) {
+        for (const tab of tabs) {
+          try {
+            const data = await readSheet(accessToken, sheetId, `'${tab.title}'!A1:Q500`);
+            allData[tab.title] = data.values || [];
+          } catch (__) {}
+        }
       }
-      return new Response(JSON.stringify({ success: true, tabs: allData, tabNames: tabs.map(t => t.title) }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return ok({ success: true, tabs: allData, tabNames: tabs.map(t => t.title) });
     }
 
     // PUSH SINGLE EVENT
     if (action === "push_single" && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
-      if (error || !event) throw new Error("Event not found");
+      if (error || !event) return ok({ success: false, error: "Event not found" });
       const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
       await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_id);
-      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return ok({ success: true, ...result });
     }
 
-    // UPDATE SINGLE EVENT (partial update - re-reads from DB and updates sheet row)
+    // UPDATE SINGLE EVENT
     if (action === "update_pushed" && event_id) {
       const { data: event, error } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
-      if (error || !event) throw new Error("Event not found");
+      if (error || !event) return ok({ success: false, error: "Event not found" });
       const result = await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
       await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_id);
-      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return ok({ success: true, ...result });
     }
 
     // DELETE FROM SHEET
     if (action === "delete_from_sheet" && event_id) {
       const { data: event } = await supabase.from("event_bookings").select("*").eq("id", event_id).single();
-      if (!event) throw new Error("Event not found");
+      if (!event) return ok({ success: false, error: "Event not found" });
       const result = await removeEventFromSheet(accessToken, sheetId, tabs, event);
       await supabase.from("event_bookings").update({ sheet_pushed: false, sheet_pushed_at: null } as any).eq("id", event_id);
-      return new Response(JSON.stringify({ success: true, ...result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return ok({ success: true, ...result });
     }
 
-    // SYNC ALL - only push events that are NOT already pushed
+    // SYNC ALL - only push events NOT already pushed
     if (action === "sync_all") {
       const { data: events, error } = await supabase.from("event_bookings").select("*").or("sheet_pushed.is.null,sheet_pushed.eq.false").order("event_date", { ascending: true });
-      if (error) throw error;
+      if (error) return ok({ success: false, error: error.message });
 
       let totalSynced = 0;
       let totalSkipped = 0;
@@ -414,14 +491,12 @@ serve(async (req) => {
           await pushEventToSheet(accessToken, sheetId, tabs, event, "web pushed");
           await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event.id);
           totalSynced++;
-        } catch (e) {
+        } catch (e: any) {
           console.warn(`Failed to push event ${event.id}: ${e.message}`);
           totalSkipped++;
         }
       }
-      return new Response(JSON.stringify({ success: true, synced: totalSynced, skipped: totalSkipped }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return ok({ success: true, synced: totalSynced, skipped: totalSkipped });
     }
 
     // APPEND EVENT (from DB trigger)
@@ -431,20 +506,20 @@ serve(async (req) => {
         if (event_data.id) {
           await supabase.from("event_bookings").update({ sheet_pushed: true, sheet_pushed_at: new Date().toISOString() } as any).eq("id", event_data.id);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.warn("Auto-push failed (non-fatal):", e.message);
       }
-      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return ok({ success: true });
     }
 
     // UPDATE EVENT (from DB trigger)
     if (action === "update_event" && event_data && event_id) {
       try {
         await pushEventToSheet(accessToken, sheetId, tabs, { ...event_data, id: event_id }, "web pushed");
-      } catch (e) {
+      } catch (e: any) {
         console.warn("Auto-update failed (non-fatal):", e.message);
       }
-      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return ok({ success: true });
     }
 
     // ADD MANUAL EVENT
@@ -470,21 +545,16 @@ serve(async (req) => {
         sheet_pushed: true,
         sheet_pushed_at: new Date().toISOString(),
       } as any).select().single();
-      if (error) throw error;
+      if (error) return ok({ success: false, error: error.message });
 
       const result = await pushEventToSheet(accessToken, sheetId, tabs, inserted, "manual");
-      return new Response(JSON.stringify({ success: true, event: inserted, ...result }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return ok({ success: true, event: inserted, ...result });
     }
 
-    return new Response(JSON.stringify({ error: "Invalid action" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
+    return ok({ success: false, error: "Invalid action" });
+  } catch (error: any) {
     console.error("Google Sheets sync error:", error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Always return 200 so frontend doesn't get network errors
+    return ok({ success: false, error: error.message });
   }
 });
