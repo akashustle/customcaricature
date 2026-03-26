@@ -827,15 +827,7 @@ const Admin = () => {
     }} />;
   }
 
-  // Inject admin-specific PWA manifest
-  useEffect(() => {
-    const existingManifest = document.querySelector('link[rel="manifest"]');
-    if (existingManifest) existingManifest.setAttribute("href", "/admin-manifest.json");
-    document.title = "CCC Admin Panel";
-    return () => {
-      if (existingManifest) existingManifest.setAttribute("href", "/manifest.json");
-    };
-  }, []);
+
 
   return (
     <div className="min-h-screen flex w-full">
