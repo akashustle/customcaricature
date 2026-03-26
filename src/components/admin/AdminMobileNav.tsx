@@ -99,9 +99,9 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
       <div className="bg-background/95 backdrop-blur-xl border-t border-border/20">
-        <div className="flex items-center h-[76px] overflow-x-auto px-2 admin-mnav" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+        <div className="flex items-center h-14 overflow-x-auto px-1 admin-mnav" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
           <style>{`.admin-mnav::-webkit-scrollbar { display: none; }`}</style>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
             {NAV_ITEMS.map((tab) => {
               const isRouteItem = tab.id === "link-workshop-admin" || tab.id === "link-shop-admin";
               const isActive = isRouteItem
@@ -114,7 +114,7 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                   onClick={() => handleItemClick(tab.id)}
                   whileTap={{ scale: 0.8 }}
                   className={cn(
-                    "flex items-center justify-center min-w-[68px] w-[68px] h-[76px] relative flex-shrink-0 rounded-2xl transition-colors",
+                    "flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0",
                     isActive ? "text-foreground" : "text-muted-foreground"
                   )}
                   title={tab.label}
@@ -123,14 +123,14 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                     className={`transition-all duration-200 ${
                       isActive ? "text-foreground" : "text-muted-foreground/45"
                     }`}
-                    size={isActive ? 32 : 28}
-                    strokeWidth={isActive ? 2.1 : 1.6}
+                    size={isActive ? 26 : 22}
+                    strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div
                       layoutId="admin-insta-dot"
-                      className="absolute bottom-2.5 w-1.5 h-1.5 rounded-full bg-foreground"
+                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     />
                   )}

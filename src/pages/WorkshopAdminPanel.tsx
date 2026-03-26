@@ -960,22 +960,22 @@ const WorkshopAdmin = () => {
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
         <div className={`backdrop-blur-xl ${dm ? "bg-[#0e0e18]/95 border-white/[0.04]" : "bg-white/95 border-slate-200/20"} border-t`}>
           <style>{`.ws-mnav::-webkit-scrollbar { display: none; }`}</style>
-          <div className="ws-mnav flex items-center h-[76px] overflow-x-auto px-2" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+          <div className="ws-mnav flex items-center h-14 overflow-x-auto px-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
             {sidebarItems.map((item) => {
               const isActive = tab === item.key;
               return (
                 <motion.button key={item.key} onClick={() => setTab(item.key)}
                   whileTap={{ scale: 0.8 }}
-                  className="flex items-center justify-center min-w-[68px] w-[68px] h-[76px] relative flex-shrink-0 rounded-2xl">
+                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
                   <item.icon
                     className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/25" : "text-slate-400/60"}`}
-                    size={isActive ? 32 : 28}
-                    strokeWidth={isActive ? 2.1 : 1.6}
+                    size={isActive ? 26 : 22}
+                    strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div layoutId="ws-admin-dot"
-                      className={`absolute bottom-2.5 w-1.5 h-1.5 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
