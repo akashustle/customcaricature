@@ -232,25 +232,32 @@ const AdminGoogleSheet = () => {
     const currentKey = getMonthKey(new Date());
     const nextKey = getMonthKey(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1));
     const now = new Date();
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
 
     const manualEvents = events.filter((event) => event.source === "manual");
-    const manualThisMonth = manualEvents.filter((event) => matchesMonth(event.event_date, currentKey));
-    const manualNextMonth = manualEvents.filter((event) => matchesMonth(event.event_date, nextKey));
+    const websiteEvents = events.filter((event) => event.source !== "manual");
     const totalThisMonth = events.filter((event) => matchesMonth(event.event_date, currentKey));
-    const upcomingTotal = events.filter((event) => new Date(event.event_date) >= now);
+    const totalNextMonth = events.filter((event) => matchesMonth(event.event_date, nextKey));
+    const upcomingThisYear = events.filter((event) => {
+      const d = new Date(event.event_date);
+      return d >= now && d <= yearEnd;
+    });
+    const websiteThisMonth = websiteEvents.filter((event) => matchesMonth(event.event_date, currentKey)).length;
+    const manualThisMonthCount = manualEvents.filter((event) => matchesMonth(event.event_date, currentKey)).length;
 
     return {
-      manualThisMonth,
-      manualNextMonth,
       totalThisMonth,
-      upcomingTotal,
+      totalNextMonth,
+      upcomingThisYear,
+      websiteThisMonth,
+      manualThisMonthCount,
       monthlyChart: tabSummaries.filter((tab) => tab.monthKey).slice(-6).map((tab) => ({
         name: tab.normalizedTitle.split(" ")[0],
         total: tab.eventCount,
       })),
       sourceChart: [
         { name: "Manual", value: manualEvents.length },
-        { name: "Website", value: events.filter((event) => event.source !== "manual").length },
+        { name: "Website", value: websiteEvents.length },
       ],
     };
   }, [events, tabSummaries]);
@@ -391,12 +398,12 @@ const AdminGoogleSheet = () => {
         </CardHeader>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { title: "Manual This Month", value: analytics.manualThisMonth.length, icon: Calendar, note: "manual events" },
-          { title: "Manual Next Month", value: analytics.manualNextMonth.length, icon: Filter, note: "manual upcoming" },
-          { title: "This Month Total", value: analytics.totalThisMonth.length, icon: Sheet, note: "all event sources" },
-          { title: "Upcoming Total", value: analytics.upcomingTotal.length, icon: TrendingUp, note: "future events" },
+          { title: "This Month Total", value: analytics.totalThisMonth.length, icon: Calendar, note: `${analytics.websiteThisMonth} website · ${analytics.manualThisMonthCount} manual` },
+          { title: "Next Month Total", value: analytics.totalNextMonth.length, icon: Filter, note: "all sources combined" },
+          { title: "Upcoming This Year", value: analytics.upcomingThisYear.length, icon: TrendingUp, note: `remaining in ${new Date().getFullYear()}` },
+          { title: "Website vs Manual", value: `${analytics.websiteThisMonth} / ${analytics.manualThisMonthCount}`, icon: Sheet, note: "website / manual this month" },
         ].map((item) => (
           <Card key={item.title} className="border-border/40 bg-card shadow-sm">
             <CardContent className="flex items-center justify-between p-4">
@@ -494,14 +501,25 @@ const AdminGoogleSheet = () => {
                   <TableCell>{event.client_name || "—"}</TableCell>
                   <TableCell><Badge variant="outline">{event.source || "website"}</Badge></TableCell>
                   <TableCell>{event.sheet_pushed ? "Yes" : "No"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
-                        {pushingId === event.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id || !event.sheet_pushed}>
-                        {reversingId === event.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                      </Button>
+                    <TableCell className="text-right">
+                    <div className="flex flex-wrap justify-end gap-1">
+                      {!event.sheet_pushed ? (
+                        <Button size="sm" variant="default" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                          {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}
+                          Push
+                        </Button>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
+                            {pushingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Send className="mr-1 h-3 w-3" />}
+                            Re-push
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
+                            {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}
+                            Remove
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
