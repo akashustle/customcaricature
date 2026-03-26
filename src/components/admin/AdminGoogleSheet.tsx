@@ -232,25 +232,32 @@ const AdminGoogleSheet = () => {
     const currentKey = getMonthKey(new Date());
     const nextKey = getMonthKey(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1));
     const now = new Date();
+    const yearEnd = new Date(now.getFullYear(), 11, 31);
 
     const manualEvents = events.filter((event) => event.source === "manual");
-    const manualThisMonth = manualEvents.filter((event) => matchesMonth(event.event_date, currentKey));
-    const manualNextMonth = manualEvents.filter((event) => matchesMonth(event.event_date, nextKey));
+    const websiteEvents = events.filter((event) => event.source !== "manual");
     const totalThisMonth = events.filter((event) => matchesMonth(event.event_date, currentKey));
-    const upcomingTotal = events.filter((event) => new Date(event.event_date) >= now);
+    const totalNextMonth = events.filter((event) => matchesMonth(event.event_date, nextKey));
+    const upcomingThisYear = events.filter((event) => {
+      const d = new Date(event.event_date);
+      return d >= now && d <= yearEnd;
+    });
+    const websiteThisMonth = websiteEvents.filter((event) => matchesMonth(event.event_date, currentKey)).length;
+    const manualThisMonthCount = manualEvents.filter((event) => matchesMonth(event.event_date, currentKey)).length;
 
     return {
-      manualThisMonth,
-      manualNextMonth,
       totalThisMonth,
-      upcomingTotal,
+      totalNextMonth,
+      upcomingThisYear,
+      websiteThisMonth,
+      manualThisMonthCount,
       monthlyChart: tabSummaries.filter((tab) => tab.monthKey).slice(-6).map((tab) => ({
         name: tab.normalizedTitle.split(" ")[0],
         total: tab.eventCount,
       })),
       sourceChart: [
         { name: "Manual", value: manualEvents.length },
-        { name: "Website", value: events.filter((event) => event.source !== "manual").length },
+        { name: "Website", value: websiteEvents.length },
       ],
     };
   }, [events, tabSummaries]);
