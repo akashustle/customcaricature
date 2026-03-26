@@ -15,6 +15,7 @@ import AppOnboarding from "./components/AppOnboarding";
 import LiveChatWrapper from "./components/LiveChatWrapper";
 import OfflineDetector from "./components/OfflineDetector";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
+import AdminPWAManager from "./components/AdminPWAManager";
 import usePageTracker from "./hooks/usePageTracker";
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
