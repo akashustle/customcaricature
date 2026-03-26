@@ -964,35 +964,8 @@ const WorkshopAdmin = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Nav - Instagram Style */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-        <div className={`backdrop-blur-xl ${dm ? "bg-[#0e0e18]/95 border-white/[0.04]" : "bg-white/95 border-slate-200/20"} border-t`}>
-          <style>{`.ws-mnav::-webkit-scrollbar { display: none; }`}</style>
-          <div className="ws-mnav flex items-center h-14 overflow-x-auto px-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
-            {sidebarItems.map((item) => {
-              const isActive = tab === item.key;
-              return (
-                <motion.button key={item.key} onClick={() => setTab(item.key)}
-                  whileTap={{ scale: 0.8 }}
-                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                  <item.icon
-                    className={`transition-all duration-200 ${isActive ? (dm ? "text-white" : "text-slate-900") : dm ? "text-white/25" : "text-slate-400/60"}`}
-                    size={isActive ? 26 : 22}
-                    strokeWidth={isActive ? 2.2 : 1.4}
-                    fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"}
-                  />
-                  {isActive && (
-                    <motion.div layoutId="ws-admin-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-white" : "bg-slate-900"}`}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }} />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-          <div className="h-[env(safe-area-inset-bottom)]" />
-        </div>
-      </div>
+      {/* Mobile Bottom Nav - Instagram Style with More */}
+      <WorkshopMobileNav tab={tab} setTab={setTab} dm={dm} navigate={navigate} adminInfo={adminInfo} sidebarItems={sidebarItems} />
 
       {/* Content */}
       <div className="flex-1 p-3 lg:p-6 pt-[68px] lg:pt-6 pb-24 lg:pb-6 overflow-auto">
