@@ -19,6 +19,7 @@ import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/eve
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "@/components/NotificationBell";
+import { initWebPush, requestBrowserNotificationPermission } from "@/lib/webpush";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePermissions } from "@/hooks/usePermissions";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
