@@ -102,13 +102,13 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
   </AnimatePresence>
 );
 
-const InfiniteScrollGallery = ({ onImageClick }: { onImageClick: (idx: number) => void }) => {
-  const doubled = [...galleryImages, ...galleryImages];
+const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onImageClick: (idx: number) => void }) => {
+  const doubled = [...images, ...images];
   return (
     <div className="overflow-hidden py-8">
       <motion.div
         className="flex gap-4"
-        animate={{ x: [0, -(galleryImages.length * 280)] }}
+        animate={{ x: [0, -(images.length * 280)] }}
         transition={{ x: { repeat: Infinity, repeatType: "loop", duration: 30, ease: "linear" } }}
       >
         {doubled.map((img, i) => (
@@ -117,9 +117,9 @@ const InfiniteScrollGallery = ({ onImageClick }: { onImageClick: (idx: number) =
             className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md"
             whileHover={{ scale: 1.03, y: -4 }}
             transition={{ duration: 0.3 }}
-            onClick={() => onImageClick(i % galleryImages.length)}
+            onClick={() => onImageClick(i % images.length)}
           >
-            <img src={img} alt={`Caricature ${(i % galleryImages.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
+            <img src={img} alt={`Caricature ${(i % images.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
           </motion.div>
         ))}
       </motion.div>
