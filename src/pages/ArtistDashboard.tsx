@@ -19,6 +19,7 @@ import { EVENT_TYPES, EVENT_STATUS_LABELS, EVENT_STATUS_COLORS } from "@/lib/eve
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "@/components/NotificationBell";
+import { initWebPush, requestBrowserNotificationPermission } from "@/lib/webpush";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePermissions } from "@/hooks/usePermissions";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
@@ -372,6 +373,10 @@ const ArtistDashboard = () => {
     fetchEvents((artistData as any).id);
     fetchBlockedDates((artistData as any).id);
     if (isR) fetchOrders((artistData as any).id);
+
+    // Init web push for artist notifications
+    requestBrowserNotificationPermission(userId).catch(() => {});
+    initWebPush(userId).catch(() => {});
 
     const ch = supabase.channel("artist-dashboard-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchEvents((artistData as any).id))
