@@ -81,7 +81,7 @@ async function formatSheet(token: string, spreadId: string, sheetId: number, hea
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 10 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
+      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
       fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment)"
     }
   });
@@ -299,7 +299,7 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z100`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, dashboardData);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.2, g: 0.2, b: 0.3 }, [200, 140, 200, 140]);
+  await formatSheet(token, sheetId, tab.sheetId, { r: 0.25, g: 0.4, b: 0.7 }, [200, 140, 200, 140]);
   return { sheet: tabTitle, rows: dashboardData.length };
 }
 
@@ -435,7 +435,28 @@ serve(async (req) => {
       return ok({ success: true, results: [r1, r2] });
     }
 
-    return err("Invalid action. Use: sync_all, sync_table, sync_users, sync_payments, sync_events, sync_orders, sync_enquiries, sync_analytics, sync_workshop");
+    if (action === "update_design") {
+      // Re-sync all sheets which re-applies vibrant formatting
+      const results = [];
+      results.push(await syncUsers(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncPaymentHistory(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncEvents(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncOrders(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncEnquiries(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncAnalytics(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncWorkshopMarch(token, sheetId, tabs, supabase));
+      tabs = await getSheetTabs(token, sheetId);
+      results.push(await syncWorkshopJune(token, sheetId, tabs, supabase));
+      return ok({ success: true, message: "Design updated with vibrant colors", results });
+    }
+
+    return err("Invalid action. Use: sync_all, update_design, sync_table, sync_users, sync_payments, sync_events, sync_orders, sync_enquiries, sync_analytics, sync_workshop");
   } catch (e: any) {
     console.error("Mini DB sync error:", e);
     return ok({ success: false, error: e.message });
