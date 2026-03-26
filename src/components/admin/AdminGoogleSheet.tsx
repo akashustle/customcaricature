@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
@@ -48,6 +48,28 @@ interface SheetTabSummary {
   eventCount: number;
 }
 
+interface ParsedSheetEvent {
+  tabTitle: string;
+  monthKey: string | null;
+  dateLabel: string;
+  venue: string;
+  time: string;
+  artist: string;
+  payment: string;
+  pending: string;
+  bookingId: string;
+  clientName: string;
+  mobile: string;
+  email: string;
+  city: string;
+  state: string;
+  eventType: string;
+  bookingStatus: string;
+  totalPrice: string;
+  source: string;
+  address: string;
+}
+
 interface ManualEventForm {
   event_date: string;
   venue_name: string;
@@ -90,6 +112,49 @@ const initialManualEvent: ManualEventForm = {
 const getMonthKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 const formatMonthLabel = (monthKey: string) => { const [y, m] = monthKey.split("-"); return `${MONTH_NAMES[Number(m) - 1]} ${y}`; };
 const matchesMonth = (dateValue: string, monthKey: string) => getMonthKey(new Date(dateValue)) === monthKey;
+const parseCurrencyValue = (value: string) => Number((value || "").replace(/[^\d.-]/g, "")) || 0;
+const isSheetEventRow = (row: string[]) => row.slice(1).some((cell) => String(cell || "").trim().length > 0);
+
+const parseSheetEvents = (tabs: Record<string, string[][]>): ParsedSheetEvent[] => {
+  return Object.entries(tabs).flatMap(([tabTitle, rows]) => {
+    const summary = rows || [];
+    let currentDate = "";
+    const tabMonthKey = (() => {
+      const match = tabTitle.trim().toUpperCase().match(/^([A-Z]+)\s+(\d{4})$/);
+      if (!match) return null;
+      const monthIndex = MONTH_NAMES.findIndex((month) => month.toUpperCase() === match[1]);
+      return monthIndex >= 0 ? `${match[2]}-${String(monthIndex + 1).padStart(2, "0")}` : null;
+    })();
+
+    return summary.slice(3).flatMap((rawRow) => {
+      const row = Array.from({ length: 17 }, (_, index) => String(rawRow?.[index] || "").trim());
+      if (row[0]) currentDate = row[0];
+      if (!currentDate || !isSheetEventRow(row)) return [];
+
+      return [{
+        tabTitle,
+        monthKey: tabMonthKey,
+        dateLabel: currentDate,
+        venue: row[1],
+        time: row[2],
+        artist: row[3],
+        payment: row[4],
+        pending: row[5],
+        bookingId: row[6],
+        clientName: row[7],
+        mobile: row[8],
+        email: row[9],
+        city: row[10],
+        state: row[11],
+        eventType: row[12],
+        bookingStatus: row[13],
+        totalPrice: row[14],
+        source: row[15] || "manual",
+        address: row[16],
+      } satisfies ParsedSheetEvent];
+    });
+  });
+};
 
 /* ─────────── 3D Flash Card Widget ─────────── */
 const FlashWidget = ({ title, value, icon: Icon, note, color = "primary", trend }: {
@@ -128,6 +193,7 @@ const FlashWidget = ({ title, value, icon: Icon, note, color = "primary", trend 
 const AdminGoogleSheet = () => {
   const [events, setEvents] = useState<EventBooking[]>([]);
   const [tabSummaries, setTabSummaries] = useState<SheetTabSummary[]>([]);
+  const [sheetTabs, setSheetTabs] = useState<Record<string, string[][]>>({});
   const [activeTab, setActiveTab] = useState("");
   const [activeTabRows, setActiveTabRows] = useState<string[][]>([]);
   const [sheetFilter, setSheetFilter] = useState("this_month");
@@ -143,6 +209,7 @@ const AdminGoogleSheet = () => {
   const [addingEvent, setAddingEvent] = useState(false);
   const [newEvent, setNewEvent] = useState<ManualEventForm>(initialManualEvent);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+  const deferredSearch = useDeferredValue(search);
 
   const fetchEvents = useCallback(async () => {
     const { data, error } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: true });
@@ -167,6 +234,17 @@ const AdminGoogleSheet = () => {
     } finally { setLoadingOverview(false); }
   }, [activeTab]);
 
+  const fetchSheetData = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("google-sheets-sync", { body: { action: "read" } });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed");
+      setSheetTabs((data.tabs || {}) as Record<string, string[][]>);
+    } catch (error: any) {
+      toast({ title: "Failed to read Google Sheet", description: error.message, variant: "destructive" });
+    }
+  }, []);
+
   const fetchActiveTab = useCallback(async (tabName: string) => {
     if (!tabName) return;
     setLoadingTab(true);
@@ -182,8 +260,8 @@ const AdminGoogleSheet = () => {
   }, []);
 
   const refreshAll = useCallback(async () => {
-    await Promise.all([fetchEvents(), fetchSheetOverview()]);
-  }, [fetchEvents, fetchSheetOverview]);
+    await Promise.all([fetchEvents(), fetchSheetOverview(), fetchSheetData()]);
+  }, [fetchEvents, fetchSheetOverview, fetchSheetData]);
 
   useEffect(() => { refreshAll().catch(() => {}); }, [refreshAll]);
   useEffect(() => { if (activeTab) fetchActiveTab(activeTab).catch(() => {}); }, [activeTab, fetchActiveTab]);
@@ -192,11 +270,11 @@ const AdminGoogleSheet = () => {
     const channel = supabase
       .channel("admin-google-sheet-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, async () => {
-        await Promise.all([fetchEvents(), fetchSheetOverview()]);
+        await Promise.all([fetchEvents(), fetchSheetOverview(), fetchSheetData()]);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [fetchEvents, fetchSheetOverview]);
+  }, [fetchEvents, fetchSheetOverview, fetchSheetData]);
 
   const availableMonthOptions = useMemo(() =>
     Array.from(new Set(events.map((e) => getMonthKey(new Date(e.event_date))))).sort(), [events]);
@@ -231,55 +309,62 @@ const AdminGoogleSheet = () => {
     else if (eventFilter === "pushed") base = events.filter((e) => e.sheet_pushed);
     else if (eventFilter === "not_pushed") base = events.filter((e) => !e.sheet_pushed);
     else if (eventFilter !== "all") base = events.filter((e) => matchesMonth(e.event_date, eventFilter));
-    if (search.trim()) base = base.filter((e) => [e.client_name, e.venue_name, e.city, e.event_type].some((v) => v?.toLowerCase().includes(search.toLowerCase())));
+    if (deferredSearch.trim()) base = base.filter((e) => [e.client_name, e.venue_name, e.city, e.event_type].some((v) => v?.toLowerCase().includes(deferredSearch.toLowerCase())));
     return base;
-  }, [eventFilter, events, search]);
+  }, [deferredSearch, eventFilter, events]);
 
   /* ─────── Analytics ─────── */
+  const parsedSheetEvents = useMemo(() => parseSheetEvents(sheetTabs), [sheetTabs]);
+
   const analytics = useMemo(() => {
     const now = new Date();
     const ck = getMonthKey(now);
     const nk = getMonthKey(new Date(now.getFullYear(), now.getMonth() + 1, 1));
     const yearEnd = new Date(now.getFullYear(), 11, 31);
 
-    const thisMonth = events.filter((e) => matchesMonth(e.event_date, ck));
-    const nextMonth = events.filter((e) => matchesMonth(e.event_date, nk));
-    const upcoming = events.filter((e) => { const d = new Date(e.event_date); return d >= now && d <= yearEnd; });
-    const manual = events.filter((e) => e.source === "manual");
-    const website = events.filter((e) => e.source !== "manual");
+    const thisMonth = parsedSheetEvents.filter((e) => e.monthKey === ck);
+    const nextMonth = parsedSheetEvents.filter((e) => e.monthKey === nk);
+    const upcoming = parsedSheetEvents.filter((e) => {
+      if (!e.monthKey || !e.dateLabel) return false;
+      const [year, month] = e.monthKey.split("-").map(Number);
+      const eventDate = new Date(year, month - 1, Number(e.dateLabel), 23, 59, 59);
+      return eventDate >= now && eventDate <= yearEnd;
+    });
+    const manual = parsedSheetEvents.filter((e) => e.source.toLowerCase() === "manual");
+    const website = parsedSheetEvents.filter((e) => e.source.toLowerCase() !== "manual");
     const pushed = events.filter((e) => e.sheet_pushed);
     const notPushed = events.filter((e) => !e.sheet_pushed);
-    const confirmed = events.filter((e) => e.status === "confirmed");
-    const pending = events.filter((e) => e.payment_status === "pending");
+    const confirmed = parsedSheetEvents.filter((e) => e.bookingStatus.toLowerCase() === "confirmed");
+    const pending = parsedSheetEvents.filter((e) => e.payment.toLowerCase().includes("pending"));
 
-    const totalRevenue = events.reduce((s, e) => s + (e.total_price || 0), 0);
-    const thisMonthRevenue = thisMonth.reduce((s, e) => s + (e.total_price || 0), 0);
-    const totalAdvance = events.reduce((s, e) => s + (e.advance_amount || 0), 0);
+    const totalRevenue = parsedSheetEvents.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
+    const thisMonthRevenue = thisMonth.reduce((s, e) => s + parseCurrencyValue(e.totalPrice), 0);
+    const totalAdvance = parsedSheetEvents.reduce((s, e) => {
+      const paymentText = e.payment.toLowerCase();
+      return paymentText.includes("advance") || paymentText.includes("full paid") ? s + parseCurrencyValue(e.payment) : s;
+    }, 0);
     const totalPending = totalRevenue - totalAdvance;
 
-    const webThisMonth = website.filter((e) => matchesMonth(e.event_date, ck)).length;
-    const manThisMonth = manual.filter((e) => matchesMonth(e.event_date, ck)).length;
+    const webThisMonth = website.filter((e) => e.monthKey === ck).length;
+    const manThisMonth = manual.filter((e) => e.monthKey === ck).length;
 
-    // City distribution
     const cityMap: Record<string, number> = {};
-    events.forEach((e) => { const c = e.city || "Unknown"; cityMap[c] = (cityMap[c] || 0) + 1; });
+    parsedSheetEvents.forEach((e) => { const c = e.city || "Unknown"; cityMap[c] = (cityMap[c] || 0) + 1; });
     const cityChart = Object.entries(cityMap).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([name, value]) => ({ name, value }));
 
-    // Event type distribution
     const typeMap: Record<string, number> = {};
-    events.forEach((e) => { const t = e.event_type || "other"; typeMap[t] = (typeMap[t] || 0) + 1; });
+    parsedSheetEvents.forEach((e) => { const t = e.eventType || "other"; typeMap[t] = (typeMap[t] || 0) + 1; });
     const typeChart = Object.entries(typeMap).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
 
-    // Monthly trend from DB events (last 6 months)
     const monthlyTrend: { name: string; website: number; manual: number; total: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const mk = getMonthKey(d);
-      const mEvents = events.filter((e) => matchesMonth(e.event_date, mk));
+      const mEvents = parsedSheetEvents.filter((e) => e.monthKey === mk);
       monthlyTrend.push({
         name: MONTH_NAMES[d.getMonth()].slice(0, 3),
-        website: mEvents.filter((e) => e.source !== "manual").length,
-        manual: mEvents.filter((e) => e.source === "manual").length,
+        website: mEvents.filter((e) => e.source.toLowerCase() !== "manual").length,
+        manual: mEvents.filter((e) => e.source.toLowerCase() === "manual").length,
         total: mEvents.length,
       });
     }
@@ -297,12 +382,12 @@ const AdminGoogleSheet = () => {
         { name: "Not Pushed", value: notPushed.length },
       ],
     };
-  }, [events]);
+  }, [events, parsedSheetEvents]);
 
   const sheetHeaders = activeTabRows[2] || [];
   const sheetRows = activeTabRows.slice(3);
-  const visibleRows = search.trim()
-    ? sheetRows.filter((row) => row.some((cell) => String(cell || "").toLowerCase().includes(search.toLowerCase())))
+  const visibleRows = deferredSearch.trim()
+    ? sheetRows.filter((row) => row.some((cell) => String(cell || "").toLowerCase().includes(deferredSearch.toLowerCase())))
     : sheetRows;
 
   /* ─────── Actions ─────── */
@@ -631,7 +716,7 @@ const AdminGoogleSheet = () => {
                           <Badge variant="outline" className="text-[10px] text-muted-foreground">Not pushed</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-wrap justify-end gap-1">
                           {!event.sheet_pushed ? (
                             <Button size="sm" variant="default" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handlePushSingle(event.id)} disabled={pushingId === event.id}>
@@ -645,9 +730,11 @@ const AdminGoogleSheet = () => {
                               <Button size="sm" variant="secondary" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleUpdatePushed(event.id)} disabled={updatingId === event.id}>
                                 {updatingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}Update
                               </Button>
-                              <Button size="sm" variant="destructive" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
-                                {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}Remove
-                              </Button>
+                                {(event.source || "website") !== "manual" && (
+                                  <Button size="sm" variant="destructive" className="h-7 rounded-lg text-[10px] px-2" onClick={() => handleReversePush(event.id)} disabled={reversingId === event.id}>
+                                    {reversingId === event.id ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RotateCcw className="mr-1 h-3 w-3" />}Reverse
+                                  </Button>
+                                )}
                             </>
                           )}
                         </div>
