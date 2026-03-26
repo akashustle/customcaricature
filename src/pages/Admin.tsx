@@ -361,6 +361,16 @@ const Admin = () => {
     } catch {}
   };
 
+  // Inject admin-specific PWA manifest
+  useEffect(() => {
+    const existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) existingManifest.setAttribute("href", "/admin-manifest.json");
+    document.title = "CCC Admin Panel";
+    return () => {
+      if (existingManifest) existingManifest.setAttribute("href", "/manifest.json");
+    };
+  }, []);
+
   // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
     const timeout = setTimeout(() => { if (loading) setLoading(false); }, 8000);
