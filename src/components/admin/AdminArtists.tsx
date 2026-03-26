@@ -38,19 +38,35 @@ const AdminArtists = () => {
   const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [artistLogs, setArtistLogs] = useState<Record<string, ArtistLog[]>>({});
+  const [showLogsFor, setShowLogsFor] = useState<string | null>(null);
 
   useEffect(() => {
     fetchArtists();
     fetchAllDocs();
     fetchAllArtistEvents();
+    fetchAllLogs();
     const ch = supabase.channel("admin-artists-rt")
       .on("postgres_changes", { event: "*", schema: "public", table: "artists" }, () => fetchArtists())
       .on("postgres_changes", { event: "*", schema: "public", table: "artist_documents" }, () => fetchAllDocs())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchAllArtistEvents())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchAllArtistEvents())
+      .on("postgres_changes", { event: "*", schema: "public", table: "artist_action_logs" }, () => fetchAllLogs())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  const fetchAllLogs = async () => {
+    const { data } = await supabase.from("artist_action_logs" as any).select("*").order("created_at", { ascending: false }).limit(200);
+    if (data) {
+      const map: Record<string, ArtistLog[]> = {};
+      (data as any[]).forEach(log => {
+        if (!map[log.artist_id]) map[log.artist_id] = [];
+        map[log.artist_id].push(log);
+      });
+      setArtistLogs(map);
+    }
+  };
 
   const fetchArtists = async () => {
     const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
