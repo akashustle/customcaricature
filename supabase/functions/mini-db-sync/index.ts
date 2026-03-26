@@ -78,20 +78,51 @@ async function formatSheet(token: string, spreadId: string, sheetId: number, hea
   colWidths.forEach((px, i) => {
     requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: i, endIndex: i + 1 }, properties: { pixelSize: px }, fields: "pixelSize" } });
   });
+  // Header row: vibrant color, bold white text, center-aligned
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-      cell: { userEnteredFormat: { backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 }, horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE" } },
-      fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment)"
+      cell: { userEnteredFormat: {
+        backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
+        textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
+        horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
+        wrapStrategy: "WRAP",
+      } },
+      fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy)"
+    }
+  });
+  // Header row height
+  requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "ROWS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 36 }, fields: "pixelSize" } });
+  // Data rows: wrap text, vertical middle
+  requests.push({
+    repeatCell: {
+      range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
+      cell: { userEnteredFormat: {
+        verticalAlignment: "MIDDLE",
+        wrapStrategy: "CLIP",
+        textFormat: { fontSize: 10 },
+      } },
+      fields: "userEnteredFormat(verticalAlignment,wrapStrategy,textFormat.fontSize)"
     }
   });
   requests.push({ updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: frozenRows } }, fields: "gridProperties.frozenRowCount" } });
-  // Alternate row colors
+  // Alternate row banding with soft pastel
   requests.push({
     addBanding: {
       bandedRange: { sheetId, range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-        rowProperties: { firstBandColor: { red: 1, green: 1, blue: 1 }, secondBandColor: { red: 0.95, green: 0.96, blue: 0.98 } }
+        rowProperties: {
+          headerColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
+          firstBandColor: { red: 1, green: 1, blue: 1 },
+          secondBandColor: { red: 0.94, green: 0.96, blue: 0.99 }
+        }
       }
+    }
+  });
+  // Borders on header
+  requests.push({
+    updateBorders: {
+      range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
+      bottom: { style: "SOLID_MEDIUM", color: { red: headerColor.r * 0.7, green: headerColor.g * 0.7, blue: headerColor.b * 0.7 } }
     }
   });
   try {
