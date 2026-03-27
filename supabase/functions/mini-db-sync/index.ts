@@ -9,12 +9,17 @@ const corsHeaders = {
 function ok(body: any) {
   return new Response(JSON.stringify(body), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
-
 function err(msg: string) {
   return new Response(JSON.stringify({ success: false, error: msg }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
-const MONTHS = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+// Light pastel color palette: yellow, green, blue, orange
+const TAB_COLORS = [
+  { header: { r: 1.0, g: 0.96, b: 0.80 }, band: { r: 1.0, g: 0.99, b: 0.93 }, text: { r: 0.35, g: 0.3, b: 0.1 } },   // light yellow
+  { header: { r: 0.85, g: 0.95, b: 0.85 }, band: { r: 0.94, g: 0.98, b: 0.94 }, text: { r: 0.1, g: 0.3, b: 0.1 } },    // light green
+  { header: { r: 0.85, g: 0.92, b: 1.0 },  band: { r: 0.94, g: 0.96, b: 1.0 },  text: { r: 0.1, g: 0.15, b: 0.35 } },  // light blue
+  { header: { r: 1.0, g: 0.92, b: 0.82 },  band: { r: 1.0, g: 0.97, b: 0.93 },  text: { r: 0.4, g: 0.25, b: 0.1 } },   // light orange
+];
 
 async function getAccessToken(key: any): Promise<string> {
   const header = { alg: "RS256", typ: "JWT" };
@@ -73,58 +78,64 @@ async function clearSheet(token: string, id: string, range: string) {
   await fetchRetry(url, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
 }
 
-async function formatSheet(token: string, spreadId: string, sheetId: number, headerColor: {r:number,g:number,b:number}, colWidths: number[], frozenRows = 1) {
+async function formatSheet(token: string, spreadId: string, sheetId: number, colorIdx: number, colWidths: number[], frozenRows = 1) {
+  const color = TAB_COLORS[colorIdx % TAB_COLORS.length];
   const requests: any[] = [];
+  
   colWidths.forEach((px, i) => {
     requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "COLUMNS", startIndex: i, endIndex: i + 1 }, properties: { pixelSize: px }, fields: "pixelSize" } });
   });
-  // Header row: vibrant color, bold white text, center-aligned
+  
+  // Header row: light pastel color, dark text
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
       cell: { userEnteredFormat: {
-        backgroundColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
-        textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 }, fontSize: 11 },
+        backgroundColor: { red: color.header.r, green: color.header.g, blue: color.header.b },
+        textFormat: { bold: true, foregroundColor: { red: color.text.r, green: color.text.g, blue: color.text.b }, fontSize: 10, fontFamily: "Google Sans" },
         horizontalAlignment: "CENTER", verticalAlignment: "MIDDLE",
         wrapStrategy: "WRAP",
       } },
       fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy)"
     }
   });
-  // Header row height
+  
   requests.push({ updateDimensionProperties: { range: { sheetId, dimension: "ROWS", startIndex: 0, endIndex: 1 }, properties: { pixelSize: 36 }, fields: "pixelSize" } });
-  // Data rows: wrap text, vertical middle
+  
   requests.push({
     repeatCell: {
       range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
       cell: { userEnteredFormat: {
-        verticalAlignment: "MIDDLE",
-        wrapStrategy: "CLIP",
+        verticalAlignment: "MIDDLE", wrapStrategy: "CLIP",
         textFormat: { fontSize: 10 },
       } },
       fields: "userEnteredFormat(verticalAlignment,wrapStrategy,textFormat.fontSize)"
     }
   });
+  
   requests.push({ updateSheetProperties: { properties: { sheetId, gridProperties: { frozenRowCount: frozenRows } }, fields: "gridProperties.frozenRowCount" } });
-  // Alternate row banding with soft pastel
+  
+  // Alternate row banding with light pastel
   requests.push({
     addBanding: {
       bandedRange: { sheetId, range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
         rowProperties: {
-          headerColor: { red: headerColor.r, green: headerColor.g, blue: headerColor.b },
+          headerColor: { red: color.header.r, green: color.header.g, blue: color.header.b },
           firstBandColor: { red: 1, green: 1, blue: 1 },
-          secondBandColor: { red: 0.94, green: 0.96, blue: 0.99 }
+          secondBandColor: { red: color.band.r, green: color.band.g, blue: color.band.b }
         }
       }
     }
   });
-  // Borders on header
+  
+  // Bottom border on header
   requests.push({
     updateBorders: {
       range: { sheetId, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: colWidths.length },
-      bottom: { style: "SOLID_MEDIUM", color: { red: headerColor.r * 0.7, green: headerColor.g * 0.7, blue: headerColor.b * 0.7 } }
+      bottom: { style: "SOLID", color: { red: color.text.r, green: color.text.g, blue: color.text.b, alpha: 0.3 } }
     }
   });
+  
   try {
     await fetchRetry(`https://sheets.googleapis.com/v4/spreadsheets/${spreadId}:batchUpdate`, {
       method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -140,7 +151,7 @@ function getSupabase() {
 function fmtDate(d: string | null) { return d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"; }
 function fmtShort(d: string | null) { return d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"; }
 
-// ─── SYNC FUNCTIONS FOR EACH SHEET ───
+// ─── SYNC FUNCTIONS ───
 
 async function syncUsers(token: string, sheetId: string, tabs: any[], supabase: any) {
   const tabTitle = "Users";
@@ -159,7 +170,7 @@ async function syncUsers(token: string, sheetId: string, tabs: any[], supabase: 
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.18, g: 0.5, b: 0.88 }, [40, 280, 160, 220, 130, 130, 90, 80, 110, 110, 90, 240, 50, 70, 110, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, 2, [40, 280, 160, 220, 130, 130, 90, 80, 110, 110, 90, 240, 50, 70, 110, 170]); // blue
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -180,7 +191,7 @@ async function syncPaymentHistory(token: string, sheetId: string, tabs: any[], s
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.16, g: 0.62, b: 0.28 }, [40, 280, 130, 110, 120, 130, 200, 200, 130, 130, 90, 240, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, 1, [40, 280, 130, 110, 120, 130, 200, 200, 130, 130, 90, 240, 170]); // green
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -207,7 +218,7 @@ async function syncEvents(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.55, g: 0.24, b: 0.86 }, [40, 280, 150, 130, 200, 130, 110, 90, 90, 120, 110, 90, 90, 140, 240, 90, 60, 110, 110, 110, 110, 110, 90, 60, 60, 60, 240, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, 3, [40, 280, 150, 130, 200, 130, 110, 90, 90, 120, 110, 90, 90, 140, 240, 90, 60, 110, 110, 110, 110, 110, 90, 60, 60, 60, 240, 170]); // orange
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -231,7 +242,7 @@ async function syncOrders(token: string, sheetId: string, tabs: any[], supabase:
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.9, g: 0.45, b: 0.15 }, [40, 280, 160, 200, 130, 130, 90, 60, 100, 120, 200, 90, 110, 240, 110, 90, 90, 240, 170, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, 0, [40, 280, 160, 200, 130, 130, 90, 60, 100, 120, 200, 90, 110, 240, 110, 90, 90, 240, 170, 170]); // yellow
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -255,7 +266,7 @@ async function syncEnquiries(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.55, b: 0.08 }, [40, 110, 150, 130, 200, 130, 110, 130, 110, 120, 110, 90, 90, 90, 90, 90, 90, 90, 240, 110, 70, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, 3, [40, 110, 150, 130, 200, 130, 110, 130, 110, 120, 110, 90, 90, 90, 90, 90, 90, 90, 240, 110, 70, 170]); // orange
   return { sheet: tabTitle, rows: rows.length };
 }
 
@@ -267,7 +278,6 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
-  const monthAgo = new Date(now.getTime() - 30 * 86400000).toISOString();
 
   const [usersRes, ordersRes, eventsRes, enquiriesRes, actionsRes, downloadsRes, chatRes, paymentsRes, workshopRes] = await Promise.all([
     supabase.from("profiles").select("user_id, created_at", { count: "exact" }),
@@ -303,7 +313,6 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
 
   const topScreens = Object.entries(actions.reduce((acc: Record<string, number>, a: any) => { if (a.screen) acc[a.screen] = (acc[a.screen] || 0) + 1; return acc; }, {}))
     .sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 15);
-
   const topActions = Object.entries(actions.reduce((acc: Record<string, number>, a: any) => { acc[a.action_type] = (acc[a.action_type] || 0) + 1; return acc; }, {}))
     .sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 15);
 
@@ -330,7 +339,7 @@ async function syncAnalytics(token: string, sheetId: string, tabs: any[], supaba
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z100`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, dashboardData);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.22, g: 0.52, b: 0.72 }, [220, 160, 220, 160]);
+  await formatSheet(token, sheetId, tab.sheetId, 2, [220, 160, 220, 160]); // blue
   return { sheet: tabTitle, rows: dashboardData.length };
 }
 
@@ -344,15 +353,14 @@ async function syncWorkshopMarch(token: string, sheetId: string, tabs: any[], su
     .order("created_at", { ascending: true }).limit(500);
   
   if (!data?.length) {
-    // Try broader match
     const { data: allWs } = await supabase.from("workshop_users").select("*").order("created_at", { ascending: true }).limit(500);
     const march = (allWs || []).filter((w: any) => {
       const d = w.workshop_date || "";
       return d.includes("-03-14") || d.includes("-03-15");
     });
-    return syncWorkshopData(token, sheetId, tab, tabTitle, march);
+    return syncWorkshopData(token, sheetId, tab, tabTitle, march, 0);
   }
-  return syncWorkshopData(token, sheetId, tab, tabTitle, data);
+  return syncWorkshopData(token, sheetId, tab, tabTitle, data, 0);
 }
 
 async function syncWorkshopJune(token: string, sheetId: string, tabs: any[], supabase: any) {
@@ -360,16 +368,15 @@ async function syncWorkshopJune(token: string, sheetId: string, tabs: any[], sup
   let tab = tabs.find((t: any) => t.title === tabTitle);
   if (!tab) { const id = await createTab(token, sheetId, tabTitle); tab = { title: tabTitle, sheetId: id }; }
 
-  // Get all workshop users that are NOT March workshops
   const { data } = await supabase.from("workshop_users").select("*").order("created_at", { ascending: true }).limit(500);
   const juneUsers = (data || []).filter((w: any) => {
     const d = w.workshop_date || "";
     return !d.includes("-03-14") && !d.includes("-03-15");
   });
-  return syncWorkshopData(token, sheetId, tab, tabTitle, juneUsers);
+  return syncWorkshopData(token, sheetId, tab, tabTitle, juneUsers, 1);
 }
 
-async function syncWorkshopData(token: string, sheetId: string, tab: any, tabTitle: string, data: any[]) {
+async function syncWorkshopData(token: string, sheetId: string, tab: any, tabTitle: string, data: any[], colorIdx: number) {
   if (!data?.length) return { sheet: tabTitle, rows: 0 };
 
   const headers = ["#", "Roll No", "Name", "Email", "Mobile", "Age", "Gender", "City", "State", "District", "Country",
@@ -386,12 +393,11 @@ async function syncWorkshopData(token: string, sheetId: string, tab: any, tabTit
 
   await clearSheet(token, sheetId, `'${tabTitle}'!A1:Z5000`);
   await updateSheet(token, sheetId, `'${tabTitle}'!A1`, [headers, ...rows]);
-  await formatSheet(token, sheetId, tab.sheetId, { r: 0.88, g: 0.25, b: 0.45 }, [40, 70, 150, 200, 130, 50, 70, 110, 90, 90, 90, 130, 110, 100, 140, 100, 90, 110, 100, 100, 200, 240, 80, 70, 170]);
+  await formatSheet(token, sheetId, tab.sheetId, colorIdx, [40, 70, 150, 200, 130, 50, 70, 110, 90, 90, 90, 130, 110, 100, 140, 100, 90, 110, 100, 100, 200, 240, 80, 70, 170]);
   return { sheet: tabTitle, rows: rows.length };
 }
 
-// ─── Single-table update (for triggers) ───
-
+// ─── Single-table update ───
 async function syncSingleTable(token: string, sheetId: string, tabs: any[], supabase: any, table: string) {
   switch (table) {
     case "profiles": return syncUsers(token, sheetId, tabs, supabase);
@@ -426,7 +432,6 @@ serve(async (req) => {
     const { action, table } = body;
 
     if (action === "sync_all") {
-      // Refresh tabs list after creating new ones
       const results = [];
       results.push(await syncUsers(token, sheetId, tabs, supabase));
       tabs = await getSheetTabs(token, sheetId);
@@ -467,7 +472,6 @@ serve(async (req) => {
     }
 
     if (action === "update_design") {
-      // Re-sync all sheets which re-applies vibrant formatting
       const results = [];
       results.push(await syncUsers(token, sheetId, tabs, supabase));
       tabs = await getSheetTabs(token, sheetId);
@@ -484,7 +488,7 @@ serve(async (req) => {
       results.push(await syncWorkshopMarch(token, sheetId, tabs, supabase));
       tabs = await getSheetTabs(token, sheetId);
       results.push(await syncWorkshopJune(token, sheetId, tabs, supabase));
-      return ok({ success: true, message: "Design updated with vibrant colors", results });
+      return ok({ success: true, message: "Design updated with light pastel colors", results });
     }
 
     return err("Invalid action. Use: sync_all, update_design, sync_table, sync_users, sync_payments, sync_events, sync_orders, sync_enquiries, sync_analytics, sync_workshop");
