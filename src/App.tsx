@@ -78,10 +78,15 @@ const Explore = lazy(() => import("./pages/Explore"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2,
-      gcTime: 1000 * 60 * 10,
+      staleTime: 1000 * 60 * 5,   // 5 min stale — reduces refetches
+      gcTime: 1000 * 60 * 15,     // 15 min GC — keeps cache longer
       refetchOnWindowFocus: false,
+      refetchOnReconnect: "always",
       retry: 1,
+      networkMode: "offlineFirst",  // serve cache first, then revalidate
+    },
+    mutations: {
+      networkMode: "offlineFirst",
     },
   },
 });
