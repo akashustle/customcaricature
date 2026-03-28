@@ -1,10 +1,10 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { gtagPageView } from "@/lib/gtag";
 
 /**
- * Tracks page views with device/browser info for web analytics.
- * Works for both logged-in and anonymous users.
+ * Tracks page views with device/browser info for web analytics + GA4.
  */
 const usePageTracker = () => {
   const location = useLocation();
@@ -59,15 +59,7 @@ const usePageTracker = () => {
     };
 
     trackPageView();
-
-    // Send page view to GA4
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("config", "G-VVZX2RDMW3", {
-        page_path: location.pathname,
-        page_title: document.title,
-        page_location: window.location.href,
-      });
-    }
+    gtagPageView(location.pathname);
   }, [location.pathname]);
 };
 

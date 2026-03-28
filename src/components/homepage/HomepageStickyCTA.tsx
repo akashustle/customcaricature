@@ -32,6 +32,7 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
     >
       <Button
         onClick={() => {
+          gtagCtaClick(config.text || "Get Quote", "homepage_sticky");
           const link = config.link || "/enquiry";
           const internalTarget = normalizeInternalNavigationTarget(link);
           if (internalTarget) navigate(internalTarget);

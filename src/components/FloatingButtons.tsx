@@ -70,6 +70,7 @@ const FloatingButtons = () => {
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => gtagWhatsAppClick(location.pathname)}
           className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition-opacity shadow-lg"
           aria-label="WhatsApp Support"
         >

@@ -59,6 +59,7 @@ const BlogPost = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
+    gtagShareClick("blog", post?.slug || "");
     if (navigator.share) {
       await navigator.share({ title: post?.title, url });
     } else {
