@@ -215,7 +215,7 @@ const Index = () => {
       <nav className="sticky top-0 z-40 glass-nav">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" width={36} height={36} />
             <span className="font-calligraphy text-xl font-bold hidden sm:inline text-foreground">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
