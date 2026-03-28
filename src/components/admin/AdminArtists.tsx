@@ -542,6 +542,15 @@ const AdminArtists = () => {
           })}
         </div>
       )}
+      {/* Artist Chat Dialog */}
+      {chatArtist && (
+        <AdminArtistChatDialog
+          artistUserId={chatArtist.userId}
+          artistName={chatArtist.name}
+          open={!!chatArtist}
+          onClose={() => setChatArtist(null)}
+        />
+      )}
     </div>
   );
 };
