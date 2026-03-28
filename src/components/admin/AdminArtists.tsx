@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp, MessageCircle, Send, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp, MessageCircle, Send, Loader2, KeyRound, Copy, RefreshCw } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -110,7 +110,7 @@ const AdminArtistChatDialog = ({ artistUserId, artistName, open, onClose }: {
 };
 
 type ArtistDocument = { id: string; artist_id: string; document_type: string; file_name: string; storage_path: string; created_at: string; };
-type Artist = { id: string; name: string; experience: string | null; portfolio_url: string | null; email: string | null; mobile: string | null; auth_user_id: string | null; created_at: string; };
+type Artist = { id: string; name: string; experience: string | null; portfolio_url: string | null; email: string | null; mobile: string | null; auth_user_id: string | null; created_at: string; secret_code: string | null; };
 type ArtistEvent = { id: string; client_name: string; event_type: string; event_date: string; city: string; status: string; payment_status: string; total_price: number; artist_count: number; };
 type ArtistLog = { id: string; artist_id: string; artist_name: string; action_type: string; description: string | null; metadata: any; created_at: string; };
 
@@ -414,6 +414,31 @@ const AdminArtists = () => {
                           <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground font-sans flex-wrap">
                             {artist.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{artist.email}</span>}
                             {artist.mobile && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{artist.mobile}</span>}
+                          </div>
+                          {/* Secret Code */}
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className="flex items-center gap-1 text-xs font-sans text-muted-foreground">
+                              <KeyRound className="w-3 h-3" />
+                              Secret Code:
+                            </span>
+                            <code className="bg-muted/60 px-2 py-0.5 rounded text-xs font-mono font-bold tracking-widest text-foreground">
+                              {artist.secret_code || "—"}
+                            </code>
+                            {artist.secret_code && (
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" title="Copy code"
+                                onClick={() => { navigator.clipboard.writeText(artist.secret_code!); toast({ title: "Secret code copied!" }); }}>
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" className="h-5 w-5 p-0" title="Regenerate code"
+                              onClick={async () => {
+                                const newCode = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+                                await supabase.from("artists").update({ secret_code: newCode } as any).eq("id", artist.id);
+                                toast({ title: "Secret code regenerated", description: `New code: ${newCode}` });
+                                fetchArtists();
+                              }}>
+                              <RefreshCw className="w-3 h-3" />
+                            </Button>
                           </div>
                           {artist.experience && <p className="text-xs text-muted-foreground font-sans mt-1">{artist.experience}</p>}
 
