@@ -50,10 +50,20 @@ serve(async (req) => {
 
     const neededCount = (artist_count || event.artist_count || 1) - (existingAssignments?.length || 0);
 
-    // Get all artists
+    // Get eligible artists (from auto_assign_eligible_artists table, or all if none set)
+    const { data: eligibleRows } = await supabase.from("auto_assign_eligible_artists").select("artist_id");
     const { data: allArtists } = await supabase.from("artists").select("id, name, auth_user_id");
     if (!allArtists || allArtists.length === 0) {
       return new Response(JSON.stringify({ error: "No artists available" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Filter to eligible only (if table has entries)
+    const eligibleIds = eligibleRows && eligibleRows.length > 0 ? new Set(eligibleRows.map((r: any) => r.artist_id)) : null;
+    const candidateArtists = eligibleIds ? allArtists.filter((a: any) => eligibleIds.has(a.id)) : allArtists;
+    if (candidateArtists.length === 0) {
+      return new Response(JSON.stringify({ error: "No eligible artists for auto-assign" }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
