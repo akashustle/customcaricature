@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -411,6 +412,7 @@ const ShopAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background admin-panel-font">
+      <SEOHead title="Shop Admin" noindex />
       <div className="admin-header-premium px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[hsl(22,78%,52%)] to-[hsl(28,14%,16%)] flex items-center justify-center shadow-sm">

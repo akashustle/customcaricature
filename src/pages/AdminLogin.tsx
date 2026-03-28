@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -296,6 +297,7 @@ const AdminLogin = () => {
 
   return (
     <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      <SEOHead title="Admin Login" noindex />
 
       {/* Soft floating brand-colored shapes */}
       <div className="absolute inset-0 overflow-hidden">

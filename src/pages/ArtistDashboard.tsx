@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -485,6 +486,7 @@ const ArtistDashboard = () => {
 
   return (
     <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
+      <SEOHead title="Artist Dashboard" noindex />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

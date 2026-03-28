@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,6 +92,7 @@ const ArtistLogin = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-secondary via-background to-muted">
+      <SEOHead title="Artist Login" noindex />
       <motion.div className="absolute top-20 left-10 w-72 h-72 rounded-full opacity-20 bg-accent/15 blur-3xl"
         animate={{ scale: [1, 1.3, 1], x: [0, 30, 0] }} transition={{ duration: 8, repeat: Infinity }} />
       <motion.div className="absolute bottom-20 right-10 w-80 h-80 rounded-full opacity-15 bg-primary/15 blur-3xl"

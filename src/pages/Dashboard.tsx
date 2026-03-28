@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -257,6 +258,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
       <header className="sticky top-0 z-40 app-header border-b border-border/30">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

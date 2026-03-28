@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -946,6 +947,7 @@ const WorkshopAdmin = () => {
 
   return (
     <div className={`min-h-screen flex ${bg} transition-colors duration-300 admin-panel-font`}>
+      <SEOHead title="Workshop Admin" noindex />
       {/* Sidebar - Desktop — Premium SaaS */}
       <div className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin transition-all duration-300 ${collapsed ? "w-[68px]" : "w-[250px]"} ${dm ? "bg-[#0e0e18] border-white/[0.06]" : "bg-white border-slate-200/60"} border-r`}>
         <div className={`flex items-center justify-between px-4 py-5 border-b ${dm ? "border-white/[0.06]" : "border-slate-100"}`}>
