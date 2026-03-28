@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { gtagWhatsAppClick } from "@/lib/gtag";
 
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://instagram.com/creativecaricatureclub";
@@ -68,6 +69,7 @@ const FloatingButtons = () => {
           href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => gtagWhatsAppClick(location.pathname)}
           className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition-opacity shadow-lg"
           aria-label="WhatsApp Support"
         >

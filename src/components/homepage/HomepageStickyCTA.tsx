@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
+import { gtagCtaClick } from "@/lib/gtag";
 
 const HomepageStickyCTA = ({ config }: { config: any }) => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
     >
       <Button
         onClick={() => {
+          gtagCtaClick(config.text || "Get Quote", "homepage_sticky");
           const link = config.link || "/enquiry";
           const internalTarget = normalizeInternalNavigationTarget(link);
           if (internalTarget) navigate(internalTarget);

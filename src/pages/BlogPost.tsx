@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import { toast } from "@/hooks/use-toast";
+import { gtagBlogView, gtagShareClick } from "@/lib/gtag";
 
 type BlogPostType = {
   id: string;
@@ -49,12 +50,16 @@ const BlogPost = () => {
       .eq("slug", slug)
       .eq("is_published", true)
       .maybeSingle();
-    if (data) setPost(data as any);
+    if (data) {
+      setPost(data as any);
+      gtagBlogView(slug || "");
+    }
     setLoading(false);
   };
 
   const handleShare = async () => {
     const url = window.location.href;
+    gtagShareClick("blog", post?.slug || "");
     if (navigator.share) {
       await navigator.share({ title: post?.title, url });
     } else {
