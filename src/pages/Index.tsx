@@ -273,9 +273,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
             {/* Mobile: Compact logo + branding */}
             <div className="flex flex-col items-center lg:hidden w-full">
-              <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4" width={64} height={64} />
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-full px-3 py-1 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
