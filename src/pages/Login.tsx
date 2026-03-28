@@ -139,7 +139,7 @@ const Login = () => {
           .eq("email", `${identifier}@phone.user`) as any;
         if (phoneProfiles?.length) {
           const combined = [...(profiles || []), ...phoneProfiles];
-          const uniqueIds = [...new Set(combined.map((p: any) => p.user_id))];
+          const uniqueIds = Array.from(new Set(combined.map((p: any) => p.user_id)));
           for (const uid of uniqueIds) {
             const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid) as any;
             if (roles?.some((r: any) => r.role === "admin")) { isAdmin = true; break; }
