@@ -3,6 +3,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { gtagWhatsAppClick } from "@/lib/gtag";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const WHATSAPP_NUMBER = "918369594271";
 const INSTAGRAM_URL = "https://instagram.com/creativecaricatureclub";
