@@ -4,7 +4,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [show, setShow] = useState(true);
 
   // Don't show on admin routes or if already visited
-  const isAdminRoute = typeof window !== "undefined" && ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel"].some(r => window.location.pathname.startsWith(r));
+  const isAdminRoute = typeof window !== "undefined" && ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel", "/lil-flea"].some(r => window.location.pathname.startsWith(r));
   const alreadyVisited = typeof sessionStorage !== "undefined" && sessionStorage.getItem("ccc_splash_shown");
 
   useEffect(() => {
