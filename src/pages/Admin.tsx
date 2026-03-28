@@ -213,6 +213,54 @@ const STATUS_LABELS: Record<string, string> = {
 const PAYMENT_STATUS_LABELS: Record<string, string> = { pending: "Pending", confirmed: "Confirmed" };
 const PAYMENT_COLORS: Record<string, string> = { pending: "bg-orange-50 text-orange-700 border border-orange-200", confirmed: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
 
+// Auto-assign artist selector sub-component
+const AutoAssignArtistSelector = ({ settings, updateSetting }: { settings: any; updateSetting: (id: string, value: any) => Promise<void> }) => {
+  const [artists, setArtists] = useState<{ id: string; name: string }[]>([]);
+  const [eligible, setEligible] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const [{ data: a }, { data: e }] = await Promise.all([
+        supabase.from("artists").select("id, name").order("name"),
+        supabase.from("auto_assign_eligible_artists" as any).select("artist_id"),
+      ]);
+      if (a) setArtists(a as any);
+      if (e && (e as any[]).length > 0) setEligible((e as any[]).map((x: any) => x.artist_id));
+      else if (a) setEligible((a as any[]).map((x: any) => x.id));
+      setLoaded(true);
+    };
+    load();
+  }, []);
+
+  const toggleArtist = async (artistId: string) => {
+    const isSelected = eligible.includes(artistId);
+    if (isSelected) {
+      await supabase.from("auto_assign_eligible_artists" as any).delete().eq("artist_id", artistId);
+      setEligible(prev => prev.filter(id => id !== artistId));
+    } else {
+      await supabase.from("auto_assign_eligible_artists" as any).insert({ artist_id: artistId } as any);
+      setEligible(prev => [...prev, artistId]);
+    }
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div className="ml-4 mt-2 space-y-2 bg-muted/30 rounded-lg p-3">
+      <p className="text-xs font-sans font-medium text-muted-foreground">Select eligible artists for auto-assignment:</p>
+      <div className="space-y-1">
+        {artists.map(a => (
+          <label key={a.id} className="flex items-center gap-2 text-sm font-sans cursor-pointer py-1 px-2 rounded hover:bg-muted/50">
+            <input type="checkbox" checked={eligible.includes(a.id)} onChange={() => toggleArtist(a.id)} className="rounded" />
+            {a.name}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
