@@ -78,13 +78,13 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
       className="fixed inset-0 z-[100] bg-foreground/80 flex items-center justify-center"
       onClick={onClose}
     >
-      <button onClick={onClose} className="absolute top-4 right-4 text-background/80 hover:text-background z-10">
+      <button onClick={onClose} className="absolute top-4 right-4 text-background/80 hover:text-background z-10" aria-label="Close lightbox">
         <X className="w-8 h-8" />
       </button>
-      <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 text-background/80 hover:text-background z-10">
+      <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 text-background/80 hover:text-background z-10" aria-label="Previous image">
         <ChevronLeft className="w-10 h-10" />
       </button>
-      <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 text-background/80 hover:text-background z-10">
+      <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 text-background/80 hover:text-background z-10" aria-label="Next image">
         <ChevronRight className="w-10 h-10" />
       </button>
       <motion.img
