@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone, Loader2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone, Loader2, ArrowLeft, ArrowRight, Shield, Palette } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Login = () => {
@@ -22,7 +23,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [loginWith, setLoginWith] = useState<"email" | "phone">("email");
-  const [step, setStep] = useState(1); // 1: identity, 2: method, 3: credential
+  const [step, setStep] = useState(1);
+  const [detecting, setDetecting] = useState(false);
+  const [roleChoiceOpen, setRoleChoiceOpen] = useState(false);
+  const [detectedRoles, setDetectedRoles] = useState<string[]>([]);
 
   const withTimeout = async (promise: Promise<any>, ms = 10000) => {
     return await Promise.race([
@@ -113,7 +117,62 @@ const Login = () => {
   };
 
   const [direction, setDirection] = useState(1);
-  const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
+
+  const detectRole = async () => {
+    setDetecting(true);
+    try {
+      const identifier = loginWith === "email" ? email.trim().toLowerCase() : phone.replace(/\D/g, "");
+      if (!identifier || identifier.length < 4) { setDetecting(false); goNextDirect(); return; }
+
+      const emailToCheck = loginWith === "email" ? identifier : `${identifier}@phone.user`;
+
+      // Check admin: profile → user_roles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", emailToCheck)
+        .maybeSingle();
+
+      let isAdmin = false;
+      if (profile?.user_id) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", profile.user_id) as any;
+        isAdmin = roles?.some((r: any) => r.role === "admin");
+      }
+
+      // Check artist
+      const artistQuery = loginWith === "email"
+        ? supabase.from("artists").select("id").eq("email", identifier).maybeSingle()
+        : supabase.from("artists").select("id").eq("mobile", identifier).maybeSingle();
+      const { data: artist } = await (artistQuery as any);
+      const isArtist = !!artist;
+
+      if (isAdmin && isArtist) {
+        setDetectedRoles(["admin", "artist"]);
+        setRoleChoiceOpen(true);
+      } else if (isAdmin) {
+        toast({ title: "Admin account detected", description: "Redirecting to admin login..." });
+        navigate("/customcad75", { replace: true });
+      } else if (isArtist) {
+        toast({ title: "Artist account detected", description: "Redirecting to artist login..." });
+        navigate("/artistlogin", { replace: true });
+      } else {
+        goNextDirect();
+      }
+    } catch {
+      goNextDirect();
+    } finally {
+      setDetecting(false);
+    }
+  };
+
+  const goNextDirect = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
+  const goNext = () => {
+    if (step === 1) { detectRole(); return; }
+    goNextDirect();
+  };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 1)); };
 
   return (
@@ -175,10 +234,45 @@ const Login = () => {
                     </div>
                   )}
                   <Button onClick={goNext} disabled={!canProceedStep1} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
-                    Continue <ArrowRight className="w-4 h-4" />
+                    Continue {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                   </Button>
                 </motion.div>
               )}
+              {/* Role choice dialog */}
+              <Dialog open={roleChoiceOpen} onOpenChange={setRoleChoiceOpen}>
+                <DialogContent className="max-w-xs rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-center">Multiple accounts found</DialogTitle>
+                    <DialogDescription className="text-center text-sm">
+                      This {loginWith === "email" ? "email" : "phone"} is linked to both admin and artist accounts. Where do you want to go?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 pt-2">
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setRoleChoiceOpen(false); navigate("/customcad75", { replace: true }); }}
+                      className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/60 text-left flex items-center gap-3 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-sans font-semibold text-sm">Admin Login</p>
+                        <p className="text-xs text-muted-foreground">Go to admin panel</p>
+                      </div>
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setRoleChoiceOpen(false); navigate("/artistlogin", { replace: true }); }}
+                      className="w-full p-4 rounded-xl border-2 border-border hover:border-accent/60 text-left flex items-center gap-3 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                        <Palette className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-sans font-semibold text-sm">Artist Login</p>
+                        <p className="text-xs text-muted-foreground">Go to artist dashboard</p>
+                      </div>
+                    </motion.button>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {step === 2 && (
                 <motion.div key="step2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
