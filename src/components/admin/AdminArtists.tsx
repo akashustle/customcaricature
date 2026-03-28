@@ -447,6 +447,11 @@ const AdminArtists = () => {
                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteArtist(artist.id)}>Delete</AlertDialogAction></AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
+                          {artist.auth_user_id && (
+                            <Button variant="ghost" size="sm" onClick={() => setChatArtist({ userId: artist.auth_user_id!, name: artist.name })}>
+                              <MessageCircle className="w-4 h-4 text-primary" />
+                            </Button>
+                          )}
                         </div>
                       </div>
 
