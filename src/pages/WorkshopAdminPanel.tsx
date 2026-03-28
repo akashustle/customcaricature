@@ -658,7 +658,7 @@ const WorkshopAdmin = () => {
 
   const RefreshButton = () => (
     <Button variant="outline" size="sm" onClick={fetchAll} disabled={refreshing}
-      className={`rounded-xl ${dm ? "border-white/[0.08] text-white/50 hover:bg-white/[0.04]" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}>
+      className="rounded-xl border-border text-muted-foreground hover:bg-muted">
       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${refreshing ? "animate-spin" : ""}`} />
       Refresh
     </Button>
