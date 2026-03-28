@@ -771,10 +771,20 @@ const ArtistDashboard = () => {
           </Card>
         )}
 
+        {/* Earnings Tab */}
+        {activeTab === "earnings" && artist && (
+          <div>
+            <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-primary" /> My Earnings
+            </h2>
+            <ArtistEarnings artistId={artist.id} />
+          </div>
+        )}
+
         {/* Chat Tab (mobile) */}
         {activeTab === "chat" && user && artist && (
-          <div className="bg-card rounded-xl border border-border p-1 min-h-[60vh]">
-            <ChatWidget userId={user.id} userName={artist.name} isArtistChat />
+          <div className="min-h-[60vh] rounded-xl overflow-hidden border border-border">
+            <ArtistChatPanel userId={user.id} userName={artist.name} />
           </div>
         )}
       </div>
@@ -786,6 +796,7 @@ const ArtistDashboard = () => {
             {[
               { id: "events", icon: CalendarDays },
               ...(isRitesh ? [{ id: "orders", icon: Package }] : []),
+              { id: "earnings", icon: Wallet },
               { id: "blocked", icon: CalendarOff },
               { id: "chat", icon: MessageCircle },
               { id: "notifications", icon: Bell, path: "/notifications" },
@@ -813,9 +824,13 @@ const ArtistDashboard = () => {
         </div>
       </nav>
 
-      {/* Chat Widget - desktop floating */}
+      {/* Chat Panel - desktop half-screen */}
       <div className="hidden md:block">
-        {user && artist && <ChatWidget userId={user.id} userName={artist.name} isArtistChat />}
+        {user && artist && activeTab === "chat" && (
+          <div className="fixed right-0 top-0 bottom-0 w-[50vw] z-50 shadow-2xl">
+            <ArtistChatPanel userId={user.id} userName={artist.name} isDesktop onClose={() => setActiveTab("events")} />
+          </div>
+        )}
       </div>
 
       {/* Payment Collection Dialog */}
