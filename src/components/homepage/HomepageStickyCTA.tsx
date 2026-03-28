@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
+import { gtagCtaClick } from "@/lib/gtag";
 
 const HomepageStickyCTA = ({ config }: { config: any }) => {
   const navigate = useNavigate();
