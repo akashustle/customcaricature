@@ -39,7 +39,8 @@ const defaults: SiteSettings = {
   app_download_link: { enabled: false },
   admin_secret_code: { code: "01022006", enabled: true },
   live_chat_visible: { enabled: false },
-  auto_assign_artist: { enabled: false },
+  auto_assign_artist: { enabled: false, selected_artists: "all" },
+  artist_payment_system: { enabled: false },
 };
 
 // Module-level cache so all instances share one fetch result
