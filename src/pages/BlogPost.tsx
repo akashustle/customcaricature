@@ -50,7 +50,10 @@ const BlogPost = () => {
       .eq("slug", slug)
       .eq("is_published", true)
       .maybeSingle();
-    if (data) setPost(data as any);
+    if (data) {
+      setPost(data as any);
+      gtagBlogView(slug || "");
+    }
     setLoading(false);
   };
 
