@@ -183,10 +183,10 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
           ) : transactions.map(tx => (
             <div key={tx.id} className="bg-muted/30 rounded-lg p-3 text-xs font-sans flex justify-between items-center">
               <div className="flex items-center gap-2">
-                {tx.transaction_type === "credit" ? (
-                  <ArrowUpCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                ) : (
+                {tx.transaction_type === "earning" ? (
                   <ArrowDownCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                ) : (
+                  <ArrowUpCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                 )}
                 <div>
                   <p className="font-semibold">{tx.description || tx.transaction_type}</p>
@@ -194,8 +194,8 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`font-bold ${tx.transaction_type === "credit" ? "text-green-600" : "text-primary"}`}>
-                  {tx.transaction_type === "credit" ? "-" : "+"}₹{tx.amount.toLocaleString("en-IN")}
+                <span className={`font-bold ${tx.transaction_type === "earning" ? "text-primary" : "text-green-600"}`}>
+                  {tx.transaction_type === "earning" ? "+" : "-"}₹{tx.amount.toLocaleString("en-IN")}
                 </span>
                 {tx.screenshot_path && (
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => getScreenshotUrl(tx.screenshot_path!)}>

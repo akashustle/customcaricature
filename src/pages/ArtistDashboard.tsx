@@ -628,7 +628,7 @@ const ArtistDashboard = () => {
                                       <div><span className="text-muted-foreground">Mobile:</span> <a href={`tel:${ev.client_mobile}`} className="text-primary underline">{ev.client_mobile}</a></div>
                                       <div><span className="text-muted-foreground">Email:</span> <a href={`mailto:${ev.client_email}`} className="text-primary underline">{ev.client_email}</a></div>
                                       {ev.client_instagram && <div><span className="text-muted-foreground">Instagram:</span> {ev.client_instagram}</div>}
-                                      <div><span className="text-muted-foreground">Artists:</span> {ev.artist_count}</div>
+                                      <div><span className="text-muted-foreground">Artists:</span> {ev.artist_count}{ev.artist_count > 1 ? " (multi-artist event)" : ""}</div>
                                       <div><span className="text-muted-foreground">Country:</span> {ev.country}</div>
                                     </div>
                                     <div className="border-t border-border pt-2">
