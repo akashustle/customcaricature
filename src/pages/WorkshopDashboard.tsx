@@ -252,11 +252,11 @@ const WorkshopDashboard = () => {
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className={`${dm ? "bg-white/[0.04] border-white/[0.06]" : "bg-white border-slate-200/60"} border rounded-2xl p-1.5 flex gap-1`}>
+        <div className={`bg-card border-border border rounded-2xl p-1.5 flex gap-1`}>
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-slate-50 dark:hover:bg-white/[0.04]`}`}>
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-muted`}`}>
               <tab.icon className="w-4 h-4" />{tab.label}
             </button>
           ))}
