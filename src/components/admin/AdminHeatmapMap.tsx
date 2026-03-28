@@ -73,12 +73,43 @@ interface Props {
 }
 
 const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins }: Props) => {
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Small delay to ensure container is measured before Leaflet initializes
+    const t = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted/30 text-sm text-muted-foreground">
+        Map failed to load. <button className="ml-2 underline" onClick={() => { setError(null); setReady(false); requestAnimationFrame(() => setReady(true)); }}>Retry</button>
+      </div>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted/30">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <MapContainer
       center={[20.5937, 78.9629]}
       zoom={5}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", minHeight: "500px", background: "#e5e7eb" }}
       scrollWheelZoom={true}
+      whenReady={() => {
+        // Force tile layer refresh after mount
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 200);
+      }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
