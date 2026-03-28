@@ -103,6 +103,24 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Programmatic SEO landing pages
+    const { data: seoPages } = await sb
+      .from("seo_landing_pages")
+      .select("slug, updated_at")
+      .eq("is_active", true);
+
+    if (seoPages) {
+      for (const page of seoPages) {
+        const lastmod = (page.updated_at || now).split("T")[0];
+        xml += `  <url>\n`;
+        xml += `    <loc>${BASE_URL}/${page.slug}</loc>\n`;
+        xml += `    <lastmod>${lastmod}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.8</priority>\n`;
+        xml += `  </url>\n`;
+      }
+    }
+
     xml += `</urlset>`;
 
     return new Response(xml, {
