@@ -157,10 +157,10 @@ const AdminArtistPayouts = () => {
   };
 
   const getArtistBalance = (artistId: string) => {
-    const earnings = eventPayouts.filter(p => p.artist_id === artistId && p.status === "credited").reduce((s, p) => s + p.calculated_amount, 0);
+    const totalEarnings = eventPayouts.filter(p => p.artist_id === artistId).reduce((s, p) => s + p.calculated_amount, 0);
     const pendingEarnings = eventPayouts.filter(p => p.artist_id === artistId && p.status === "pending").reduce((s, p) => s + p.calculated_amount, 0);
     const credited = transactions.filter(t => t.artist_id === artistId && t.transaction_type === "credit").reduce((s, t) => s + t.amount, 0);
-    return { earnings, pendingEarnings, credited, balance: earnings - credited + pendingEarnings };
+    return { earnings: totalEarnings, pendingEarnings, credited, balance: totalEarnings - credited };
   };
 
   const getScreenshotUrl = async (path: string) => {
