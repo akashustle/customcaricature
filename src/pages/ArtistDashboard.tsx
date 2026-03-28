@@ -12,7 +12,7 @@ import {
   LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2,
   CalendarOff, Trash2, Package, Palette, MessageCircle, X, Bell, Clock,
   IndianRupee, CheckCircle2, Camera, CreditCard, Banknote, Upload, Phone, Mail,
-  ChevronDown, ChevronUp, User
+  ChevronDown, ChevronUp, User, Wallet
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
@@ -26,6 +26,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 import ArtworkUploadFlow from "@/components/admin/ArtworkUploadFlow";
 import ChatWidget from "@/components/ChatWidget";
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
+import ArtistEarnings from "@/components/artist/ArtistEarnings";
+import ArtistChatPanel from "@/components/artist/ArtistChatPanel";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
