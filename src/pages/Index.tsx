@@ -367,7 +367,7 @@ const Index = () => {
                 {/* Bottom right top */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
                   onClick={() => openLightbox(2)}>
-                  <img src={galleryImages[2]} alt="Event caricature artist" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                  <img src={galleryImages[2]} alt="Event caricature artist" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" width={240} height={261} loading="lazy" decoding="async" />
                 </motion.div>
                 {/* Bottom left */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-4 row-span-2 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
