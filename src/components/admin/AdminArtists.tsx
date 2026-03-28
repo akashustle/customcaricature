@@ -415,6 +415,31 @@ const AdminArtists = () => {
                             {artist.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{artist.email}</span>}
                             {artist.mobile && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{artist.mobile}</span>}
                           </div>
+                          {/* Secret Code */}
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className="flex items-center gap-1 text-xs font-sans text-muted-foreground">
+                              <KeyRound className="w-3 h-3" />
+                              Secret Code:
+                            </span>
+                            <code className="bg-muted/60 px-2 py-0.5 rounded text-xs font-mono font-bold tracking-widest text-foreground">
+                              {artist.secret_code || "—"}
+                            </code>
+                            {artist.secret_code && (
+                              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" title="Copy code"
+                                onClick={() => { navigator.clipboard.writeText(artist.secret_code!); toast({ title: "Secret code copied!" }); }}>
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" className="h-5 w-5 p-0" title="Regenerate code"
+                              onClick={async () => {
+                                const newCode = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+                                await supabase.from("artists").update({ secret_code: newCode } as any).eq("id", artist.id);
+                                toast({ title: "Secret code regenerated", description: `New code: ${newCode}` });
+                                fetchArtists();
+                              }}>
+                              <RefreshCw className="w-3 h-3" />
+                            </Button>
+                          </div>
                           {artist.experience && <p className="text-xs text-muted-foreground font-sans mt-1">{artist.experience}</p>}
 
                           {/* Quick stats */}
