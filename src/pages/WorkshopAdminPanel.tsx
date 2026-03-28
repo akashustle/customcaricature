@@ -140,7 +140,7 @@ const WorkshopAdmin = () => {
   const [newSession, setNewSession] = useState({ title: "", session_date: "2026-03-14", slot: "6pm-9pm", artist_name: "", artist_portfolio_link: "", requirements: "", what_students_learn: "", meet_link: "" });
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "", permissions: [] as string[] });
 
-  useEffect(() => { localStorage.setItem("ws_dark", darkMode.toString()); }, [darkMode]);
+  // Dark mode is now managed by next-themes globally
 
   useEffect(() => {
     let mounted = true;
