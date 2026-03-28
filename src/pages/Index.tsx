@@ -119,7 +119,7 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
             transition={{ duration: 0.3 }}
             onClick={() => onImageClick(i % images.length)}
           >
-            <img src={img} alt={`Caricature ${(i % images.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
+            <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" />
           </motion.div>
         ))}
       </motion.div>
