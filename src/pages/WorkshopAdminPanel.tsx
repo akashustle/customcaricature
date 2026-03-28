@@ -884,24 +884,24 @@ const WorkshopAdmin = () => {
     return (
       <>
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-          <div className={`backdrop-blur-xl ${isDark ? "bg-[#0e0e18]/95 border-white/[0.04]" : "bg-white/95 border-slate-200/20"} border-t`}>
+          <div className="backdrop-blur-xl bg-card/95 border-border border-t">
             <div className="flex items-center justify-evenly h-[56px] px-1">
               {WS_PRIMARY.map((item: any) => {
                 const isActive = activeTab === item.key;
                 return (
                   <motion.button key={item.key} onClick={() => onTabChange(item.key)} whileTap={{ scale: 0.75 }}
                     className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                    <item.icon className={`transition-all duration-200 ${isActive ? (isDark ? "text-white" : "text-slate-900") : isDark ? "text-white/25" : "text-slate-400/60"}`}
+                    <item.icon className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/60"}`}
                       size={isActive ? 26 : 22} strokeWidth={isActive ? 2.2 : 1.4}
                       fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"} />
-                    {isActive && <motion.div layoutId="ws-admin-dot" className={`absolute bottom-1.5 w-1 h-1 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} transition={{ type: "spring", stiffness: 500, damping: 30 }} />}
+                    {isActive && <motion.div layoutId="ws-admin-dot" className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" transition={{ type: "spring", stiffness: 500, damping: 30 }} />}
                   </motion.button>
                 );
               })}
               <motion.button onClick={() => setShowMore(true)} whileTap={{ scale: 0.75 }} className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                <MoreHorizontal className={`transition-all duration-200 ${isMoreActive || showMore ? (isDark ? "text-white" : "text-slate-900") : isDark ? "text-white/25" : "text-slate-400/60"}`}
+                <MoreHorizontal className={`transition-all duration-200 ${isMoreActive || showMore ? "text-foreground" : "text-muted-foreground/60"}`}
                   size={isMoreActive ? 26 : 22} strokeWidth={isMoreActive ? 2.2 : 1.4} />
-                {isMoreActive && <div className={`absolute bottom-1.5 w-1 h-1 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} />}
+                {isMoreActive && <div className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />}
               </motion.button>
             </div>
             <div className="h-[env(safe-area-inset-bottom)]" />
@@ -914,9 +914,9 @@ const WorkshopAdmin = () => {
                 className="lg:hidden fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm" onClick={() => setShowMore(false)} />
               <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className={`lg:hidden fixed bottom-0 left-0 right-0 z-[61] ${isDark ? "bg-[#0e0e18]" : "bg-white"} border-t border-border rounded-t-3xl max-h-[70vh] overflow-hidden flex flex-col`}>
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-[61] bg-card border-t border-border rounded-t-3xl max-h-[70vh] overflow-hidden flex flex-col">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
-                  <h3 className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>All Modules</h3>
+                  <h3 className="text-sm font-bold text-foreground">All Modules</h3>
                   <button onClick={() => setShowMore(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
@@ -928,7 +928,7 @@ const WorkshopAdmin = () => {
                       return (
                         <button key={item.key} onClick={() => { onTabChange(item.key); setShowMore(false); }}
                           className={cn("flex flex-col items-center gap-1 py-3 px-1 rounded-xl transition-all",
-                            isActive ? (isDark ? "bg-violet-500/15 text-violet-300" : "bg-violet-50 text-violet-700") : (isDark ? "text-white/40" : "text-slate-500")
+                            isActive ? "bg-violet-500/15 text-violet-400" : "text-muted-foreground"
                           )}>
                           <item.icon size={20} strokeWidth={isActive ? 2 : 1.4} />
                           <span className="text-[10px] font-medium leading-tight text-center">{item.label}</span>

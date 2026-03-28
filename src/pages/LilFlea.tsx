@@ -338,7 +338,7 @@ const FlashCard3D = ({ card, index }: { card: typeof EXPERIENCE_CARDS[0]; index:
           className={`absolute inset-0 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-br ${card.gradient} border border-border/50 shadow-md`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-12 h-12 rounded-xl bg-white/70 flex items-center justify-center ${card.iconColor}`}>
+          <div className={`w-12 h-12 rounded-xl bg-background/70 flex items-center justify-center ${card.iconColor}`}>
             <Icon className="w-6 h-6" />
           </div>
           <div>
