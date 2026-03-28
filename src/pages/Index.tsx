@@ -78,13 +78,13 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
       className="fixed inset-0 z-[100] bg-foreground/80 flex items-center justify-center"
       onClick={onClose}
     >
-      <button onClick={onClose} className="absolute top-4 right-4 text-background/80 hover:text-background z-10">
+      <button onClick={onClose} className="absolute top-4 right-4 text-background/80 hover:text-background z-10" aria-label="Close lightbox">
         <X className="w-8 h-8" />
       </button>
-      <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 text-background/80 hover:text-background z-10">
+      <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 text-background/80 hover:text-background z-10" aria-label="Previous image">
         <ChevronLeft className="w-10 h-10" />
       </button>
-      <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 text-background/80 hover:text-background z-10">
+      <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 text-background/80 hover:text-background z-10" aria-label="Next image">
         <ChevronRight className="w-10 h-10" />
       </button>
       <motion.img
@@ -119,7 +119,7 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
             transition={{ duration: 0.3 }}
             onClick={() => onImageClick(i % images.length)}
           >
-            <img src={img} alt={`Caricature ${(i % images.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
+            <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" />
           </motion.div>
         ))}
       </motion.div>
@@ -215,7 +215,7 @@ const Index = () => {
       <nav className="sticky top-0 z-40 glass-nav">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" />
+            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" width={36} height={36} />
             <span className="font-calligraphy text-xl font-bold hidden sm:inline text-foreground">Creative Caricature Club</span>
           </div>
           <div className="flex items-center gap-3">
@@ -273,9 +273,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
             {/* Mobile: Compact logo + branding */}
             <div className="flex flex-col items-center lg:hidden w-full">
-              <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4" width={64} height={64} />
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-full px-3 py-1 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -355,7 +353,7 @@ const Index = () => {
                 {/* Large main image */}
                 <motion.div whileHover={{ scale: 1.03, zIndex: 10 }} className="col-span-7 row-span-4 rounded-2xl overflow-hidden shadow-2xl cursor-pointer border border-border/50 relative group"
                   onClick={() => openLightbox(0)}>
-                  <img src={galleryImages[0]} alt="Featured caricature artwork" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="eager" />
+                  <img src={galleryImages[0]} alt="Featured caricature artwork" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="eager" width={336} height={347} fetchPriority="high" />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-body font-semibold px-3 py-1 rounded-full">View Gallery</span>
@@ -364,22 +362,22 @@ const Index = () => {
                 {/* Top right */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
                   onClick={() => openLightbox(1)}>
-                  <img src={galleryImages[1]} alt="Custom couple caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                  <img src={galleryImages[1]} alt="Custom couple caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" width={240} height={261} loading="lazy" decoding="async" />
                 </motion.div>
                 {/* Bottom right top */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-5 row-span-3 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
                   onClick={() => openLightbox(2)}>
-                  <img src={galleryImages[2]} alt="Event caricature artist" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                  <img src={galleryImages[2]} alt="Event caricature artist" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" width={240} height={261} loading="lazy" decoding="async" />
                 </motion.div>
                 {/* Bottom left */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-4 row-span-2 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
                   onClick={() => openLightbox(3)}>
-                  <img src={galleryImages[3]} alt="Fun style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                  <img src={galleryImages[3]} alt="Fun style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" width={160} height={173} loading="lazy" decoding="async" />
                 </motion.div>
                 {/* Bottom center */}
                 <motion.div whileHover={{ scale: 1.05, zIndex: 10 }} className="col-span-3 row-span-2 rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50"
                   onClick={() => openLightbox(4)}>
-                  <img src={galleryImages[4]} alt="Royal style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" loading="lazy" />
+                  <img src={galleryImages[4]} alt="Royal style caricature" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" width={144} height={173} loading="lazy" decoding="async" />
                 </motion.div>
               </div>
               {/* Floating stats card */}
@@ -636,7 +634,7 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" />
+                <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" width={44} height={44} />
                 <div>
                   <span className="font-calligraphy text-lg font-bold text-foreground block">CCC</span>
                   <span className="text-[10px] text-muted-foreground">Creative Caricature Club</span>
