@@ -353,7 +353,7 @@ const Index = () => {
                 {/* Large main image */}
                 <motion.div whileHover={{ scale: 1.03, zIndex: 10 }} className="col-span-7 row-span-4 rounded-2xl overflow-hidden shadow-2xl cursor-pointer border border-border/50 relative group"
                   onClick={() => openLightbox(0)}>
-                  <img src={galleryImages[0]} alt="Featured caricature artwork" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="eager" />
+                  <img src={galleryImages[0]} alt="Featured caricature artwork" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="eager" width={336} height={347} fetchPriority="high" />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="bg-background/90 backdrop-blur-sm text-foreground text-xs font-body font-semibold px-3 py-1 rounded-full">View Gallery</span>
