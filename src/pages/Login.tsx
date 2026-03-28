@@ -124,30 +124,46 @@ const Login = () => {
       const identifier = loginWith === "email" ? email.trim().toLowerCase() : phone.replace(/\D/g, "");
       if (!identifier || identifier.length < 4) { setDetecting(false); goNextDirect(); return; }
 
-      const emailToCheck = loginWith === "email" ? identifier : `${identifier}@phone.user`;
-
-      // Check admin: profile → user_roles
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("email", emailToCheck)
-        .maybeSingle();
-
+      // Check admin: try both email and mobile in profiles, then check user_roles
       let isAdmin = false;
-      if (profile?.user_id) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", profile.user_id) as any;
-        isAdmin = roles?.some((r: any) => r.role === "admin");
+      const profileQuery = loginWith === "email"
+        ? supabase.from("profiles").select("user_id").eq("email", identifier)
+        : supabase.from("profiles").select("user_id").eq("mobile", identifier);
+      const { data: profiles } = await (profileQuery as any);
+
+      // Also check phone.user email format for phone logins
+      if (loginWith === "phone") {
+        const { data: phoneProfiles } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("email", `${identifier}@phone.user`) as any;
+        if (phoneProfiles?.length) {
+          const combined = [...(profiles || []), ...phoneProfiles];
+          const uniqueIds = [...new Set(combined.map((p: any) => p.user_id))];
+          for (const uid of uniqueIds) {
+            const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid) as any;
+            if (roles?.some((r: any) => r.role === "admin")) { isAdmin = true; break; }
+          }
+        } else if (profiles?.length) {
+          for (const p of profiles) {
+            const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", p.user_id) as any;
+            if (roles?.some((r: any) => r.role === "admin")) { isAdmin = true; break; }
+          }
+        }
+      } else if (profiles?.length) {
+        for (const p of profiles) {
+          const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", p.user_id) as any;
+          if (roles?.some((r: any) => r.role === "admin")) { isAdmin = true; break; }
+        }
       }
 
-      // Check artist
+      // Check artist by email or mobile
+      let isArtist = false;
       const artistQuery = loginWith === "email"
-        ? supabase.from("artists").select("id").eq("email", identifier).maybeSingle()
-        : supabase.from("artists").select("id").eq("mobile", identifier).maybeSingle();
-      const { data: artist } = await (artistQuery as any);
-      const isArtist = !!artist;
+        ? supabase.from("artists").select("id").eq("email", identifier).limit(1)
+        : supabase.from("artists").select("id").eq("mobile", identifier).limit(1);
+      const { data: artistResults } = await (artistQuery as any);
+      isArtist = !!(artistResults && artistResults.length > 0);
 
       if (isAdmin && isArtist) {
         setDetectedRoles(["admin", "artist"]);
