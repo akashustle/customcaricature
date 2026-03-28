@@ -238,6 +238,41 @@ const Login = () => {
                   </Button>
                 </motion.div>
               )}
+              {/* Role choice dialog */}
+              <Dialog open={roleChoiceOpen} onOpenChange={setRoleChoiceOpen}>
+                <DialogContent className="max-w-xs rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-center">Multiple accounts found</DialogTitle>
+                    <DialogDescription className="text-center text-sm">
+                      This {loginWith === "email" ? "email" : "phone"} is linked to both admin and artist accounts. Where do you want to go?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 pt-2">
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setRoleChoiceOpen(false); navigate("/customcad75", { replace: true }); }}
+                      className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/60 text-left flex items-center gap-3 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-sans font-semibold text-sm">Admin Login</p>
+                        <p className="text-xs text-muted-foreground">Go to admin panel</p>
+                      </div>
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                      onClick={() => { setRoleChoiceOpen(false); navigate("/artistlogin", { replace: true }); }}
+                      className="w-full p-4 rounded-xl border-2 border-border hover:border-accent/60 text-left flex items-center gap-3 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                        <Palette className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-sans font-semibold text-sm">Artist Login</p>
+                        <p className="text-xs text-muted-foreground">Go to artist dashboard</p>
+                      </div>
+                    </motion.button>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {step === 2 && (
                 <motion.div key="step2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
