@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { MapPin, Calendar, Users, Filter, RefreshCw, Eye, TrendingUp, Globe } from "lucide-react";
 import type { EventPin, UserPin } from "./AdminHeatmapMap";
-
-const LeafletMap = lazy(() => import("./AdminHeatmapMap"));
+import AdminHeatmapPanel from "./AdminHeatmapPanel";
 
 const INDIA_CITY_COORDS: Record<string, [number, number]> = {
   mumbai: [19.076, 72.8777], delhi: [28.6139, 77.209], bangalore: [12.9716, 77.5946],
@@ -43,14 +42,15 @@ function getCoordsByCity(city: string): { lat: number; lng: number } | null {
 const AdminHeatmap = () => {
   const [events, setEvents] = useState<EventPin[]>([]);
   const [users, setUsers] = useState<UserPin[]>([]);
+  const [userLocationCount, setUserLocationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
   const [showUsers, setShowUsers] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("");
-  const [mapReady, setMapReady] = useState(false);
+  const [usersLoaded, setUsersLoaded] = useState(false);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     const { data } = await supabase
       .from("event_bookings")
       .select("id, client_name, event_date, event_type, city, state, status, payment_status, total_price, artist_count, venue_name, event_start_time, event_end_time, client_mobile, client_email, registration_lat, registration_lng")
@@ -79,9 +79,20 @@ const AdminHeatmap = () => {
       }
       setEvents(pins);
     }
-  };
+  }, []);
 
-  const fetchUsers = async () => {
+  const fetchUserCount = useCallback(async () => {
+    const { count } = await supabase
+      .from("profiles")
+      .select("user_id", { count: "exact", head: true })
+      .not("city", "is", null);
+
+    if (typeof count === "number") {
+      setUserLocationCount(count);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
     const { data } = await supabase
       .from("profiles")
       .select("user_id, full_name, email, city, state, created_at")
@@ -100,15 +111,36 @@ const AdminHeatmap = () => {
         }
       }
       setUsers(pins);
+      setUsersLoaded(true);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    Promise.all([fetchEvents(), fetchUsers()]).finally(() => setLoading(false));
-    // Delay map mount slightly to avoid blocking the UI thread
-    const t = setTimeout(() => setMapReady(true), 100);
-    return () => clearTimeout(t);
-  }, []);
+    Promise.all([fetchEvents(), fetchUserCount()]).finally(() => setLoading(false));
+
+    const channel = supabase
+      .channel("admin-heatmap-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {
+        fetchEvents();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => {
+        fetchUserCount();
+        if (showUsers || usersLoaded) {
+          fetchUsers();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchEvents, fetchUserCount, fetchUsers, showUsers, usersLoaded]);
+
+  useEffect(() => {
+    if (showUsers && !usersLoaded) {
+      void fetchUsers();
+    }
+  }, [showUsers, usersLoaded, fetchUsers]);
 
   const filteredEvents = useMemo(() => {
     let filtered = events;
@@ -119,21 +151,20 @@ const AdminHeatmap = () => {
     return filtered;
   }, [events, statusFilter, cityFilter]);
 
-  const allPins = useMemo(() => {
-    const pins: { lat: number; lng: number }[] = [];
-    if (showEvents) pins.push(...filteredEvents);
-    if (showUsers) pins.push(...users);
-    return pins.length > 0 ? pins : [{ lat: 20.5937, lng: 78.9629 }];
-  }, [filteredEvents, users, showEvents, showUsers]);
-
   const stats = useMemo(() => ({
     total: events.length,
     upcoming: events.filter(e => new Date(e.event_date) >= new Date()).length,
     completed: events.filter(e => e.status === "completed").length,
     cities: new Set(events.map(e => e.city)).size,
     totalRevenue: events.reduce((s, e) => s + (e.total_price || 0), 0),
-    usersWithLocation: users.length,
-  }), [events, users]);
+    usersWithLocation: userLocationCount,
+  }), [events, userLocationCount]);
+
+  const refreshAll = async () => {
+    setLoading(true);
+    await Promise.all([fetchEvents(), fetchUserCount(), showUsers ? fetchUsers() : Promise.resolve()]);
+    setLoading(false);
+  };
 
   return (
     <div className="space-y-4">
@@ -144,7 +175,7 @@ const AdminHeatmap = () => {
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">Live map of all events & registered users</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => { setLoading(true); Promise.all([fetchEvents(), fetchUsers()]).finally(() => setLoading(false)); }}>
+        <Button variant="outline" size="sm" onClick={refreshAll}>
           <RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh
         </Button>
       </div>
@@ -210,37 +241,13 @@ const AdminHeatmap = () => {
         </CardContent>
       </Card>
 
-      {/* Map */}
-      <Card className="border-border/50 overflow-hidden">
-        <CardContent className="p-0">
-          <div style={{ height: "600px", minHeight: "500px", position: "relative" }}>
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
-                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-              </div>
-            )}
-            {mapReady ? (
-              <Suspense fallback={
-                <div className="h-full flex items-center justify-center bg-muted/30">
-                  <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                </div>
-              }>
-                <LeafletMap
-                  filteredEvents={filteredEvents}
-                  users={users}
-                  showEvents={showEvents}
-                  showUsers={showUsers}
-                  allPins={allPins}
-                />
-              </Suspense>
-            ) : (
-              <div className="h-full flex items-center justify-center bg-muted/30">
-                <p className="text-xs text-muted-foreground">Loading map…</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <AdminHeatmapPanel
+        filteredEvents={filteredEvents}
+        users={users}
+        showEvents={showEvents}
+        showUsers={showUsers}
+        loading={loading}
+      />
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-muted-foreground">

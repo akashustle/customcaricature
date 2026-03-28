@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
@@ -8,12 +8,25 @@ const LilFleaGallery = () => {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from("lil_flea_gallery").select("*").order("sort_order");
-      if (data && data.length > 0) setImages(data as any[]);
-    })();
+  const fetchImages = useCallback(async () => {
+    const { data } = await supabase.from("lil_flea_gallery").select("*").order("sort_order");
+    if (data && data.length > 0) setImages(data as any[]);
   }, []);
+
+  useEffect(() => {
+    fetchImages();
+
+    const channel = supabase
+      .channel("lil-flea-gallery-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_gallery" }, () => {
+        fetchImages();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchImages]);
 
   // Infinite upward auto-scroll — fast & smooth via RAF
   useEffect(() => {

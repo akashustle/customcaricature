@@ -83,6 +83,7 @@ const AdminLilFlea = () => {
     const ch = supabase
       .channel("admin-lil-flea-gallery")
       .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_gallery" }, () => fetchImages())
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings", filter: "id=eq.lil_flea_config" }, () => fetchConfig())
       .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_notify_users" }, () => fetchNotifyUsers())
       .subscribe();
     return () => { supabase.removeChannel(ch); };

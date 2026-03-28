@@ -537,17 +537,43 @@ const LilFlea = () => {
   }, []);
 
   useEffect(() => {
-    (async () => {
+    const fetchConfig = async () => {
       const { data } = await supabase.from("admin_site_settings").select("*").eq("id", "lil_flea_config").maybeSingle();
       if (data?.value) setConfig({ ...DEFAULT_CONFIG, ...(data.value as any) });
-    })();
+    };
+
+    fetchConfig();
+
+    const channel = supabase
+      .channel("lil-flea-page-config")
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings", filter: "id=eq.lil_flea_config" }, () => {
+        fetchConfig();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
-    (async () => {
+    const fetchGallery = async () => {
       const { data } = await supabase.from("lil_flea_gallery").select("*").order("sort_order");
       if (data && data.length > 0) setGalleryImages(data as any[]);
-    })();
+    };
+
+    fetchGallery();
+
+    const channel = supabase
+      .channel("lil-flea-page-gallery")
+      .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_gallery" }, () => {
+        fetchGallery();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleSplashComplete = useCallback(() => setSplashDone(true), []);

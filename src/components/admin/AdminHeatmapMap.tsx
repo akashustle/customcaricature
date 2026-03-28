@@ -70,11 +70,17 @@ interface Props {
   showEvents: boolean;
   showUsers: boolean;
   allPins: { lat: number; lng: number }[];
+  onMapReady?: () => void;
+  onMapError?: (message?: string) => void;
 }
 
-const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins }: Props) => {
+const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins, onMapReady, onMapError }: Props) => {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (error) onMapError?.(error);
+  }, [error, onMapError]);
 
   useEffect(() => {
     // Small delay to ensure container is measured before Leaflet initializes
@@ -105,6 +111,7 @@ const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins
       style={{ height: "100%", width: "100%", minHeight: "500px", background: "#e5e7eb" }}
       scrollWheelZoom={true}
       whenReady={() => {
+        onMapReady?.();
         // Force tile layer refresh after mount
         setTimeout(() => {
           window.dispatchEvent(new Event("resize"));
