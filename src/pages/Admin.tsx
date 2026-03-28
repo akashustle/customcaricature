@@ -1790,6 +1790,10 @@ const Admin = () => {
 
           <TabsContent value="artists">
             <AdminArtists />
+            <div className="mt-6">
+              <h3 className="font-display text-lg font-bold mb-3 flex items-center gap-2">💰 Artist Payouts & Earnings</h3>
+              <AdminArtistPayouts />
+            </div>
           </TabsContent>
 
 
