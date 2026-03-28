@@ -111,10 +111,13 @@ const BlogPost = () => {
     description: post.meta_description || post.excerpt,
     image: post.cover_image || undefined,
     author: { "@type": "Person", name: post.author_name },
-    publisher: { "@type": "Organization", name: "Creative Caricature Club", logo: { "@type": "ImageObject", url: "https://customcaricature.lovable.app/logo.png" } },
+    publisher: { "@type": "Organization", name: "Creative Caricature Club", logo: { "@type": "ImageObject", url: "https://portal.creativecaricatureclub.com/logo.png" } },
     datePublished: post.published_at || post.created_at,
     dateModified: post.published_at || post.created_at,
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://customcaricature.lovable.app/blog/${post.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://portal.creativecaricatureclub.com/blog/${post.slug}` },
+    keywords: post.tags?.join(", ") || "",
+    articleSection: post.category,
+    inLanguage: "en-IN",
   };
 
   return (
