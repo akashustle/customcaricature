@@ -234,7 +234,7 @@ const Login = () => {
                     </div>
                   )}
                   <Button onClick={goNext} disabled={!canProceedStep1} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
-                    Continue <ArrowRight className="w-4 h-4" />
+                    Continue {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                   </Button>
                 </motion.div>
               )}
