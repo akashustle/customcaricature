@@ -723,6 +723,9 @@
   .admin-content-premium {
     background: linear-gradient(180deg, hsl(30 20% 98%) 0%, hsl(0 0% 100%) 50%, hsl(30 15% 97%) 100%);
   }
+  .dark .admin-content-premium {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(25 10% 8%) 50%, hsl(var(--background)) 100%);
+  }
 
   /* 3D Widget Card */
   .admin-widget-3d {
