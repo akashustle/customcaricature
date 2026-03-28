@@ -142,13 +142,13 @@ const WorkshopDashboard = () => {
   if (!workshopUser) return null;
 
   const dm = darkMode;
-  const bg = dm ? "bg-background" : "bg-[#f8fafc]";
-  const headerBg = dm ? "bg-card/98 border-border" : "bg-white/98 border-slate-200/60";
-  const textPrimary = dm ? "text-foreground font-bold" : "text-slate-900 font-bold";
-  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-slate-500 font-medium";
-  const activeClass = `text-white shadow-lg font-semibold`;
+  const bg = dm ? "bg-background" : "bg-background";
+  const headerBg = dm ? "bg-card/98 border-border" : "bg-card/98 border-border";
+  const textPrimary = dm ? "text-foreground font-bold" : "text-foreground font-bold";
+  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-muted-foreground font-medium";
+  const activeClass = `text-primary-foreground shadow-lg font-semibold`;
   const activeStyle = { background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})`, boxShadow: `0 4px 15px ${accent.primary}30` };
-  const inactiveClass = dm ? "text-muted-foreground font-medium" : "text-slate-400 font-medium";
+  const inactiveClass = "text-muted-foreground font-medium";
 
   const visibleTabs = allTabs.filter(tab => {
     if (!tab.settingKey) return true;
