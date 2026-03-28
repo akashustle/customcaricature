@@ -103,27 +103,27 @@ const Lightbox = ({ images, currentIndex, onClose, onPrev, onNext }: {
 );
 
 const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onImageClick: (idx: number) => void }) => {
-  const doubled = [...images, ...images];
+  const tripled = [...images, ...images, ...images];
   return (
-    <div className="overflow-hidden py-8">
-      <motion.div
-        className="flex gap-4"
-        animate={{ x: [0, -(images.length * 280)] }}
-        transition={{ x: { repeat: Infinity, repeatType: "loop", duration: 30, ease: "linear" } }}
-      >
-        {doubled.map((img, i) => (
-          <motion.div
-            key={i}
-            className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md"
-            whileHover={{ scale: 1.03, y: -4 }}
-            transition={{ duration: 0.3 }}
-            onClick={() => onImageClick(i % images.length)}
-          >
-            <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" />
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
+    <>
+      <style>{`@keyframes gallery-scroll{0%{transform:translateX(0)}100%{transform:translateX(-33.33%)}}`}</style>
+      <div className="overflow-hidden py-8">
+        <div
+          className="flex gap-4"
+          style={{ animation: "gallery-scroll 30s linear infinite", width: "max-content" }}
+        >
+          {tripled.map((img, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300"
+              onClick={() => onImageClick(i % images.length)}
+            >
+              <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 
