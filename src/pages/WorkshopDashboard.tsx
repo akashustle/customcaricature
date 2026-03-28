@@ -279,7 +279,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - Instagram Style */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-lg ${dm ? "bg-card/95 border-border" : "bg-white/95 border-slate-200/30"} border-t`}>
+        <div className={`backdrop-blur-lg bg-card/95 border-border border-t`}>
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
@@ -288,14 +288,14 @@ const WorkshopDashboard = () => {
                   whileTap={{ scale: 0.75 }}
                   className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
                   <tab.icon
-                    className={`transition-all duration-200 ${isActive ? (dm ? "text-foreground" : "text-slate-900") : dm ? "text-muted-foreground" : "text-slate-400"}`}
+                    className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
                     size={isActive ? 26 : 22}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && tab.icon === Home ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div layoutId="ws-dash-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-foreground" : "bg-slate-900"}`}
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
@@ -303,7 +303,7 @@ const WorkshopDashboard = () => {
             })}
             <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.75 }}
               className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-muted-foreground" : "text-slate-400"}`} strokeWidth={1.4} />
+              <LayoutDashboard className="w-[22px] h-[22px] text-muted-foreground" strokeWidth={1.4} />
             </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
