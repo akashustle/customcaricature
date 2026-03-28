@@ -213,7 +213,7 @@ const AdminHeatmap = () => {
       {/* Map */}
       <Card className="border-border/50 overflow-hidden">
         <CardContent className="p-0">
-          <div className="h-[500px] md:h-[600px] relative">
+          <div style={{ height: "600px", minHeight: "500px", position: "relative" }}>
             {loading && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10">
                 <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
