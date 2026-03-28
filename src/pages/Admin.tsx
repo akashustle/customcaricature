@@ -50,6 +50,7 @@ import { MessageCircle, Radio } from "lucide-react";
 const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
 const AdminEvents = lazy(() => import("@/components/admin/AdminEvents"));
 const AdminArtists = lazy(() => import("@/components/admin/AdminArtists"));
+const AdminArtistPayouts = lazy(() => import("@/components/admin/AdminArtistPayouts"));
 const AdminCustomerPricing = lazy(() => import("@/components/admin/AdminCustomerPricing"));
 const AdminCustomerEventPricing = lazy(() => import("@/components/admin/AdminCustomerEventPricing"));
 const AdminCustomerIntlPricing = lazy(() => import("@/components/admin/AdminCustomerIntlPricing"));
