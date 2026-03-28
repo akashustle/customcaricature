@@ -1,4 +1,4 @@
-const BASE_URL = "https://customcaricature.lovable.app";
+const BASE_URL = "https://portal.creativecaricatureclub.com";
 
 const organizationSchema = {
   "@context": "https://schema.org",
