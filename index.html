@@ -29,29 +29,60 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CCC" />
+
+    <!-- Preload LCP hero logo -->
+    <link rel="preload" as="image" href="/logo.png" />
+
+    <!-- DNS prefetch & preconnect -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="dns-prefetch" href="https://cqdxfvcyrvlttmkuaeda.supabase.co" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cqdxfvcyrvlttmkuaeda.supabase.co" crossorigin />
-    <!-- Preload critical fonts -->
+
+    <!-- Non-blocking font loading -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VVZX2RDMW3"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-VVZX2RDMW3', { send_page_view: false });
-    </script>
+
+    <!-- Inline critical above-the-fold CSS -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      html{-webkit-text-size-adjust:100%;font-feature-settings:normal}
+      body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#fdf8f3;color:#3d3028;line-height:1.5;min-height:100vh}
+      #root{min-height:100vh}
+      .min-h-screen{min-height:100vh}
+      .flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}
+      .bg-background{background:hsl(30,43%,97%)}
+      .animate-spin{animation:spin 1s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Defer GA4 until after page load for better LCP -->
     <script>
-      // Lazy load Razorpay only when needed
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-VVZX2RDMW3', { send_page_view: false });
+
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-VVZX2RDMW3';
+          s.async = true;
+          document.head.appendChild(s);
+        }, 1500);
+      });
+    </script>
+
+    <!-- Lazy load Razorpay only when needed -->
+    <script>
       window.__loadRazorpay = function() {
         if (window.Razorpay) return Promise.resolve();
         return new Promise(function(resolve) {

@@ -14,16 +14,37 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: "es2020",
+    cssMinify: "lightningcss",
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: mode === "production",
+        drop_debugger: true,
+        passes: 2,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-select', '@radix-ui/react-tabs', '@radix-ui/react-tooltip'],
-          charts: ['recharts'],
-          motion: ['framer-motion'],
+          "vendor-react": ["react", "react-dom"],
+          "vendor-router": ["react-router-dom"],
+          "vendor-query": ["@tanstack/react-query"],
+          "ui-radix": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-dropdown-menu",
+          ],
+          charts: ["recharts"],
+          motion: ["framer-motion"],
+          supabase: ["@supabase/supabase-js"],
         },
       },
     },
+    chunkSizeWarningLimit: 600,
   },
   plugins: [
     react(),
@@ -32,7 +53,7 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "logo.png", "badge-96.png", "badge-72.png", "sw-push.js"],
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2,webp,avif}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         importScripts: ["/sw-push.js"],
         runtimeCaching: [
@@ -59,6 +80,14 @@ export default defineConfig(({ mode }) => ({
               cacheName: "supabase-api-cache",
               expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
               networkTimeoutSeconds: 3,
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif)$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "image-cache",
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
         ],
