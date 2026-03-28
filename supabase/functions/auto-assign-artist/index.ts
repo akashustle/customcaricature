@@ -101,7 +101,7 @@ serve(async (req) => {
     const alreadyAssignedIds = new Set((existingAssignments || []).map((a: any) => a.artist_id));
 
     // Filter available artists
-    const availableArtists = allArtists.filter(a =>
+    const availableArtists = candidateArtists.filter((a: any) =>
       !blockedArtistIds.has(a.id) &&
       !busyArtistIds.has(a.id) &&
       !alreadyAssignedIds.has(a.id)
