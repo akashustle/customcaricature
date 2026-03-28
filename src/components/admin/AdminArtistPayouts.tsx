@@ -271,15 +271,26 @@ const AdminArtistPayouts = () => {
                         {isExpanded && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                             <div className="space-y-1 mt-2">
-                              {artistEventPayouts.map(ep => (
+                                {artistEventPayouts.map(ep => (
                                 <div key={ep.id} className="bg-muted/30 rounded-lg p-2 text-xs font-sans flex justify-between items-center">
                                   <div>
                                     <p className="text-muted-foreground">Event ₹{ep.event_total.toLocaleString("en-IN")}</p>
                                     <p className="font-semibold">{ep.payout_type === "percentage" ? `${ep.payout_value}%` : `₹${ep.payout_value}`} → ₹{ep.calculated_amount.toLocaleString("en-IN")}</p>
                                   </div>
-                                  <Badge className={`text-[9px] border-none ${ep.status === "credited" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                                    {ep.status}
-                                  </Badge>
+                                  <div className="flex items-center gap-1.5">
+                                    <Badge className={`text-[9px] border-none ${ep.status === "credited" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                                      {ep.status}
+                                    </Badge>
+                                    {ep.status === "pending" && (
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-primary" onClick={() => {
+                                        setEditingEvent({ eventId: ep.event_id, artistId: artist.id });
+                                        setCustomPayoutType(ep.payout_type);
+                                        setCustomPayoutValue(String(ep.payout_value));
+                                      }}>
+                                        <Eye className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               ))}
                             </div>

@@ -52,8 +52,12 @@ const ArtistChatPanel = ({ userId, userName, isDesktop = false, onClose }: {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
     setSending(true);
+    // Get first admin user as receiver for proper realtime filtering
+    const { data: admins } = await supabase.from("user_roles" as any).select("user_id").eq("role", "admin").limit(1);
+    const adminId = (admins as any)?.[0]?.user_id || null;
     await supabase.from("chat_messages").insert({
-      sender_id: userId, message: newMessage.trim(),
+      sender_id: userId, receiver_id: adminId,
+      message: newMessage.trim(),
       is_admin: false, is_artist_chat: true,
     } as any);
     setNewMessage("");
