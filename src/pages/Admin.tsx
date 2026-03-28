@@ -1997,8 +1997,12 @@ const Admin = () => {
             <AdminHeatmap />
           </TabsContent>
 
-          <TabsContent value="maintenance">
+           <TabsContent value="maintenance">
             <AdminMaintenance />
+          </TabsContent>
+
+          <TabsContent value="lil-flea">
+            <AdminLilFlea />
           </TabsContent>
 
           <TabsContent value="settings">
