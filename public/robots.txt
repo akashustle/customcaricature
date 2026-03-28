@@ -43,4 +43,4 @@ Disallow: /workshop-admin-panel
 Disallow: /cccworkshop2006
 Disallow: /forgot-password
 
-Sitemap: https://customcaricature.lovable.app/sitemap.xml
+Sitemap: https://portal.creativecaricatureclub.com/sitemap.xml
