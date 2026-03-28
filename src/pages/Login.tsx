@@ -117,7 +117,62 @@ const Login = () => {
   };
 
   const [direction, setDirection] = useState(1);
-  const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
+
+  const detectRole = async () => {
+    setDetecting(true);
+    try {
+      const identifier = loginWith === "email" ? email.trim().toLowerCase() : phone.replace(/\D/g, "");
+      if (!identifier || identifier.length < 4) { setDetecting(false); goNextDirect(); return; }
+
+      const emailToCheck = loginWith === "email" ? identifier : `${identifier}@phone.user`;
+
+      // Check admin: profile → user_roles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("email", emailToCheck)
+        .maybeSingle();
+
+      let isAdmin = false;
+      if (profile?.user_id) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", profile.user_id) as any;
+        isAdmin = roles?.some((r: any) => r.role === "admin");
+      }
+
+      // Check artist
+      const artistQuery = loginWith === "email"
+        ? supabase.from("artists").select("id").eq("email", identifier).maybeSingle()
+        : supabase.from("artists").select("id").eq("mobile", identifier).maybeSingle();
+      const { data: artist } = await (artistQuery as any);
+      const isArtist = !!artist;
+
+      if (isAdmin && isArtist) {
+        setDetectedRoles(["admin", "artist"]);
+        setRoleChoiceOpen(true);
+      } else if (isAdmin) {
+        toast({ title: "Admin account detected", description: "Redirecting to admin login..." });
+        navigate("/customcad75", { replace: true });
+      } else if (isArtist) {
+        toast({ title: "Artist account detected", description: "Redirecting to artist login..." });
+        navigate("/artistlogin", { replace: true });
+      } else {
+        goNextDirect();
+      }
+    } catch {
+      goNextDirect();
+    } finally {
+      setDetecting(false);
+    }
+  };
+
+  const goNextDirect = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
+  const goNext = () => {
+    if (step === 1) { detectRole(); return; }
+    goNextDirect();
+  };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 1)); };
 
   return (
