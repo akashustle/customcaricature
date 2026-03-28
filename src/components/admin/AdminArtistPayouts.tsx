@@ -425,6 +425,37 @@ const AdminArtistPayouts = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Per-Event Payout Customize Dialog */}
+      {editingEvent && (
+        <Dialog open={!!editingEvent} onOpenChange={() => setEditingEvent(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader><DialogTitle className="font-display flex items-center gap-2">
+              <Percent className="w-5 h-5 text-primary" /> Customize Event Payout
+            </DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs font-sans">Payout Type</Label>
+                <Select value={customPayoutType} onValueChange={setCustomPayoutType}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage %</SelectItem>
+                    <SelectItem value="fixed">Fixed ₹</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs font-sans">Value</Label>
+                <Input type="number" value={customPayoutValue} onChange={e => setCustomPayoutValue(e.target.value)}
+                  placeholder={customPayoutType === "percentage" ? "e.g. 30" : "e.g. 5000"} className="h-9" />
+              </div>
+              <Button onClick={() => saveEventPayout(editingEvent.eventId, editingEvent.artistId)} className="w-full h-10 rounded-xl font-sans">
+                Save Event Payout
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
