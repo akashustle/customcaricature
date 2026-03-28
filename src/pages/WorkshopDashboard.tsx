@@ -240,7 +240,7 @@ const WorkshopDashboard = () => {
                 {ACCENT_COLORS.map((c, i) => (
                   <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
                     whileHover={{ scale: 1.2, y: -2 }} whileTap={{ scale: 0.9 }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent"}`}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-foreground shadow-lg" : "border-transparent"}`}
                     style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
                     title={c.name} />
                 ))}
