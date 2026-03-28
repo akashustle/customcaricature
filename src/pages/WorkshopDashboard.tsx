@@ -69,14 +69,15 @@ const WorkshopDashboard = () => {
   const navigate = useNavigate();
   const [workshopUser, setWorkshopUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("home");
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_user_dark") === "true");
+  const { resolvedTheme, setTheme } = useTheme();
+  const darkMode = resolvedTheme === "dark";
   const [settings, setSettings] = useState<any>({});
   const [accentIdx, setAccentIdx] = useState(() => parseInt(localStorage.getItem("ws_accent") || "0") || 0);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const accent = ACCENT_COLORS[accentIdx] || ACCENT_COLORS[0];
 
-  useEffect(() => { localStorage.setItem("ws_user_dark", darkMode.toString()); }, [darkMode]);
+  const setDarkMode = (val: boolean) => setTheme(val ? "dark" : "light");
   useEffect(() => { localStorage.setItem("ws_accent", accentIdx.toString()); }, [accentIdx]);
 
   useEffect(() => {
