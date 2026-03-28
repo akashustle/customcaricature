@@ -657,8 +657,8 @@ const LilFlea = () => {
 
           {/* ─── HERO ─── */}
           <section className="relative min-h-[90svh] flex items-center justify-center overflow-hidden">
-            <div className="absolute top-10 left-10 w-60 h-60 rounded-full blur-[100px] bg-rose-200/30" />
-            <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full blur-[80px] bg-violet-200/25" />
+            <div className="absolute top-10 left-10 w-60 h-60 rounded-full blur-[100px] bg-rose-200/30 dark:bg-rose-900/20" />
+            <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full blur-[80px] bg-violet-200/25 dark:bg-violet-900/15" />
 
             <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-4 mb-8 flex-wrap">
