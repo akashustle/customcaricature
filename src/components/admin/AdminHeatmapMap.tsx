@@ -1,16 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { format } from "date-fns";
 
 // Fix leaflet default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-});
+try {
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  });
+} catch (e) {
+  console.warn("Leaflet icon fix failed:", e);
+}
 
 const eventIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
@@ -69,12 +73,43 @@ interface Props {
 }
 
 const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins }: Props) => {
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Small delay to ensure container is measured before Leaflet initializes
+    const t = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted/30 text-sm text-muted-foreground">
+        Map failed to load. <button className="ml-2 underline" onClick={() => { setError(null); setReady(false); requestAnimationFrame(() => setReady(true)); }}>Retry</button>
+      </div>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted/30">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <MapContainer
       center={[20.5937, 78.9629]}
       zoom={5}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", minHeight: "500px", background: "#e5e7eb" }}
       scrollWheelZoom={true}
+      whenReady={() => {
+        // Force tile layer refresh after mount
+        setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, 200);
+      }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
