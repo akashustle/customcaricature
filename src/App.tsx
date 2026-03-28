@@ -75,6 +75,7 @@ const DatabaseEntryReversal = lazy(() => import("./pages/DatabaseEntryReversal")
 const FAQs = lazy(() => import("./pages/FAQs"));
 const Explore = lazy(() => import("./pages/Explore"));
 const SEOLandingPage = lazy(() => import("./pages/SEOLandingPage"));
+const LilFlea = lazy(() => import("./pages/LilFlea"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -268,6 +269,7 @@ const App = () => {
                 <Route path="/database-entry-reversal" element={<DatabaseEntryReversal />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/explore" element={<Explore />} />
+                <Route path="/lil-flea" element={<LilFlea />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />

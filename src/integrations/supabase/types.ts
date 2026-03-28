@@ -2143,6 +2143,33 @@ export type Database = {
           },
         ]
       }
+      lil_flea_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          is_featured: boolean | null
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          is_featured?: boolean | null
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          is_featured?: boolean | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       live_chat_messages: {
         Row: {
           created_at: string
