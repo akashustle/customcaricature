@@ -5,11 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Trash2, Star, GripVertical, Image, ExternalLink, Save, Settings, Link, Calendar, MapPin, Ticket, Eye, ChevronUp, ChevronDown, Smartphone } from "lucide-react";
+import { Upload, Trash2, Star, Image, ExternalLink, Save, Settings, Link, Calendar, MapPin, Ticket, Eye, ChevronUp, ChevronDown, Smartphone, Clapperboard, Type } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
 
 type GalleryItem = {
   id: string;
@@ -31,6 +29,11 @@ const DEFAULT_CONFIG = {
   maps_url: "https://maps.app.goo.gl/JioWorldGardenBKC",
   whatsapp_number: "919819731040",
   show_district: true,
+  splash_line1: "We're Coming to",
+  splash_line2: "The Lil Flea!",
+  splash_line3: "Come, Visit Our Stall",
+  splash_line4: "See You There! 🎨",
+  splash_enabled: true,
 };
 
 const AdminLilFlea = () => {
@@ -113,6 +116,10 @@ const AdminLilFlea = () => {
     ]);
   };
 
+  const clearSplashSession = () => {
+    toast({ title: "Splash will show again on next visit to /lil-flea", description: "Session cleared for testing" });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -121,25 +128,87 @@ const AdminLilFlea = () => {
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             🎪 Lil Flea Page
           </h2>
-          <p className="text-muted-foreground text-sm">Manage event settings, gallery & page content</p>
+          <p className="text-muted-foreground text-sm">Manage event page, splash screen, gallery & content</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => window.open("/lil-flea", "_blank")} className="gap-1.5 rounded-full">
-          <Eye className="w-4 h-4" /> Preview Page
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={clearSplashSession} className="gap-1.5 rounded-xl text-xs">
+            <Clapperboard className="w-3.5 h-3.5" /> Reset Splash
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => window.open("/lil-flea", "_blank")} className="gap-1.5 rounded-xl text-xs">
+            <Eye className="w-3.5 h-3.5" /> Preview
+          </Button>
+        </div>
       </div>
 
-      <Tabs defaultValue="settings" className="w-full">
+      <Tabs defaultValue="splash" className="w-full">
         <TabsList className="w-full flex flex-wrap gap-1 bg-muted/50 p-1 rounded-xl h-auto">
-          <TabsTrigger value="settings" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[100px]"><Settings className="w-3.5 h-3.5" /> Settings</TabsTrigger>
-          <TabsTrigger value="gallery" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[100px]"><Image className="w-3.5 h-3.5" /> Gallery ({images.length})</TabsTrigger>
-          <TabsTrigger value="links" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[100px]"><Link className="w-3.5 h-3.5" /> Links & CTAs</TabsTrigger>
+          <TabsTrigger value="splash" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[80px]"><Clapperboard className="w-3.5 h-3.5" /> Splash</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[80px]"><Settings className="w-3.5 h-3.5" /> Event</TabsTrigger>
+          <TabsTrigger value="gallery" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[80px]"><Image className="w-3.5 h-3.5" /> Gallery</TabsTrigger>
+          <TabsTrigger value="links" className="gap-1.5 rounded-lg text-xs flex-1 min-w-[80px]"><Link className="w-3.5 h-3.5" /> Links</TabsTrigger>
         </TabsList>
+
+        {/* ─── SPLASH TAB ─── */}
+        <TabsContent value="splash" className="space-y-4 mt-4">
+          <Card className="shadow-sm border-border/60">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2"><Clapperboard className="w-4 h-4 text-accent" /> Splash Screen</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="font-medium">Enable Splash Screen</Label>
+                  <p className="text-xs text-muted-foreground">Show cinematic intro when users visit the page</p>
+                </div>
+                <Switch checked={config.splash_enabled} onCheckedChange={v => setConfig({ ...config, splash_enabled: v })} />
+              </div>
+
+              <div className="border-t border-border/50 pt-4 space-y-4">
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider flex items-center gap-1.5"><Type className="w-3.5 h-3.5" /> Typewriter Text Lines</p>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Line 1 — Opening subtitle</Label>
+                    <Input value={config.splash_line1} onChange={e => setConfig({ ...config, splash_line1: e.target.value })} placeholder="We're Coming to" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Line 2 — Main title (big caricature font)</Label>
+                    <Input value={config.splash_line2} onChange={e => setConfig({ ...config, splash_line2: e.target.value })} placeholder="The Lil Flea!" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Line 3 — Call to action message</Label>
+                    <Input value={config.splash_line3} onChange={e => setConfig({ ...config, splash_line3: e.target.value })} placeholder="Come, Visit Our Stall" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Line 4 — Final closing message</Label>
+                    <Input value={config.splash_line4} onChange={e => setConfig({ ...config, splash_line4: e.target.value })} placeholder="See You There! 🎨" />
+                  </div>
+                </div>
+
+                <div className="bg-muted/30 rounded-xl p-4 text-xs text-muted-foreground space-y-1">
+                  <p className="font-semibold">ℹ️ Splash flow (12 seconds):</p>
+                  <p>0-2s → 3D gate opens, logo appears</p>
+                  <p>2-4.5s → Line 1 & 2 typewriter</p>
+                  <p>4.5-6s → Line 3 + date/time/venue</p>
+                  <p>6-9.5s → Images flow from all directions</p>
+                  <p>9.5-12s → Line 4 final message + fade out</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button onClick={saveConfig} disabled={saving} className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold">
+              <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Splash Settings"}
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* ─── SETTINGS TAB ─── */}
         <TabsContent value="settings" className="space-y-4 mt-4">
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Calendar className="w-4 h-4 text-amber-500" /> Event Details</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Calendar className="w-4 h-4 text-accent" /> Event Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,9 +232,9 @@ const AdminLilFlea = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4 text-blue-500" /> Hero Section Content</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> Hero Section Content</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
@@ -184,7 +253,7 @@ const AdminLilFlea = () => {
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={saveConfig} disabled={saving} className="gap-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold hover:from-amber-400 hover:to-orange-400">
+            <Button onClick={saveConfig} disabled={saving} className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold">
               <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Settings"}
             </Button>
           </div>
@@ -192,12 +261,12 @@ const AdminLilFlea = () => {
 
         {/* ─── GALLERY TAB ─── */}
         <TabsContent value="gallery" className="space-y-4 mt-4">
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Upload className="w-4 h-4 text-green-500" /> Upload Images</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Upload className="w-4 h-4 text-accent" /> Upload Images</CardTitle>
             </CardHeader>
             <CardContent>
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-10 cursor-pointer hover:bg-muted/30 transition-all hover:border-amber-400/50">
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-10 cursor-pointer hover:bg-muted/30 transition-all hover:border-accent/50">
                 <Image className="w-10 h-10 text-muted-foreground mb-3" />
                 <span className="text-sm text-muted-foreground font-medium">{uploading ? "Uploading..." : "Click to upload multiple images"}</span>
                 <span className="text-xs text-muted-foreground/60 mt-1">JPG, PNG, WebP supported</span>
@@ -206,9 +275,9 @@ const AdminLilFlea = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Image className="w-4 h-4 text-purple-500" /> Gallery ({images.length} images)</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Image className="w-4 h-4 text-accent" /> Gallery ({images.length} images)</CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -236,7 +305,7 @@ const AdminLilFlea = () => {
                         />
                       </div>
                       {img.is_featured && (
-                        <div className="absolute top-1.5 right-1.5 bg-amber-500 text-black text-[10px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Featured</div>
+                        <div className="absolute top-1.5 right-1.5 bg-accent text-accent-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Featured</div>
                       )}
                     </div>
                   ))}
@@ -248,9 +317,9 @@ const AdminLilFlea = () => {
 
         {/* ─── LINKS TAB ─── */}
         <TabsContent value="links" className="space-y-4 mt-4">
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Ticket className="w-4 h-4 text-orange-500" /> Ticket Booking Links</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Ticket className="w-4 h-4 text-accent" /> Ticket Booking Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
@@ -264,9 +333,9 @@ const AdminLilFlea = () => {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
+          <Card className="shadow-sm border-border/60">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Smartphone className="w-4 h-4 text-purple-500" /> District App Integration</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Smartphone className="w-4 h-4 text-accent" /> District App Integration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -284,7 +353,7 @@ const AdminLilFlea = () => {
           </Card>
 
           <div className="flex justify-end">
-            <Button onClick={saveConfig} disabled={saving} className="gap-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold hover:from-amber-400 hover:to-orange-400">
+            <Button onClick={saveConfig} disabled={saving} className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold">
               <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Links"}
             </Button>
           </div>
