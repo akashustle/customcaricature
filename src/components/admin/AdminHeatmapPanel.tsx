@@ -17,6 +17,7 @@ interface Props {
 const AdminHeatmapPanel = ({ filteredEvents, users, showEvents, showUsers, loading }: Props) => {
   const [mapReady, setMapReady] = useState(false);
   const [leafletReady, setLeafletReady] = useState(false);
+  const [showRetryOverlay, setShowRetryOverlay] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   const allPins = useMemo(() => {
@@ -45,9 +46,21 @@ const AdminHeatmapPanel = ({ filteredEvents, users, showEvents, showUsers, loadi
     return () => globalThis.clearTimeout(id);
   }, [mapReady, reloadKey]);
 
-  const showFallback = mapReady && !leafletReady && !loading;
+  useEffect(() => {
+    if (!mapReady || leafletReady || loading) {
+      setShowRetryOverlay(false);
+      return;
+    }
+
+    const id = globalThis.setTimeout(() => {
+      setShowRetryOverlay(true);
+    }, 8000);
+
+    return () => globalThis.clearTimeout(id);
+  }, [mapReady, leafletReady, loading, reloadKey]);
 
   const retryMap = () => {
+    setShowRetryOverlay(false);
     setLeafletReady(false);
     setMapReady(false);
     setReloadKey((value) => value + 1);
@@ -63,15 +76,7 @@ const AdminHeatmapPanel = ({ filteredEvents, users, showEvents, showUsers, loadi
             </div>
           )}
 
-          {showFallback ? (
-            <div className="flex h-full flex-col items-center justify-center bg-muted/30 px-4 text-center">
-              <p className="text-sm font-medium text-foreground">Map is taking too long to initialize.</p>
-              <p className="mt-1 text-xs text-muted-foreground">You can retry without freezing the admin panel.</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={retryMap}>
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry map
-              </Button>
-            </div>
-          ) : mapReady ? (
+          {mapReady ? (
             <Suspense
               fallback={
                 <div className="flex h-full items-center justify-center bg-muted/30">
@@ -87,12 +92,29 @@ const AdminHeatmapPanel = ({ filteredEvents, users, showEvents, showUsers, loadi
                 showUsers={showUsers}
                 allPins={allPins}
                 onMapReady={() => setLeafletReady(true)}
-                onMapError={() => setLeafletReady(false)}
+                onMapError={() => {
+                  setLeafletReady(false);
+                  setShowRetryOverlay(true);
+                }}
               />
             </Suspense>
           ) : (
             <div className="flex h-full items-center justify-center bg-muted/30">
               <p className="text-xs text-muted-foreground">Preparing map…</p>
+            </div>
+          )}
+
+          {showRetryOverlay && !leafletReady && !loading && (
+            <div className="absolute inset-x-4 bottom-4 z-20 rounded-xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur-sm">
+              <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">Map is taking longer than expected.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Retry the heatmap without freezing the admin panel.</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={retryMap}>
+                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Retry map
+                </Button>
+              </div>
             </div>
           )}
         </div>
