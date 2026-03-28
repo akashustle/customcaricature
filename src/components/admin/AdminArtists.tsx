@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp, MessageCircle, Send, Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -16,6 +16,98 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EVENT_TYPES, EVENT_STATUS_LABELS } from "@/lib/event-data";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Admin-side chat panel for artist
+const AdminArtistChatDialog = ({ artistUserId, artistName, open, onClose }: {
+  artistUserId: string; artistName: string; open: boolean; onClose: () => void;
+}) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMsg, setNewMsg] = useState("");
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open || !artistUserId) return;
+    fetchMessages();
+    const ch = supabase.channel(`admin-artist-chat-${artistUserId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.new as any;
+        if (row.is_artist_chat && (row.sender_id === artistUserId || row.receiver_id === artistUserId)) fetchMessages();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [open, artistUserId]);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  const fetchMessages = async () => {
+    const { data } = await supabase.from("chat_messages")
+      .select("id, message, is_admin, sender_id, created_at, read")
+      .or(`sender_id.eq.${artistUserId},receiver_id.eq.${artistUserId}`)
+      .eq("is_artist_chat", true).eq("deleted", false)
+      .order("created_at", { ascending: true }).limit(200);
+    if (data) setMessages(data as any);
+    // Mark artist messages as read
+    await supabase.from("chat_messages").update({ read: true } as any)
+      .eq("sender_id", artistUserId).eq("is_artist_chat", true).eq("read", false);
+  };
+
+  const sendMessage = async () => {
+    if (!newMsg.trim()) return;
+    setSending(true);
+    await supabase.from("chat_messages").insert({
+      sender_id: (await supabase.auth.getUser()).data.user?.id || "",
+      receiver_id: artistUserId,
+      message: newMsg.trim(), is_admin: true, is_artist_chat: true,
+    } as any);
+    setNewMsg("");
+    setSending(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md max-h-[80vh] flex flex-col p-0">
+        <DialogHeader className="p-4 pb-2 border-b border-border">
+          <DialogTitle className="font-display flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-primary" /> Chat with {artistName}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[300px]">
+          {messages.length === 0 && (
+            <div className="text-center py-8">
+              <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground font-sans">No messages yet</p>
+            </div>
+          )}
+          {messages.map(msg => (
+            <div key={msg.id} className={`flex ${msg.is_admin ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm font-sans ${
+                msg.is_admin ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-muted/50 text-foreground rounded-tl-sm"
+              }`}>
+                {!msg.is_admin && <p className="text-[10px] font-semibold text-primary mb-0.5">{artistName}</p>}
+                <p className="whitespace-pre-wrap break-words">{msg.message}</p>
+                <p className={`text-[9px] mt-0.5 ${msg.is_admin ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  {new Date(msg.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+        <div className="p-3 border-t border-border">
+          <div className="flex gap-2">
+            <Input value={newMsg} onChange={e => setNewMsg(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder="Type a message..." className="flex-1 h-10 rounded-full text-sm" />
+            <Button onClick={sendMessage} disabled={!newMsg.trim() || sending} className="h-10 w-10 rounded-full p-0">
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 type ArtistDocument = { id: string; artist_id: string; document_type: string; file_name: string; storage_path: string; created_at: string; };
 type Artist = { id: string; name: string; experience: string | null; portfolio_url: string | null; email: string | null; mobile: string | null; auth_user_id: string | null; created_at: string; };
@@ -40,6 +132,7 @@ const AdminArtists = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [artistLogs, setArtistLogs] = useState<Record<string, ArtistLog[]>>({});
   const [showLogsFor, setShowLogsFor] = useState<string | null>(null);
+  const [chatArtist, setChatArtist] = useState<{ userId: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchArtists();
@@ -354,6 +447,11 @@ const AdminArtists = () => {
                               <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteArtist(artist.id)}>Delete</AlertDialogAction></AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
+                          {artist.auth_user_id && (
+                            <Button variant="ghost" size="sm" onClick={() => setChatArtist({ userId: artist.auth_user_id!, name: artist.name })}>
+                              <MessageCircle className="w-4 h-4 text-primary" />
+                            </Button>
+                          )}
                         </div>
                       </div>
 
@@ -443,6 +541,15 @@ const AdminArtists = () => {
             );
           })}
         </div>
+      )}
+      {/* Artist Chat Dialog */}
+      {chatArtist && (
+        <AdminArtistChatDialog
+          artistUserId={chatArtist.userId}
+          artistName={chatArtist.name}
+          open={!!chatArtist}
+          onClose={() => setChatArtist(null)}
+        />
       )}
     </div>
   );

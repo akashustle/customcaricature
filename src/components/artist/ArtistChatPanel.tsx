@@ -21,8 +21,8 @@ const ArtistChatPanel = ({ userId, userName, isDesktop = false, onClose }: {
   useEffect(() => {
     fetchMessages();
     const ch = supabase.channel(`artist-chat-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages", filter: `sender_id=eq.${userId}` }, fetchMessages)
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages", filter: `receiver_id=eq.${userId}` }, fetchMessages)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `sender_id=eq.${userId}` }, fetchMessages)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `receiver_id=eq.${userId}` }, fetchMessages)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [userId]);
