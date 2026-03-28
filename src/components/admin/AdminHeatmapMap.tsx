@@ -70,9 +70,11 @@ interface Props {
   showEvents: boolean;
   showUsers: boolean;
   allPins: { lat: number; lng: number }[];
+  onMapReady?: () => void;
+  onMapError?: (message?: string) => void;
 }
 
-const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins }: Props) => {
+const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins, onMapReady, onMapError }: Props) => {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,6 +85,7 @@ const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins
   }, []);
 
   if (error) {
+    onMapError?.(error);
     return (
       <div className="h-full flex items-center justify-center bg-muted/30 text-sm text-muted-foreground">
         Map failed to load. <button className="ml-2 underline" onClick={() => { setError(null); setReady(false); requestAnimationFrame(() => setReady(true)); }}>Retry</button>
@@ -105,6 +108,7 @@ const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins
       style={{ height: "100%", width: "100%", minHeight: "500px", background: "#e5e7eb" }}
       scrollWheelZoom={true}
       whenReady={() => {
+        onMapReady?.();
         // Force tile layer refresh after mount
         setTimeout(() => {
           window.dispatchEvent(new Event("resize"));

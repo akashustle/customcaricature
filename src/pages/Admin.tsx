@@ -32,6 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import LocationDropdowns from "@/components/LocationDropdowns";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminTabErrorBoundary from "@/components/admin/AdminTabErrorBoundary";
 import { getStates, getDistricts, getCities } from "@/lib/india-locations";
 import { usePermissions } from "@/hooks/usePermissions";
 import AdminActionConfirm from "@/components/admin/AdminActionConfirm";
@@ -1994,7 +1995,9 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="heatmap">
-            <AdminHeatmap />
+            <AdminTabErrorBoundary title="Heatmap crashed" onRetry={() => setActiveTab("heatmap")}>
+              <AdminHeatmap />
+            </AdminTabErrorBoundary>
           </TabsContent>
 
            <TabsContent value="maintenance">

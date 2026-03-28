@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -127,8 +127,7 @@ const HomepageEnquiryFunnel = () => {
 
         {/* Card */}
         <div className="bg-card rounded-2xl border border-border shadow-lg shadow-foreground/[0.03] overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div key={currentStep} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.25 }} className="p-6 md:p-8">
+          <motion.div key={currentStep} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="p-6 md:p-8">
               {/* Step 1: Event Type */}
               {currentStep === "event" && (
                 <div>
@@ -302,8 +301,7 @@ const HomepageEnquiryFunnel = () => {
                   </motion.div>
                 </div>
               )}
-            </motion.div>
-          </AnimatePresence>
+          </motion.div>
 
           {/* Footer Actions */}
           <div className="px-6 md:px-8 pb-6 flex items-center justify-between">
