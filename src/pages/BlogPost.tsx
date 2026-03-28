@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import { toast } from "@/hooks/use-toast";
+import { gtagBlogView, gtagShareClick } from "@/lib/gtag";
 
 type BlogPostType = {
   id: string;
