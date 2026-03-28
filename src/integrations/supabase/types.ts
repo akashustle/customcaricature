@@ -2170,6 +2170,30 @@ export type Database = {
         }
         Relationships: []
       }
+      lil_flea_notify_users: {
+        Row: {
+          created_at: string
+          id: string
+          instagram_id: string | null
+          mobile: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instagram_id?: string | null
+          mobile: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instagram_id?: string | null
+          mobile?: string
+          name?: string
+        }
+        Relationships: []
+      }
       live_chat_messages: {
         Row: {
           created_at: string
