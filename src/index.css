@@ -955,6 +955,11 @@
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
   }
+  .dark .admin-badge-success {
+    background: hsl(152 45% 15%);
+    color: hsl(152 45% 70%);
+    border-color: hsl(152 45% 25%);
+  }
   .admin-badge-warning {
     background: hsl(38 75% 95%);
     color: hsl(38 75% 32%);
@@ -963,6 +968,11 @@
     font-size: 0.6875rem;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
+  }
+  .dark .admin-badge-warning {
+    background: hsl(38 75% 15%);
+    color: hsl(38 75% 65%);
+    border-color: hsl(38 75% 25%);
   }
   .admin-badge-danger {
     background: hsl(0 50% 95%);
@@ -973,6 +983,11 @@
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
   }
+  .dark .admin-badge-danger {
+    background: hsl(0 50% 15%);
+    color: hsl(0 50% 70%);
+    border-color: hsl(0 50% 25%);
+  }
   .admin-badge-info {
     background: hsl(210 55% 95%);
     color: hsl(210 55% 32%);
@@ -981,6 +996,11 @@
     font-size: 0.6875rem;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
+  }
+  .dark .admin-badge-info {
+    background: hsl(210 55% 15%);
+    color: hsl(210 55% 70%);
+    border-color: hsl(210 55% 25%);
   }
 
   /* Premium admin section header */
