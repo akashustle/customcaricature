@@ -2092,6 +2092,21 @@ const Admin = () => {
                       }}
                     />
                   </div>
+                  {/* Artist Payment System Toggle */}
+                  <div className="flex items-center justify-between border-t border-border pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">💰 Artist Payment System</p>
+                      <p className="text-xs text-muted-foreground font-sans">Enable artist payout tracking, earnings, and payout requests</p>
+                    </div>
+                    <Switch
+                      checked={(settings as any).artist_payment_system?.enabled === true}
+                      onCheckedChange={async (checked) => {
+                        if (!confirm(`${checked ? "Enable" : "Disable"} artist payment system?`)) return;
+                        await updateSetting("artist_payment_system", { enabled: checked });
+                        toast({ title: checked ? "Artist payment system enabled" : "Artist payment system disabled" });
+                      }}
+                    />
+                  </div>
                   {/* Auto Assign Artist Toggle */}
                   <div className="flex items-center justify-between border-t border-border pt-4">
                     <div>
@@ -2101,12 +2116,21 @@ const Admin = () => {
                     <Switch
                       checked={(settings as any).auto_assign_artist?.enabled === true}
                       onCheckedChange={async (checked) => {
-                        if (!confirm(`${checked ? "Enable" : "Disable"} automatic artist assignment?`)) return;
-                        await updateSetting("auto_assign_artist", { enabled: checked });
-                        toast({ title: checked ? "Auto-assign enabled — artists will be assigned automatically" : "Auto-assign disabled — manual assignment only" });
+                        if (!checked) {
+                          await updateSetting("auto_assign_artist", { enabled: false });
+                          toast({ title: "Auto-assign disabled" });
+                          return;
+                        }
+                        // When enabling, default to all artists
+                        await updateSetting("auto_assign_artist", { enabled: true, selected_artists: "all" });
+                        toast({ title: "Auto-assign enabled — all artists eligible by default" });
                       }}
                     />
                   </div>
+                  {/* Auto-assign artist selection (when enabled) */}
+                  {(settings as any).auto_assign_artist?.enabled && (
+                    <AutoAssignArtistSelector settings={settings} updateSetting={updateSetting} />
+                  )}
                   {/* Global International Booking Toggle */}
                   <div className="flex items-center justify-between border-t border-border pt-4">
                     <div>
