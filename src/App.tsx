@@ -74,6 +74,7 @@ const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const DatabaseEntryReversal = lazy(() => import("./pages/DatabaseEntryReversal"));
 const FAQs = lazy(() => import("./pages/FAQs"));
 const Explore = lazy(() => import("./pages/Explore"));
+const SEOLandingPage = lazy(() => import("./pages/SEOLandingPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
