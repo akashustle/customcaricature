@@ -542,6 +542,7 @@ const ArtistDashboard = () => {
           {[
             { id: "events", icon: CalendarDays, label: "Events" },
             ...(isRitesh ? [{ id: "orders", icon: Package, label: "Orders" }] : []),
+            { id: "earnings", icon: Wallet, label: "Earnings" },
             { id: "blocked", icon: CalendarOff, label: "Block Dates" },
             { id: "chat", icon: MessageCircle, label: "Chat" },
           ].map(t => (
