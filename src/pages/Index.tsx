@@ -634,7 +634,7 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 cursor-pointer mb-3" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" />
+                <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" width={44} height={44} />
                 <div>
                   <span className="font-calligraphy text-lg font-bold text-foreground block">CCC</span>
                   <span className="text-[10px] text-muted-foreground">Creative Caricature Club</span>
