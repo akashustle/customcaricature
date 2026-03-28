@@ -3259,6 +3259,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_landing_pages: {
+        Row: {
+          body_content: string
+          city: string | null
+          created_at: string | null
+          h1_title: string
+          id: string
+          intro_text: string
+          is_active: boolean | null
+          keywords: string[] | null
+          meta_description: string
+          page_title: string
+          service: string
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          body_content?: string
+          city?: string | null
+          created_at?: string | null
+          h1_title: string
+          id?: string
+          intro_text: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          meta_description: string
+          page_title: string
+          service: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          body_content?: string
+          city?: string | null
+          created_at?: string | null
+          h1_title?: string
+          id?: string
+          intro_text?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          meta_description?: string
+          page_title?: string
+          service?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       seo_page_settings: {
         Row: {
           id: string
