@@ -190,6 +190,15 @@
     --brand-terracotta: 18 45% 55%;
     --brand-brown: 25 25% 72%;
     --brand-warm: 30 8% 14%;
+
+    --admin-bg: 25 12% 6%;
+    --admin-surface: 25 10% 10%;
+    --admin-foreground: 30 15% 90%;
+    --admin-primary: 30 30% 78%;
+    --admin-secondary: 35 42% 48%;
+    --admin-highlight: 18 45% 55%;
+    --admin-border: 25 8% 18%;
+    --admin-shadow: 0 0% 0%;
   }
 }
 
