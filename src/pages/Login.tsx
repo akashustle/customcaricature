@@ -23,7 +23,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "secret_code">("password");
   const [loginWith, setLoginWith] = useState<"email" | "phone">("email");
-  const [step, setStep] = useState(1); // 1: identity, 2: method, 3: credential
+  const [step, setStep] = useState(1);
+  const [detecting, setDetecting] = useState(false);
+  const [roleChoiceOpen, setRoleChoiceOpen] = useState(false);
+  const [detectedRoles, setDetectedRoles] = useState<string[]>([]);
 
   const withTimeout = async (promise: Promise<any>, ms = 10000) => {
     return await Promise.race([
