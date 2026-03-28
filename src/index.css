@@ -1310,6 +1310,10 @@
     box-shadow: 0 25px 50px -12px hsl(0 0% 0% / 0.15), 0 0 0 1px hsl(0 0% 100% / 0.1) inset;
     border-radius: 1.5rem;
   }
+  .dark .admin-dialog-glass {
+    background: hsl(var(--card) / 0.88);
+    box-shadow: 0 25px 50px -12px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border) / 0.2) inset;
+  }
 
   /* Smooth content fade for tab switches */
   @keyframes contentReveal {
