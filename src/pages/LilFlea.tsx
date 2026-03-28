@@ -303,10 +303,10 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
 };
 
 const EXPERIENCE_CARDS = [
-  { title: "Single Caricature", desc: "Your personality captured in a fun, unique sketch", icon: Sparkles, gradient: "from-rose-100 to-pink-50", iconColor: "text-rose-500" },
-  { title: "Couple Caricature", desc: "A memorable sketch for two — perfect keepsake", icon: Heart, gradient: "from-violet-100 to-purple-50", iconColor: "text-violet-500" },
-  { title: "Family Caricature", desc: "The whole family in one beautiful portrait", icon: Users, gradient: "from-sky-100 to-blue-50", iconColor: "text-sky-500" },
-  { title: "Color & B&W", desc: "Vibrant colors or classic black & white — your call", icon: Palette, gradient: "from-amber-100 to-yellow-50", iconColor: "text-amber-500" },
+  { title: "Single Caricature", desc: "Your personality captured in a fun, unique sketch", icon: Sparkles, gradient: "from-rose-100 to-pink-50 dark:from-rose-950 dark:to-pink-950", iconColor: "text-rose-500" },
+  { title: "Couple Caricature", desc: "A memorable sketch for two — perfect keepsake", icon: Heart, gradient: "from-violet-100 to-purple-50 dark:from-violet-950 dark:to-purple-950", iconColor: "text-violet-500" },
+  { title: "Family Caricature", desc: "The whole family in one beautiful portrait", icon: Users, gradient: "from-sky-100 to-blue-50 dark:from-sky-950 dark:to-blue-950", iconColor: "text-sky-500" },
+  { title: "Color & B&W", desc: "Vibrant colors or classic black & white — your call", icon: Palette, gradient: "from-amber-100 to-yellow-50 dark:from-amber-950 dark:to-yellow-950", iconColor: "text-amber-500" },
 ];
 
 const HOW_IT_WORKS = [
