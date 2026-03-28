@@ -190,6 +190,15 @@
     --brand-terracotta: 18 45% 55%;
     --brand-brown: 25 25% 72%;
     --brand-warm: 30 8% 14%;
+
+    --admin-bg: 25 12% 6%;
+    --admin-surface: 25 10% 10%;
+    --admin-foreground: 30 15% 90%;
+    --admin-primary: 30 30% 78%;
+    --admin-secondary: 35 42% 48%;
+    --admin-highlight: 18 45% 55%;
+    --admin-border: 25 8% 18%;
+    --admin-shadow: 0 0% 0%;
   }
 }
 
@@ -632,6 +641,13 @@
       0 8px 32px hsl(0 0% 0% / 0.05),
       inset 0 1px 0 hsl(0 0% 100% / 0.8);
   }
+  .dark .admin-sidebar-premium {
+    background: hsl(var(--card) / 0.75);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow:
+      0 2px 8px hsl(0 0% 0% / 0.15),
+      0 8px 32px hsl(0 0% 0% / 0.2);
+  }
 
   /* Sidebar nav item states */
   .admin-sidebar-item-active {
@@ -640,12 +656,24 @@
     font-weight: 600;
     box-shadow: 0 1px 3px hsl(25 25% 32% / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.6);
   }
+  .dark .admin-sidebar-item-active {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.1));
+    color: hsl(var(--foreground));
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.2);
+  }
   .admin-sidebar-item-idle {
     color: hsl(25 10% 48%);
   }
   .admin-sidebar-item-idle:hover {
     color: hsl(25 15% 28%);
     background: hsl(30 15% 96%);
+  }
+  .dark .admin-sidebar-item-idle {
+    color: hsl(var(--muted-foreground));
+  }
+  .dark .admin-sidebar-item-idle:hover {
+    color: hsl(var(--foreground));
+    background: hsl(var(--muted) / 0.5);
   }
 
   /* Sidebar icon states */
@@ -658,11 +686,19 @@
     background: hsl(30 15% 94%);
     color: hsl(25 10% 50%);
   }
+  .dark .admin-sidebar-icon-idle {
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
   .admin-sidebar-item-idle:hover .admin-sidebar-icon-idle {
     background: hsl(30 18% 90%);
     color: hsl(25 15% 35%);
     transform: scale(1.05);
     transition: all 0.2s ease;
+  }
+  .dark .admin-sidebar-item-idle:hover .admin-sidebar-icon-idle {
+    background: hsl(var(--muted) / 0.8);
+    color: hsl(var(--foreground));
   }
 
   /* Sidebar search input */
@@ -671,6 +707,11 @@
     border-color: hsl(25 30% 75%);
     box-shadow: 0 0 0 3px hsl(25 30% 80% / 0.2), 0 1px 3px hsl(0 0% 0% / 0.04);
     background: hsl(0 0% 100%);
+  }
+  .dark .admin-sidebar-search:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+    background: hsl(var(--card));
   }
 
   /* Premium admin header — glass blur */
@@ -681,10 +722,18 @@
     border-bottom: 1px solid hsl(30 18% 92%);
     box-shadow: 0 1px 2px hsl(0 0% 0% / 0.02), 0 4px 16px hsl(0 0% 0% / 0.03);
   }
+  .dark .admin-header-glass {
+    background: hsl(var(--card) / 0.72);
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 0 1px 2px hsl(0 0% 0% / 0.1), 0 4px 16px hsl(0 0% 0% / 0.15);
+  }
 
   /* Admin content premium bg */
   .admin-content-premium {
     background: linear-gradient(180deg, hsl(30 20% 98%) 0%, hsl(0 0% 100%) 50%, hsl(30 15% 97%) 100%);
+  }
+  .dark .admin-content-premium {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(25 10% 8%) 50%, hsl(var(--background)) 100%);
   }
 
   /* 3D Widget Card */
@@ -915,6 +964,11 @@
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
   }
+  .dark .admin-badge-success {
+    background: hsl(152 45% 15%);
+    color: hsl(152 45% 70%);
+    border-color: hsl(152 45% 25%);
+  }
   .admin-badge-warning {
     background: hsl(38 75% 95%);
     color: hsl(38 75% 32%);
@@ -923,6 +977,11 @@
     font-size: 0.6875rem;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
+  }
+  .dark .admin-badge-warning {
+    background: hsl(38 75% 15%);
+    color: hsl(38 75% 65%);
+    border-color: hsl(38 75% 25%);
   }
   .admin-badge-danger {
     background: hsl(0 50% 95%);
@@ -933,6 +992,11 @@
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
   }
+  .dark .admin-badge-danger {
+    background: hsl(0 50% 15%);
+    color: hsl(0 50% 70%);
+    border-color: hsl(0 50% 25%);
+  }
   .admin-badge-info {
     background: hsl(210 55% 95%);
     color: hsl(210 55% 32%);
@@ -941,6 +1005,11 @@
     font-size: 0.6875rem;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
+  }
+  .dark .admin-badge-info {
+    background: hsl(210 55% 15%);
+    color: hsl(210 55% 70%);
+    border-color: hsl(210 55% 25%);
   }
 
   /* Premium admin section header */
@@ -1249,6 +1318,10 @@
     border: 1px solid hsl(var(--border) / 0.3);
     box-shadow: 0 25px 50px -12px hsl(0 0% 0% / 0.15), 0 0 0 1px hsl(0 0% 100% / 0.1) inset;
     border-radius: 1.5rem;
+  }
+  .dark .admin-dialog-glass {
+    background: hsl(var(--card) / 0.88);
+    box-shadow: 0 25px 50px -12px hsl(0 0% 0% / 0.4), 0 0 0 1px hsl(var(--border) / 0.2) inset;
   }
 
   /* Smooth content fade for tab switches */

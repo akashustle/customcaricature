@@ -303,10 +303,10 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
 };
 
 const EXPERIENCE_CARDS = [
-  { title: "Single Caricature", desc: "Your personality captured in a fun, unique sketch", icon: Sparkles, gradient: "from-rose-100 to-pink-50", iconColor: "text-rose-500" },
-  { title: "Couple Caricature", desc: "A memorable sketch for two — perfect keepsake", icon: Heart, gradient: "from-violet-100 to-purple-50", iconColor: "text-violet-500" },
-  { title: "Family Caricature", desc: "The whole family in one beautiful portrait", icon: Users, gradient: "from-sky-100 to-blue-50", iconColor: "text-sky-500" },
-  { title: "Color & B&W", desc: "Vibrant colors or classic black & white — your call", icon: Palette, gradient: "from-amber-100 to-yellow-50", iconColor: "text-amber-500" },
+  { title: "Single Caricature", desc: "Your personality captured in a fun, unique sketch", icon: Sparkles, gradient: "from-rose-100 to-pink-50 dark:from-rose-950 dark:to-pink-950", iconColor: "text-rose-500" },
+  { title: "Couple Caricature", desc: "A memorable sketch for two — perfect keepsake", icon: Heart, gradient: "from-violet-100 to-purple-50 dark:from-violet-950 dark:to-purple-950", iconColor: "text-violet-500" },
+  { title: "Family Caricature", desc: "The whole family in one beautiful portrait", icon: Users, gradient: "from-sky-100 to-blue-50 dark:from-sky-950 dark:to-blue-950", iconColor: "text-sky-500" },
+  { title: "Color & B&W", desc: "Vibrant colors or classic black & white — your call", icon: Palette, gradient: "from-amber-100 to-yellow-50 dark:from-amber-950 dark:to-yellow-950", iconColor: "text-amber-500" },
 ];
 
 const HOW_IT_WORKS = [
@@ -338,7 +338,7 @@ const FlashCard3D = ({ card, index }: { card: typeof EXPERIENCE_CARDS[0]; index:
           className={`absolute inset-0 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-br ${card.gradient} border border-border/50 shadow-md`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-12 h-12 rounded-xl bg-white/70 flex items-center justify-center ${card.iconColor}`}>
+          <div className={`w-12 h-12 rounded-xl bg-background/70 flex items-center justify-center ${card.iconColor}`}>
             <Icon className="w-6 h-6" />
           </div>
           <div>
@@ -657,8 +657,8 @@ const LilFlea = () => {
 
           {/* ─── HERO ─── */}
           <section className="relative min-h-[90svh] flex items-center justify-center overflow-hidden">
-            <div className="absolute top-10 left-10 w-60 h-60 rounded-full blur-[100px] bg-rose-200/30" />
-            <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full blur-[80px] bg-violet-200/25" />
+            <div className="absolute top-10 left-10 w-60 h-60 rounded-full blur-[100px] bg-rose-200/30 dark:bg-rose-900/20" />
+            <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full blur-[80px] bg-violet-200/25 dark:bg-violet-900/15" />
 
             <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-4 mb-8 flex-wrap">

@@ -28,6 +28,7 @@ import {
   Bell, Send, Lock, Reply, Monitor, GraduationCap, MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 import ExportButton from "@/components/admin/ExportButton";
 import AdminOnlineAttendance from "@/components/admin/AdminOnlineAttendance";
 import AdminWorkshopCountdown from "@/components/admin/AdminWorkshopCountdown";
@@ -96,7 +97,9 @@ const WorkshopAdmin = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [adminInfo, setAdminInfo] = useState<any>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_dark") === "true");
+  const { resolvedTheme, setTheme: setGlobalTheme } = useTheme();
+  const darkMode = resolvedTheme === "dark";
+  const setDarkMode = (val: boolean) => setGlobalTheme(val ? "dark" : "light");
   const [hardResetStep, setHardResetStep] = useState(0);
   const [hardResetCode, setHardResetCode] = useState("");
   const [feedbackReply, setFeedbackReply] = useState<{ [key: string]: string }>({});
@@ -137,7 +140,7 @@ const WorkshopAdmin = () => {
   const [newSession, setNewSession] = useState({ title: "", session_date: "2026-03-14", slot: "6pm-9pm", artist_name: "", artist_portfolio_link: "", requirements: "", what_students_learn: "", meet_link: "" });
   const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "", permissions: [] as string[] });
 
-  useEffect(() => { localStorage.setItem("ws_dark", darkMode.toString()); }, [darkMode]);
+  // Dark mode is now managed by next-themes globally
 
   useEffect(() => {
     let mounted = true;
@@ -634,18 +637,18 @@ const WorkshopAdmin = () => {
   const marksDistribution = [{ name: "0-40", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 <= 40).length }, { name: "41-60", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 40 && (a.marks/(a.total_marks||100))*100 <= 60).length }, { name: "61-80", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 60 && (a.marks/(a.total_marks||100))*100 <= 80).length }, { name: "81-100", value: filteredAssignments.filter(a => a.marks != null && (a.marks/(a.total_marks||100))*100 > 80).length }].filter(d => d.value > 0);
   const dailyRegData = (() => { const days: any[] = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().split("T")[0]; days.push({ name: d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), regs: filteredUsers.filter(u => u.created_at?.startsWith(ds)).length }); } return days; })();
 
-  // Theme — Premium SaaS aesthetic
+  // Theme — Premium SaaS aesthetic (uses semantic tokens for dark mode)
   const dm = darkMode;
-  const bg = dm ? "bg-[#0a0a0f]" : "bg-[#f8fafc]";
-  const cardBg = dm ? "bg-[#141420]/95 border-white/[0.06]" : "bg-white border-slate-200/60";
-  const textPrimary = dm ? "text-white font-semibold" : "text-slate-900 font-semibold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-slate-500 font-medium";
-  const textMuted = dm ? "text-white/35" : "text-slate-400";
-  const sidebarBg = dm ? "bg-[#0e0e18]/98 border-white/[0.06]" : "bg-white/95 border-slate-200/60";
+  const bg = "bg-background";
+  const cardBg = "bg-card border-border";
+  const textPrimary = "text-foreground font-semibold";
+  const textSecondary = "text-muted-foreground font-medium";
+  const textMuted = "text-muted-foreground/60";
+  const sidebarBg = "bg-card/95 border-border";
   const activeTabClass = "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold";
-  const inactiveTab = dm ? "text-white/40 hover:text-white/80 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50";
+  const inactiveTab = "text-muted-foreground hover:text-foreground hover:bg-muted";
   const btnPrimary = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 font-semibold";
-  const inputClass = dm ? "bg-white/[0.06] border-white/[0.08] text-white font-medium placeholder:text-white/25 rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20" : "bg-slate-50/80 border-slate-200 text-slate-900 font-medium placeholder:text-slate-400 rounded-xl focus:border-violet-500 focus:ring-violet-500/20";
+  const inputClass = "bg-secondary border-border text-foreground font-medium placeholder:text-muted-foreground rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }}
@@ -658,7 +661,7 @@ const WorkshopAdmin = () => {
 
   const RefreshButton = () => (
     <Button variant="outline" size="sm" onClick={fetchAll} disabled={refreshing}
-      className={`rounded-xl ${dm ? "border-white/[0.08] text-white/50 hover:bg-white/[0.04]" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}>
+      className="rounded-xl border-border text-muted-foreground hover:bg-muted">
       <RefreshCw className={`w-3.5 h-3.5 mr-1 ${refreshing ? "animate-spin" : ""}`} />
       Refresh
     </Button>
@@ -884,24 +887,24 @@ const WorkshopAdmin = () => {
     return (
       <>
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-          <div className={`backdrop-blur-xl ${isDark ? "bg-[#0e0e18]/95 border-white/[0.04]" : "bg-white/95 border-slate-200/20"} border-t`}>
+          <div className="backdrop-blur-xl bg-card/95 border-border border-t">
             <div className="flex items-center justify-evenly h-[56px] px-1">
               {WS_PRIMARY.map((item: any) => {
                 const isActive = activeTab === item.key;
                 return (
                   <motion.button key={item.key} onClick={() => onTabChange(item.key)} whileTap={{ scale: 0.75 }}
                     className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                    <item.icon className={`transition-all duration-200 ${isActive ? (isDark ? "text-white" : "text-slate-900") : isDark ? "text-white/25" : "text-slate-400/60"}`}
+                    <item.icon className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/60"}`}
                       size={isActive ? 26 : 22} strokeWidth={isActive ? 2.2 : 1.4}
                       fill={isActive && item.icon === LayoutDashboard ? "currentColor" : "none"} />
-                    {isActive && <motion.div layoutId="ws-admin-dot" className={`absolute bottom-1.5 w-1 h-1 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} transition={{ type: "spring", stiffness: 500, damping: 30 }} />}
+                    {isActive && <motion.div layoutId="ws-admin-dot" className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" transition={{ type: "spring", stiffness: 500, damping: 30 }} />}
                   </motion.button>
                 );
               })}
               <motion.button onClick={() => setShowMore(true)} whileTap={{ scale: 0.75 }} className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                <MoreHorizontal className={`transition-all duration-200 ${isMoreActive || showMore ? (isDark ? "text-white" : "text-slate-900") : isDark ? "text-white/25" : "text-slate-400/60"}`}
+                <MoreHorizontal className={`transition-all duration-200 ${isMoreActive || showMore ? "text-foreground" : "text-muted-foreground/60"}`}
                   size={isMoreActive ? 26 : 22} strokeWidth={isMoreActive ? 2.2 : 1.4} />
-                {isMoreActive && <div className={`absolute bottom-1.5 w-1 h-1 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} />}
+                {isMoreActive && <div className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />}
               </motion.button>
             </div>
             <div className="h-[env(safe-area-inset-bottom)]" />
@@ -914,9 +917,9 @@ const WorkshopAdmin = () => {
                 className="lg:hidden fixed inset-0 z-[60] bg-background/60 backdrop-blur-sm" onClick={() => setShowMore(false)} />
               <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className={`lg:hidden fixed bottom-0 left-0 right-0 z-[61] ${isDark ? "bg-[#0e0e18]" : "bg-white"} border-t border-border rounded-t-3xl max-h-[70vh] overflow-hidden flex flex-col`}>
+                className="lg:hidden fixed bottom-0 left-0 right-0 z-[61] bg-card border-t border-border rounded-t-3xl max-h-[70vh] overflow-hidden flex flex-col">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
-                  <h3 className={`text-sm font-bold ${isDark ? "text-white" : "text-slate-900"}`}>All Modules</h3>
+                  <h3 className="text-sm font-bold text-foreground">All Modules</h3>
                   <button onClick={() => setShowMore(false)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
@@ -928,7 +931,7 @@ const WorkshopAdmin = () => {
                       return (
                         <button key={item.key} onClick={() => { onTabChange(item.key); setShowMore(false); }}
                           className={cn("flex flex-col items-center gap-1 py-3 px-1 rounded-xl transition-all",
-                            isActive ? (isDark ? "bg-violet-500/15 text-violet-300" : "bg-violet-50 text-violet-700") : (isDark ? "text-white/40" : "text-slate-500")
+                            isActive ? "bg-violet-500/15 text-violet-400" : "text-muted-foreground"
                           )}>
                           <item.icon size={20} strokeWidth={isActive ? 2 : 1.4} />
                           <span className="text-[10px] font-medium leading-tight text-center">{item.label}</span>

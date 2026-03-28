@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
@@ -68,14 +69,15 @@ const WorkshopDashboard = () => {
   const navigate = useNavigate();
   const [workshopUser, setWorkshopUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("home");
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_user_dark") === "true");
+  const { resolvedTheme, setTheme } = useTheme();
+  const darkMode = resolvedTheme === "dark";
   const [settings, setSettings] = useState<any>({});
   const [accentIdx, setAccentIdx] = useState(() => parseInt(localStorage.getItem("ws_accent") || "0") || 0);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const accent = ACCENT_COLORS[accentIdx] || ACCENT_COLORS[0];
 
-  useEffect(() => { localStorage.setItem("ws_user_dark", darkMode.toString()); }, [darkMode]);
+  const setDarkMode = (val: boolean) => setTheme(val ? "dark" : "light");
   useEffect(() => { localStorage.setItem("ws_accent", accentIdx.toString()); }, [accentIdx]);
 
   useEffect(() => {
@@ -142,13 +144,13 @@ const WorkshopDashboard = () => {
   if (!workshopUser) return null;
 
   const dm = darkMode;
-  const bg = dm ? "bg-background" : "bg-[#f8fafc]";
-  const headerBg = dm ? "bg-card/98 border-border" : "bg-white/98 border-slate-200/60";
-  const textPrimary = dm ? "text-foreground font-bold" : "text-slate-900 font-bold";
-  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-slate-500 font-medium";
-  const activeClass = `text-white shadow-lg font-semibold`;
+  const bg = dm ? "bg-background" : "bg-background";
+  const headerBg = dm ? "bg-card/98 border-border" : "bg-card/98 border-border";
+  const textPrimary = dm ? "text-foreground font-bold" : "text-foreground font-bold";
+  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-muted-foreground font-medium";
+  const activeClass = `text-primary-foreground shadow-lg font-semibold`;
   const activeStyle = { background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})`, boxShadow: `0 4px 15px ${accent.primary}30` };
-  const inactiveClass = dm ? "text-muted-foreground font-medium" : "text-slate-400 font-medium";
+  const inactiveClass = "text-muted-foreground font-medium";
 
   const visibleTabs = allTabs.filter(tab => {
     if (!tab.settingKey) return true;
@@ -240,7 +242,7 @@ const WorkshopDashboard = () => {
                 {ACCENT_COLORS.map((c, i) => (
                   <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
                     whileHover={{ scale: 1.2, y: -2 }} whileTap={{ scale: 0.9 }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-slate-900 dark:border-white shadow-lg" : "border-transparent"}`}
+                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-foreground shadow-lg" : "border-transparent"}`}
                     style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
                     title={c.name} />
                 ))}
@@ -252,11 +254,11 @@ const WorkshopDashboard = () => {
 
       {/* Desktop Tab Bar */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className={`${dm ? "bg-white/[0.04] border-white/[0.06]" : "bg-white border-slate-200/60"} border rounded-2xl p-1.5 flex gap-1`}>
+        <div className={`bg-card border-border border rounded-2xl p-1.5 flex gap-1`}>
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-slate-50 dark:hover:bg-white/[0.04]`}`}>
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-muted`}`}>
               <tab.icon className="w-4 h-4" />{tab.label}
             </button>
           ))}
@@ -279,7 +281,7 @@ const WorkshopDashboard = () => {
 
       {/* Mobile Bottom Nav - Instagram Style */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-lg ${dm ? "bg-card/95 border-border" : "bg-white/95 border-slate-200/30"} border-t`}>
+        <div className={`backdrop-blur-lg bg-card/95 border-border border-t`}>
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
@@ -288,14 +290,14 @@ const WorkshopDashboard = () => {
                   whileTap={{ scale: 0.75 }}
                   className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
                   <tab.icon
-                    className={`transition-all duration-200 ${isActive ? (dm ? "text-foreground" : "text-slate-900") : dm ? "text-muted-foreground" : "text-slate-400"}`}
+                    className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
                     size={isActive ? 26 : 22}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && tab.icon === Home ? "currentColor" : "none"}
                   />
                   {isActive && (
                     <motion.div layoutId="ws-dash-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full ${dm ? "bg-foreground" : "bg-slate-900"}`}
+                      className={`absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground`}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
@@ -303,7 +305,7 @@ const WorkshopDashboard = () => {
             })}
             <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.75 }}
               className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-              <LayoutDashboard className={`w-[22px] h-[22px] ${dm ? "text-muted-foreground" : "text-slate-400"}`} strokeWidth={1.4} />
+              <LayoutDashboard className="w-[22px] h-[22px] text-muted-foreground" strokeWidth={1.4} />
             </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
