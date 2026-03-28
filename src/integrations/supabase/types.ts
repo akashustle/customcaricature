@@ -720,6 +720,215 @@ export type Database = {
           },
         ]
       }
+      artist_event_payouts: {
+        Row: {
+          artist_id: string
+          calculated_amount: number
+          created_at: string
+          credited_at: string | null
+          event_id: string
+          event_total: number
+          id: string
+          payout_type: string
+          payout_value: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          calculated_amount?: number
+          created_at?: string
+          credited_at?: string | null
+          event_id: string
+          event_total?: number
+          id?: string
+          payout_type?: string
+          payout_value?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          calculated_amount?: number
+          created_at?: string
+          credited_at?: string | null
+          event_id?: string
+          event_total?: number
+          id?: string
+          payout_type?: string
+          payout_value?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_event_payouts_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_event_payouts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_payout_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          artist_id: string
+          created_at: string
+          credited_at: string | null
+          expected_credit_date: string | null
+          id: string
+          note: string | null
+          request_type: string
+          screenshot_path: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          artist_id: string
+          created_at?: string
+          credited_at?: string | null
+          expected_credit_date?: string | null
+          id?: string
+          note?: string | null
+          request_type?: string
+          screenshot_path?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          artist_id?: string
+          created_at?: string
+          credited_at?: string | null
+          expected_credit_date?: string | null
+          id?: string
+          note?: string | null
+          request_type?: string
+          screenshot_path?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_payout_requests_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_payout_settings: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          payout_cycle: string
+          payout_type: string
+          payout_value: number
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          payout_cycle?: string
+          payout_type?: string
+          payout_value?: number
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          payout_cycle?: string
+          payout_type?: string
+          payout_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_payout_settings_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: true
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_transactions: {
+        Row: {
+          amount: number
+          artist_id: string
+          created_at: string
+          description: string | null
+          event_id: string | null
+          id: string
+          payout_request_id: string | null
+          screenshot_path: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          artist_id: string
+          created_at?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          payout_request_id?: string | null
+          screenshot_path?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          artist_id?: string
+          created_at?: string
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          payout_request_id?: string | null
+          screenshot_path?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_transactions_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_transactions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_transactions_payout_request_id_fkey"
+            columns: ["payout_request_id"]
+            isOneToOne: false
+            referencedRelation: "artist_payout_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           auth_user_id: string | null
@@ -790,6 +999,32 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_assign_eligible_artists: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_assign_eligible_artists_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: true
+            referencedRelation: "artists"
             referencedColumns: ["id"]
           },
         ]

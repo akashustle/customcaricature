@@ -118,6 +118,54 @@ serve(async (req) => {
       description: `Remaining ₹${totalCollected} collected by artist ${artist.name} (${collection_method})${extraHoursNum > 0 ? ` + ${extraHoursNum} extra hrs (₹${extraAmt})` : ""}`,
     });
 
+    // Auto-create artist event payouts based on payout settings
+    try {
+      const { data: assignments } = await supabase
+        .from("event_artist_assignments")
+        .select("artist_id")
+        .eq("event_id", event_id);
+      
+      const artistIds = assignments?.map((a: any) => a.artist_id) || [];
+      if (booking.assigned_artist_id && !artistIds.includes(booking.assigned_artist_id)) {
+        artistIds.push(booking.assigned_artist_id);
+      }
+
+      const finalTotal = booking.negotiated && booking.negotiated_total ? booking.negotiated_total : booking.total_price;
+      const finalWithExtra = finalTotal + (extraAmt || 0);
+
+      for (const aid of artistIds) {
+        // Check if payout already exists
+        const { data: existing } = await supabase.from("artist_event_payouts")
+          .select("id").eq("artist_id", aid).eq("event_id", event_id).maybeSingle();
+        if (existing) continue;
+
+        const { data: payoutSetting } = await supabase.from("artist_payout_settings")
+          .select("payout_type, payout_value").eq("artist_id", aid).eq("is_active", true).maybeSingle();
+        
+        if (payoutSetting) {
+          const perArtistTotal = artistIds.length > 1 ? finalWithExtra / artistIds.length : finalWithExtra;
+          const calcAmount = payoutSetting.payout_type === "percentage"
+            ? (perArtistTotal * payoutSetting.payout_value / 100)
+            : payoutSetting.payout_value;
+
+          await supabase.from("artist_event_payouts").insert({
+            artist_id: aid, event_id, payout_type: payoutSetting.payout_type,
+            payout_value: payoutSetting.payout_value, event_total: perArtistTotal,
+            calculated_amount: calcAmount, status: "pending",
+          });
+
+          // Create earning transaction
+          await supabase.from("artist_transactions").insert({
+            artist_id: aid, transaction_type: "earning", amount: calcAmount,
+            description: `Earning from ${booking.client_name}'s event (${payoutSetting.payout_type === "percentage" ? payoutSetting.payout_value + "%" : "₹" + payoutSetting.payout_value} of ₹${perArtistTotal.toLocaleString("en-IN")})`,
+            event_id,
+          });
+        }
+      }
+    } catch (payoutErr) {
+      console.warn("Payout calculation failed (non-fatal):", payoutErr);
+    }
+
     // Notify admin
     const { data: admins } = await supabase.from("user_roles").select("user_id").eq("role", "admin");
     if (admins) {
