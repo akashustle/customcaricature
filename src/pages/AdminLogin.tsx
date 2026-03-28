@@ -296,6 +296,7 @@ const AdminLogin = () => {
 
   return (
     <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      <SEOHead title="Admin Login" noindex />
 
       {/* Soft floating brand-colored shapes */}
       <div className="absolute inset-0 overflow-hidden">

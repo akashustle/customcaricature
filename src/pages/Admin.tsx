@@ -880,6 +880,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex w-full">
+      <SEOHead title="Admin Panel" noindex />
       <AdminActionConfirm
         open={actionState.pending}
         action={actionState.action}

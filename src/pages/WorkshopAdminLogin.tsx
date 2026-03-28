@@ -210,6 +210,7 @@ const WorkshopAdminLogin = () => {
 
   return (
     <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      <SEOHead title="Workshop Admin Login" noindex />
 
       {/* Soft floating shapes */}
       <div className="absolute inset-0 overflow-hidden">

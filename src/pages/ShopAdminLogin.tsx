@@ -54,6 +54,7 @@ const ShopAdminLogin = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.15),transparent_60%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.1),transparent_50%)] bg-background">
+      <SEOHead title="Shop Admin Login" noindex />
       <motion.div className="absolute top-20 right-20 w-72 h-72 rounded-full opacity-20 blur-3xl"
         style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.25), hsl(var(--accent)/0.15))" }}
         animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 6, repeat: Infinity }} />

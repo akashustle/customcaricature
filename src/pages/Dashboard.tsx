@@ -257,6 +257,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
       <header className="sticky top-0 z-40 app-header border-b border-border/30">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
