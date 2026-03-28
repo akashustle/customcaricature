@@ -132,6 +132,7 @@ const AdminArtists = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [artistLogs, setArtistLogs] = useState<Record<string, ArtistLog[]>>({});
   const [showLogsFor, setShowLogsFor] = useState<string | null>(null);
+  const [chatArtist, setChatArtist] = useState<{ userId: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchArtists();
