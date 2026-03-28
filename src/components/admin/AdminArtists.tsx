@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp, MessageCircle, Send, Loader2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Save, X, FileText, Upload, UserPlus, CalendarDays, MapPin, Users, Phone, Mail, Search, Eye, Palette, IndianRupee, CheckCircle2, Clock, ChevronDown, ChevronUp, MessageCircle, Send, Loader2, KeyRound, Copy, RefreshCw } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
