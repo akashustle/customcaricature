@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { MapPin, Calendar, Clock, ArrowRight, Ticket, Phone, X, ChevronLeft, ChevronRight, Instagram, ExternalLink, Sparkles, Users, Palette, Heart, Star, Download, Mail, Send } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, Calendar, Clock, ArrowRight, Ticket, Phone, X, ChevronLeft, ChevronRight, Instagram, ExternalLink, Sparkles, Users, Palette, Heart, Star, Download, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,106 +70,83 @@ const Typewriter = ({ text, delay = 0, speed = 50, className = "", onDone }: {
     <span className={className}>
       {displayed}
       {started && displayed.length < text.length && (
-        <motion.span
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-          className="inline-block w-[3px] h-[1em] bg-current ml-0.5 align-middle"
-        />
+        <span className="inline-block w-[3px] h-[1em] bg-current ml-0.5 align-middle animate-pulse" />
       )}
     </span>
   );
 };
 
-/* ─── Splash Screen ─── */
+/* ─── Splash Screen — lightweight, instant audio ─── */
 const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config: EventConfig }) => {
   const [phase, setPhase] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [userTapped, setUserTapped] = useState(false);
-  const soundRef = useRef<HTMLAudioElement | null>(null);
-  const soundPlayed = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (sessionStorage.getItem("lf_splash_done") || !config.splash_enabled) {
       onComplete();
       return;
     }
+
+    // Create audio element immediately and try to play
+    const soundUrl = config.splash_sound_url || "/sounds/lil-flea-splash.wav";
+    const audio = new Audio(soundUrl);
+    audio.volume = 0.5;
+    audio.preload = "auto";
+    audioRef.current = audio;
+
+    // Try autoplay immediately
+    const tryPlay = () => {
+      audio.play().catch(() => {});
+    };
+    tryPlay();
+
+    // Also play on first interaction as fallback
+    const onInteract = () => {
+      if (audio.paused) audio.play().catch(() => {});
+      document.removeEventListener("touchstart", onInteract);
+      document.removeEventListener("click", onInteract);
+    };
+    document.addEventListener("touchstart", onInteract, { once: true, passive: true });
+    document.addEventListener("click", onInteract, { once: true });
+
     // Preload images
     EVENT_IMAGES.forEach(src => { const img = new Image(); img.src = src; });
-    
-    if (document.readyState === "complete") {
-      setReady(true);
-    } else {
-      const onLoad = () => setReady(true);
-      window.addEventListener("load", onLoad);
-      return () => window.removeEventListener("load", onLoad);
-    }
-  }, [config.splash_enabled, onComplete]);
 
-  // Play sound after user interaction (autoplay policy)
-  const playSound = useCallback(() => {
-    if (soundPlayed.current) return;
-    soundPlayed.current = true;
-    try {
-      const soundUrl = config.splash_sound_url || "/sounds/lil-flea-splash.wav";
-      soundRef.current = new Audio(soundUrl);
-      soundRef.current.volume = 0.5;
-      soundRef.current.play().catch(() => {});
-    } catch {}
-  }, [config.splash_sound_url]);
-
-  // Try playing on first user interaction
-  useEffect(() => {
-    if (!ready) return;
-    const handler = () => {
-      playSound();
-      setUserTapped(true);
-      document.removeEventListener("touchstart", handler);
-      document.removeEventListener("click", handler);
-      document.removeEventListener("keydown", handler);
-    };
-    // Also try immediately (some browsers allow it)
-    playSound();
-    document.addEventListener("touchstart", handler, { once: true, passive: true });
-    document.addEventListener("click", handler, { once: true });
-    document.addEventListener("keydown", handler, { once: true });
-    return () => {
-      document.removeEventListener("touchstart", handler);
-      document.removeEventListener("click", handler);
-      document.removeEventListener("keydown", handler);
-    };
-  }, [ready, playSound]);
-
-  useEffect(() => {
-    if (!ready) return;
+    // Phase timeline — fast & smooth
     const timers = [
-      setTimeout(() => setPhase(1), 200),
-      setTimeout(() => setPhase(2), 1800),
-      setTimeout(() => setPhase(3), 4200),
-      setTimeout(() => setPhase(4), 5800),
-      setTimeout(() => setPhase(5), 9200),
-      setTimeout(() => setPhase(6), 12000),
+      setTimeout(() => setPhase(1), 100),     // gates open
+      setTimeout(() => setPhase(2), 1400),     // typewriter text
+      setTimeout(() => setPhase(3), 3800),     // date pills
+      setTimeout(() => setPhase(4), 5200),     // photo mosaic (logo stays visible)
+      setTimeout(() => setPhase(5), 8500),     // final message
+      setTimeout(() => setPhase(6), 11000),    // fade out
       setTimeout(() => {
         sessionStorage.setItem("lf_splash_done", "1");
-        if (soundRef.current) { soundRef.current.pause(); soundRef.current = null; }
+        if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
         onComplete();
-      }, 12800),
+      }, 11800),
     ];
-    return () => { timers.forEach(clearTimeout); if (soundRef.current) { soundRef.current.pause(); } };
-  }, [ready, onComplete]);
 
-  if (!ready || sessionStorage.getItem("lf_splash_done") || !config.splash_enabled) return null;
+    return () => {
+      timers.forEach(clearTimeout);
+      document.removeEventListener("touchstart", onInteract);
+      document.removeEventListener("click", onInteract);
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    };
+  }, [config.splash_enabled, config.splash_sound_url, onComplete]);
 
-  /* Image mosaic positions — scattered grid pattern */
-  const imgGrid = [
-    { col: 0, row: 0, r: -8 },
-    { col: 1, row: 0, r: 5 },
-    { col: 2, row: 0, r: -3 },
-    { col: 0, row: 1, r: 6 },
-    { col: 1, row: 1, r: -10 },
-    { col: 2, row: 1, r: 4 },
-    { col: 0, row: 2, r: -5 },
-    { col: 1, row: 2, r: 8 },
-    { col: 2, row: 2, r: -7 },
+  if (sessionStorage.getItem("lf_splash_done") || !config.splash_enabled) return null;
+
+  const imgPositions = [
+    "top-[8%] left-[5%] w-20 h-20 rotate-[-8deg]",
+    "top-[5%] right-[8%] w-24 h-24 rotate-[5deg]",
+    "top-[35%] left-[3%] w-22 h-22 rotate-[6deg]",
+    "top-[38%] right-[4%] w-20 h-20 rotate-[-10deg]",
+    "bottom-[30%] left-[8%] w-24 h-24 rotate-[-5deg]",
+    "bottom-[28%] right-[6%] w-20 h-20 rotate-[8deg]",
+    "bottom-[8%] left-[15%] w-22 h-22 rotate-[4deg]",
+    "bottom-[5%] right-[12%] w-24 h-24 rotate-[-7deg]",
+    "top-[20%] left-[35%] w-20 h-20 rotate-[-3deg]",
   ];
 
   return (
@@ -177,10 +154,9 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
       {phase < 6 && (
         <motion.div
           className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center"
-          style={{ background: "hsl(var(--background))", perspective: "1200px" }}
+          style={{ background: "hsl(var(--background))", perspective: "1200px", fontFamily: "'Nunito', sans-serif" }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          onClick={() => { playSound(); setUserTapped(true); }}
+          transition={{ duration: 0.6 }}
         >
           {/* Gate doors */}
           <motion.div
@@ -188,132 +164,114 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
             style={{
               background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))",
               transformOrigin: "left center",
-              boxShadow: "10px 0 40px rgba(0,0,0,0.2)",
             }}
             initial={{ rotateY: 0 }}
             animate={phase >= 1 ? { rotateY: -90 } : {}}
-            transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
-          >
-            <div className="absolute inset-0 flex items-center justify-end pr-8">
-              <span className="text-4xl">🎨</span>
-            </div>
-          </motion.div>
+            transition={{ duration: 1, ease: [0.65, 0, 0.35, 1] }}
+          />
           <motion.div
             className="absolute inset-y-0 right-0 w-1/2 z-30"
             style={{
               background: "linear-gradient(225deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))",
               transformOrigin: "right center",
-              boxShadow: "-10px 0 40px rgba(0,0,0,0.2)",
             }}
             initial={{ rotateY: 0 }}
             animate={phase >= 1 ? { rotateY: 90 } : {}}
-            transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}
-          >
-            <div className="absolute inset-0 flex items-center justify-start pl-8">
-              <span className="text-4xl">✏️</span>
-            </div>
-          </motion.div>
+            transition={{ duration: 1, ease: [0.65, 0, 0.35, 1] }}
+          />
 
-          {/* Center content behind gates */}
+          {/* Center content */}
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6">
-            {/* Phase 1: Logo reveal */}
+            {/* Logo — ALWAYS visible (z-40) */}
             <motion.div
+              className="z-40 relative"
               initial={{ scale: 0, opacity: 0 }}
-              animate={phase >= 1 ? { scale: phase >= 2 ? 0.6 : 1, opacity: 1, y: phase >= 2 ? -100 : 0 } : {}}
-              transition={{ delay: 0.4, type: "spring", stiffness: 120, damping: 14 }}
+              animate={phase >= 1 ? {
+                scale: phase >= 4 ? 0.5 : 1,
+                opacity: 1,
+                y: phase >= 2 ? -80 : 0,
+              } : {}}
+              transition={{ delay: 0.3, type: "spring", stiffness: 120, damping: 14 }}
             >
               <div
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-[3px] p-1"
+                className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-[3px] p-1"
                 style={{
                   borderColor: "hsl(var(--accent) / 0.5)",
-                  boxShadow: "0 0 60px hsl(var(--accent) / 0.25), 0 0 120px hsl(var(--primary) / 0.1)",
                   background: "hsl(var(--background))",
+                  boxShadow: "0 0 40px hsl(var(--accent) / 0.2)",
                 }}
               >
                 <img src="/logo.png" alt="Creative Caricature Club" className="w-full h-full rounded-full object-cover" />
               </div>
             </motion.div>
 
-            {/* Phase 2: Big Typewriter text */}
-            {phase >= 2 && (
+            {/* Phase 2: Typewriter text */}
+            {phase >= 2 && phase < 5 && (
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center mt-4"
+                className="text-center mt-2 z-40 relative"
               >
-                <p className="text-xl md:text-3xl font-bold mb-3 text-muted-foreground" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                  <Typewriter text={config.splash_line1} speed={55} />
+                <p className="text-lg md:text-2xl font-bold mb-2 text-muted-foreground" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                  <Typewriter text={config.splash_line1} speed={50} />
                 </p>
-                <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-black leading-[1.05] text-foreground" style={{ fontFamily: "'Nunito', sans-serif", letterSpacing: "-0.03em" }}>
-                  <Typewriter text={config.splash_line2} delay={1200} speed={75} />
+                <h1 className="text-4xl md:text-6xl font-black leading-tight text-foreground" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  <Typewriter text={config.splash_line2} delay={1000} speed={70} />
                 </h1>
               </motion.div>
             )}
 
-            {/* Phase 3: Date/time + line 3 */}
+            {/* Phase 3: Date/venue pills */}
             {phase >= 3 && phase < 4 && (
               <motion.div
-                initial={{ y: 30, opacity: 0 }}
+                initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ type: "spring" }}
-                className="text-center mt-6"
+                className="text-center mt-4 z-40"
               >
-                <p className="text-lg md:text-2xl font-bold text-accent mb-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                  <Typewriter text={config.splash_line3} speed={45} />
+                <p className="text-base md:text-xl font-bold text-accent mb-3" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                  <Typewriter text={config.splash_line3} speed={40} />
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  {[
-                    { icon: "📅", text: config.dates },
-                    { icon: "⏰", text: config.time },
-                    { icon: "📍", text: config.venue },
-                  ].map((item, i) => (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {[config.dates, config.time, config.venue].map((text, i) => (
                     <motion.span
                       key={i}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ delay: 0.2 + i * 0.2, type: "spring" }}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-secondary text-secondary-foreground"
+                      transition={{ delay: 0.15 + i * 0.15, type: "spring" }}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold bg-secondary text-secondary-foreground"
                     >
-                      {item.icon} {item.text}
+                      {["📅", "⏰", "📍"][i]} {text}
                     </motion.span>
                   ))}
                 </div>
               </motion.div>
             )}
 
-            {/* Phase 4: Photo mosaic — 3x3 grid popping in */}
+            {/* Phase 4: Photo mosaic — images around edges, logo stays center */}
             {phase >= 4 && phase < 5 && (
-              <motion.div
-                className="absolute inset-0 z-10 flex items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="grid grid-cols-3 gap-2 md:gap-3 w-[85vw] md:w-[60vw] max-w-[500px]">
-                  {imgGrid.map((pos, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0, rotate: pos.r * 3 }}
-                      animate={{ opacity: 1, scale: 1, rotate: pos.r }}
-                      transition={{ delay: i * 0.1, type: "spring", stiffness: 150, damping: 15 }}
-                      className="rounded-xl overflow-hidden shadow-xl border-2 border-background aspect-square"
-                    >
-                      <img src={EVENT_IMAGES[i]} alt="" className="w-full h-full object-cover" loading="eager" />
-                    </motion.div>
-                  ))}
-                </div>
+              <>
+                {imgPositions.map((pos, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 18 }}
+                    className={`absolute ${pos} rounded-xl overflow-hidden shadow-lg border-2 border-background z-10`}
+                  >
+                    <img src={EVENT_IMAGES[i % EVENT_IMAGES.length]} alt="" className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.2 }}
-                  className="absolute inset-0 flex items-center justify-center"
+                  transition={{ delay: 1 }}
+                  className="z-40 mt-4 px-6 py-3 rounded-2xl bg-background/90 backdrop-blur-sm shadow-lg"
                 >
-                  <div className="px-8 py-4 rounded-2xl bg-background/90 backdrop-blur-md shadow-xl">
-                    <p className="text-2xl md:text-4xl font-black text-center text-foreground" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                      ✨ Live Caricatures ✨
-                    </p>
-                  </div>
+                  <p className="text-xl md:text-3xl font-black text-center text-foreground" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                    ✨ Live Caricatures ✨
+                  </p>
                 </motion.div>
-              </motion.div>
+              </>
             )}
 
             {/* Phase 5: Final message */}
@@ -321,40 +279,23 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 bg-background/95"
+                className="absolute inset-0 z-50 flex flex-col items-center justify-center px-6 bg-background/95"
               >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring" }}
-                  className="w-20 h-20 rounded-full overflow-hidden border-2 border-accent/40 p-0.5 bg-background mb-6"
-                >
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent/40 p-0.5 bg-background mb-4">
                   <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
-                </motion.div>
-                <h2 className="text-4xl md:text-6xl font-black text-center text-foreground leading-tight" style={{ fontFamily: "'Nunito', sans-serif" }}>
-                  <Typewriter text={config.splash_line4} speed={65} />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-center text-foreground leading-tight" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                  <Typewriter text={config.splash_line4} speed={60} />
                 </h2>
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: 120 }}
-                  transition={{ delay: 1, duration: 0.8 }}
-                  className="h-[3px] rounded-full mt-6 bg-gradient-to-r from-primary to-accent"
+                  animate={{ width: 100 }}
+                  transition={{ delay: 0.8, duration: 0.6 }}
+                  className="h-[3px] rounded-full mt-4 bg-gradient-to-r from-primary to-accent"
                 />
               </motion.div>
             )}
           </div>
-
-          {/* Tap hint for sound (mobile) */}
-          {!userTapped && phase >= 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              transition={{ delay: 1 }}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 text-xs font-medium px-4 py-2 rounded-full bg-muted text-muted-foreground"
-            >
-              Tap for sound 🔊
-            </motion.div>
-          )}
         </motion.div>
       )}
     </AnimatePresence>
@@ -381,61 +322,63 @@ const FlashCard3D = ({ card, index }: { card: typeof EXPERIENCE_CARDS[0]; index:
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, rotateX: -15 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-      className="h-56 cursor-pointer group"
-      style={{ perspective: "1200px" }}
+      transition={{ delay: index * 0.1 }}
+      className="h-52 cursor-pointer"
+      style={{ perspective: "800px" }}
       onClick={() => setFlipped(!flipped)}
     >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.7, type: "spring", stiffness: 80 }}
+      <div
+        className="relative w-full h-full transition-transform duration-500"
+        style={{ transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "rotateY(0)" }}
       >
         <div
-          className={`absolute inset-0 rounded-3xl p-6 flex flex-col justify-between bg-gradient-to-br ${card.gradient} border border-border/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)]`}
+          className={`absolute inset-0 rounded-2xl p-5 flex flex-col justify-between bg-gradient-to-br ${card.gradient} border border-border/50 shadow-md`}
           style={{ backfaceVisibility: "hidden" }}
         >
-          <div className={`w-14 h-14 rounded-2xl bg-white/70 backdrop-blur-sm flex items-center justify-center shadow-sm ${card.iconColor}`}>
-            <Icon className="w-7 h-7" />
+          <div className={`w-12 h-12 rounded-xl bg-white/70 flex items-center justify-center ${card.iconColor}`}>
+            <Icon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-foreground">{card.title}</h3>
+            <h3 className="text-lg font-black text-foreground">{card.title}</h3>
             <p className="text-xs text-muted-foreground mt-1">Tap to flip ↻</p>
           </div>
         </div>
         <div
-          className={`absolute inset-0 rounded-3xl p-6 flex flex-col items-center justify-center text-center bg-gradient-to-br ${card.gradient} border border-border/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)]`}
+          className={`absolute inset-0 rounded-2xl p-5 flex flex-col items-center justify-center text-center bg-gradient-to-br ${card.gradient} border border-border/50 shadow-md`}
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          <Icon className={`w-12 h-12 mb-3 ${card.iconColor}`} />
-          <h3 className="text-lg font-black text-foreground mb-2">{card.title}</h3>
+          <Icon className={`w-10 h-10 mb-2 ${card.iconColor}`} />
+          <h3 className="text-base font-black text-foreground mb-1">{card.title}</h3>
           <p className="text-sm text-muted-foreground">{card.desc}</p>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
 
-/* ─── Marquee Row (no buttons, auto-scroll) ─── */
-const MarqueeRow = ({ images, direction = "left", speed = 30 }: { images: string[]; direction?: "left" | "right"; speed?: number }) => {
+/* ─── CSS Marquee Row (no framer-motion animation = no lag) ─── */
+const MarqueeRow = ({ images, direction = "left", duration = 25 }: { images: string[]; direction?: "left" | "right"; duration?: number }) => {
   const tripled = [...images, ...images, ...images];
+  const animName = direction === "left" ? "marquee-left" : "marquee-right";
+
   return (
     <div className="overflow-hidden relative py-1">
-      <motion.div
+      <div
         className="flex gap-3"
-        animate={{ x: direction === "left" ? ["0%", "-33.33%"] : ["-33.33%", "0%"] }}
-        transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
+        style={{
+          animation: `${animName} ${duration}s linear infinite`,
+          width: "max-content",
+        }}
       >
         {tripled.map((img, i) => (
-          <div key={i} className="flex-shrink-0 w-36 md:w-48 h-24 md:h-32 rounded-2xl overflow-hidden shadow-md border border-border/30">
+          <div key={i} className="flex-shrink-0 w-32 md:w-44 h-20 md:h-28 rounded-xl overflow-hidden shadow-sm border border-border/30">
             <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" />
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -522,23 +465,69 @@ const ThankYouPopup = ({ config, onClose }: { config: EventConfig; onClose: () =
   );
 };
 
+/* ─── Gallery Image Lightbox (used in gallery section) ─── */
+const GalleryLightbox = ({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) => {
+  const [idx, setIdx] = useState(startIdx);
+  const len = images.length;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setIdx(i => (i + 1) % len);
+      else if (e.key === "ArrowLeft") setIdx(i => (i - 1 + len) % len);
+      else if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [len, onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/90 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <button onClick={onClose} className="absolute top-4 right-4 z-10 text-background/80 hover:text-background" aria-label="Close"><X className="w-7 h-7" /></button>
+      <button
+        onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + len) % len); }}
+        className="absolute left-3 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/80 hover:bg-background/30"
+        aria-label="Previous"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % len); }}
+        className="absolute right-3 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/80 hover:bg-background/30"
+        aria-label="Next"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+      <img
+        key={idx}
+        src={images[idx]}
+        alt="Gallery preview"
+        className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl"
+        onClick={e => e.stopPropagation()}
+      />
+      <p className="absolute bottom-5 text-sm text-background/50 font-semibold">{idx + 1} / {len}</p>
+    </motion.div>
+  );
+};
+
 /* ─── Main Page ─── */
 const LilFlea = () => {
   const [splashDone, setSplashDone] = useState(!!sessionStorage.getItem("lf_splash_done"));
   const [galleryImages, setGalleryImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
   const [config, setConfig] = useState<EventConfig>(DEFAULT_CONFIG);
   const [showThankYou, setShowThankYou] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   // Disable zoom on this page
   useEffect(() => {
     const meta = document.querySelector('meta[name="viewport"]');
     const original = meta?.getAttribute("content") || "";
     meta?.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no");
-    // Prevent touch zoom
     const preventZoom = (e: TouchEvent) => { if (e.touches.length > 1) e.preventDefault(); };
     document.addEventListener("touchmove", preventZoom, { passive: false });
     return () => {
@@ -629,72 +618,73 @@ const LilFlea = () => {
         }}
       />
 
+      {/* Marquee CSS keyframes */}
+      <style>{`
+        @keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }
+        @keyframes marquee-right { 0% { transform: translateX(-33.33%); } 100% { transform: translateX(0); } }
+      `}</style>
+
       {!splashDone && <LilFleaSplash onComplete={handleSplashComplete} config={config} />}
 
       {splashDone && (
-        <div className="min-h-screen bg-background text-foreground overscroll-none" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
           {/* ─── HERO ─── */}
-          <section ref={heroRef} className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
-            <motion.div style={{ y: heroY }} className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
-            </motion.div>
+          <section className="relative min-h-[90svh] flex items-center justify-center overflow-hidden">
+            <div className="absolute top-10 left-10 w-60 h-60 rounded-full blur-[100px] bg-rose-200/30" />
+            <div className="absolute bottom-20 right-10 w-48 h-48 rounded-full blur-[80px] bg-violet-200/25" />
 
-            <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.12, 0.22, 0.12] }} transition={{ duration: 4, repeat: Infinity }} className="absolute top-10 left-10 w-80 h-80 rounded-full blur-[120px] bg-rose-300/40" />
-            <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.18, 0.1] }} transition={{ duration: 5, repeat: Infinity, delay: 1 }} className="absolute bottom-20 right-10 w-60 h-60 rounded-full blur-[100px] bg-violet-300/30" />
-            <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 6, repeat: Infinity, delay: 2 }} className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-[130px] bg-amber-200/30" />
-
-            <motion.div style={{ opacity: heroOpacity }} className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-              <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center justify-center gap-4 mb-8 flex-wrap">
-                <div className="w-16 h-16 rounded-full border-2 overflow-hidden shadow-lg p-0.5 border-accent/30 bg-background" style={{ boxShadow: "0 8px 30px hsl(var(--accent) / 0.15)" }}>
+            <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-4 mb-8 flex-wrap">
+                <div className="w-14 h-14 rounded-full border-2 overflow-hidden shadow-md p-0.5 border-accent/30 bg-background">
                   <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
                 </div>
-                <motion.span animate={{ rotate: [0, 360] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="text-xl text-accent/40">✦</motion.span>
-                <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-9 md:h-11 opacity-70" />
+                <span className="text-lg text-accent/40">✦</span>
+                <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-8 md:h-10 opacity-70" />
               </motion.div>
 
-              <motion.h1 initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4, type: "spring" }} className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight tracking-tight">
+              <motion.h1 initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 leading-tight tracking-tight">
                 {config.hero_title}
               </motion.h1>
 
-              <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="text-lg md:text-xl mb-3 text-muted-foreground">
+              <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="text-base md:text-lg mb-3 text-muted-foreground">
                 {config.hero_subtitle}
               </motion.p>
 
-              <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }} className="flex flex-wrap items-center justify-center gap-2 md:gap-3 text-sm mb-10">
-                <span className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full bg-secondary text-secondary-foreground"><MapPin className="w-4 h-4 text-accent" /> {config.venue}</span>
-                <span className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full bg-secondary text-secondary-foreground"><Calendar className="w-4 h-4 text-accent" /> {config.dates}</span>
-                <span className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full bg-secondary text-secondary-foreground"><Clock className="w-4 h-4 text-accent" /> {config.time}</span>
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="flex flex-wrap items-center justify-center gap-2 text-sm mb-8">
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground"><MapPin className="w-4 h-4 text-accent" /> {config.venue}</span>
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground"><Calendar className="w-4 h-4 text-accent" /> {config.dates}</span>
+                <span className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-secondary text-secondary-foreground"><Clock className="w-4 h-4 text-accent" /> {config.time}</span>
               </motion.div>
 
-              <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 1 }} className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="flex flex-wrap items-center justify-center gap-3">
                 <Button
                   size="lg"
-                  className="rounded-full gap-2 px-5 md:px-6 font-bold shadow-lg text-base bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 hover:from-rose-500 hover:to-pink-600"
+                  className="rounded-full gap-2 px-5 font-bold shadow-md text-base bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 hover:from-rose-500 hover:to-pink-600"
                   onClick={() => window.open(config.ticket_url, "_blank")}
                 >
                   <Ticket className="w-5 h-5" /> Book Tickets
                 </Button>
                 <Button
                   size="lg"
-                  className="rounded-full gap-2 px-5 md:px-6 font-bold shadow-lg text-base bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 hover:from-violet-500 hover:to-purple-600"
+                  className="rounded-full gap-2 px-5 font-bold shadow-md text-base bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 hover:from-violet-500 hover:to-purple-600"
                   onClick={() => window.open(config.maps_url, "_blank")}
                 >
                   <MapPin className="w-5 h-5" /> Event Location
                 </Button>
               </motion.div>
-            </motion.div>
+            </div>
           </section>
 
           {/* ─── 3D EXPERIENCE FLASH CARDS ─── */}
-          <section className="py-16 md:py-24 relative">
+          <section className="py-14 md:py-20">
             <div className="container mx-auto px-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+              <div className="text-center mb-10">
                 <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Caricature Experience</p>
-                <h2 className="text-3xl md:text-5xl font-black">On-Spot Caricatures with<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-violet-500">Live Interaction</span></h2>
-                <p className="text-muted-foreground mt-3 text-base md:text-lg">With our professional artists — come to {config.event_name}!</p>
-              </motion.div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+                <h2 className="text-2xl md:text-4xl font-black">On-Spot Caricatures with<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-violet-500">Live Interaction</span></h2>
+                <p className="text-muted-foreground mt-2 text-sm md:text-base">With our professional artists — come to {config.event_name}!</p>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
                 {EXPERIENCE_CARDS.map((card, i) => (
                   <FlashCard3D key={card.title} card={card} index={i} />
                 ))}
@@ -702,242 +692,210 @@ const LilFlea = () => {
             </div>
           </section>
 
-          {/* ─── OUR PREVIOUS LIL FLEA RECAPS ─── */}
-          <section className="py-16 md:py-24 relative overflow-hidden bg-secondary/30">
+          {/* ─── MEMORIES — auto-scroll marquee, no buttons ─── */}
+          <section className="py-14 md:py-20 bg-secondary/30">
             <div className="container mx-auto px-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 md:mb-12">
+              <div className="text-center mb-8">
                 <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Memories</p>
-                <h2 className="text-3xl md:text-5xl font-black">Our Lil Flea Recaps 📸</h2>
-                <p className="text-muted-foreground mt-3">Your caricature, sketched in 3–5 minutes — relive the magic!</p>
-              </motion.div>
-
-              {/* Auto-scrolling marquee rows — no buttons */}
-              <div className="max-w-6xl mx-auto space-y-3">
-                <MarqueeRow images={EVENT_IMAGES.slice(0, 5)} direction="left" speed={25} />
-                <MarqueeRow images={EVENT_IMAGES.slice(3, 8)} direction="right" speed={30} />
+                <h2 className="text-2xl md:text-4xl font-black">Our Lil Flea Recaps 📸</h2>
+                <p className="text-muted-foreground mt-2 text-sm">Your caricature, sketched in 3–5 minutes — relive the magic!</p>
+              </div>
+              <div className="max-w-6xl mx-auto space-y-2">
+                <MarqueeRow images={EVENT_IMAGES.slice(0, 5)} direction="left" duration={22} />
+                <MarqueeRow images={EVENT_IMAGES.slice(3, 8)} direction="right" duration={28} />
               </div>
             </div>
           </section>
 
-          {/* ─── GALLERY — Infinite Auto-Scroll 3 Rows ─── */}
-          <section className="py-16 md:py-24 relative">
+          {/* ─── GALLERY — clickable images with lightbox ─── */}
+          <section className="py-14 md:py-20">
             <div className="container mx-auto px-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+              <div className="text-center mb-10">
                 <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Gallery</p>
-                <h2 className="text-3xl md:text-5xl font-black">Our Lil Flea Memories 🖼️</h2>
-              </motion.div>
-              <div className="max-w-6xl mx-auto space-y-3">
-                <MarqueeRow images={row1.length > 0 ? row1 : EVENT_IMAGES.slice(0, 3)} direction="left" speed={35} />
-                <MarqueeRow images={row2.length > 0 ? row2 : EVENT_IMAGES.slice(3, 6)} direction="right" speed={40} />
-                <MarqueeRow images={row3.length > 0 ? row3 : EVENT_IMAGES.slice(6)} direction="left" speed={30} />
+                <h2 className="text-2xl md:text-4xl font-black">Our Lil Flea Memories 🖼️</h2>
               </div>
-              <div className="text-center mt-8 md:mt-10">
+              <div className="max-w-6xl mx-auto space-y-2">
+                <MarqueeRow images={row1.length > 0 ? row1 : EVENT_IMAGES.slice(0, 3)} direction="left" duration={30} />
+                <MarqueeRow images={row2.length > 0 ? row2 : EVENT_IMAGES.slice(3, 6)} direction="right" duration={35} />
+                <MarqueeRow images={row3.length > 0 ? row3 : EVENT_IMAGES.slice(6)} direction="left" duration={26} />
+              </div>
+
+              {/* Clickable grid preview */}
+              <div className="max-w-5xl mx-auto mt-8 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                {allImages.slice(0, 10).map((url, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-xl overflow-hidden cursor-pointer border border-border/30 shadow-sm hover:shadow-lg transition-shadow"
+                    onClick={() => setLightboxIdx(i)}
+                  >
+                    <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center mt-6">
                 <Button
                   variant="outline"
                   className="rounded-full gap-2 border-accent/30 text-accent font-bold px-8"
                   onClick={() => window.open("/lil-flea-gallery", "_blank")}
                 >
-                  View All Photos <ArrowRight className="w-4 h-4" />
+                  All Images <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           </section>
 
           {/* ─── HOW IT WORKS ─── */}
-          <section className="py-16 md:py-24 relative bg-secondary/30">
+          <section className="py-14 md:py-20 bg-secondary/30">
             <div className="container mx-auto px-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
+              <div className="text-center mb-10">
                 <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Simple Process</p>
-                <h2 className="text-3xl md:text-5xl font-black">How It Works</h2>
-              </motion.div>
-              <div className="max-w-4xl mx-auto relative">
-                <div className="hidden md:block absolute top-1/2 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-200 via-violet-200 to-amber-200 -translate-y-1/2 z-0" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative z-10">
-                  {HOW_IT_WORKS.map((item, i) => (
-                    <motion.div
-                      key={item.step}
-                      initial={{ opacity: 0, y: 50, scale: 0.85 }}
-                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.2, type: "spring", stiffness: 80 }}
-                      className="text-center"
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.05, y: -8 }}
-                        className="rounded-3xl p-6 md:p-8 bg-card border border-border shadow-[0_15px_50px_-12px_rgba(0,0,0,0.06)] relative overflow-hidden"
-                      >
-                        <div className="text-4xl md:text-5xl mb-4">{item.emoji}</div>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-accent/20 to-primary/10 flex items-center justify-center mx-auto mb-3">
-                          <span className="text-sm font-black text-accent">{item.step}</span>
-                        </div>
-                        <h3 className="text-lg font-black mb-2">{item.title}</h3>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </div>
+                <h2 className="text-2xl md:text-4xl font-black">How It Works</h2>
               </div>
-            </div>
-          </section>
-
-          {/* ─── PRICING MESSAGE ─── */}
-          <section className="py-16 md:py-20 relative">
-            <div className="container mx-auto px-4 text-center max-w-2xl">
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-                <div className="rounded-3xl p-8 md:p-10 bg-gradient-to-br from-rose-50 via-violet-50 to-amber-50 border border-border shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
-                  <Palette className="w-12 h-12 text-accent mx-auto mb-4" />
-                  <h2 className="text-2xl md:text-3xl font-black mb-3">Caricatures Available Live 🎨</h2>
-                  <p className="text-muted-foreground">Visit us at our stall to experience & get yours made instantly by professional artists!</p>
-                </div>
-              </motion.div>
-            </div>
-          </section>
-
-          {/* ─── SOCIAL PROOF ─── */}
-          <section className="py-16 md:py-24 relative bg-secondary/30">
-            <div className="container mx-auto px-4">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
-                <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Happy Customers</p>
-                <h2 className="text-3xl md:text-5xl font-black">Reactions That Speak ❤️</h2>
-              </motion.div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
-                {EVENT_IMAGES.slice(0, 3).map((img, i) => (
+              <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+                {HOW_IT_WORKS.map((item, i) => (
                   <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 40 }}
+                    key={item.step}
+                    initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.1, type: "spring" }}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    className="rounded-3xl overflow-hidden border border-border shadow-[0_15px_50px_-12px_rgba(0,0,0,0.06)]"
+                    transition={{ delay: i * 0.15 }}
+                    className="rounded-2xl p-6 bg-card border border-border shadow-sm text-center"
                   >
-                    <img src={img} alt={`Customer reaction ${i + 1}`} className="w-full h-48 md:h-64 object-cover" loading="lazy" />
-                    <div className="p-4 md:p-5 bg-card">
-                      <div className="flex gap-0.5 mb-2">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className="w-4 h-4 fill-current text-amber-400" />)}</div>
-                      <p className="text-sm text-muted-foreground">"Amazing experience! Got our caricature done in minutes!"</p>
+                    <div className="text-3xl mb-3">{item.emoji}</div>
+                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                      <span className="text-xs font-black text-accent">{item.step}</span>
                     </div>
+                    <h3 className="text-base font-black mb-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </motion.div>
                 ))}
               </div>
             </div>
           </section>
 
-          {/* ─── TICKET BOOKING SECTION ─── */}
-          <section className="py-16 md:py-20 relative">
+          {/* ─── PRICING ─── */}
+          <section className="py-14 md:py-18">
+            <div className="container mx-auto px-4 text-center max-w-2xl">
+              <div className="rounded-2xl p-7 bg-gradient-to-br from-rose-50 via-violet-50 to-amber-50 border border-border shadow-sm">
+                <Palette className="w-10 h-10 text-accent mx-auto mb-3" />
+                <h2 className="text-xl md:text-2xl font-black mb-2">Caricatures Available Live 🎨</h2>
+                <p className="text-muted-foreground text-sm">Visit us at our stall to experience & get yours made instantly!</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ─── SOCIAL PROOF ─── */}
+          <section className="py-14 md:py-20 bg-secondary/30">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-10">
+                <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Happy Customers</p>
+                <h2 className="text-2xl md:text-4xl font-black">Reactions That Speak ❤️</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+                {EVENT_IMAGES.slice(0, 3).map((img, i) => (
+                  <div key={i} className="rounded-2xl overflow-hidden border border-border shadow-sm">
+                    <img src={img} alt={`Customer reaction ${i + 1}`} className="w-full h-44 md:h-56 object-cover" loading="lazy" />
+                    <div className="p-4 bg-card">
+                      <div className="flex gap-0.5 mb-1">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className="w-3.5 h-3.5 fill-current text-amber-400" />)}</div>
+                      <p className="text-sm text-muted-foreground">"Amazing experience! Got our caricature done in minutes!"</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─── TICKETS ─── */}
+          <section className="py-14 md:py-18">
             <div className="container mx-auto px-4 max-w-5xl">
-              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-12">
+              <div className="text-center mb-10">
                 <p className="uppercase tracking-[0.3em] text-xs font-semibold mb-3 text-accent">Get Entry</p>
-                <h2 className="text-3xl md:text-5xl font-black">Book Your Entry Tickets 🎟️</h2>
-              </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -6, scale: 1.01 }}
-                  className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] text-center"
-                >
-                  <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-12 mx-auto mb-4 opacity-80" />
-                  <h3 className="text-xl font-black mb-2">Book on {config.event_name}</h3>
-                  <p className="text-sm text-muted-foreground mb-6">Official event website — secure your entry passes</p>
+                <h2 className="text-2xl md:text-4xl font-black">Book Your Entry Tickets 🎟️</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="rounded-2xl p-6 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 shadow-sm text-center">
+                  <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-10 mx-auto mb-3 opacity-80" />
+                  <h3 className="text-lg font-black mb-1">Book on {config.event_name}</h3>
+                  <p className="text-sm text-muted-foreground mb-5">Official event website — secure your entry passes</p>
                   <Button
-                    className="rounded-full gap-2 font-bold px-8 bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 shadow-lg hover:from-rose-500 hover:to-pink-600"
+                    className="rounded-full gap-2 font-bold px-6 bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 shadow-md"
                     onClick={() => window.open(config.ticket_url, "_blank")}
                   >
                     <Ticket className="w-4 h-4" /> Book Tickets <ExternalLink className="w-3 h-3" />
                   </Button>
-                </motion.div>
+                </div>
 
                 {config.show_district && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 30 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -6, scale: 1.01 }}
-                    className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] text-center"
-                  >
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-4 shadow-md">
+                  <div className="rounded-2xl p-6 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 shadow-sm text-center">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-3 shadow-sm">
                       <img src="/images/district-logo-coloured.png" alt="District by Zomato" className="w-full h-full object-cover" />
                     </div>
-                    <h3 className="text-xl font-black mb-1">Book on District App</h3>
-                    <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
-                      <img src="/images/district-app.svg" alt="" className="h-4 opacity-60" /> by Zomato
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-6">Also available on the District app</p>
+                    <h3 className="text-lg font-black mb-1">Book on District App</h3>
+                    <p className="text-sm text-muted-foreground mb-5">Also available on the District app by Zomato</p>
                     <Button
-                      className="rounded-full gap-2 font-bold px-8 bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 shadow-lg hover:from-violet-500 hover:to-purple-600"
+                      className="rounded-full gap-2 font-bold px-6 bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 shadow-md"
                       onClick={() => window.open(config.district_app_url, "_blank")}
                     >
                       <Download className="w-4 h-4" /> Get App <ExternalLink className="w-3 h-3" />
                     </Button>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             </div>
           </section>
 
           {/* ─── FINAL CTA ─── */}
-          <section className="py-16 md:py-24 relative bg-gradient-to-b from-secondary/30 to-background">
+          <section className="py-14 md:py-20 bg-gradient-to-b from-secondary/30 to-background">
             <div className="container mx-auto px-4 text-center max-w-3xl">
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
-                <h2 className="text-3xl md:text-5xl font-black mb-4">
-                  Catch Us <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-violet-500">LIVE</span> at {config.event_name}
-                </h2>
-                <p className="mb-8 md:mb-10 text-base md:text-lg text-muted-foreground">Before it ends! {config.dates} at {config.venue}</p>
-                <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
-                  <Button size="lg" className="rounded-full gap-2 shadow-lg px-5 md:px-6 font-bold bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0" onClick={() => window.open(config.maps_url, "_blank")}>
-                    <MapPin className="w-5 h-5" /> Get Directions
-                  </Button>
-                  <Button size="lg" className="rounded-full gap-2 px-5 md:px-6 font-bold bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0" onClick={() => window.open(config.ticket_url, "_blank")}>
-                    <Ticket className="w-5 h-5" /> Book Tickets
-                  </Button>
-                </div>
-              </motion.div>
+              <h2 className="text-2xl md:text-4xl font-black mb-3">
+                Catch Us <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-violet-500">LIVE</span> at {config.event_name}
+              </h2>
+              <p className="mb-8 text-sm md:text-base text-muted-foreground">Before it ends! {config.dates} at {config.venue}</p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Button size="lg" className="rounded-full gap-2 shadow-md px-5 font-bold bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0" onClick={() => window.open(config.maps_url, "_blank")}>
+                  <MapPin className="w-5 h-5" /> Get Directions
+                </Button>
+                <Button size="lg" className="rounded-full gap-2 px-5 font-bold bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0" onClick={() => window.open(config.ticket_url, "_blank")}>
+                  <Ticket className="w-5 h-5" /> Book Tickets
+                </Button>
+              </div>
             </div>
           </section>
 
-          {/* ─── BOOK US / CUSTOM ORDER — Buttons only, no form ─── */}
-          <section id="book-us" className="py-16 md:py-24 relative">
+          {/* ─── BOOK US — buttons only ─── */}
+          <section id="book-us" className="py-14 md:py-20">
             <div className="container mx-auto px-4 max-w-4xl">
-              <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-3xl p-8 md:p-12 bg-gradient-to-br from-rose-50 via-amber-50 to-violet-50 border border-border shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] text-center">
-                <h2 className="text-2xl md:text-4xl font-black mb-3">Want to Book Us for Your Event?</h2>
-                <p className="text-muted-foreground text-base md:text-lg mb-8">Or order a custom caricature delivered to your home 🏠</p>
+              <div className="rounded-2xl p-7 md:p-10 bg-gradient-to-br from-rose-50 via-amber-50 to-violet-50 border border-border shadow-sm text-center" style={{ fontFamily: "'Nunito', sans-serif" }}>
+                <h2 className="text-xl md:text-3xl font-black mb-2" style={{ fontFamily: "'Nunito', sans-serif" }}>Want to Book Us for Your Event?</h2>
+                <p className="text-muted-foreground text-sm md:text-base mb-6" style={{ fontFamily: "'Nunito', sans-serif" }}>Or order a custom caricature delivered to your home 🏠</p>
 
-                {/* Contact */}
-                <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-                  <a href={`https://wa.me/${config.whatsapp_number}`} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-200 text-green-700 font-semibold text-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+                  <a href={`https://wa.me/${config.whatsapp_number}`} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 border border-green-200 text-green-700 font-semibold text-sm">
                     <Phone className="w-4 h-4" /> WhatsApp
                   </a>
-                  <a href={`https://www.instagram.com/${config.instagram_id}/`} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-pink-700 font-semibold text-sm hover:shadow-md transition-shadow">
+                  <a href={`https://www.instagram.com/${config.instagram_id}/`} target="_blank" rel="noopener" className="flex items-center gap-2 px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-pink-700 font-semibold text-sm">
                     <Instagram className="w-4 h-4" /> @{config.instagram_id}
                   </a>
-                  <a href={`mailto:${config.email}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-50 border border-sky-200 text-sky-700 font-semibold text-sm hover:shadow-md transition-shadow">
+                  <a href={`mailto:${config.email}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-50 border border-sky-200 text-sky-700 font-semibold text-sm">
                     <Mail className="w-4 h-4" /> Email Us
                   </a>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Button
-                    size="lg"
-                    className="rounded-full gap-2 px-6 md:px-8 font-bold bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 shadow-lg hover:from-rose-500 hover:to-pink-600"
-                    onClick={() => window.open("/book-event", "_self")}
-                  >
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Button size="lg" className="rounded-full gap-2 px-6 font-bold bg-gradient-to-r from-rose-400 to-pink-500 text-white border-0 shadow-md" onClick={() => window.open("/book-event", "_self")}>
                     <Calendar className="w-5 h-5" /> Event Booking
                   </Button>
-                  <Button
-                    size="lg"
-                    className="rounded-full gap-2 px-6 md:px-8 font-bold bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 shadow-lg hover:from-violet-500 hover:to-purple-600"
-                    onClick={() => window.open("/order", "_self")}
-                  >
+                  <Button size="lg" className="rounded-full gap-2 px-6 font-bold bg-gradient-to-r from-violet-400 to-purple-500 text-white border-0 shadow-md" onClick={() => window.open("/order", "_self")}>
                     <Palette className="w-5 h-5" /> Custom Caricature Order
                   </Button>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </section>
 
           {/* Footer */}
-          <footer className="py-6 md:py-8 border-t border-border">
+          <footer className="py-6 border-t border-border">
             <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
               <p>© {new Date().getFullYear()} Creative Caricature Club. All rights reserved.</p>
               <p className="mt-1">Event collaboration with {config.event_name}</p>
@@ -945,6 +903,13 @@ const LilFlea = () => {
           </footer>
         </div>
       )}
+
+      {/* Gallery Lightbox */}
+      <AnimatePresence>
+        {lightboxIdx !== null && (
+          <GalleryLightbox images={allImages} startIdx={lightboxIdx} onClose={() => setLightboxIdx(null)} />
+        )}
+      </AnimatePresence>
 
       {/* Thank You Popup */}
       <AnimatePresence>
