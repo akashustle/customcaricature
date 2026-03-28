@@ -14,11 +14,11 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       return;
     }
     sessionStorage.setItem("ccc_splash_shown", "1");
-    // Ultra-fast splash — 600ms total (was 1400ms)
+    // Ultra-fast splash — 400ms total
     const timer = setTimeout(() => {
       setShow(false);
       onComplete();
-    }, 600);
+    }, 400);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
