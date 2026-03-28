@@ -19,6 +19,7 @@ const organizationSchema = {
     "https://www.instagram.com/creativecaricatureclub",
     "https://www.facebook.com/creativecaricatureclub",
     "https://www.youtube.com/creativecaricatureclub",
+    "https://share.google/sDpIC3P2ZMJJPLYj1",
   ],
   address: {
     "@type": "PostalAddress",
