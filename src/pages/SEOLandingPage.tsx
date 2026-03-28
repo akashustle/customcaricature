@@ -76,6 +76,11 @@ const SEOLandingPage = () => {
   }
 
   if (!page) {
+    // For file-like slugs, try to load the actual static file
+    if (slug && /\.\w{2,5}$/.test(slug)) {
+      window.location.replace(`/${slug}`);
+      return null;
+    }
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
