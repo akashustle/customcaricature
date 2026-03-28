@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 type SiteSettings = {
@@ -41,33 +41,82 @@ const defaults: SiteSettings = {
   auto_assign_artist: { enabled: false },
 };
 
+// Module-level cache so all instances share one fetch result
+let cachedSettings: SiteSettings | null = null;
+let fetchPromise: Promise<SiteSettings> | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 60_000; // 1 minute
+
+const parseSettings = (data: any[]): SiteSettings => {
+  const s = { ...defaults };
+  data.forEach((row: any) => {
+    const key = row.id === "allow_artwork_status_without_upload" ? "allow_artwork_bypass" : row.id;
+    if (key in s) {
+      (s as any)[key] = row.value;
+    }
+  });
+  return s;
+};
+
+const fetchSettingsOnce = async (): Promise<SiteSettings> => {
+  const now = Date.now();
+  if (cachedSettings && now - lastFetchTime < CACHE_TTL) return cachedSettings;
+  if (fetchPromise) return fetchPromise;
+
+  fetchPromise = (async () => {
+    try {
+      const { data } = await supabase.from("admin_site_settings").select("id, value");
+      if (data) {
+        cachedSettings = parseSettings(data);
+        lastFetchTime = Date.now();
+      }
+      return cachedSettings || defaults;
+    } finally {
+      fetchPromise = null;
+    }
+  })();
+  return fetchPromise;
+};
 
 export const useSiteSettings = () => {
-  const [settings, setSettings] = useState<SiteSettings>(defaults);
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<SiteSettings>(cachedSettings || defaults);
+  const [loading, setLoading] = useState(!cachedSettings);
+  const channelRef = useRef<any>(null);
 
-  const fetchSettings = async () => {
-    const { data } = await supabase.from("admin_site_settings").select("id, value");
-    if (data) {
-      const s = { ...defaults };
-      data.forEach((row: any) => {
-        const key = row.id === "allow_artwork_status_without_upload" ? "allow_artwork_bypass" : row.id === "shop_nav_visible" ? "shop_nav_visible" : row.id;
-        if (key in s) {
-          (s as any)[key] = row.value;
-        }
-      });
-      setSettings(s);
-    }
+  const fetchSettings = useCallback(async () => {
+    // Invalidate cache for forced refetch
+    lastFetchTime = 0;
+    cachedSettings = null;
+    const s = await fetchSettingsOnce();
+    setSettings(s);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    fetchSettings();
-    const ch = supabase
-      .channel("site-settings")
-      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, () => fetchSettings())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    let mounted = true;
+    fetchSettingsOnce().then(s => {
+      if (mounted) { setSettings(s); setLoading(false); }
+    });
+
+    // Only subscribe if not already subscribed (shared channel)
+    if (!channelRef.current) {
+      channelRef.current = supabase
+        .channel("site-settings")
+        .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, () => {
+          lastFetchTime = 0;
+          cachedSettings = null;
+          fetchSettingsOnce().then(s => { if (mounted) setSettings(s); });
+        })
+        .subscribe();
+    }
+
+    return () => {
+      mounted = false;
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
   }, []);
 
   const updateSetting = async (id: string, value: any) => {
