@@ -58,10 +58,13 @@ const AdminArtistPayouts = () => {
   useEffect(() => {
     fetchAll();
     const ch = supabase.channel("admin-artist-payouts-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "artist_payout_settings" }, fetchAll)
-      .on("postgres_changes", { event: "*", schema: "public", table: "artist_event_payouts" }, fetchAll)
-      .on("postgres_changes", { event: "*", schema: "public", table: "artist_payout_requests" }, fetchAll)
-      .on("postgres_changes", { event: "*", schema: "public", table: "artist_transactions" }, fetchAll)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "artist_payout_settings" }, fetchAll)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "artist_payout_settings" }, fetchAll)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "artist_event_payouts" }, fetchAll)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "artist_event_payouts" }, fetchAll)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "artist_payout_requests" }, fetchAll)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "artist_payout_requests" }, fetchAll)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "artist_transactions" }, fetchAll)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
