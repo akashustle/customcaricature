@@ -97,7 +97,9 @@ const WorkshopAdmin = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [adminInfo, setAdminInfo] = useState<any>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ws_dark") === "true");
+  const { resolvedTheme, setTheme: setGlobalTheme } = useTheme();
+  const darkMode = resolvedTheme === "dark";
+  const setDarkMode = (val: boolean) => setGlobalTheme(val ? "dark" : "light");
   const [hardResetStep, setHardResetStep] = useState(0);
   const [hardResetCode, setHardResetCode] = useState("");
   const [feedbackReply, setFeedbackReply] = useState<{ [key: string]: string }>({});
