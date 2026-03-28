@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
@@ -26,15 +26,23 @@ const AdminHeatmapPanel = ({ filteredEvents, users, showEvents, showUsers, loadi
     return pins.length > 0 ? pins : [{ lat: 20.5937, lng: 78.9629 }];
   }, [filteredEvents, users, showEvents, showUsers]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (mapReady) return;
+
+    const idleHost = globalThis as typeof globalThis & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
     const start = () => setMapReady(true);
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(start, { timeout: 300 });
-      return () => window.cancelIdleCallback(id);
+
+    if (typeof idleHost.requestIdleCallback === "function") {
+      const id = idleHost.requestIdleCallback(() => start(), { timeout: 300 });
+      return () => idleHost.cancelIdleCallback?.(id);
     }
-    const id = window.setTimeout(start, 150);
-    return () => window.clearTimeout(id);
+
+    const id = globalThis.setTimeout(start, 150);
+    return () => globalThis.clearTimeout(id);
   }, [mapReady, reloadKey]);
 
   const showFallback = mapReady && !leafletReady && !loading;

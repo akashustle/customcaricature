@@ -79,13 +79,16 @@ const AdminHeatmapMap = ({ filteredEvents, users, showEvents, showUsers, allPins
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (error) onMapError?.(error);
+  }, [error, onMapError]);
+
+  useEffect(() => {
     // Small delay to ensure container is measured before Leaflet initializes
     const t = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(t);
   }, []);
 
   if (error) {
-    onMapError?.(error);
     return (
       <div className="h-full flex items-center justify-center bg-muted/30 text-sm text-muted-foreground">
         Map failed to load. <button className="ml-2 underline" onClick={() => { setError(null); setReady(false); requestAnimationFrame(() => setReady(true)); }}>Retry</button>
