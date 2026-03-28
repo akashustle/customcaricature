@@ -22,6 +22,13 @@ type LandingPage = {
 
 const BASE_URL = "https://portal.creativecaricatureclub.com";
 
+// Slugs that are static files or known non-SEO routes — skip DB lookup
+const SKIP_SLUGS = new Set([
+  "sitemap.xml", "robots.txt", "manifest.json", "sw-push.js",
+  "pushpilot-sw.js", "OneSignalSDKWorker.js", "favicon.ico", "logo.png",
+  "placeholder.svg",
+]);
+
 const SEOLandingPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -30,6 +37,12 @@ const SEOLandingPage = () => {
   const [relatedPages, setRelatedPages] = useState<LandingPage[]>([]);
 
   useEffect(() => {
+    // If slug looks like a file (has extension) or is a known static asset, skip
+    if (!slug || SKIP_SLUGS.has(slug) || /\.\w{2,5}$/.test(slug)) {
+      setLoading(false);
+      return;
+    }
+
     const fetchPage = async () => {
       setLoading(true);
       const { data } = await supabase
@@ -41,7 +54,6 @@ const SEOLandingPage = () => {
 
       if (data) {
         setPage(data as any);
-        // Fetch related pages (same city or same service)
         const { data: related } = await supabase
           .from("seo_landing_pages" as any)
           .select("slug, h1_title, city, service")
@@ -52,7 +64,7 @@ const SEOLandingPage = () => {
       }
       setLoading(false);
     };
-    if (slug) fetchPage();
+    fetchPage();
   }, [slug]);
 
   if (loading) {
