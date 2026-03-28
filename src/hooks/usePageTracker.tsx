@@ -59,6 +59,14 @@ const usePageTracker = () => {
     };
 
     trackPageView();
+
+    // Send page view to GA4
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "page_view", {
+        page_path: location.pathname,
+        page_title: document.title,
+      });
+    }
   }, [location.pathname]);
 };
 
