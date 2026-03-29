@@ -502,7 +502,7 @@ const Dashboard = () => {
               { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
               { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
               { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
+              { icon: Receipt, key: "payments", action: () => setActiveTab("payments") },
               { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
               ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
               { icon: User, key: "profile", action: () => setActiveTab("profile") },
