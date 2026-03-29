@@ -93,10 +93,9 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
       if (!booking) throw new Error("Booking not found");
 
       const amount = partialConfig.partial_2_amount;
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Payment creation failed");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
