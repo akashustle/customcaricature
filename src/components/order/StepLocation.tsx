@@ -13,7 +13,7 @@ interface Props {
 }
 
 const StepLocation = ({ data, update, onNext }: Props) => {
-  const isMumbai = isMumbaiCity(data.state, data.city);
+  const isMumbai = isMumbaiRegion(data.state, data.district, data.city);
   const canProceed = data.state.trim() && data.district.trim() && data.city.trim();
 
   return (
