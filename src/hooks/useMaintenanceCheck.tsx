@@ -55,8 +55,8 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
 
     check();
 
-    // Reduced polling: 2 minutes
-    const iv = setInterval(check, 120_000);
+    // Reduced polling: 5 minutes (was 2 min) — realtime handles instant updates
+    const iv = setInterval(check, 300_000);
 
     if (!channelRef.current) {
       channelRef.current = supabase

@@ -17,12 +17,17 @@ export default defineConfig(({ mode }) => ({
     target: "es2020",
     cssMinify: true,
     minify: "terser",
+    modulePreload: { polyfill: true },
     terserOptions: {
       compress: {
         drop_console: mode === "production",
         drop_debugger: true,
-        passes: 2,
+        passes: 3,
+        pure_getters: true,
+        unsafe_math: true,
+        unsafe_arrows: true,
       },
+      mangle: { toplevel: true },
     },
     rollupOptions: {
       output: {
@@ -45,6 +50,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     chunkSizeWarningLimit: 600,
+    reportCompressedSize: false,
   },
   plugins: [
     react(),

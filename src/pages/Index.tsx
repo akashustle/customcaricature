@@ -262,9 +262,9 @@ const Index = () => {
       <section className="relative overflow-hidden" ref={heroRef}>
         {/* Soft gradient — no harsh animations on mobile */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card/30 to-background" />
-        <div className="absolute inset-0 hidden lg:block">
-          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
+          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px]" />
         </div>
         <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
@@ -406,6 +406,7 @@ const Index = () => {
       </section>
 
       {/* Dynamic Sections — rendered in admin-configured order, lazy loaded */}
+      {/* content-visibility:auto skips rendering until near viewport — massive perf win */}
       <Suspense fallback={null}>
       {sectionOrder.map((sectionId) => {
         const renderHiddenMessage = () => {
@@ -422,13 +423,13 @@ const Index = () => {
 
         switch (sectionId) {
           case "instant_quote":
-            return <div key={sectionId} id="section-instant-quote"><HomepageInstantQuote config={content.homepage_instant_quote} /></div>;
+            return <div key={sectionId} id="section-instant-quote" className="cv-auto"><HomepageInstantQuote config={content.homepage_instant_quote} /></div>;
           case "social_proof":
-            return <div key={sectionId} id="section-social-proof"><HomepageSocialProof config={content.homepage_social_proof} /></div>;
+            return <div key={sectionId} id="section-social-proof" className="cv-auto"><HomepageSocialProof config={content.homepage_social_proof} /></div>;
           case "video":
-            return <div key={sectionId} id="section-video"><HomepageVideo config={content.homepage_video} /></div>;
+            return <div key={sectionId} id="section-video" className="cv-auto"><HomepageVideo config={content.homepage_video} /></div>;
           case "enquiry_funnel":
-            return <div key={sectionId} id="section-enquiry-funnel"><HomepageEnquiryFunnel /></div>;
+            return <div key={sectionId} id="section-enquiry-funnel" className="cv-auto"><HomepageEnquiryFunnel /></div>;
           case "portfolio_gallery":
             return (
               <section key={sectionId} className="py-16 md:py-20" aria-label="Gallery of recent caricature work" id="section-portfolio-gallery">
@@ -444,10 +445,10 @@ const Index = () => {
               </section>
             );
           case "what_you_get":
-            return <div key={sectionId} id="section-what-you-get"><HomepageWhatYouGet config={content.homepage_what_you_get} /></div>;
+            return <div key={sectionId} id="section-what-you-get" className="cv-auto"><HomepageWhatYouGet config={content.homepage_what_you_get} /></div>;
           case "how_it_works":
             return (
-              <section key={sectionId} className="container mx-auto px-4 py-16 md:py-24" id="section-how-it-works">
+              <section key={sectionId} className="container mx-auto px-4 py-16 md:py-24 cv-auto" id="section-how-it-works">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
                   <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Simple Process</p>
                   <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">How It Works</h2>
@@ -483,10 +484,10 @@ const Index = () => {
               </section>
             );
           case "scroll_events":
-            return <div key={sectionId} id="section-scroll-events"><HomepageScrollEvents /></div>;
+            return <div key={sectionId} id="section-scroll-events" className="cv-auto"><HomepageScrollEvents /></div>;
           case "services":
             return (
-              <section key={sectionId} className="bg-card/50 py-16 md:py-24 border-y border-border/50" id="section-services">
+              <section key={sectionId} className="bg-card/50 py-16 md:py-24 border-y border-border/50 cv-auto" id="section-services">
                 <div className="container mx-auto px-4">
                   <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
                     <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">What We Offer</p>
@@ -523,10 +524,10 @@ const Index = () => {
               </section>
             );
           case "use_cases":
-            return <div key={sectionId} id="section-use-cases"><HomepageUseCases config={content.homepage_use_cases} /></div>;
+            return <div key={sectionId} id="section-use-cases" className="cv-auto"><HomepageUseCases config={content.homepage_use_cases} /></div>;
           case "styles":
             return (
-              <section key={sectionId} className="py-16 md:py-24 overflow-hidden" id="section-styles">
+              <section key={sectionId} className="py-16 md:py-24 overflow-hidden cv-auto" id="section-styles">
                 <div className="container mx-auto px-4">
                   <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
                     <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Pick Your Vibe</p>
@@ -556,19 +557,19 @@ const Index = () => {
               </section>
             );
           case "why_us":
-            return <div key={sectionId} id="section-why-us"><HomepageWhyUs config={content.homepage_why_us} /></div>;
+            return <div key={sectionId} id="section-why-us" className="cv-auto"><HomepageWhyUs config={content.homepage_why_us} /></div>;
           case "reviews":
-            return <div key={sectionId} id="section-reviews"><HomepageReviews /></div>;
+            return <div key={sectionId} id="section-reviews" className="cv-auto"><HomepageReviews /></div>;
           case "trusted_brands":
-            return <div key={sectionId} id="section-trusted-brands"><HomepageTrustedBrands /></div>;
+            return <div key={sectionId} id="section-trusted-brands" className="cv-auto"><HomepageTrustedBrands /></div>;
           case "event_gallery":
-            return <div key={sectionId} id="section-event-gallery"><HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" /></div>;
+            return <div key={sectionId} id="section-event-gallery" className="cv-auto"><HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" /></div>;
           case "caricature_gallery":
-            return <div key={sectionId} id="section-caricature-gallery"><HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" /></div>;
+            return <div key={sectionId} id="section-caricature-gallery" className="cv-auto"><HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" /></div>;
           case "before_after":
-            return <div key={sectionId} id="section-before-after"><HomepageBeforeAfter /></div>;
+            return <div key={sectionId} id="section-before-after" className="cv-auto"><HomepageBeforeAfter /></div>;
           case "smart_help":
-            return <div key={sectionId} id="section-smart-help"><HomepageSmartHelp config={content.homepage_smart_help} /></div>;
+            return <div key={sectionId} id="section-smart-help" className="cv-auto"><HomepageSmartHelp config={content.homepage_smart_help} /></div>;
           default:
             return null;
         }
