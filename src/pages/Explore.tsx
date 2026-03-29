@@ -72,7 +72,7 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
-      <SEOHead title="Explore - Creative Caricature Club™" description="Explore our services, gallery, workshops and more." canonical="/explore" />
+      <SEOHead title="Explore Caricature Services | Creative Caricature Club™" description="Explore all services — custom caricature orders, live event artist bookings, caricature workshops, merchandise shop & more from Creative Caricature Club™ India." canonical="/explore" />
       
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/30">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">

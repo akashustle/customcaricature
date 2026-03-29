@@ -118,7 +118,7 @@ const Order = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Order Custom Caricature from Photos" description="Order custom hand-crafted caricatures from your photos. Choose from cute, romantic, fun, royal & minimal styles. Delivered across India." canonical="/order" />
+      <SEOHead title="Order Custom Caricature from Photos Online | Creative Caricature Club™" description="Order custom hand-crafted caricatures from your photos online. Choose from cute, romantic, fun, royal & minimal styles. Creative Caricature Club™ delivers across India & internationally. Perfect gift for birthdays, anniversaries & weddings." canonical="/order" />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">

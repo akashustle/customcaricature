@@ -74,7 +74,7 @@ const GalleryPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <SEOHead title={`${title} - Creative Caricature Club™`} description={`Browse our ${title.toLowerCase()} collection`} canonical={`/gallery/${type}`} />
+      <SEOHead title={type === "caricatures" ? "Custom Caricature Gallery | Hand-Crafted Artwork Samples" : "Live Event Caricature Gallery | Wedding & Corporate Events"} description={type === "caricatures" ? "Browse Creative Caricature Club™ custom caricature gallery — cute, romantic, fun, royal & minimal styles. Hand-crafted caricature artwork from photos." : "See live caricature events by Creative Caricature Club™ at weddings, corporate events, birthday parties & college fests across India."} canonical={`/gallery/${type}`} />
 
       {/* Lightbox */}
       <AnimatePresence>

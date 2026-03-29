@@ -69,8 +69,8 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <SEOHead
-        title="Blog - Tutorials & Case Studies"
-        description="Read our latest tutorials, case studies, and tips about custom caricature art. Learn about styles, techniques, and behind-the-scenes stories."
+        title="Caricature Blog | Tips, Tutorials & Event Stories"
+        description="Read the Creative Caricature Club™ blog for caricature tips, tutorials, event case studies & behind-the-scenes stories. Learn about caricature styles, wedding entertainment ideas & more."
         canonical="/blog"
       />
 

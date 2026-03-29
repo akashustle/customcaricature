@@ -131,7 +131,7 @@ const CaricatureBudgeting = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <SEOHead title="Caricature Budgeting Calculator" description="Calculate pricing for custom caricatures and live event bookings." canonical="/caricature-budgeting" />
+      <SEOHead title="Caricature Pricing Calculator | Event & Custom Caricature Cost" description="Calculate caricature pricing for live events & custom orders. Get instant quotes for wedding caricature artists, corporate event entertainment & custom caricature gifts. Creative Caricature Club™ India." canonical="/caricature-budgeting" />
 
       {/* Header */}
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">

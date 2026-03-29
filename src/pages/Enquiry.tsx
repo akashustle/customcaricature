@@ -451,7 +451,7 @@ const Enquiry = () => {
 
   return (
     <>
-      <SEOHead title="Enquiry | Creative Caricature Club™" description="Submit your enquiry for custom caricatures or event bookings." />
+      <SEOHead title="Enquiry | Book Caricature Artist or Order Custom Caricature" description="Submit an enquiry for custom caricatures, live event caricature artists for weddings & corporate events, or get a custom quote. Creative Caricature Club™ — India's #1 caricature studio in Mumbai." canonical="/enquiry" />
       <div className="min-h-screen bg-background flex items-center justify-center p-4 pb-20 md:pb-4">
         <Card className="w-full max-w-lg shadow-2xl border-border bg-card/90 backdrop-blur-sm">
           <CardHeader className="text-center pb-2">
