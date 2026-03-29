@@ -569,7 +569,7 @@ const Index = () => {
           case "before_after":
             return <div key={sectionId} id="section-before-after" className="cv-auto"><HomepageBeforeAfter /></div>;
           case "smart_help":
-            return <div key={sectionId} id="section-smart-help"><HomepageSmartHelp config={content.homepage_smart_help} /></div>;
+            return <div key={sectionId} id="section-smart-help" className="cv-auto"><HomepageSmartHelp config={content.homepage_smart_help} /></div>;
           default:
             return null;
         }
