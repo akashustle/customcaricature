@@ -140,7 +140,7 @@ const Dashboard = () => {
     init();
 
     const channel = supabase
-      .channel("user-dashboard")
+      .channel(`user-dashboard-${user.id}-${Date.now()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `user_id=eq.${user.id}` }, () => fetchOrders(user.id))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => fetchProfile(user.id))
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` }, () => {
@@ -163,7 +163,12 @@ const Dashboard = () => {
         }
       });
 
-    return () => { cancelled = true; supabase.removeChannel(channel); };
+    // Polling fallback: check every 10s for portal requests in case realtime misses
+    const portalPoll = setInterval(() => {
+      fetchLatestPortalPaymentRequest(user.id);
+    }, 10000);
+
+    return () => { cancelled = true; clearInterval(portalPoll); supabase.removeChannel(channel); };
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
