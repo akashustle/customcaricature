@@ -2405,6 +2405,174 @@ export type Database = {
           },
         ]
       }
+      lead_link_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          details: string | null
+          id: string
+          lead_link_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          lead_link_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          lead_link_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_link_actions_lead_link_id_fkey"
+            columns: ["lead_link_id"]
+            isOneToOne: false
+            referencedRelation: "lead_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_link_caricature_pricing: {
+        Row: {
+          caricature_type_slug: string
+          created_at: string
+          custom_price: number
+          id: string
+          lead_link_id: string
+        }
+        Insert: {
+          caricature_type_slug: string
+          created_at?: string
+          custom_price: number
+          id?: string
+          lead_link_id: string
+        }
+        Update: {
+          caricature_type_slug?: string
+          created_at?: string
+          custom_price?: number
+          id?: string
+          lead_link_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_link_caricature_pricing_lead_link_id_fkey"
+            columns: ["lead_link_id"]
+            isOneToOne: false
+            referencedRelation: "lead_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_link_event_pricing: {
+        Row: {
+          artist_count: number
+          created_at: string
+          custom_advance_amount: number
+          custom_extra_hour_rate: number
+          custom_total_price: number
+          id: string
+          lead_link_id: string
+          region: string
+        }
+        Insert: {
+          artist_count?: number
+          created_at?: string
+          custom_advance_amount?: number
+          custom_extra_hour_rate?: number
+          custom_total_price?: number
+          id?: string
+          lead_link_id: string
+          region?: string
+        }
+        Update: {
+          artist_count?: number
+          created_at?: string
+          custom_advance_amount?: number
+          custom_extra_hour_rate?: number
+          custom_total_price?: number
+          id?: string
+          lead_link_id?: string
+          region?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_link_event_pricing_lead_link_id_fkey"
+            columns: ["lead_link_id"]
+            isOneToOne: false
+            referencedRelation: "lead_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_links: {
+        Row: {
+          booking_id: string | null
+          booking_status: string | null
+          created_at: string
+          created_by: string
+          created_by_user_id: string
+          id: string
+          is_active: boolean
+          is_used: boolean
+          label: string
+          link_code: string
+          notes: string | null
+          updated_at: string
+          used_at: string | null
+          used_by_email: string | null
+          used_by_mobile: string | null
+          used_by_name: string | null
+          used_by_user_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          booking_status?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_user_id: string
+          id?: string
+          is_active?: boolean
+          is_used?: boolean
+          label?: string
+          link_code?: string
+          notes?: string | null
+          updated_at?: string
+          used_at?: string | null
+          used_by_email?: string | null
+          used_by_mobile?: string | null
+          used_by_name?: string | null
+          used_by_user_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          booking_status?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_user_id?: string
+          id?: string
+          is_active?: boolean
+          is_used?: boolean
+          label?: string
+          link_code?: string
+          notes?: string | null
+          updated_at?: string
+          used_at?: string | null
+          used_by_email?: string | null
+          used_by_mobile?: string | null
+          used_by_name?: string | null
+          used_by_user_id?: string | null
+        }
+        Relationships: []
+      }
       lil_flea_gallery: {
         Row: {
           caption: string | null
