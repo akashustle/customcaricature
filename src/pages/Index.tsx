@@ -296,7 +296,8 @@ const Index = () => {
               </motion.p>
               {hero.pricing_line && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-                  className="text-sm font-body font-semibold text-primary mb-2">
+                  className="text-primary mb-2 tracking-wide"
+                  style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(1rem, 2vw, 1.35rem)' }}>
                   {hero.pricing_line}
                 </motion.p>
               )}
