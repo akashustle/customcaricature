@@ -934,6 +934,47 @@ const ArtistDashboard = () => {
           artistId={artist?.id || ""}
         />
       )}
+
+      {/* Portal Payment Received Popup */}
+      <AnimatePresence>
+        {portalPaymentReceived && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setPortalPaymentReceived(false)}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ delay: 0.2, duration: 0.5 }}>
+                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
+                  <CheckCircle2 className="w-14 h-14 text-white" />
+                </div>
+              </motion.div>
+              <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}
+                className="font-display text-2xl font-bold text-foreground mb-2">
+                💰 Payment Received!
+              </motion.h2>
+              <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground font-sans mb-4">
+                Customer has completed the remaining payment via portal. The event is now fully paid! ✅
+              </motion.p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+                <Button variant="outline" className="rounded-full font-sans" onClick={() => setPortalPaymentReceived(false)}>
+                  Awesome! 🎉
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
