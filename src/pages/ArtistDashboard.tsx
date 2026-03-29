@@ -923,6 +923,7 @@ const ArtistDashboard = () => {
           open={!!collectEvent}
           onClose={() => setCollectEvent(null)}
           onSuccess={() => { if (artist) fetchEvents(artist.id); }}
+          artistId={artist?.id || ""}
         />
       )}
     </div>
