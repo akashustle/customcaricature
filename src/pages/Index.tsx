@@ -159,6 +159,7 @@ const Index = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const heroGalleryY = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const maintenance = useMaintenanceCheck("home");
 
   // Smart redirect: logged-in users go to their dashboard (deferred to not block paint)
