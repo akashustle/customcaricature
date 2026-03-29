@@ -262,9 +262,9 @@ const Index = () => {
       <section className="relative overflow-hidden" ref={heroRef}>
         {/* Soft gradient — no harsh animations on mobile */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card/30 to-background" />
-        <div className="absolute inset-0 hidden lg:block">
-          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px] animate-pulse" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 hidden lg:block" aria-hidden="true">
+          <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px]" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px]" />
         </div>
         <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
