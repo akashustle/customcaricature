@@ -292,7 +292,7 @@ const Index = () => {
               </motion.h1>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
                 className="text-base md:text-lg lg:text-xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
-                {hero.subtext || "Book professional caricature artists for weddings, corporate events & parties. Order custom hand-crafted caricatures from your photos."}
+                {hero.subtext || "India's most loved caricature studio — book live artists for weddings & events, or order stunning custom caricatures from your photos."}
               </motion.p>
               {hero.pricing_line && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
