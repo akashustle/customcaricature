@@ -51,7 +51,7 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
             />
           </div>
           {data.customerMobile && data.customerMobile.length < 10 && (
-            <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit Indian mobile number</p>
+            <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit WhatsApp number</p>
           )}
         </div>
         <div>
