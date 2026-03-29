@@ -1,11 +1,12 @@
 const BASE_URL = "https://portal.creativecaricatureclub.com";
+const LOGO_URL = `${BASE_URL}/logo.png?v=2`;
 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Creative Caricature Club™",
   url: BASE_URL,
-  logo: `${BASE_URL}/logo.png`,
+  logo: LOGO_URL,
   description: "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online.",
   founder: { "@type": "Person", name: "Ritesh Mahendra Gupta" },
   contactPoint: {
@@ -33,7 +34,7 @@ const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "Creative Caricature Club™",
-  image: `${BASE_URL}/logo.png`,
+  image: LOGO_URL,
   url: BASE_URL,
   description: "India's premium caricature studio. Custom hand-crafted caricatures for gifts, events and celebrations. Live caricature artists for weddings, corporate events and parties.",
   address: {
@@ -88,7 +89,7 @@ const productSchema = {
   name: "Custom Caricature from Photo",
   brand: { "@type": "Brand", name: "Creative Caricature Club™" },
   description: "Hand-crafted caricature artwork created from your photos. Available in cute, romantic, fun, royal, and minimal styles.",
-  image: `${BASE_URL}/logo.png`,
+  image: LOGO_URL,
   offers: {
     "@type": "AggregateOffer",
     priceCurrency: "INR",
