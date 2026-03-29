@@ -241,10 +241,9 @@ const Dashboard = () => {
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id,
             });
-            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
             playPaymentSuccessSound();
             toast({ title: "🎉 Payment Successful!" });
             if (user) fetchOrders(user.id);
