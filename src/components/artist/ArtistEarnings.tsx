@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "@/hooks/use-toast";
 import {
   Wallet, IndianRupee, TrendingUp, Clock, CheckCircle2, Send,
-  Image as ImageIcon, Banknote, ArrowDownCircle, ArrowUpCircle
+  Image as ImageIcon, Banknote, ArrowDownCircle, ArrowUpCircle, CreditCard
 } from "lucide-react";
+import ArtistPaymentDetails from "./ArtistPaymentDetails";
 import { motion } from "framer-motion";
 
 type EventPayout = {
