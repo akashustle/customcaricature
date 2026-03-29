@@ -10,11 +10,6 @@ import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay } from "@/lib/razorpay";
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 interface Props {
   data: OrderFormData;
