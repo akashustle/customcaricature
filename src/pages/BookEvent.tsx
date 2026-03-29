@@ -277,10 +277,9 @@ const BookEvent = () => {
       } as any).select("id").single();
       if (error || !booking) throw new Error(error?.message || "Failed to create booking");
 
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: totalPayable, order_id: booking.id, customer_name: clientName, customer_email: clientEmail, customer_mobile: clientMobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: totalPayable, order_id: booking.id, customer_name: clientName, customer_email: clientEmail, customer_mobile: clientMobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id,
