@@ -24,6 +24,7 @@ const OfflineDetector = lazy(() => import("./components/OfflineDetector"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
+import useAutoUpdate from "./hooks/useAutoUpdate";
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
