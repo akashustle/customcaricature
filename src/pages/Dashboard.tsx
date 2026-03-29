@@ -503,7 +503,7 @@ const Dashboard = () => {
               { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
               { icon: Receipt, key: "invoices", action: () => setActiveTab("invoices") },
               { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              { icon: Download, key: "downloads", action: () => navigate("/notifications") },
+              { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
               ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
               { icon: User, key: "profile", action: () => setActiveTab("profile") },
               { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
