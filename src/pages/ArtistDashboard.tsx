@@ -857,6 +857,21 @@ const ArtistDashboard = () => {
                                       <IndianRupee className="w-4 h-4 mr-1" /> Collect ₹{remaining.toLocaleString("en-IN")} Remaining
                                     </Button>
                                   )}
+                                  {/* Stop Portal Prompt Button */}
+                                  {activePortalRequests[ev.id] && (
+                                    <Button
+                                      onClick={() => handleCancelPortalRequest(ev.id)}
+                                      disabled={cancellingPortal === ev.id}
+                                      variant="outline"
+                                      className="w-full mt-2 h-10 rounded-xl font-sans border-destructive/50 text-destructive hover:bg-destructive/10"
+                                    >
+                                      {cancellingPortal === ev.id ? (
+                                        <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Stopping...</>
+                                      ) : (
+                                        <><XCircle className="w-4 h-4 mr-1" /> Stop Portal Payment Prompt</>
+                                      )}
+                                    </Button>
+                                  )}
                                   {ev.payment_status === "fully_paid" && (
                                     <div className="mt-3 flex items-center justify-center gap-2 text-green-600 text-sm font-sans">
                                       <CheckCircle2 className="w-4 h-4" /> Fully Paid ✅
