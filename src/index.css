@@ -1441,3 +1441,29 @@
   border-radius: 8px;
   transition: all 0.3s ease;
 }
+
+/* ===== Blog content typography ===== */
+.blog-content > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.8;
+  margin-right: 0.08em;
+  margin-top: 0.05em;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+  font-family: 'Nunito', serif;
+}
+
+.blog-content blockquote {
+  position: relative;
+}
+.blog-content blockquote::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.25em;
+  left: 0.15em;
+  font-size: 3em;
+  color: hsl(var(--primary) / 0.2);
+  font-family: 'Georgia', serif;
+  line-height: 1;
+}
