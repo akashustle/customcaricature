@@ -524,10 +524,10 @@ const Index = () => {
               </section>
             );
           case "use_cases":
-            return <div key={sectionId} id="section-use-cases"><HomepageUseCases config={content.homepage_use_cases} /></div>;
+            return <div key={sectionId} id="section-use-cases" className="cv-auto"><HomepageUseCases config={content.homepage_use_cases} /></div>;
           case "styles":
             return (
-              <section key={sectionId} className="py-16 md:py-24 overflow-hidden" id="section-styles">
+              <section key={sectionId} className="py-16 md:py-24 overflow-hidden cv-auto" id="section-styles">
                 <div className="container mx-auto px-4">
                   <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
                     <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Pick Your Vibe</p>
@@ -557,17 +557,17 @@ const Index = () => {
               </section>
             );
           case "why_us":
-            return <div key={sectionId} id="section-why-us"><HomepageWhyUs config={content.homepage_why_us} /></div>;
+            return <div key={sectionId} id="section-why-us" className="cv-auto"><HomepageWhyUs config={content.homepage_why_us} /></div>;
           case "reviews":
-            return <div key={sectionId} id="section-reviews"><HomepageReviews /></div>;
+            return <div key={sectionId} id="section-reviews" className="cv-auto"><HomepageReviews /></div>;
           case "trusted_brands":
-            return <div key={sectionId} id="section-trusted-brands"><HomepageTrustedBrands /></div>;
+            return <div key={sectionId} id="section-trusted-brands" className="cv-auto"><HomepageTrustedBrands /></div>;
           case "event_gallery":
-            return <div key={sectionId} id="section-event-gallery"><HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" /></div>;
+            return <div key={sectionId} id="section-event-gallery" className="cv-auto"><HomepageGallery table="event_gallery" title="Event Gallery" subtitle="Live Caricature Events" /></div>;
           case "caricature_gallery":
-            return <div key={sectionId} id="section-caricature-gallery"><HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" /></div>;
+            return <div key={sectionId} id="section-caricature-gallery" className="cv-auto"><HomepageGallery table="caricature_gallery" title="Custom Caricature Gallery" subtitle="Hand-Crafted Masterpieces" /></div>;
           case "before_after":
-            return <div key={sectionId} id="section-before-after"><HomepageBeforeAfter /></div>;
+            return <div key={sectionId} id="section-before-after" className="cv-auto"><HomepageBeforeAfter /></div>;
           case "smart_help":
             return <div key={sectionId} id="section-smart-help"><HomepageSmartHelp config={content.homepage_smart_help} /></div>;
           default:
