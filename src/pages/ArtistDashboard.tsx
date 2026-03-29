@@ -12,7 +12,7 @@ import {
   LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2,
   CalendarOff, Trash2, Package, Palette, MessageCircle, X, Bell, Clock,
   IndianRupee, CheckCircle2, Camera, CreditCard, Banknote, Upload, Phone, Mail,
-  ChevronDown, ChevronUp, User, Wallet
+  ChevronDown, ChevronUp, User, Wallet, XCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
