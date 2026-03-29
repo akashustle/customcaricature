@@ -85,6 +85,7 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
     const { error } = await supabase.from("artist_payout_requests" as any).insert({
       artist_id: artistId, amount, request_type: requestType,
       note: requestNote || null,
+      preferred_payment_method: preferredMethod,
     } as any);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
