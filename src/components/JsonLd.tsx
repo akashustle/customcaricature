@@ -34,7 +34,7 @@ const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "Creative Caricature Club™",
-  image: `${BASE_URL}/logo.png`,
+  image: LOGO_URL,
   url: BASE_URL,
   description: "India's premium caricature studio. Custom hand-crafted caricatures for gifts, events and celebrations. Live caricature artists for weddings, corporate events and parties.",
   address: {
