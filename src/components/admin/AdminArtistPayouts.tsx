@@ -71,12 +71,13 @@ const AdminArtistPayouts = () => {
   }, []);
 
   const fetchAll = async () => {
-    const [{ data: artistsData }, { data: settingsData }, { data: payoutsData }, { data: reqData }, { data: txData }] = await Promise.all([
+    const [{ data: artistsData }, { data: settingsData }, { data: payoutsData }, { data: reqData }, { data: txData }, { data: pdData }] = await Promise.all([
       supabase.from("artists").select("id, name, email").order("name"),
       supabase.from("artist_payout_settings" as any).select("*"),
       supabase.from("artist_event_payouts" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("artist_payout_requests" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("artist_transactions" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("artist_payment_details" as any).select("*"),
     ]);
     if (artistsData) setArtists(artistsData as any);
     if (settingsData) {
@@ -87,6 +88,11 @@ const AdminArtistPayouts = () => {
     if (payoutsData) setEventPayouts(payoutsData as any);
     if (reqData) setRequests(reqData as any);
     if (txData) setTransactions(txData as any);
+    if (pdData) {
+      const pdMap: Record<string, any> = {};
+      (pdData as any[]).forEach(d => { pdMap[d.artist_id] = d; });
+      setPaymentDetails(pdMap);
+    }
   };
 
   const savePayoutSetting = async (artistId: string, type: string, value: number, cycle: string) => {
