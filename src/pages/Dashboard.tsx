@@ -687,12 +687,22 @@ const ChatSection = ({ userId, userName, fullScreen }: { userId: string; userNam
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Chat with Admin</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-64 overflow-y-auto space-y-2 mb-4 border border-border rounded-xl p-3 bg-muted/20">
+    <div className={fullScreen ? "flex flex-col h-full" : ""}>
+      {!fullScreen && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display text-lg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" />Chat with Admin</CardTitle>
+          </CardHeader>
+        </Card>
+      )}
+      {fullScreen && (
+        <div className="flex items-center gap-2 p-3 border-b border-border bg-background">
+          <MessageCircle className="w-5 h-5 text-primary" />
+          <h3 className="font-display text-lg font-bold">Chat with Admin</h3>
+        </div>
+      )}
+      <div className={`${fullScreen ? "flex-1 overflow-y-auto" : "px-4 pb-4"}`}>
+        <div className={`${fullScreen ? "h-full p-3" : "h-64 overflow-y-auto border border-border rounded-xl p-3 bg-muted/20 mb-4"} space-y-2`}>
           {messages.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start a conversation!</p>}
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.sender_id === userId ? "justify-end" : "justify-start"}`}>
@@ -703,13 +713,16 @@ const ChatSection = ({ userId, userName, fullScreen }: { userId: string; userNam
             </div>
           ))}
         </div>
+      </div>
+      <div className="p-3 border-t border-border bg-background">
         <div className="flex gap-2">
           <Input value={newMsg} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMsg(e.target.value)} placeholder="Type a message..."
-            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} />
+            onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+            className="flex-1 rounded-full" />
           <Button onClick={sendMessage} disabled={sending || !newMsg.trim()} size="sm" className="rounded-full px-4">Send</Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
