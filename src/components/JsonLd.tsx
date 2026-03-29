@@ -36,7 +36,7 @@ const localBusinessSchema = {
   name: "Creative Caricature Club™",
   image: LOGO_URL,
   url: BASE_URL,
-  description: "India's premium caricature studio. Custom hand-crafted caricatures for gifts, events and celebrations. Live caricature artists for weddings, corporate events and parties.",
+  description: "Creative Caricature Club™ — India's premium caricature studio in Mumbai. Custom hand-crafted caricatures for gifts, events & celebrations. Live caricature artists for weddings, corporate events, birthday parties & college fests across India & internationally.",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Mumbai",

@@ -10,7 +10,7 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "Creative Caricature Club™";
-const DEFAULT_DESC = "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online with Creative Caricature Club™. India's #1 caricature studio.";
+const DEFAULT_DESC = "Creative Caricature Club™ — India's #1 caricature studio. Book live caricature artists for weddings, corporate events, birthdays & parties in Mumbai & across India. Order custom hand-crafted caricatures from photos online. International event bookings available.";
 const BASE_URL = "https://portal.creativecaricatureclub.com";
 
 const SEOHead = ({
