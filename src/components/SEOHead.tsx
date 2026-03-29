@@ -7,11 +7,14 @@ interface SEOHeadProps {
   type?: string;
   image?: string;
   noindex?: boolean;
+  keywords?: string;
 }
 
 const SITE_NAME = "Creative Caricature Club™";
 const DEFAULT_DESC = "Creative Caricature Club™ — India's #1 caricature studio. Book live caricature artists for weddings, corporate events, birthdays & parties in Mumbai & across India. Order custom hand-crafted caricatures from photos online. International event bookings available.";
 const BASE_URL = "https://portal.creativecaricatureclub.com";
+
+const DEFAULT_KEYWORDS = "Creative Caricature Club, caricature, caricature artist, live caricature, caricature artist Mumbai, caricature for wedding, custom caricature, caricature online India, book caricature artist, caricature artist near me";
 
 const SEOHead = ({
   title,
@@ -20,6 +23,7 @@ const SEOHead = ({
   type = "website",
   image = "/logo.png",
   noindex = false,
+  keywords = DEFAULT_KEYWORDS,
 }: SEOHeadProps) => {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} - Custom Hand-Crafted Caricatures Online India`;
   const fullImage = image.startsWith("http") ? image : `${BASE_URL}${image}`;
@@ -39,6 +43,7 @@ const SEOHead = ({
     };
 
     setMeta("description", description);
+    if (keywords) setMeta("keywords", keywords);
     setMeta("og:title", fullTitle, "property");
     setMeta("og:description", description, "property");
     setMeta("og:type", type, "property");
@@ -61,7 +66,7 @@ const SEOHead = ({
       link.href = fullCanonical;
       setMeta("og:url", fullCanonical, "property");
     }
-  }, [fullTitle, description, type, fullImage, fullCanonical, noindex]);
+  }, [fullTitle, description, type, fullImage, fullCanonical, noindex, keywords]);
 
   return null;
 };

@@ -287,12 +287,12 @@ const Index = () => {
                 <span className="text-xs font-body font-semibold text-primary tracking-wide">India's #1 Premium Caricature Studio</span>
               </motion.div>
               <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-                className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]">
-                {hero.headline || (<>Turn Moments Into <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
+                className="text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]" style={{ fontFamily: "'Nunito', sans-serif", fontWeight: 800, letterSpacing: '-0.02em' }}>
+                {hero.headline || (<>Where Every Face Becomes <span className="text-primary relative font-calligraphy">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
               </motion.h1>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
                 className="text-base md:text-lg lg:text-xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 font-body leading-relaxed">
-                {hero.subtext || "Book professional caricature artists for weddings, corporate events & parties. Order custom hand-crafted caricatures from your photos."}
+                {hero.subtext || "India's most loved caricature studio — book live artists for weddings & events, or order stunning custom caricatures from your photos."}
               </motion.p>
               {hero.pricing_line && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
