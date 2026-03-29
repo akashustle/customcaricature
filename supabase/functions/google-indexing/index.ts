@@ -235,9 +235,8 @@ async function verifyAdmin(
     global: { headers: { Authorization: authHeader } },
   });
 
-  const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsError } = await sb.auth.getClaims(token);
-  if (claimsError || !claimsData?.claims) {
+  const { data: { user }, error: userError } = await sb.auth.getUser();
+  if (userError || !user) {
     return {
       userId: "",
       error: new Response(
@@ -247,7 +246,7 @@ async function verifyAdmin(
     };
   }
 
-  const userId = claimsData.claims.sub as string;
+  const userId = user.id;
 
   // Check admin role using service role client
   const sbService = createClient(
