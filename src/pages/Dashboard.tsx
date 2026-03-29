@@ -231,10 +231,9 @@ const Dashboard = () => {
   const handlePayNow = async (order: Order) => {
     setPayingOrderId(order.id);
     try {
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: order.amount, order_id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_mobile: order.customer_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: order.amount, order_id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_mobile: order.customer_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
