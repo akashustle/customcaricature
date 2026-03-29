@@ -302,7 +302,8 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
       const actualCity = mf.city === "__other__" ? mf.customCity : mf.city;
       const finalEventType = mf.eventType === "other" ? mf.customEventType : mf.eventType;
       const MUMBAI_DISTRICTS = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
-      const isMumbai = mf.state === "Maharashtra" && (MUMBAI_DISTRICTS.includes(mf.district || "") || ["Mumbai", "Navi Mumbai", "Thane", "Palghar"].includes(actualCity));
+      const MUMBAI_CITIES = ["Mumbai", "Navi Mumbai", "Thane", "Palghar"];
+      const isMumbai = mf.state === "Maharashtra" && (MUMBAI_DISTRICTS.includes(actualCity) || MUMBAI_CITIES.includes(actualCity));
       await supabase.from("event_bookings").insert({
         user_id: mf.userId || null, client_name: mf.clientName, client_mobile: mf.clientMobile,
         client_email: mf.clientEmail, client_instagram: mf.clientInstagram || null,

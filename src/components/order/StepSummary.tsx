@@ -1,5 +1,6 @@
 import { OrderFormData } from "@/lib/order-types";
 import { formatPrice, STYLES } from "@/lib/pricing";
+import { isMumbaiRegion } from "@/lib/india-locations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
