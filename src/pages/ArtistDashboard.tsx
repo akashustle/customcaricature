@@ -895,7 +895,7 @@ const ArtistDashboard = () => {
               { id: "earnings", icon: Wallet },
               { id: "blocked", icon: CalendarOff },
               { id: "chat", icon: MessageCircle },
-              { id: "notifications", icon: Bell, path: "/notifications" },
+              { id: "notifications", icon: Bell },
               { id: "home", icon: Home, path: "/" },
               { id: "logout", icon: LogOut, action: handleLogout },
             ].map(item => {
