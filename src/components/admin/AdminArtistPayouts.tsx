@@ -44,6 +44,7 @@ const AdminArtistPayouts = () => {
   const [eventPayouts, setEventPayouts] = useState<EventPayout[]>([]);
   const [requests, setRequests] = useState<PayoutRequest[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [paymentDetails, setPaymentDetails] = useState<Record<string, any>>({});
   const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
   const [editingEvent, setEditingEvent] = useState<{ eventId: string; artistId: string } | null>(null);
   const [customPayoutType, setCustomPayoutType] = useState("percentage");
