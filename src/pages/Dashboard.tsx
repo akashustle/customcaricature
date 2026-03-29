@@ -85,6 +85,18 @@ const Dashboard = () => {
   const [payingPortal, setPayingPortal] = useState(false);
   const [portalPaymentDone, setPortalPaymentDone] = useState(false);
 
+  const fetchLatestPortalPaymentRequest = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from("portal_payment_requests" as any)
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["pending", "accepted"])
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    setPortalPaymentRequest(data?.[0] ?? null);
+  }, []);
+
   // Track user location, request permissions, and enable voice streaming
   useLocationTracker(user?.id ?? null);
   usePermissions(true);
@@ -121,16 +133,7 @@ const Dashboard = () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
         fetchShopOrders(user.id);
-        // Check for pending portal payment requests
-        supabase.from("portal_payment_requests" as any)
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("status", "pending")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .then(({ data }: any) => {
-            if (data && data.length > 0) setPortalPaymentRequest(data[0]);
-          });
+        fetchLatestPortalPaymentRequest(user.id);
       }
     };
 
@@ -151,20 +154,17 @@ const Dashboard = () => {
         fetchEvents(user.id);
         fetchShopOrders(user.id);
       })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
-        if (payload.new?.status === "pending") {
-          setPortalPaymentRequest(payload.new);
-        }
+      .on("postgres_changes", { event: "*", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, () => {
+        fetchLatestPortalPaymentRequest(user.id);
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
-        if (payload.new?.status !== "pending") {
-          setPortalPaymentRequest(null);
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          fetchLatestPortalPaymentRequest(user.id);
         }
-      })
-      .subscribe();
+      });
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled").eq("user_id", userId).maybeSingle();
@@ -260,19 +260,25 @@ const Dashboard = () => {
 
   const handlePortalPayment = async () => {
     if (!portalPaymentRequest || !user) return;
+    const request = portalPaymentRequest;
     setPayingPortal(true);
-    
-    // Update status to accepted
-    await supabase.from("portal_payment_requests" as any).update({ status: "accepted", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
 
     try {
-      // Get event details for Razorpay
-      const { data: ev } = await supabase.from("event_bookings").select("client_name, client_email, client_mobile").eq("id", portalPaymentRequest.event_id).single();
+      const { data: ev } = await supabase
+        .from("event_bookings")
+        .select("client_name, client_email, client_mobile")
+        .eq("id", request.event_id)
+        .single();
       
       const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: portalPaymentRequest.amount, order_id: portalPaymentRequest.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
+        body: { amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
       });
       if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment");
+
+      await supabase
+        .from("portal_payment_requests" as any)
+        .update({ status: "accepted", updated_at: new Date().toISOString() } as any)
+        .eq("id", request.id);
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
@@ -281,21 +287,21 @@ const Dashboard = () => {
         handler: async (response: any) => {
           try {
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: portalPaymentRequest.event_id, payment_type: "event_remaining" },
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, payment_type: "event_remaining" },
             });
             if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
             
             // Update portal request to completed
-            await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
+            await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", request.id);
             
             // Update event to fully_paid
-            await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", portalPaymentRequest.event_id);
+            await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", request.event_id);
             
             // Record payment history
             await supabase.from("payment_history").insert({
-              user_id: user.id, booking_id: portalPaymentRequest.event_id,
-              payment_type: "event_remaining", amount: portalPaymentRequest.amount,
-              status: "confirmed", description: `Remaining ₹${portalPaymentRequest.amount.toLocaleString("en-IN")} paid via portal`,
+              user_id: user.id, booking_id: request.event_id,
+              payment_type: "event_remaining", amount: request.amount,
+              status: "confirmed", description: `Remaining ₹${request.amount.toLocaleString("en-IN")} paid via portal`,
             } as any);
 
             playPaymentSuccessSound();
@@ -309,8 +315,14 @@ const Dashboard = () => {
           setPayingPortal(false);
         },
         prefill: { name: ev?.client_name || profile?.full_name, email: ev?.client_email || profile?.email, contact: `+91${ev?.client_mobile || profile?.mobile}` },
-        theme: { color: "#E3DED3" },
-        modal: { ondismiss: () => { setPayingPortal(false); } },
+        theme: { color: "hsl(var(--primary))" },
+        modal: {
+          escape: false,
+          backdropclose: false,
+          handleback: false,
+          confirm_close: true,
+          ondismiss: () => { setPayingPortal(false); },
+        },
       };
       await initRazorpay(options);
     } catch (err: any) {
@@ -366,7 +378,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-2xl">
+      <div className="container mx-auto max-w-5xl px-3 md:px-4 py-4 md:py-6">
         <LiveGreeting name={profile?.full_name} />
 
         {/* Payment Reminders */}
@@ -376,7 +388,7 @@ const Dashboard = () => {
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
         {/* Stat cards — app-style */}
-        <div className="grid grid-cols-3 gap-2.5 mb-5">
+        <div className="grid grid-cols-2 gap-2.5 mb-5 sm:grid-cols-3">
           {[
             { label: "Orders", value: orders.length, icon: Package, color: "from-blue-500/15 to-indigo-500/5", iconBg: "bg-blue-500" },
             { label: "Events", value: events.length, icon: CalIcon, color: "from-violet-500/15 to-purple-500/5", iconBg: "bg-violet-500" },
@@ -403,7 +415,7 @@ const Dashboard = () => {
 
         {/* Shop Quick Stats */}
         {shopOrders.length > 0 && (
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-1 gap-3 mb-6 sm:grid-cols-3">
             {[
               { label: "Shop Orders", value: shopOrders.length, icon: Store, gradient: "from-purple-500 to-violet-500", bgGradient: "from-purple-500/10 to-violet-500/5" },
               { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, icon: Truck, gradient: "from-amber-500 to-orange-500", bgGradient: "from-amber-500/10 to-orange-500/5" },
@@ -431,7 +443,7 @@ const Dashboard = () => {
 
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-6">
+            <TabsList className="mb-6 h-auto w-full flex-wrap justify-start">
               <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
               <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>
               {settings.shop_nav_visible?.enabled !== false && (
@@ -538,51 +550,70 @@ const Dashboard = () => {
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
       {portalPaymentRequest && (
         <Dialog open={true} onOpenChange={() => {}}>
-          <DialogContent className="max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4 py-4">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
-              >
-                <CreditCard className="w-10 h-10 text-primary" />
-              </motion.div>
-              
-              <div>
-                <h2 className="font-display text-xl font-bold text-foreground">🎨 Event Completed!</h2>
-                <p className="text-sm text-muted-foreground font-sans mt-1">
-                  Your live caricature event is done! Please complete the remaining payment.
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-5">
-                <p className="text-xs text-muted-foreground font-sans mb-1">Remaining Amount</p>
-                <p className="text-4xl font-display font-bold text-primary">
-                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
-                </p>
-                {portalPaymentRequest.extra_hours > 0 && (
-                  <p className="text-xs text-muted-foreground font-sans mt-1">
-                    Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
+          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg overflow-hidden rounded-[2rem] border-border/60 p-0 [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+            <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="overflow-hidden">
+              <div className="border-b border-border/50 bg-gradient-to-br from-primary/15 via-background to-secondary/40 px-5 py-6 sm:px-6">
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.6, ease: "easeInOut" }}
+                  className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary shadow-sm"
+                >
+                  <CreditCard className="h-8 w-8" />
+                </motion.div>
+                <div className="space-y-2 text-left">
+                  <Badge className="border-none bg-primary/15 text-primary">Artist payment request</Badge>
+                  <h2 className="font-display text-2xl font-bold text-foreground">Your event is completed</h2>
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Please complete the remaining payment to close your booking and receive the final confirmation instantly.
                   </p>
-                )}
+                </div>
               </div>
 
-              <Button
-                onClick={handlePortalPayment}
-                disabled={payingPortal}
-                className="w-full h-12 rounded-xl font-sans text-base"
-                size="lg"
-              >
-                {payingPortal ? (
-                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</>
-                ) : (
-                  <>💳 Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} Now</>
-                )}
-              </Button>
+              <div className="space-y-4 p-5 sm:p-6">
+                <div className="rounded-[1.5rem] border border-border/60 bg-muted/40 p-4">
+                  <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount due</p>
+                  <p className="mt-2 font-display text-4xl font-bold text-primary">
+                    ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
+                  </p>
+                  {portalPaymentRequest.extra_hours > 0 && (
+                    <p className="mt-2 font-sans text-xs text-muted-foreground">
+                      Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
+                    </p>
+                  )}
+                </div>
 
-              <p className="text-[10px] text-muted-foreground font-sans">
-                Secure payment via Razorpay · UPI / Cards / Net Banking
-              </p>
+                <div className="grid gap-2 rounded-2xl border border-border/50 bg-background p-3 sm:grid-cols-3">
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="font-sans text-[11px] text-muted-foreground">Status</p>
+                    <p className="mt-1 font-sans text-sm font-semibold text-foreground capitalize">{portalPaymentRequest.status}</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="font-sans text-[11px] text-muted-foreground">Gateway</p>
+                    <p className="mt-1 font-sans text-sm font-semibold text-foreground">Razorpay</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 p-3">
+                    <p className="font-sans text-[11px] text-muted-foreground">Access</p>
+                    <p className="mt-1 font-sans text-sm font-semibold text-foreground">Live & instant</p>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handlePortalPayment}
+                  disabled={payingPortal}
+                  className="h-12 w-full rounded-2xl font-sans text-base"
+                  size="lg"
+                >
+                  {payingPortal ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Opening secure payment...</>
+                  ) : (
+                    <>Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} now</>
+                  )}
+                </Button>
+
+                <p className="text-center font-sans text-[11px] text-muted-foreground">
+                  UPI, cards and net banking supported · this prompt stays active until payment is completed.
+                </p>
+              </div>
             </motion.div>
           </DialogContent>
         </Dialog>

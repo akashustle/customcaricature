@@ -494,13 +494,13 @@ const ArtistDashboard = () => {
     requestBrowserNotificationPermission(userId).catch(() => {});
     initWebPush(userId).catch(() => {});
 
-    const ch = supabase.channel("artist-dashboard-rt")
+    const ch = supabase.channel(`artist-dashboard-rt-${(artistData as any).id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "event_artist_assignments" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { if (isR) fetchOrders((artistData as any).id); })
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests" }, (payload: any) => {
-        if (payload.new?.status === "completed") {
+        if (payload.new?.artist_id === (artistData as any).id && payload.new?.status === "completed") {
           setPortalPaymentReceived(true);
           fetchEvents((artistData as any).id);
           setTimeout(() => setPortalPaymentReceived(false), 6000);
@@ -604,10 +604,15 @@ const ArtistDashboard = () => {
 
   const upcoming = events.filter(e => e.status === "upcoming");
   const completed = events.filter(e => e.status === "completed");
-  const totalRevenue = events.reduce((s, e) => s + (e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price), 0);
+  const totalToCollect = events.reduce((sum, e) => {
+    const totalAmount = e.negotiated && e.negotiated_total ? e.negotiated_total : e.total_price;
+    const advanceAmount = e.negotiated && e.negotiated_advance ? e.negotiated_advance : e.advance_amount;
+    const remainingAmount = e.payment_status === "fully_paid" ? 0 : (e.remaining_amount ?? (totalAmount - advanceAmount));
+    return sum + Math.max(remainingAmount, 0);
+  }, 0);
 
   return (
-    <div className="min-h-screen dashboard-gradient pb-20 md:pb-0">
+      <div className="min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
       <SEOHead title="Artist Dashboard" noindex />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
@@ -624,7 +629,7 @@ const ArtistDashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-4 max-w-2xl">
+      <div className="container mx-auto max-w-5xl px-3 py-4 sm:px-4">
         <div className="mb-3">
           <AdminSmartSearch panelType="artist"
             tabs={[{ id: "events", label: "Events" }, { id: "orders", label: "Orders" }]}
@@ -640,12 +645,12 @@ const ArtistDashboard = () => {
         <LiveGreeting name={artist?.name} />
 
         {/* Stats Row - Premium 3D Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Total Events", value: events.length, icon: CalendarDays, color: "from-primary/10 to-primary/5", iconBg: "bg-primary", desc: `${upcoming.length} upcoming` },
             { label: "This Month", value: events.filter(e => { const d = new Date(e.event_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length, icon: Clock, color: "from-blue-500/10 to-blue-500/5", iconBg: "bg-blue-500", desc: "events this month" },
             { label: "Completed", value: completed.length, icon: CheckCircle2, color: "from-green-500/10 to-green-500/5", iconBg: "bg-green-500", desc: `${((completed.length / Math.max(events.length, 1)) * 100).toFixed(0)}% completion` },
-            { label: "Revenue", value: `₹${totalRevenue >= 100000 ? (totalRevenue / 100000).toFixed(1) + "L" : (totalRevenue / 1000).toFixed(0) + "K"}`, icon: IndianRupee, color: "from-amber-500/10 to-amber-500/5", iconBg: "bg-amber-500", desc: `₹${totalRevenue.toLocaleString("en-IN")} total` },
+            { label: "To Collect", value: `₹${totalToCollect >= 100000 ? (totalToCollect / 100000).toFixed(1) + "L" : totalToCollect >= 1000 ? (totalToCollect / 1000).toFixed(0) + "K" : totalToCollect.toLocaleString("en-IN")}`, icon: IndianRupee, color: "from-amber-500/10 to-amber-500/5", iconBg: "bg-amber-500", desc: "pending from assigned events" },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
               <Card className="overflow-hidden relative border-border/60 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
@@ -700,7 +705,7 @@ const ArtistDashboard = () => {
         )}
 
         {/* Desktop Tabs */}
-        <div className="hidden md:flex gap-1 mb-4 bg-muted/30 rounded-xl p-1">
+        <div className="mb-4 hidden flex-wrap gap-1 rounded-xl bg-muted/30 p-1 md:flex">
           {[
             { id: "events", icon: CalendarDays, label: "Events" },
             ...(isRitesh ? [{ id: "orders", icon: Package, label: "Orders" }] : []),
@@ -788,7 +793,7 @@ const ArtistDashboard = () => {
                                   className="overflow-hidden">
                                   <div className="bg-muted/30 rounded-lg p-3 mt-2 space-y-2 text-xs font-sans">
                                     <p className="font-semibold text-foreground text-sm">📋 Full Event Details</p>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                       <div><span className="text-muted-foreground">Client:</span> {ev.client_name}</div>
                                       <div><span className="text-muted-foreground">Mobile:</span> <a href={`tel:${ev.client_mobile}`} className="text-primary underline">{ev.client_mobile}</a></div>
                                       <div><span className="text-muted-foreground">Email:</span> <a href={`mailto:${ev.client_email}`} className="text-primary underline">{ev.client_email}</a></div>
@@ -808,7 +813,7 @@ const ArtistDashboard = () => {
                                     )}
                                     <div className="border-t border-border pt-2 space-y-1">
                                       <p className="font-semibold text-sm">💰 Payment Details</p>
-                                      <div className="grid grid-cols-2 gap-1">
+                                      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                                         <div><span className="text-muted-foreground">Total:</span> <span className="font-semibold">₹{totalAmt.toLocaleString("en-IN")}</span></div>
                                         <div><span className="text-muted-foreground">Advance:</span> <span className="text-green-600">₹{advAmt.toLocaleString("en-IN")}</span></div>
                                         <div><span className="text-muted-foreground">Remaining:</span> <span className="text-primary font-bold">₹{remaining.toLocaleString("en-IN")}</span></div>
@@ -906,11 +911,11 @@ const ArtistDashboard = () => {
           <Card>
             <CardHeader><CardTitle className="font-display text-lg flex items-center gap-2"><CalendarOff className="w-5 h-5 text-primary" /> Block Dates</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div><Label className="font-sans text-xs">Date</Label><Input type="date" value={blockDate} onChange={e => setBlockDate(e.target.value)} min={new Date().toISOString().split("T")[0]} /></div>
                 <div><Label className="font-sans text-xs">Reason</Label><Input value={blockReason} onChange={e => setBlockReason(e.target.value)} placeholder="e.g. Leave" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div><Label className="font-sans text-xs">From</Label><Input type="time" value={blockStartTime} onChange={e => setBlockStartTime(e.target.value)} /></div>
                 <div><Label className="font-sans text-xs">To</Label><Input type="time" value={blockEndTime} onChange={e => setBlockEndTime(e.target.value)} /></div>
               </div>
@@ -961,8 +966,8 @@ const ArtistDashboard = () => {
 
       {/* Instagram-style Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Artist navigation">
-        <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-          <div className="flex items-center justify-evenly max-w-lg mx-auto h-[56px]">
+          <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
+          <div className="scrollbar-hide mx-auto flex h-[56px] max-w-lg items-center justify-evenly overflow-x-auto px-1">
             {[
               { id: "events", icon: CalendarDays },
               ...(isRitesh ? [{ id: "orders", icon: Package }] : []),

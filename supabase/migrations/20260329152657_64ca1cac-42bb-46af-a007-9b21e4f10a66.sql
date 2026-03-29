@@ -1,0 +1,1 @@
+ALTER TABLE public.portal_payment_requests REPLICA IDENTITY FULL;

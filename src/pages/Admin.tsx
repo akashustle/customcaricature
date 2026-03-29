@@ -931,7 +931,7 @@ const Admin = () => {
 
 
   return (
-    <div className="min-h-screen flex w-full">
+    <div className="min-h-screen flex w-full overflow-x-hidden">
       <SEOHead title="Admin Panel" noindex />
       <AdminActionConfirm
         open={actionState.pending}
@@ -952,7 +952,7 @@ const Admin = () => {
       {/* Chat button moved to header */}
 
       {/* Main Content */}
-      <div className="flex-1 min-h-screen admin-content-premium pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
+      <div className="min-w-0 flex-1 min-h-screen admin-content-premium pb-20 md:pb-0 overflow-x-hidden admin-panel-font">
         <AdminOfflineBanner />
         <AdminLocationPrompt />
         <header className="sticky top-0 z-40 admin-header-glass" style={{ transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)" }}>
@@ -1017,7 +1017,7 @@ const Admin = () => {
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
 
-        <div className="px-4 md:px-6 py-5">
+        <div className="px-3 py-4 sm:px-4 md:px-6 md:py-5">
           <div className="md:hidden mb-4">
             <LiveGreeting name={adminProfile?.full_name} />
           </div>
