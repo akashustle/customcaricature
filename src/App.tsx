@@ -198,7 +198,13 @@ const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  // Skip splash entirely for returning visitors (check before first render)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem("ccc_splash_shown")) return false;
+    const path = typeof window !== "undefined" ? window.location.pathname : "/";
+    if (["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel", "/lil-flea"].some(r => path.startsWith(r))) return false;
+    return true;
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
