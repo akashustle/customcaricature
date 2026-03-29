@@ -1253,11 +1253,8 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             await verifyRazorpayPayment(supabase, {
               razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount,
             });
-              playPaymentSuccessSound();
-              toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
-            } else {
-              throw new Error("Verification failed");
-            }
+            playPaymentSuccessSound();
+            toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
           } catch (err: any) {
             console.error("Partial 2 verification error:", err);
             toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });
