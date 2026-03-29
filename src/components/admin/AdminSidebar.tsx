@@ -117,6 +117,7 @@ const NAV_SECTIONS = [
   {
     label: "Marketing",
     items: [
+      { id: "lead-links", icon: Gift, label: "Lead Links" },
       { id: "lil-flea", icon: Ticket, label: "Lil Flea Page" },
       { id: "referrals", icon: Gift, label: "Referrals" },
       { id: "coupons", icon: Ticket, label: "Coupons" },

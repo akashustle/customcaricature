@@ -273,6 +273,7 @@ const App = () => {
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/lil-flea" element={<LilFlea />} />
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
+                <Route path="/claim-link" element={<ClaimLink />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />

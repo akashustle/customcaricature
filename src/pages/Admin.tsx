@@ -2061,6 +2061,10 @@ const Admin = () => {
             <AdminLilFlea />
           </TabsContent>
 
+          <TabsContent value="lead-links">
+            <AdminLeadLinks />
+          </TabsContent>
+
           <TabsContent value="settings">
             <div className="space-y-6 max-w-2xl">
               {/* Admin Profile Section */}
