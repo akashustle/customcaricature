@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { initRazorpay } from "@/lib/razorpay";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPaying(false) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPaying(false);

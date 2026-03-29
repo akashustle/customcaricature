@@ -29,10 +29,7 @@ import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-
-declare global {
-  interface Window { Razorpay: any; }
-}
+import { initRazorpay } from "@/lib/razorpay";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
@@ -228,7 +225,7 @@ const Dashboard = () => {
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingOrderId(null) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingOrderId(null);
@@ -1022,7 +1019,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingEventId(null) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingEventId(null);
@@ -1070,7 +1067,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingEventId(null) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingEventId(null);

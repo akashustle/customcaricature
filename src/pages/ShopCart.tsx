@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart, Loader2, Store } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 
 const ShopCart = () => {
   const navigate = useNavigate();
@@ -126,8 +127,7 @@ const ShopCart = () => {
           navigate(`/shop/order-confirmation?order_id=${order.id}`);
         },
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Order failed", description: err?.message, variant: "destructive" });
     }

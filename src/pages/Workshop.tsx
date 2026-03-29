@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Phone, Sparkles, Calendar, Clock, Mail, MessageCircle,
@@ -360,8 +361,7 @@ const Workshop = () => {
         prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
         theme: { color: "#b08d57" },
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Payment Error", description: err.message, variant: "destructive" });
     } finally { setPayingNow(false); }

@@ -14,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 import { format } from "date-fns";
 import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -342,7 +343,7 @@ const BookEvent = () => {
           },
         },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setSubmitting(false);
@@ -350,25 +351,60 @@ const BookEvent = () => {
   };
 
   if (bookingConfirmed) {
+    const confettiColors = ["hsl(var(--primary))", "hsl(142 76% 50%)", "hsl(45 93% 58%)", "hsl(280 87% 65%)", "hsl(199 89% 48%)"];
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          <Card className="max-w-md w-full text-center">
-            <CardContent className="p-8 space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-              <h2 className="font-display text-2xl font-bold">{isPartialEnabled ? "Partial Payment Done!" : "Event Booking Confirmed!"}</h2>
-              <p className="text-muted-foreground font-sans">{isPartialEnabled ? "Your partial advance payment has been received. Complete remaining advance from your dashboard." : "Your advance payment has been received successfully!"}</p>
-              <div className="text-left bg-muted/50 rounded-lg p-3 space-y-1 text-sm font-sans">
-                <p><span className="text-muted-foreground">Event:</span> <span className="font-medium capitalize">{eventType === "other" ? customEventType : eventType}</span></p>
-                {eventDate && <p><span className="text-muted-foreground">Date:</span> <span className="font-medium">{format(eventDate, "PPP")}</span></p>}
-                <p><span className="text-muted-foreground">Venue:</span> <span className="font-medium">{venueName}, {actualCity}</span></p>
-                <p><span className="text-muted-foreground">Artists:</span> <span className="font-medium">{artistCount}</span></p>
-                <p><span className="text-muted-foreground">{isPartialEnabled ? "Partial Payment:" : "Advance Paid:"}</span> <span className="font-medium text-primary">{formatPrice(totalPayable)}</span></p>
-                {isPartialEnabled && <p><span className="text-muted-foreground">Remaining Advance:</span> <span className="font-medium text-amber-600">{formatPrice(partialConfig.partial_2_amount)}</span></p>}
-              </div>
-              <div className="flex flex-col gap-2">
-                <Button onClick={() => navigate("/dashboard")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Go to Dashboard</Button>
-                <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-sans">Back to Home</Button>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Confetti */}
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-sm"
+            style={{
+              width: 6 + Math.random() * 6, height: 6 + Math.random() * 6,
+              background: confettiColors[i % confettiColors.length],
+              left: `${5 + Math.random() * 90}%`, top: "-5%",
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            }}
+            animate={{ y: ["0vh", "110vh"], x: [0, (Math.random() - 0.5) * 200], rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)], opacity: [1, 1, 0] }}
+            transition={{ duration: 2.5 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 3, ease: "easeIn" }}
+          />
+        ))}
+
+        <motion.div initial={{ scale: 0.8, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", bounce: 0.35, duration: 0.7 }} className="max-w-md w-full relative z-10">
+          <Card className="border-0 shadow-2xl overflow-hidden">
+            {/* Header */}
+            <motion.div className="relative h-32 flex items-center justify-center overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(280 60% 55%), hsl(var(--primary)))" }}>
+              <motion.div className="absolute inset-0" style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)" }} animate={{ x: ["-100%", "200%"] }} transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }} />
+              <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.3, type: "spring", bounce: 0.5 }}>
+                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ring-4 ring-white/10">
+                  <CheckCircle className="w-12 h-12 text-white drop-shadow-lg" />
+                </div>
+                <motion.div className="absolute inset-0 rounded-full border-2 border-white/30" animate={{ scale: [1, 1.6], opacity: [0.6, 0] }} transition={{ duration: 1.5, repeat: Infinity }} />
+              </motion.div>
+            </motion.div>
+
+            <CardContent className="p-6 text-center -mt-4 relative">
+              <div className="bg-background rounded-2xl p-6 shadow-inner border border-border/50">
+                <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="font-display text-2xl font-bold mb-1">
+                  {isPartialEnabled ? "Partial Payment Done! 💫" : "Event Booked! 🎉"}
+                </motion.h2>
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-muted-foreground font-sans text-sm mb-4">
+                  {isPartialEnabled ? "Complete remaining advance from your dashboard." : "Your advance payment has been received!"}
+                </motion.p>
+
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="text-left rounded-xl p-4 space-y-2 text-sm font-sans border border-border bg-muted/30 mb-4">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Event</span><span className="font-medium capitalize">{eventType === "other" ? customEventType : eventType}</span></div>
+                  {eventDate && <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="font-medium">{format(eventDate, "PPP")}</span></div>}
+                  <div className="flex justify-between"><span className="text-muted-foreground">Venue</span><span className="font-medium">{venueName}, {actualCity}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Artists</span><span className="font-medium">{artistCount}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{isPartialEnabled ? "Partial Payment" : "Advance Paid"}</span><span className="font-medium text-primary">{formatPrice(totalPayable)}</span></div>
+                  {isPartialEnabled && <div className="flex justify-between"><span className="text-muted-foreground">Remaining Advance</span><span className="font-medium text-amber-600">{formatPrice(partialConfig.partial_2_amount)}</span></div>}
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="flex flex-col gap-2.5">
+                  <Button onClick={() => navigate("/dashboard")} className="rounded-full font-sans shadow-lg" size="lg">Go to Dashboard</Button>
+                  <Button variant="outline" onClick={() => navigate("/")} className="rounded-full font-sans" size="lg">Back to Home</Button>
+                </motion.div>
               </div>
             </CardContent>
           </Card>

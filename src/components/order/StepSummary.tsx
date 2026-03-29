@@ -8,12 +8,8 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 interface Props {
   data: OrderFormData;
@@ -161,8 +157,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
         },
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       console.error("Order submission error:", err);
       toast({
