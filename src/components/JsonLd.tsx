@@ -1,4 +1,5 @@
 const BASE_URL = "https://portal.creativecaricatureclub.com";
+const LOGO_URL = `${BASE_URL}/logo.png?v=2`;
 
 const organizationSchema = {
   "@context": "https://schema.org",
