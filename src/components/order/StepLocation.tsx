@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
-import { isMumbaiCity } from "@/lib/india-locations";
+import { isMumbaiRegion } from "@/lib/india-locations";
 
 interface Props {
   data: OrderFormData;
