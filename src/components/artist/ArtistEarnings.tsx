@@ -43,7 +43,8 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
   const [requestNote, setRequestNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [viewScreenshot, setViewScreenshot] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "requests">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "requests" | "payment_details">("overview");
+  const [preferredMethod, setPreferredMethod] = useState("upi_id");
 
   useEffect(() => {
     fetchAll();
