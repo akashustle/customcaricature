@@ -7,6 +7,7 @@ interface SEOHeadProps {
   type?: string;
   image?: string;
   noindex?: boolean;
+  keywords?: string;
 }
 
 const SITE_NAME = "Creative Caricature Club™";
