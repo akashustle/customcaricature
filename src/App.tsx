@@ -181,7 +181,7 @@ const InternalNavigationBridge = () => {
   return null;
 };
 
-/** Global Maintenance Gate — blocks ALL pages except admin paths when global maintenance is ON */
+/** Global Maintenance Gate — NON-BLOCKING: renders children immediately, only blocks when confirmed enabled */
 const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const maintenance = useMaintenanceCheck("global");
@@ -189,7 +189,8 @@ const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
   const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
   const isAdminPath = adminPaths.some(p => location.pathname.startsWith(p));
   
-  if (!maintenance.loading && maintenance.isEnabled && !isAdminPath) {
+  // Non-blocking: don't wait for loading. Default state is isEnabled=false so children render immediately.
+  if (maintenance.isEnabled && !isAdminPath) {
     return <MaintenanceScreen title={maintenance.title} message={maintenance.message} estimatedEnd={maintenance.estimatedEnd} isGlobal={true} />;
   }
   

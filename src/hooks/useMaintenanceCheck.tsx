@@ -8,18 +8,26 @@ interface MaintenanceState {
   estimatedEnd: string | null;
 }
 
-// Module-level cache per pageId
+const DEFAULT_STATE: MaintenanceState = {
+  isEnabled: false,
+  title: "Under Maintenance",
+  message: "Please check back soon.",
+  estimatedEnd: null,
+};
+
+// Module-level cache per pageId — shared across all hook instances
 const maintenanceCache = new Map<string, { state: MaintenanceState; ts: number }>();
-const CACHE_TTL = 30_000; // 30s
+const CACHE_TTL = 30_000;
+// Track in-flight fetches to avoid duplicates
+const inflightFetches = new Map<string, Promise<MaintenanceState>>();
 
 export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loading: boolean } => {
   const cached = maintenanceCache.get(pageId);
-  const [state, setState] = useState<MaintenanceState>(
-    cached && Date.now() - cached.ts < CACHE_TTL
-      ? cached.state
-      : { isEnabled: false, title: "Under Maintenance", message: "Please check back soon.", estimatedEnd: null }
-  );
-  const [loading, setLoading] = useState(!(cached && Date.now() - cached.ts < CACHE_TTL));
+  const hasFreshCache = cached && Date.now() - cached.ts < CACHE_TTL;
+
+  // Start with cached value or default (non-blocking — defaults to NOT in maintenance)
+  const [state, setState] = useState<MaintenanceState>(hasFreshCache ? cached.state : DEFAULT_STATE);
+  const [loading, setLoading] = useState(!hasFreshCache);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -33,63 +41,21 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
         return;
       }
 
-      const { data } = await supabase
-        .from("maintenance_settings")
-        .select("*")
-        .in("id", ["global", pageId]);
-
-      if (!data) { if (mounted) setLoading(false); return; }
-
-      const global = data.find(d => d.id === "global");
-      const page = data.find(d => d.id === pageId);
-
-      // Check admin bypass via cached session (avoid extra auth call)
-      const sessionData = await supabase.auth.getSession();
-      const userId = sessionData.data.session?.user?.id;
-      if (userId) {
-        const { data: roles } = await supabase
-          .from("user_roles").select("role").eq("user_id", userId);
-        if (roles?.some(r => r.role === "admin")) {
-          const result = { isEnabled: false, title: "", message: "", estimatedEnd: null };
-          maintenanceCache.set(pageId, { state: result, ts: Date.now() });
-          if (mounted) { setState(result); setLoading(false); }
-          return;
-        }
+      // Deduplicate in-flight fetches
+      let fetchPromise = inflightFetches.get(pageId);
+      if (!fetchPromise) {
+        fetchPromise = fetchMaintenanceState(pageId);
+        inflightFetches.set(pageId, fetchPromise);
+        fetchPromise.finally(() => inflightFetches.delete(pageId));
       }
 
-      const isAllowed = (setting: any) => {
-        if (!setting?.allowed_user_ids?.length) return false;
-        return userId && setting.allowed_user_ids.includes(userId);
-      };
-
-      // Auto-disable expired maintenance
-      const checkExpired = async (setting: any) => {
-        if (!setting?.is_enabled) return false;
-        if (setting?.estimated_end && new Date(setting.estimated_end).getTime() <= Date.now()) {
-          await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: new Date().toISOString() } as any).eq("id", setting.id);
-          return false;
-        }
-        return true;
-      };
-
-      const globalEnabled = await checkExpired(global);
-      const pageEnabled = await checkExpired(page);
-
-      let result: MaintenanceState = { isEnabled: false, title: "", message: "", estimatedEnd: null };
-
-      if (globalEnabled && !isAllowed(global)) {
-        result = { isEnabled: true, title: global?.title || "Site Under Maintenance", message: global?.message || "Please check back soon.", estimatedEnd: global?.estimated_end };
-      } else if (pageEnabled && !isAllowed(page)) {
-        result = { isEnabled: true, title: page?.title || "Under Maintenance", message: page?.message || "Please check back soon.", estimatedEnd: page?.estimated_end };
-      }
-
-      maintenanceCache.set(pageId, { state: result, ts: Date.now() });
+      const result = await fetchPromise;
       if (mounted) { setState(result); setLoading(false); }
     };
 
     check();
 
-    // Reduced polling: 2 minutes instead of 60s
+    // Reduced polling: 2 minutes
     const iv = setInterval(check, 120_000);
 
     if (!channelRef.current) {
@@ -114,5 +80,79 @@ export const useMaintenanceCheck = (pageId: string): MaintenanceState & { loadin
 
   return { ...state, loading };
 };
+
+/** Fetches maintenance state without blocking render */
+async function fetchMaintenanceState(pageId: string): Promise<MaintenanceState> {
+  try {
+    const { data } = await supabase
+      .from("maintenance_settings")
+      .select("*")
+      .in("id", ["global", pageId]);
+
+    if (!data) return DEFAULT_STATE;
+
+    const global = data.find(d => d.id === "global");
+    const page = data.find(d => d.id === pageId);
+
+    // Use cached session (no network call) for admin bypass
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
+    if (userId) {
+      const { data: roles } = await supabase
+        .from("user_roles").select("role").eq("user_id", userId);
+      if (roles?.some(r => r.role === "admin")) {
+        const result = DEFAULT_STATE;
+        maintenanceCache.set(pageId, { state: result, ts: Date.now() });
+        return result;
+      }
+    }
+
+    const isAllowed = (setting: any) => {
+      if (!setting?.allowed_user_ids?.length) return false;
+      return userId && setting.allowed_user_ids.includes(userId);
+    };
+
+    // Auto-disable expired maintenance (fire-and-forget)
+    const isStillEnabled = (setting: any): boolean => {
+      if (!setting?.is_enabled) return false;
+      if (setting?.estimated_end && new Date(setting.estimated_end).getTime() <= Date.now()) {
+        // Fire-and-forget — don't await
+        supabase.from("maintenance_settings").update({
+          is_enabled: false,
+          updated_at: new Date().toISOString(),
+        } as any).eq("id", setting.id).then(() => {});
+        return false;
+      }
+      return true;
+    };
+
+    const globalEnabled = isStillEnabled(global);
+    const pageEnabled = isStillEnabled(page);
+
+    let result: MaintenanceState = DEFAULT_STATE;
+
+    if (globalEnabled && !isAllowed(global)) {
+      result = {
+        isEnabled: true,
+        title: global?.title || "Site Under Maintenance",
+        message: global?.message || "Please check back soon.",
+        estimatedEnd: global?.estimated_end,
+      };
+    } else if (pageEnabled && !isAllowed(page)) {
+      result = {
+        isEnabled: true,
+        title: page?.title || "Under Maintenance",
+        message: page?.message || "Please check back soon.",
+        estimatedEnd: page?.estimated_end,
+      };
+    }
+
+    maintenanceCache.set(pageId, { state: result, ts: Date.now() });
+    return result;
+  } catch {
+    return DEFAULT_STATE;
+  }
+}
 
 export default useMaintenanceCheck;
