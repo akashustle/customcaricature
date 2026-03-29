@@ -81,6 +81,9 @@ const Dashboard = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
+  const [portalPaymentRequest, setPortalPaymentRequest] = useState<any>(null);
+  const [payingPortal, setPayingPortal] = useState(false);
+  const [portalPaymentDone, setPortalPaymentDone] = useState(false);
 
   // Track user location, request permissions, and enable voice streaming
   useLocationTracker(user?.id ?? null);
