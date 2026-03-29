@@ -29,10 +29,7 @@ import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-
-declare global {
-  interface Window { Razorpay: any; }
-}
+import { initRazorpay } from "@/lib/razorpay";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
