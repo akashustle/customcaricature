@@ -267,8 +267,8 @@ const HomepageEnquiryFunnel = () => {
                     </p>
                     {/* State-based pricing preview */}
                     {(() => {
-                      const MUMBAI_CITIES = ["mumbai"];
-                      const isMumbai = MUMBAI_CITIES.includes(data.city);
+                       const MUMBAI_IDS = ["mumbai", "navi_mumbai", "thane", "palghar"];
+                       const isMumbai = MUMBAI_IDS.includes(data.city);
                       const region = isMumbai ? "mumbai" : "pan_india";
                       const pricing = pricingInfo?.find((p: any) => p.region === region && p.artist_count === 1);
                       return pricing ? (
