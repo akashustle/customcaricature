@@ -372,7 +372,7 @@ const Index = () => {
 
             {/* Right: Premium gallery mosaic for desktop */}
             <motion.div initial={{ opacity: 0, scale: 0.85, rotateY: -10 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              style={{ y: useTransform(scrollYProgress, [0, 1], [0, -40]) }}
+              style={{ y: heroGalleryY }}
               className="hidden lg:block flex-shrink-0 w-[480px] xl:w-[540px] relative perspective-1000">
               {/* Decorative frame */}
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
