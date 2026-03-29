@@ -5304,6 +5304,10 @@ export type Database = {
         Args: { _auth_user_id: string; _event_id: string }
         Returns: boolean
       }
+      detect_login_role: {
+        Args: { p_identifier: string; p_identifier_type: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
