@@ -103,17 +103,15 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: bookingId,
-                is_event_advance: true,
-                advance_amount: amount,
-                is_partial_advance: true,
-                partial_number: 2,
-              },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: bookingId,
+              is_event_advance: true,
+              advance_amount: amount,
+              is_partial_advance: true,
+              partial_number: 2,
             });
             toast({ title: "✅ Advance Payment Completed!" });
             fetchPayments();
