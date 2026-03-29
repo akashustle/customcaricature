@@ -625,7 +625,7 @@ const ArtistDashboard = () => {
                           {ev.status === "upcoming" && daysLeft >= 0 && (
                             <div className={`p-2 text-center ${daysLeft === 0 ? "bg-primary/20" : daysLeft <= 3 ? "bg-amber-50" : "bg-primary/5"}`}>
                               <p className="font-display text-lg font-bold text-primary">
-                                {daysLeft === 0 ? "🎊 Today!" : daysLeft === 1 ? "✨ Tomorrow!" : `${daysLeft} days to go`}
+                                {daysLeft === 0 ? "🎊 Today!" : daysLeft === 1 ? `✨ Tomorrow (${dayName})!` : `${daysLeft} days to go (${dayName})`}
                               </p>
                             </div>
                           )}
