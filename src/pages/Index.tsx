@@ -423,13 +423,13 @@ const Index = () => {
 
         switch (sectionId) {
           case "instant_quote":
-            return <div key={sectionId} id="section-instant-quote"><HomepageInstantQuote config={content.homepage_instant_quote} /></div>;
+            return <div key={sectionId} id="section-instant-quote" className="cv-auto"><HomepageInstantQuote config={content.homepage_instant_quote} /></div>;
           case "social_proof":
-            return <div key={sectionId} id="section-social-proof"><HomepageSocialProof config={content.homepage_social_proof} /></div>;
+            return <div key={sectionId} id="section-social-proof" className="cv-auto"><HomepageSocialProof config={content.homepage_social_proof} /></div>;
           case "video":
-            return <div key={sectionId} id="section-video"><HomepageVideo config={content.homepage_video} /></div>;
+            return <div key={sectionId} id="section-video" className="cv-auto"><HomepageVideo config={content.homepage_video} /></div>;
           case "enquiry_funnel":
-            return <div key={sectionId} id="section-enquiry-funnel"><HomepageEnquiryFunnel /></div>;
+            return <div key={sectionId} id="section-enquiry-funnel" className="cv-auto"><HomepageEnquiryFunnel /></div>;
           case "portfolio_gallery":
             return (
               <section key={sectionId} className="py-16 md:py-20" aria-label="Gallery of recent caricature work" id="section-portfolio-gallery">
