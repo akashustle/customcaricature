@@ -10,7 +10,7 @@ const INSTAGRAM_URL = "https://instagram.com/creativecaricatureclub";
 
 const PAGE_MESSAGES: Record<string, string> = {
   "/": "Hi! I'm interested in your caricature services. Can you tell me more?",
-  "/about": "Hi! I visited your About page and want to learn more about Creative Caricature Club.",
+  "/about": "Hi! I visited your About page and want to learn more about Creative Caricature Club™.",
   "/order": "Hi! I'd like to place a custom caricature order.",
   "/book-event": "Hi! I'm interested in booking a caricature artist for my event.",
   "/enquiry": "Hi! I have an enquiry about your caricature services.",

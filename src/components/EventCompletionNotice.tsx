@@ -24,7 +24,7 @@ const EventCompletionNotice = ({ event, assignedArtists = [] }: EventCompletionN
   const totalAmount = event.negotiated && event.negotiated_total ? event.negotiated_total : event.total_price;
   const eventDate = new Date(event.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
 
-  const summaryText = `🎉 Event Completed!\n\n📋 ${event.event_type} Event\n📅 ${eventDate}\n📍 ${event.venue_name}, ${event.city}\n🎨 ${event.artist_count} Artist${event.artist_count > 1 ? "s" : ""}${assignedArtists.length > 0 ? `: ${assignedArtists.map(a => a.name).join(", ")}` : ""}\n💰 Total: ${formatPrice(totalAmount)}\n\nBooking ID: ${event.id.slice(0, 8).toUpperCase()}\n\nPowered by Creative Caricature Club ✨`;
+  const summaryText = `🎉 Event Completed!\n\n📋 ${event.event_type} Event\n📅 ${eventDate}\n📍 ${event.venue_name}, ${event.city}\n🎨 ${event.artist_count} Artist${event.artist_count > 1 ? "s" : ""}${assignedArtists.length > 0 ? `: ${assignedArtists.map(a => a.name).join(", ")}` : ""}\n💰 Total: ${formatPrice(totalAmount)}\n\nBooking ID: ${event.id.slice(0, 8).toUpperCase()}\n\nPowered by Creative Caricature Club™ ✨`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(summaryText);

@@ -210,7 +210,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-full border-2 border-border" width={36} height={36} />
-            <span className="font-calligraphy text-xl font-bold hidden sm:inline text-foreground">Creative Caricature Club</span>
+            <span className="font-calligraphy text-xl font-bold hidden sm:inline text-foreground">Creative Caricature Club™</span>
           </div>
           <div className="flex items-center gap-3">
             {settings.shop_nav_visible && (
@@ -267,7 +267,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
             {/* Mobile: Compact logo + branding */}
             <div className="flex flex-col items-center lg:hidden w-full">
-              <img src="/logo.png" alt="Creative Caricature Club" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4" width={64} height={64} />
+              <img src="/logo.png" alt="Creative Caricature Club™" className="w-16 h-16 rounded-[1.25rem] border-2 border-border/30 bg-card shadow-xl mb-4" width={64} height={64} />
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="inline-flex items-center gap-2 bg-primary/8 border border-primary/15 rounded-full px-3 py-1 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -631,7 +631,7 @@ const Index = () => {
                 <img src="/logo.png" alt="CCC" className="w-11 h-11 rounded-xl border border-border shadow-sm" width={44} height={44} />
                 <div>
                   <span className="font-calligraphy text-lg font-bold text-foreground block">CCC</span>
-                  <span className="text-[10px] text-muted-foreground">Creative Caricature Club</span>
+                  <span className="text-[10px] text-muted-foreground">Creative Caricature Club™</span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premium caricature studio. Hand-crafted art for events, gifts & memories.</p>
@@ -706,7 +706,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-border/30 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
+            <p className="text-xs text-muted-foreground font-body">© 2025 Creative Caricature Club™. All rights reserved. · Founded by Ritesh Mahendra Gupta</p>
             <div className="flex items-center gap-4 flex-wrap">
               {(settings as any).pwa_install_link?.enabled && (
                 <button 

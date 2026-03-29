@@ -159,7 +159,7 @@ const AdminSplashScreen = ({ onComplete }: { onComplete: () => void }) => {
             className="absolute bottom-8 z-10 text-[9px] tracking-widest uppercase"
             style={{ color: "hsl(25 20% 18%)" }}
           >
-            Creative Caricature Club
+            Creative Caricature Club™
           </motion.p>
         </motion.div>
       )}

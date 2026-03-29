@@ -10,7 +10,7 @@ const WorkshopPolicy = () => {
   const navigate = useNavigate();
   return (
     <>
-    <SEOHead title="Workshop Policy" description="Workshop terms, conditions and policies for Creative Caricature Club caricature workshops." canonical="/workshop-policy" />
+    <SEOHead title="Workshop Policy" description="Workshop terms, conditions and policies for Creative Caricature Club™ caricature workshops." canonical="/workshop-policy" />
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
@@ -20,7 +20,7 @@ const WorkshopPolicy = () => {
         </div>
       </div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-4 text-sm text-foreground/80">
-        <motion.p {...fadeUp(0.05)}>Creative Caricature Club conducts professional workshops for learning caricature art.</motion.p>
+        <motion.p {...fadeUp(0.05)}>Creative Caricature Club™ conducts professional workshops for learning caricature art.</motion.p>
         
         <motion.h2 {...fadeUp(0.1)} className="font-display text-lg font-bold text-foreground pt-2">Registration</motion.h2>
         <motion.p {...fadeUp(0.12)}>Workshop registration must be completed through the official website or approved registration channels. Registration fees are non-refundable.</motion.p>
@@ -29,10 +29,10 @@ const WorkshopPolicy = () => {
         <motion.p {...fadeUp(0.17)}>Participants are responsible for attending workshops at the scheduled time. Missed sessions will not be repeated.</motion.p>
         
         <motion.h2 {...fadeUp(0.2)} className="font-display text-lg font-bold text-foreground pt-2">Workshop Material</motion.h2>
-        <motion.p {...fadeUp(0.22)}>All workshop materials are protected under intellectual property laws and may not be reproduced, distributed, or used commercially without written permission from Creative Caricature Club.</motion.p>
+        <motion.p {...fadeUp(0.22)}>All workshop materials are protected under intellectual property laws and may not be reproduced, distributed, or used commercially without written permission from Creative Caricature Club™.</motion.p>
         
         <motion.h2 {...fadeUp(0.25)} className="font-display text-lg font-bold text-foreground pt-2">Conduct</motion.h2>
-        <motion.p {...fadeUp(0.27)}>Participants are expected to maintain professional conduct during workshops. Creative Caricature Club reserves the right to remove participants who engage in disruptive behavior.</motion.p>
+        <motion.p {...fadeUp(0.27)}>Participants are expected to maintain professional conduct during workshops. Creative Caricature Club™ reserves the right to remove participants who engage in disruptive behavior.</motion.p>
         
         <motion.h2 {...fadeUp(0.3)} className="font-display text-lg font-bold text-foreground pt-2">Certificates</motion.h2>
         <motion.p {...fadeUp(0.32)}>Certificates of completion are awarded based on attendance and assignment submission as determined by the instructor.</motion.p>

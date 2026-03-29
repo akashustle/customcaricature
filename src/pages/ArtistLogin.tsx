@@ -112,7 +112,7 @@ const ArtistLogin = () => {
               <Palette className="w-5 h-5 text-primary" />
               <h1 className="text-2xl font-bold text-foreground">Artist Login</h1>
             </div>
-            <p className="text-sm text-muted-foreground">Creative Caricature Club</p>
+            <p className="text-sm text-muted-foreground">Creative Caricature Club™</p>
           </div>
 
           {/* Login method toggle */}

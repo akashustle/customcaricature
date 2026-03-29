@@ -74,7 +74,7 @@ const GalleryPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <SEOHead title={`${title} - Creative Caricature Club`} description={`Browse our ${title.toLowerCase()} collection`} canonical={`/gallery/${type}`} />
+      <SEOHead title={`${title} - Creative Caricature Club™`} description={`Browse our ${title.toLowerCase()} collection`} canonical={`/gallery/${type}`} />
 
       {/* Lightbox */}
       <AnimatePresence>

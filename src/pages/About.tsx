@@ -10,7 +10,7 @@ const About = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen brand-gradient-bg pb-16 md:pb-0">
-      <SEOHead title="About Us" description="Learn about Creative Caricature Club - India's premium caricature studio. Founded by Ritesh Mahendra Gupta." canonical="/about" />
+      <SEOHead title="About Us" description="Learn about Creative Caricature Club™ - India's premium caricature studio. Founded by Ritesh Mahendra Gupta." canonical="/about" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full"><ArrowLeft className="w-5 h-5" /></Button>
@@ -21,8 +21,8 @@ const About = () => {
       
       <div className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-6 text-sm text-foreground/80">
         <motion.div initial={{ scale: 0.8, rotateY: 180, opacity: 0 }} animate={{ scale: 1, rotateY: 0, opacity: 1 }} transition={{ duration: 0.8, type: "spring" }} className="text-center">
-          <motion.img src="/logo.png" alt="Creative Caricature Club" className="w-24 h-24 rounded-2xl mx-auto mb-4 shadow-3d border-glow" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} />
-          <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground text-3d animate-text-glow">Creative Caricature Club</h2>
+          <motion.img src="/logo.png" alt="Creative Caricature Club™" className="w-24 h-24 rounded-2xl mx-auto mb-4 shadow-3d border-glow" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} />
+          <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground text-3d animate-text-glow">Creative Caricature Club™</h2>
           <p className="text-muted-foreground italic mt-2">Founded by <strong className="text-foreground">Ritesh Mahendra Gupta</strong></p>
         </motion.div>
 
@@ -43,9 +43,9 @@ const About = () => {
           ))}
         </motion.div>
 
-        <motion.p {...fadeUp(0.2)}>Creative Caricature Club is a professional caricature art collective dedicated to creating memorable artistic experiences through caricature art.</motion.p>
+        <motion.p {...fadeUp(0.2)}>Creative Caricature Club™ is a professional caricature art collective dedicated to creating memorable artistic experiences through caricature art.</motion.p>
         <motion.p {...fadeUp(0.25)}>The organization operates as a network of professional caricature artists who provide artistic services for events, custom artwork, workshops, and creative merchandise.</motion.p>
-        <motion.p {...fadeUp(0.3)}>Creative Caricature Club specializes in live caricature entertainment and custom artistic creations designed to enhance celebrations, events, and personal gifting experiences.</motion.p>
+        <motion.p {...fadeUp(0.3)}>Creative Caricature Club™ specializes in live caricature entertainment and custom artistic creations designed to enhance celebrations, events, and personal gifting experiences.</motion.p>
         <motion.p {...fadeUp(0.35)}>The organization serves clients across <strong>Mumbai, India, and internationally</strong>, offering both physical and digital artistic services.</motion.p>
 
         <motion.div {...fadeUp(0.4)} className="border-t border-border pt-6 mt-6">

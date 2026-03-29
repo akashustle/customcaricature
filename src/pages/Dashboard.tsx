@@ -210,7 +210,7 @@ const Dashboard = () => {
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
-        name: "Creative Caricature Club", description: `${order.order_type} Caricature - ${order.style}`,
+        name: "Creative Caricature Club™", description: `${order.order_type} Caricature - ${order.style}`,
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
@@ -998,7 +998,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
-        name: "Creative Caricature Club", description: `Event Advance - Partial 2`,
+        name: "Creative Caricature Club™", description: `Event Advance - Partial 2`,
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
@@ -1044,7 +1044,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
-        name: "Creative Caricature Club", description: `Event Remaining Payment`,
+        name: "Creative Caricature Club™", description: `Event Remaining Payment`,
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
@@ -1673,7 +1673,7 @@ td{padding:10px 14px;font-size:14px;border-bottom:1px solid #f1f5f9}
 .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#999}
 .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${inv.status==='paid'?'#ecfdf5;color:#059669':'#f1f5f9;color:#64748b'}}
 @media print{body{padding:20px}}</style></head><body>
-<div class="header"><div><div class="brand">Creative Caricature Club</div><div class="inv-num">${inv.invoice_number}</div></div>
+<div class="header"><div><div class="brand">Creative Caricature Club™</div><div class="inv-num">${inv.invoice_number}</div></div>
 <div class="meta">Date: ${new Date(inv.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>Status: <span class="badge">${inv.status.toUpperCase()}</span></div></div>
 <div class="section"><h3>Bill To</h3><div class="detail">${inv.customer_name}<br>${inv.customer_email}<br>${inv.customer_mobile}</div></div>
 <table><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>
@@ -1683,7 +1683,7 @@ td{padding:10px 14px;font-size:14px;border-bottom:1px solid #f1f5f9}
 </tbody></table>
 ${inv.payment_method ? `<div class="section"><h3>Payment</h3><div class="detail">Method: ${inv.payment_method}</div></div>` : ''}
 ${inv.notes ? `<div class="section"><h3>Notes</h3><div class="detail">${inv.notes}</div></div>` : ''}
-<div class="footer">Creative Caricature Club • Thank you for your business!<br>This is a computer-generated invoice.</div>
+<div class="footer">Creative Caricature Club™ • Thank you for your business!<br>This is a computer-generated invoice.</div>
 <script>window.onload=()=>window.print()</script></body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);

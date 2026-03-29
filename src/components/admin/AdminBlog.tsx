@@ -24,7 +24,7 @@ type BlogPost = {
 
 const EMPTY_POST = {
   title: "", slug: "", excerpt: "", content: "", cover_image: "",
-  category: "tutorial", tags: [] as string[], author_name: "Creative Caricature Club",
+  category: "tutorial", tags: [] as string[], author_name: "Creative Caricature Club™",
   is_published: false, meta_title: "", meta_description: "",
 };
 

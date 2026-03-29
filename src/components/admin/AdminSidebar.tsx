@@ -197,7 +197,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             {!collapsed && (
               <motion.div initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} className="min-w-0">
                 <p className="text-[13px] font-bold tracking-tight admin-panel-font" style={{ color: "hsl(25 20% 18%)" }}>Admin Panel</p>
-                <p className="text-[9px] tracking-wide admin-panel-font" style={{ color: "hsl(25 10% 55%)" }}>Creative Caricature Club</p>
+                <p className="text-[9px] tracking-wide admin-panel-font" style={{ color: "hsl(25 10% 55%)" }}>Creative Caricature Club™</p>
               </motion.div>
             )}
           </div>

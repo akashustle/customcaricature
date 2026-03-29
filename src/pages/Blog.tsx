@@ -79,7 +79,7 @@ const Blog = () => {
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
               <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-              <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club</span>
+              <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club™</span>
             </div>
             <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-full font-sans">
               ← Back to Home
@@ -188,7 +188,7 @@ const Blog = () => {
       <footer className="border-t border-border bg-card/50 py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground font-sans">
-            © {new Date().getFullYear()} Creative Caricature Club. All rights reserved.
+            © {new Date().getFullYear()} Creative Caricature Club™. All rights reserved.
           </p>
         </div>
       </footer>
