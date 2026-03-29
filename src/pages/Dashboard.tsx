@@ -656,7 +656,7 @@ const Dashboard = () => {
 };
 
 
-const ChatSection = ({ userId, userName }: { userId: string; userName: string }) => {
+const ChatSection = ({ userId, userName, fullScreen }: { userId: string; userName: string; fullScreen?: boolean }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
