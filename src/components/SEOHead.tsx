@@ -66,7 +66,7 @@ const SEOHead = ({
       link.href = fullCanonical;
       setMeta("og:url", fullCanonical, "property");
     }
-  }, [fullTitle, description, type, fullImage, fullCanonical, noindex]);
+  }, [fullTitle, description, type, fullImage, fullCanonical, noindex, keywords]);
 
   return null;
 };
