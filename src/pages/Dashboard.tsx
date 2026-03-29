@@ -141,6 +141,16 @@ const Dashboard = () => {
         fetchEvents(user.id);
         fetchShopOrders(user.id);
       })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        if (payload.new?.status === "pending") {
+          setPortalPaymentRequest(payload.new);
+        }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        if (payload.new?.status !== "pending") {
+          setPortalPaymentRequest(null);
+        }
+      })
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
