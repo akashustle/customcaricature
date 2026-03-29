@@ -273,10 +273,9 @@ const Dashboard = () => {
         .eq("id", request.event_id)
         .single();
       
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment");
 
       await supabase
         .from("portal_payment_requests" as any)
