@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "@/hooks/use-toast";
 import {
   Wallet, IndianRupee, TrendingUp, Clock, CheckCircle2, Send,
-  Image as ImageIcon, Banknote, ArrowDownCircle, ArrowUpCircle
+  Image as ImageIcon, Banknote, ArrowDownCircle, ArrowUpCircle, CreditCard
 } from "lucide-react";
+import ArtistPaymentDetails from "./ArtistPaymentDetails";
 import { motion } from "framer-motion";
 
 type EventPayout = {
@@ -42,7 +43,8 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
   const [requestNote, setRequestNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [viewScreenshot, setViewScreenshot] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "requests">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "transactions" | "requests" | "payment_details">("overview");
+  const [preferredMethod, setPreferredMethod] = useState("upi_id");
 
   useEffect(() => {
     fetchAll();
@@ -83,6 +85,7 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
     const { error } = await supabase.from("artist_payout_requests" as any).insert({
       artist_id: artistId, amount, request_type: requestType,
       note: requestNote || null,
+      preferred_payment_method: preferredMethod,
     } as any);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
@@ -103,7 +106,7 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         {[
-          { label: "Total Earnings", value: `₹${totalEarnings.toLocaleString("en-IN")}`, icon: TrendingUp, color: "from-primary/60 to-primary" },
+          { label: "Total Income", value: `₹${totalEarnings.toLocaleString("en-IN")}`, icon: TrendingUp, color: "from-primary/60 to-primary" },
           { label: "Balance", value: `₹${balance.toLocaleString("en-IN")}`, icon: Wallet, color: "from-green-400 to-green-600" },
           { label: "Credited", value: `₹${creditedAmount.toLocaleString("en-IN")}`, icon: CheckCircle2, color: "from-blue-400 to-blue-600" },
           { label: "Pending", value: `₹${pendingEarnings.toLocaleString("en-IN")}`, icon: Clock, color: "from-amber-400 to-amber-600" },
@@ -138,24 +141,26 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
       {/* Tabs */}
       <div className="flex gap-1 bg-muted/30 rounded-xl p-1">
         {[
-          { id: "overview" as const, label: "Earnings" },
+          { id: "overview" as const, label: "Income" },
           { id: "transactions" as const, label: "Transactions" },
           { id: "requests" as const, label: "Requests" },
+          { id: "payment_details" as const, label: "Payment Info" },
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-sans transition-all ${activeTab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-sans transition-all ${activeTab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* Earnings Tab */}
+      {/* Income Tab */}
       {activeTab === "overview" && (
         <div className="space-y-2">
+          <h3 className="font-display text-sm font-bold flex items-center gap-1"><IndianRupee className="w-4 h-4 text-primary" /> Income History</h3>
           {payouts.length === 0 ? (
             <Card><CardContent className="p-6 text-center">
               <IndianRupee className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm font-sans text-muted-foreground">No earnings yet</p>
+              <p className="text-sm font-sans text-muted-foreground">No income yet</p>
             </CardContent></Card>
           ) : payouts.map(p => (
             <div key={p.id} className="bg-muted/30 rounded-lg p-3 text-xs font-sans flex justify-between items-center">
@@ -246,6 +251,11 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
         </div>
       )}
 
+      {/* Payment Details Tab */}
+      {activeTab === "payment_details" && (
+        <ArtistPaymentDetails artistId={artistId} />
+      )}
+
       {/* Payout Request Dialog */}
       <Dialog open={showRequest} onOpenChange={setShowRequest}>
         <DialogContent className="max-w-sm">
@@ -279,6 +289,18 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
               <Label className="text-xs font-sans">Note (optional)</Label>
               <Textarea value={requestNote} onChange={e => setRequestNote(e.target.value)}
                 placeholder="Add a note for admin..." className="text-sm" rows={2} />
+            </div>
+
+            <div>
+              <Label className="text-xs font-sans">Where should we send payment?</Label>
+              <Select value={preferredMethod} onValueChange={setPreferredMethod}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upi_id">UPI ID</SelectItem>
+                  <SelectItem value="upi_number">UPI Mobile Number</SelectItem>
+                  <SelectItem value="bank_account">Bank Account</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Button onClick={submitRequest} disabled={submitting} className="w-full h-10 rounded-xl font-sans">

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, LazyMotion, domAnimation } from "framer-motion";
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight, Star, Users, Calendar, Award, Zap, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -704,6 +704,7 @@ const Index = () => {
                 <Link to="/workshop-policy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Workshop Policy</Link>
                 <Link to="/disclaimer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Disclaimer</Link>
                 <Link to="/caricature-budgeting" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Caricature Budgeting</Link>
+                <Link to="/lil-flea" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">Lil Flea</Link>
                 {settings.workshop_button?.enabled && (
                   <a href={settings.workshop_button.url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">{settings.workshop_button.label}</a>
                 )}

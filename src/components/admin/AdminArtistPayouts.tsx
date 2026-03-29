@@ -44,6 +44,7 @@ const AdminArtistPayouts = () => {
   const [eventPayouts, setEventPayouts] = useState<EventPayout[]>([]);
   const [requests, setRequests] = useState<PayoutRequest[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [paymentDetails, setPaymentDetails] = useState<Record<string, any>>({});
   const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
   const [editingEvent, setEditingEvent] = useState<{ eventId: string; artistId: string } | null>(null);
   const [customPayoutType, setCustomPayoutType] = useState("percentage");
@@ -70,12 +71,13 @@ const AdminArtistPayouts = () => {
   }, []);
 
   const fetchAll = async () => {
-    const [{ data: artistsData }, { data: settingsData }, { data: payoutsData }, { data: reqData }, { data: txData }] = await Promise.all([
+    const [{ data: artistsData }, { data: settingsData }, { data: payoutsData }, { data: reqData }, { data: txData }, { data: pdData }] = await Promise.all([
       supabase.from("artists").select("id, name, email").order("name"),
       supabase.from("artist_payout_settings" as any).select("*"),
       supabase.from("artist_event_payouts" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("artist_payout_requests" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("artist_transactions" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("artist_payment_details" as any).select("*"),
     ]);
     if (artistsData) setArtists(artistsData as any);
     if (settingsData) {
@@ -86,6 +88,11 @@ const AdminArtistPayouts = () => {
     if (payoutsData) setEventPayouts(payoutsData as any);
     if (reqData) setRequests(reqData as any);
     if (txData) setTransactions(txData as any);
+    if (pdData) {
+      const pdMap: Record<string, any> = {};
+      (pdData as any[]).forEach(d => { pdMap[d.artist_id] = d; });
+      setPaymentDetails(pdMap);
+    }
   };
 
   const savePayoutSetting = async (artistId: string, type: string, value: number, cycle: string) => {
@@ -260,6 +267,32 @@ const AdminArtistPayouts = () => {
                     </div>
                   </div>
 
+                  {/* Payment Details */}
+                  {paymentDetails[artist.id] && (
+                    <div className="mt-3 bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-wider">Payment Details</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-sans">
+                        {paymentDetails[artist.id].upi_id && (
+                          <><span className="text-muted-foreground">UPI ID:</span><span className="font-medium">{paymentDetails[artist.id].upi_id}</span></>
+                        )}
+                        {paymentDetails[artist.id].upi_number && (
+                          <><span className="text-muted-foreground">UPI Mobile:</span><span className="font-medium">{paymentDetails[artist.id].upi_number}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_account_name && (
+                          <><span className="text-muted-foreground">Bank Name:</span><span className="font-medium">{paymentDetails[artist.id].bank_account_name}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_account_number && (
+                          <><span className="text-muted-foreground">Account No:</span><span className="font-medium">{paymentDetails[artist.id].bank_account_number}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_ifsc_code && (
+                          <><span className="text-muted-foreground">IFSC:</span><span className="font-medium">{paymentDetails[artist.id].bank_ifsc_code}</span></>
+                        )}
+                        <span className="text-muted-foreground">Default:</span>
+                        <span className="font-medium text-primary">{paymentDetails[artist.id].default_payment_method?.replace("_", " ") || "UPI ID"}</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Event payouts expand */}
                   {artistEventPayouts.length > 0 && (
                     <>
@@ -334,7 +367,32 @@ const AdminArtistPayouts = () => {
                       }`}>{req.status}</Badge>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">{req.request_type === "full" ? "Full Balance" : "Partial"}</Badge>
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-[10px]">{req.request_type === "full" ? "Full Balance" : "Partial"}</Badge>
+                    {(req as any).preferred_payment_method && (
+                      <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">
+                        💳 {(req as any).preferred_payment_method.replace("_", " ")}
+                      </Badge>
+                    )}
+                  </div>
+                  {/* Show payment details for this artist */}
+                  {paymentDetails[req.artist_id] && (
+                    <div className="bg-muted/20 rounded p-2 text-[10px] font-sans space-y-0.5">
+                      {(req as any).preferred_payment_method === "upi_id" && paymentDetails[req.artist_id].upi_id && (
+                        <p>UPI: <strong>{paymentDetails[req.artist_id].upi_id}</strong></p>
+                      )}
+                      {(req as any).preferred_payment_method === "upi_number" && paymentDetails[req.artist_id].upi_number && (
+                        <p>UPI Mobile: <strong>{paymentDetails[req.artist_id].upi_number}</strong></p>
+                      )}
+                      {(req as any).preferred_payment_method === "bank_account" && (
+                        <>
+                          {paymentDetails[req.artist_id].bank_account_name && <p>Name: <strong>{paymentDetails[req.artist_id].bank_account_name}</strong></p>}
+                          {paymentDetails[req.artist_id].bank_account_number && <p>A/C: <strong>{paymentDetails[req.artist_id].bank_account_number}</strong></p>}
+                          {paymentDetails[req.artist_id].bank_ifsc_code && <p>IFSC: <strong>{paymentDetails[req.artist_id].bank_ifsc_code}</strong></p>}
+                        </>
+                      )}
+                    </div>
+                  )}
                   {req.note && <p className="text-xs font-sans bg-muted/30 rounded p-2">📝 {req.note}</p>}
                   {req.expected_credit_date && <p className="text-xs font-sans text-muted-foreground">Expected: {new Date(req.expected_credit_date).toLocaleDateString("en-IN")}</p>}
                   {req.screenshot_path && (
