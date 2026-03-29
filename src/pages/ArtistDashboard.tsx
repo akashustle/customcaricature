@@ -612,7 +612,7 @@ const ArtistDashboard = () => {
   }, 0);
 
   return (
-      <div className="min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
+      <div className="min-h-screen dashboard-gradient pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="Artist Dashboard" noindex />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
@@ -629,7 +629,7 @@ const ArtistDashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-3 py-4 sm:px-4">
+      <div className="container mx-auto max-w-5xl px-2 py-3 sm:px-4 sm:py-4">
         <div className="mb-3">
           <AdminSmartSearch panelType="artist"
             tabs={[{ id: "events", label: "Events" }, { id: "orders", label: "Orders" }]}
@@ -645,7 +645,7 @@ const ArtistDashboard = () => {
         <LiveGreeting name={artist?.name} />
 
         {/* Stats Row - Premium 3D Cards */}
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-2 xl:grid-cols-4 sm:gap-3">
           {[
             { label: "Total Events", value: events.length, icon: CalendarDays, color: "from-primary/10 to-primary/5", iconBg: "bg-primary", desc: `${upcoming.length} upcoming` },
             { label: "This Month", value: events.filter(e => { const d = new Date(e.event_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length, icon: Clock, color: "from-blue-500/10 to-blue-500/5", iconBg: "bg-blue-500", desc: "events this month" },
@@ -986,8 +986,8 @@ const ArtistDashboard = () => {
                     if (item.path) { navigate(item.path); return; }
                     setActiveTab(item.id);
                   }}
-                  className="flex items-center justify-center min-w-[44px] w-12 h-12 relative flex-shrink-0">
-                  <item.icon className={`transition-all duration-200 ${isActive ? "w-7 h-7 stroke-[2.5px] text-foreground" : "w-6 h-6 stroke-[1.5px] text-muted-foreground"}`} />
+                  className="flex items-center justify-center min-w-[40px] w-11 h-12 relative flex-shrink-0">
+                  <item.icon className={`transition-all duration-200 ${isActive ? "w-6 h-6 stroke-[2.5px] text-foreground" : "w-5 h-5 stroke-[1.5px] text-muted-foreground"}`} />
                   {isActive && (
                     <motion.div layoutId="artist-nav-dot" className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary" initial={false}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />

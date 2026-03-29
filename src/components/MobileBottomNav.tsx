@@ -36,7 +36,7 @@ const MobileBottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
       <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-        <div className="flex items-center justify-evenly max-w-lg mx-auto h-[56px] overflow-x-auto scrollbar-hide">
+        <div className="flex items-center justify-evenly max-w-lg mx-auto h-[56px] px-1">
           {visibleItems.map((item) => {
             const active = location.pathname === item.path;
             return (
@@ -44,13 +44,13 @@ const MobileBottomNav = () => {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 whileTap={{ scale: 0.75 }}
-                className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0"
+                className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0"
               >
                 <item.icon
                   className={`transition-all duration-200 ${
                     active ? "text-foreground" : "text-muted-foreground/40"
                   } ${item.icon === Sparkles && !active ? "animate-pulse text-primary/60" : ""}`}
-                  size={active ? 26 : 22}
+                  size={active ? 24 : 20}
                   strokeWidth={active ? 2.2 : 1.4}
                   fill={active && item.icon === Home ? "currentColor" : "none"}
                 />

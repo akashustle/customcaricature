@@ -187,7 +187,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-36 md:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead 
         title="Book Live Caricature Artist for Events | Order Custom Caricatures Online India"
         description="Creative Caricature Club™ — India's #1 caricature studio. Book live caricature artists for weddings, corporate events & parties in Mumbai, Delhi & across India. Order custom hand-crafted caricatures from photos online. International bookings available."

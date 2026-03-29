@@ -358,11 +358,11 @@ const Dashboard = () => {
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
       <header className="sticky top-0 z-40 app-header border-b border-border/30">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-2xl shadow-md border border-border/30" />
             <div>
@@ -383,7 +383,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-3 md:px-4 py-4 md:py-6">
+      <div className="container mx-auto max-w-5xl px-2 sm:px-3 md:px-4 py-3 md:py-6">
         <LiveGreeting name={profile?.full_name} />
 
         {/* Payment Reminders */}
@@ -522,20 +522,19 @@ const Dashboard = () => {
               ...(settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
               { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
               { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
-              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              { icon: Receipt, key: "payments", action: () => setActiveTab("payments") },
               { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
+              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
               ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
               { icon: User, key: "profile", action: () => setActiveTab("profile") },
               { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
-            ].map((item) => {
+            ].map((item, idx) => {
               const isActive = item.key === "home" ? false : activeTab === item.key;
               return (
-                <motion.button key={item.key} onClick={item.action} whileTap={{ scale: 0.75 }}
-                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
+                <motion.button key={`${item.key}-${idx}`} onClick={item.action} whileTap={{ scale: 0.75 }}
+                  className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0">
                   <item.icon
                     className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
-                    size={isActive ? 26 : 22}
+                    size={isActive ? 24 : 20}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && item.icon === Home ? "currentColor" : "none"}
                   />
