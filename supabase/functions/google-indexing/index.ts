@@ -288,7 +288,11 @@ async function logActivity(
   entries: { url: string; action_type: string; success: boolean; error_message: string | null }[]
 ) {
   if (entries.length === 0) return;
-  await sb.from("google_indexing_log").insert(entries).catch(() => {});
+  try {
+    await sb.from("google_indexing_log").insert(entries);
+  } catch (_e) {
+    console.warn("Failed to log indexing activity:", _e);
+  }
 }
 
 /* ── Main handler ── */

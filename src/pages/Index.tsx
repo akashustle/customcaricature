@@ -189,8 +189,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-36 md:pb-0">
       <SEOHead 
-        title="Book Caricature Artist for Events & Order Custom Caricatures from Photos"
-        description="Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online. India's #1 caricature studio."
+        title="Book Live Caricature Artist for Events | Order Custom Caricatures Online India"
+        description="Creative Caricature Club™ — India's #1 caricature studio. Book live caricature artists for weddings, corporate events & parties in Mumbai, Delhi & across India. Order custom hand-crafted caricatures from photos online. International bookings available."
         canonical="/" 
       />
       <JsonLd />
