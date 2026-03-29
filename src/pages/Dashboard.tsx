@@ -1942,7 +1942,7 @@ ${!isEvent ? '<div class="thank-you"><h3>🎨 Thank You for Your Order!</h3><p>Y
                 <p className="font-mono text-sm font-bold">{inv.invoice_number}</p>
                 <p className="text-xs text-muted-foreground font-sans">{new Date(inv.created_at).toLocaleDateString()} • {inv.invoice_type}</p>
               </div>
-              <Badge className={inv.status === "paid" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground"}>{inv.status}</Badge>
+              <Badge className={inv.status === "paid" || inv.status === "generated" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground"}>{inv.status === "generated" ? "paid" : inv.status}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <p className="font-display text-lg font-bold text-primary">{formatPrice(inv.total_amount)}</p>
