@@ -931,7 +931,7 @@ const Admin = () => {
 
 
   return (
-    <div className="min-h-screen flex w-full overflow-x-hidden">
+    <div className="min-h-screen flex w-full overflow-x-hidden max-w-[100vw]">
       <SEOHead title="Admin Panel" noindex />
       <AdminActionConfirm
         open={actionState.pending}
