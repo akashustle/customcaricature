@@ -629,7 +629,7 @@ const ArtistDashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-3 py-4 sm:px-4">
+      <div className="container mx-auto max-w-5xl px-2 py-3 sm:px-4 sm:py-4">
         <div className="mb-3">
           <AdminSmartSearch panelType="artist"
             tabs={[{ id: "events", label: "Events" }, { id: "orders", label: "Orders" }]}
