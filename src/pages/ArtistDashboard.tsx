@@ -133,13 +133,13 @@ const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
 };
 
 // Payment Collection Dialog
-const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
-  event: ArtistEvent; open: boolean; onClose: () => void; onSuccess: () => void;
+const PaymentCollectionDialog = ({ event, open, onClose, onSuccess, artistId }: {
+  event: ArtistEvent; open: boolean; onClose: () => void; onSuccess: () => void; artistId: string;
 }) => {
   const [step, setStep] = useState<"details" | "method" | "screenshot" | "done">("details");
   const [extraHoursInput, setExtraHoursInput] = useState("");
   const [extraHourRate, setExtraHourRate] = useState(0);
-  const [collectionMethod, setCollectionMethod] = useState<"online" | "cash" | "">("");
+  const [collectionMethod, setCollectionMethod] = useState<"online" | "cash" | "portal" | "">("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -148,7 +148,6 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
   const baseRemaining = event.remaining_amount || (totalAmount - advanceAmount);
   const extraHoursNum = parseFloat(extraHoursInput) || 0;
   
-  // Use pricing: Mumbai=4000, Pan-India=5000 per extra hour (fallback)
   useEffect(() => {
     const fetchRate = async () => {
       const region = event.city?.toLowerCase().includes("mumbai") || event.city?.toLowerCase().includes("thane") ? "mumbai" : "outside";
@@ -161,11 +160,36 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
   const extraAmount = extraHoursNum * extraHourRate;
   const totalToCollect = baseRemaining + extraAmount;
 
+  const handlePortalPayment = async () => {
+    setUploading(true);
+    try {
+      // Get event booking user_id
+      const { data: booking } = await supabase.from("event_bookings").select("user_id").eq("id", event.id).single();
+      if (!booking?.user_id) throw new Error("Customer not found");
+
+      await supabase.from("portal_payment_requests" as any).insert({
+        event_id: event.id,
+        artist_id: artistId,
+        user_id: booking.user_id,
+        amount: totalToCollect,
+        extra_hours: extraHoursNum,
+        extra_amount: extraAmount,
+        status: "pending",
+      } as any);
+
+      setStep("done");
+      toast({ title: "📲 Payment Request Sent!", description: "Customer will receive a payment prompt on their dashboard" });
+      setTimeout(() => { onClose(); onSuccess(); }, 1500);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  };
+
   const handleCollect = async () => {
     if (!collectionMethod) return;
     setUploading(true);
     try {
-      // Upload screenshot if provided
       if (screenshotFile) {
         const path = `payment-screenshots/${event.id}/${Date.now()}_${screenshotFile.name}`;
         await supabase.storage.from("event-documents").upload(path, screenshotFile);
@@ -261,20 +285,28 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
 
             <p className="text-sm font-sans text-muted-foreground text-center">How is the customer paying?</p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => { setCollectionMethod("online"); setStep("screenshot"); }}
-                className={`p-4 rounded-xl border-2 text-center space-y-2 transition-all ${collectionMethod === "online" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-                <CreditCard className="w-8 h-8 mx-auto text-primary" />
-                <p className="font-sans font-semibold text-sm">Online Payment</p>
-                <p className="text-[10px] text-muted-foreground font-sans">UPI / Bank Transfer</p>
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40">
+                <CreditCard className="w-7 h-7 mx-auto text-primary" />
+                <p className="font-sans font-semibold text-xs">Online</p>
+                <p className="text-[9px] text-muted-foreground font-sans">UPI / Bank</p>
               </motion.button>
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => { setCollectionMethod("cash"); handleCollectCash(); }}
-                className={`p-4 rounded-xl border-2 text-center space-y-2 transition-all ${collectionMethod === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-                <Banknote className="w-8 h-8 mx-auto text-green-600" />
-                <p className="font-sans font-semibold text-sm">Cash</p>
-                <p className="text-[10px] text-muted-foreground font-sans">Collected in hand</p>
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40">
+                <Banknote className="w-7 h-7 mx-auto text-green-600" />
+                <p className="font-sans font-semibold text-xs">Cash</p>
+                <p className="text-[9px] text-muted-foreground font-sans">In hand</p>
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.95 }}
+                onClick={() => { setCollectionMethod("portal"); handlePortalPayment(); }}
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500" />
+                <Phone className="w-7 h-7 mx-auto text-blue-600" />
+                <p className="font-sans font-semibold text-xs">Portal</p>
+                <p className="text-[9px] text-muted-foreground font-sans">Send to app</p>
               </motion.button>
             </div>
           </div>
@@ -320,8 +352,14 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
               <CheckCircle2 className="w-16 h-16 mx-auto text-green-500" />
             </motion.div>
-            <p className="font-display text-xl font-bold">Payment Collected!</p>
-            <p className="text-sm text-muted-foreground font-sans">₹{totalToCollect.toLocaleString("en-IN")} via {collectionMethod}</p>
+            <p className="font-display text-xl font-bold">
+              {collectionMethod === "portal" ? "Payment Request Sent!" : "Payment Collected!"}
+            </p>
+            <p className="text-sm text-muted-foreground font-sans">
+              {collectionMethod === "portal" 
+                ? "Customer will receive a payment prompt on their dashboard"
+                : `₹${totalToCollect.toLocaleString("en-IN")} via ${collectionMethod}`}
+            </p>
           </div>
         )}
       </DialogContent>
