@@ -121,6 +121,16 @@ const Dashboard = () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
         fetchShopOrders(user.id);
+        // Check for pending portal payment requests
+        supabase.from("portal_payment_requests" as any)
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(({ data }: any) => {
+            if (data && data.length > 0) setPortalPaymentRequest(data[0]);
+          });
       }
     };
 
