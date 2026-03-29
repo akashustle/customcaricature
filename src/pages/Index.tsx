@@ -484,10 +484,10 @@ const Index = () => {
               </section>
             );
           case "scroll_events":
-            return <div key={sectionId} id="section-scroll-events"><HomepageScrollEvents /></div>;
+            return <div key={sectionId} id="section-scroll-events" className="cv-auto"><HomepageScrollEvents /></div>;
           case "services":
             return (
-              <section key={sectionId} className="bg-card/50 py-16 md:py-24 border-y border-border/50" id="section-services">
+              <section key={sectionId} className="bg-card/50 py-16 md:py-24 border-y border-border/50 cv-auto" id="section-services">
                 <div className="container mx-auto px-4">
                   <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
                     <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">What We Offer</p>
