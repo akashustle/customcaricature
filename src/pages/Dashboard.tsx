@@ -383,7 +383,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-3 md:px-4 py-4 md:py-6">
+      <div className="container mx-auto max-w-5xl px-2 sm:px-3 md:px-4 py-3 md:py-6">
         <LiveGreeting name={profile?.full_name} />
 
         {/* Payment Reminders */}

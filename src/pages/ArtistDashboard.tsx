@@ -645,7 +645,7 @@ const ArtistDashboard = () => {
         <LiveGreeting name={artist?.name} />
 
         {/* Stats Row - Premium 3D Cards */}
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-2 xl:grid-cols-4 sm:gap-3">
           {[
             { label: "Total Events", value: events.length, icon: CalendarDays, color: "from-primary/10 to-primary/5", iconBg: "bg-primary", desc: `${upcoming.length} upcoming` },
             { label: "This Month", value: events.filter(e => { const d = new Date(e.event_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length, icon: Clock, color: "from-blue-500/10 to-blue-500/5", iconBg: "bg-blue-500", desc: "events this month" },

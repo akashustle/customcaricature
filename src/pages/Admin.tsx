@@ -1017,7 +1017,7 @@ const Admin = () => {
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
 
-        <div className="px-3 py-4 sm:px-4 md:px-6 md:py-5">
+        <div className="px-2 py-3 sm:px-4 md:px-6 md:py-5">
           <div className="md:hidden mb-4">
             <LiveGreeting name={adminProfile?.full_name} />
           </div>
