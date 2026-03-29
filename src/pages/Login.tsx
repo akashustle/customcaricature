@@ -124,11 +124,10 @@ const Login = () => {
       const identifier = loginWith === "email" ? email.trim().toLowerCase() : phone.replace(/\D/g, "");
       if (!identifier || identifier.length < 4) { setDetecting(false); goNextDirect(); return; }
 
-      const { data, error } = await withTimeout(
-        supabase.rpc("detect_login_role", {
+      const { data } = await (supabase.rpc("detect_login_role" as any, {
           p_identifier: identifier,
           p_identifier_type: loginWith === "email" ? "email" : "phone",
-        })
+        }) as any
       );
 
       const isAdmin = data?.is_admin === true;
