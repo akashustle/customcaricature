@@ -552,7 +552,22 @@ const ArtistDashboard = () => {
     if (data) setBlockedDates(data as any);
   };
 
-  const updateOrderStatus = async (orderId: string, status: string) => {
+  const handleCancelPortalRequest = async (eventId: string) => {
+    const requestId = activePortalRequests[eventId];
+    if (!requestId) return;
+    setCancellingPortal(eventId);
+    try {
+      await supabase.from("portal_payment_requests" as any)
+        .update({ status: "cancelled", updated_at: new Date().toISOString() } as any)
+        .eq("id", requestId);
+      setActivePortalRequests(prev => { const n = { ...prev }; delete n[eventId]; return n; });
+      toast({ title: "Portal prompt stopped", description: "Customer will no longer see the payment popup" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setCancellingPortal(null);
+  };
+
     const { error } = await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Status Updated!" }); if (artist) fetchOrders(artist.id); }
