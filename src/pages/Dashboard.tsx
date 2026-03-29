@@ -358,11 +358,11 @@ const Dashboard = () => {
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
       <header className="sticky top-0 z-40 app-header border-b border-border/30">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-2xl shadow-md border border-border/30" />
             <div>
