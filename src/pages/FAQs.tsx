@@ -36,7 +36,7 @@ const FAQs = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <SEOHead title="FAQs - Creative Caricature Club™" description="Frequently asked questions about our caricature services, events, orders, and more." />
+      <SEOHead title="FAQs | Caricature Orders, Events & Pricing Questions" description="Frequently asked questions about Creative Caricature Club™ — custom caricature orders, live event artist bookings, delivery timelines, pricing, refund policy & more. India's trusted caricature studio." canonical="/faqs" />
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">

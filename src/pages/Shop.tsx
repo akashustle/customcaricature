@@ -162,7 +162,7 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEOHead title="Shop | Creative Caricature Club™" description="Browse caricature merchandise - T-shirts, mugs, hoodies, posters & custom print-on-demand products." />
+      <SEOHead title="Caricature Merchandise Shop | T-Shirts, Mugs & Custom Gifts" description="Shop caricature merchandise — T-shirts, mugs, hoodies, posters & custom print-on-demand products from Creative Caricature Club™. Unique caricature gifts delivered across India." canonical="/shop" />
 
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-40">

@@ -162,7 +162,7 @@ const TrackOrder = () => {
 
   return (
     <div className="min-h-screen pb-16 md:pb-0" style={{ background: "linear-gradient(180deg, hsl(40, 50%, 97%) 0%, hsl(35, 40%, 94%) 100%)" }}>
-      <SEOHead title="Track Your Caricature Order" description="Track the status of your custom caricature order or shop order." canonical="/track-order" />
+      <SEOHead title="Track Your Caricature Order | Creative Caricature Club™" description="Track the real-time status of your custom caricature order or shop order. Enter your order ID to see progress updates from Creative Caricature Club™." canonical="/track-order" />
 
       {/* Header */}
       <header className="sticky top-0 z-40 border-b backdrop-blur-md" style={{ background: "hsla(40, 50%, 98%, 0.9)", borderColor: "hsl(30, 20%, 88%)" }}>

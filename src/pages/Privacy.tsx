@@ -10,7 +10,7 @@ const Privacy = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <SEOHead title="Privacy Policy" description="Privacy policy for Creative Caricature Club™. Learn how we handle your data." canonical="/privacy" />
+      <SEOHead title="Privacy Policy | Creative Caricature Club™" description="Privacy policy for Creative Caricature Club™. Learn how we collect, use and protect your personal data when ordering caricatures or booking events." canonical="/privacy" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>

@@ -10,7 +10,7 @@ const IntellectualProperty = () => {
   const navigate = useNavigate();
   return (
     <>
-    <SEOHead title="Intellectual Property" description="Intellectual property policy for Creative Caricature Club™ artwork and designs." canonical="/intellectual-property" />
+    <SEOHead title="Intellectual Property Policy | Creative Caricature Club™" description="Intellectual property and copyright policy for Creative Caricature Club™ caricature artwork, designs & creative content." canonical="/intellectual-property" />
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
