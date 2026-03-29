@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, User, Search } from "lucide-react";
+import { ArrowRight, Calendar, User, Search, TrendingUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 
 type BlogPost = {
   id: string;
@@ -31,9 +28,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   tips: "Tips & Tricks",
 };
 
+const CATEGORY_COLORS: Record<string, string> = {
+  tutorial: "bg-blue-500",
+  case_study: "bg-emerald-500",
+  news: "bg-red-500",
+  tips: "bg-amber-500",
+};
+
+const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+const readTime = (excerpt: string) => Math.max(3, Math.ceil(excerpt.length / 200)) + " Min Read";
+
 const Blog = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -41,7 +49,8 @@ const Blog = () => {
 
   useEffect(() => {
     fetchPosts();
-    const ch = supabase.channel("blog-realtime")
+    const ch = supabase
+      .channel("blog-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => fetchPosts())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -57,59 +66,62 @@ const Blog = () => {
     setLoading(false);
   };
 
-  const filtered = posts.filter((p) => {
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
-    const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+    return posts.filter((p) => {
+      const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
+      const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [posts, search, categoryFilter]);
 
-  const categories = ["all", ...new Set(posts.map((p) => p.category))];
+  const categories = useMemo(() => ["all", ...new Set(posts.map((p) => p.category))], [posts]);
+  const [hero, ...rest] = filtered;
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <SEOHead
         title="Caricature Blog | Tips, Tutorials & Event Stories"
-        description="Read the Creative Caricature Club™ blog for caricature tips, tutorials, event case studies & behind-the-scenes stories. Learn about caricature styles, wedding entertainment ideas & more."
+        description="Read the Creative Caricature Club™ blog for caricature tips, tutorials, event case studies & behind-the-scenes stories."
         canonical="/blog"
       />
 
-      <header>
-        <nav className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-              <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
-              <span className="font-display text-lg font-bold hidden sm:inline">Creative Caricature Club™</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-full font-sans">
-              ← Back to Home
-            </Button>
+      {/* Sticky Nav */}
+      <nav className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" width={32} height={32} />
+            <span className="font-display text-base font-bold hidden sm:inline">Creative Caricature Club™</span>
           </div>
-        </nav>
-      </header>
+          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-full text-xs">
+            ← Home
+          </Button>
+        </div>
+      </nav>
 
-      <main className="container mx-auto px-4 py-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-3">Our Blog</h1>
-          <p className="text-muted-foreground font-sans text-lg max-w-2xl mx-auto">
-            Tutorials, case studies & behind-the-scenes stories from our artists
+      <main className="container mx-auto px-4 py-6 md:py-10">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+          <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-2">Our Blog</h1>
+          <p className="text-muted-foreground text-sm md:text-lg max-w-xl mx-auto">
+            Tutorials, case studies & stories from our artists
           </p>
         </motion.div>
 
-        {/* Filters */}
+        {/* Search + Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search articles..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 font-sans" />
+            <Input placeholder="Search articles..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 rounded-xl" />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap justify-center">
             {categories.map((cat) => (
               <Button
                 key={cat}
                 variant={categoryFilter === cat ? "default" : "outline"}
                 size="sm"
                 onClick={() => setCategoryFilter(cat)}
-                className="rounded-full font-sans text-xs"
+                className="rounded-full text-xs h-9"
               >
                 {cat === "all" ? "All" : CATEGORY_LABELS[cat] || cat}
               </Button>
@@ -118,76 +130,139 @@ const Blog = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <div className="h-48 bg-muted rounded-t-lg" />
-                <CardContent className="p-5 space-y-3">
-                  <div className="h-4 bg-muted rounded w-1/4" />
-                  <div className="h-6 bg-muted rounded w-3/4" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-6">
+            <div className="animate-pulse rounded-2xl bg-muted h-[300px] md:h-[420px]" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="animate-pulse space-y-3">
+                  <div className="h-44 bg-muted rounded-xl" />
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="h-3 bg-muted rounded w-full" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground font-sans text-lg">No articles found</p>
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg">No articles found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((post, i) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-              >
-                <Link to={`/blog/${post.slug}`}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-all group cursor-pointer h-full">
-                    {post.cover_image && (
-                      <div className="h-48 overflow-hidden">
+          <>
+            {/* ===== HERO POST (Full-width like reference) ===== */}
+            {hero && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+                <Link to={`/blog/${hero.slug}`}>
+                  <div className="relative rounded-2xl overflow-hidden group cursor-pointer">
+                    {/* Cover image */}
+                    <div className="relative h-[280px] sm:h-[360px] md:h-[460px]">
+                      {hero.cover_image ? (
                         <img
-                          src={post.cover_image}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
+                          src={hero.cover_image}
+                          alt={hero.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          loading="eager"
                         />
-                      </div>
-                    )}
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="secondary" className="text-xs font-sans">
-                          {CATEGORY_LABELS[post.category] || post.category}
-                        </Badge>
-                        {post.tags?.slice(0, 2).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs font-sans">{tag}</Badge>
-                        ))}
-                      </div>
-                      <h2 className="font-display text-xl font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                        {post.title}
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+                      )}
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    </div>
+
+                    {/* Content overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+                      <Badge className={`${CATEGORY_COLORS[hero.category] || "bg-primary"} text-white border-0 text-xs font-bold mb-3`}>
+                        {CATEGORY_LABELS[hero.category] || hero.category}
+                      </Badge>
+                      <h2 className="text-white text-xl sm:text-2xl md:text-4xl font-black leading-tight mb-3 line-clamp-3 drop-shadow-lg">
+                        {hero.title}
                       </h2>
-                      <p className="text-sm text-muted-foreground font-sans line-clamp-3 mb-4">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground font-sans">
-                        <span className="flex items-center gap-1"><User className="w-3 h-3" /> {post.author_name}</span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(post.published_at || post.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      <div className="flex items-center gap-4 text-white/80 text-xs md:text-sm">
+                        <span className="flex items-center gap-1.5">
+                          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">
+                            {hero.author_name.charAt(0)}
+                          </div>
+                          {hero.author_name}
                         </span>
+                        <span>•</span>
+                        <span>{formatDate(hero.published_at || hero.created_at)}</span>
+                        <span>•</span>
+                        <span>{readTime(hero.excerpt)}</span>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </Link>
               </motion.div>
-            ))}
-          </div>
+            )}
+
+            {/* ===== GRID POSTS ===== */}
+            {rest.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+                {rest.map((post, i) => (
+                  <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                  >
+                    <Link to={`/blog/${post.slug}`} className="block group">
+                      <div className="rounded-xl overflow-hidden bg-card border border-border hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                        {/* Image */}
+                        <div className="relative h-44 md:h-48 overflow-hidden">
+                          {post.cover_image ? (
+                            <img
+                              src={post.cover_image}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                              <TrendingUp className="w-10 h-10 text-muted-foreground/30" />
+                            </div>
+                          )}
+                          <Badge
+                            className={`absolute top-3 left-3 ${CATEGORY_COLORS[post.category] || "bg-primary"} text-white border-0 text-[10px] font-bold`}
+                          >
+                            {CATEGORY_LABELS[post.category] || post.category}
+                          </Badge>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4 md:p-5 flex flex-col flex-1">
+                          <h3 className="font-display text-base md:text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                            {post.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                            {post.excerpt}
+                          </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
+                            <span className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-bold text-primary">
+                                {post.author_name.charAt(0)}
+                              </div>
+                              {post.author_name}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(post.published_at || post.created_at)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border bg-card/50 py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground font-sans">
+          <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Creative Caricature Club™. All rights reserved.
           </p>
         </div>
