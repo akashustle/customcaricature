@@ -568,6 +568,7 @@ const ArtistDashboard = () => {
     setCancellingPortal(null);
   };
 
+  const updateOrderStatus = async (orderId: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status: status as any }).eq("id", orderId);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Status Updated!" }); if (artist) fetchOrders(artist.id); }
