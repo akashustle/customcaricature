@@ -258,7 +258,7 @@ const Register = () => {
                 {step === 2 && (
                   <motion.div key="s2" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
                     <div>
-                      <Label className="font-sans text-sm font-medium">Mobile * (10 digits)</Label>
+                      <Label className="font-sans text-sm font-medium">WhatsApp Number * (10 digits)</Label>
                       <div className="flex gap-2"><div className="flex items-center px-3 bg-muted rounded-xl border border-input text-sm font-sans h-11">+91</div><Input value={form.mobile} onChange={(e) => validateMobile(e.target.value)} placeholder="9876543210" maxLength={10} className="h-11 rounded-xl" /></div>
                     </div>
                     <div>

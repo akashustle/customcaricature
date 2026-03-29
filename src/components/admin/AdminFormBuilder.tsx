@@ -36,7 +36,7 @@ const DEFAULT_FIELDS: Record<string, Partial<FormField>[]> = {
   registration: [
     { field_key: "full_name", label: "Full Name", field_type: "text", placeholder: "Enter your full name", is_required: true },
     { field_key: "email", label: "Email Address", field_type: "email", placeholder: "you@example.com", is_required: true },
-    { field_key: "mobile", label: "Mobile Number", field_type: "tel", placeholder: "+91 9876543210", is_required: true },
+    { field_key: "mobile", label: "WhatsApp Number", field_type: "tel", placeholder: "+91 9876543210", is_required: true },
     { field_key: "password", label: "Password", field_type: "text", placeholder: "Min 6 characters", is_required: true },
     { field_key: "instagram_id", label: "Instagram ID", field_type: "text", placeholder: "@yourhandle", is_required: false },
     { field_key: "city", label: "City", field_type: "text", placeholder: "Your city", is_required: false },
