@@ -986,8 +986,8 @@ const ArtistDashboard = () => {
                     if (item.path) { navigate(item.path); return; }
                     setActiveTab(item.id);
                   }}
-                  className="flex items-center justify-center min-w-[44px] w-12 h-12 relative flex-shrink-0">
-                  <item.icon className={`transition-all duration-200 ${isActive ? "w-7 h-7 stroke-[2.5px] text-foreground" : "w-6 h-6 stroke-[1.5px] text-muted-foreground"}`} />
+                  className="flex items-center justify-center min-w-[40px] w-11 h-12 relative flex-shrink-0">
+                  <item.icon className={`transition-all duration-200 ${isActive ? "w-6 h-6 stroke-[2.5px] text-foreground" : "w-5 h-5 stroke-[1.5px] text-muted-foreground"}`} />
                   {isActive && (
                     <motion.div layoutId="artist-nav-dot" className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary" initial={false}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
