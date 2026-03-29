@@ -2169,6 +2169,33 @@ export type Database = {
         }
         Relationships: []
       }
+      google_indexing_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          error_message: string | null
+          id: string
+          success: boolean
+          url: string
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          success?: boolean
+          url: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          success?: boolean
+          url?: string
+        }
+        Relationships: []
+      }
       guest_enquiry_tracking: {
         Row: {
           created_at: string
