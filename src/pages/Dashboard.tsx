@@ -1250,11 +1250,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount,
             });
-            if (verifyError) throw new Error("Verification failed");
-            if (verifyData?.verified || verifyData?.success) {
               playPaymentSuccessSound();
               toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
             } else {
