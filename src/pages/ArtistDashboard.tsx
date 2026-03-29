@@ -12,7 +12,7 @@ import {
   LogOut, CalendarDays, MapPin, Users, Home, FileText, RefreshCw, Loader2,
   CalendarOff, Trash2, Package, Palette, MessageCircle, X, Bell, Clock,
   IndianRupee, CheckCircle2, Camera, CreditCard, Banknote, Upload, Phone, Mail,
-  ChevronDown, ChevronUp, User, Wallet
+  ChevronDown, ChevronUp, User, Wallet, XCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LiveGreeting from "@/components/LiveGreeting";
@@ -461,6 +461,8 @@ const ArtistDashboard = () => {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [collectEvent, setCollectEvent] = useState<ArtistEvent | null>(null);
   const [portalPaymentReceived, setPortalPaymentReceived] = useState(false);
+  const [activePortalRequests, setActivePortalRequests] = useState<Record<string, string>>({}); // event_id -> request_id
+  const [cancellingPortal, setCancellingPortal] = useState<string | null>(null);
 
   // Block date form
   const [blockDate, setBlockDate] = useState("");
@@ -524,6 +526,17 @@ const ArtistDashboard = () => {
       .order("event_date", { ascending: true });
     if (data) setEvents(data as any);
     setLoading(false);
+
+    // Fetch active portal payment requests for these events
+    const { data: portalReqs } = await supabase
+      .from("portal_payment_requests" as any)
+      .select("id, event_id")
+      .eq("artist_id", artistId)
+      .in("status", ["pending", "accepted"])
+      .in("event_id", Array.from(eventIds));
+    const map: Record<string, string> = {};
+    if (portalReqs) (portalReqs as any[]).forEach((r: any) => { map[r.event_id] = r.id; });
+    setActivePortalRequests(map);
   };
 
   const fetchOrders = async (artistId: string) => {
@@ -537,6 +550,22 @@ const ArtistDashboard = () => {
     const { data } = await (supabase.from("artist_blocked_dates").select("id, blocked_date, blocked_start_time, blocked_end_time, reason, artist_id") as any)
       .eq("artist_id", artistId).order("blocked_date", { ascending: true });
     if (data) setBlockedDates(data as any);
+  };
+
+  const handleCancelPortalRequest = async (eventId: string) => {
+    const requestId = activePortalRequests[eventId];
+    if (!requestId) return;
+    setCancellingPortal(eventId);
+    try {
+      await supabase.from("portal_payment_requests" as any)
+        .update({ status: "cancelled", updated_at: new Date().toISOString() } as any)
+        .eq("id", requestId);
+      setActivePortalRequests(prev => { const n = { ...prev }; delete n[eventId]; return n; });
+      toast({ title: "Portal prompt stopped", description: "Customer will no longer see the payment popup" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setCancellingPortal(null);
   };
 
   const updateOrderStatus = async (orderId: string, status: string) => {
@@ -826,6 +855,21 @@ const ArtistDashboard = () => {
                                   {canCollect && (
                                     <Button onClick={() => setCollectEvent(ev)} className="w-full mt-3 h-11 rounded-xl font-sans bg-green-600 hover:bg-green-700 text-white">
                                       <IndianRupee className="w-4 h-4 mr-1" /> Collect ₹{remaining.toLocaleString("en-IN")} Remaining
+                                    </Button>
+                                  )}
+                                  {/* Stop Portal Prompt Button */}
+                                  {activePortalRequests[ev.id] && (
+                                    <Button
+                                      onClick={() => handleCancelPortalRequest(ev.id)}
+                                      disabled={cancellingPortal === ev.id}
+                                      variant="outline"
+                                      className="w-full mt-2 h-10 rounded-xl font-sans border-destructive/50 text-destructive hover:bg-destructive/10"
+                                    >
+                                      {cancellingPortal === ev.id ? (
+                                        <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Stopping...</>
+                                      ) : (
+                                        <><XCircle className="w-4 h-4 mr-1" /> Stop Portal Payment Prompt</>
+                                      )}
                                     </Button>
                                   )}
                                   {ev.payment_status === "fully_paid" && (
