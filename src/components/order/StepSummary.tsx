@@ -74,19 +74,13 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
       }
 
       // 3. Create Razorpay order via edge function
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: {
-          amount,
-          order_id: orderId,
-          customer_name: data.customerName,
-          customer_email: data.customerEmail,
-          customer_mobile: data.customerMobile,
-        },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount,
+        order_id: orderId,
+        customer_name: data.customerName,
+        customer_email: data.customerEmail,
+        customer_mobile: data.customerMobile,
       });
-
-      if (rzpError || !rzpData?.razorpay_order_id) {
-        throw new Error(rzpError?.message || "Failed to create payment order");
-      }
 
       // 4. Open Razorpay checkout
       const options = {
