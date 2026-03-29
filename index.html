@@ -30,21 +30,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CCC" />
 
-    <!-- Preload LCP hero logo -->
-    <link rel="preload" as="image" href="/logo.png" />
+    <!-- DNS prefetch & preconnect — FIRST for earliest possible connection -->
+    <link rel="preconnect" href="https://cqdxfvcyrvlttmkuaeda.supabase.co" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
-    <!-- Preload critical fonts (already in CSS but hint early) -->
+    <!-- Preload LCP hero logo -->
+    <link rel="preload" as="image" href="/logo.png" fetchpriority="high" />
+
+    <!-- Preload critical fonts -->
     <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofiOc5wtlZ2di8HDLshRTY9jo7eTWk.woff2" />
     <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/dancingscript/v25/If2cXTr6YS-zF4S-kcSWSVi_sxjsohD9F50Ruu7BMSo3Sup8.woff2" />
-
-    <!-- DNS prefetch & preconnect -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://cqdxfvcyrvlttmkuaeda.supabase.co" />
-    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://cqdxfvcyrvlttmkuaeda.supabase.co" crossorigin />
 
     <!-- Non-blocking font loading -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
@@ -53,14 +50,20 @@
     <!-- Inline critical above-the-fold CSS -->
     <style>
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-      html{-webkit-text-size-adjust:100%;font-feature-settings:normal}
-      body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#fdf8f3;color:#3d3028;line-height:1.5;min-height:100vh}
+      html{-webkit-text-size-adjust:100%;font-feature-settings:normal;text-rendering:optimizeSpeed}
+      body{font-family:'Nunito','Inter',system-ui,-apple-system,sans-serif;background:#fdf8f3;color:#3d3028;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
       #root{min-height:100vh}
       .min-h-screen{min-height:100vh}
       .flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}
       .bg-background{background:hsl(30,43%,97%)}
       .animate-spin{animation:spin 1s linear infinite}
       @keyframes spin{to{transform:rotate(360deg)}}
+      /* Prevent layout shift from nav */
+      nav.sticky{min-height:56px}
+      /* GPU-accelerate common animated elements */
+      .animate-pulse,.animate-spin,[class*="motion"]{will-change:transform,opacity;contain:layout style paint}
+      /* Reduce paint for heavy sections */
+      img{content-visibility:auto}
     </style>
   </head>
   <body>
