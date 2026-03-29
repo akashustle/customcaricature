@@ -138,24 +138,27 @@ const Index = () => {
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
   const maintenance = useMaintenanceCheck("home");
 
-  // Smart redirect: logged-in users go to their dashboard
+  // Smart redirect: logged-in users go to their dashboard (deferred to not block paint)
   useEffect(() => {
     if (loading || redirectChecked || !user) { setRedirectChecked(true); return; }
-    const checkRole = async () => {
-      // Check if admin
-      const { data: adminRole } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
-      if (adminRole) {
-        const lastAdmin = sessionStorage.getItem("ccc_admin_session");
-        if (lastAdmin) { navigate("/admin-panel", { replace: true }); return; }
-      }
-      // Check if artist
-      const { data: artist } = await supabase.from("artists").select("id").eq("auth_user_id", user.id).maybeSingle() as any;
-      if (artist) { navigate("/artist-dashboard", { replace: true }); return; }
-      // Regular user → dashboard
-      navigate("/dashboard", { replace: true });
-    };
-    checkRole();
+    // Defer role check to avoid blocking initial render
+    const timer = setTimeout(async () => {
+      try {
+        // Batch both queries in parallel for speed
+        const [adminResult, artistResult] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle(),
+          supabase.from("artists").select("id").eq("auth_user_id", user.id).maybeSingle() as any,
+        ]);
+        if (adminResult.data) {
+          const lastAdmin = sessionStorage.getItem("ccc_admin_session");
+          if (lastAdmin) { navigate("/admin-panel", { replace: true }); return; }
+        }
+        if (artistResult.data) { navigate("/artist-dashboard", { replace: true }); return; }
+        navigate("/dashboard", { replace: true });
+      } catch {}
+    }, 100);
     setRedirectChecked(true);
+    return () => clearTimeout(timer);
   }, [user, loading, redirectChecked]);
 
   const hero = content.homepage_hero || {};
