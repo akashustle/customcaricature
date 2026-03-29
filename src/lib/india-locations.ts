@@ -531,7 +531,22 @@ export const getCities = (state: string, district: string): string[] => {
   return districts[district] || [];
 };
 
-// Helper to check if a city is Mumbai (for framing logic)
-export const isMumbaiCity = (state: string, city: string): boolean => {
-  return state === "Maharashtra" && (city === "Mumbai" || city === "Navi Mumbai");
+// Districts that qualify for Mumbai pricing
+export const MUMBAI_DISTRICTS = ["Mumbai City", "Mumbai Suburban", "Thane", "Navi Mumbai", "Palghar"];
+
+// Helper to check if a location qualifies for Mumbai pricing (district-based)
+export const isMumbaiCity = (state: string, cityOrDistrict: string): boolean => {
+  if (state !== "Maharashtra") return false;
+  return MUMBAI_DISTRICTS.includes(cityOrDistrict);
+};
+
+// Overload: check using both district and city for maximum compatibility
+export const isMumbaiRegion = (state: string, district: string, city?: string): boolean => {
+  if (state !== "Maharashtra") return false;
+  if (MUMBAI_DISTRICTS.includes(district)) return true;
+  if (city && MUMBAI_DISTRICTS.includes(city)) return true;
+  // Also match city names that imply Mumbai
+  const MUMBAI_CITIES = ["Mumbai", "Navi Mumbai", "Thane", "Palghar"];
+  if (city && MUMBAI_CITIES.includes(city)) return true;
+  return false;
 };

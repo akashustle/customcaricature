@@ -1,5 +1,6 @@
 import { OrderFormData } from "@/lib/order-types";
 import { formatPrice, STYLES } from "@/lib/pricing";
+import { isMumbaiRegion } from "@/lib/india-locations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +25,7 @@ interface Props {
 const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const styleName = STYLES.find((s) => s.value === data.style)?.label || data.style;
-  const isMumbai = data.city.toLowerCase().trim() === "mumbai";
+  const isMumbai = isMumbaiRegion(data.state, data.district, data.city);
 
   const handleSubmit = async () => {
     setSubmitting(true);

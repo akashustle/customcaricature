@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import LocationDropdowns from "@/components/LocationDropdowns";
-import { isMumbaiCity } from "@/lib/india-locations";
+import { isMumbaiRegion } from "@/lib/india-locations";
 
 interface Props {
   data: OrderFormData;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const StepLocation = ({ data, update, onNext }: Props) => {
-  const isMumbai = isMumbaiCity(data.state, data.city);
+  const isMumbai = isMumbaiRegion(data.state, data.district, data.city);
   const canProceed = data.state.trim() && data.district.trim() && data.city.trim();
 
   return (
