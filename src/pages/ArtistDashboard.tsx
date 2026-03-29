@@ -372,6 +372,80 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess, artistId }: 
   }
 };
 
+// Artist-specific notifications (only event/assignment related, not admin broadcasts)
+const ArtistNotifications = ({ userId }: { userId: string }) => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const ch = supabase.channel(`artist-notifs-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => fetchNotifications())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId]);
+
+  const fetchNotifications = async () => {
+    const { data } = await supabase.from("notifications").select("*")
+      .eq("user_id", userId)
+      .in("type", ["event", "payment", "chat", "order"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (data) setNotifications(data);
+  };
+
+  const markRead = async (id: string) => {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+    fetchNotifications();
+  };
+
+  const markAllRead = async () => {
+    await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
+    fetchNotifications();
+  };
+
+  const unread = notifications.filter(n => !n.read).length;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="font-display text-lg font-bold flex items-center gap-2">
+          <Bell className="w-5 h-5 text-primary" /> Notifications
+          {unread > 0 && <Badge className="bg-primary text-primary-foreground text-xs">{unread}</Badge>}
+        </h2>
+        {unread > 0 && (
+          <Button variant="outline" size="sm" onClick={markAllRead} className="text-xs rounded-full font-sans">Mark All Read</Button>
+        )}
+      </div>
+      {notifications.length === 0 ? (
+        <Card><CardContent className="p-8 text-center">
+          <Bell className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground font-sans">No notifications yet</p>
+        </CardContent></Card>
+      ) : (
+        notifications.map(n => (
+          <motion.div key={n.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className={`cursor-pointer transition-all ${!n.read ? "border-primary/30 bg-primary/5" : ""}`}
+              onClick={() => { if (!n.read) markRead(n.id); }}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1">
+                    <p className={`font-sans text-sm ${!n.read ? "font-bold" : "font-medium"}`}>{n.title}</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-1">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/60 font-sans mt-2">
+                      {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
+                  {!n.read && <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))
+      )}
+    </div>
+  );
+};
+
 const ArtistDashboard = () => {
   const navigate = useNavigate();
   usePermissions(true);
