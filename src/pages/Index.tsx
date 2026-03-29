@@ -121,6 +121,29 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
   );
 };
 
+const ScrollTypeReveal = ({ text, className }: { text: string; className?: string }) => {
+  const [visibleChars, setVisibleChars] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const progress = Math.min(1, window.scrollY / 320);
+      setVisibleChars(Math.max(1, Math.floor(text.length * progress)));
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [text]);
+
+  const shown = text.slice(0, visibleChars);
+  return (
+    <span className={className} aria-label={text}>
+      {shown}
+      <span className="ml-1 inline-block h-[1em] w-px translate-y-1 animate-pulse bg-primary" aria-hidden="true" />
+    </span>
+  );
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
@@ -136,6 +159,7 @@ const Index = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const heroGalleryY = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const maintenance = useMaintenanceCheck("home");
 
   // Smart redirect: logged-in users go to their dashboard (deferred to not block paint)
@@ -288,7 +312,11 @@ const Index = () => {
               </motion.div>
               <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
                 className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]">
-                {hero.headline || (<>Where Every Face Becomes <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>)}
+                {hero.headline ? (
+                  <ScrollTypeReveal text={hero.headline} className="inline" />
+                ) : (
+                  <>Where Every Face Becomes <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>
+                )}
               </motion.h1>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
                 className="text-base md:text-lg lg:text-xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed" style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)' }}>
@@ -344,6 +372,7 @@ const Index = () => {
 
             {/* Right: Premium gallery mosaic for desktop */}
             <motion.div initial={{ opacity: 0, scale: 0.85, rotateY: -10 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              style={{ y: heroGalleryY }}
               className="hidden lg:block flex-shrink-0 w-[480px] xl:w-[540px] relative perspective-1000">
               {/* Decorative frame */}
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />

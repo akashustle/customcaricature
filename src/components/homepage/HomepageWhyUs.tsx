@@ -14,7 +14,11 @@ const HomepageWhyUs = ({ config }: { config: any }) => {
           className="text-center mb-10"
         >
           <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Our Promise</p>
-          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">Why Choose Us</h2>
+          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">
+            <motion.span initial={{ opacity: 0, letterSpacing: "0.4em" }} whileInView={{ opacity: 1, letterSpacing: "0em" }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+              Why Choose Us
+            </motion.span>
+          </h2>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {(config.points as string[]).map((point, i) => (

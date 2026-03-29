@@ -31,7 +31,7 @@ import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent,
 } from "@/components/ui/dialog";
 
 type Profile = {
@@ -549,74 +549,72 @@ const Dashboard = () => {
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
       {portalPaymentRequest && (
-        <Dialog open={true} onOpenChange={() => {}}>
-          <DialogContent className="w-[calc(100vw-1rem)] max-w-lg overflow-hidden rounded-[2rem] border-border/60 p-0 [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
-            <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="overflow-hidden">
-              <div className="border-b border-border/50 bg-gradient-to-br from-primary/15 via-background to-secondary/40 px-5 py-6 sm:px-6">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ repeat: Infinity, duration: 2.6, ease: "easeInOut" }}
-                  className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary shadow-sm"
-                >
-                  <CreditCard className="h-8 w-8" />
-                </motion.div>
-                <div className="space-y-2 text-left">
-                  <Badge className="border-none bg-primary/15 text-primary">Artist payment request</Badge>
-                  <h2 className="font-display text-2xl font-bold text-foreground">Your event is completed</h2>
-                  <p className="font-sans text-sm text-muted-foreground">
-                    Please complete the remaining payment to close your booking and receive the final confirmation instantly.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 p-5 sm:p-6">
-                <div className="rounded-[1.5rem] border border-border/60 bg-muted/40 p-4">
-                  <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount due</p>
-                  <p className="mt-2 font-display text-4xl font-bold text-primary">
-                    ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
-                  </p>
-                  {portalPaymentRequest.extra_hours > 0 && (
-                    <p className="mt-2 font-sans text-xs text-muted-foreground">
-                      Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-2 rounded-2xl border border-border/50 bg-background p-3 sm:grid-cols-3">
-                  <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="font-sans text-[11px] text-muted-foreground">Status</p>
-                    <p className="mt-1 font-sans text-sm font-semibold text-foreground capitalize">{portalPaymentRequest.status}</p>
-                  </div>
-                  <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="font-sans text-[11px] text-muted-foreground">Gateway</p>
-                    <p className="mt-1 font-sans text-sm font-semibold text-foreground">Razorpay</p>
-                  </div>
-                  <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="font-sans text-[11px] text-muted-foreground">Access</p>
-                    <p className="mt-1 font-sans text-sm font-semibold text-foreground">Live & instant</p>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handlePortalPayment}
-                  disabled={payingPortal}
-                  className="h-12 w-full rounded-2xl font-sans text-base"
-                  size="lg"
-                >
-                  {payingPortal ? (
-                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Opening secure payment...</>
-                  ) : (
-                    <>Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} now</>
-                  )}
-                </Button>
-
-                <p className="text-center font-sans text-[11px] text-muted-foreground">
-                  UPI, cards and net banking supported · this prompt stays active until payment is completed.
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-foreground/55 px-2 backdrop-blur-sm">
+          <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-border/60 bg-background shadow-2xl">
+            <div className="border-b border-border/50 bg-gradient-to-br from-primary/15 via-background to-secondary/40 px-5 py-6 sm:px-6">
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 2.6, ease: "easeInOut" }}
+                className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary shadow-sm"
+              >
+                <CreditCard className="h-8 w-8" />
+              </motion.div>
+              <div className="space-y-2 text-left">
+                <Badge className="border-none bg-primary/15 text-primary">Artist payment request</Badge>
+                <h2 className="font-display text-2xl font-bold text-foreground">Your event is completed</h2>
+                <p className="font-sans text-sm text-muted-foreground">
+                  Please complete the remaining payment to close your booking and receive the final confirmation instantly.
                 </p>
               </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
+            </div>
+
+            <div className="space-y-4 p-5 sm:p-6">
+              <div className="rounded-[1.5rem] border border-border/60 bg-muted/40 p-4">
+                <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount due</p>
+                <p className="mt-2 font-display text-4xl font-bold text-primary">
+                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
+                </p>
+                {portalPaymentRequest.extra_hours > 0 && (
+                  <p className="mt-2 font-sans text-xs text-muted-foreground">
+                    Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-2 rounded-2xl border border-border/50 bg-background p-3 sm:grid-cols-3">
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="font-sans text-[11px] text-muted-foreground">Status</p>
+                  <p className="mt-1 font-sans text-sm font-semibold text-foreground capitalize">{portalPaymentRequest.status}</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="font-sans text-[11px] text-muted-foreground">Gateway</p>
+                  <p className="mt-1 font-sans text-sm font-semibold text-foreground">Razorpay</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3">
+                  <p className="font-sans text-[11px] text-muted-foreground">Access</p>
+                  <p className="mt-1 font-sans text-sm font-semibold text-foreground">Live & instant</p>
+                </div>
+              </div>
+
+              <Button
+                onClick={handlePortalPayment}
+                disabled={payingPortal}
+                className="h-12 w-full rounded-2xl font-sans text-base"
+                size="lg"
+              >
+                {payingPortal ? (
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Opening secure payment...</>
+                ) : (
+                  <>Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} now</>
+                )}
+              </Button>
+
+              <p className="text-center font-sans text-[11px] text-muted-foreground">
+                UPI, cards and net banking supported · this prompt stays active until payment is completed.
+              </p>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* Thank You Popup after Portal Payment */}
