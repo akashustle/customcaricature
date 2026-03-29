@@ -57,7 +57,7 @@ const Support = () => {
   if (submitted) {
     return (
       <>
-        <SEOHead title="Support | Creative Caricature Club™" description="Get in touch with us" />
+        <SEOHead title="Contact & Support | Creative Caricature Club™" description="Contact Creative Caricature Club™ for caricature orders, event bookings, custom artwork enquiries & support. Reach us via phone, email, WhatsApp or Instagram. Based in Mumbai, serving all India & internationally." canonical="/support" />
         <div className="min-h-screen brand-gradient-bg flex items-center justify-center p-4">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <Card className="w-full max-w-md shadow-3d border-glow text-center">
