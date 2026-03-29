@@ -444,7 +444,7 @@ const ThankYouPopup = ({ config, onClose }: { config: EventConfig; onClose: () =
             <h3 className="text-xl font-black text-foreground mb-4">Get Notified 🔔</h3>
             <div className="space-y-3 mb-4">
               <Input placeholder="Your Name *" value={notifyForm.name} onChange={e => setNotifyForm({ ...notifyForm, name: e.target.value })} className="rounded-xl h-11" />
-              <Input placeholder="Mobile Number *" value={notifyForm.mobile} onChange={e => setNotifyForm({ ...notifyForm, mobile: e.target.value })} className="rounded-xl h-11" />
+              <Input placeholder="WhatsApp Number *" value={notifyForm.mobile} onChange={e => setNotifyForm({ ...notifyForm, mobile: e.target.value })} className="rounded-xl h-11" />
               <Input placeholder="Instagram ID (optional)" value={notifyForm.instagram_id} onChange={e => setNotifyForm({ ...notifyForm, instagram_id: e.target.value })} className="rounded-xl h-11" />
             </div>
             <Button onClick={handleNotify} disabled={sending} className="w-full rounded-full gap-2 bg-accent text-accent-foreground font-bold">
