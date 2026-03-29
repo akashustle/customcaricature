@@ -530,6 +530,123 @@ const Dashboard = () => {
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
       </div>
+
+      {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
+      {portalPaymentRequest && (
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent className="max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4 py-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+              >
+                <CreditCard className="w-10 h-10 text-primary" />
+              </motion.div>
+              
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">🎨 Event Completed!</h2>
+                <p className="text-sm text-muted-foreground font-sans mt-1">
+                  Your live caricature event is done! Please complete the remaining payment.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-5">
+                <p className="text-xs text-muted-foreground font-sans mb-1">Remaining Amount</p>
+                <p className="text-4xl font-display font-bold text-primary">
+                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
+                </p>
+                {portalPaymentRequest.extra_hours > 0 && (
+                  <p className="text-xs text-muted-foreground font-sans mt-1">
+                    Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                onClick={handlePortalPayment}
+                disabled={payingPortal}
+                className="w-full h-12 rounded-xl font-sans text-base"
+                size="lg"
+              >
+                {payingPortal ? (
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</>
+                ) : (
+                  <>💳 Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} Now</>
+                )}
+              </Button>
+
+              <p className="text-[10px] text-muted-foreground font-sans">
+                Secure payment via Razorpay · UPI / Cards / Net Banking
+              </p>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Thank You Popup after Portal Payment */}
+      <AnimatePresence>
+        {portalPaymentDone && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setPortalPaymentDone(false)}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.3, 1] }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
+                  <CheckCircle2 className="w-14 h-14 text-white" />
+                </div>
+              </motion.div>
+              <motion.h2
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="font-display text-2xl font-bold text-foreground mb-2"
+              >
+                🎉 Thank You!
+              </motion.h2>
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground font-sans mb-4"
+              >
+                Your live caricature booking is now fully paid! We hope you had an amazing experience. ✨
+              </motion.p>
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Badge className="bg-green-100 text-green-700 border-none text-sm px-4 py-1">✅ Fully Paid</Badge>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <Button variant="outline" className="mt-4 rounded-full font-sans" onClick={() => setPortalPaymentDone(false)}>
+                  Close
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
