@@ -406,6 +406,7 @@ const Index = () => {
       </section>
 
       {/* Dynamic Sections — rendered in admin-configured order, lazy loaded */}
+      {/* content-visibility:auto skips rendering until near viewport — massive perf win */}
       <Suspense fallback={null}>
       {sectionOrder.map((sectionId) => {
         const renderHiddenMessage = () => {
