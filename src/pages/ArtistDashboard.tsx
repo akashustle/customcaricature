@@ -557,23 +557,65 @@ const ArtistDashboard = () => {
         </div>
         <LiveGreeting name={artist?.name} />
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        {/* Stats Row - Premium 3D Cards */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {[
-            { label: "Events", value: events.length, color: "from-primary/60 to-primary" },
-            { label: "Upcoming", value: upcoming.length, color: "from-blue-400 to-blue-600" },
-            { label: "Done", value: completed.length, color: "from-green-400 to-green-600" },
-            { label: "Revenue", value: `₹${(totalRevenue / 1000).toFixed(0)}K`, color: "from-amber-400 to-amber-600" },
+            { label: "Total Events", value: events.length, icon: CalendarDays, color: "from-primary/10 to-primary/5", iconBg: "bg-primary", desc: `${upcoming.length} upcoming` },
+            { label: "This Month", value: events.filter(e => { const d = new Date(e.event_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length, icon: Clock, color: "from-blue-500/10 to-blue-500/5", iconBg: "bg-blue-500", desc: "events this month" },
+            { label: "Completed", value: completed.length, icon: CheckCircle2, color: "from-green-500/10 to-green-500/5", iconBg: "bg-green-500", desc: `${((completed.length / Math.max(events.length, 1)) * 100).toFixed(0)}% completion` },
+            { label: "Revenue", value: `₹${totalRevenue >= 100000 ? (totalRevenue / 100000).toFixed(1) + "L" : (totalRevenue / 1000).toFixed(0) + "K"}`, icon: IndianRupee, color: "from-amber-500/10 to-amber-500/5", iconBg: "bg-amber-500", desc: `₹${totalRevenue.toLocaleString("en-IN")} total` },
           ].map((s, i) => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className="overflow-hidden relative"><CardContent className="p-3 text-center">
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${s.color}`} />
-                <p className="text-xl font-bold font-display text-foreground">{s.value}</p>
-                <p className="text-[9px] text-muted-foreground font-sans">{s.label}</p>
-              </CardContent></Card>
+            <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+              <Card className="overflow-hidden relative border-border/60 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+                <div className={`absolute inset-0 bg-gradient-to-br ${s.color} pointer-events-none`} />
+                <CardContent className="p-3.5 relative">
+                  <div className="flex items-start gap-2.5">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg} shadow-md flex-shrink-0`}>
+                      <s.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xl font-bold font-display leading-tight">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground font-sans truncate">{s.label}</p>
+                      <p className="text-[9px] text-muted-foreground/70 font-sans">{s.desc}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
+
+        {/* Upcoming Events Quick View */}
+        {upcoming.length > 0 && activeTab !== "events" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4">
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardContent className="p-3">
+                <p className="text-xs font-sans font-semibold text-primary mb-2 flex items-center gap-1">
+                  <CalendarDays className="w-3.5 h-3.5" /> Next Event
+                </p>
+                {(() => {
+                  const next = upcoming.sort((a, b) => a.event_date.localeCompare(b.event_date))[0];
+                  if (!next) return null;
+                  const [ny, nm, nd] = next.event_date.split("-").map(Number);
+                  const nDate = new Date(ny, nm - 1, nd);
+                  const nToday = new Date(); nToday.setHours(0,0,0,0);
+                  const nDays = Math.round((nDate.getTime() - nToday.getTime()) / (1000*60*60*24));
+                  return (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans text-sm font-medium">{next.client_name} · {next.city}</p>
+                        <p className="text-[10px] text-muted-foreground font-sans">{nDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", weekday: "short" })} · {next.event_start_time}</p>
+                      </div>
+                      <Badge className="border-none text-xs bg-primary/15 text-primary font-display">
+                        {nDays === 0 ? "Today!" : nDays === 1 ? "Tomorrow" : `${nDays}d`}
+                      </Badge>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Desktop Tabs */}
         <div className="hidden md:flex gap-1 mb-4 bg-muted/30 rounded-xl p-1">
