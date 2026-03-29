@@ -777,6 +777,53 @@ export type Database = {
           },
         ]
       }
+      artist_payment_details: {
+        Row: {
+          artist_id: string
+          bank_account_name: string | null
+          bank_account_number: string | null
+          bank_ifsc_code: string | null
+          created_at: string | null
+          default_payment_method: string | null
+          id: string
+          updated_at: string | null
+          upi_id: string | null
+          upi_number: string | null
+        }
+        Insert: {
+          artist_id: string
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          created_at?: string | null
+          default_payment_method?: string | null
+          id?: string
+          updated_at?: string | null
+          upi_id?: string | null
+          upi_number?: string | null
+        }
+        Update: {
+          artist_id?: string
+          bank_account_name?: string | null
+          bank_account_number?: string | null
+          bank_ifsc_code?: string | null
+          created_at?: string | null
+          default_payment_method?: string | null
+          id?: string
+          updated_at?: string | null
+          upi_id?: string | null
+          upi_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_payment_details_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: true
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_payout_requests: {
         Row: {
           admin_note: string | null
@@ -787,6 +834,7 @@ export type Database = {
           expected_credit_date: string | null
           id: string
           note: string | null
+          preferred_payment_method: string | null
           request_type: string
           screenshot_path: string | null
           status: string
@@ -801,6 +849,7 @@ export type Database = {
           expected_credit_date?: string | null
           id?: string
           note?: string | null
+          preferred_payment_method?: string | null
           request_type?: string
           screenshot_path?: string | null
           status?: string
@@ -815,6 +864,7 @@ export type Database = {
           expected_credit_date?: string | null
           id?: string
           note?: string | null
+          preferred_payment_method?: string | null
           request_type?: string
           screenshot_path?: string | null
           status?: string
