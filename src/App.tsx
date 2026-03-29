@@ -116,8 +116,6 @@ DeferredInit.displayName = "DeferredInit";
 const DeferredInitInner = () => {
   useOneSignal();
   useWebPush();
-  // Auto-detect new deployments and reload seamlessly
-  const useAutoUpdate = require("./hooks/useAutoUpdate").default;
   useAutoUpdate();
   return null;
 };
