@@ -237,6 +237,12 @@
 }
 
 @layer utilities {
+  /* Performance: skip rendering off-screen sections */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
