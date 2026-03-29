@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Phone, Sparkles, Calendar, Clock, Mail, MessageCircle,

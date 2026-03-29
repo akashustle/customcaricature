@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart, Loader2, Store } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 
 const ShopCart = () => {
   const navigate = useNavigate();

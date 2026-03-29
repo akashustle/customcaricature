@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { initRazorpay } from "@/lib/razorpay";
 
 declare global {
   interface Window {
