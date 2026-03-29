@@ -250,6 +250,11 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
         </div>
       )}
 
+      {/* Payment Details Tab */}
+      {activeTab === "payment_details" && (
+        <ArtistPaymentDetails artistId={artistId} />
+      )}
+
       {/* Payout Request Dialog */}
       <Dialog open={showRequest} onOpenChange={setShowRequest}>
         <DialogContent className="max-w-sm">
