@@ -605,9 +605,12 @@ const ArtistDashboard = () => {
             ) : (
               <div className="space-y-3">
                 {events.map((ev) => {
-                  const eventDate = new Date(ev.event_date);
+                  // Parse YYYY-MM-DD as local date to avoid timezone issues
+                  const [yyyy, mm, dd] = ev.event_date.split("-").map(Number);
+                  const eventDate = new Date(yyyy, mm - 1, dd);
                   const today = new Date(); today.setHours(0,0,0,0);
-                  const daysLeft = Math.ceil((eventDate.getTime() - today.getTime()) / (1000*60*60*24));
+                  const daysLeft = Math.round((eventDate.getTime() - today.getTime()) / (1000*60*60*24));
+                  const dayName = eventDate.toLocaleDateString("en-IN", { weekday: "long" });
                   const isExpanded = expandedEvent === ev.id;
                   const totalAmt = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
                   const advAmt = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
