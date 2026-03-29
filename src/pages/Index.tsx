@@ -445,10 +445,10 @@ const Index = () => {
               </section>
             );
           case "what_you_get":
-            return <div key={sectionId} id="section-what-you-get"><HomepageWhatYouGet config={content.homepage_what_you_get} /></div>;
+            return <div key={sectionId} id="section-what-you-get" className="cv-auto"><HomepageWhatYouGet config={content.homepage_what_you_get} /></div>;
           case "how_it_works":
             return (
-              <section key={sectionId} className="container mx-auto px-4 py-16 md:py-24" id="section-how-it-works">
+              <section key={sectionId} className="container mx-auto px-4 py-16 md:py-24 cv-auto" id="section-how-it-works">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
                   <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Simple Process</p>
                   <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">How It Works</h2>
