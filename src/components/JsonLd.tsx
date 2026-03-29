@@ -6,7 +6,7 @@ const organizationSchema = {
   "@type": "Organization",
   name: "Creative Caricature Club™",
   url: BASE_URL,
-  logo: `${BASE_URL}/logo.png`,
+  logo: LOGO_URL,
   description: "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online.",
   founder: { "@type": "Person", name: "Ritesh Mahendra Gupta" },
   contactPoint: {
