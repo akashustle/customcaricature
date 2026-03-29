@@ -425,6 +425,13 @@ const ArtistDashboard = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { if (isR) fetchOrders((artistData as any).id); })
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents((artistData as any).id))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests" }, (payload: any) => {
+        if (payload.new?.status === "completed") {
+          setPortalPaymentReceived(true);
+          fetchEvents((artistData as any).id);
+          setTimeout(() => setPortalPaymentReceived(false), 6000);
+        }
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   };
