@@ -872,9 +872,14 @@ const ArtistDashboard = () => {
           </div>
         )}
 
+        {/* Notifications Tab */}
+        {activeTab === "notifications" && user && (
+          <ArtistNotifications userId={user.id} />
+        )}
+
         {/* Chat Tab (mobile) */}
         {activeTab === "chat" && user && artist && (
-          <div className="min-h-[60vh] rounded-xl overflow-hidden border border-border">
+          <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(56px + env(safe-area-inset-bottom))" }}>
             <ArtistChatPanel userId={user.id} userName={artist.name} />
           </div>
         )}
