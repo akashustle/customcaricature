@@ -7,7 +7,7 @@ const organizationSchema = {
   name: "Creative Caricature Club™",
   url: BASE_URL,
   logo: LOGO_URL,
-  description: "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online.",
+  description: "Creative Caricature Club™ — India's #1 caricature studio. Book live caricature artists for weddings, corporate events, birthdays & parties in Mumbai & across India. Order custom hand-crafted caricatures from photos online.",
   founder: { "@type": "Person", name: "Ritesh Mahendra Gupta" },
   contactPoint: {
     "@type": "ContactPoint",
