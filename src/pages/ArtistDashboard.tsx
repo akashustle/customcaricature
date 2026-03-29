@@ -386,6 +386,7 @@ const ArtistDashboard = () => {
   const [orderFilter, setOrderFilter] = useState("all");
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [collectEvent, setCollectEvent] = useState<ArtistEvent | null>(null);
+  const [portalPaymentReceived, setPortalPaymentReceived] = useState(false);
 
   // Block date form
   const [blockDate, setBlockDate] = useState("");
