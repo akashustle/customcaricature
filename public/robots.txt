@@ -15,7 +15,6 @@ Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
-Disallow: /notifications
 
 User-agent: Bingbot
 Allow: /
@@ -34,7 +33,6 @@ Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
-Disallow: /notifications
 
 User-agent: *
 Allow: /
@@ -53,6 +51,13 @@ Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
-Disallow: /notifications
 
-Sitemap: https://portal.creativecaricatureclub.com/sitemap.xml
+# Sitemap Index — comprehensive, auto-generated sub-sitemaps
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=index
+
+# Direct sub-sitemaps for faster crawler discovery
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=pages
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=blog
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=seo
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=images
+Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=shop
