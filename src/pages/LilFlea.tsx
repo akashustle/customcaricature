@@ -201,7 +201,7 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
                   boxShadow: "0 0 40px hsl(var(--accent) / 0.2)",
                 }}
               >
-                <img src="/logo.png" alt="Creative Caricature Club" className="w-full h-full rounded-full object-cover" />
+                <img src="/logo.png" alt="Creative Caricature Club™" className="w-full h-full rounded-full object-cover" />
               </div>
             </motion.div>
 
@@ -618,8 +618,8 @@ const LilFlea = () => {
   return (
     <>
       <SEOHead
-        title={`Live Caricature at ${config.event_name} Mumbai | Creative Caricature Club`}
-        description={`Get your caricature made live at ${config.event_name} Mumbai! Creative Caricature Club brings professional caricature artists to ${config.venue}.`}
+        title={`Live Caricature at ${config.event_name} Mumbai | Creative Caricature Club™`}
+        description={`Get your caricature made live at ${config.event_name} Mumbai! Creative Caricature Club™ brings professional caricature artists to ${config.venue}.`}
         canonical="/lil-flea"
         image="/images/lil-flea/lf-3.jpeg"
       />
@@ -638,7 +638,7 @@ const LilFlea = () => {
             location: { "@type": "Place", name: config.venue, address: { "@type": "PostalAddress", addressLocality: "Mumbai", addressRegion: "Maharashtra", addressCountry: "IN" } },
             image: ["/images/lil-flea/lf-3.jpeg"],
             description: `Get your caricature made live by professional artists at ${config.event_name} Mumbai.`,
-            organizer: { "@type": "Organization", name: "Creative Caricature Club", url: "https://portal.creativecaricatureclub.com" },
+            organizer: { "@type": "Organization", name: "Creative Caricature Club™", url: "https://portal.creativecaricatureclub.com" },
             offers: { "@type": "Offer", url: config.ticket_url, availability: "https://schema.org/InStock" },
           }),
         }}
@@ -923,7 +923,7 @@ const LilFlea = () => {
           {/* Footer */}
           <footer className="py-6 border-t border-border">
             <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-              <p>© {new Date().getFullYear()} Creative Caricature Club. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} Creative Caricature Club™. All rights reserved.</p>
               <p className="mt-1">Event collaboration with {config.event_name}</p>
             </div>
           </footer>

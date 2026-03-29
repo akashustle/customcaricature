@@ -29,7 +29,7 @@ const applicationServerKeyMatches = (currentKey: Uint8Array, existingKey?: Array
  */
 const showLocalWelcomeNotification = async (registration: ServiceWorkerRegistration) => {
   try {
-    await registration.showNotification("Welcome to Creative Caricature Club", {
+    await registration.showNotification("Welcome to Creative Caricature Club™", {
       body: "Notifications enabled. You will receive order updates and event alerts.",
       icon: NOTIFICATION_ICON,
       badge: "/badge-96.png",

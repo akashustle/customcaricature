@@ -147,7 +147,7 @@ const Shop = () => {
   if (!shopEnabled) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <SEOHead title="Shop Coming Soon | Creative Caricature Club" description="Our merchandise shop is coming soon!" />
+        <SEOHead title="Shop Coming Soon | Creative Caricature Club™" description="Our merchandise shop is coming soon!" />
         <Card className="max-w-md w-full text-center">
           <CardContent className="p-8 space-y-4">
             <Store className="w-16 h-16 text-primary mx-auto" />
@@ -162,7 +162,7 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEOHead title="Shop | Creative Caricature Club" description="Browse caricature merchandise - T-shirts, mugs, hoodies, posters & custom print-on-demand products." />
+      <SEOHead title="Shop | Creative Caricature Club™" description="Browse caricature merchandise - T-shirts, mugs, hoodies, posters & custom print-on-demand products." />
 
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-40">

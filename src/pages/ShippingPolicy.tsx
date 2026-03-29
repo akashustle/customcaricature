@@ -10,7 +10,7 @@ const ShippingPolicy = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <SEOHead title="Shipping Policy" description="Shipping and delivery policy for Creative Caricature Club." canonical="/shipping" />
+      <SEOHead title="Shipping Policy" description="Shipping and delivery policy for Creative Caricature Club™." canonical="/shipping" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
@@ -36,7 +36,7 @@ const ShippingPolicy = () => {
         <motion.p {...fadeUp(0.34)}><strong>Orders Outside Mumbai:</strong> Artwork shipped without frame to avoid damage during courier transit.</motion.p>
         
         <motion.h2 {...fadeUp(0.37)} className="font-display text-lg font-bold text-foreground pt-2">Courier Delays</motion.h2>
-        <motion.p {...fadeUp(0.39)}>Creative Caricature Club is not responsible for courier delays beyond our control.</motion.p>
+        <motion.p {...fadeUp(0.39)}>Creative Caricature Club™ is not responsible for courier delays beyond our control.</motion.p>
         
         <motion.h2 {...fadeUp(0.42)} className="font-display text-lg font-bold text-foreground pt-2">Tracking</motion.h2>
         <motion.p {...fadeUp(0.44)}>Once your caricature is dispatched, tracking details will be shared via WhatsApp. Customers with accounts can also track order status from their dashboard.</motion.p>

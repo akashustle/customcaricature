@@ -28,13 +28,13 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background">
       <img
         src="/logo.png"
-        alt="Creative Caricature Club"
+        alt="Creative Caricature Club™"
         className="w-20 h-20 rounded-full border-2 border-border shadow-lg"
         width={80}
         height={80}
       />
       <h1 className="mt-4 text-2xl font-bold text-foreground font-calligraphy">
-        Creative Caricature Club
+        Creative Caricature Club™
       </h1>
       <p className="mt-1 text-[11px] tracking-[0.3em] uppercase font-semibold text-muted-foreground font-body">
         Art • Events • Workshops

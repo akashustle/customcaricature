@@ -99,7 +99,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
-        name: "Creative Caricature Club", description: "Remaining Advance Payment",
+        name: "Creative Caricature Club™", description: "Remaining Advance Payment",
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {

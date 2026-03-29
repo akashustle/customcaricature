@@ -204,7 +204,7 @@ const Register = () => {
 
   return (
     <>
-    <SEOHead title="Register" description="Create your Creative Caricature Club account to order caricatures, book events and join workshops." canonical="/register" noindex />
+    <SEOHead title="Register" description="Create your Creative Caricature Club™ account to order caricatures, book events and join workshops." canonical="/register" noindex />
     <div className="min-h-[100dvh] flex items-center justify-center px-4 py-6 pb-24 md:pb-6 relative overflow-hidden bg-background">
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 30% 0%, hsl(var(--primary) / 0.05), transparent 50%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.04), transparent 50%)" }} />
@@ -362,7 +362,7 @@ const Register = () => {
             <p className="text-center text-sm font-sans mt-4 text-muted-foreground">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
           </CardContent>
         </Card>
-        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club © {new Date().getFullYear()}</p>
+        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club™ © {new Date().getFullYear()}</p>
       </motion.div>
     </div>
     </>

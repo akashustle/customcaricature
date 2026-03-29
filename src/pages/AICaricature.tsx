@@ -111,7 +111,7 @@ const AICaricature = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEOHead title="AI Caricature Generator | Creative Caricature Club" description="Upload your photo and get an instant AI-generated caricature! Print it on T-shirts, mugs, and more." />
+      <SEOHead title="AI Caricature Generator | Creative Caricature Club™" description="Upload your photo and get an instant AI-generated caricature! Print it on T-shirts, mugs, and more." />
 
       <div className="bg-card border-b border-border sticky top-0 z-40 px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/shop")}><ArrowLeft className="w-5 h-5" /></Button>

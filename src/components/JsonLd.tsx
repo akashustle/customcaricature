@@ -3,7 +3,7 @@ const BASE_URL = "https://portal.creativecaricatureclub.com";
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Creative Caricature Club",
+  name: "Creative Caricature Club™",
   url: BASE_URL,
   logo: `${BASE_URL}/logo.png`,
   description: "Book professional caricature artists for weddings, corporate events, birthdays and parties. Order custom caricatures from photos online.",
@@ -32,7 +32,7 @@ const organizationSchema = {
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Creative Caricature Club",
+  name: "Creative Caricature Club™",
   image: `${BASE_URL}/logo.png`,
   url: BASE_URL,
   description: "India's premium caricature studio. Custom hand-crafted caricatures for gifts, events and celebrations. Live caricature artists for weddings, corporate events and parties.",
@@ -58,7 +58,7 @@ const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
   name: "Custom Caricature Art",
-  provider: { "@type": "Organization", name: "Creative Caricature Club" },
+  provider: { "@type": "Organization", name: "Creative Caricature Club™" },
   description: "Professional hand-crafted caricatures in cute, romantic, fun, royal, and minimal styles. Order custom caricatures from photos online.",
   areaServed: [
     { "@type": "Country", name: "India" },
@@ -76,7 +76,7 @@ const eventServiceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
   name: "Live Event Caricature Artists",
-  provider: { "@type": "Organization", name: "Creative Caricature Club" },
+  provider: { "@type": "Organization", name: "Creative Caricature Club™" },
   description: "Book professional caricature artists for weddings, corporate events, birthdays, and parties. Live on-the-spot caricature entertainment.",
   areaServed: { "@type": "Country", name: "India" },
   serviceType: "Live Event Caricature Entertainment",
@@ -86,7 +86,7 @@ const productSchema = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: "Custom Caricature from Photo",
-  brand: { "@type": "Brand", name: "Creative Caricature Club" },
+  brand: { "@type": "Brand", name: "Creative Caricature Club™" },
   description: "Hand-crafted caricature artwork created from your photos. Available in cute, romantic, fun, royal, and minimal styles.",
   image: `${BASE_URL}/logo.png`,
   offers: {
@@ -129,7 +129,7 @@ const faqSchema = {
     {
       "@type": "Question",
       name: "What is your refund policy?",
-      acceptedAnswer: { "@type": "Answer", text: "Creative Caricature Club maintains a strict No Refund Policy. All payments once made are final for event bookings, custom orders, workshops, and merchandise." },
+      acceptedAnswer: { "@type": "Answer", text: "Creative Caricature Club™ maintains a strict No Refund Policy. All payments once made are final for event bookings, custom orders, workshops, and merchandise." },
     },
   ],
 };

@@ -285,7 +285,7 @@ const BookEvent = () => {
         key: rzpData.razorpay_key_id,
         amount: rzpData.amount,
         currency: rzpData.currency,
-        name: "Creative Caricature Club",
+        name: "Creative Caricature Club™",
         description: `Event Booking – ${finalEventType}`,
         image: "/logo.png",
         order_id: rzpData.razorpay_order_id,

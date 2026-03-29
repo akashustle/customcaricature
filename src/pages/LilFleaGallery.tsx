@@ -63,7 +63,7 @@ const LilFleaGallery = () => {
   return (
     <>
       <SEOHead
-        title="Lil Flea Gallery | Creative Caricature Club"
+        title="Lil Flea Gallery | Creative Caricature Club™"
         description="Browse all our Lil Flea event photos — live caricatures, happy customers, and unforgettable moments."
         canonical="/lil-flea-gallery"
       />

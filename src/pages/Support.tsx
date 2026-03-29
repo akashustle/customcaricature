@@ -57,7 +57,7 @@ const Support = () => {
   if (submitted) {
     return (
       <>
-        <SEOHead title="Support | Creative Caricature Club" description="Get in touch with us" />
+        <SEOHead title="Support | Creative Caricature Club™" description="Get in touch with us" />
         <div className="min-h-screen brand-gradient-bg flex items-center justify-center p-4">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <Card className="w-full max-w-md shadow-3d border-glow text-center">
@@ -85,7 +85,7 @@ const Support = () => {
 
   return (
     <>
-      <SEOHead title="Support & Contact | Creative Caricature Club" description="Have a question or want to discuss a project? We'd love to hear from you!" />
+      <SEOHead title="Support & Contact | Creative Caricature Club™" description="Have a question or want to discuss a project? We'd love to hear from you!" />
       <div className="min-h-screen brand-gradient-bg pb-24 md:pb-0">
         {/* Hero Header */}
         <div className="relative overflow-hidden">

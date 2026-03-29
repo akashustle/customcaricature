@@ -85,7 +85,7 @@ const ShopAdminLogin = () => {
                 <Sparkles className="w-4 h-4 text-primary/60" />
               </motion.div>
             </div>
-            <p className="text-sm text-muted-foreground">Creative Caricature Club - Store</p>
+            <p className="text-sm text-muted-foreground">Creative Caricature Club™ - Store</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">

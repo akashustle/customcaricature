@@ -93,7 +93,7 @@ const SEOLandingPage = () => {
     "@context": "https://schema.org",
     "@type": "Service",
     name: page.h1_title,
-    provider: { "@type": "Organization", name: "Creative Caricature Club", url: BASE_URL },
+    provider: { "@type": "Organization", name: "Creative Caricature Club™", url: BASE_URL },
     description: page.meta_description,
     areaServed: page.city ? { "@type": "City", name: page.city } : { "@type": "Country", name: "India" },
     serviceType: "Caricature Art Entertainment",
@@ -127,7 +127,7 @@ const SEOLandingPage = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <img src="/logo.png" alt="Creative Caricature Club" className="w-8 h-8 rounded-lg" loading="lazy" />
+          <img src="/logo.png" alt="Creative Caricature Club™" className="w-8 h-8 rounded-lg" loading="lazy" />
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-sm font-bold truncate">{page.city || "India"}</h2>
             <p className="text-xs text-muted-foreground">Caricature Services</p>

@@ -157,7 +157,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className={`${dm ? "bg-green-900/30 border-green-700/40" : "bg-gradient-to-r from-green-100/80 to-emerald-100/80 border-green-200/40"} border rounded-2xl p-5 text-center`}>
             <h2 className={`${dm ? "text-green-400" : "text-green-700"} font-bold text-lg mb-1`}>🎉 Workshop Completed!</h2>
-            <p className={`${dm ? "text-green-300/70" : "text-green-600"} text-sm font-medium`}>Thank you for joining Creative Caricature Club Workshop!</p>
+            <p className={`${dm ? "text-green-300/70" : "text-green-600"} text-sm font-medium`}>Thank you for joining Creative Caricature Club™ Workshop!</p>
           </div>
         </motion.div>
       )}
@@ -240,7 +240,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
             {now.getHours() < 12 ? "Good Morning ☀️" : now.getHours() < 17 ? "Good Afternoon 🌤️" : "Good Evening 🌙"}
           </p>
           <h2 className={`text-2xl ${textPrimary} mb-1`}>Hello, {user.name?.split(" ")[0]}! 👋</h2>
-          <p className={`${textMuted} text-sm`}>Welcome to Creative Caricature Club Workshop {user.roll_number && `· Roll #${user.roll_number}`}</p>
+          <p className={`${textMuted} text-sm`}>Welcome to Creative Caricature Club™ Workshop {user.roll_number && `· Roll #${user.roll_number}`}</p>
           <div className="mt-4 flex flex-wrap gap-4">
             <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
               <Calendar className="w-4 h-4 text-purple-400" />

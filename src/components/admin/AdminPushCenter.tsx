@@ -502,7 +502,7 @@ const AdminPushCenter = () => {
                       <p className="text-sm font-semibold font-sans truncate">{title || "Title"}</p>
                       <p className="text-xs text-muted-foreground font-sans line-clamp-2">{message || "Message..."}</p>
                       {imageUrl && <div className="mt-1.5 rounded overflow-hidden h-16"><img src={imageUrl} alt="" className="w-full h-full object-cover" /></div>}
-                      <p className="text-[9px] text-muted-foreground font-sans mt-1">Creative Caricature Club • now</p>
+                      <p className="text-[9px] text-muted-foreground font-sans mt-1">Creative Caricature Club™ • now</p>
                     </div>
                   </div>
                 </div>

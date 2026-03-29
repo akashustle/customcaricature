@@ -65,7 +65,7 @@ const defaultWorkshop: WorkshopData = {
   brochure_image_url: "",
   brochure_pdf_url: "",
   instructor_name: "Ritesh Gupta",
-  instructor_title: "Founder & Lead Artist, Creative Caricature Club",
+  instructor_title: "Founder & Lead Artist, Creative Caricature Club™",
   instructor_bio: "With over 10 years of professional experience, Ritesh has trained thousands of artists and delivered live caricature entertainment at corporate events, weddings, and brand activations across India.",
   instructor_stats: [
     { label: "Professional Experience", value: "10+ Years" },
@@ -334,7 +334,7 @@ const Workshop = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || data.key_id,
         amount: priceNum * 100,
         currency: "INR",
-        name: "Creative Caricature Club",
+        name: "Creative Caricature Club™",
         description: `Workshop Registration - ${workshop.title}`,
         order_id: data.order_id,
         handler: async (response: any) => {
@@ -614,7 +614,7 @@ const Workshop = () => {
 
   // Login View
   if (view === "login") {
-    const whatsappLink = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent("Hi, I'm unable to login to the Creative Caricature Club Workshop. Can you help me?")}`;
+    const whatsappLink = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent("Hi, I'm unable to login to the Creative Caricature Club™ Workshop. Can you help me?")}`;
     return (
       <div className="min-h-screen flex items-center justify-center p-4 pb-24 md:pb-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
@@ -625,7 +625,7 @@ const Workshop = () => {
                   <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
                 </motion.div>
                 <h1 className="font-calligraphy text-3xl font-bold text-foreground">Workshop Login</h1>
-                <p className="text-muted-foreground text-sm font-body flex items-center justify-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Creative Caricature Club</p>
+                <p className="text-muted-foreground text-sm font-body flex items-center justify-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Creative Caricature Club™</p>
               </div>
 
               {/* Batch Selector */}
@@ -719,7 +719,7 @@ const Workshop = () => {
   // Details View (Main Workshop Page)
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
-      <SEOHead title={`${workshop.title} - Creative Caricature Club`} description={workshop.description} />
+      <SEOHead title={`${workshop.title} - Creative Caricature Club™`} description={workshop.description} />
       
       {/* Hero */}
       <section className="relative overflow-hidden py-16 md:py-28 bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -810,7 +810,7 @@ const Workshop = () => {
           {/* Brand trust */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-8 text-center">
             <Card><CardContent className="p-6">
-              <p className="text-sm font-body font-semibold text-primary mb-2">Backed by Creative Caricature Club</p>
+              <p className="text-sm font-body font-semibold text-primary mb-2">Backed by Creative Caricature Club™</p>
               <p className="text-sm text-muted-foreground font-body leading-relaxed">India's premier caricature artist collective, trusted by government institutions and entertainment platforms. With a network of professional artists and a track record of over 1000 successful events.</p>
             </CardContent></Card>
           </motion.div>

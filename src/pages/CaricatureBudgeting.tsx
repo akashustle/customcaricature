@@ -43,7 +43,7 @@ const CaricatureBudgeting = () => {
   const [showCaricResult, setShowCaricResult] = useState(false);
 
   const introTexts = [
-    "🎨 Welcome to Creative Caricature Club",
+    "🎨 Welcome to Creative Caricature Club™",
     "💰 Let's find the perfect pricing for you...",
     "📊 Calculating best rates...",
     "🎯 Almost there...",

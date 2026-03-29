@@ -96,7 +96,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
         key: rzpData.razorpay_key_id,
         amount: rzpData.amount,
         currency: rzpData.currency,
-        name: "Creative Caricature Club",
+        name: "Creative Caricature Club™",
         description: `${data.orderType} Caricature - ${styleName}`,
         image: "/logo.png",
         order_id: rzpData.razorpay_order_id,

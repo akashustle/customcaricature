@@ -10,7 +10,7 @@ const EventPolicy = () => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
-      <SEOHead title="Event Booking Policy" description="Live caricature event booking policy for Creative Caricature Club." canonical="/event-policy" />
+      <SEOHead title="Event Booking Policy" description="Live caricature event booking policy for Creative Caricature Club™." canonical="/event-policy" />
       <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
@@ -39,7 +39,7 @@ const EventPolicy = () => {
           </motion.div>
 
           <motion.div {...fadeUp(0.25)}>
-            <h3 className="font-display text-lg font-bold text-foreground">4. Cancellation by Creative Caricature Club</h3>
+            <h3 className="font-display text-lg font-bold text-foreground">4. Cancellation by Creative Caricature Club™</h3>
             <p>In rare circumstances where we are unable to provide services due to unforeseen circumstances, we may provide an alternative artist or offer rescheduling based on mutual agreement.</p>
           </motion.div>
 
@@ -75,7 +75,7 @@ const EventPolicy = () => {
 
           <motion.div {...fadeUp(0.55)}>
             <h3 className="font-display text-lg font-bold text-foreground">10. Force Majeure</h3>
-            <p>Creative Caricature Club shall not be held liable for failure to perform due to circumstances beyond reasonable control — natural disasters, pandemics, government restrictions, transportation disruptions, or emergencies.</p>
+            <p>Creative Caricature Club™ shall not be held liable for failure to perform due to circumstances beyond reasonable control — natural disasters, pandemics, government restrictions, transportation disruptions, or emergencies.</p>
           </motion.div>
 
           <motion.div {...fadeUp(0.6)}>
