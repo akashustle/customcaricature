@@ -522,20 +522,19 @@ const Dashboard = () => {
               ...(settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
               { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
               { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
-              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              { icon: Receipt, key: "payments", action: () => setActiveTab("payments") },
               { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
+              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
               ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
               { icon: User, key: "profile", action: () => setActiveTab("profile") },
               { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
-            ].map((item) => {
+            ].map((item, idx) => {
               const isActive = item.key === "home" ? false : activeTab === item.key;
               return (
-                <motion.button key={item.key} onClick={item.action} whileTap={{ scale: 0.75 }}
-                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
+                <motion.button key={`${item.key}-${idx}`} onClick={item.action} whileTap={{ scale: 0.75 }}
+                  className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0">
                   <item.icon
                     className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
-                    size={isActive ? 26 : 22}
+                    size={isActive ? 24 : 20}
                     strokeWidth={isActive ? 2.2 : 1.4}
                     fill={isActive && item.icon === Home ? "currentColor" : "none"}
                   />
