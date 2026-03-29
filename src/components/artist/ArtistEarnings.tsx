@@ -156,9 +156,10 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
       {activeTab === "overview" && (
         <div className="space-y-2">
           <h3 className="font-display text-sm font-bold flex items-center gap-1"><IndianRupee className="w-4 h-4 text-primary" /> Income History</h3>
+          {payouts.length === 0 ? (
             <Card><CardContent className="p-6 text-center">
               <IndianRupee className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm font-sans text-muted-foreground">No earnings yet</p>
+              <p className="text-sm font-sans text-muted-foreground">No income yet</p>
             </CardContent></Card>
           ) : payouts.map(p => (
             <div key={p.id} className="bg-muted/30 rounded-lg p-3 text-xs font-sans flex justify-between items-center">
