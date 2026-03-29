@@ -77,6 +77,7 @@ const Explore = lazy(() => import("./pages/Explore"));
 const SEOLandingPage = lazy(() => import("./pages/SEOLandingPage"));
 const LilFlea = lazy(() => import("./pages/LilFlea"));
 const LilFleaGallery = lazy(() => import("./pages/LilFleaGallery"));
+const ClaimLink = lazy(() => import("./pages/ClaimLink"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
