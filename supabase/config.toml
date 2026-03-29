@@ -41,3 +41,9 @@ verify_jwt = false
 
 [functions.mini-db-sync]
 verify_jwt = false
+
+[functions.google-indexing]
+verify_jwt = false
+
+[functions.dynamic-sitemap]
+verify_jwt = false
