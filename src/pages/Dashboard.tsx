@@ -258,6 +258,67 @@ const Dashboard = () => {
     }
   };
 
+  const handlePortalPayment = async () => {
+    if (!portalPaymentRequest || !user) return;
+    setPayingPortal(true);
+    
+    // Update status to accepted
+    await supabase.from("portal_payment_requests" as any).update({ status: "accepted", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
+
+    try {
+      // Get event details for Razorpay
+      const { data: ev } = await supabase.from("event_bookings").select("client_name, client_email, client_mobile").eq("id", portalPaymentRequest.event_id).single();
+      
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: portalPaymentRequest.amount, order_id: portalPaymentRequest.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
+      });
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment");
+
+      const options = {
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club™", description: `Event Remaining Payment`,
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: portalPaymentRequest.event_id, payment_type: "event_remaining" },
+            });
+            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
+            
+            // Update portal request to completed
+            await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
+            
+            // Update event to fully_paid
+            await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", portalPaymentRequest.event_id);
+            
+            // Record payment history
+            await supabase.from("payment_history").insert({
+              user_id: user.id, booking_id: portalPaymentRequest.event_id,
+              payment_type: "event_remaining", amount: portalPaymentRequest.amount,
+              status: "confirmed", description: `Remaining ₹${portalPaymentRequest.amount.toLocaleString("en-IN")} paid via portal`,
+            } as any);
+
+            playPaymentSuccessSound();
+            setPortalPaymentDone(true);
+            setPortalPaymentRequest(null);
+            if (user) { fetchEvents(user.id); fetchOrders(user.id); }
+            setTimeout(() => setPortalPaymentDone(false), 6000);
+          } catch {
+            toast({ title: "Verification Failed", variant: "destructive" });
+          }
+          setPayingPortal(false);
+        },
+        prefill: { name: ev?.client_name || profile?.full_name, email: ev?.client_email || profile?.email, contact: `+91${ev?.client_mobile || profile?.mobile}` },
+        theme: { color: "#E3DED3" },
+        modal: { ondismiss: () => { setPayingPortal(false); } },
+      };
+      await initRazorpay(options);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPayingPortal(false);
+    }
+  };
+
   const handleLogout = async () => { await signOut(); navigate("/"); };
 
   const handleRefresh = useCallback(async () => {
