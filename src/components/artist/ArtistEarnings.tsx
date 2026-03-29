@@ -291,6 +291,18 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
                 placeholder="Add a note for admin..." className="text-sm" rows={2} />
             </div>
 
+            <div>
+              <Label className="text-xs font-sans">Where should we send payment?</Label>
+              <Select value={preferredMethod} onValueChange={setPreferredMethod}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upi_id">UPI ID</SelectItem>
+                  <SelectItem value="upi_number">UPI Mobile Number</SelectItem>
+                  <SelectItem value="bank_account">Bank Account</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button onClick={submitRequest} disabled={submitting} className="w-full h-10 rounded-xl font-sans">
               {submitting ? "Submitting..." : `Submit Request for ₹${(requestType === "full" ? balance : parseFloat(requestAmount) || 0).toLocaleString("en-IN")}`}
             </Button>
