@@ -182,8 +182,8 @@ const Support = () => {
                       <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1 rounded-xl" />
                     </motion.div>
                     <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
-                      <Label className="font-body">Mobile Number</Label>
-                      <Input value={mobile} onChange={e => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit number" className="mt-1 rounded-xl" maxLength={10} />
+                      <Label className="font-body">WhatsApp Number</Label>
+                      <Input value={mobile} onChange={e => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit WhatsApp number" className="mt-1 rounded-xl" maxLength={10} />
                     </motion.div>
                     <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.55 }}>
                       <Label className="font-body">Subject</Label>

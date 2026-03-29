@@ -513,8 +513,8 @@ const Enquiry = () => {
                   <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" className="mt-1" />
                 </div>
                 <div>
-                  <Label className="font-sans">Mobile Number *</Label>
-                  <Input value={mobile} onChange={e => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit mobile number" className="mt-1" maxLength={10} />
+                  <Label className="font-sans">WhatsApp Number *</Label>
+                  <Input value={mobile} onChange={e => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setMobile(v); }} placeholder="10-digit WhatsApp number" className="mt-1" maxLength={10} />
                 </div>
                 <div>
                   <Label className="font-sans">Email Address <span className="text-muted-foreground">(optional)</span></Label>

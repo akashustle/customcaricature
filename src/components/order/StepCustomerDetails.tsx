@@ -39,7 +39,7 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
           <Input value={data.customerName} onChange={(e) => update({ customerName: e.target.value })} placeholder="Your full name" />
         </div>
         <div>
-          <Label className="font-sans">Mobile Number * (10 digits)</Label>
+          <Label className="font-sans">WhatsApp Number * (10 digits)</Label>
           <div className="flex gap-2">
             <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-sans">+91</div>
             <Input 
@@ -51,7 +51,7 @@ const StepCustomerDetails = ({ data, update, onNext }: Props) => {
             />
           </div>
           {data.customerMobile && data.customerMobile.length < 10 && (
-            <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit Indian mobile number</p>
+            <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit WhatsApp number</p>
           )}
         </div>
         <div>

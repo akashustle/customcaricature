@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download, CheckCircle2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import LiveGreeting from "@/components/LiveGreeting";
@@ -30,6 +30,9 @@ import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay } from "@/lib/razorpay";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
@@ -78,6 +81,9 @@ const Dashboard = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
+  const [portalPaymentRequest, setPortalPaymentRequest] = useState<any>(null);
+  const [payingPortal, setPayingPortal] = useState(false);
+  const [portalPaymentDone, setPortalPaymentDone] = useState(false);
 
   // Track user location, request permissions, and enable voice streaming
   useLocationTracker(user?.id ?? null);
@@ -115,6 +121,16 @@ const Dashboard = () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
         fetchShopOrders(user.id);
+        // Check for pending portal payment requests
+        supabase.from("portal_payment_requests" as any)
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(({ data }: any) => {
+            if (data && data.length > 0) setPortalPaymentRequest(data[0]);
+          });
       }
     };
 
@@ -134,6 +150,16 @@ const Dashboard = () => {
         fetchOrders(user.id);
         fetchEvents(user.id);
         fetchShopOrders(user.id);
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        if (payload.new?.status === "pending") {
+          setPortalPaymentRequest(payload.new);
+        }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        if (payload.new?.status !== "pending") {
+          setPortalPaymentRequest(null);
+        }
       })
       .subscribe();
 
@@ -229,6 +255,67 @@ const Dashboard = () => {
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingOrderId(null);
+    }
+  };
+
+  const handlePortalPayment = async () => {
+    if (!portalPaymentRequest || !user) return;
+    setPayingPortal(true);
+    
+    // Update status to accepted
+    await supabase.from("portal_payment_requests" as any).update({ status: "accepted", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
+
+    try {
+      // Get event details for Razorpay
+      const { data: ev } = await supabase.from("event_bookings").select("client_name, client_email, client_mobile").eq("id", portalPaymentRequest.event_id).single();
+      
+      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { amount: portalPaymentRequest.amount, order_id: portalPaymentRequest.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
+      });
+      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment");
+
+      const options = {
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        name: "Creative Caricature Club™", description: `Event Remaining Payment`,
+        image: "/logo.png", order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
+              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: portalPaymentRequest.event_id, payment_type: "event_remaining" },
+            });
+            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
+            
+            // Update portal request to completed
+            await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", portalPaymentRequest.id);
+            
+            // Update event to fully_paid
+            await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", portalPaymentRequest.event_id);
+            
+            // Record payment history
+            await supabase.from("payment_history").insert({
+              user_id: user.id, booking_id: portalPaymentRequest.event_id,
+              payment_type: "event_remaining", amount: portalPaymentRequest.amount,
+              status: "confirmed", description: `Remaining ₹${portalPaymentRequest.amount.toLocaleString("en-IN")} paid via portal`,
+            } as any);
+
+            playPaymentSuccessSound();
+            setPortalPaymentDone(true);
+            setPortalPaymentRequest(null);
+            if (user) { fetchEvents(user.id); fetchOrders(user.id); }
+            setTimeout(() => setPortalPaymentDone(false), 6000);
+          } catch {
+            toast({ title: "Verification Failed", variant: "destructive" });
+          }
+          setPayingPortal(false);
+        },
+        prefill: { name: ev?.client_name || profile?.full_name, email: ev?.client_email || profile?.email, contact: `+91${ev?.client_mobile || profile?.mobile}` },
+        theme: { color: "#E3DED3" },
+        modal: { ondismiss: () => { setPayingPortal(false); } },
+      };
+      await initRazorpay(options);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPayingPortal(false);
     }
   };
 
@@ -443,6 +530,123 @@ const Dashboard = () => {
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
       </div>
+
+      {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
+      {portalPaymentRequest && (
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent className="max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4 py-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+              >
+                <CreditCard className="w-10 h-10 text-primary" />
+              </motion.div>
+              
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">🎨 Event Completed!</h2>
+                <p className="text-sm text-muted-foreground font-sans mt-1">
+                  Your live caricature event is done! Please complete the remaining payment.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-5">
+                <p className="text-xs text-muted-foreground font-sans mb-1">Remaining Amount</p>
+                <p className="text-4xl font-display font-bold text-primary">
+                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
+                </p>
+                {portalPaymentRequest.extra_hours > 0 && (
+                  <p className="text-xs text-muted-foreground font-sans mt-1">
+                    Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                onClick={handlePortalPayment}
+                disabled={payingPortal}
+                className="w-full h-12 rounded-xl font-sans text-base"
+                size="lg"
+              >
+                {payingPortal ? (
+                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</>
+                ) : (
+                  <>💳 Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} Now</>
+                )}
+              </Button>
+
+              <p className="text-[10px] text-muted-foreground font-sans">
+                Secure payment via Razorpay · UPI / Cards / Net Banking
+              </p>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Thank You Popup after Portal Payment */}
+      <AnimatePresence>
+        {portalPaymentDone && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setPortalPaymentDone(false)}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.3, 1] }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
+                  <CheckCircle2 className="w-14 h-14 text-white" />
+                </div>
+              </motion.div>
+              <motion.h2
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="font-display text-2xl font-bold text-foreground mb-2"
+              >
+                🎉 Thank You!
+              </motion.h2>
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground font-sans mb-4"
+              >
+                Your live caricature booking is now fully paid! We hope you had an amazing experience. ✨
+              </motion.p>
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Badge className="bg-green-100 text-green-700 border-none text-sm px-4 py-1">✅ Fully Paid</Badge>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <Button variant="outline" className="mt-4 rounded-full font-sans" onClick={() => setPortalPaymentDone(false)}>
+                  Close
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

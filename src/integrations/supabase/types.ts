@@ -3149,6 +3149,60 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_payment_requests: {
+        Row: {
+          amount: number
+          artist_id: string
+          created_at: string
+          event_id: string
+          extra_amount: number
+          extra_hours: number
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          artist_id: string
+          created_at?: string
+          event_id: string
+          extra_amount?: number
+          extra_hours?: number
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          artist_id?: string
+          created_at?: string
+          event_id?: string
+          extra_amount?: number
+          extra_hours?: number
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_payment_requests_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_payment_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null

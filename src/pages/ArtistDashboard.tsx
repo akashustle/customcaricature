@@ -133,13 +133,13 @@ const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
 };
 
 // Payment Collection Dialog
-const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
-  event: ArtistEvent; open: boolean; onClose: () => void; onSuccess: () => void;
+const PaymentCollectionDialog = ({ event, open, onClose, onSuccess, artistId }: {
+  event: ArtistEvent; open: boolean; onClose: () => void; onSuccess: () => void; artistId: string;
 }) => {
   const [step, setStep] = useState<"details" | "method" | "screenshot" | "done">("details");
   const [extraHoursInput, setExtraHoursInput] = useState("");
   const [extraHourRate, setExtraHourRate] = useState(0);
-  const [collectionMethod, setCollectionMethod] = useState<"online" | "cash" | "">("");
+  const [collectionMethod, setCollectionMethod] = useState<"online" | "cash" | "portal" | "">("");
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -148,7 +148,6 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
   const baseRemaining = event.remaining_amount || (totalAmount - advanceAmount);
   const extraHoursNum = parseFloat(extraHoursInput) || 0;
   
-  // Use pricing: Mumbai=4000, Pan-India=5000 per extra hour (fallback)
   useEffect(() => {
     const fetchRate = async () => {
       const region = event.city?.toLowerCase().includes("mumbai") || event.city?.toLowerCase().includes("thane") ? "mumbai" : "outside";
@@ -161,11 +160,36 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
   const extraAmount = extraHoursNum * extraHourRate;
   const totalToCollect = baseRemaining + extraAmount;
 
+  const handlePortalPayment = async () => {
+    setUploading(true);
+    try {
+      // Get event booking user_id
+      const { data: booking } = await supabase.from("event_bookings").select("user_id").eq("id", event.id).single();
+      if (!booking?.user_id) throw new Error("Customer not found");
+
+      await supabase.from("portal_payment_requests" as any).insert({
+        event_id: event.id,
+        artist_id: artistId,
+        user_id: booking.user_id,
+        amount: totalToCollect,
+        extra_hours: extraHoursNum,
+        extra_amount: extraAmount,
+        status: "pending",
+      } as any);
+
+      setStep("done");
+      toast({ title: "📲 Payment Request Sent!", description: "Customer will receive a payment prompt on their dashboard" });
+      setTimeout(() => { onClose(); onSuccess(); }, 1500);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setUploading(false);
+  };
+
   const handleCollect = async () => {
     if (!collectionMethod) return;
     setUploading(true);
     try {
-      // Upload screenshot if provided
       if (screenshotFile) {
         const path = `payment-screenshots/${event.id}/${Date.now()}_${screenshotFile.name}`;
         await supabase.storage.from("event-documents").upload(path, screenshotFile);
@@ -261,20 +285,28 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
 
             <p className="text-sm font-sans text-muted-foreground text-center">How is the customer paying?</p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => { setCollectionMethod("online"); setStep("screenshot"); }}
-                className={`p-4 rounded-xl border-2 text-center space-y-2 transition-all ${collectionMethod === "online" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-                <CreditCard className="w-8 h-8 mx-auto text-primary" />
-                <p className="font-sans font-semibold text-sm">Online Payment</p>
-                <p className="text-[10px] text-muted-foreground font-sans">UPI / Bank Transfer</p>
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40">
+                <CreditCard className="w-7 h-7 mx-auto text-primary" />
+                <p className="font-sans font-semibold text-xs">Online</p>
+                <p className="text-[9px] text-muted-foreground font-sans">UPI / Bank</p>
               </motion.button>
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => { setCollectionMethod("cash"); handleCollectCash(); }}
-                className={`p-4 rounded-xl border-2 text-center space-y-2 transition-all ${collectionMethod === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-                <Banknote className="w-8 h-8 mx-auto text-green-600" />
-                <p className="font-sans font-semibold text-sm">Cash</p>
-                <p className="text-[10px] text-muted-foreground font-sans">Collected in hand</p>
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40">
+                <Banknote className="w-7 h-7 mx-auto text-green-600" />
+                <p className="font-sans font-semibold text-xs">Cash</p>
+                <p className="text-[9px] text-muted-foreground font-sans">In hand</p>
+              </motion.button>
+              <motion.button whileTap={{ scale: 0.95 }}
+                onClick={() => { setCollectionMethod("portal"); handlePortalPayment(); }}
+                className="p-3 rounded-xl border-2 text-center space-y-1.5 transition-all border-border hover:border-primary/40 relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500" />
+                <Phone className="w-7 h-7 mx-auto text-blue-600" />
+                <p className="font-sans font-semibold text-xs">Portal</p>
+                <p className="text-[9px] text-muted-foreground font-sans">Send to app</p>
               </motion.button>
             </div>
           </div>
@@ -320,8 +352,14 @@ const PaymentCollectionDialog = ({ event, open, onClose, onSuccess }: {
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
               <CheckCircle2 className="w-16 h-16 mx-auto text-green-500" />
             </motion.div>
-            <p className="font-display text-xl font-bold">Payment Collected!</p>
-            <p className="text-sm text-muted-foreground font-sans">₹{totalToCollect.toLocaleString("en-IN")} via {collectionMethod}</p>
+            <p className="font-display text-xl font-bold">
+              {collectionMethod === "portal" ? "Payment Request Sent!" : "Payment Collected!"}
+            </p>
+            <p className="text-sm text-muted-foreground font-sans">
+              {collectionMethod === "portal" 
+                ? "Customer will receive a payment prompt on their dashboard"
+                : `₹${totalToCollect.toLocaleString("en-IN")} via ${collectionMethod}`}
+            </p>
           </div>
         )}
       </DialogContent>
@@ -348,6 +386,7 @@ const ArtistDashboard = () => {
   const [orderFilter, setOrderFilter] = useState("all");
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [collectEvent, setCollectEvent] = useState<ArtistEvent | null>(null);
+  const [portalPaymentReceived, setPortalPaymentReceived] = useState(false);
 
   // Block date form
   const [blockDate, setBlockDate] = useState("");
@@ -386,6 +425,13 @@ const ArtistDashboard = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => fetchEvents((artistData as any).id))
       .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { if (isR) fetchOrders((artistData as any).id); })
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, () => fetchEvents((artistData as any).id))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "portal_payment_requests" }, (payload: any) => {
+        if (payload.new?.status === "completed") {
+          setPortalPaymentReceived(true);
+          fetchEvents((artistData as any).id);
+          setTimeout(() => setPortalPaymentReceived(false), 6000);
+        }
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   };
@@ -519,23 +565,65 @@ const ArtistDashboard = () => {
         </div>
         <LiveGreeting name={artist?.name} />
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        {/* Stats Row - Premium 3D Cards */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {[
-            { label: "Events", value: events.length, color: "from-primary/60 to-primary" },
-            { label: "Upcoming", value: upcoming.length, color: "from-blue-400 to-blue-600" },
-            { label: "Done", value: completed.length, color: "from-green-400 to-green-600" },
-            { label: "Revenue", value: `₹${(totalRevenue / 1000).toFixed(0)}K`, color: "from-amber-400 to-amber-600" },
+            { label: "Total Events", value: events.length, icon: CalendarDays, color: "from-primary/10 to-primary/5", iconBg: "bg-primary", desc: `${upcoming.length} upcoming` },
+            { label: "This Month", value: events.filter(e => { const d = new Date(e.event_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length, icon: Clock, color: "from-blue-500/10 to-blue-500/5", iconBg: "bg-blue-500", desc: "events this month" },
+            { label: "Completed", value: completed.length, icon: CheckCircle2, color: "from-green-500/10 to-green-500/5", iconBg: "bg-green-500", desc: `${((completed.length / Math.max(events.length, 1)) * 100).toFixed(0)}% completion` },
+            { label: "Revenue", value: `₹${totalRevenue >= 100000 ? (totalRevenue / 100000).toFixed(1) + "L" : (totalRevenue / 1000).toFixed(0) + "K"}`, icon: IndianRupee, color: "from-amber-500/10 to-amber-500/5", iconBg: "bg-amber-500", desc: `₹${totalRevenue.toLocaleString("en-IN")} total` },
           ].map((s, i) => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className="overflow-hidden relative"><CardContent className="p-3 text-center">
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${s.color}`} />
-                <p className="text-xl font-bold font-display text-foreground">{s.value}</p>
-                <p className="text-[9px] text-muted-foreground font-sans">{s.label}</p>
-              </CardContent></Card>
+            <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+              <Card className="overflow-hidden relative border-border/60 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+                <div className={`absolute inset-0 bg-gradient-to-br ${s.color} pointer-events-none`} />
+                <CardContent className="p-3.5 relative">
+                  <div className="flex items-start gap-2.5">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${s.iconBg} shadow-md flex-shrink-0`}>
+                      <s.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xl font-bold font-display leading-tight">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground font-sans truncate">{s.label}</p>
+                      <p className="text-[9px] text-muted-foreground/70 font-sans">{s.desc}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
+
+        {/* Upcoming Events Quick View */}
+        {upcoming.length > 0 && activeTab !== "events" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4">
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardContent className="p-3">
+                <p className="text-xs font-sans font-semibold text-primary mb-2 flex items-center gap-1">
+                  <CalendarDays className="w-3.5 h-3.5" /> Next Event
+                </p>
+                {(() => {
+                  const next = upcoming.sort((a, b) => a.event_date.localeCompare(b.event_date))[0];
+                  if (!next) return null;
+                  const [ny, nm, nd] = next.event_date.split("-").map(Number);
+                  const nDate = new Date(ny, nm - 1, nd);
+                  const nToday = new Date(); nToday.setHours(0,0,0,0);
+                  const nDays = Math.round((nDate.getTime() - nToday.getTime()) / (1000*60*60*24));
+                  return (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-sans text-sm font-medium">{next.client_name} · {next.city}</p>
+                        <p className="text-[10px] text-muted-foreground font-sans">{nDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", weekday: "short" })} · {next.event_start_time}</p>
+                      </div>
+                      <Badge className="border-none text-xs bg-primary/15 text-primary font-display">
+                        {nDays === 0 ? "Today!" : nDays === 1 ? "Tomorrow" : `${nDays}d`}
+                      </Badge>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Desktop Tabs */}
         <div className="hidden md:flex gap-1 mb-4 bg-muted/30 rounded-xl p-1">
@@ -567,9 +655,12 @@ const ArtistDashboard = () => {
             ) : (
               <div className="space-y-3">
                 {events.map((ev) => {
-                  const eventDate = new Date(ev.event_date);
+                  // Parse YYYY-MM-DD as local date to avoid timezone issues
+                  const [yyyy, mm, dd] = ev.event_date.split("-").map(Number);
+                  const eventDate = new Date(yyyy, mm - 1, dd);
                   const today = new Date(); today.setHours(0,0,0,0);
-                  const daysLeft = Math.ceil((eventDate.getTime() - today.getTime()) / (1000*60*60*24));
+                  const daysLeft = Math.round((eventDate.getTime() - today.getTime()) / (1000*60*60*24));
+                  const dayName = eventDate.toLocaleDateString("en-IN", { weekday: "long" });
                   const isExpanded = expandedEvent === ev.id;
                   const totalAmt = ev.negotiated && ev.negotiated_total ? ev.negotiated_total : ev.total_price;
                   const advAmt = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
@@ -584,7 +675,7 @@ const ArtistDashboard = () => {
                           {ev.status === "upcoming" && daysLeft >= 0 && (
                             <div className={`p-2 text-center ${daysLeft === 0 ? "bg-primary/20" : daysLeft <= 3 ? "bg-amber-50" : "bg-primary/5"}`}>
                               <p className="font-display text-lg font-bold text-primary">
-                                {daysLeft === 0 ? "🎊 Today!" : daysLeft === 1 ? "✨ Tomorrow!" : `${daysLeft} days to go`}
+                                {daysLeft === 0 ? "🎊 Today!" : daysLeft === 1 ? `✨ Tomorrow (${dayName})!` : `${daysLeft} days to go (${dayName})`}
                               </p>
                             </div>
                           )}
@@ -840,8 +931,50 @@ const ArtistDashboard = () => {
           open={!!collectEvent}
           onClose={() => setCollectEvent(null)}
           onSuccess={() => { if (artist) fetchEvents(artist.id); }}
+          artistId={artist?.id || ""}
         />
       )}
+
+      {/* Portal Payment Received Popup */}
+      <AnimatePresence>
+        {portalPaymentReceived && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setPortalPaymentReceived(false)}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
+              onClick={e => e.stopPropagation()}
+            >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ delay: 0.2, duration: 0.5 }}>
+                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
+                  <CheckCircle2 className="w-14 h-14 text-white" />
+                </div>
+              </motion.div>
+              <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}
+                className="font-display text-2xl font-bold text-foreground mb-2">
+                💰 Payment Received!
+              </motion.h2>
+              <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground font-sans mb-4">
+                Customer has completed the remaining payment via portal. The event is now fully paid! ✅
+              </motion.p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+                <Button variant="outline" className="rounded-full font-sans" onClick={() => setPortalPaymentReceived(false)}>
+                  Awesome! 🎉
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
