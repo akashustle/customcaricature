@@ -121,6 +121,29 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
   );
 };
 
+const ScrollTypeReveal = ({ text, className }: { text: string; className?: string }) => {
+  const [visibleChars, setVisibleChars] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const progress = Math.min(1, window.scrollY / 320);
+      setVisibleChars(Math.max(1, Math.floor(text.length * progress)));
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [text]);
+
+  const shown = text.slice(0, visibleChars);
+  return (
+    <span className={className} aria-label={text}>
+      {shown}
+      <span className="ml-1 inline-block h-[1em] w-px translate-y-1 animate-pulse bg-primary" aria-hidden="true" />
+    </span>
+  );
+};
+
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
