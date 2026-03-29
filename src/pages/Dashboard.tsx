@@ -225,7 +225,7 @@ const Dashboard = () => {
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingOrderId(null) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingOrderId(null);
