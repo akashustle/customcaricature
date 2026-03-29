@@ -461,6 +461,8 @@ const ArtistDashboard = () => {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [collectEvent, setCollectEvent] = useState<ArtistEvent | null>(null);
   const [portalPaymentReceived, setPortalPaymentReceived] = useState(false);
+  const [activePortalRequests, setActivePortalRequests] = useState<Record<string, string>>({}); // event_id -> request_id
+  const [cancellingPortal, setCancellingPortal] = useState<string | null>(null);
 
   // Block date form
   const [blockDate, setBlockDate] = useState("");
