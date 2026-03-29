@@ -30,6 +30,9 @@ import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay } from "@/lib/razorpay";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
