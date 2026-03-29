@@ -94,18 +94,12 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
         handler: async (response: any) => {
           try {
             // 5. Verify payment
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: orderId,
-              },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: orderId,
             });
-
-            if (verifyError || !verifyData?.verified) {
-              throw new Error("Payment verification failed");
-            }
 
             playPaymentSuccessSound();
             onComplete(orderId);

@@ -288,10 +288,9 @@ const Dashboard = () => {
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, payment_type: "event_remaining" },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, is_event_remaining: true,
             });
-            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
             
             // Update portal request to completed
             await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", request.id);
