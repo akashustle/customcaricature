@@ -612,7 +612,7 @@ const ArtistDashboard = () => {
   }, 0);
 
   return (
-      <div className="min-h-screen dashboard-gradient pb-20 md:pb-0 overflow-x-hidden">
+      <div className="min-h-screen dashboard-gradient pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="Artist Dashboard" noindex />
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
