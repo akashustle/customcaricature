@@ -267,6 +267,32 @@ const AdminArtistPayouts = () => {
                     </div>
                   </div>
 
+                  {/* Payment Details */}
+                  {paymentDetails[artist.id] && (
+                    <div className="mt-3 bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-wider">Payment Details</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-sans">
+                        {paymentDetails[artist.id].upi_id && (
+                          <><span className="text-muted-foreground">UPI ID:</span><span className="font-medium">{paymentDetails[artist.id].upi_id}</span></>
+                        )}
+                        {paymentDetails[artist.id].upi_number && (
+                          <><span className="text-muted-foreground">UPI Mobile:</span><span className="font-medium">{paymentDetails[artist.id].upi_number}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_account_name && (
+                          <><span className="text-muted-foreground">Bank Name:</span><span className="font-medium">{paymentDetails[artist.id].bank_account_name}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_account_number && (
+                          <><span className="text-muted-foreground">Account No:</span><span className="font-medium">{paymentDetails[artist.id].bank_account_number}</span></>
+                        )}
+                        {paymentDetails[artist.id].bank_ifsc_code && (
+                          <><span className="text-muted-foreground">IFSC:</span><span className="font-medium">{paymentDetails[artist.id].bank_ifsc_code}</span></>
+                        )}
+                        <span className="text-muted-foreground">Default:</span>
+                        <span className="font-medium text-primary">{paymentDetails[artist.id].default_payment_method?.replace("_", " ") || "UPI ID"}</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Event payouts expand */}
                   {artistEventPayouts.length > 0 && (
                     <>
