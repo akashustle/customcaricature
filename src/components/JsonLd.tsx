@@ -89,7 +89,7 @@ const productSchema = {
   name: "Custom Caricature from Photo",
   brand: { "@type": "Brand", name: "Creative Caricature Club™" },
   description: "Hand-crafted caricature artwork created from your photos. Available in cute, romantic, fun, royal, and minimal styles.",
-  image: `${BASE_URL}/logo.png`,
+  image: LOGO_URL,
   offers: {
     "@type": "AggregateOffer",
     priceCurrency: "INR",
