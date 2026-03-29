@@ -526,6 +526,17 @@ const ArtistDashboard = () => {
       .order("event_date", { ascending: true });
     if (data) setEvents(data as any);
     setLoading(false);
+
+    // Fetch active portal payment requests for these events
+    const { data: portalReqs } = await supabase
+      .from("portal_payment_requests" as any)
+      .select("id, event_id")
+      .eq("artist_id", artistId)
+      .in("status", ["pending", "accepted"])
+      .in("event_id", Array.from(eventIds));
+    const map: Record<string, string> = {};
+    if (portalReqs) (portalReqs as any[]).forEach((r: any) => { map[r.event_id] = r.id; });
+    setActivePortalRequests(map);
   };
 
   const fetchOrders = async (artistId: string) => {
