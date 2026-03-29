@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -93,10 +93,9 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
       if (!booking) throw new Error("Booking not found");
 
       const amount = partialConfig.partial_2_amount;
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Payment creation failed");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
@@ -104,17 +103,15 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: bookingId,
-                is_event_advance: true,
-                advance_amount: amount,
-                is_partial_advance: true,
-                partial_number: 2,
-              },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: bookingId,
+              is_event_advance: true,
+              advance_amount: amount,
+              is_partial_advance: true,
+              partial_number: 2,
             });
             toast({ title: "✅ Advance Payment Completed!" });
             fetchPayments();

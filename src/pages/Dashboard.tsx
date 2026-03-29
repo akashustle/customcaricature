@@ -29,7 +29,7 @@ import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -231,10 +231,9 @@ const Dashboard = () => {
   const handlePayNow = async (order: Order) => {
     setPayingOrderId(order.id);
     try {
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: order.amount, order_id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_mobile: order.customer_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: order.amount, order_id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_mobile: order.customer_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
@@ -242,10 +241,9 @@ const Dashboard = () => {
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: order.id,
             });
-            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
             playPaymentSuccessSound();
             toast({ title: "🎉 Payment Successful!" });
             if (user) fetchOrders(user.id);
@@ -275,10 +273,9 @@ const Dashboard = () => {
         .eq("id", request.event_id)
         .single();
       
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "", payment_type: "event_remaining" },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment");
 
       await supabase
         .from("portal_payment_requests" as any)
@@ -291,10 +288,9 @@ const Dashboard = () => {
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, payment_type: "event_remaining" },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, is_event_remaining: true,
             });
-            if (verifyError || !verifyData?.verified) throw new Error("Verification failed");
             
             // Update portal request to completed
             await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", request.id);
@@ -1244,10 +1240,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
       const advanceAmount = ev.negotiated && ev.negotiated_advance ? ev.negotiated_advance : ev.advance_amount;
       const partial2Amount = config?.partial_2_amount || Math.ceil(advanceAmount / 2);
 
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: partial2Amount, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: partial2Amount, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
@@ -1255,16 +1250,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_advance: true, is_partial_advance: true, partial_number: 2, advance_amount: partial2Amount,
             });
-            if (verifyError) throw new Error("Verification failed");
-            if (verifyData?.verified || verifyData?.success) {
-              playPaymentSuccessSound();
-              toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
-            } else {
-              throw new Error("Verification failed");
-            }
+            playPaymentSuccessSound();
+            toast({ title: "✅ Advance Payment Complete!", description: "Your full advance is now paid. Booking confirmed!" });
           } catch (err: any) {
             console.error("Partial 2 verification error:", err);
             toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });
@@ -1290,10 +1280,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
     setPayingEventId(ev.id);
     try {
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: remaining, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: remaining, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error(rzpError?.message || "Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
@@ -1301,18 +1290,13 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true,
             });
-            if (verifyError) throw new Error("Verification failed");
-            if (verifyData?.verified || verifyData?.success) {
-              playPaymentSuccessSound();
-              setShowPaymentCelebration(true);
-              toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
-              setTimeout(() => setShowPaymentCelebration(false), 8000);
-            } else {
-              throw new Error("Verification failed");
-            }
+            playPaymentSuccessSound();
+            setShowPaymentCelebration(true);
+            toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
+            setTimeout(() => setShowPaymentCelebration(false), 8000);
           } catch (err: any) {
             console.error("Remaining payment verification error:", err);
             toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });

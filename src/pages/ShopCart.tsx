@@ -10,7 +10,7 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart, Loader2, Store } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 const ShopCart = () => {
   const navigate = useNavigate();
@@ -92,12 +92,13 @@ const ShopCart = () => {
       await supabase.from("shop_order_items").insert(items);
 
       // Initialize Razorpay payment
-      const { data: rzpData, error: rzpErr } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: total, receipt: order.order_number, notes: { type: "shop", order_id: order.id } },
-      });
-
-      if (rzpErr || !rzpData?.order_id) {
-        // Mark order as created, payment pending
+      let rzpData: any;
+      try {
+        rzpData = await createRazorpayOrder(supabase, {
+          amount: total, order_id: order.id, customer_name: shipping.name, customer_email: user!.email || "", customer_mobile: shipping.mobile,
+        });
+      } catch {
+        // Payment creation failed - order is saved, user can pay later
         toast({ title: "Order created! Payment pending.", description: "Complete payment from your dashboard." });
         await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
         navigate(`/shop/order-confirmation?order_id=${order.id}`);
@@ -105,27 +106,30 @@ const ShopCart = () => {
       }
 
       // Update order with Razorpay ID
-      await supabase.from("shop_orders").update({ razorpay_order_id: rzpData.order_id }).eq("id", order.id);
+      await supabase.from("shop_orders").update({ razorpay_order_id: rzpData.razorpay_order_id }).eq("id", order.id);
 
       // Open Razorpay
       const options = {
-        key: rzpData.key_id, amount: total * 100, currency: "INR", name: "CCC Shop",
-        description: `Order ${order.order_number}`, order_id: rzpData.order_id,
+        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency, name: "CCC Shop",
+        description: `Order ${order.order_number}`, order_id: rzpData.razorpay_order_id,
         prefill: { name: shipping.name, contact: shipping.mobile, email: user!.email },
         handler: async (response: any) => {
-          await supabase.functions.invoke("verify-razorpay-payment", {
-            body: {
+          try {
+            await verifyRazorpayPayment(supabase, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               order_id: order.id, type: "shop",
-            },
-          });
-          await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
-          playPaymentSuccessSound();
-          toast({ title: "Payment successful! 🎉" });
-          navigate(`/shop/order-confirmation?order_id=${order.id}`);
+            });
+            await supabase.from("shop_cart_items").delete().eq("user_id", user!.id);
+            playPaymentSuccessSound();
+            toast({ title: "Payment successful! 🎉" });
+            navigate(`/shop/order-confirmation?order_id=${order.id}`);
+          } catch {
+            toast({ title: "Payment verification issue", description: "If amount was deducted, contact support.", variant: "destructive" });
+          }
         },
+        modal: { ondismiss: () => setCheckingOut(false) },
       };
       await initRazorpay(options);
     } catch (err: any) {

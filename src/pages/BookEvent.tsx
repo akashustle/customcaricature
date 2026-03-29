@@ -14,7 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import { format } from "date-fns";
 import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -277,10 +277,9 @@ const BookEvent = () => {
       } as any).select("id").single();
       if (error || !booking) throw new Error(error?.message || "Failed to create booking");
 
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: totalPayable, order_id: booking.id, customer_name: clientName, customer_email: clientEmail, customer_mobile: clientMobile },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: totalPayable, order_id: booking.id, customer_name: clientName, customer_email: clientEmail, customer_mobile: clientMobile,
       });
-      if (rzpError || !rzpData?.razorpay_order_id) throw new Error("Failed to create payment order");
 
       const options = {
         key: rzpData.razorpay_key_id,
@@ -292,18 +291,15 @@ const BookEvent = () => {
         order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: booking.id,
-                is_event_advance: true,
-                advance_amount: totalPayable,
-                ...(isPartialEnabled ? { is_partial_advance: true, partial_number: 1 } : {}),
-              },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: booking.id,
+              is_event_advance: true,
+              advance_amount: totalPayable,
+              ...(isPartialEnabled ? { is_partial_advance: true, partial_number: 1 } : {}),
             });
-            if (verifyError) throw verifyError;
 
             setBookingConfirmed(true);
             playPaymentSuccessSound();

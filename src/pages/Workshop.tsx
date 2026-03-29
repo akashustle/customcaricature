@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap, Phone, Sparkles, Calendar, Clock, Mail, MessageCircle,
@@ -326,40 +326,39 @@ const Workshop = () => {
     try {
       // Extract price number from workshop price string (e.g., "₹1,999" -> 1999)
       const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
-      const { data, error } = await supabase.functions.invoke("create-razorpay-order", {
-        body: { amount: priceNum, currency: "INR", receipt: `workshop_${registeredUserId}`, notes: { type: "workshop", user_id: registeredUserId, name: regForm.name } },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: priceNum, order_id: registeredUserId, customer_name: regForm.name, customer_email: regForm.email, customer_mobile: regForm.mobile,
       });
-      if (error || !data?.order_id) throw new Error("Could not create payment order");
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || data.key_id,
-        amount: priceNum * 100,
-        currency: "INR",
+        key: rzpData.razorpay_key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
         name: "Creative Caricature Club™",
         description: `Workshop Registration - ${workshop.title}`,
-        order_id: data.order_id,
+        order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
-          // Verify payment
-          const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-            body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature },
-          });
-          if (verifyError || !verifyData?.verified) {
-            toast({ title: "Payment verification failed", variant: "destructive" });
-            return;
+          try {
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: registeredUserId,
+            });
+            // Update workshop user payment status
+            await supabase.from("workshop_users" as any).update({
+              payment_status: "paid",
+              payment_amount: priceNum,
+            } as any).eq("id", registeredUserId);
+            playPaymentSuccessSound();
+            toast({ title: "Payment Successful! 🎉", description: "Your seat is confirmed. You can now login." });
+            setView("login");
+            setEmail(regForm.email);
+            setRegStep(0);
+          } catch {
+            toast({ title: "Payment verification failed", description: "Contact support if amount was deducted.", variant: "destructive" });
           }
-          // Update workshop user payment status
-          await supabase.from("workshop_users" as any).update({
-            payment_status: "paid",
-            payment_amount: priceNum,
-          } as any).eq("id", registeredUserId);
-          playPaymentSuccessSound();
-          toast({ title: "Payment Successful! 🎉", description: "Your seat is confirmed. You can now login." });
-          setView("login");
-          setEmail(regForm.email);
-          setRegStep(0);
         },
         prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
         theme: { color: "#b08d57" },
+        modal: { ondismiss: () => setPayingNow(false) },
       };
       await initRazorpay(options);
     } catch (err: any) {

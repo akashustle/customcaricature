@@ -8,7 +8,7 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
-import { initRazorpay } from "@/lib/razorpay";
+import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 
 interface Props {
@@ -74,19 +74,13 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
       }
 
       // 3. Create Razorpay order via edge function
-      const { data: rzpData, error: rzpError } = await supabase.functions.invoke("create-razorpay-order", {
-        body: {
-          amount,
-          order_id: orderId,
-          customer_name: data.customerName,
-          customer_email: data.customerEmail,
-          customer_mobile: data.customerMobile,
-        },
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount,
+        order_id: orderId,
+        customer_name: data.customerName,
+        customer_email: data.customerEmail,
+        customer_mobile: data.customerMobile,
       });
-
-      if (rzpError || !rzpData?.razorpay_order_id) {
-        throw new Error(rzpError?.message || "Failed to create payment order");
-      }
 
       // 4. Open Razorpay checkout
       const options = {
@@ -100,18 +94,12 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
         handler: async (response: any) => {
           try {
             // 5. Verify payment
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: orderId,
-              },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: orderId,
             });
-
-            if (verifyError || !verifyData?.verified) {
-              throw new Error("Payment verification failed");
-            }
 
             playPaymentSuccessSound();
             onComplete(orderId);
