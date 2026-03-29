@@ -342,7 +342,7 @@ const BookEvent = () => {
           },
         },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setSubmitting(false);

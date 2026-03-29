@@ -126,7 +126,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPaying(false) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPaying(false);

@@ -360,8 +360,7 @@ const Workshop = () => {
         prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
         theme: { color: "#b08d57" },
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Payment Error", description: err.message, variant: "destructive" });
     } finally { setPayingNow(false); }

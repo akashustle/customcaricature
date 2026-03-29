@@ -1067,7 +1067,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         theme: { color: "#E3DED3" },
         modal: { ondismiss: () => setPayingEventId(null) },
       };
-      new window.Razorpay(options).open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
       setPayingEventId(null);

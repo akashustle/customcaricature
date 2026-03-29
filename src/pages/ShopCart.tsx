@@ -126,8 +126,7 @@ const ShopCart = () => {
           navigate(`/shop/order-confirmation?order_id=${order.id}`);
         },
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Order failed", description: err?.message, variant: "destructive" });
     }

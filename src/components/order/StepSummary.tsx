@@ -161,8 +161,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
         },
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      await initRazorpay(options);
     } catch (err: any) {
       console.error("Order submission error:", err);
       toast({
