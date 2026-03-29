@@ -1290,18 +1290,13 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
         image: "/logo.png", order_id: rzpData.razorpay_order_id,
         handler: async (response: any) => {
           try {
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke("verify-razorpay-payment", {
-              body: { razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true },
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: ev.id, is_event_remaining: true,
             });
-            if (verifyError) throw new Error("Verification failed");
-            if (verifyData?.verified || verifyData?.success) {
-              playPaymentSuccessSound();
-              setShowPaymentCelebration(true);
-              toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
-              setTimeout(() => setShowPaymentCelebration(false), 8000);
-            } else {
-              throw new Error("Verification failed");
-            }
+            playPaymentSuccessSound();
+            setShowPaymentCelebration(true);
+            toast({ title: "🎉 Full Payment Received!", description: "Your event is now fully paid. Thank you!" });
+            setTimeout(() => setShowPaymentCelebration(false), 8000);
           } catch (err: any) {
             console.error("Remaining payment verification error:", err);
             toast({ title: "Payment Verification Issue", description: "If amount was deducted, it will be verified automatically. Contact support if needed.", variant: "destructive" });
