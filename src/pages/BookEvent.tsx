@@ -453,9 +453,9 @@ const BookEvent = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label className="font-sans">Contact Number *</Label>
-                <Input value={clientMobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setClientMobile(d); }} maxLength={10} placeholder="10 digit number" />
-                {clientMobile && clientMobile.length < 10 && <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit mobile number</p>}
+                <Label className="font-sans">WhatsApp Number *</Label>
+                <Input value={clientMobile} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setClientMobile(d); }} maxLength={10} placeholder="10 digit WhatsApp number" />
+                {clientMobile && clientMobile.length < 10 && <p className="text-xs text-destructive font-sans mt-1">Enter 10-digit WhatsApp number</p>}
               </div>
               <div>
                 <Label className="font-sans">Email Address *</Label>
