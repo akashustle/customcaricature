@@ -367,7 +367,32 @@ const AdminArtistPayouts = () => {
                       }`}>{req.status}</Badge>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-[10px]">{req.request_type === "full" ? "Full Balance" : "Partial"}</Badge>
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-[10px]">{req.request_type === "full" ? "Full Balance" : "Partial"}</Badge>
+                    {(req as any).preferred_payment_method && (
+                      <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">
+                        💳 {(req as any).preferred_payment_method.replace("_", " ")}
+                      </Badge>
+                    )}
+                  </div>
+                  {/* Show payment details for this artist */}
+                  {paymentDetails[req.artist_id] && (
+                    <div className="bg-muted/20 rounded p-2 text-[10px] font-sans space-y-0.5">
+                      {(req as any).preferred_payment_method === "upi_id" && paymentDetails[req.artist_id].upi_id && (
+                        <p>UPI: <strong>{paymentDetails[req.artist_id].upi_id}</strong></p>
+                      )}
+                      {(req as any).preferred_payment_method === "upi_number" && paymentDetails[req.artist_id].upi_number && (
+                        <p>UPI Mobile: <strong>{paymentDetails[req.artist_id].upi_number}</strong></p>
+                      )}
+                      {(req as any).preferred_payment_method === "bank_account" && (
+                        <>
+                          {paymentDetails[req.artist_id].bank_account_name && <p>Name: <strong>{paymentDetails[req.artist_id].bank_account_name}</strong></p>}
+                          {paymentDetails[req.artist_id].bank_account_number && <p>A/C: <strong>{paymentDetails[req.artist_id].bank_account_number}</strong></p>}
+                          {paymentDetails[req.artist_id].bank_ifsc_code && <p>IFSC: <strong>{paymentDetails[req.artist_id].bank_ifsc_code}</strong></p>}
+                        </>
+                      )}
+                    </div>
+                  )}
                   {req.note && <p className="text-xs font-sans bg-muted/30 rounded p-2">📝 {req.note}</p>}
                   {req.expected_credit_date && <p className="text-xs font-sans text-muted-foreground">Expected: {new Date(req.expected_credit_date).toLocaleDateString("en-IN")}</p>}
                   {req.screenshot_path && (
