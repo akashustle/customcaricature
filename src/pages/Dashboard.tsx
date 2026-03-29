@@ -1878,30 +1878,43 @@ const InvoicesList = ({ userId }: { userId: string }) => {
   }, [userId]);
 
   const downloadInvoice = (inv: any) => {
+    const isEvent = inv.invoice_type === "event_booking";
+    const items = Array.isArray(inv.items) ? inv.items : (typeof inv.items === "string" ? JSON.parse(inv.items || "[]") : []);
+    const isAdvance = items.some((i: any) => /advance/i.test(i.name || ""));
+    const isRemaining = items.some((i: any) => /remaining/i.test(i.name || ""));
+
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.invoice_number}</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;padding:40px;color:#1a1a2e;max-width:800px;margin:auto}
-.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:30px}
-.brand{font-size:24px;font-weight:800;color:#6366f1}.inv-num{font-size:14px;color:#666;margin-top:4px}
-.meta{text-align:right;font-size:13px;color:#555;line-height:1.8}
-.section{margin-bottom:24px}.section h3{font-size:13px;text-transform:uppercase;color:#6366f1;letter-spacing:1px;margin-bottom:8px;font-weight:700}
-.detail{font-size:14px;line-height:1.7;color:#333}
-table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#f1f5f9;text-align:left;padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#555;border-bottom:2px solid #e2e8f0}
-td{padding:10px 14px;font-size:14px;border-bottom:1px solid #f1f5f9}
-.total-row td{font-weight:700;font-size:16px;border-top:2px solid #6366f1;color:#6366f1}
-.footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#999}
-.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${inv.status==='paid'?'#ecfdf5;color:#059669':'#f1f5f9;color:#64748b'}}
-@media print{body{padding:20px}}</style></head><body>
-<div class="header"><div><div class="brand">Creative Caricature Club™</div><div class="inv-num">${inv.invoice_number}</div></div>
-<div class="meta">Date: ${new Date(inv.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>Status: <span class="badge">${inv.status.toUpperCase()}</span></div></div>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;padding:40px;color:#3a2e22;max-width:800px;margin:auto;background:#fdf8f3}
+.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3a2e22;padding-bottom:20px;margin-bottom:30px}
+.brand{display:flex;align-items:center;gap:12px}.brand img{width:48px;height:48px;border-radius:12px}
+.brand-name{font-size:22px;font-weight:800;color:#3a2e22}.brand-tm{font-size:10px;vertical-align:super}
+.inv-num{font-size:14px;color:#8b7355;margin-top:4px}
+.meta{text-align:right;font-size:13px;color:#6b5b47;line-height:1.8}
+.section{margin-bottom:24px}.section h3{font-size:13px;text-transform:uppercase;color:#3a2e22;letter-spacing:1px;margin-bottom:8px;font-weight:700}
+.detail{font-size:14px;line-height:1.7;color:#5a4a36}
+table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#f0e8dc;text-align:left;padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#6b5b47;border-bottom:2px solid #d4c4a8}
+td{padding:10px 14px;font-size:14px;border-bottom:1px solid #f0e8dc}
+.total-row td{font-weight:700;font-size:16px;border-top:2px solid #3a2e22;color:#3a2e22}
+.balance-row td{font-weight:600;font-size:14px;color:#b8860b;background:#fef9e7}
+.footer{margin-top:40px;padding-top:20px;border-top:1px solid #d4c4a8;text-align:center;font-size:12px;color:#8b7355}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${inv.status==='paid'||inv.status==='generated'?'#ecfdf5;color:#059669':'#f0e8dc;color:#6b5b47'}}
+.thank-you{background:linear-gradient(135deg,#fdf8f3,#f0e8dc);border:1px solid #d4c4a8;border-radius:12px;padding:20px;text-align:center;margin-top:30px}
+.thank-you h3{color:#3a2e22;font-size:18px;margin-bottom:4px}.thank-you p{color:#8b7355;font-size:13px}
+@media print{body{padding:20px;background:#fff}}</style></head><body>
+<div class="header"><div class="brand"><img src="${window.location.origin}/logo.png" alt="CCC" /><div><div class="brand-name">Creative Caricature Club<span class="brand-tm">™</span></div><div class="inv-num">${inv.invoice_number}</div></div></div>
+<div class="meta">Date: ${new Date(inv.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>Status: <span class="badge">${(inv.status==='generated'?'PAID':inv.status).toUpperCase()}</span><br>${isAdvance ? '<span style="color:#b8860b;font-weight:600">⚡ Advance Payment</span>' : isRemaining ? '<span style="color:#059669;font-weight:600">✅ Full Payment</span>' : ''}</div></div>
 <div class="section"><h3>Bill To</h3><div class="detail">${inv.customer_name}<br>${inv.customer_email}<br>${inv.customer_mobile}</div></div>
 <table><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-<tr><td>${inv.invoice_type.charAt(0).toUpperCase()+inv.invoice_type.slice(1)} Service</td><td style="text-align:right">₹${Number(inv.amount).toLocaleString('en-IN')}</td></tr>
-<tr><td>Tax / GST</td><td style="text-align:right">₹${Number(inv.tax_amount).toLocaleString('en-IN')}</td></tr>
-<tr class="total-row"><td>Total</td><td style="text-align:right">₹${Number(inv.total_amount).toLocaleString('en-IN')}</td></tr>
+${items.map((i: any) => `<tr><td>${i.name || inv.invoice_type}</td><td style="text-align:right">₹${Number(i.total || i.price || inv.amount).toLocaleString('en-IN')}</td></tr>`).join('')}
+${inv.tax_amount > 0 ? `<tr><td>Tax / GST</td><td style="text-align:right">₹${Number(inv.tax_amount).toLocaleString('en-IN')}</td></tr>` : ''}
+<tr class="total-row"><td>${isAdvance ? 'Advance Paid' : 'Total'}</td><td style="text-align:right">₹${Number(inv.total_amount).toLocaleString('en-IN')}</td></tr>
 </tbody></table>
-${inv.payment_method ? `<div class="section"><h3>Payment</h3><div class="detail">Method: ${inv.payment_method}</div></div>` : ''}
+${inv.payment_method ? `<div class="section"><h3>Payment</h3><div class="detail">Method: ${inv.payment_method}${inv.payment_id ? ` • ID: ${inv.payment_id}` : ''}</div></div>` : ''}
 ${inv.notes ? `<div class="section"><h3>Notes</h3><div class="detail">${inv.notes}</div></div>` : ''}
-<div class="footer">Creative Caricature Club™ • Thank you for your business!<br>This is a computer-generated invoice.</div>
+${isRemaining ? '<div class="thank-you"><h3>🎉 Thank You!</h3><p>Your live caricature booking is fully paid. We look forward to making your event memorable!</p></div>' : ''}
+${isAdvance ? '<div class="thank-you"><h3>🎨 Booking Confirmed!</h3><p>Your advance payment has been received. The remaining balance will be collected at the event.</p></div>' : ''}
+${!isEvent ? '<div class="thank-you"><h3>🎨 Thank You for Your Order!</h3><p>Your custom caricature is being crafted with love. We appreciate your trust in Creative Caricature Club™</p></div>' : ''}
+<div class="footer">Creative Caricature Club™ • Premium Caricature Services Across India<br>This is a computer-generated invoice.</div>
 <script>window.onload=()=>window.print()</script></body></html>`;
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
