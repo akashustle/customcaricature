@@ -104,7 +104,7 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2">
         {[
-          { label: "Total Earnings", value: `₹${totalEarnings.toLocaleString("en-IN")}`, icon: TrendingUp, color: "from-primary/60 to-primary" },
+          { label: "Total Income", value: `₹${totalEarnings.toLocaleString("en-IN")}`, icon: TrendingUp, color: "from-primary/60 to-primary" },
           { label: "Balance", value: `₹${balance.toLocaleString("en-IN")}`, icon: Wallet, color: "from-green-400 to-green-600" },
           { label: "Credited", value: `₹${creditedAmount.toLocaleString("en-IN")}`, icon: CheckCircle2, color: "from-blue-400 to-blue-600" },
           { label: "Pending", value: `₹${pendingEarnings.toLocaleString("en-IN")}`, icon: Clock, color: "from-amber-400 to-amber-600" },
@@ -139,12 +139,13 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
       {/* Tabs */}
       <div className="flex gap-1 bg-muted/30 rounded-xl p-1">
         {[
-          { id: "overview" as const, label: "Earnings" },
+          { id: "overview" as const, label: "Income" },
           { id: "transactions" as const, label: "Transactions" },
           { id: "requests" as const, label: "Requests" },
+          { id: "payment_details" as const, label: "Payment Info" },
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-sans transition-all ${activeTab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-sans transition-all ${activeTab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
             {t.label}
           </button>
         ))}
