@@ -118,6 +118,7 @@ const AdminLiveActivityTicker = lazy(() => import("@/components/admin/AdminLiveA
 const AdminHeatmap = lazy(() => import("@/components/admin/AdminHeatmap"));
 const AdminLilFlea = lazy(() => import("@/components/admin/AdminLilFlea"));
 const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
+const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -2063,9 +2064,13 @@ const Admin = () => {
 
           <TabsContent value="lead-links">
             <AdminLeadLinks />
-          </TabsContent>
+           </TabsContent>
 
-          <TabsContent value="settings">
+           <TabsContent value="accounting">
+             <AdminAccounting />
+           </TabsContent>
+
+           <TabsContent value="settings">
             <div className="space-y-6 max-w-2xl">
               {/* Admin Profile Section */}
               <div className="admin-settings-card p-6">
