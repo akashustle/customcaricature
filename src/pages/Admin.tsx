@@ -118,6 +118,7 @@ const AdminLiveActivityTicker = lazy(() => import("@/components/admin/AdminLiveA
 const AdminHeatmap = lazy(() => import("@/components/admin/AdminHeatmap"));
 const AdminLilFlea = lazy(() => import("@/components/admin/AdminLilFlea"));
 const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
+const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
