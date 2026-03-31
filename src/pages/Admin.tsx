@@ -2063,9 +2063,13 @@ const Admin = () => {
 
           <TabsContent value="lead-links">
             <AdminLeadLinks />
-          </TabsContent>
+           </TabsContent>
 
-          <TabsContent value="settings">
+           <TabsContent value="accounting">
+             <AdminAccounting />
+           </TabsContent>
+
+           <TabsContent value="settings">
             <div className="space-y-6 max-w-2xl">
               {/* Admin Profile Section */}
               <div className="admin-settings-card p-6">
