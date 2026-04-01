@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { AlertTriangle, Globe, Home, UserPlus, LogIn, LayoutDashboard, Package, Calendar, ShoppingBag, ClipboardList, Save, Wrench, BookOpen, MessageCircle, HelpCircle, FileText, Clock, Timer } from "lucide-react";
+import { AlertTriangle, Globe, Home, UserPlus, LogIn, LayoutDashboard, Package, Calendar, ShoppingBag, ClipboardList, Save, Wrench, BookOpen, MessageCircle, HelpCircle, FileText, Clock, Timer, Eye, EyeOff, Receipt, Bell, User, Settings, CreditCard, Store, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const PAGE_ICONS: Record<string, any> = {
   global: Globe, home: Home, registration: UserPlus, login: LogIn,
@@ -25,12 +26,26 @@ const ALL_PAGES = [
   "gallery", "about", "blog", "track-order",
 ];
 
+const DASHBOARD_TABS = [
+  { key: "orders", label: "Orders", icon: Package },
+  { key: "events", label: "Events", icon: Calendar },
+  { key: "shop", label: "Shop", icon: Store },
+  { key: "chat", label: "Chat", icon: MessageCircle },
+  { key: "payments", label: "Payments", icon: CreditCard },
+  { key: "invoices", label: "Invoices", icon: Receipt },
+  { key: "alerts", label: "Alerts", icon: Bell },
+  { key: "workshop", label: "Workshop", icon: GraduationCap },
+  { key: "profile", label: "Profile", icon: User },
+  { key: "settings", label: "Settings", icon: Settings },
+];
+
 const AdminMaintenance = () => {
   const [settings, setSettings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [timers, setTimers] = useState<Record<string, { hours: number; minutes: number; seconds: number }>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { settings: siteSettings, updateSetting: updateSiteSetting } = useSiteSettings();
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -50,17 +65,12 @@ const AdminMaintenance = () => {
     } else {
       setSettings(existing);
     }
-    // Initialize timers from existing settings
     const newTimers: Record<string, { hours: number; minutes: number; seconds: number }> = {};
     (existing || []).forEach((s: any) => {
       if (s.estimated_end) {
         const diff = new Date(s.estimated_end).getTime() - Date.now();
         if (diff > 0) {
-          newTimers[s.id] = {
-            hours: Math.floor(diff / 3600000),
-            minutes: Math.floor((diff % 3600000) / 60000),
-            seconds: Math.floor((diff % 60000) / 1000),
-          };
+          newTimers[s.id] = { hours: Math.floor(diff / 3600000), minutes: Math.floor((diff % 3600000) / 60000), seconds: Math.floor((diff % 60000) / 1000) };
         } else {
           newTimers[s.id] = { hours: 0, minutes: 30, seconds: 0 };
         }
@@ -74,7 +84,6 @@ const AdminMaintenance = () => {
 
   useEffect(() => { fetchSettings(); }, []);
 
-  // Auto-disable maintenance when estimated_end passes
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(async () => {
@@ -85,10 +94,7 @@ const AdminMaintenance = () => {
           const end = new Date(s.estimated_end);
           if (end <= now) {
             const { error } = await supabase.from("maintenance_settings").update({ is_enabled: false, updated_at: now.toISOString() } as any).eq("id", s.id);
-            if (!error) {
-              toast({ title: `✅ ${s.id} maintenance auto-disabled`, description: "Timer expired." });
-              changed = true;
-            }
+            if (!error) { toast({ title: `✅ ${s.id} maintenance auto-disabled`, description: "Timer expired." }); changed = true; }
           }
         }
       }
@@ -107,7 +113,6 @@ const AdminMaintenance = () => {
 
   const toggleMaintenance = async (id: string, current: boolean) => {
     if (!current) {
-      // Turning ON: compute estimated_end from timer
       const t = timers[id] || { hours: 0, minutes: 30, seconds: 0 };
       const totalMs = (t.hours * 3600 + t.minutes * 60 + t.seconds) * 1000;
       const estimatedEnd = totalMs > 0 ? new Date(Date.now() + totalMs).toISOString() : null;
@@ -118,25 +123,29 @@ const AdminMaintenance = () => {
   };
 
   const setTimerAndSave = (id: string, field: "hours" | "minutes" | "seconds", value: number) => {
-    setTimers(prev => ({
-      ...prev,
-      [id]: { ...(prev[id] || { hours: 0, minutes: 30, seconds: 0 }), [field]: value }
-    }));
+    setTimers(prev => ({ ...prev, [id]: { ...(prev[id] || { hours: 0, minutes: 30, seconds: 0 }), [field]: value } }));
   };
 
   const applyTimer = async (id: string) => {
     const t = timers[id] || { hours: 0, minutes: 30, seconds: 0 };
     const totalMs = (t.hours * 3600 + t.minutes * 60 + t.seconds) * 1000;
-    if (totalMs <= 0) {
-      toast({ title: "Set a timer duration", variant: "destructive" });
-      return;
-    }
+    if (totalMs <= 0) { toast({ title: "Set a timer duration", variant: "destructive" }); return; }
     const estimatedEnd = new Date(Date.now() + totalMs).toISOString();
     const s = settings.find(x => x.id === id);
     await updateSetting(id, { title: s?.title, message: s?.message, estimated_end: estimatedEnd });
   };
 
   const globalEnabled = settings.find(s => s.id === "global")?.is_enabled;
+
+  const dashboardTabs = (siteSettings as any).dashboard_tabs || { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true };
+
+  const toggleDashboardTab = (key: string) => {
+    const updated = { ...dashboardTabs, [key]: !dashboardTabs[key] };
+    updateSiteSetting("dashboard_tabs", updated);
+  };
+
+  const allowRegistration = (siteSettings as any).allow_registration_maintenance?.enabled ?? false;
+  const loginPopupVisible = (siteSettings as any).login_popup_visible?.enabled ?? true;
 
   if (loading) return <div className="flex items-center justify-center py-10"><Wrench className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
 
@@ -149,17 +158,65 @@ const AdminMaintenance = () => {
               <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0" />
               <div>
                 <p className="font-bold text-destructive">GLOBAL MAINTENANCE MODE IS ON</p>
-                <p className="text-sm text-muted-foreground">Entire website is blocked for non-admin users. Mobile nav hidden. Full-screen maintenance page shown.</p>
+                <p className="text-sm text-muted-foreground">Entire website is blocked for non-admin users.</p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
       )}
 
+      {/* Quick Controls */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2"><Settings className="w-4 h-4" /> Quick Controls</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Allow Registration During Maintenance</p>
+              <p className="text-xs text-muted-foreground">Show register button on maintenance page</p>
+            </div>
+            <Switch checked={allowRegistration} onCheckedChange={(v) => updateSiteSetting("allow_registration_maintenance", { enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Login Popup on Website</p>
+              <p className="text-xs text-muted-foreground">Show login prompt popup to visitors</p>
+            </div>
+            <Switch checked={loginPopupVisible} onCheckedChange={(v) => updateSiteSetting("login_popup_visible", { enabled: v })} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dashboard Tab Visibility Control */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2"><LayoutDashboard className="w-4 h-4" /> User Dashboard Tab Control</CardTitle>
+          <p className="text-xs text-muted-foreground">Show/hide tabs on user dashboard in real-time</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {DASHBOARD_TABS.map(tab => {
+              const isOn = dashboardTabs[tab.key] !== false;
+              const Icon = tab.icon;
+              return (
+                <motion.button key={tab.key} whileTap={{ scale: 0.95 }}
+                  onClick={() => toggleDashboardTab(tab.key)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all ${isOn ? "bg-primary/10 border-primary/30 text-foreground" : "bg-muted/30 border-border/40 text-muted-foreground"}`}>
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-xs font-medium truncate">{tab.label}</span>
+                  {isOn ? <Eye className="w-3 h-3 ml-auto text-primary flex-shrink-0" /> : <EyeOff className="w-3 h-3 ml-auto flex-shrink-0" />}
+                </motion.button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-bold text-lg">Maintenance Mode</h3>
-          <p className="text-sm text-muted-foreground">Set timer (hours/min/sec). Auto-disables when timer expires.</p>
+          <p className="text-sm text-muted-foreground">Set timer. Auto-disables when timer expires.</p>
         </div>
         <Badge variant="outline">{settings.filter(s => s.is_enabled).length} active</Badge>
       </div>
@@ -177,7 +234,7 @@ const AdminMaintenance = () => {
 
           return (
             <motion.div key={s.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <Card className={`transition-all rounded-2xl overflow-hidden ${s.is_enabled ? "border-destructive/50 bg-destructive/5" : "bg-white"} ${isGlobal ? "md:col-span-2 border-2" : ""}`}>
+              <Card className={`transition-all rounded-2xl overflow-hidden ${s.is_enabled ? "border-destructive/50 bg-destructive/5" : "bg-card"} ${isGlobal ? "md:col-span-2 border-2" : ""}`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -204,9 +261,8 @@ const AdminMaintenance = () => {
                     <Label className="text-xs text-muted-foreground">Message</Label>
                     <Textarea value={s.message || ""} onChange={e => setSettings(prev => prev.map(x => x.id === s.id ? { ...x, message: e.target.value } : x))} className="text-sm" rows={2} />
                   </div>
-                  {/* Timer setting: hours, minutes, seconds */}
                   <div>
-                    <Label className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Duration Timer (set before enabling)</Label>
+                    <Label className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> Duration Timer</Label>
                     <div className="grid grid-cols-3 gap-2 mt-1">
                       <div>
                         <Label className="text-[10px] text-muted-foreground">Hours</Label>
