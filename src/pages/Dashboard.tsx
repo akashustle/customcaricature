@@ -342,6 +342,7 @@ const Dashboard = () => {
   }, [user]);
 
   const canBookEvent = profile?.event_booking_allowed || settings.event_booking_global.enabled;
+  const dt = (settings as any).dashboard_tabs || { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true };
 
   const handleBookEvent = () => {
     if (canBookEvent) {
