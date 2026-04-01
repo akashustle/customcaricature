@@ -146,6 +146,7 @@ const AdminMaintenance = () => {
 
   const allowRegistration = (siteSettings as any).allow_registration_maintenance?.enabled ?? false;
   const loginPopupVisible = (siteSettings as any).login_popup_visible?.enabled ?? true;
+  const maintenanceWaMessage = (siteSettings as any).maintenance_whatsapp_message?.text ?? "Hi, I want to book an event caricature";
 
   if (loading) return <div className="flex items-center justify-center py-10"><Wrench className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
 
@@ -183,7 +184,19 @@ const AdminMaintenance = () => {
               <p className="text-sm font-medium">Login Popup on Website</p>
               <p className="text-xs text-muted-foreground">Show login prompt popup to visitors</p>
             </div>
-            <Switch checked={loginPopupVisible} onCheckedChange={(v) => updateSiteSetting("login_popup_visible", { enabled: v })} />
+           <Switch checked={loginPopupVisible} onCheckedChange={(v) => updateSiteSetting("login_popup_visible", { enabled: v })} />
+          </div>
+          <div className="space-y-1.5 pt-2 border-t border-border/40">
+            <Label className="text-sm font-medium flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Maintenance WhatsApp Prefilled Message</Label>
+            <div className="flex gap-2">
+              <Input
+                value={maintenanceWaMessage}
+                onChange={e => updateSiteSetting("maintenance_whatsapp_message", { text: e.target.value })}
+                placeholder="Hi, I want to book an event caricature"
+                className="text-sm flex-1"
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground">This message is prefilled when users click the WhatsApp button on the maintenance page.</p>
           </div>
         </CardContent>
       </Card>

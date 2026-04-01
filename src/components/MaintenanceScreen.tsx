@@ -14,10 +14,12 @@ interface MaintenanceScreenProps {
 }
 
 const WHATSAPP_NUMBER = "918369594271";
+const DEFAULT_WA_MESSAGE = "Hi, I want to book an event caricature";
 
 const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are performing scheduled maintenance. Please check back soon.", estimatedEnd, isGlobal }: MaintenanceScreenProps) => {
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
+  const waMessage = (settings as any).maintenance_whatsapp_message?.text || DEFAULT_WA_MESSAGE;
   const [countdown, setCountdown] = useState("");
   const [notifyRequested, setNotifyRequested] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
@@ -111,21 +113,18 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
 
         {/* WhatsApp Event Booking CTA */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="mb-4">
-          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C%20I%20want%20to%20book%20an%20event%20caricature`} target="_blank" rel="noopener noreferrer"
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-lg">
             <MessageCircle className="w-4 h-4" />
             Want to book an event? WhatsApp us
           </a>
         </motion.div>
 
-        {/* Login Buttons */}
+        {/* Login Buttons — User & Workshop only */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
           className="flex flex-wrap justify-center gap-2 mb-4">
           <Button variant="default" onClick={() => navigate("/login")} className="rounded-full font-body gap-2 shadow-md">
             <LogIn className="w-4 h-4" /> Login
-          </Button>
-          <Button variant="outline" onClick={() => navigate("/customcad75")} className="rounded-full font-body gap-2">
-            <LogIn className="w-4 h-4" /> Portal Login
           </Button>
           <Button variant="outline" onClick={() => navigate("/cccworkshop2006")} className="rounded-full font-body gap-2">
             <GraduationCap className="w-4 h-4" /> Workshop Login
