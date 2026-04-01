@@ -485,20 +485,20 @@ const Dashboard = () => {
         </div>
 
         <div className="md:hidden">
-          {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
-          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
-          {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
-          {activeTab === "chat" && user && (
+          {activeTab === "orders" && dt.orders && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
+          {activeTab === "events" && dt.events && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "shop" && dt.shop && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
+          {activeTab === "chat" && dt.chat && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(56px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
             </div>
           )}
-          {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
-          {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
-          {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
-          {activeTab === "workshop" && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
-          {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
-          {activeTab === "settings" && (
+          {activeTab === "payments" && dt.payments && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "invoices" && dt.invoices && user && <InvoicesList userId={user.id} />}
+          {activeTab === "alerts" && dt.alerts && user && <AlertsSection userId={user.id} />}
+          {activeTab === "workshop" && dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
+          {activeTab === "profile" && dt.profile && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
+          {activeTab === "settings" && dt.settings && (
             <SettingsSection
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
               currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
