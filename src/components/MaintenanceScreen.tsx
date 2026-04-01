@@ -14,10 +14,12 @@ interface MaintenanceScreenProps {
 }
 
 const WHATSAPP_NUMBER = "918369594271";
+const DEFAULT_WA_MESSAGE = "Hi, I want to book an event caricature";
 
 const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are performing scheduled maintenance. Please check back soon.", estimatedEnd, isGlobal }: MaintenanceScreenProps) => {
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
+  const waMessage = (settings as any).maintenance_whatsapp_message?.text || DEFAULT_WA_MESSAGE;
   const [countdown, setCountdown] = useState("");
   const [notifyRequested, setNotifyRequested] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
