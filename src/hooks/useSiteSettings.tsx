@@ -1,6 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+type DashboardTabs = {
+  orders: boolean; events: boolean; shop: boolean; chat: boolean;
+  payments: boolean; invoices: boolean; alerts: boolean; workshop: boolean;
+  profile: boolean; settings: boolean;
+};
+
 type SiteSettings = {
   event_booking_global: { enabled: boolean };
   workshop_button: { enabled: boolean; label: string; url: string };
@@ -20,6 +26,9 @@ type SiteSettings = {
   live_chat_visible: { enabled: boolean };
   auto_assign_artist: { enabled: boolean; selected_artists?: string };
   artist_payment_system: { enabled: boolean };
+  allow_registration_maintenance: { enabled: boolean };
+  login_popup_visible: { enabled: boolean };
+  dashboard_tabs: DashboardTabs;
 };
 
 const defaults: SiteSettings = {
@@ -41,13 +50,16 @@ const defaults: SiteSettings = {
   live_chat_visible: { enabled: false },
   auto_assign_artist: { enabled: false, selected_artists: "all" },
   artist_payment_system: { enabled: false },
+  allow_registration_maintenance: { enabled: false },
+  login_popup_visible: { enabled: true },
+  dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
 };
 
 // Module-level cache so all instances share one fetch result
 let cachedSettings: SiteSettings | null = null;
 let fetchPromise: Promise<SiteSettings> | null = null;
 let lastFetchTime = 0;
-const CACHE_TTL = 60_000; // 1 minute
+const CACHE_TTL = 60_000;
 
 const parseSettings = (data: any[]): SiteSettings => {
   const s = { ...defaults };
@@ -86,7 +98,6 @@ export const useSiteSettings = () => {
   const channelRef = useRef<any>(null);
 
   const fetchSettings = useCallback(async () => {
-    // Invalidate cache for forced refetch
     lastFetchTime = 0;
     cachedSettings = null;
     const s = await fetchSettingsOnce();
@@ -100,7 +111,6 @@ export const useSiteSettings = () => {
       if (mounted) { setSettings(s); setLoading(false); }
     });
 
-    // Only subscribe if not already subscribed (shared channel)
     if (!channelRef.current) {
       channelRef.current = supabase
         .channel("site-settings")

@@ -342,6 +342,7 @@ const Dashboard = () => {
   }, [user]);
 
   const canBookEvent = profile?.event_booking_allowed || settings.event_booking_global.enabled;
+  const dt = (settings as any).dashboard_tabs || { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true };
 
   const handleBookEvent = () => {
     if (canBookEvent) {
@@ -445,59 +446,59 @@ const Dashboard = () => {
         <div className="hidden md:block">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6 h-auto w-full flex-wrap justify-start">
-              <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>
-              <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>
-              {settings.shop_nav_visible?.enabled !== false && (
+              {dt.orders && <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>}
+              {dt.events && <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>}
+              {dt.shop && settings.shop_nav_visible?.enabled !== false && (
                 <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
               )}
-              <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-2" />Chat</TabsTrigger>
-              <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>
-              <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>
-              <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>
-              {(settings as any).workshop_dashboard_visible?.enabled && (
+              {dt.chat && <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-2" />Chat</TabsTrigger>}
+              {dt.payments && <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>}
+              {dt.invoices && <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>}
+              {dt.alerts && <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>}
+              {dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && (
                 <TabsTrigger value="workshop" className="flex-1 font-sans"><GraduationCap className="w-4 h-4 mr-2" />Workshop</TabsTrigger>
               )}
-              <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>
+              {dt.profile && <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>}
+              {dt.settings && <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>}
             </TabsList>
-            <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>
-            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
-            {settings.shop_nav_visible?.enabled !== false && (
+            {dt.orders && <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>}
+            {dt.events && <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>}
+            {dt.shop && settings.shop_nav_visible?.enabled !== false && (
               <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
             )}
-            <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
-            <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
-            <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>
-            <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
-            {(settings as any).workshop_dashboard_visible?.enabled && (
+            {dt.chat && <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>}
+            {dt.payments && <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>}
+            {dt.invoices && <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>}
+            {dt.alerts && <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>}
+            {dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && (
               <TabsContent value="workshop"><WorkshopSection profile={profile} user={user} navigate={navigate} /></TabsContent>
             )}
-            <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>
-            <TabsContent value="settings">
+            {dt.profile && <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>}
+            {dt.settings && <TabsContent value="settings">
               <SettingsSection
                 newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
                 currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
                 confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
               />
-            </TabsContent>
+            </TabsContent>}
           </Tabs>
         </div>
 
         <div className="md:hidden">
-          {activeTab === "orders" && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
-          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
-          {activeTab === "shop" && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
-          {activeTab === "chat" && user && (
+          {activeTab === "orders" && dt.orders && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
+          {activeTab === "events" && dt.events && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "shop" && dt.shop && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
+          {activeTab === "chat" && dt.chat && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(56px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
             </div>
           )}
-          {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
-          {activeTab === "invoices" && user && <InvoicesList userId={user.id} />}
-          {activeTab === "alerts" && user && <AlertsSection userId={user.id} />}
-          {activeTab === "workshop" && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
-          {activeTab === "profile" && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
-          {activeTab === "settings" && (
+          {activeTab === "payments" && dt.payments && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "invoices" && dt.invoices && user && <InvoicesList userId={user.id} />}
+          {activeTab === "alerts" && dt.alerts && user && <AlertsSection userId={user.id} />}
+          {activeTab === "workshop" && dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
+          {activeTab === "profile" && dt.profile && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
+          {activeTab === "settings" && dt.settings && (
             <SettingsSection
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
               currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
@@ -513,16 +514,16 @@ const Dashboard = () => {
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {[
               { icon: Home, key: "home", action: () => navigate("/") },
-              { icon: Package, key: "orders", action: () => setActiveTab("orders") },
-              { icon: CalIcon, key: "events", action: () => setActiveTab("events") },
-              ...(settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
-              { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
-              { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
-              { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
-              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
-              { icon: User, key: "profile", action: () => setActiveTab("profile") },
-              { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
+              ...(dt.orders ? [{ icon: Package, key: "orders", action: () => setActiveTab("orders") }] : []),
+              ...(dt.events ? [{ icon: CalIcon, key: "events", action: () => setActiveTab("events") }] : []),
+              ...(dt.shop && settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
+              ...(dt.chat ? [{ icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") }] : []),
+              ...(dt.payments ? [{ icon: CreditCard, key: "payments", action: () => setActiveTab("payments") }] : []),
+              ...(dt.invoices ? [{ icon: FileText, key: "invoices", action: () => setActiveTab("invoices") }] : []),
+              ...(dt.alerts ? [{ icon: Bell, key: "alerts", action: () => setActiveTab("alerts") }] : []),
+              ...(dt.workshop && (settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
+              ...(dt.profile ? [{ icon: User, key: "profile", action: () => setActiveTab("profile") }] : []),
+              ...(dt.settings ? [{ icon: Settings, key: "settings", action: () => setActiveTab("settings") }] : []),
             ].map((item, idx) => {
               const isActive = item.key === "home" ? false : activeTab === item.key;
               return (
