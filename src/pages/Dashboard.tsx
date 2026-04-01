@@ -514,16 +514,16 @@ const Dashboard = () => {
           <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {[
               { icon: Home, key: "home", action: () => navigate("/") },
-              { icon: Package, key: "orders", action: () => setActiveTab("orders") },
-              { icon: CalIcon, key: "events", action: () => setActiveTab("events") },
-              ...(settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
-              { icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") },
-              { icon: CreditCard, key: "payments", action: () => setActiveTab("payments") },
-              { icon: FileText, key: "invoices", action: () => setActiveTab("invoices") },
-              { icon: Bell, key: "alerts", action: () => setActiveTab("alerts") },
-              ...((settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
-              { icon: User, key: "profile", action: () => setActiveTab("profile") },
-              { icon: Settings, key: "settings", action: () => setActiveTab("settings") },
+              ...(dt.orders ? [{ icon: Package, key: "orders", action: () => setActiveTab("orders") }] : []),
+              ...(dt.events ? [{ icon: CalIcon, key: "events", action: () => setActiveTab("events") }] : []),
+              ...(dt.shop && settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
+              ...(dt.chat ? [{ icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") }] : []),
+              ...(dt.payments ? [{ icon: CreditCard, key: "payments", action: () => setActiveTab("payments") }] : []),
+              ...(dt.invoices ? [{ icon: FileText, key: "invoices", action: () => setActiveTab("invoices") }] : []),
+              ...(dt.alerts ? [{ icon: Bell, key: "alerts", action: () => setActiveTab("alerts") }] : []),
+              ...(dt.workshop && (settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
+              ...(dt.profile ? [{ icon: User, key: "profile", action: () => setActiveTab("profile") }] : []),
+              ...(dt.settings ? [{ icon: Settings, key: "settings", action: () => setActiveTab("settings") }] : []),
             ].map((item, idx) => {
               const isActive = item.key === "home" ? false : activeTab === item.key;
               return (
