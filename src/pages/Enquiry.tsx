@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const RichText = ({ text }: { text: string }) => {
 };
 
 const Enquiry = () => {
+  const { settings: siteSettings } = useSiteSettings();
   const [step, setStep] = useState<Step>("info");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -341,7 +343,9 @@ const Enquiry = () => {
               <div className="flex flex-col gap-2 pt-2">
                 <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
                 <Button onClick={() => {
-                  const msg = `Hi, I submitted an enquiry (${enquiryId}) for ${caricatureType} caricature. I'd like to know more.`;
+                  const priceData = getPricingForType();
+                  const priceLine = priceData ? `💰 Price: ₹${priceData.price.toLocaleString("en-IN")}${priceData.per_face ? "/face" : ""}` : "";
+                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted a custom caricature enquiry and need help.\n\n📋 *Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎨 *Caricature Details:*\n🖼️ Type: ${caricatureType}\n${priceLine ? `${priceLine}\n` : ""}\nI'd like to know more about the process, timeline, and how to proceed. Please help! 🙏`;
                   window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
                 }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
@@ -432,7 +436,11 @@ const Enquiry = () => {
               <div className="flex flex-col gap-2 pt-2">
                 <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
                 <Button onClick={() => {
-                  const msg = `Hi, I submitted an event enquiry (${enquiryId}) for ${eventType === "other" ? customEventType : eventType} on ${eventDate ? format(eventDate, "dd MMM yyyy") : "TBD"} in ${city || state || "India"}. I'd like to know more.`;
+                  const finalEvent = eventType === "other" ? customEventType : COMMON_EVENT_TYPES.find(t => t.value === eventType)?.label || eventType;
+                  const locationParts = [city, district, state, country].filter(Boolean).join(", ");
+                  const dateStr = eventDate ? format(eventDate, "dd MMM yyyy") : "Not decided yet";
+                  const priceLine = resolvedPrice ? `💰 Estimated Price: ${resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}${resolvedPrice.price.toLocaleString("en-IN")} (Based on ${resolvedPrice.source} pricing)` : "";
+                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted an event enquiry and need help with booking.\n\n📋 *Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎉 *Event Information:*\n🎊 Event Type: ${finalEvent}\n📍 Location: ${locationParts}\n📅 Event Date: ${dateStr}\n${priceLine ? `${priceLine}\n` : ""}\nI'd like to know more about artist availability, exact pricing, and how to proceed with the booking. Please help! 🙏`;
                   window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
                 }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
@@ -535,20 +543,34 @@ const Enquiry = () => {
               <div className="space-y-4 animate-in fade-in duration-300">
                 <h3 className="font-display text-lg font-semibold">What are you looking for?</h3>
                 <div className="grid gap-3">
-                  <button
-                    onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_select"); }}
-                    className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Palette className="w-6 h-6 text-primary" />
+                  {siteSettings.custom_caricature_visible?.enabled !== false ? (
+                    <button
+                      onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_select"); }}
+                      className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                          <Palette className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-sans font-semibold text-foreground">Custom Caricature from Photo</p>
+                          <p className="text-xs text-muted-foreground font-sans">Personalized artwork from your photos</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-sans font-semibold text-foreground">Custom Caricature from Photo</p>
-                        <p className="text-xs text-muted-foreground font-sans">Personalized artwork from your photos</p>
+                    </button>
+                  ) : (
+                    <div className="p-5 rounded-2xl border-2 border-amber-200 bg-amber-50/50 text-left opacity-80">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                          <Palette className="w-6 h-6 text-amber-500" />
+                        </div>
+                        <div>
+                          <p className="font-sans font-semibold text-amber-800">Custom Caricature — Temporarily Paused</p>
+                          <p className="text-xs text-amber-600 font-sans">🔥 Due to overwhelming demand, custom caricature orders are currently paused. We'll be back soon!</p>
+                        </div>
                       </div>
                     </div>
-                  </button>
+                  )}
                   <button
                     onClick={() => { setEnquiryType("event_booking"); setStep("event_details"); }}
                     className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
