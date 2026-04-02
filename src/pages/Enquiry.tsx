@@ -541,20 +541,34 @@ const Enquiry = () => {
               <div className="space-y-4 animate-in fade-in duration-300">
                 <h3 className="font-display text-lg font-semibold">What are you looking for?</h3>
                 <div className="grid gap-3">
-                  <button
-                    onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_select"); }}
-                    className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Palette className="w-6 h-6 text-primary" />
+                  {siteSettings.custom_caricature_visible?.enabled !== false ? (
+                    <button
+                      onClick={() => { setEnquiryType("custom_caricature"); setStep("caricature_select"); }}
+                      className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                          <Palette className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-sans font-semibold text-foreground">Custom Caricature from Photo</p>
+                          <p className="text-xs text-muted-foreground font-sans">Personalized artwork from your photos</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-sans font-semibold text-foreground">Custom Caricature from Photo</p>
-                        <p className="text-xs text-muted-foreground font-sans">Personalized artwork from your photos</p>
+                    </button>
+                  ) : (
+                    <div className="p-5 rounded-2xl border-2 border-amber-200 bg-amber-50/50 text-left opacity-80">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                          <Palette className="w-6 h-6 text-amber-500" />
+                        </div>
+                        <div>
+                          <p className="font-sans font-semibold text-amber-800">Custom Caricature — Temporarily Paused</p>
+                          <p className="text-xs text-amber-600 font-sans">🔥 Due to overwhelming demand, custom caricature orders are currently paused. We'll be back soon!</p>
+                        </div>
                       </div>
                     </div>
-                  </button>
+                  )}
                   <button
                     onClick={() => { setEnquiryType("event_booking"); setStep("event_details"); }}
                     className="p-5 rounded-2xl border-2 border-border hover:border-primary/50 transition-all text-left group hover:bg-primary/5"
