@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 // New order: location → caricature details → photos → customer details → address → summary
 const STEPS = ["location", "details", "photos", "customer", "address", "summary"] as const;
