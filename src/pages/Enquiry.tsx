@@ -52,6 +52,7 @@ const RichText = ({ text }: { text: string }) => {
 };
 
 const Enquiry = () => {
+  const { settings: siteSettings } = useSiteSettings();
   const [step, setStep] = useState<Step>("info");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
