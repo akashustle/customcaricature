@@ -341,7 +341,9 @@ const Enquiry = () => {
               <div className="flex flex-col gap-2 pt-2">
                 <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
                 <Button onClick={() => {
-                  const msg = `Hi, I submitted an enquiry (${enquiryId}) for ${caricatureType} caricature. I'd like to know more.`;
+                  const priceData = getPricingForType();
+                  const priceLine = priceData ? `💰 Price: ₹${priceData.price.toLocaleString("en-IN")}${priceData.per_face ? "/face" : ""}` : "";
+                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted a custom caricature enquiry and need help.\n\n📋 *Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎨 *Caricature Details:*\n🖼️ Type: ${caricatureType}\n${priceLine ? `${priceLine}\n` : ""}\nI'd like to know more about the process, timeline, and how to proceed. Please help! 🙏`;
                   window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
                 }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
