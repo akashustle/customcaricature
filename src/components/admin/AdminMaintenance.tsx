@@ -172,20 +172,34 @@ const AdminMaintenance = () => {
           <CardTitle className="text-sm flex items-center gap-2"><Settings className="w-4 h-4" /> Quick Controls</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Allow Registration During Maintenance</p>
-              <p className="text-xs text-muted-foreground">Show register button on maintenance page</p>
-            </div>
-            <Switch checked={allowRegistration} onCheckedChange={(v) => updateSiteSetting("allow_registration_maintenance", { enabled: v })} />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Login Popup on Website</p>
-              <p className="text-xs text-muted-foreground">Show login prompt popup to visitors</p>
-            </div>
-           <Switch checked={loginPopupVisible} onCheckedChange={(v) => updateSiteSetting("login_popup_visible", { enabled: v })} />
-          </div>
+         <div className="flex items-center justify-between">
+176:             <div>
+177:               <p className="text-sm font-medium">Allow Registration During Maintenance</p>
+178:               <p className="text-xs text-muted-foreground">Show register button on maintenance page</p>
+179:             </div>
+180:             <Switch checked={allowRegistration} onCheckedChange={(v) => updateSiteSetting("allow_registration_maintenance", { enabled: v })} />
+181:           </div>
+182:           <div className="flex items-center justify-between">
+183:             <div>
+184:               <p className="text-sm font-medium">Login Popup on Website</p>
+185:               <p className="text-xs text-muted-foreground">Show login prompt popup to visitors</p>
+186:             </div>
+187:            <Switch checked={loginPopupVisible} onCheckedChange={(v) => updateSiteSetting("login_popup_visible", { enabled: v })} />
+188:           </div>
+189:           <div className="flex items-center justify-between">
+190:             <div>
+191:               <p className="text-sm font-medium">Custom Caricature Ordering</p>
+192:               <p className="text-xs text-muted-foreground">Show/hide all custom caricature ordering across website</p>
+193:             </div>
+194:             <Switch checked={caricatureVisible} onCheckedChange={(v) => updateSiteSetting("custom_caricature_visible", { enabled: v })} />
+195:           </div>
+196:           <div className="flex items-center justify-between">
+197:             <div>
+198:               <p className="text-sm font-medium">Admin Page Splash Screen</p>
+199:               <p className="text-xs text-muted-foreground">Show splash animation on admin login page</p>
+200:             </div>
+201:             <Switch checked={adminSplashEnabled} onCheckedChange={(v) => updateSiteSetting("admin_splash_enabled", { enabled: v })} />
+202:           </div>
           <div className="space-y-1.5 pt-2 border-t border-border/40">
             <Label className="text-sm font-medium flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Maintenance WhatsApp Prefilled Message</Label>
             <div className="flex gap-2">
