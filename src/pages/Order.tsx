@@ -33,6 +33,7 @@ const Order = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { getPrice, fetchCustomerPricing } = usePricing();
+  const { settings } = useSiteSettings();
   const [formData, setFormData] = useState<OrderFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
