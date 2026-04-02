@@ -428,6 +428,7 @@ const Index = () => {
 
           </div>
         </motion.div>
+        {settings.custom_caricature_visible?.enabled !== false && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
           className="glass-crystal border-t border-border/20">
           <div className="container mx-auto px-4 py-3 text-center">
@@ -436,6 +437,7 @@ const Index = () => {
             </p>
           </div>
         </motion.div>
+        )}
       </section>
 
       {/* Dynamic Sections — rendered in admin-configured order, lazy loaded */}
