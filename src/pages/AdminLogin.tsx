@@ -105,6 +105,7 @@ const AdminAvatar = ({ admin, avatarUrl, size = 72 }: { admin: AdminInfo; avatar
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { settings: siteSettingsData } = useSiteSettings();
   const [showSplash, setShowSplash] = useState(true);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
