@@ -17,7 +17,6 @@ type SiteSettings = {
   workshop_mobile_nav: { enabled: boolean };
   shop_tracking_visible: { enabled: boolean };
   support_button_visible: { enabled: boolean };
-  support_mobile_nav: { enabled: boolean };
   gateway_charge_percentage: { percentage: number };
   admin_action_prompt: { enabled: boolean };
   workshop_dashboard_visible: { enabled: boolean };
@@ -29,6 +28,8 @@ type SiteSettings = {
   allow_registration_maintenance: { enabled: boolean };
   login_popup_visible: { enabled: boolean };
   dashboard_tabs: DashboardTabs;
+  custom_caricature_visible: { enabled: boolean };
+  admin_splash_enabled: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
