@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone, Shield, Sparkles } from "lucide-react";
 import AdminSplashScreen from "@/components/AdminSplashScreen";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
@@ -104,6 +105,7 @@ const AdminAvatar = ({ admin, avatarUrl, size = 72 }: { admin: AdminInfo; avatar
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  const { settings: siteSettingsData } = useSiteSettings();
   const [showSplash, setShowSplash] = useState(true);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -313,8 +315,9 @@ const AdminLogin = () => {
     else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); }
   };
 
-  // Show splash first for new visitors
-  if (showSplash) {
+  // Show splash first for new visitors (if enabled in admin settings)
+  const splashEnabled = (siteSettingsData as any).admin_splash_enabled?.enabled !== false;
+  if (showSplash && splashEnabled) {
     return <AdminSplashScreen onComplete={() => setShowSplash(false)} />;
   }
 

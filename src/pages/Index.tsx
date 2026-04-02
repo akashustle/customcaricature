@@ -264,7 +264,9 @@ const Index = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-body"><User className="w-4 h-4 mr-2" /> Dashboard</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/order")} className="font-body"><Palette className="w-4 h-4 mr-2" /> New Order</DropdownMenuItem>
+                    {settings.custom_caricature_visible?.enabled !== false && (
+                      <DropdownMenuItem onClick={() => navigate("/order")} className="font-body"><Palette className="w-4 h-4 mr-2" /> New Order</DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="font-body text-destructive"><LogOut className="w-4 h-4 mr-2" /> Logout</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -337,11 +339,13 @@ const Index = () => {
               )}
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}
                 className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-6">
+                {settings.custom_caricature_visible?.enabled !== false && (
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" onClick={() => navigate(hero.primary_cta_link || (user ? "/order" : "/login"))} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
                     {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </motion.div>
+                )}
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button size="lg" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
                     <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Book for Event"}
@@ -424,6 +428,7 @@ const Index = () => {
 
           </div>
         </motion.div>
+        {settings.custom_caricature_visible?.enabled !== false && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
           className="glass-crystal border-t border-border/20">
           <div className="container mx-auto px-4 py-3 text-center">
@@ -432,6 +437,7 @@ const Index = () => {
             </p>
           </div>
         </motion.div>
+        )}
       </section>
 
       {/* Dynamic Sections — rendered in admin-configured order, lazy loaded */}

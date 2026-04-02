@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 // New order: location → caricature details → photos → customer details → address → summary
 const STEPS = ["location", "details", "photos", "customer", "address", "summary"] as const;
@@ -32,18 +33,22 @@ const Order = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { getPrice, fetchCustomerPricing } = usePricing();
+  const { settings } = useSiteSettings();
   const [formData, setFormData] = useState<OrderFormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Redirect to register if not logged in
+  // Redirect if not logged in or caricature ordering is disabled
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/register");
     }
-  }, [authLoading, user, navigate]);
+    if (!authLoading && settings.custom_caricature_visible?.enabled === false) {
+      navigate("/");
+    }
+  }, [authLoading, user, navigate, settings.custom_caricature_visible]);
 
   // Auto-fill from profile & fetch custom pricing with real-time sync
   useEffect(() => {

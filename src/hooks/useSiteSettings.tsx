@@ -29,6 +29,8 @@ type SiteSettings = {
   allow_registration_maintenance: { enabled: boolean };
   login_popup_visible: { enabled: boolean };
   dashboard_tabs: DashboardTabs;
+  custom_caricature_visible: { enabled: boolean };
+  admin_splash_enabled: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -53,6 +55,8 @@ const defaults: SiteSettings = {
   allow_registration_maintenance: { enabled: false },
   login_popup_visible: { enabled: true },
   dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
+  custom_caricature_visible: { enabled: true },
+  admin_splash_enabled: { enabled: true },
 };
 
 // Module-level cache so all instances share one fetch result
