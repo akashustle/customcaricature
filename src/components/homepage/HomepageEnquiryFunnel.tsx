@@ -281,7 +281,7 @@ const HomepageEnquiryFunnel = () => {
                         </div>
                       ) : null;
                     })()}
-                    <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left">
+                    <div className="bg-muted/50 rounded-xl p-4 mb-4 text-left">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
                           <Sparkles className="w-4 h-4 text-accent" />
@@ -292,6 +292,28 @@ const HomepageEnquiryFunnel = () => {
                         </div>
                       </div>
                     </div>
+                    {/* WhatsApp button with prefilled enquiry details */}
+                    {(() => {
+                      const eventLabel = eventTypes.find((e: any) => e.id === data.event)?.label || data.otherDetails || data.event;
+                      const cityLabel = cities.find((c: any) => c.id === data.city)?.label || data.otherDetails || data.city;
+                      const budgetLabel = budgets.find((b: any) => b.id === data.budget)?.label || data.budget;
+                      const MUMBAI_IDS = ["mumbai", "navi_mumbai", "thane", "palghar"];
+                      const isMumbai = MUMBAI_IDS.includes(data.city);
+                      const region = isMumbai ? "mumbai" : "pan_india";
+                      const pricing = pricingInfo?.find((p: any) => p.region === region && p.artist_count === 1);
+                      const pricingLine = pricing ? `Estimated Price: ₹${pricing.total_price?.toLocaleString("en-IN")} (Advance: ₹${pricing.advance_amount?.toLocaleString("en-IN")})` : "";
+                      const waMsg = `Hi Creative Caricature Club! 🎨\n\nI'm interested in booking a live caricature artist for my event. Here are my details:\n\n📋 Event Type: ${eventLabel}\n📍 City: ${cityLabel}\n📅 Event Date: ${data.date || "Not selected"}\n💰 Budget Range: ${budgetLabel}\n${pricingLine ? `💵 ${pricingLine}\n` : ""}\nI'd like to know more about availability, pricing, and next steps. Please help me with the booking!\n\nThank you 🙏`;
+                      return (
+                        <a
+                          href={`https://wa.me/918369594271?text=${encodeURIComponent(waMsg)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-body font-semibold text-sm px-5 py-2.5 rounded-full shadow-md transition-all mb-4"
+                        >
+                          <MessageCircle className="w-4 h-4" /> Chat on WhatsApp
+                        </a>
+                      );
+                    })()}
                     {!user && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground font-body justify-center mb-4">
                         <Lock className="w-3.5 h-3.5" />
