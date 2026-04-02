@@ -40,12 +40,15 @@ const Order = () => {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Redirect to register if not logged in
+  // Redirect if not logged in or caricature ordering is disabled
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/register");
     }
-  }, [authLoading, user, navigate]);
+    if (!authLoading && settings.custom_caricature_visible?.enabled === false) {
+      navigate("/");
+    }
+  }, [authLoading, user, navigate, settings.custom_caricature_visible]);
 
   // Auto-fill from profile & fetch custom pricing with real-time sync
   useEffect(() => {
