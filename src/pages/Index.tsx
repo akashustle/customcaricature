@@ -264,7 +264,9 @@ const Index = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-body"><User className="w-4 h-4 mr-2" /> Dashboard</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/order")} className="font-body"><Palette className="w-4 h-4 mr-2" /> New Order</DropdownMenuItem>
+                    {settings.custom_caricature_visible?.enabled !== false && (
+                      <DropdownMenuItem onClick={() => navigate("/order")} className="font-body"><Palette className="w-4 h-4 mr-2" /> New Order</DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="font-body text-destructive"><LogOut className="w-4 h-4 mr-2" /> Logout</DropdownMenuItem>
                   </DropdownMenuContent>
