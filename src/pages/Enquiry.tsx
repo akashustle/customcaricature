@@ -432,7 +432,11 @@ const Enquiry = () => {
               <div className="flex flex-col gap-2 pt-2">
                 <p className="text-xs text-muted-foreground font-sans text-center">Need help? Connect with us:</p>
                 <Button onClick={() => {
-                  const msg = `Hi, I submitted an event enquiry (${enquiryId}) for ${eventType === "other" ? customEventType : eventType} on ${eventDate ? format(eventDate, "dd MMM yyyy") : "TBD"} in ${city || state || "India"}. I'd like to know more.`;
+                  const finalEvent = eventType === "other" ? customEventType : COMMON_EVENT_TYPES.find(t => t.value === eventType)?.label || eventType;
+                  const locationParts = [city, district, state, country].filter(Boolean).join(", ");
+                  const dateStr = eventDate ? format(eventDate, "dd MMM yyyy") : "Not decided yet";
+                  const priceLine = resolvedPrice ? `💰 Estimated Price: ${resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}${resolvedPrice.price.toLocaleString("en-IN")} (Based on ${resolvedPrice.source} pricing)` : "";
+                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted an event enquiry and need help with booking.\n\n📋 *Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎉 *Event Information:*\n🎊 Event Type: ${finalEvent}\n📍 Location: ${locationParts}\n📅 Event Date: ${dateStr}\n${priceLine ? `${priceLine}\n` : ""}\nI'd like to know more about artist availability, exact pricing, and how to proceed with the booking. Please help! 🙏`;
                   window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
                 }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
