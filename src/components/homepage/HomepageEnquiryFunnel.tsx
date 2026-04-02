@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Sparkles, ArrowRight, ArrowLeft, Lock, CheckCircle, TrendingUp, Clock, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, Users, Sparkles, ArrowRight, ArrowLeft, Lock, CheckCircle, TrendingUp, Clock, AlertCircle, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
