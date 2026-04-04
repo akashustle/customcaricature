@@ -1467,3 +1467,43 @@
   font-family: 'Georgia', serif;
   line-height: 1;
 }
+
+/* ===== Performance: GPU-accelerated layers ===== */
+.cv-auto { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+.gpu { transform: translateZ(0); will-change: transform; }
+
+/* Smooth page transitions */
+[data-motion-pop-id] { will-change: transform, opacity; }
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Workshop background orbs — pure CSS, zero JS overhead */
+@keyframes orb-float-1 {
+  0%, 100% { transform: scale(1) translateX(0); }
+  50% { transform: scale(1.2) translateX(30px); }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+}
+.ws-orb-1 { animation: orb-float-1 10s ease-in-out infinite; }
+.ws-orb-2 { animation: orb-float-2 12s ease-in-out infinite; }
+
+/* Optimize scrollbar-hide for bottom navs */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* Fast tab transitions */
+.tab-content-enter { animation: tab-fade-in 0.2s ease-out; }
+@keyframes tab-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

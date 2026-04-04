@@ -163,10 +163,9 @@ const Dashboard = () => {
         }
       });
 
-    // Polling fallback: check every 10s for portal requests in case realtime misses
     const portalPoll = setInterval(() => {
       fetchLatestPortalPaymentRequest(user.id);
-    }, 10000);
+    }, 30000);
 
     return () => { cancelled = true; clearInterval(portalPoll); supabase.removeChannel(channel); };
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);

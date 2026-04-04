@@ -263,18 +263,11 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Content with stagger animation */}
+      {/* Content — lightweight fade */}
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
-        <AnimatePresence mode="wait">
-          <motion.div key={activeTab}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            {renderContent()}
-          </motion.div>
-        </AnimatePresence>
+        <div key={activeTab} className="tab-content-enter">
+          {renderContent()}
+        </div>
       </div>
 
       {/* Mobile Bottom Nav - Instagram Style */}
