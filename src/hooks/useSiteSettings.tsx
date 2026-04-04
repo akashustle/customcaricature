@@ -31,6 +31,10 @@ type SiteSettings = {
   dashboard_tabs: DashboardTabs;
   custom_caricature_visible: { enabled: boolean };
   admin_splash_enabled: { enabled: boolean };
+  permission_location: { enabled: boolean };
+  permission_notifications: { enabled: boolean };
+  permission_microphone: { enabled: boolean };
+  permission_camera: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
