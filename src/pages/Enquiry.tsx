@@ -439,8 +439,11 @@ const Enquiry = () => {
                   const finalEvent = eventType === "other" ? customEventType : COMMON_EVENT_TYPES.find(t => t.value === eventType)?.label || eventType;
                   const locationParts = [city, district, state, country].filter(Boolean).join(", ");
                   const dateStr = eventDate ? format(eventDate, "dd MMM yyyy") : "Not decided yet";
-                  const priceLine = resolvedPrice ? `💰 Estimated Price: ${resolvedPrice.currency === "INR" ? "₹" : resolvedPrice.currency}${resolvedPrice.price.toLocaleString("en-IN")} (Based on ${resolvedPrice.source} pricing)` : "";
-                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted an event enquiry and need help with booking.\n\n📋 *Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎉 *Event Information:*\n🎊 Event Type: ${finalEvent}\n📍 Location: ${locationParts}\n📅 Event Date: ${dateStr}\n${priceLine ? `${priceLine}\n` : ""}\nI'd like to know more about artist availability, exact pricing, and how to proceed with the booking. Please help! 🙏`;
+                  const currSymbol = resolvedPrice?.currency === "INR" ? "₹" : (resolvedPrice?.currency || "₹");
+                  const advanceAmt = resolvedPrice ? Math.round(resolvedPrice.price * 0.5) : null;
+                  const pricingBlock = resolvedPrice ? `\n💰 *Pricing Breakdown:*\n📊 Estimated Total: ${currSymbol}${resolvedPrice.price.toLocaleString("en-IN")}\n💳 Advance Amount (50%): ${currSymbol}${advanceAmt?.toLocaleString("en-IN")}\n📏 Pricing Basis: ${resolvedPrice.source} rate` : "";
+                  const regionLabel = country !== "India" ? "International" : (getEventRegion() === "maharashtra" ? "Maharashtra Region" : "Pan India");
+                  const msg = `Hi Creative Caricature Club! 🎨\n\nI just submitted an event enquiry and would love to proceed.\n\n📋 *My Enquiry Details:*\n🔖 Enquiry ID: ${enquiryId}\n👤 Name: ${name}\n📱 Mobile: ${mobile}${email ? `\n📧 Email: ${email}` : ""}${instagramId ? `\n📸 Instagram: ${instagramId}` : ""}\n\n🎉 *Event Information:*\n🎊 Event Type: ${finalEvent}\n📍 Location: ${locationParts}\n🌍 Region: ${regionLabel}\n📅 Event Date: ${dateStr}${pricingBlock}\n\nI'd like to know more about:\n✅ Artist availability for my date\n✅ Exact pricing & packages\n✅ How to confirm the booking\n\nPlease help me finalize! 🙏`;
                   window.open(`https://wa.me/${contactInfo.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
                 }} className="w-full font-sans bg-green-600 hover:bg-green-700">
                   <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
