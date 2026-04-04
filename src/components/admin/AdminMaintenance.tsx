@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { AlertTriangle, Globe, Home, UserPlus, LogIn, LayoutDashboard, Package, Calendar, ShoppingBag, ClipboardList, Save, Wrench, BookOpen, MessageCircle, HelpCircle, FileText, Clock, Timer, Eye, EyeOff, Receipt, Bell, User, Settings, CreditCard, Store, GraduationCap } from "lucide-react";
+import { AlertTriangle, Globe, Home, UserPlus, LogIn, LayoutDashboard, Package, Calendar, ShoppingBag, ClipboardList, Save, Wrench, BookOpen, MessageCircle, HelpCircle, FileText, Clock, Timer, Eye, EyeOff, Receipt, Bell, User, Settings, CreditCard, Store, GraduationCap, MapPin, Mic, Camera, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -213,6 +213,35 @@ const AdminMaintenance = () => {
               />
             </div>
             <p className="text-[10px] text-muted-foreground">This message is prefilled when users click the WhatsApp button on the maintenance page.</p>
+          </div>
+
+          {/* Permission Toggles */}
+          <div className="space-y-3 pt-3 border-t border-border/40">
+            <Label className="text-sm font-medium flex items-center gap-2"><Shield className="w-4 h-4" /> Customer Permission Prompts</Label>
+            <p className="text-[10px] text-muted-foreground">Control which browser permissions are requested from visitors</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { key: "permission_location", label: "Location", icon: MapPin, desc: "Track visitor location" },
+                { key: "permission_notifications", label: "Notifications", icon: Bell, desc: "Push notifications" },
+                { key: "permission_microphone", label: "Microphone", icon: Mic, desc: "Voice features" },
+                { key: "permission_camera", label: "Camera", icon: Camera, desc: "Camera access" },
+              ].map(perm => {
+                const Icon = perm.icon;
+                const isOn = (siteSettings as any)[perm.key]?.enabled ?? true;
+                return (
+                  <div key={perm.key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isOn ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/40"}`}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-primary" />
+                      <div>
+                        <p className="text-xs font-medium">{perm.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{perm.desc}</p>
+                      </div>
+                    </div>
+                    <Switch checked={isOn} onCheckedChange={(v) => updateSiteSetting(perm.key, { enabled: v })} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </CardContent>
       </Card>
