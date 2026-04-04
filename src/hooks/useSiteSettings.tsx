@@ -61,6 +61,10 @@ const defaults: SiteSettings = {
   dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
   custom_caricature_visible: { enabled: true },
   admin_splash_enabled: { enabled: true },
+  permission_location: { enabled: true },
+  permission_notifications: { enabled: true },
+  permission_microphone: { enabled: true },
+  permission_camera: { enabled: true },
 };
 
 // Module-level cache so all instances share one fetch result
