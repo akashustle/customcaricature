@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -176,14 +176,12 @@ const WorkshopDashboard = () => {
 
   return (
     <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300 relative`}>
-      {/* Background animated orbs */}
+      {/* Background orbs — pure CSS for zero JS overhead */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <motion.div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px]"
-          style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }}
-          animate={{ scale: [1, 1.2, 1], x: [0, 30, 0] }} transition={{ duration: 10, repeat: Infinity }} />
-        <motion.div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.03] blur-[80px]"
-          style={{ background: `linear-gradient(225deg, ${accent.secondary}, ${accent.primary})` }}
-          animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 12, repeat: Infinity }} />
+        <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px] ws-orb-1"
+          style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }} />
+        <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.03] blur-[80px] ws-orb-2"
+          style={{ background: `linear-gradient(225deg, ${accent.secondary}, ${accent.primary})` }} />
       </div>
 
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
@@ -265,18 +263,11 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Content with stagger animation */}
+      {/* Content — lightweight fade */}
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
-        <AnimatePresence mode="wait">
-          <motion.div key={activeTab}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            {renderContent()}
-          </motion.div>
-        </AnimatePresence>
+        <div key={activeTab} className="tab-content-enter">
+          {renderContent()}
+        </div>
       </div>
 
       {/* Mobile Bottom Nav - Instagram Style */}
