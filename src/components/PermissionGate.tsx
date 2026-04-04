@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { requestBrowserNotificationPermission } from "@/lib/webpush";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const GATE_KEY = "ccc_permissions_gate_v3";
 const ADMIN_ROUTES = ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel"];
 
 const PermissionGate = () => {
   const { user } = useAuth();
+  const { settings } = useSiteSettings();
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
@@ -26,9 +28,17 @@ const PermissionGate = () => {
 
   const isAdminRoute = typeof window !== "undefined" && ADMIN_ROUTES.some(r => window.location.pathname.startsWith(r));
   const isStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
-  const requiredPermissionsGranted = locationStatus === "granted" && (notificationStatus === "granted" || notificationStatus === "unsupported");
 
-  // Check existing permissions immediately on mount
+  // Admin routes always request all; for customers, respect admin toggles
+  const askLocation = isAdminRoute || (settings as any).permission_location?.enabled !== false;
+  const askNotifications = isAdminRoute || (settings as any).permission_notifications?.enabled !== false;
+  const askMicrophone = isAdminRoute || (settings as any).permission_microphone?.enabled !== false;
+  const askCamera = isAdminRoute || (settings as any).permission_camera?.enabled !== false;
+
+  const requiredPermissionsGranted = 
+    (!askLocation || locationStatus === "granted") && 
+    (!askNotifications || notificationStatus === "granted" || notificationStatus === "unsupported");
+
   useEffect(() => {
     if (navigator.permissions) {
       navigator.permissions.query({ name: "geolocation" }).then(r => {
@@ -51,31 +61,30 @@ const PermissionGate = () => {
 
   useEffect(() => {
     const done = localStorage.getItem(GATE_KEY) === "done";
-
-    // Always re-init web push if notification permission is granted (even if gate was completed)
     if (typeof Notification !== "undefined" && Notification.permission === "granted") {
       requestBrowserNotificationPermission(user?.id);
     }
-
     if (done) return;
 
-    // If all already granted, mark done and skip — do NOT re-show
-    const allGranted = locationStatus === "granted" && (typeof Notification === "undefined" || Notification.permission === "granted");
+    if (!askLocation && !askNotifications && !askMicrophone && !askCamera) {
+      localStorage.setItem(GATE_KEY, "done");
+      return;
+    }
+
+    const allGranted = (!askLocation || locationStatus === "granted") && (!askNotifications || typeof Notification === "undefined" || Notification.permission === "granted");
     if (allGranted) {
       localStorage.setItem(GATE_KEY, "done");
       setVisible(false);
       return;
     }
 
-    // Shorter delay for admin PWA (3s), normal delay for website (20s)
     const delayMs = (isAdminRoute || isStandalone) ? 3000 : 20000;
     const timer = setTimeout(() => {
-      // Double-check gate wasn't completed in the meantime
       if (localStorage.getItem(GATE_KEY) === "done") return;
       setVisible(true);
     }, delayMs);
     return () => clearTimeout(timer);
-  }, [user?.id, isAdminRoute, isStandalone, locationStatus]);
+  }, [user?.id, isAdminRoute, isStandalone, locationStatus, askLocation, askNotifications, askMicrophone, askCamera]);
 
   useEffect(() => {
     if (!requesting && visible && requiredPermissionsGranted) {
@@ -83,7 +92,6 @@ const PermissionGate = () => {
     }
   }, [requesting, visible, requiredPermissionsGranted]);
 
-  // Safety: auto-dismiss if stuck for more than 15 seconds while requesting
   useEffect(() => {
     if (requesting) {
       const timer = setTimeout(() => {
@@ -105,11 +113,10 @@ const PermissionGate = () => {
 
   const handleAllow = async () => {
     setRequesting(true);
+    const tasks: Promise<void>[] = [];
 
-    // Request all permissions in parallel for speed
-    await Promise.allSettled([
-      // Location
-      new Promise<void>((resolve) => {
+    if (askLocation) {
+      tasks.push(new Promise<void>((resolve) => {
         setCurrentStep("location");
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -124,17 +131,21 @@ const PermissionGate = () => {
           () => { setLocationStatus("denied"); resolve(); },
           { timeout: 5000, enableHighAccuracy: false }
         );
-      }),
-      // Notifications
-      (async () => {
+      }));
+    }
+
+    if (askNotifications) {
+      tasks.push((async () => {
         setCurrentStep("notifications");
         try {
           const perm = await requestBrowserNotificationPermission(user?.id);
           setNotificationStatus(perm === "unsupported" ? "unsupported" : perm);
         } catch {}
-      })(),
-      // Microphone
-      (async () => {
+      })());
+    }
+
+    if (askMicrophone) {
+      tasks.push((async () => {
         setCurrentStep("microphone");
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -143,9 +154,11 @@ const PermissionGate = () => {
         } catch {
           setMicStatus("denied");
         }
-      })(),
-      // Camera
-      (async () => {
+      })());
+    }
+
+    if (askCamera) {
+      tasks.push((async () => {
         setCurrentStep("camera");
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -154,10 +167,13 @@ const PermissionGate = () => {
         } catch {
           setCameraStatus("denied");
         }
-      })(),
-    ]);
+      })());
+    }
+
+    await Promise.allSettled(tasks);
 
     const finalLocationStatus = await (async () => {
+      if (!askLocation) return "granted";
       if (!navigator.permissions) return locationStatus;
       try {
         const result = await navigator.permissions.query({ name: "geolocation" });
@@ -167,26 +183,30 @@ const PermissionGate = () => {
       }
     })();
 
-    const finalNotificationStatus = typeof Notification === "undefined" ? "unsupported" : Notification.permission;
+    const finalNotificationStatus = !askNotifications ? "granted" : (typeof Notification === "undefined" ? "unsupported" : Notification.permission);
     setLocationStatus(finalLocationStatus);
     setNotificationStatus(finalNotificationStatus);
     setCurrentStep(null);
     setRequesting(false);
 
-    if (finalLocationStatus === "granted" && (finalNotificationStatus === "granted" || finalNotificationStatus === "unsupported")) {
+    if ((!askLocation || finalLocationStatus === "granted") && (!askNotifications || finalNotificationStatus === "granted" || finalNotificationStatus === "unsupported")) {
       completeGate();
     }
   };
 
+  const allStatuses = [
+    { label: "Location", value: locationStatus, icon: MapPin, step: "location", enabled: askLocation },
+    { label: "Notifications", value: notificationStatus, icon: Bell, step: "notifications", enabled: askNotifications },
+    { label: "Microphone", value: micStatus, icon: Mic, step: "microphone", enabled: askMicrophone },
+    { label: "Camera", value: cameraStatus, icon: Camera, step: "camera", enabled: askCamera },
+  ];
+
   const statuses = useMemo(
-    () => [
-      { label: "Location", value: locationStatus, icon: MapPin, step: "location" },
-      { label: "Notifications", value: notificationStatus, icon: Bell, step: "notifications" },
-      { label: "Microphone", value: micStatus, icon: Mic, step: "microphone" },
-      { label: "Camera", value: cameraStatus, icon: Camera, step: "camera" },
-    ],
-    [locationStatus, notificationStatus, micStatus, cameraStatus]
+    () => allStatuses.filter(s => s.enabled),
+    [locationStatus, notificationStatus, micStatus, cameraStatus, askLocation, askNotifications, askMicrophone, askCamera]
   );
+
+  if (statuses.length === 0) return null;
 
   return (
     <AnimatePresence>
