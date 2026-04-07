@@ -786,6 +786,8 @@ const SettingsSection = ({ newSecretCode, setNewSecretCode, changeSecretCode, ch
 );
 
 const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, handlePayNow, navigate, userId }: any) => {
+  const { settings: _siteSettings } = useSiteSettings();
+  const caricatureOff = _siteSettings.custom_caricature_visible?.enabled === false;
   const [reviews, setReviews] = useState<Record<string, any>>({});
   const [adminReplies, setAdminReplies] = useState<Record<string, any>>({});
   const [artworkPhotos, setArtworkPhotos] = useState<Record<string, any[]>>({});
@@ -1975,6 +1977,8 @@ ${!isEvent ? '<div class="thank-you"><h3>🎨 Thank You for Your Order!</h3><p>Y
 };
 
 const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, canBookEvent }: any) => {
+  const { settings: _siteSettings2 } = useSiteSettings();
+  const caricatureOff = _siteSettings2.custom_caricature_visible?.enabled === false;
   const suggestions: { icon: any; text: string; action: () => void; color: string }[] = [];
 
   const pendingPayment = orders.find((o: any) => o.payment_status !== "confirmed");

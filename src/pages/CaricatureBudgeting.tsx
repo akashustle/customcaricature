@@ -22,6 +22,8 @@ const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
   const { types, getPrice } = usePricing();
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [phase, setPhase] = useState<"intro" | "event" | "caricature">("intro");
   const [introComplete, setIntroComplete] = useState(false);
   const [introStep, setIntroStep] = useState(0);

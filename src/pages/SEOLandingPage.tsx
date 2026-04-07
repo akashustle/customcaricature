@@ -36,6 +36,8 @@ const SEOLandingPage = () => {
   const [page, setPage] = useState<LandingPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedPages, setRelatedPages] = useState<LandingPage[]>([]);
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
 
   useEffect(() => {
     // If slug looks like a file (has extension) or is a known static asset, skip

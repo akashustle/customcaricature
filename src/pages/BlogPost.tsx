@@ -53,6 +53,8 @@ const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostType | null>(null);
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [loading, setLoading] = useState(true);
   const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
   const [showBackToTop, setShowBackToTop] = useState(false);

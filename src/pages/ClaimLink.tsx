@@ -10,6 +10,8 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 const ClaimLink = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const code = params.get("code");
   const [status, setStatus] = useState<"loading" | "claiming" | "success" | "error" | "login_required">("loading");
   const [errorMsg, setErrorMsg] = useState("");
