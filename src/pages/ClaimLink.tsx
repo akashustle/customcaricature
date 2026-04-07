@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, XCircle, Link2 } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ClaimLink = () => {
   const [params] = useSearchParams();
@@ -125,7 +126,7 @@ const ClaimLink = () => {
               <p className="font-semibold text-green-700">Custom pricing activated!</p>
               {linkLabel && <p className="text-sm text-muted-foreground">{linkLabel}</p>}
               <div className="flex gap-2 justify-center">
-                <Button onClick={() => navigate("/order")}>Order Now</Button>
+                {!caricatureOff && <Button onClick={() => navigate("/order")}>Order Now</Button>}
                 <Button variant="outline" onClick={() => navigate("/book-event")}>Book Event</Button>
               </div>
             </div>

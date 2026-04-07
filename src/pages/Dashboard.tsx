@@ -885,13 +885,13 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   <>
     <div className="flex justify-between items-center mb-4">
       <h2 className="font-display text-xl font-bold">My Orders</h2>
-      <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ New Order</Button>
+      {!caricatureOff && <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ New Order</Button>}
     </div>
     {orders.length === 0 ? (
       <Card><CardContent className="p-8 text-center">
         <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <p className="font-sans text-muted-foreground mb-4">No orders yet</p>
-        <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Order Your Caricature</Button>
+        {!caricatureOff && <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90">Order Your Caricature</Button>}
       </CardContent></Card>
     ) : (
       <div className="space-y-3">
@@ -1987,7 +1987,7 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
     suggestions.push({ icon: Sparkles, text: `Your caricature is being crafted! Check order details`, action: () => {}, color: "hsl(210,65%,55%)" });
   }
 
-  if (orders.length === 0) {
+  if (orders.length === 0 && !caricatureOff) {
     suggestions.push({ icon: Package, text: "Order your first custom caricature today!", action: () => navigate("/order"), color: "hsl(36,45%,52%)" });
   }
 

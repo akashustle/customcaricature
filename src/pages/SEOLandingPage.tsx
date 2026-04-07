@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Calendar, Phone, Star, Users, CheckCircle, ArrowRight, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type LandingPage = {
   id: string;
@@ -160,9 +161,11 @@ const SEOLandingPage = () => {
               <Calendar className="w-4 h-4 mr-2" />
               Book for Event
             </Button>
+            {!caricatureOff && (
             <Button size="lg" variant="outline" onClick={() => navigate("/order")} className="font-body">
               Order Custom Caricature
             </Button>
+            )}
             <Button size="lg" variant="secondary" onClick={() => navigate("/enquiry")} className="font-body">
               <MessageCircle className="w-4 h-4 mr-2" />
               Send Enquiry
