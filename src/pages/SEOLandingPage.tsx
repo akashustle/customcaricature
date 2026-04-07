@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Calendar, Phone, Star, Users, CheckCircle, ArrowRight, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type LandingPage = {
   id: string;
@@ -35,6 +36,8 @@ const SEOLandingPage = () => {
   const [page, setPage] = useState<LandingPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedPages, setRelatedPages] = useState<LandingPage[]>([]);
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
 
   useEffect(() => {
     // If slug looks like a file (has extension) or is a known static asset, skip
@@ -160,9 +163,11 @@ const SEOLandingPage = () => {
               <Calendar className="w-4 h-4 mr-2" />
               Book for Event
             </Button>
+            {!caricatureOff && (
             <Button size="lg" variant="outline" onClick={() => navigate("/order")} className="font-body">
               Order Custom Caricature
             </Button>
+            )}
             <Button size="lg" variant="secondary" onClick={() => navigate("/enquiry")} className="font-body">
               <MessageCircle className="w-4 h-4 mr-2" />
               Send Enquiry

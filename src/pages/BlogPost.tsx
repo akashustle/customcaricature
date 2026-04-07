@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, User, Share2, BookOpen, Link2, Printer, ChevronUp, Facebook, Twitter, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "@/hooks/use-toast";
 import { gtagBlogView, gtagShareClick } from "@/lib/gtag";
 
@@ -52,6 +53,8 @@ const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostType | null>(null);
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [loading, setLoading] = useState(true);
   const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -389,11 +392,13 @@ const BlogPost = () => {
             )}
 
             {/* CTA */}
+            {!caricatureOff && (
             <div className="mt-10 p-6 rounded-2xl bg-primary/5 border border-primary/20 text-center">
               <h3 className="font-display text-xl font-semibold mb-2">Ready to Order Your Caricature?</h3>
               <p className="text-muted-foreground text-sm mb-4">Turn your photos into art — delivered to your doorstep.</p>
               <Button onClick={() => navigate("/order")} className="rounded-full">Order Now →</Button>
             </div>
+            )}
           </article>
 
           {/* Right sidebar — Popular Posts (desktop) */}

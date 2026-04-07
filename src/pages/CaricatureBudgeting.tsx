@@ -12,7 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePricing } from "@/hooks/usePricing";
 import PricingReveal from "@/components/PricingReveal";
 import UrgencyTimer from "@/components/UrgencyTimer";
-import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2 } from "lucide-react";
+import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2, AlertTriangle } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { playCurrencySound, playEnterSound, playCoinDrop, playCashRegister } from "@/lib/sounds";
 
 const WHATSAPP_NUMBER = "918369594271";
@@ -21,6 +22,8 @@ const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
   const { types, getPrice } = usePricing();
+  const { settings: siteSettings } = useSiteSettings();
+  const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [phase, setPhase] = useState<"intro" | "event" | "caricature">("intro");
   const [introComplete, setIntroComplete] = useState(false);
   const [introStep, setIntroStep] = useState(0);
@@ -372,9 +375,17 @@ const CaricatureBudgeting = () => {
                 )}
 
                 <div className="space-y-3 mt-4">
+                  {caricatureOff ? (
+                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                      <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                      <p className="text-sm font-semibold text-amber-800">Custom caricature ordering is temporarily paused 🎨</p>
+                      <p className="text-xs text-amber-600 mt-1">We'll be back soon — stay tuned!</p>
+                    </div>
+                  ) : (
                   <Button className="w-full rounded-full text-base py-6" onClick={() => navigate("/order")}>
                     <Palette className="w-5 h-5 mr-2" />Order Now <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="outline" className="rounded-full" onClick={() => navigate("/enquiry")}>📋 Enquiry</Button>
                     <Button variant="outline" className="rounded-full" onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, "_blank")}>💬 WhatsApp</Button>
