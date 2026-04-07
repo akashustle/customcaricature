@@ -100,6 +100,9 @@ const HomepageGallery = ({ table, title, subtitle }: {
                   alt={item.caption || `${title} ${i + 1}`}
                   className="w-full h-48 md:h-56 object-cover"
                   loading="lazy"
+                  decoding="async"
+                  width={300}
+                  height={224}
                 />
                 {item.caption && (
                   <p className="px-3 py-2 text-xs font-body text-muted-foreground truncate">{item.caption}</p>

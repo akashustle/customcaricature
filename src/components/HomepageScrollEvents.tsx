@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const HomepageScrollEvents = () => {
@@ -20,7 +20,8 @@ const HomepageScrollEvents = () => {
 
   if (items.length === 0) return null;
 
-  const doubled = [...items, ...items];
+  const tripled = [...items, ...items, ...items];
+  const duration = Math.max(20, items.length * 5);
 
   return (
     <>
@@ -39,7 +40,7 @@ const HomepageScrollEvents = () => {
         </AnimatePresence>
       )}
 
-      <section className="py-12 md:py-16">
+      <section className="py-12 md:py-16" style={{ contentVisibility: 'auto', containIntrinsicSize: '0 400px' }}>
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-6">
             <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Live Events</p>
@@ -47,17 +48,19 @@ const HomepageScrollEvents = () => {
             <p className="text-muted-foreground font-body">Moments from our live caricature events</p>
           </motion.div>
         </div>
+        <style>{`@keyframes events-scroll{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-33.33%,0,0)}}`}</style>
         <div className="overflow-hidden py-4">
-          <motion.div className="flex gap-4"
-            animate={{ x: [0, -(items.length * 280)] }}
-            transition={{ x: { repeat: Infinity, repeatType: "loop", duration: Math.max(15, items.length * 4), ease: "linear" } }}>
-            {doubled.map((item: any, i) => (
-              <motion.div key={i} className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md border border-border/50"
-                whileHover={{ scale: 1.03, y: -4 }} onClick={() => { setLightboxIndex(i % items.length); setLightboxOpen(true); }}>
-                <img src={item.image_url} alt={item.caption || `Event ${(i % items.length) + 1}`} className="w-full h-full object-cover" loading="lazy" />
-              </motion.div>
+          <div
+            className="flex gap-4 will-change-transform"
+            style={{ animation: `events-scroll ${duration}s linear infinite`, width: "max-content" }}
+          >
+            {tripled.map((item: any, i) => (
+              <div key={i} className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md border border-border/50 hover:scale-[1.03] hover:-translate-y-1 transition-transform duration-300"
+                onClick={() => { setLightboxIndex(i % items.length); setLightboxOpen(true); }}>
+                <img src={item.image_url} alt={item.caption || `Event ${(i % items.length) + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" width={256} height={320} />
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
     </>

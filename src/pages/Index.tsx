@@ -100,10 +100,10 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
   const tripled = [...images, ...images, ...images];
   return (
     <>
-      <style>{`@keyframes gallery-scroll{0%{transform:translateX(0)}100%{transform:translateX(-33.33%)}}`}</style>
+      <style>{`@keyframes gallery-scroll{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-33.33%,0,0)}}`}</style>
       <div className="overflow-hidden py-8">
         <div
-          className="flex gap-4"
+          className="flex gap-4 will-change-transform"
           style={{ animation: "gallery-scroll 30s linear infinite", width: "max-content" }}
         >
           {tripled.map((img, i) => (
@@ -112,7 +112,7 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
               className="flex-shrink-0 w-64 h-80 rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl hover:scale-[1.03] hover:-translate-y-1 transition-all duration-300"
               onClick={() => onImageClick(i % images.length)}
             >
-              <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" />
+              <img src={img} alt={`Caricature artwork ${(i % images.length) + 1}`} className="w-full h-full object-cover" width={256} height={320} loading="lazy" decoding="async" fetchPriority={i < 4 ? "high" : "low"} />
             </div>
           ))}
         </div>
@@ -123,16 +123,20 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
 
 const ScrollTypeReveal = ({ text, className }: { text: string; className?: string }) => {
   const [visibleChars, setVisibleChars] = useState(0);
+  const rafRef = useRef(0);
 
   useEffect(() => {
     const update = () => {
-      const progress = Math.min(1, window.scrollY / 320);
-      setVisibleChars(Math.max(1, Math.floor(text.length * progress)));
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const progress = Math.min(1, window.scrollY / 320);
+        setVisibleChars(Math.max(1, Math.floor(text.length * progress)));
+      });
     };
 
     update();
     window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    return () => { window.removeEventListener("scroll", update); cancelAnimationFrame(rafRef.current); };
   }, [text]);
 
   const shown = text.slice(0, visibleChars);
