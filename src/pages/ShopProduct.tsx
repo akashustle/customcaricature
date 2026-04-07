@@ -145,7 +145,7 @@ const ShopProduct = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SEOHead title={product.seo_title || `${product.name} | CCC Shop`} description={product.seo_description || product.description?.slice(0, 160)} />
+      <SEOHead title={product.seo_title || `${product.name} | CCC Shop`} description={product.seo_description || product.description?.slice(0, 160)} canonical={`/shop/product/${product.slug}`} />
 
       <div className="bg-card border-b border-border sticky top-0 z-40 px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/shop")}><ArrowLeft className="w-5 h-5" /></Button>

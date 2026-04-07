@@ -718,7 +718,7 @@ const Workshop = () => {
   // Details View (Main Workshop Page)
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
-      <SEOHead title={`${workshop.title} - Creative Caricature Club™`} description={workshop.description} />
+      <SEOHead title={`${workshop.title} - Creative Caricature Club™`} description={workshop.description} canonical="/workshop" />
       
       {/* Hero */}
       <section className="relative overflow-hidden py-16 md:py-28 bg-gradient-to-br from-primary/5 via-background to-accent/5">
