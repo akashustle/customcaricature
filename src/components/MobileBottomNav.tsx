@@ -1,9 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Search, User, ShoppingBag, Compass, GraduationCap, MessageCircle, Play, Sparkles } from "lucide-react";
+import { Home, User, ShoppingBag, Compass, GraduationCap, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { motion } from "framer-motion";
 
 const MobileBottomNav = () => {
   const navigate = useNavigate();
@@ -31,20 +30,17 @@ const MobileBottomNav = () => {
       : [{ icon: User, label: "", path: "/login" }]),
   ];
 
-  const visibleItems = items;
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
       <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
         <div className="flex items-center justify-evenly max-w-lg mx-auto h-[56px] px-1">
-          {visibleItems.map((item) => {
+          {items.map((item) => {
             const active = location.pathname === item.path;
             return (
-              <motion.button
+              <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                whileTap={{ scale: 0.75 }}
-                className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0"
+                className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150"
               >
                 <item.icon
                   className={`transition-all duration-200 ${
@@ -55,13 +51,9 @@ const MobileBottomNav = () => {
                   fill={active && item.icon === Home ? "currentColor" : "none"}
                 />
                 {active && (
-                  <motion.div
-                    layoutId="insta-dot"
-                    className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
+                  <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
                 )}
-              </motion.button>
+              </button>
             );
           })}
         </div>
