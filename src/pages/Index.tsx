@@ -270,8 +270,7 @@ const Index = () => {
                     <DropdownMenuItem onClick={() => navigate("/dashboard")} className="font-body"><User className="w-4 h-4 mr-2" /> Dashboard</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => {
                       if (settings.custom_caricature_visible?.enabled === false) {
-                        const { showCaricatureOffMessage } = require("@/components/CaricatureOffToast");
-                        showCaricatureOffMessage();
+                        import("@/components/CaricatureOffToast").then(m => m.showCaricatureOffMessage());
                       } else {
                         navigate("/order");
                       }
