@@ -29,11 +29,11 @@ const PermissionGate = () => {
   const isAdminRoute = typeof window !== "undefined" && ADMIN_ROUTES.some(r => window.location.pathname.startsWith(r));
   const isStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true);
 
-  // Admin routes always request all; for customers, respect admin toggles
-  const askLocation = isAdminRoute || (settings as any).permission_location?.enabled !== false;
-  const askNotifications = isAdminRoute || (settings as any).permission_notifications?.enabled !== false;
-  const askMicrophone = isAdminRoute || (settings as any).permission_microphone?.enabled !== false;
-  const askCamera = isAdminRoute || (settings as any).permission_camera?.enabled !== false;
+  // Respect admin toggles everywhere — no forced overrides for admin routes
+  const askLocation = settings.permission_location?.enabled === true;
+  const askNotifications = settings.permission_notifications?.enabled === true;
+  const askMicrophone = settings.permission_microphone?.enabled === true;
+  const askCamera = settings.permission_camera?.enabled === true;
 
   const requiredPermissionsGranted = 
     (!askLocation || locationStatus === "granted") && 
