@@ -149,6 +149,7 @@ const AdminMaintenance = () => {
   const maintenanceWaMessage = (siteSettings as any).maintenance_whatsapp_message?.text ?? "Hi, I want to book an event caricature";
   const caricatureVisible = (siteSettings as any).custom_caricature_visible?.enabled ?? true;
   const adminSplashEnabled = (siteSettings as any).admin_splash_enabled?.enabled ?? true;
+  const adminLocationRequired = (siteSettings as any).admin_location_required?.enabled ?? false;
 
   if (loading) return <div className="flex items-center justify-center py-10"><Wrench className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
 
@@ -201,7 +202,14 @@ const AdminMaintenance = () => {
 199:               <p className="text-xs text-muted-foreground">Show splash animation on admin login page</p>
 200:             </div>
 201:             <Switch checked={adminSplashEnabled} onCheckedChange={(v) => updateSiteSetting("admin_splash_enabled", { enabled: v })} />
-202:           </div>
+ 202:           </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Require Location for Admin Login</p>
+              <p className="text-xs text-muted-foreground">Block admin dashboard if location is denied</p>
+            </div>
+            <Switch checked={adminLocationRequired} onCheckedChange={(v) => updateSiteSetting("admin_location_required", { enabled: v })} />
+          </div>
           <div className="space-y-1.5 pt-2 border-t border-border/40">
             <Label className="text-sm font-medium flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Maintenance WhatsApp Prefilled Message</Label>
             <div className="flex gap-2">

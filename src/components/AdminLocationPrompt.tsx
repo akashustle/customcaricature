@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
 import { MapPin, X, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 /**
  * Shows a sticky bar on admin pages when location permission is not granted.
- * If denied, shows a full-screen blocking overlay.
+ * If denied AND admin_location_required is enabled, shows a full-screen blocking overlay.
+ * Can be turned off from admin settings.
  */
 const AdminLocationPrompt = () => {
   const [status, setStatus] = useState<string>("prompt");
   const [dismissed, setDismissed] = useState(false);
+  const { settings } = useSiteSettings();
+  const locationRequired = (settings as any).admin_location_required?.enabled === true;
 
   useEffect(() => {
-    if (!navigator.permissions) return;
+    if (!locationRequired || !navigator.permissions) return;
     navigator.permissions.query({ name: "geolocation" }).then(r => {
       setStatus(r.state);
       r.addEventListener("change", () => setStatus(r.state));
     }).catch(() => {});
-  }, []);
+  }, [locationRequired]);
+
+  if (!locationRequired) return null;
 
   const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -33,7 +39,6 @@ const AdminLocationPrompt = () => {
     );
   };
 
-  // Full-screen blocking overlay when denied
   if (status === "denied") {
     return (
       <motion.div
