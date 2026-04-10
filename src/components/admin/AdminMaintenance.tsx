@@ -149,6 +149,7 @@ const AdminMaintenance = () => {
   const maintenanceWaMessage = (siteSettings as any).maintenance_whatsapp_message?.text ?? "Hi, I want to book an event caricature";
   const caricatureVisible = (siteSettings as any).custom_caricature_visible?.enabled ?? true;
   const adminSplashEnabled = (siteSettings as any).admin_splash_enabled?.enabled ?? true;
+  const adminLocationRequired = (siteSettings as any).admin_location_required?.enabled ?? false;
 
   if (loading) return <div className="flex items-center justify-center py-10"><Wrench className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
 
