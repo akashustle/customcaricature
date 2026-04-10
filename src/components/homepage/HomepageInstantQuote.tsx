@@ -1,14 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Zap, AlertTriangle } from "lucide-react";
+import { ArrowRight, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const HomepageInstantQuote = ({ config }: { config: any }) => {
   const navigate = useNavigate();
-  const { settings } = useSiteSettings();
-  const caricatureOff = settings.custom_caricature_visible?.enabled === false;
 
   if (!config) return null;
 
