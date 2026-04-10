@@ -35,6 +35,7 @@ type SiteSettings = {
   permission_notifications: { enabled: boolean };
   permission_microphone: { enabled: boolean };
   permission_camera: { enabled: boolean };
+  admin_location_required: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -57,14 +58,15 @@ const defaults: SiteSettings = {
   auto_assign_artist: { enabled: false, selected_artists: "all" },
   artist_payment_system: { enabled: false },
   allow_registration_maintenance: { enabled: false },
-  login_popup_visible: { enabled: true },
+  login_popup_visible: { enabled: false },
   dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
-  custom_caricature_visible: { enabled: true },
+  custom_caricature_visible: { enabled: false },
   admin_splash_enabled: { enabled: true },
   permission_location: { enabled: true },
   permission_notifications: { enabled: true },
-  permission_microphone: { enabled: true },
-  permission_camera: { enabled: true },
+  permission_microphone: { enabled: false },
+  permission_camera: { enabled: false },
+  admin_location_required: { enabled: false },
 };
 
 // Module-level cache so all instances share one fetch result
