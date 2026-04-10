@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { 
   LayoutDashboard, Package, Calendar, Users, BarChart3, 
   MoreHorizontal, DollarSign, Target, Zap, Bot, Settings,
@@ -10,8 +10,8 @@ import {
   CalendarDays, LineChart, GripHorizontal, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 interface AdminMobileNavProps {
   activeTab: string;
@@ -24,14 +24,20 @@ const PRIMARY_ITEMS = [
   { id: "events", label: "Events", icon: Calendar },
   { id: "payments", label: "Payments", icon: Receipt },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "revenue", label: "Revenue", icon: DollarSign },
+  { id: "enquiries", label: "Enquiries", icon: ClipboardList },
+  { id: "customers", label: "Customers", icon: Users },
+  { id: "artists", label: "Artists", icon: PenTool },
+  { id: "invoices", label: "Invoices", icon: FileText },
+  { id: "calendar", label: "Calendar", icon: CalendarDays },
+  { id: "crm-pipeline", label: "CRM", icon: Target },
+  { id: "gallery", label: "Gallery", icon: Image },
 ];
 
 const MORE_ITEMS = [
   { section: "Analytics", items: [
-    { id: "revenue", label: "Revenue", icon: DollarSign },
     { id: "revenue-target", label: "₹10L Target", icon: Target },
     { id: "ai-intelligence", label: "AI Insights", icon: Zap },
-    { id: "calendar", label: "Calendar", icon: CalendarDays },
     { id: "website-analytics", label: "Web Analytics", icon: LineChart },
   ]},
   { section: "AI & Chat", items: [
@@ -41,14 +47,10 @@ const MORE_ITEMS = [
     { id: "quick-questions", label: "Quick Q&A", icon: Brain },
   ]},
   { section: "CRM", items: [
-    { id: "crm-pipeline", label: "Pipeline", icon: Target },
-    { id: "enquiries", label: "Enquiries", icon: ClipboardList },
     { id: "support", label: "Support", icon: HelpCircle },
   ]},
   { section: "People", items: [
-    { id: "customers", label: "Customers", icon: Users },
     { id: "event-users", label: "Event Users", icon: UserCheck },
-    { id: "artists", label: "Artists", icon: PenTool },
     { id: "reviews", label: "Reviews", icon: Star },
   ]},
   { section: "Pricing", items: [
@@ -56,7 +58,6 @@ const MORE_ITEMS = [
     { id: "intl-pricing", label: "International", icon: Globe },
   ]},
   { section: "Operations", items: [
-    { id: "invoices", label: "Invoices", icon: FileText },
     { id: "locations", label: "Locations", icon: MapPin },
     { id: "voice", label: "Voice", icon: Radio },
     { id: "push-center", label: "Push", icon: Zap },
@@ -71,7 +72,6 @@ const MORE_ITEMS = [
   { section: "Content", items: [
     { id: "homepage", label: "Homepage", icon: HomeIcon },
     { id: "blog", label: "Blog", icon: FileText },
-    { id: "gallery", label: "Gallery", icon: Image },
     { id: "hp-reviews", label: "HP Reviews", icon: Star },
     { id: "brands", label: "Brands", icon: Shield },
     { id: "pages", label: "Pages", icon: FileQuestion },
@@ -111,8 +111,8 @@ const MORE_ITEMS = [
 
 const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [showMore, setShowMore] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleItemClick = (itemId: string) => {
     if (itemId === "link-workshop-admin") { navigate("/workshop-admin-panel"); return; }
@@ -121,60 +121,68 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
     setShowMore(false);
   };
 
-  // Check if active tab is in "More" items
+  // Auto-scroll active tab into view
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const activeEl = scrollRef.current.querySelector(`[data-tab="${activeTab}"]`) as HTMLElement;
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [activeTab]);
+
   const isMoreActive = MORE_ITEMS.some(s => s.items.some(i => i.id === activeTab));
 
   return (
     <>
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
         <div style={{ background: "hsla(0,0%,100%,0.82)", backdropFilter: "blur(24px) saturate(180%)", WebkitBackdropFilter: "blur(24px) saturate(180%)", borderTop: "1px solid hsl(30 18% 92%)" }}>
-          <div className="flex items-center justify-evenly h-[56px] px-1">
-            {PRIMARY_ITEMS.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <motion.button
-                  key={tab.id}
-                  onClick={() => handleItemClick(tab.id)}
-                  whileTap={{ scale: 0.75 }}
-                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0"
-                >
-                  <tab.icon
-                    className={`transition-all duration-200 ${
-                      isActive ? "text-foreground" : "text-muted-foreground/40"
-                    }`}
-                    size={isActive ? 26 : 22}
-                    strokeWidth={isActive ? 2.2 : 1.4}
-                    fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
-                  />
-                  {isActive && (
-                    <motion.div
-                      layoutId="admin-insta-dot"
-                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          <div className="flex items-center h-[56px]">
+            {/* Scrollable primary tabs */}
+            <div
+              ref={scrollRef}
+              className="flex items-center flex-1 overflow-x-auto no-scrollbar px-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {PRIMARY_ITEMS.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    data-tab={tab.id}
+                    onClick={() => handleItemClick(tab.id)}
+                    className="flex items-center justify-center min-w-[48px] w-12 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150"
+                  >
+                    <tab.icon
+                      className={`transition-all duration-200 ${
+                        isActive ? "text-foreground" : "text-muted-foreground/40"
+                      }`}
+                      size={isActive ? 24 : 20}
+                      strokeWidth={isActive ? 2.2 : 1.4}
+                      fill={isActive && tab.icon === LayoutDashboard ? "currentColor" : "none"}
                     />
-                  )}
-                </motion.button>
-              );
-            })}
-            {/* More Button */}
-            <motion.button
+                    {isActive && (
+                      <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {/* More Button - always visible */}
+            <button
               onClick={() => setShowMore(true)}
-              whileTap={{ scale: 0.75 }}
-              className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0"
+              className="flex items-center justify-center min-w-[48px] w-12 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150 border-l border-border/20"
             >
               <MoreHorizontal
                 className={`transition-all duration-200 ${
                   isMoreActive || showMore ? "text-foreground" : "text-muted-foreground/40"
                 }`}
-                size={isMoreActive ? 26 : 22}
+                size={isMoreActive ? 24 : 20}
                 strokeWidth={isMoreActive ? 2.2 : 1.4}
               />
               {isMoreActive && (
-                <motion.div
-                  className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                />
+                <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
               )}
-            </motion.button>
+            </button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
@@ -184,20 +192,13 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
       <AnimatePresence>
         {showMore && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 z-[60] backdrop-blur-sm"
+            <div
+              className="md:hidden fixed inset-0 z-[60] backdrop-blur-sm animate-in fade-in duration-200"
               style={{ background: "hsla(0,0%,0%,0.15)" }}
               onClick={() => setShowMore(false)}
             />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="md:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col"
+            <div
+              className="md:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-3xl max-h-[80vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-300"
               style={{ background: "hsla(0,0%,100%,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid hsl(30 18% 90%)" }}
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
@@ -235,7 +236,7 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
