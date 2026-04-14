@@ -191,6 +191,7 @@ const TrackOrder = () => {
       </header>
 
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }} className="container mx-auto px-4 py-6 max-w-lg">
+        {caricatureOff && <CaricaturePausedBanner />}
         <Tabs value={trackType} onValueChange={(v) => { setTrackType(v as any); setOrder(null); setShopOrder(null); setSearched(false); setOrderExtras(null); }}>
           {shopTrackingVisible && (
             <TabsList className="w-full mb-4" style={{ background: "hsl(35, 30%, 92%)" }}>
