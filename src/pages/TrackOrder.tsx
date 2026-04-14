@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,7 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import {
   Search, Package, ArrowLeft, Clock, CreditCard, Truck, CheckCircle, Loader2,
-  Store, Palette, Eye, Gift, Star, MessageCircle, Share2, Bell, HelpCircle,
-  ChevronDown, ChevronUp, Heart, Sparkles, Calendar, Construction
+  Store, Palette, Eye, MessageCircle, Share2, Sparkles, Calendar
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -75,106 +74,17 @@ type TrackedShopOrder = {
   shipping_state: string; created_at: string; updated_at: string;
 };
 
-const ComingSoonOverlay = () => (
+const CaricaturePausedBanner = () => (
   <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="min-h-screen flex items-center justify-center p-4"
-    style={{ background: "linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)" }}
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4 flex items-start gap-3"
   >
-    <SEOHead title="Track Order — Coming Soon | Creative Caricature Club™" description="Order tracking is coming soon." />
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", damping: 15, delay: 0.2 }}
-      className="max-w-md w-full text-center space-y-6"
-    >
-      <motion.div
-        className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto"
-        animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <Construction className="w-12 h-12 text-primary" />
-      </motion.div>
-
-      <div>
-        <motion.h1
-          className="font-calligraphy text-4xl md:text-5xl font-bold text-foreground mb-3"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          Coming Soon ✨
-        </motion.h1>
-        <motion.p
-          className="text-muted-foreground font-body text-base"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
-        >
-          We're building an amazing order tracking experience for you. Stay tuned!
-        </motion.p>
-      </div>
-
-      {/* Animated dots */}
-      <div className="flex items-center justify-center gap-2">
-        {[0, 1, 2].map(i => (
-          <motion.div
-            key={i}
-            className="w-3 h-3 rounded-full bg-primary"
-            animate={{ y: [0, -10, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-          />
-        ))}
-      </div>
-
-      {/* Features coming */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="bg-card border border-border rounded-2xl p-6 text-left space-y-3"
-      >
-        <p className="font-body font-semibold text-sm text-foreground">What's coming:</p>
-        {[
-          { icon: "🎨", text: "Real-time artwork progress tracking" },
-          { icon: "📦", text: "Live delivery status updates" },
-          { icon: "🔔", text: "Instant notifications at every step" },
-          { icon: "💬", text: "Direct artist communication" },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            className="flex items-center gap-3"
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 1 + i * 0.15 }}
-          >
-            <span className="text-lg">{item.icon}</span>
-            <span className="text-sm font-body text-muted-foreground">{item.text}</span>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6 }}
-        className="flex flex-col gap-2"
-      >
-        <Button
-          onClick={() => {
-            const msg = "Hi! I'd like to track my order. Can you help me with the status?";
-            window.open(`https://wa.me/918369594271?text=${encodeURIComponent(msg)}`, "_blank");
-          }}
-          className="w-full font-body bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full"
-        >
-          <MessageCircle className="w-4 h-4 mr-2" /> Track via WhatsApp
-        </Button>
-        <Button variant="outline" onClick={() => window.location.href = "/"} className="w-full font-body rounded-full">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
-        </Button>
-      </motion.div>
-    </motion.div>
+    <Sparkles className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+    <div>
+      <p className="font-semibold text-sm text-amber-800">Custom Caricature Orders Paused 🎨</p>
+      <p className="text-xs text-amber-600 mt-1">New orders are temporarily paused due to high demand, but you can still track your existing orders below!</p>
+    </div>
   </motion.div>
 );
 
@@ -194,10 +104,7 @@ const TrackOrder = () => {
   const [orderExtras, setOrderExtras] = useState<any>(null);
   const shopTrackingVisible = (siteSettings as any).shop_tracking_visible?.enabled !== false;
 
-  // If custom caricature is off, show coming soon
-  if (caricatureOff) {
-    return <ComingSoonOverlay />;
-  }
+  // Remove the coming soon block — show banner instead inside the UI
 
   const handleTrackCustom = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,6 +191,7 @@ const TrackOrder = () => {
       </header>
 
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }} className="container mx-auto px-4 py-6 max-w-lg">
+        {caricatureOff && <CaricaturePausedBanner />}
         <Tabs value={trackType} onValueChange={(v) => { setTrackType(v as any); setOrder(null); setShopOrder(null); setSearched(false); setOrderExtras(null); }}>
           {shopTrackingVisible && (
             <TabsList className="w-full mb-4" style={{ background: "hsl(35, 30%, 92%)" }}>
