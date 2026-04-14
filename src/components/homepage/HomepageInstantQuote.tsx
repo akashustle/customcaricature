@@ -6,11 +6,10 @@ import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
 
 const HomepageInstantQuote = ({ config }: { config: any }) => {
   const navigate = useNavigate();
-
-  if (!config) return null;
+  const cfg = config || {};
 
   const handleClick = () => {
-    const link = config.link || "/caricature-budgeting";
+    const link = cfg.link || "/caricature-budgeting";
     const internalTarget = normalizeInternalNavigationTarget(link);
     if (internalTarget) navigate(internalTarget);
     else window.location.assign(link);
@@ -33,7 +32,7 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
             <Zap className="w-8 h-8 text-primary" />
           </motion.div>
           <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground mb-4">
-            {config.title || "Check your event price in 30 seconds 🎨"}
+            {cfg.title || "Check your event price in 30 seconds 🎨"}
           </h2>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
@@ -41,7 +40,7 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
               onClick={handleClick}
               className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 mt-4"
             >
-              {config.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />
+              {cfg.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </motion.div>
         </motion.div>
