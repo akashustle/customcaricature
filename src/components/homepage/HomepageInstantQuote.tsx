@@ -1,19 +1,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight, Zap, CalendarCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { normalizeInternalNavigationTarget } from "@/lib/internal-navigation";
 
 const HomepageInstantQuote = ({ config }: { config: any }) => {
   const navigate = useNavigate();
   const cfg = config || {};
-
-  const handleClick = () => {
-    const link = cfg.link || "/caricature-budgeting";
-    const internalTarget = normalizeInternalNavigationTarget(link);
-    if (internalTarget) navigate(internalTarget);
-    else window.location.assign(link);
-  };
 
   return (
     <section className="py-12 md:py-16">
@@ -34,15 +26,27 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
           <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground mb-4">
             {cfg.title || "Check your event price in 30 seconds 🎨"}
           </h2>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              size="xl"
-              onClick={handleClick}
-              className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 mt-4"
-            >
-              {cfg.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </motion.div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="xl"
+                onClick={() => navigate("/caricature-budgeting")}
+                className="rounded-full font-body font-semibold shadow-lg shadow-primary/20"
+              >
+                {cfg.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                size="xl"
+                variant="outline"
+                onClick={() => navigate("/enquiry")}
+                className="rounded-full font-body font-semibold border-border hover:bg-card"
+              >
+                <CalendarCheck className="w-5 h-5 mr-2" /> Check Event Pricing
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
