@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
 import {
   Search, Package, ArrowLeft, Clock, CreditCard, Truck, CheckCircle, Loader2,
-  Store, Palette, Eye, Gift, Star, MessageCircle, Share2, Bell, HelpCircle,
-  ChevronDown, ChevronUp, Heart, Sparkles, Calendar, Construction
+  Store, Palette, Eye, MessageCircle, Share2, Sparkles, Calendar
+} from "lucide-react";
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -105,10 +105,7 @@ const TrackOrder = () => {
   const [orderExtras, setOrderExtras] = useState<any>(null);
   const shopTrackingVisible = (siteSettings as any).shop_tracking_visible?.enabled !== false;
 
-  // If custom caricature is off, show coming soon
-  if (caricatureOff) {
-    return <ComingSoonOverlay />;
-  }
+  // Remove the coming soon block — show banner instead inside the UI
 
   const handleTrackCustom = async (e: React.FormEvent) => {
     e.preventDefault();
