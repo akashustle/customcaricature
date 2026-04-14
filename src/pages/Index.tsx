@@ -516,7 +516,13 @@ const Index = () => {
                     <motion.div key={item.step} initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-30px" }}
                       transition={{ duration: 0.7, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
                       whileHover={{ y: -12, transition: { duration: 0.3, ease: "easeOut" } }}
-                      className="cursor-pointer group" onClick={() => navigate(item.route)}>
+                      className="cursor-pointer group" onClick={() => {
+                        if (item.route === "/order" || item.route === "/login") {
+                          handleOrderClick();
+                        } else {
+                          navigate(item.route);
+                        }
+                      }}>
                       <Card className="text-center h-full border border-border group-hover:border-primary/30 group-hover:shadow-xl transition-all duration-500">
                         <CardContent className="pt-10 pb-8 px-6">
                           <motion.div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/15 group-hover:bg-primary/25 transition-colors"
