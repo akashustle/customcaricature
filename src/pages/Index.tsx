@@ -199,7 +199,13 @@ const Index = () => {
   ];
   const isSectionVisible = (id: string) => sections[id]?.visible !== false;
   const getSectionMessage = (id: string) => sections[id]?.message || "";
-  const handleOrderClick = () => navigate(user ? "/order" : "/login");
+  const handleOrderClick = () => {
+    if (settings.custom_caricature_visible?.enabled === false) {
+      import("@/components/CaricatureOffToast").then(m => m.showCaricatureOffMessage());
+      return;
+    }
+    navigate(user ? "/order" : "/login");
+  };
   const handleEventClick = () => {
     if (!user) { navigate("/login"); return; }
     navigate("/book-event");

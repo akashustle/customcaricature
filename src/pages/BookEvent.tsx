@@ -488,8 +488,17 @@ const BookEvent = () => {
                     {eventDate ? format(eventDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={eventDate} onSelect={setEventDate} disabled={(date) => date < new Date()} className={cn("p-3 pointer-events-auto")} initialFocus />
+                <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={4}>
+                  <Calendar
+                    mode="single"
+                    selected={eventDate}
+                    onSelect={setEventDate}
+                    disabled={(date) => date < new Date()}
+                    className={cn("p-3 pointer-events-auto")}
+                    initialFocus
+                    fromMonth={new Date()}
+                    numberOfMonths={1}
+                  />
                 </PopoverContent>
               </Popover>
             </div>
