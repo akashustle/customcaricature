@@ -83,12 +83,12 @@ const ClaimLink = lazy(() => import("./pages/ClaimLink"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,   // 5 min stale — reduces refetches
-      gcTime: 1000 * 60 * 15,     // 15 min GC — keeps cache longer
+      staleTime: 1000 * 30,        // 30s stale — faster fresh data with realtime
+      gcTime: 1000 * 60 * 10,      // 10 min GC
       refetchOnWindowFocus: false,
       refetchOnReconnect: "always",
       retry: 1,
-      networkMode: "offlineFirst",  // serve cache first, then revalidate
+      networkMode: "offlineFirst",
     },
     mutations: {
       networkMode: "offlineFirst",
