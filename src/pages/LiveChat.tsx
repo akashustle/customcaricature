@@ -101,16 +101,32 @@ const LiveChat = () => {
     return () => { supabase.removeChannel(ch); };
   }, [user?.id]);
 
-  // For guest AI chat sessions
+  // For guest AI chat sessions - uses custom header for RLS scoping
   const fetchGuestMessages = async (sessionId: string) => {
-    const { data } = await supabase.from("ai_chat_messages").select("*").eq("session_id", sessionId).order("created_at", { ascending: true });
-    if (data) {
-      const mapped: ChatMessage[] = data.map((m: any) => ({
-        id: m.id, sender_id: m.role === "user" ? "guest" : "admin",
-        receiver_id: null, message: m.content, is_admin: m.role === "assistant",
-        read: true, created_at: m.created_at, deleted: false, sender_name: m.sender_name,
-      }));
-      setMessages(mapped);
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/ai_chat_messages?session_id=eq.${sessionId}&order=created_at.asc&select=*`,
+        {
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+            "x-guest-session-id": sessionId,
+          },
+        }
+      );
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const mapped: ChatMessage[] = data.map((m: any) => ({
+          id: m.id, sender_id: m.role === "user" ? "guest" : "admin",
+          receiver_id: null, message: m.content, is_admin: m.role === "assistant",
+          read: true, created_at: m.created_at, deleted: false, sender_name: m.sender_name,
+        }));
+        setMessages(mapped);
+      }
+    } catch {
+      // Silently fail - messages will load on next retry
     }
   };
 
