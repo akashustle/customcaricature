@@ -73,7 +73,7 @@ const defaults: SiteSettings = {
 let cachedSettings: SiteSettings | null = null;
 let fetchPromise: Promise<SiteSettings> | null = null;
 let lastFetchTime = 0;
-const CACHE_TTL = 60_000;
+const CACHE_TTL = 30_000;
 
 const parseSettings = (data: any[]): SiteSettings => {
   const s = { ...defaults };

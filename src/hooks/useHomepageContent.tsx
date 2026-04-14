@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 let cachedContent: Record<string, any> | null = null;
 let contentFetchPromise: Promise<Record<string, any>> | null = null;
 let lastContentFetch = 0;
-const CACHE_TTL = 60_000;
+const CACHE_TTL = 30_000;
 
 const KEYS = [
   "homepage_hero", "homepage_video", "homepage_social_proof",

@@ -103,8 +103,8 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
       <style>{`@keyframes gallery-scroll{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-33.33%,0,0)}}`}</style>
       <div className="overflow-hidden py-8">
         <div
-          className="flex gap-4 will-change-transform"
-          style={{ animation: "gallery-scroll 30s linear infinite", width: "max-content" }}
+          className="flex gap-4"
+          style={{ animation: "gallery-scroll 30s linear infinite", width: "max-content", willChange: "transform", contain: "layout style" }}
         >
           {tripled.map((img, i) => (
             <div
