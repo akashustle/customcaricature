@@ -12,7 +12,6 @@ import {
   Search, Package, ArrowLeft, Clock, CreditCard, Truck, CheckCircle, Loader2,
   Store, Palette, Eye, MessageCircle, Share2, Sparkles, Calendar
 } from "lucide-react";
-} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { motion, AnimatePresence } from "framer-motion";
