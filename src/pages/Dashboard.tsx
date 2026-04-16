@@ -1392,6 +1392,36 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
           {canBookEvent ? "+ Book Event" : <><Sparkles className="w-3 h-3 mr-1" />Book Event</>}
         </Button>
       </div>
+
+      {/* Upcoming Events Countdown Strip */}
+      {upcomingEvents.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 rounded-2xl overflow-hidden border border-primary/20"
+          style={{ perspective: "600px" }}
+        >
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 p-4"
+            style={{ transform: "rotateX(1deg)", transformStyle: "preserve-3d" }}>
+            <p className="text-xs font-sans font-semibold text-primary mb-2">🎯 Upcoming Events</p>
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+              {upcomingEvents.slice(0, 3).map((ev: any) => {
+                const daysLeft = Math.ceil((new Date(ev.event_date).getTime() - Date.now()) / 86400000);
+                return (
+                  <motion.div key={ev.id} whileHover={{ scale: 1.03 }} className="flex-shrink-0 bg-background/80 backdrop-blur-sm rounded-xl p-3 min-w-[140px] border border-border/30">
+                    <p className="text-2xl font-bold font-display text-primary">{daysLeft}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans">days left</p>
+                    <p className="text-xs font-sans font-medium mt-1 truncate">{ev.event_type}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans truncate">{ev.city}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {showPaymentCelebration && <PaymentSuccessOverlay show={showPaymentCelebration} onClose={() => setShowPaymentCelebration(false)} />}
       {!canBookEvent && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="mb-4 border-primary/20 bg-primary/5">
