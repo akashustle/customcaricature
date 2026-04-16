@@ -444,6 +444,25 @@ const AdminGoogleSheet = () => {
     } finally { setAddingEvent(false); }
   };
 
+  const handleChangePaymentStatus = async (eventId: string, newStatus: string) => {
+    setSavingPaymentStatus(eventId);
+    try {
+      const event = events.find((e) => e.id === eventId);
+      if (!event) throw new Error("Event not found");
+      const updates: Record<string, any> = { payment_status: newStatus };
+      if (newStatus === "fully_paid") {
+        updates.remaining_amount = 0;
+        updates.advance_amount = event.total_price || 0;
+      }
+      const { error } = await supabase.from("event_bookings").update(updates).eq("id", eventId);
+      if (error) throw error;
+      toast({ title: "Payment status updated", description: `Set to ${newStatus.replace(/_/g, " ")}` });
+      await fetchEvents();
+    } catch (error: any) {
+      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+    } finally { setSavingPaymentStatus(null); }
+  };
+
   const getPendingAmount = (event: EventBooking) => {
     if (event.remaining_amount != null && event.remaining_amount > 0) return event.remaining_amount;
     const remaining = (event.total_price || 0) - (event.advance_amount || 0);
