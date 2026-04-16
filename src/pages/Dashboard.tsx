@@ -394,6 +394,32 @@ const Dashboard = () => {
         {/* Payment Reminders */}
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
 
+        {/* Quick Actions — 5 new features */}
+        <div className="grid grid-cols-5 gap-2 mb-5">
+          {[
+            { label: "Track", icon: Truck, action: () => navigate("/track-order"), gradient: "from-cyan-500 to-blue-500" },
+            { label: "Support", icon: MessageCircle, action: () => navigate("/support"), gradient: "from-pink-500 to-rose-500" },
+            { label: "Gallery", icon: Sparkles, action: () => navigate("/gallery/caricature"), gradient: "from-amber-500 to-orange-500" },
+            { label: "FAQs", icon: FileText, action: () => navigate("/faqs"), gradient: "from-teal-500 to-emerald-500" },
+            { label: "Explore", icon: Star, action: () => navigate("/explore"), gradient: "from-purple-500 to-indigo-500" },
+          ].map((item, i) => (
+            <motion.button
+              key={item.label}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 + i * 0.05, type: "spring", stiffness: 300 }}
+              whileTap={{ scale: 0.85 }}
+              onClick={item.action}
+              className="flex flex-col items-center gap-1 py-2"
+            >
+              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md`}>
+                <item.icon className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] font-sans text-muted-foreground font-medium">{item.label}</span>
+            </motion.button>
+          ))}
+        </div>
+
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
