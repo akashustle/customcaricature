@@ -45,6 +45,7 @@ import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import NotificationBell from "@/components/NotificationBell";
 import ExportButton from "@/components/admin/ExportButton";
 import { MessageCircle, Radio } from "lucide-react";
+import AdminInfoPanel from "@/components/admin/AdminInfoPanel";
 
 // Lazy load all admin tab components for performance
 const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
@@ -1025,6 +1026,7 @@ const Admin = () => {
           </div>
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
+        {showAdminInfo && <AdminInfoPanel onClose={() => setShowAdminInfo(false)} />}
 
         <div className="px-2 py-3 sm:px-4 md:px-6 md:py-5">
           <div className="md:hidden mb-4">

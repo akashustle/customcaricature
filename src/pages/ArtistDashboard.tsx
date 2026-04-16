@@ -448,7 +448,7 @@ const ArtistNotifications = ({ userId }: { userId: string }) => {
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
-  usePermissions(true);
+  usePermissions(false);
   const { user, loading: authLoading, signOut } = useAuth();
   const [artist, setArtist] = useState<{ id: string; name: string; portfolio_url: string | null } | null>(null);
   const [events, setEvents] = useState<ArtistEvent[]>([]);
