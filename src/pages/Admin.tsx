@@ -994,6 +994,13 @@ const Admin = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAdminInfo(true)}
+                className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                title="Admin Panel Guide"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
               <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
