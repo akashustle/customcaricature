@@ -356,15 +356,23 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
-      <header className="sticky top-0 z-40 app-header border-b border-border/30">
+      {/* App-style header with glass effect */}
+      <header className="sticky top-0 z-40 border-b border-border/20" style={{ background: "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
         <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-2xl shadow-md border border-border/30" />
+          <motion.div 
+            className="flex items-center gap-2.5 cursor-pointer" 
+            onClick={() => navigate("/")}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="relative">
+              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-2xl shadow-lg border border-border/30" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+            </div>
             <div>
               <h1 className="font-display text-lg font-bold text-foreground leading-tight">Dashboard</h1>
               <p className="text-[10px] text-muted-foreground font-sans leading-none">Welcome back!</p>
             </div>
-          </div>
+          </motion.div>
           <div className="flex items-center gap-1">
             <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans h-9 w-9 p-0 rounded-xl">
