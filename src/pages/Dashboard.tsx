@@ -1253,8 +1253,13 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
     setPayingEventId(ev.id);
     try {
+      // Apply gateway fee
+      const gatewayPercent = _siteSettings?.gateway_charge_percentage?.percentage || 2.6;
+      const gatewayFee = Math.ceil(remaining * gatewayPercent / 100);
+      const amountWithGateway = remaining + gatewayFee;
+
       const rzpData = await createRazorpayOrder(supabase, {
-        amount: remaining, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
+        amount: amountWithGateway, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
       });
 
       const options = {
