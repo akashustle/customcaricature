@@ -349,6 +349,7 @@ const Admin = () => {
   const [manualPhotos, setManualPhotos] = useState<File[]>([]);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [addingOrder, setAddingOrder] = useState(false);
+  const [showAdminInfo, setShowAdminInfo] = useState(false);
   // Admin settings state
   const [adminCurrentPassword, setAdminCurrentPassword] = useState("");
   const [adminNewPassword, setAdminNewPassword] = useState("");
