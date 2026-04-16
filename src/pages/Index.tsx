@@ -328,13 +328,17 @@ const Index = () => {
                 <span className="text-xs font-body font-semibold text-primary tracking-wide">India's #1 Premium Caricature Studio</span>
               </motion.div>
               <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-                className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-4 lg:mb-6 leading-[1.1]">
+                className="font-calligraphy text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-foreground mb-2 lg:mb-3 leading-[1.1]">
                 {hero.headline ? (
                   <ScrollTypeReveal text={hero.headline} className="inline" />
                 ) : (
                   <>Where Every Face Becomes <span className="text-primary relative">Art<svg className="absolute -bottom-2 left-0 w-full hidden lg:block" viewBox="0 0 200 12" fill="none"><path d="M2 8C40 2 80 2 100 6C120 10 160 10 198 4" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.4"/></svg></span></>
                 )}
               </motion.h1>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 0.4 }}
+                className="text-sm md:text-base lg:text-lg font-body font-semibold text-primary/80 mb-3 lg:mb-4">
+                <ScrollTypeReveal text="Book Professional Caricature Artists for Your Event" className="inline" />
+              </motion.div>
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
                 className="text-base md:text-lg lg:text-xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed" style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)' }}>
                 {hero.subtext || "Bringing smiles to life, one sketch at a time"}
