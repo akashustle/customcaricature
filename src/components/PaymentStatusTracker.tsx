@@ -193,7 +193,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
                   className="w-full rounded-full font-sans bg-red-600 hover:bg-red-700 text-white text-sm"
                   size="sm"
                 >
-                  {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="w-4 h-4 mr-2" />Pay {formatPrice(withGw)} (incl. {gp}% fee)</>}
+                  {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="w-4 h-4 mr-2" />Pay {formatPrice(withGw)} (incl. gateway fee)</>}
                 </Button>
               );
             })()}

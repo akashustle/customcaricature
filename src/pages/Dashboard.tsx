@@ -597,7 +597,7 @@ const Dashboard = () => {
                       </p>
                       {gcEnabled && (
                         <p className="mt-1 font-sans text-[11px] text-muted-foreground">
-                          Base: ₹{base.toLocaleString("en-IN")} + {gp}% gateway fee
+                          Base: ₹{base.toLocaleString("en-IN")} + Gateway fee included
                         </p>
                       )}
                     </>
@@ -862,6 +862,14 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
       <h2 className="font-display text-xl font-bold">My Orders</h2>
       {!caricatureOff && <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ New Order</Button>}
     </div>
+    {caricatureOff && (
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 space-y-1" style={{ perspective: "600px", transform: "rotateX(1deg)" }}>
+          <p className="font-sans text-sm font-semibold text-amber-800">🎨 Custom Caricature Orders Paused</p>
+          <p className="font-sans text-xs text-amber-700/80">We've temporarily stopped taking new custom caricature orders made from photos. Your existing orders will continue to be processed normally.</p>
+        </div>
+      </motion.div>
+    )}
     {orders.length === 0 ? (
       <Card><CardContent className="p-8 text-center">
         <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -1125,7 +1133,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
   const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
-  const [payPreview, setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
+  const [_payPreview, _setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
 
   // Fetch partial advance config for this user
   useEffect(() => {
