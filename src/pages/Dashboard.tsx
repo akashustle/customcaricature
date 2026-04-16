@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download, CheckCircle2 } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import LiveGreeting from "@/components/LiveGreeting";
@@ -28,11 +28,9 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
+import PaymentSuccessOverlay from "@/components/PaymentSuccessOverlay";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
-import {
-  Dialog, DialogContent,
-} from "@/components/ui/dialog";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
@@ -271,9 +269,15 @@ const Dashboard = () => {
         .select("client_name, client_email, client_mobile")
         .eq("id", request.event_id)
         .single();
+
+      // Apply gateway fee from admin settings
+      const gatewayPercent = settings.gateway_charge_percentage?.percentage || 2.6;
+      const gatewayChargesEnabled = profile?.gateway_charges_enabled !== false;
+      const baseAmount = request.amount;
+      const amountWithGateway = gatewayChargesEnabled ? Math.ceil(baseAmount + (baseAmount * gatewayPercent / 100)) : baseAmount;
       
       const rzpData = await createRazorpayOrder(supabase, {
-        amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
+        amount: amountWithGateway, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
       });
 
       await supabase
@@ -291,24 +295,19 @@ const Dashboard = () => {
               razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, is_event_remaining: true,
             });
             
-            // Update portal request to completed
             await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", request.id);
-            
-            // Update event to fully_paid
             await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", request.event_id);
-            
-            // Record payment history
             await supabase.from("payment_history").insert({
               user_id: user.id, booking_id: request.event_id,
-              payment_type: "event_remaining", amount: request.amount,
-              status: "confirmed", description: `Remaining ₹${request.amount.toLocaleString("en-IN")} paid via portal`,
+              payment_type: "event_remaining", amount: amountWithGateway,
+              status: "confirmed", description: `Remaining ₹${amountWithGateway.toLocaleString("en-IN")} paid via portal${gatewayChargesEnabled ? ` (incl. ${gatewayPercent}% gateway fee)` : ""}`,
             } as any);
 
             playPaymentSuccessSound();
             setPortalPaymentDone(true);
             setPortalPaymentRequest(null);
             if (user) { fetchEvents(user.id); fetchOrders(user.id); }
-            setTimeout(() => setPortalPaymentDone(false), 6000);
+            setTimeout(() => setPortalPaymentDone(false), 8000);
           } catch {
             toast({ title: "Verification Failed", variant: "destructive" });
           }
@@ -357,15 +356,23 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
       {/* App-style header */}
-      <header className="sticky top-0 z-40 app-header border-b border-border/30">
+      {/* App-style header with glass effect */}
+      <header className="sticky top-0 z-40 border-b border-border/20" style={{ background: "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
         <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-9 h-9 rounded-2xl shadow-md border border-border/30" />
+          <motion.div 
+            className="flex items-center gap-2.5 cursor-pointer" 
+            onClick={() => navigate("/")}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="relative">
+              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-2xl shadow-lg border border-border/30" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+            </div>
             <div>
               <h1 className="font-display text-lg font-bold text-foreground leading-tight">Dashboard</h1>
               <p className="text-[10px] text-muted-foreground font-sans leading-none">Welcome back!</p>
             </div>
-          </div>
+          </motion.div>
           <div className="flex items-center gap-1">
             <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans h-9 w-9 p-0 rounded-xl">
@@ -388,26 +395,31 @@ const Dashboard = () => {
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
-        {/* Stat cards — app-style */}
-        <div className="grid grid-cols-2 gap-2.5 mb-5 sm:grid-cols-3">
+        {/* Stat cards — vibrant 3D mobile-first */}
+        <div className="grid grid-cols-3 gap-2.5 mb-5">
           {[
-            { label: "Orders", value: orders.length, icon: Package, color: "from-blue-500/15 to-indigo-500/5", iconBg: "bg-blue-500" },
-            { label: "Events", value: events.length, icon: CalIcon, color: "from-violet-500/15 to-purple-500/5", iconBg: "bg-violet-500" },
-            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, color: "from-emerald-500/15 to-green-500/5", iconBg: "bg-emerald-500" },
+            { label: "Orders", value: orders.length, icon: Package, gradient: "from-blue-500 to-indigo-600", glow: "shadow-blue-500/25" },
+            { label: "Events", value: events.length, icon: CalIcon, gradient: "from-violet-500 to-purple-600", glow: "shadow-violet-500/25" },
+            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, gradient: "from-emerald-500 to-green-600", glow: "shadow-emerald-500/25" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 20 }}
+              whileHover={{ y: -4, scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div className={`app-card p-3 bg-gradient-to-br ${s.color}`}>
-                <div className="text-center">
-                  <div className={`w-8 h-8 rounded-xl mx-auto mb-2 flex items-center justify-center ${s.iconBg} shadow-md`}>
-                    <s.icon className="w-3.5 h-3.5 text-white" />
+              <div className={`relative overflow-hidden rounded-2xl p-3 bg-gradient-to-br ${s.gradient} shadow-lg ${s.glow}`}
+                style={{ transform: "perspective(600px) rotateX(2deg)", transformStyle: "preserve-3d" }}>
+                {/* Glass overlay */}
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] rounded-2xl" />
+                <div className="relative text-center text-white">
+                  <div className="w-9 h-9 rounded-xl mx-auto mb-1.5 flex items-center justify-center bg-white/20 backdrop-blur-sm shadow-inner">
+                    <s.icon className="w-4 h-4 text-white drop-shadow-sm" />
                   </div>
-                  <p className="text-xl font-bold font-display">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                  <p className="text-2xl font-bold font-display drop-shadow-sm">{s.value}</p>
+                  <p className="text-[10px] text-white/80 font-sans font-medium">{s.label}</p>
                 </div>
               </div>
             </motion.div>
@@ -571,9 +583,24 @@ const Dashboard = () => {
             <div className="space-y-4 p-5 sm:p-6">
               <div className="rounded-[1.5rem] border border-border/60 bg-muted/40 p-4">
                 <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount due</p>
-                <p className="mt-2 font-display text-4xl font-bold text-primary">
-                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
-                </p>
+                {(() => {
+                  const gp = settings.gateway_charge_percentage?.percentage || 2.6;
+                  const gcEnabled = profile?.gateway_charges_enabled !== false;
+                  const base = portalPaymentRequest.amount;
+                  const withGw = gcEnabled ? Math.ceil(base + (base * gp / 100)) : base;
+                  return (
+                    <>
+                      <p className="mt-2 font-display text-4xl font-bold text-primary">
+                        ₹{withGw.toLocaleString("en-IN")}
+                      </p>
+                      {gcEnabled && (
+                        <p className="mt-1 font-sans text-[11px] text-muted-foreground">
+                          Base: ₹{base.toLocaleString("en-IN")} + {gp}% gateway fee
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
                 {portalPaymentRequest.extra_hours > 0 && (
                   <p className="mt-2 font-sans text-xs text-muted-foreground">
                     Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
@@ -605,7 +632,12 @@ const Dashboard = () => {
                 {payingPortal ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Opening secure payment...</>
                 ) : (
-                  <>Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} now</>
+                  <>Pay ₹{(() => {
+                    const gp = settings.gateway_charge_percentage?.percentage || 2.6;
+                    const gcEnabled = profile?.gateway_charges_enabled !== false;
+                    const base = portalPaymentRequest.amount;
+                    return gcEnabled ? Math.ceil(base + (base * gp / 100)).toLocaleString("en-IN") : base.toLocaleString("en-IN");
+                  })()} now</>
                 )}
               </Button>
 
@@ -617,69 +649,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Thank You Popup after Portal Payment */}
-      <AnimatePresence>
-        {portalPaymentDone && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={() => setPortalPaymentDone(false)}
-          >
-            <motion.div
-              initial={{ scale: 0, rotate: -10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0 }}
-              transition={{ type: "spring", bounce: 0.5 }}
-              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
-              onClick={e => e.stopPropagation()}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.3, 1] }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
-                  <CheckCircle2 className="w-14 h-14 text-white" />
-                </div>
-              </motion.div>
-              <motion.h2
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="font-display text-2xl font-bold text-foreground mb-2"
-              >
-                🎉 Thank You!
-              </motion.h2>
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground font-sans mb-4"
-              >
-                Your live caricature booking is now fully paid! We hope you had an amazing experience. ✨
-              </motion.p>
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Badge className="bg-green-100 text-green-700 border-none text-sm px-4 py-1">✅ Fully Paid</Badge>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                <Button variant="outline" className="mt-4 rounded-full font-sans" onClick={() => setPortalPaymentDone(false)}>
-                  Close
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Premium Payment Success Overlay */}
+      <PaymentSuccessOverlay show={portalPaymentDone} onClose={() => setPortalPaymentDone(false)} />
     </div>
   );
 };
