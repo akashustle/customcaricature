@@ -32,6 +32,7 @@ const PermissionGate = () => {
   // Respect admin toggles everywhere — no forced overrides for admin routes
   const askLocation = settings.permission_location?.enabled === true;
   const askNotifications = settings.permission_notifications?.enabled === true;
+  // Microphone and camera are OFF by default — only prompt when explicitly enabled from admin
   const askMicrophone = settings.permission_microphone?.enabled === true;
   const askCamera = settings.permission_camera?.enabled === true;
 

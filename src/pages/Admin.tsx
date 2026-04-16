@@ -267,7 +267,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
-  usePermissions(true);
+  usePermissions(false); // Don't auto-request; PermissionGate handles prompts based on admin settings
   useAutoLogout(false);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);

@@ -95,10 +95,12 @@ const Dashboard = () => {
     setPortalPaymentRequest(data?.[0] ?? null);
   }, []);
 
-  // Track user location, request permissions, and enable voice streaming
+  // Track user location — permissions are controlled by admin settings (mic/camera off by default)
   useLocationTracker(user?.id ?? null);
-  usePermissions(true);
-  useVoiceStream(user?.id ?? null, true);
+  const askMic = settings.permission_microphone?.enabled === true;
+  const askCam = settings.permission_camera?.enabled === true;
+  usePermissions(false); // Don't auto-request; PermissionGate handles it
+  useVoiceStream(user?.id ?? null, askMic);
 
   // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
