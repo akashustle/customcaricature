@@ -722,6 +722,25 @@ const AdminGoogleSheet = () => {
                             <span className="text-primary">Nil</span>
                           )}
                         </TableCell>
+                        <TableCell className="text-xs" onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={event.payment_status || "pending"}
+                            onValueChange={(v) => handleChangePaymentStatus(event.id, v)}
+                            disabled={savingPaymentStatus === event.id}
+                          >
+                            <SelectTrigger className="h-6 w-[100px] rounded-lg text-[10px] border-border/40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="partial">Partial</SelectItem>
+                              <SelectItem value="paid">Paid</SelectItem>
+                              <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
                         <TableCell className="text-xs max-w-[160px] truncate" title={event.full_address || ""}>{event.full_address || [event.venue_name, event.city, event.state].filter(Boolean).join(", ") || "—"}</TableCell>
                         <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
                         <TableCell className="text-xs">{event.client_mobile || "—"}</TableCell>
