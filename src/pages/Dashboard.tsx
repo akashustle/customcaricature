@@ -1474,26 +1474,58 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
                     {/* Pay partial 2 to complete advance - ONLY if PaymentStatusTracker not handling it */}
 
-                    {/* Pay remaining balance button (green) */}
-                    {remaining > 0 && advancePaid && !fullyPaid && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-sans bg-green-50 text-green-700 rounded-lg p-3 font-medium border border-green-200">
-                          ✅ Advance paid! Remaining balance {formatPrice(remaining)} can be paid now or at the event.
-                        </p>
-                        <Button
-                          size="sm"
-                          className="rounded-full font-sans w-full bg-green-600 hover:bg-green-700 text-white"
-                          disabled={payingEventId === ev.id}
-                          onClick={() => handlePayRemaining(ev)}
-                        >
-                          {payingEventId === ev.id ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                          ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Remaining {formatPrice(remaining)}</>
-                          )}
-                        </Button>
-                      </div>
-                    )}
+                    {/* Pay remaining balance button with preview */}
+                    {remaining > 0 && advancePaid && !fullyPaid && (() => {
+                      const gp = _siteSettings?.gateway_charge_percentage?.percentage || 2.6;
+                      const fee = Math.ceil(remaining * gp / 100);
+                      const totalPayable = remaining + fee;
+                      return (
+                        <div className="space-y-2">
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-3"
+                            style={{ perspective: "600px", transform: "rotateX(1deg)" }}
+                          >
+                            <p className="text-xs font-sans font-semibold text-emerald-800">✅ Advance paid! Pay remaining to complete.</p>
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between text-xs font-sans">
+                                <span className="text-muted-foreground">Remaining Balance</span>
+                                <span className="font-semibold">{formatPrice(remaining)}</span>
+                              </div>
+                              <div className="flex justify-between text-xs font-sans">
+                                <span className="text-muted-foreground">Payment Gateway Fee</span>
+                                <span className="font-semibold">{formatPrice(fee)}</span>
+                              </div>
+                              <div className="h-px bg-emerald-200" />
+                              <div className="flex justify-between text-sm font-sans">
+                                <span className="font-bold text-emerald-800">Total Payable</span>
+                                <motion.span
+                                  className="font-bold text-emerald-700 text-lg"
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: [1, 1.05, 1] }}
+                                  transition={{ duration: 0.6, delay: 0.3 }}
+                                >
+                                  {formatPrice(totalPayable)}
+                                </motion.span>
+                              </div>
+                            </div>
+                          </motion.div>
+                          <Button
+                            size="sm"
+                            className="rounded-full font-sans w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                            disabled={payingEventId === ev.id}
+                            onClick={() => handlePayRemaining(ev)}
+                          >
+                            {payingEventId === ev.id ? (
+                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                            ) : (
+                              <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(totalPayable)} Now</>
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })()}
 
                     {/* Show Event Details toggle (for completed/fully paid) */}
                     {(ev.status === "completed" || fullyPaid) && (
