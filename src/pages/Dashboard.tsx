@@ -272,9 +272,15 @@ const Dashboard = () => {
         .select("client_name, client_email, client_mobile")
         .eq("id", request.event_id)
         .single();
+
+      // Apply gateway fee from admin settings
+      const gatewayPercent = settings.gateway_charge_percentage?.percentage || 2.6;
+      const gatewayChargesEnabled = profile?.gateway_charges_enabled !== false;
+      const baseAmount = request.amount;
+      const amountWithGateway = gatewayChargesEnabled ? Math.ceil(baseAmount + (baseAmount * gatewayPercent / 100)) : baseAmount;
       
       const rzpData = await createRazorpayOrder(supabase, {
-        amount: request.amount, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
+        amount: amountWithGateway, order_id: request.event_id, customer_name: ev?.client_name || profile?.full_name || "", customer_email: ev?.client_email || profile?.email || "", customer_mobile: ev?.client_mobile || profile?.mobile || "",
       });
 
       await supabase
@@ -292,24 +298,19 @@ const Dashboard = () => {
               razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: request.event_id, is_event_remaining: true,
             });
             
-            // Update portal request to completed
             await supabase.from("portal_payment_requests" as any).update({ status: "completed", updated_at: new Date().toISOString() } as any).eq("id", request.id);
-            
-            // Update event to fully_paid
             await supabase.from("event_bookings").update({ payment_status: "fully_paid", remaining_amount: 0 } as any).eq("id", request.event_id);
-            
-            // Record payment history
             await supabase.from("payment_history").insert({
               user_id: user.id, booking_id: request.event_id,
-              payment_type: "event_remaining", amount: request.amount,
-              status: "confirmed", description: `Remaining ₹${request.amount.toLocaleString("en-IN")} paid via portal`,
+              payment_type: "event_remaining", amount: amountWithGateway,
+              status: "confirmed", description: `Remaining ₹${amountWithGateway.toLocaleString("en-IN")} paid via portal${gatewayChargesEnabled ? ` (incl. ${gatewayPercent}% gateway fee)` : ""}`,
             } as any);
 
             playPaymentSuccessSound();
             setPortalPaymentDone(true);
             setPortalPaymentRequest(null);
             if (user) { fetchEvents(user.id); fetchOrders(user.id); }
-            setTimeout(() => setPortalPaymentDone(false), 6000);
+            setTimeout(() => setPortalPaymentDone(false), 8000);
           } catch {
             toast({ title: "Verification Failed", variant: "destructive" });
           }
