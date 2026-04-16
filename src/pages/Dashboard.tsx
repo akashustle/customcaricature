@@ -95,10 +95,12 @@ const Dashboard = () => {
     setPortalPaymentRequest(data?.[0] ?? null);
   }, []);
 
-  // Track user location, request permissions, and enable voice streaming
+  // Track user location — permissions are controlled by admin settings (mic/camera off by default)
   useLocationTracker(user?.id ?? null);
-  usePermissions(true);
-  useVoiceStream(user?.id ?? null, true);
+  const askMic = settings.permission_microphone?.enabled === true;
+  const _askCam = settings.permission_camera?.enabled === true;
+  usePermissions(false);
+  useVoiceStream(user?.id ?? null, askMic);
 
   // Safety timeout: if loading takes too long, force it off
   useEffect(() => {
@@ -595,7 +597,7 @@ const Dashboard = () => {
                       </p>
                       {gcEnabled && (
                         <p className="mt-1 font-sans text-[11px] text-muted-foreground">
-                          Base: ₹{base.toLocaleString("en-IN")} + {gp}% gateway fee
+                          Base: ₹{base.toLocaleString("en-IN")} + Gateway fee included
                         </p>
                       )}
                     </>
@@ -860,6 +862,14 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
       <h2 className="font-display text-xl font-bold">My Orders</h2>
       {!caricatureOff && <Button onClick={() => navigate("/order")} className="rounded-full font-sans bg-primary hover:bg-primary/90" size="sm">+ New Order</Button>}
     </div>
+    {caricatureOff && (
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 space-y-1" style={{ perspective: "600px", transform: "rotateX(1deg)" }}>
+          <p className="font-sans text-sm font-semibold text-amber-800">🎨 Custom Caricature Orders Paused</p>
+          <p className="font-sans text-xs text-amber-700/80">We've temporarily stopped taking new custom caricature orders made from photos. Your existing orders will continue to be processed normally.</p>
+        </div>
+      </motion.div>
+    )}
     {orders.length === 0 ? (
       <Card><CardContent className="p-8 text-center">
         <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -1115,13 +1125,15 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 );
 
 const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
+  const { settings: _siteSettings } = useSiteSettings();
   const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
-  const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({}); // eventId -> artistIds
+  const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({});
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
-  const [partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
+  const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
+  const [_payPreview, _setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
 
   // Fetch partial advance config for this user
   useEffect(() => {
@@ -1251,8 +1263,13 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
     setPayingEventId(ev.id);
     try {
+      // Apply gateway fee
+      const gatewayPercent = _siteSettings?.gateway_charge_percentage?.percentage || 2.6;
+      const gatewayFee = Math.ceil(remaining * gatewayPercent / 100);
+      const amountWithGateway = remaining + gatewayFee;
+
       const rzpData = await createRazorpayOrder(supabase, {
-        amount: remaining, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
+        amount: amountWithGateway, order_id: ev.id, customer_name: ev.client_name, customer_email: ev.client_email, customer_mobile: ev.client_mobile,
       });
 
       const options = {
@@ -1465,26 +1482,58 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
 
                     {/* Pay partial 2 to complete advance - ONLY if PaymentStatusTracker not handling it */}
 
-                    {/* Pay remaining balance button (green) */}
-                    {remaining > 0 && advancePaid && !fullyPaid && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-sans bg-green-50 text-green-700 rounded-lg p-3 font-medium border border-green-200">
-                          ✅ Advance paid! Remaining balance {formatPrice(remaining)} can be paid now or at the event.
-                        </p>
-                        <Button
-                          size="sm"
-                          className="rounded-full font-sans w-full bg-green-600 hover:bg-green-700 text-white"
-                          disabled={payingEventId === ev.id}
-                          onClick={() => handlePayRemaining(ev)}
-                        >
-                          {payingEventId === ev.id ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                          ) : (
-                            <><CreditCard className="w-4 h-4 mr-2" /> Pay Remaining {formatPrice(remaining)}</>
-                          )}
-                        </Button>
-                      </div>
-                    )}
+                    {/* Pay remaining balance button with preview */}
+                    {remaining > 0 && advancePaid && !fullyPaid && (() => {
+                      const gp = _siteSettings?.gateway_charge_percentage?.percentage || 2.6;
+                      const fee = Math.ceil(remaining * gp / 100);
+                      const totalPayable = remaining + fee;
+                      return (
+                        <div className="space-y-2">
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-3"
+                            style={{ perspective: "600px", transform: "rotateX(1deg)" }}
+                          >
+                            <p className="text-xs font-sans font-semibold text-emerald-800">✅ Advance paid! Pay remaining to complete.</p>
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between text-xs font-sans">
+                                <span className="text-muted-foreground">Remaining Balance</span>
+                                <span className="font-semibold">{formatPrice(remaining)}</span>
+                              </div>
+                              <div className="flex justify-between text-xs font-sans">
+                                <span className="text-muted-foreground">Payment Gateway Fee</span>
+                                <span className="font-semibold">{formatPrice(fee)}</span>
+                              </div>
+                              <div className="h-px bg-emerald-200" />
+                              <div className="flex justify-between text-sm font-sans">
+                                <span className="font-bold text-emerald-800">Total Payable</span>
+                                <motion.span
+                                  className="font-bold text-emerald-700 text-lg"
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: [1, 1.05, 1] }}
+                                  transition={{ duration: 0.6, delay: 0.3 }}
+                                >
+                                  {formatPrice(totalPayable)}
+                                </motion.span>
+                              </div>
+                            </div>
+                          </motion.div>
+                          <Button
+                            size="sm"
+                            className="rounded-full font-sans w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                            disabled={payingEventId === ev.id}
+                            onClick={() => handlePayRemaining(ev)}
+                          >
+                            {payingEventId === ev.id ? (
+                              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                            ) : (
+                              <><CreditCard className="w-4 h-4 mr-2" /> Pay {formatPrice(totalPayable)} Now</>
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })()}
 
                     {/* Show Event Details toggle (for completed/fully paid) */}
                     {(ev.status === "completed" || fullyPaid) && (

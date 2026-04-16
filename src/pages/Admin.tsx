@@ -45,6 +45,7 @@ import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import NotificationBell from "@/components/NotificationBell";
 import ExportButton from "@/components/admin/ExportButton";
 import { MessageCircle, Radio } from "lucide-react";
+import AdminInfoPanel from "@/components/admin/AdminInfoPanel";
 
 // Lazy load all admin tab components for performance
 const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
@@ -267,7 +268,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { settings, updateSetting } = useSiteSettings();
-  usePermissions(true);
+  usePermissions(false); // Don't auto-request; PermissionGate handles prompts based on admin settings
   useAutoLogout(false);
   const [adminEnteredName, setAdminEnteredName] = useState<string | null>(() => sessionStorage.getItem("admin_entered_name"));
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -349,6 +350,7 @@ const Admin = () => {
   const [manualPhotos, setManualPhotos] = useState<File[]>([]);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [addingOrder, setAddingOrder] = useState(false);
+  const [showAdminInfo, setShowAdminInfo] = useState(false);
   // Admin settings state
   const [adminCurrentPassword, setAdminCurrentPassword] = useState("");
   const [adminNewPassword, setAdminNewPassword] = useState("");
@@ -994,6 +996,13 @@ const Admin = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAdminInfo(true)}
+                className="h-8 w-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                title="Admin Panel Guide"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
               <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
@@ -1017,6 +1026,7 @@ const Admin = () => {
           </div>
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
+        {showAdminInfo && <AdminInfoPanel onClose={() => setShowAdminInfo(false)} />}
 
         <div className="px-2 py-3 sm:px-4 md:px-6 md:py-5">
           <div className="md:hidden mb-4">
