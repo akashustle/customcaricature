@@ -123,27 +123,28 @@ const InfiniteScrollGallery = ({ images, onImageClick }: { images: string[]; onI
 
 const ScrollTypeReveal = ({ text, className }: { text: string; className?: string }) => {
   const [visibleChars, setVisibleChars] = useState(0);
-  const rafRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const update = () => {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        const progress = Math.min(1, window.scrollY / 320);
-        setVisibleChars(Math.max(1, Math.floor(text.length * progress)));
-      });
+    setVisibleChars(0);
+    let i = 0;
+    const tick = () => {
+      i++;
+      setVisibleChars(i);
+      if (i < text.length) {
+        timerRef.current = setTimeout(tick, 38);
+      }
     };
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => { window.removeEventListener("scroll", update); cancelAnimationFrame(rafRef.current); };
+    timerRef.current = setTimeout(tick, 400);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [text]);
 
-  const shown = text.slice(0, visibleChars);
   return (
     <span className={className} aria-label={text}>
-      {shown}
-      <span className="ml-1 inline-block h-[1em] w-px translate-y-1 animate-pulse bg-primary" aria-hidden="true" />
+      {text.slice(0, visibleChars)}
+      {visibleChars < text.length && (
+        <span className="ml-0.5 inline-block h-[1em] w-[2px] translate-y-1 animate-pulse bg-primary" aria-hidden="true" />
+      )}
     </span>
   );
 };
