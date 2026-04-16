@@ -182,14 +182,21 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
             <p className="text-xs font-sans bg-red-50 text-red-700 rounded-lg p-3 font-medium border border-red-200">
               🔒 Your event date is blocked. To fully confirm your booking, pay Partial 2 to complete advance payment.
             </p>
-            <Button
-              onClick={handlePayPartial2}
-              disabled={paying}
-              className="w-full rounded-full font-sans bg-red-600 hover:bg-red-700 text-white text-sm"
-              size="sm"
-            >
-              {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="w-4 h-4 mr-2" />Pay Partial 2 — Complete Advance {formatPrice(partialConfig.partial_2_amount)}</>}
-            </Button>
+            {(() => {
+              const gp = settings.gateway_charge_percentage?.percentage || 2.6;
+              const base = partialConfig.partial_2_amount;
+              const withGw = Math.ceil(base + (base * gp / 100));
+              return (
+                <Button
+                  onClick={handlePayPartial2}
+                  disabled={paying}
+                  className="w-full rounded-full font-sans bg-red-600 hover:bg-red-700 text-white text-sm"
+                  size="sm"
+                >
+                  {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="w-4 h-4 mr-2" />Pay {formatPrice(withGw)} (incl. {gp}% fee)</>}
+                </Button>
+              );
+            })()}
           </div>
         )}
 
