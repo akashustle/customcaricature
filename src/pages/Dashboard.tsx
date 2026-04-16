@@ -28,6 +28,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
+import PaymentSuccessOverlay from "@/components/PaymentSuccessOverlay";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import {
