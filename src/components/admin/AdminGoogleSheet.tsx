@@ -169,6 +169,7 @@ const AdminGoogleSheet = () => {
   const [editingPendingId, setEditingPendingId] = useState<string | null>(null);
   const [pendingValue, setPendingValue] = useState("");
   const [savingPending, setSavingPending] = useState(false);
+  const [savingPaymentStatus, setSavingPaymentStatus] = useState<string | null>(null);
   const deferredSearch = useDeferredValue(search);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -443,6 +444,25 @@ const AdminGoogleSheet = () => {
     } finally { setAddingEvent(false); }
   };
 
+  const handleChangePaymentStatus = async (eventId: string, newStatus: string) => {
+    setSavingPaymentStatus(eventId);
+    try {
+      const event = events.find((e) => e.id === eventId);
+      if (!event) throw new Error("Event not found");
+      const updates: Record<string, any> = { payment_status: newStatus };
+      if (newStatus === "fully_paid") {
+        updates.remaining_amount = 0;
+        updates.advance_amount = event.total_price || 0;
+      }
+      const { error } = await supabase.from("event_bookings").update(updates).eq("id", eventId);
+      if (error) throw error;
+      toast({ title: "Payment status updated", description: `Set to ${newStatus.replace(/_/g, " ")}` });
+      await fetchEvents();
+    } catch (error: any) {
+      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+    } finally { setSavingPaymentStatus(null); }
+  };
+
   const getPendingAmount = (event: EventBooking) => {
     if (event.remaining_amount != null && event.remaining_amount > 0) return event.remaining_amount;
     const remaining = (event.total_price || 0) - (event.advance_amount || 0);
@@ -672,7 +692,8 @@ const AdminGoogleSheet = () => {
                   <TableHead>Artist</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Paid</TableHead>
-                  <TableHead>Remaining</TableHead>
+                    <TableHead>Remaining</TableHead>
+                    <TableHead>Payment</TableHead>
                   <TableHead>Address</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Phone</TableHead>
@@ -700,6 +721,25 @@ const AdminGoogleSheet = () => {
                           ) : (
                             <span className="text-primary">Nil</span>
                           )}
+                        </TableCell>
+                        <TableCell className="text-xs" onClick={(e) => e.stopPropagation()}>
+                          <Select
+                            value={event.payment_status || "pending"}
+                            onValueChange={(v) => handleChangePaymentStatus(event.id, v)}
+                            disabled={savingPaymentStatus === event.id}
+                          >
+                            <SelectTrigger className="h-6 w-[100px] rounded-lg text-[10px] border-border/40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="partial">Partial</SelectItem>
+                              <SelectItem value="paid">Paid</SelectItem>
+                              <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-xs max-w-[160px] truncate" title={event.full_address || ""}>{event.full_address || [event.venue_name, event.city, event.state].filter(Boolean).join(", ") || "—"}</TableCell>
                         <TableCell className="text-xs">{event.client_name || "—"}</TableCell>
@@ -736,7 +776,7 @@ const AdminGoogleSheet = () => {
                       <AnimatePresence>
                         {expandedEventId === event.id && (
                           <TableRow key={`${event.id}-detail`}>
-                            <TableCell colSpan={12} className="p-0">
+                            <TableCell colSpan={13} className="p-0">
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
@@ -813,7 +853,25 @@ const AdminGoogleSheet = () => {
                                       </div>
                                       <div className="space-y-0.5">
                                         <p className="text-[10px] text-muted-foreground font-medium">Payment Status</p>
-                                        <Badge variant="outline" className="text-[10px]">{event.payment_status || "—"}</Badge>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                          <Select
+                                            value={event.payment_status || "pending"}
+                                            onValueChange={(v) => handleChangePaymentStatus(event.id, v)}
+                                            disabled={savingPaymentStatus === event.id}
+                                          >
+                                            <SelectTrigger className="h-7 w-[130px] rounded-lg text-[10px]">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="partial">Partial</SelectItem>
+                                              <SelectItem value="paid">Paid</SelectItem>
+                                              <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                                              <SelectItem value="refunded">Refunded</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
                                       </div>
                                     </div>
 
@@ -849,7 +907,7 @@ const AdminGoogleSheet = () => {
                 })}
                 {filteredEvents.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={12} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
+                    <TableCell colSpan={13} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
