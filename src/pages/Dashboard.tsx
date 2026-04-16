@@ -1117,13 +1117,15 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 );
 
 const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
+  const { settings: _siteSettings } = useSiteSettings();
   const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
-  const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({}); // eventId -> artistIds
+  const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({});
   const [payingEventId, setPayingEventId] = useState<string | null>(null);
   const [showPaymentCelebration, setShowPaymentCelebration] = useState(false);
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
-  const [partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
+  const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
+  const [payPreview, setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
 
   // Fetch partial advance config for this user
   useEffect(() => {
