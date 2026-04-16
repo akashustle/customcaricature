@@ -692,7 +692,8 @@ const AdminGoogleSheet = () => {
                   <TableHead>Artist</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Paid</TableHead>
-                  <TableHead>Remaining</TableHead>
+                    <TableHead>Remaining</TableHead>
+                    <TableHead>Payment</TableHead>
                   <TableHead>Address</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Phone</TableHead>
