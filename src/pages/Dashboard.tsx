@@ -573,9 +573,24 @@ const Dashboard = () => {
             <div className="space-y-4 p-5 sm:p-6">
               <div className="rounded-[1.5rem] border border-border/60 bg-muted/40 p-4">
                 <p className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">Amount due</p>
-                <p className="mt-2 font-display text-4xl font-bold text-primary">
-                  ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")}
-                </p>
+                {(() => {
+                  const gp = settings.gateway_charge_percentage?.percentage || 2.6;
+                  const gcEnabled = profile?.gateway_charges_enabled !== false;
+                  const base = portalPaymentRequest.amount;
+                  const withGw = gcEnabled ? Math.ceil(base + (base * gp / 100)) : base;
+                  return (
+                    <>
+                      <p className="mt-2 font-display text-4xl font-bold text-primary">
+                        ₹{withGw.toLocaleString("en-IN")}
+                      </p>
+                      {gcEnabled && (
+                        <p className="mt-1 font-sans text-[11px] text-muted-foreground">
+                          Base: ₹{base.toLocaleString("en-IN")} + {gp}% gateway fee
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
                 {portalPaymentRequest.extra_hours > 0 && (
                   <p className="mt-2 font-sans text-xs text-muted-foreground">
                     Includes {portalPaymentRequest.extra_hours} extra hour(s) · ₹{portalPaymentRequest.extra_amount?.toLocaleString("en-IN")}
@@ -607,7 +622,12 @@ const Dashboard = () => {
                 {payingPortal ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Opening secure payment...</>
                 ) : (
-                  <>Pay ₹{portalPaymentRequest.amount?.toLocaleString("en-IN")} now</>
+                  <>Pay ₹{(() => {
+                    const gp = settings.gateway_charge_percentage?.percentage || 2.6;
+                    const gcEnabled = profile?.gateway_charges_enabled !== false;
+                    const base = portalPaymentRequest.amount;
+                    return gcEnabled ? Math.ceil(base + (base * gp / 100)).toLocaleString("en-IN") : base.toLocaleString("en-IN");
+                  })()} now</>
                 )}
               </Button>
 
@@ -619,69 +639,8 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Thank You Popup after Portal Payment */}
-      <AnimatePresence>
-        {portalPaymentDone && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={() => setPortalPaymentDone(false)}
-          >
-            <motion.div
-              initial={{ scale: 0, rotate: -10 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0 }}
-              transition={{ type: "spring", bounce: 0.5 }}
-              className="bg-background rounded-3xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-border"
-              onClick={e => e.stopPropagation()}
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.3, 1] }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4 shadow-lg">
-                  <CheckCircle2 className="w-14 h-14 text-white" />
-                </div>
-              </motion.div>
-              <motion.h2
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="font-display text-2xl font-bold text-foreground mb-2"
-              >
-                🎉 Thank You!
-              </motion.h2>
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground font-sans mb-4"
-              >
-                Your live caricature booking is now fully paid! We hope you had an amazing experience. ✨
-              </motion.p>
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Badge className="bg-green-100 text-green-700 border-none text-sm px-4 py-1">✅ Fully Paid</Badge>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
-                <Button variant="outline" className="mt-4 rounded-full font-sans" onClick={() => setPortalPaymentDone(false)}>
-                  Close
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Premium Payment Success Overlay */}
+      <PaymentSuccessOverlay show={portalPaymentDone} onClose={() => setPortalPaymentDone(false)} />
     </div>
   );
 };
