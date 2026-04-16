@@ -776,7 +776,7 @@ const AdminGoogleSheet = () => {
                       <AnimatePresence>
                         {expandedEventId === event.id && (
                           <TableRow key={`${event.id}-detail`}>
-                            <TableCell colSpan={12} className="p-0">
+                            <TableCell colSpan={13} className="p-0">
                               <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
@@ -907,7 +907,7 @@ const AdminGoogleSheet = () => {
                 })}
                 {filteredEvents.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={12} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
+                    <TableCell colSpan={13} className="py-12 text-center text-muted-foreground">No events found for this filter.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
