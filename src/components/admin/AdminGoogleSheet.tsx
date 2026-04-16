@@ -169,6 +169,7 @@ const AdminGoogleSheet = () => {
   const [editingPendingId, setEditingPendingId] = useState<string | null>(null);
   const [pendingValue, setPendingValue] = useState("");
   const [savingPending, setSavingPending] = useState(false);
+  const [savingPaymentStatus, setSavingPaymentStatus] = useState<string | null>(null);
   const deferredSearch = useDeferredValue(search);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
