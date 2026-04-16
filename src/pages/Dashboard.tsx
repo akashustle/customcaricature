@@ -394,6 +394,32 @@ const Dashboard = () => {
         {/* Payment Reminders */}
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
 
+        {/* Quick Actions — 5 new features */}
+        <div className="grid grid-cols-5 gap-2 mb-5">
+          {[
+            { label: "Track", icon: Truck, action: () => navigate("/track-order"), gradient: "from-cyan-500 to-blue-500" },
+            { label: "Support", icon: MessageCircle, action: () => navigate("/support"), gradient: "from-pink-500 to-rose-500" },
+            { label: "Gallery", icon: Sparkles, action: () => navigate("/gallery/caricature"), gradient: "from-amber-500 to-orange-500" },
+            { label: "FAQs", icon: FileText, action: () => navigate("/faqs"), gradient: "from-teal-500 to-emerald-500" },
+            { label: "Explore", icon: Star, action: () => navigate("/explore"), gradient: "from-purple-500 to-indigo-500" },
+          ].map((item, i) => (
+            <motion.button
+              key={item.label}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 + i * 0.05, type: "spring", stiffness: 300 }}
+              whileTap={{ scale: 0.85 }}
+              onClick={item.action}
+              className="flex flex-col items-center gap-1 py-2"
+            >
+              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md`}>
+                <item.icon className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] font-sans text-muted-foreground font-medium">{item.label}</span>
+            </motion.button>
+          ))}
+        </div>
+
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
@@ -1078,51 +1104,103 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   );
 };
 
-const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between">
-      <CardTitle className="font-display text-lg">My Profile</CardTitle>
-      {!editing ? (
-        <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans"><Edit2 className="w-4 h-4 mr-1" /> Edit</Button>
-      ) : (
-        <div className="flex gap-2">
-          <Button size="sm" onClick={saveProfile} className="font-sans bg-primary hover:bg-primary/90"><Save className="w-4 h-4 mr-1" />Save</Button>
-          <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans"><X className="w-4 h-4" /></Button>
-        </div>
-      )}
-    </CardHeader>
-    <CardContent className="space-y-4">
-      {editing && editForm ? (
-        <>
-          <div><Label className="font-sans">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} /></div>
-          <div><Label className="font-sans">Email (cannot be changed)</Label><Input value={editForm.email || ""} disabled className="opacity-60" /></div>
-          <div><Label className="font-sans">Mobile (10 digits)</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} /></div>
-          <div><Label className="font-sans">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} /></div>
-          <div><Label className="font-sans">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label className="font-sans">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} /></div>
-            <div><Label className="font-sans">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} /></div>
+const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
+  const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
+  const memberSince = profile?.email ? "Member" : "";
+
+  return (
+    <div className="space-y-4">
+      {/* Profile Hero Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-3xl"
+        style={{ perspective: "800px" }}
+      >
+        <div className="bg-gradient-to-br from-primary/20 via-background to-secondary/30 p-6 border border-border/40 rounded-3xl"
+          style={{ transform: "rotateX(1deg)", transformStyle: "preserve-3d" }}>
+          {/* Glass overlay */}
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] rounded-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-4 mb-5">
+            <motion.div
+              whileHover={{ scale: 1.08, rotateY: 10 }}
+              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <span className="text-2xl font-bold text-primary-foreground font-display">{initials}</span>
+            </motion.div>
+            <div className="flex-1">
+              <h3 className="font-display text-xl font-bold text-foreground">{profile?.full_name || "User"}</h3>
+              <p className="text-sm text-muted-foreground font-sans">{profile?.email || ""}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-xs text-muted-foreground font-sans">{memberSince}</span>
+              </div>
+            </div>
+            {!editing ? (
+              <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            ) : (
+              <div className="flex gap-1.5">
+                <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl"><X className="w-4 h-4" /></Button>
+              </div>
+            )}
           </div>
-          <div><Label className="font-sans">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} /></div>
-        </>
-      ) : profile ? (
-        <div className="space-y-3 font-sans text-sm">
-          <Row label="Name" value={profile.full_name || "—"} />
-          <Row label="Email" value={profile.email || "—"} />
-          <Row label="Mobile" value={profile.mobile ? `+91 ${profile.mobile}` : "—"} />
-          <Row label="Instagram" value={profile.instagram_id || "—"} />
-          <Row label="Full Address" value={[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(", ") || "—"} />
-          <Row label="City" value={profile.city || "—"} />
-          <Row label="State" value={profile.state || "—"} />
-          <Row label="Pincode" value={profile.pincode || "—"} />
-          <Row label="Secret Code" value={profile.secret_code || "Not set"} />
+
+          {editing && editForm ? (
+            <div className="space-y-3">
+              <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Mobile</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} className="rounded-xl" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="font-sans text-xs text-muted-foreground">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} className="rounded-xl" /></div>
+                <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} className="rounded-xl" /></div>
+              </div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} className="rounded-xl" /></div>
+            </div>
+          ) : profile ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {[
+                { label: "📱 Mobile", value: profile.mobile ? `+91 ${profile.mobile}` : "Not set" },
+                { label: "📸 Instagram", value: profile.instagram_id || "Not set" },
+                { label: "📍 City", value: profile.city || "Not set" },
+                { label: "🏠 State", value: profile.state || "Not set" },
+                { label: "📮 Pincode", value: profile.pincode || "Not set" },
+                { label: "🔐 Secret Code", value: profile.secret_code || "Not set" },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/30"
+                >
+                  <p className="text-[10px] text-muted-foreground font-sans">{item.label}</p>
+                  <p className="text-sm font-sans font-medium text-foreground mt-0.5">{item.value}</p>
+                </motion.div>
+              ))}
+              {profile.address && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="sm:col-span-2 bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/30"
+                >
+                  <p className="text-[10px] text-muted-foreground font-sans">🏡 Full Address</p>
+                  <p className="text-sm font-sans font-medium text-foreground mt-0.5">{[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(", ")}</p>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground font-sans">No profile data found.</p>
+          )}
         </div>
-      ) : (
-        <p className="text-muted-foreground font-sans">No profile data found.</p>
-      )}
-    </CardContent>
-  </Card>
-);
+      </motion.div>
+    </div>
+  );
+};
 
 const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
   const { settings: _siteSettings } = useSiteSettings();
@@ -1134,6 +1212,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
   const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
   const [_payPreview, _setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
+
+  // Separate upcoming and past events
+  const now = new Date();
+  const upcomingEvents = events.filter(e => new Date(e.event_date) >= now);
+  const pastEvents = events.filter(e => new Date(e.event_date) < now);
 
   // Fetch partial advance config for this user
   useEffect(() => {
@@ -1335,6 +1418,36 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
           {canBookEvent ? "+ Book Event" : <><Sparkles className="w-3 h-3 mr-1" />Book Event</>}
         </Button>
       </div>
+
+      {/* Upcoming Events Countdown Strip */}
+      {upcomingEvents.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 rounded-2xl overflow-hidden border border-primary/20"
+          style={{ perspective: "600px" }}
+        >
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 p-4"
+            style={{ transform: "rotateX(1deg)", transformStyle: "preserve-3d" }}>
+            <p className="text-xs font-sans font-semibold text-primary mb-2">🎯 Upcoming Events</p>
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+              {upcomingEvents.slice(0, 3).map((ev: any) => {
+                const daysLeft = Math.ceil((new Date(ev.event_date).getTime() - Date.now()) / 86400000);
+                return (
+                  <motion.div key={ev.id} whileHover={{ scale: 1.03 }} className="flex-shrink-0 bg-background/80 backdrop-blur-sm rounded-xl p-3 min-w-[140px] border border-border/30">
+                    <p className="text-2xl font-bold font-display text-primary">{daysLeft}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans">days left</p>
+                    <p className="text-xs font-sans font-medium mt-1 truncate">{ev.event_type}</p>
+                    <p className="text-[10px] text-muted-foreground font-sans truncate">{ev.city}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {showPaymentCelebration && <PaymentSuccessOverlay show={showPaymentCelebration} onClose={() => setShowPaymentCelebration(false)} />}
       {!canBookEvent && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="mb-4 border-primary/20 bg-primary/5">

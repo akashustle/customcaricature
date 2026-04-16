@@ -1,12 +1,13 @@
 import { useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const CHECK_INTERVAL = 45_000; // 45 seconds
+const CHECK_INTERVAL = 30_000; // 30 seconds
 const BUILD_HASH_KEY = "ccc_build_hash";
 
 /**
  * Polls index.html for changes in the built asset hashes.
- * When a new deployment is detected, triggers a seamless reload
- * so users always see the latest version without manual refresh.
+ * Also listens to realtime admin_site_settings for app_update_push.
+ * When a new deployment is detected, triggers a seamless reload.
  */
 const useAutoUpdate = () => {
   const checkForUpdate = useCallback(async () => {
@@ -18,7 +19,6 @@ const useAutoUpdate = () => {
       if (!res.ok) return;
       const html = await res.text();
 
-      // Extract main JS bundle hash from the HTML
       const match = html.match(/src="\/assets\/index-([a-zA-Z0-9]+)\.js"/);
       if (!match) return;
 
@@ -26,7 +26,6 @@ const useAutoUpdate = () => {
       const storedHash = sessionStorage.getItem(BUILD_HASH_KEY);
 
       if (!storedHash) {
-        // First load — just store
         sessionStorage.setItem(BUILD_HASH_KEY, newHash);
         return;
       }
@@ -34,7 +33,6 @@ const useAutoUpdate = () => {
       if (newHash !== storedHash) {
         sessionStorage.setItem(BUILD_HASH_KEY, newHash);
         
-        // Update service worker first
         if ("serviceWorker" in navigator) {
           const reg = await navigator.serviceWorker.getRegistration();
           if (reg) {
@@ -43,24 +41,17 @@ const useAutoUpdate = () => {
           }
         }
 
-        // Reload seamlessly
         window.location.reload();
       }
     } catch {
-      // Silent fail — network issues shouldn't break the app
+      // Silent fail
     }
   }, []);
 
   useEffect(() => {
-    // Don't run on admin pages to avoid interrupting admin work
-    if (window.location.pathname.startsWith("/admin") || 
-        window.location.pathname.startsWith("/customcad75")) {
-      return;
-    }
-
+    // Run on all pages — including admin — to ensure everyone gets updates
     const interval = setInterval(checkForUpdate, CHECK_INTERVAL);
     
-    // Also check on visibility change (tab comes back to focus)
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
         checkForUpdate();
@@ -68,9 +59,26 @@ const useAutoUpdate = () => {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Listen to realtime push updates from admin
+    const channel = supabase
+      .channel("app-update-broadcast")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "admin_site_settings", filter: "id=eq.app_update_push" },
+        (payload: any) => {
+          const val = payload?.new?.value;
+          if (val?.active) {
+            // Force check immediately when admin pushes update
+            setTimeout(() => checkForUpdate(), 2000);
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
+      supabase.removeChannel(channel);
     };
   }, [checkForUpdate]);
 };
