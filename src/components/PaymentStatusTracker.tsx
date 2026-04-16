@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/pricing";
 import { CheckCircle2, Circle, CreditCard, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -35,6 +36,7 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
   const [loading, setLoading] = useState(true);
   const [partialConfig, setPartialConfig] = useState<any>(null);
   const [paying, setPaying] = useState(false);
+  const { settings } = useSiteSettings();
 
   const fetchPayments = async () => {
     const { data } = await supabase
@@ -92,7 +94,10 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
       const { data: booking } = await supabase.from("event_bookings").select("client_name, client_email, client_mobile").eq("id", bookingId).single();
       if (!booking) throw new Error("Booking not found");
 
-      const amount = partialConfig.partial_2_amount;
+      const baseAmount = partialConfig.partial_2_amount;
+      const gatewayPercent = settings.gateway_charge_percentage?.percentage || 2.6;
+      const amount = Math.ceil(baseAmount + (baseAmount * gatewayPercent / 100));
+      
       const rzpData = await createRazorpayOrder(supabase, {
         amount, order_id: bookingId, customer_name: booking.client_name, customer_email: booking.client_email, customer_mobile: booking.client_mobile,
       });
