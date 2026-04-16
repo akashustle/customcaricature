@@ -204,18 +204,19 @@ const AdminGoogleSheet = () => {
 
   useEffect(() => { refreshAll().catch(() => {}); }, []);
 
-  // Debounced realtime refresh - prevents rate limiting
+  // Debounced realtime refresh - re-fetch both DB events AND sheet data
   const debouncedRefresh = useCallback(() => {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     refreshTimerRef.current = setTimeout(() => {
-      fetchEvents().catch(() => {});
-    }, 3000); // Only refresh DB events on realtime, don't re-fetch sheet
-  }, [fetchEvents]);
+      refreshAll().catch(() => {});
+    }, 3000);
+  }, [refreshAll]);
 
   useEffect(() => {
     const channel = supabase
       .channel("admin-google-sheet-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, debouncedRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "payment_history" }, debouncedRefresh)
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
