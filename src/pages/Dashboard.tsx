@@ -98,8 +98,8 @@ const Dashboard = () => {
   // Track user location — permissions are controlled by admin settings (mic/camera off by default)
   useLocationTracker(user?.id ?? null);
   const askMic = settings.permission_microphone?.enabled === true;
-  const askCam = settings.permission_camera?.enabled === true;
-  usePermissions(false); // Don't auto-request; PermissionGate handles it
+  const _askCam = settings.permission_camera?.enabled === true;
+  usePermissions(false);
   useVoiceStream(user?.id ?? null, askMic);
 
   // Safety timeout: if loading takes too long, force it off
