@@ -833,7 +833,25 @@ const AdminGoogleSheet = () => {
                                       </div>
                                       <div className="space-y-0.5">
                                         <p className="text-[10px] text-muted-foreground font-medium">Payment Status</p>
-                                        <Badge variant="outline" className="text-[10px]">{event.payment_status || "—"}</Badge>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                          <Select
+                                            value={event.payment_status || "pending"}
+                                            onValueChange={(v) => handleChangePaymentStatus(event.id, v)}
+                                            disabled={savingPaymentStatus === event.id}
+                                          >
+                                            <SelectTrigger className="h-7 w-[130px] rounded-lg text-[10px]">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="pending">Pending</SelectItem>
+                                              <SelectItem value="partial">Partial</SelectItem>
+                                              <SelectItem value="paid">Paid</SelectItem>
+                                              <SelectItem value="fully_paid">Fully Paid</SelectItem>
+                                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                                              <SelectItem value="refunded">Refunded</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
                                       </div>
                                     </div>
 
