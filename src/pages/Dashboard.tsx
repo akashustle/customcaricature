@@ -387,26 +387,31 @@ const Dashboard = () => {
         {/* Smart Suggestions */}
         <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
 
-        {/* Stat cards — app-style */}
-        <div className="grid grid-cols-2 gap-2.5 mb-5 sm:grid-cols-3">
+        {/* Stat cards — vibrant 3D mobile-first */}
+        <div className="grid grid-cols-3 gap-2.5 mb-5">
           {[
-            { label: "Orders", value: orders.length, icon: Package, color: "from-blue-500/15 to-indigo-500/5", iconBg: "bg-blue-500" },
-            { label: "Events", value: events.length, icon: CalIcon, color: "from-violet-500/15 to-purple-500/5", iconBg: "bg-violet-500" },
-            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, color: "from-emerald-500/15 to-green-500/5", iconBg: "bg-emerald-500" },
+            { label: "Orders", value: orders.length, icon: Package, gradient: "from-blue-500 to-indigo-600", glow: "shadow-blue-500/25" },
+            { label: "Events", value: events.length, icon: CalIcon, gradient: "from-violet-500 to-purple-600", glow: "shadow-violet-500/25" },
+            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, gradient: "from-emerald-500 to-green-600", glow: "shadow-emerald-500/25" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 20 }}
+              whileHover={{ y: -4, scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div className={`app-card p-3 bg-gradient-to-br ${s.color}`}>
-                <div className="text-center">
-                  <div className={`w-8 h-8 rounded-xl mx-auto mb-2 flex items-center justify-center ${s.iconBg} shadow-md`}>
-                    <s.icon className="w-3.5 h-3.5 text-white" />
+              <div className={`relative overflow-hidden rounded-2xl p-3 bg-gradient-to-br ${s.gradient} shadow-lg ${s.glow}`}
+                style={{ transform: "perspective(600px) rotateX(2deg)", transformStyle: "preserve-3d" }}>
+                {/* Glass overlay */}
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] rounded-2xl" />
+                <div className="relative text-center text-white">
+                  <div className="w-9 h-9 rounded-xl mx-auto mb-1.5 flex items-center justify-center bg-white/20 backdrop-blur-sm shadow-inner">
+                    <s.icon className="w-4 h-4 text-white drop-shadow-sm" />
                   </div>
-                  <p className="text-xl font-bold font-display">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
+                  <p className="text-2xl font-bold font-display drop-shadow-sm">{s.value}</p>
+                  <p className="text-[10px] text-white/80 font-sans font-medium">{s.label}</p>
                 </div>
               </div>
             </motion.div>
