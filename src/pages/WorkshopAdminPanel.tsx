@@ -25,7 +25,7 @@ import {
   MapPin, History, Shield, BarChart3, ChevronDown, ChevronUp, TrendingUp,
   PieChart, Activity, Moon, Sun, ChevronLeft, ChevronRight, AlertTriangle,
   ExternalLink, UsersRound, Download, RefreshCw, Search, Hash, MonitorPlay,
-  Bell, Send, Lock, Reply, Monitor, GraduationCap, MoreHorizontal,
+  Bell, Send, Lock, Reply, Monitor, GraduationCap, MoreHorizontal, Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
@@ -36,6 +36,7 @@ import { BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell, Cartesia
 import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
+import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
 
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
@@ -57,6 +58,7 @@ const sidebarItems = [
   { key: "locations", icon: MapPin, label: "Locations" },
   { key: "feedback", icon: MessageSquare, label: "Feedback" },
   { key: "notifications", icon: Bell, label: "Notifications" },
+  { key: "page-builder", icon: Layers, label: "Dashboard Builder" },
   { key: "log", icon: History, label: "Activity Log" },
   { key: "settings", icon: Settings, label: "Settings" },
 ];
@@ -1936,6 +1938,18 @@ const WorkshopAdmin = () => {
                     </GlassCard>
                   ))}
                   {adminLog.length === 0 && <GlassCard><p className={`text-center ${textSecondary} py-8`}>No activity yet</p></GlassCard>}
+                </div>
+              )}
+
+              {tab === "page-builder" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary}`}>Student Dashboard Builder</h1>
+                    <RefreshButton />
+                  </div>
+                  <GlassCard>
+                    <AdminPageBuilder page="workshop-dashboard-builder" pageLabel="Workshop Student Dashboard" bucket="workshop-files" />
+                  </GlassCard>
                 </div>
               )}
 
