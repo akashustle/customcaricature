@@ -966,6 +966,9 @@ const Workshop = () => {
         </section>
       )}
 
+      {/* Admin-built dynamic blocks (editable from Admin → Workshop Page Builder) */}
+      <PageBuilderRenderer page="workshop-builder" className="py-6" />
+
       {/* CTA */}
       <section className="py-16 md:py-20">
         <div className="container mx-auto px-4 text-center max-w-lg">
