@@ -84,6 +84,8 @@ const NAV_SECTIONS = [
       { id: "content-editor", icon: Type, label: "Text Editor" },
       { id: "form-builder", icon: FormInput, label: "Form Builder" },
       { id: "design-control", icon: Palette, label: "Design" },
+      { id: "workshop-builder", icon: Layers, label: "Workshop Page Builder" },
+      { id: "dashboard-builder", icon: Layers, label: "User Dashboard Builder" },
     ],
   },
   {
