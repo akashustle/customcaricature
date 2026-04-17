@@ -18,6 +18,7 @@ import {
   Zap, Monitor, Languages, Target, UserCheck,
 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
