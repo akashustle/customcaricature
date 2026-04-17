@@ -15,6 +15,7 @@ import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
+import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 const ACCENT_COLORS = [
   { name: "Violet", primary: "#7c3aed", secondary: "#a855f7" },
@@ -268,6 +269,8 @@ const WorkshopDashboard = () => {
         <div key={activeTab} className="tab-content-enter">
           {renderContent()}
         </div>
+        {/* Admin-built dynamic blocks (editable from Workshop Admin → Dashboard Builder) */}
+        <PageBuilderRenderer page="workshop-dashboard-builder" className="mt-6" />
       </div>
 
       {/* Mobile Bottom Nav - Instagram Style */}

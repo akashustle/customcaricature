@@ -18,6 +18,7 @@ import {
   Zap, Monitor, Languages, Target, UserCheck,
 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -964,6 +965,9 @@ const Workshop = () => {
           </div>
         </section>
       )}
+
+      {/* Admin-built dynamic blocks (editable from Admin → Workshop Page Builder) */}
+      <PageBuilderRenderer page="workshop-builder" className="py-6" />
 
       {/* CTA */}
       <section className="py-16 md:py-20">

@@ -22,6 +22,10 @@ import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
+import PageBuilderRenderer from "@/components/PageBuilderRenderer";
+
+// Lightweight wrapper so it sits inside the dashboard layout
+const DashboardPageBuilder = () => <PageBuilderRenderer page="dashboard-builder" />;
 
 import NotificationBell from "@/components/NotificationBell";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -544,6 +548,11 @@ const Dashboard = () => {
               confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
             />
           )}
+        </div>
+
+        {/* Admin-built dynamic blocks (editable from Admin → User Dashboard Builder) */}
+        <div className="px-2 md:px-0 mt-4 mb-24 md:mb-6">
+          <DashboardPageBuilder />
         </div>
 
       </div>
