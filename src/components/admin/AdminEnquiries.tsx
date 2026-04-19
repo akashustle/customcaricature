@@ -684,7 +684,7 @@ const AdminEnquiries = () => {
                     <Textarea
                       value={eventDetails[region.key]?.pricing_text || ""}
                       onChange={e => setEventDetails({ ...eventDetails, [region.key]: { ...eventDetails[region.key], pricing_text: e.target.value } })}
-                      placeholder="e.g. Starting from ₹30,000 for 2 hours..."
+                      placeholder="e.g. Starting from ₹40,000 for 2 hours..."
                       className="mt-1" rows={3}
                     />
                   </div>

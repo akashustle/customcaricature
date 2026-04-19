@@ -430,7 +430,7 @@ const BookEvent = () => {
               finalPrice={pricing.total}
               revealed={false}
               showRange={true}
-              rangeMin={30000}
+              rangeMin={40000}
               rangeMax={90000}
               label="🎨 Live Caricature Event"
               urgencyMessage="Complete details to unlock your exclusive price!"
@@ -623,7 +623,7 @@ const BookEvent = () => {
                     finalPrice={40000}
                     revealed={false}
                     showRange={true}
-                    rangeMin={30000}
+                    rangeMin={40000}
                     rangeMax={80000}
                     label="Estimated range"
                   />
