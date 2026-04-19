@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense, useEffect, memo } from "react";
+import { AuthProvider } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
+import RoutePrefetcher from "./components/RoutePrefetcher";
 
 import usePageTracker from "./hooks/usePageTracker";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
@@ -209,10 +211,12 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <DefaultThemeApplier />
         <DeferredInit />
+        <RoutePrefetcher />
         <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
@@ -291,6 +295,7 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
       </ThemeProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
