@@ -216,6 +216,7 @@ const App = () => {
       <TooltipProvider>
         <DefaultThemeApplier />
         <DeferredInit />
+        <RoutePrefetcher />
         <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
