@@ -210,6 +210,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <DefaultThemeApplier />
