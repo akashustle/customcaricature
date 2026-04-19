@@ -94,9 +94,8 @@ const CaricatureBudgeting = () => {
   const guests = parseInt(guestCount) || 0;
   const isMumbai = city.toLowerCase().includes("mumbai") || city.toLowerCase().includes("thane") || city.toLowerCase().includes("navi mumbai") || city.toLowerCase().includes("palghar");
   const suggestedArtists = guests <= 50 ? 1 : 2;
-  const eventPrice = isMumbai
-    ? (suggestedArtists === 1 ? 30000 : 50000)
-    : (suggestedArtists === 1 ? 40000 : 70000);
+  // Unified pricing — Mumbai = Outside. Starting ₹40,000 for 1 artist.
+  const eventPrice = suggestedArtists === 1 ? 40000 : 70000;
 
   const logSession = async (action: string, link?: string) => {
     try {
