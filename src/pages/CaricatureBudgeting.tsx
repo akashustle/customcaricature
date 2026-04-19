@@ -192,7 +192,7 @@ const CaricatureBudgeting = () => {
                   <Calendar className="w-12 h-12 mx-auto text-primary" />
                   <h3 className="font-display text-xl font-bold">Live Event Booking</h3>
                   <p className="text-sm text-muted-foreground">Live caricature artist at your event</p>
-                  <Badge className="bg-primary/10 text-primary">Starting ₹30,000</Badge>
+                  <Badge className="bg-primary/10 text-primary">Starting ₹40,000</Badge>
                 </CardContent>
               </Card>
             </motion.div>
