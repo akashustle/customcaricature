@@ -473,11 +473,26 @@ const Admin = () => {
     let cancelled = false;
 
     const init = async () => {
-      // Verify admin role using SECURITY DEFINER RPC (bypasses RLS reliably).
-      // Retry a couple times in case the session token isn't fully attached yet
-      // — this prevents the "instant logout after login" flash.
+      // Wait for the session token to actually be attached to the supabase client.
+      // Without this, the very first has_role() RPC fires before the JWT lands
+      // → returns false → triggers signOut → infinite refresh-token storm (429s).
+      let sessionReady = false;
+      for (let i = 0; i < 8 && !cancelled; i++) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) { sessionReady = true; break; }
+        await new Promise(r => setTimeout(r, 250));
+      }
+      if (cancelled) return;
+      if (!sessionReady) {
+        // Don't sign out — just bail; AuthProvider will retry naturally.
+        return;
+      }
+
+      // Verify admin role using SECURITY DEFINER RPC. Retry generously on
+      // transient network/rate-limit errors before signing the user out.
       let isAdmin = false;
-      for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
+      let definitiveNonAdmin = false;
+      for (let attempt = 0; attempt < 5 && !cancelled; attempt++) {
         try {
           const { data, error } = await supabase.rpc("has_role", {
             _user_id: user.id,
@@ -485,14 +500,18 @@ const Admin = () => {
           });
           if (cancelled) return;
           if (!error && data === true) { isAdmin = true; break; }
-          if (!error && data === false) break; // definitive non-admin
-        } catch { /* network blip — retry */ }
-        await new Promise(r => setTimeout(r, 400));
+          if (!error && data === false) { definitiveNonAdmin = true; break; }
+        } catch { /* retry */ }
+        await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
       }
       if (cancelled) return;
       if (!isAdmin) {
-        await supabase.auth.signOut();
-        navigate("/customcad75", { replace: true });
+        // Only sign out if we got a definitive "not admin" response.
+        // Otherwise leave the session intact — they can refresh/retry.
+        if (definitiveNonAdmin) {
+          await supabase.auth.signOut();
+          navigate("/customcad75", { replace: true });
+        }
         return;
       }
       // Confirmed admin — load everything

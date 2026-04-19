@@ -217,7 +217,7 @@ const CaricatureBudgeting = () => {
           </Button>
 
           {!showEventResult && (
-            <PricingReveal finalPrice={35000} revealed={false} showRange rangeMin={30000} rangeMax={90000} label="Event Pricing Range"
+            <PricingReveal finalPrice={35000} revealed={false} showRange rangeMin={40000} rangeMax={90000} label="Event Pricing Range"
               urgencyMessage="Enter details below to get your exact quote" className="mb-6" />
           )}
 

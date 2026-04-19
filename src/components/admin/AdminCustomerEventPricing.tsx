@@ -25,7 +25,7 @@ interface Props {
 }
 
 const CONFIGS = [
-  { region: "mumbai", artist_count: 1, label: "Mumbai – 1 Artist", defaultTotal: 30000, defaultAdvance: 20000, defaultExtraHr: 4000 },
+  { region: "mumbai", artist_count: 1, label: "Mumbai – 1 Artist", defaultTotal: 40000, defaultAdvance: 25000, defaultExtraHr: 4000 },
   { region: "mumbai", artist_count: 2, label: "Mumbai – 2 Artists", defaultTotal: 50000, defaultAdvance: 35000, defaultExtraHr: 4000 },
   { region: "outside", artist_count: 1, label: "Outside Mumbai – 1 Artist", defaultTotal: 40000, defaultAdvance: 25000, defaultExtraHr: 5000 },
   { region: "outside", artist_count: 2, label: "Outside Mumbai – 2 Artists", defaultTotal: 70000, defaultAdvance: 45000, defaultExtraHr: 5000 },

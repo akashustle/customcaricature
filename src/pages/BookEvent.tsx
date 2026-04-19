@@ -430,7 +430,7 @@ const BookEvent = () => {
               finalPrice={pricing.total}
               revealed={false}
               showRange={true}
-              rangeMin={30000}
+              rangeMin={40000}
               rangeMax={90000}
               label="🎨 Live Caricature Event"
               urgencyMessage="Complete details to unlock your exclusive price!"
@@ -488,13 +488,17 @@ const BookEvent = () => {
                     {eventDate ? format(eventDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start" sideOffset={4}>
+                <PopoverContent className="w-auto p-0 z-[100] bg-card border-2 border-primary/20 shadow-2xl rounded-2xl" align="start" sideOffset={4}>
                   <Calendar
                     mode="single"
                     selected={eventDate}
-                    onSelect={setEventDate}
-                    disabled={(date) => date < new Date()}
-                    className={cn("p-3 pointer-events-auto")}
+                    onSelect={(d) => setEventDate(d)}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
+                    className={cn("p-3 pointer-events-auto rounded-2xl bg-card")}
                     initialFocus
                     fromMonth={new Date()}
                     numberOfMonths={1}
@@ -619,7 +623,7 @@ const BookEvent = () => {
                     finalPrice={40000}
                     revealed={false}
                     showRange={true}
-                    rangeMin={30000}
+                    rangeMin={40000}
                     rangeMax={80000}
                     label="Estimated range"
                   />

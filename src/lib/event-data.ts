@@ -40,6 +40,11 @@ export const EVENT_TYPES = [
 
 // Fallback pricing (used when DB pricing is not yet loaded)
 // Unified: Mumbai = Outside (same rates). Starting ₹40,000.
+// Psychological pricing: show "Starting ₹40,000" but display ranges to anchor higher.
+export const EVENT_PRICING_STARTING = 40000;
+export const EVENT_PRICING_RANGE_MIN = 40000;
+export const EVENT_PRICING_RANGE_MAX = 90000;
+
 export const EVENT_PRICING = {
   mumbai: {
     1: { total: 40000, advance: 25000 },

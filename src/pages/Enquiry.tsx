@@ -503,7 +503,7 @@ const Enquiry = () => {
                     finalPrice={45000}
                     revealed={false}
                     showRange={true}
-                    rangeMin={30000}
+                    rangeMin={40000}
                     rangeMax={90000}
                     label="🎨 Event Booking Starts From"
                     urgencyMessage="Fill details to unlock your special price!"
@@ -687,7 +687,7 @@ const Enquiry = () => {
                       finalPrice={50000}
                       revealed={false}
                       showRange={true}
-                      rangeMin={30000}
+                      rangeMin={40000}
                       rangeMax={90000}
                       label="🎨 Live Event Caricature"
                       urgencyMessage="Select location to see your exclusive price!"
@@ -765,7 +765,7 @@ const Enquiry = () => {
                       finalPrice={40000}
                       revealed={false}
                       showRange={true}
-                      rangeMin={30000}
+                      rangeMin={40000}
                       rangeMax={80000}
                       label="Estimated Event Price"
                     />
@@ -779,7 +779,7 @@ const Enquiry = () => {
                       finalPrice={resolvedPrice.price}
                       revealed={!!state && !!city}
                       showRange={!state || !city}
-                      rangeMin={30000}
+                      rangeMin={40000}
                       rangeMax={80000}
                       label="Estimated Event Booking Price"
                     />
