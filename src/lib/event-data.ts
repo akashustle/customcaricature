@@ -39,16 +39,17 @@ export const EVENT_TYPES = [
 ] as const;
 
 // Fallback pricing (used when DB pricing is not yet loaded)
+// Unified: Mumbai = Outside (same rates). Starting ₹40,000.
 export const EVENT_PRICING = {
   mumbai: {
-    1: { total: 30000, advance: 20000 },
-    2: { total: 50000, advance: 35000 },
+    1: { total: 40000, advance: 25000 },
+    2: { total: 70000, advance: 45000 },
   },
   outside: {
     1: { total: 40000, advance: 25000 },
     2: { total: 70000, advance: 45000 },
   },
-  extraHourRateMumbai: 4000,
+  extraHourRateMumbai: 5000,
   extraHourRateOutside: 5000,
 } as const;
 
