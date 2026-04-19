@@ -77,7 +77,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
     clientName: "", clientMobile: "", clientEmail: "", clientInstagram: "",
     eventType: "wedding", customEventType: "", eventDate: "", startTime: "10:00", endTime: "18:00",
     state: "", city: "", customCity: "", fullAddress: "", venueName: "", pincode: "",
-    artistCount: 1, totalPrice: 30000, advancePaid: 20000,
+    artistCount: 1, totalPrice: 40000, advancePaid: 25000,
     paymentStatus: "pending", negotiated: false, negotiatedTotal: 0, negotiatedAdvance: 0,
     notes: "", extraHours: 0, userId: "",
   });
@@ -318,7 +318,7 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
         payment_status: mf.paymentStatus, notes: mf.notes || null,
       } as any);
       toast({ title: "Event Added!" }); setShowAddEvent(false);
-      setMf({ clientName: "", clientMobile: "", clientEmail: "", clientInstagram: "", eventType: "wedding", customEventType: "", eventDate: "", startTime: "10:00", endTime: "18:00", state: "", city: "", customCity: "", fullAddress: "", venueName: "", pincode: "", artistCount: 1, totalPrice: 30000, advancePaid: 20000, paymentStatus: "pending", negotiated: false, negotiatedTotal: 0, negotiatedAdvance: 0, notes: "", extraHours: 0, userId: "" });
+      setMf({ clientName: "", clientMobile: "", clientEmail: "", clientInstagram: "", eventType: "wedding", customEventType: "", eventDate: "", startTime: "10:00", endTime: "18:00", state: "", city: "", customCity: "", fullAddress: "", venueName: "", pincode: "", artistCount: 1, totalPrice: 40000, advancePaid: 25000, paymentStatus: "pending", negotiated: false, negotiatedTotal: 0, negotiatedAdvance: 0, notes: "", extraHours: 0, userId: "" });
       fetchEvents();
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); } finally { setAddingEvent(false); }
   };
