@@ -473,15 +473,29 @@ const Admin = () => {
     let cancelled = false;
 
     const init = async () => {
-      // Verify admin role first before loading data
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      // Verify admin role using SECURITY DEFINER RPC (bypasses RLS reliably).
+      // Retry a couple times in case the session token isn't fully attached yet
+      // — this prevents the "instant logout after login" flash.
+      let isAdmin = false;
+      for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
+        try {
+          const { data, error } = await supabase.rpc("has_role", {
+            _user_id: user.id,
+            _role: "admin",
+          });
+          if (cancelled) return;
+          if (!error && data === true) { isAdmin = true; break; }
+          if (!error && data === false) break; // definitive non-admin
+        } catch { /* network blip — retry */ }
+        await new Promise(r => setTimeout(r, 400));
+      }
       if (cancelled) return;
-      if (!roles || roles.length === 0) {
+      if (!isAdmin) {
         await supabase.auth.signOut();
         navigate("/customcad75", { replace: true });
         return;
       }
-      // User is confirmed admin, load everything
+      // Confirmed admin — load everything
       fetchOrders();
       fetchCaricatureTypes();
       fetchCustomers();
