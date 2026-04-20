@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Palette, ArrowRight, Sparkles, Star, Users, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ONBOARDING_KEY = "ccc_onboarding_done_v2";
 
@@ -32,6 +33,7 @@ const AppOnboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading } = useAuth();
+  const { settings } = useSiteSettings();
   const [visible, setVisible] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -62,6 +64,7 @@ const AppOnboarding = () => {
 
   const slide = slides[currentSlide];
   const isLast = currentSlide === slides.length - 1;
+  const loginPopupVisible = settings.login_popup_visible?.enabled === true;
 
   return (
     <AnimatePresence>
@@ -128,7 +131,7 @@ const AppOnboarding = () => {
               >
                 Get Started <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              {(
+              {loginPopupVisible && (
                 <Button
                   variant="ghost"
                   size="lg"

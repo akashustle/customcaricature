@@ -145,7 +145,7 @@ const AdminMaintenance = () => {
   };
 
   const allowRegistration = (siteSettings as any).allow_registration_maintenance?.enabled ?? false;
-  const loginPopupVisible = (siteSettings as any).login_popup_visible?.enabled ?? true;
+  const loginPopupVisible = (siteSettings as any).login_popup_visible?.enabled ?? false;
   const maintenanceWaMessage = (siteSettings as any).maintenance_whatsapp_message?.text ?? "Hi, I want to book an event caricature";
   const caricatureVisible = (siteSettings as any).custom_caricature_visible?.enabled ?? true;
   const adminSplashEnabled = (siteSettings as any).admin_splash_enabled?.enabled ?? true;
@@ -235,7 +235,7 @@ const AdminMaintenance = () => {
                 { key: "permission_camera", label: "Camera", icon: Camera, desc: "Camera access" },
               ].map(perm => {
                 const Icon = perm.icon;
-                const isOn = (siteSettings as any)[perm.key]?.enabled ?? true;
+                const isOn = (siteSettings as any)[perm.key]?.enabled ?? false;
                 return (
                   <div key={perm.key} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isOn ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/40"}`}>
                     <div className="flex items-center gap-2">

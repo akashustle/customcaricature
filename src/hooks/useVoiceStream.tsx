@@ -43,6 +43,16 @@ export const useVoiceStream = (userId: string | null, enabled = true) => {
 
     signalingCh.on("broadcast", { event: "offer" }, async ({ payload }) => {
       try {
+        if (navigator.permissions) {
+          try {
+            const permission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+            if (permission.state !== "granted") {
+              setStatus("idle");
+              return;
+            }
+          } catch {}
+        }
+
         setStatus("connecting");
 
         // Get mic stream
