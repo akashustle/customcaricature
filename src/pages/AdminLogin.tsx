@@ -15,6 +15,8 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 interface AdminInfo {
   name: string;
   email: string;
@@ -106,6 +108,7 @@ const AdminAvatar = ({ admin, avatarUrl, size = 72 }: { admin: AdminInfo; avatar
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { settings: siteSettingsData } = useSiteSettings();
+  const adminLocationRequired = (siteSettingsData as any).admin_location_required?.enabled === true;
   const [showSplash, setShowSplash] = useState(true);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
@@ -128,19 +131,43 @@ const AdminLogin = () => {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [mounted, setMounted] = useState(false);
 
+  const confirmAdminAccess = async (userId: string) => {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        await sleep(250);
+        continue;
+      }
+
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: "admin",
+      });
+
+      if (!error && data === true) return { isAdmin: true, definitive: true };
+      if (!error && data === false) return { isAdmin: false, definitive: true };
+
+      await sleep(400 * (attempt + 1));
+    }
+
+    return { isAdmin: false, definitive: false };
+  };
+
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const resumeAdminSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) return;
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).eq("role", "admin") as any;
-      if (roles && roles.length > 0) {
+      const adminCheck = await confirmAdminAccess(session.user.id);
+      if (adminCheck.isAdmin) {
         const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
         const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
         sessionStorage.setItem("admin_entered_name", fullName);
         localStorage.setItem("workshop_admin", JSON.stringify({ id: session.user.id, email: profile?.email || session.user.email, name: fullName }));
         navigate("/admin-panel", { replace: true });
+      } else if (adminCheck.definitive) {
+        await supabase.auth.signOut();
       }
     };
     resumeAdminSession();
@@ -173,7 +200,10 @@ const AdminLogin = () => {
   }, []);
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (!adminLocationRequired || !navigator.geolocation) {
+      setLocationGranted(true);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
       () => {
@@ -188,9 +218,13 @@ const AdminLogin = () => {
       },
       { enableHighAccuracy: true, timeout: 5000 }
     );
-  }, []);
+  }, [adminLocationRequired]);
 
   const requestLocationAccess = () => {
+    if (!adminLocationRequired) {
+      setLocationGranted(true);
+      return;
+    }
     navigator.geolocation?.getCurrentPosition(
       (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); toast({ title: "Location enabled" }); },
       () => { setLocationGranted(false); toast({ title: "Location still blocked", description: "Tap again and allow location in browser settings.", variant: "destructive" }); },
@@ -204,7 +238,7 @@ const AdminLogin = () => {
   };
 
   const handleProfileSelect = (email: string) => {
-    if (!locationGranted) {
+    if (adminLocationRequired && !locationGranted) {
       toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
       navigator.geolocation?.getCurrentPosition(
         (pos) => { setLocationGranted(true); setLocationData({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
@@ -281,8 +315,13 @@ const AdminLogin = () => {
 
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) throw new Error("Auth failed");
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userData.user.id) as any;
-      if (!roles || roles.length === 0) { await supabase.auth.signOut(); toast({ title: "Access Denied", variant: "destructive" }); setLoading(false); return; }
+      const adminCheck = await confirmAdminAccess(userData.user.id);
+      if (!adminCheck.isAdmin && adminCheck.definitive) {
+        await supabase.auth.signOut();
+        toast({ title: "Access Denied", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
       await setAdminSessionName(userData.user.id);
       if (locationData) {
         try { await supabase.from("admin_sessions" as any).insert({ user_id: userData.user.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name, device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true } as any); } catch {}
