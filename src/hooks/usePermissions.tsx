@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export type PermissionStatus = "granted" | "denied" | "prompt" | "unsupported";
 
-export const usePermissions = (requestOnMount = true) => {
+export const usePermissions = (requestOnMount = false) => {
   const [location, setLocation] = useState<PermissionStatus>("prompt");
   const [microphone, setMicrophone] = useState<PermissionStatus>("prompt");
   const [camera, setCamera] = useState<PermissionStatus>("prompt");
@@ -25,21 +25,29 @@ export const usePermissions = (requestOnMount = true) => {
         );
       }
 
-      // Request microphone
-      navigator.mediaDevices?.getUserMedia({ audio: true })
-        .then(stream => {
-          setMicrophone("granted");
-          stream.getTracks().forEach(t => t.stop());
-        })
-        .catch(() => setMicrophone("denied"));
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: "microphone" as PermissionName }).then(r => {
+          if (r.state === "granted") {
+            navigator.mediaDevices?.getUserMedia({ audio: true })
+              .then(stream => {
+                setMicrophone("granted");
+                stream.getTracks().forEach(t => t.stop());
+              })
+              .catch(() => setMicrophone("denied"));
+          }
+        }).catch(() => {});
 
-      // Request camera (for photo/file access)
-      navigator.mediaDevices?.getUserMedia({ video: true })
-        .then(stream => {
-          setCamera("granted");
-          stream.getTracks().forEach(t => t.stop());
-        })
-        .catch(() => setCamera("denied"));
+        navigator.permissions.query({ name: "camera" as PermissionName }).then(r => {
+          if (r.state === "granted") {
+            navigator.mediaDevices?.getUserMedia({ video: true })
+              .then(stream => {
+                setCamera("granted");
+                stream.getTracks().forEach(t => t.stop());
+              })
+              .catch(() => setCamera("denied"));
+          }
+        }).catch(() => {});
+      }
     }
   }, [requestOnMount]);
 
