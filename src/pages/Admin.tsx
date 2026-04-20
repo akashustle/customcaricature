@@ -475,14 +475,19 @@ const Admin = () => {
       let resolvedUser = user;
 
       if (!resolvedUser) {
-        for (let i = 0; i < 10 && !cancelled; i++) {
+        for (let i = 0; i < 20 && !cancelled; i++) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
             resolvedUser = session.user;
             break;
           }
-          await new Promise(r => setTimeout(r, 200));
+          await new Promise(r => setTimeout(r, 250));
         }
+      }
+
+      if (!resolvedUser && !cancelled) {
+        const { data: { user: directUser } } = await supabase.auth.getUser();
+        if (directUser) resolvedUser = directUser;
       }
 
       if (cancelled) return;
@@ -533,12 +538,25 @@ const Admin = () => {
         return;
       }
       // Confirmed admin — load everything
-      fetchOrders();
-      fetchCaricatureTypes();
-      fetchCustomers();
-      fetchAdminProfile(resolvedUser.id);
-      fetchArtistProfiles();
-      logAdminSession(resolvedUser.id);
+      await Promise.all([
+        fetchOrders(),
+        fetchCaricatureTypes(),
+        fetchAdminProfile(resolvedUser.id),
+      ]);
+
+      const defer = (cb: () => void) => {
+        if (typeof requestIdleCallback === "function") {
+          requestIdleCallback(cb, { timeout: 1500 });
+          return;
+        }
+        setTimeout(cb, 250);
+      };
+
+      defer(() => {
+        void fetchCustomers();
+        void fetchArtistProfiles();
+        void logAdminSession(resolvedUser.id);
+      });
     };
 
     init();

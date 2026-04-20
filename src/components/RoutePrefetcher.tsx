@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * Idle-prefetches the JS chunks for the most commonly visited routes.
@@ -9,8 +10,6 @@ const PREFETCH_ROUTES: Array<() => Promise<unknown>> = [
   () => import("@/pages/Order"),
   () => import("@/pages/BookEvent"),
   () => import("@/pages/Shop"),
-  () => import("@/pages/Login"),
-  () => import("@/pages/Dashboard"),
   () => import("@/pages/About"),
   () => import("@/pages/CaricatureBudgeting"),
   () => import("@/pages/Workshop"),
@@ -18,7 +17,17 @@ const PREFETCH_ROUTES: Array<() => Promise<unknown>> = [
 ];
 
 const RoutePrefetcher = () => {
+  const location = useLocation();
+
   useEffect(() => {
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const isSlowConnection = connection?.saveData || ["slow-2g", "2g", "3g"].includes(connection?.effectiveType || "");
+    const isAdminRoute = ["/customcad75", "/admin-panel", "/cccworkshop2006", "/workshop-admin-panel"].some((route) => location.pathname.startsWith(route));
+
+    if (isSlowConnection || isAdminRoute) return;
+
     let cancelled = false;
     const idle = (cb: () => void) => {
       if (typeof requestIdleCallback === "function") {
@@ -50,7 +59,7 @@ const RoutePrefetcher = () => {
         clearTimeout(handle as unknown as ReturnType<typeof setTimeout>);
       }
     };
-  }, []);
+  }, [location.pathname]);
   return null;
 };
 
