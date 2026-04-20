@@ -468,11 +468,29 @@ const Admin = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { navigate("/customcad75", { replace: true }); return; }
 
     let cancelled = false;
 
     const init = async () => {
+      let resolvedUser = user;
+
+      if (!resolvedUser) {
+        for (let i = 0; i < 10 && !cancelled; i++) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            resolvedUser = session.user;
+            break;
+          }
+          await new Promise(r => setTimeout(r, 200));
+        }
+      }
+
+      if (cancelled) return;
+      if (!resolvedUser) {
+        navigate("/customcad75", { replace: true });
+        return;
+      }
+
       // Wait for the session token to actually be attached to the supabase client.
       // Without this, the very first has_role() RPC fires before the JWT lands
       // → returns false → triggers signOut → infinite refresh-token storm (429s).
@@ -495,7 +513,7 @@ const Admin = () => {
       for (let attempt = 0; attempt < 5 && !cancelled; attempt++) {
         try {
           const { data, error } = await supabase.rpc("has_role", {
-            _user_id: user.id,
+            _user_id: resolvedUser.id,
             _role: "admin",
           });
           if (cancelled) return;
@@ -518,9 +536,9 @@ const Admin = () => {
       fetchOrders();
       fetchCaricatureTypes();
       fetchCustomers();
-      fetchAdminProfile();
+      fetchAdminProfile(resolvedUser.id);
       fetchArtistProfiles();
-      logAdminSession(user.id);
+      logAdminSession(resolvedUser.id);
     };
 
     init();
@@ -555,9 +573,9 @@ const Admin = () => {
     if (data) setArtistProfiles(data as any);
   };
 
-  const fetchAdminProfile = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
+  const fetchAdminProfile = async (userId = user?.id) => {
+    if (!userId) return;
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
     if (data) { setAdminProfile(data as any); setAdminEditData(data as any); }
   };
 
