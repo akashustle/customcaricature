@@ -178,10 +178,7 @@ const Index = () => {
           supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle(),
           supabase.from("artists").select("id").eq("auth_user_id", user.id).maybeSingle() as any,
         ]);
-        if (adminResult.data) {
-          const lastAdmin = sessionStorage.getItem("ccc_admin_session");
-          if (lastAdmin) { navigate("/admin-panel", { replace: true }); return; }
-        }
+        if (adminResult.data) { navigate("/admin-panel", { replace: true }); return; }
         if (artistResult.data) { navigate("/artist-dashboard", { replace: true }); return; }
         navigate("/dashboard", { replace: true });
       } catch {}

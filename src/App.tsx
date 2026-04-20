@@ -134,8 +134,11 @@ const RouteMemoryRedirector = () => {
   useEffect(() => {
     if (location.pathname === "/") {
       const lastRoute = getLastRoute();
-      if (lastRoute && lastRoute !== "/") {
+      const blockedRoutes = ["/login", "/register", "/forgot-password", "/customcad75", "/admin-login", "/artistlogin", "/cccworkshop2006", "/CFCAdmin936"];
+      if (lastRoute && lastRoute !== "/" && !blockedRoutes.includes(lastRoute)) {
         navigate(lastRoute, { replace: true });
+        clearRouteMemory();
+      } else if (lastRoute && blockedRoutes.includes(lastRoute)) {
         clearRouteMemory();
       }
     }
