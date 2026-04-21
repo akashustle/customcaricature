@@ -5637,6 +5637,48 @@ export type Database = {
         Args: { _event_id: string; _user_id: string }
         Returns: boolean
       }
+      workshop_login: {
+        Args: {
+          p_credential: string
+          p_credential_type: string
+          p_identifier: string
+          p_identifier_type: string
+        }
+        Returns: {
+          age: number
+          artist_background: string
+          artist_background_type: string
+          city: string
+          country: string
+          district: string
+          email: string
+          gender: string
+          id: string
+          instagram_id: string
+          is_enabled: boolean
+          mobile: string
+          name: string
+          occupation: string
+          payment_status: string
+          prefers_recorded: boolean
+          roll_number: number
+          secret_code: string
+          skill_level: string
+          slot: string
+          state: string
+          student_type: string
+          terms_accepted: boolean
+          video_access_enabled: boolean
+          video_download_allowed: boolean
+          why_join: string
+          workshop_date: string
+          workshop_id: string
+        }[]
+      }
+      workshop_user_exists: {
+        Args: { p_email: string; p_mobile: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "artist" | "shop_admin"
