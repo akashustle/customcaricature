@@ -529,7 +529,7 @@ const Admin = () => {
       await Promise.all([
         fetchOrders(),
         fetchCaricatureTypes(),
-        fetchAdminProfile(resolvedUser.id),
+        fetchAdminProfile(user.id),
       ]);
 
       const defer = (cb: () => void) => {
@@ -543,7 +543,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
-        void logAdminSession(resolvedUser.id);
+        void logAdminSession(user.id);
       });
     };
 
