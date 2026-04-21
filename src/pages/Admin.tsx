@@ -1005,6 +1005,22 @@ const Admin = () => {
     return <OrderDetail orderId={selectedOrder} onBack={() => { setSelectedOrder(null); fetchOrders(); }} />;
   }
 
+  // Verifying-access screen — shown until the role check confirms admin access.
+  // Prevents the user from ever seeing a half-rendered/blank panel during login.
+  if (accessState === "pending") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-base font-semibold text-foreground">Verifying admin access…</p>
+          <p className="text-xs text-muted-foreground max-w-xs">
+            Hang tight — we're confirming your credentials and loading the panel.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Admin Name Gate — mandatory name entry before accessing panel
   if (!adminEnteredName) {
     return <AdminNameGate onNameSubmit={(name) => {
