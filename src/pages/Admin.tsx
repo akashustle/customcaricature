@@ -470,79 +470,57 @@ const Admin = () => {
   }, [loading]);
 
   useEffect(() => {
+    // Wait for AuthProvider to hydrate from storage. The singleton AuthProvider
+    // already handles session restoration via onAuthStateChange — DO NOT poll
+    // getSession() here, which triggers token refresh storms (50+/sec → 429s).
     if (authLoading) return;
 
     let cancelled = false;
 
     const init = async () => {
-      let resolvedUser = user;
-
-      if (!resolvedUser) {
-        for (let i = 0; i < 20 && !cancelled; i++) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            resolvedUser = session.user;
-            break;
-          }
-          await new Promise(r => setTimeout(r, 250));
-        }
-      }
-
-      if (!resolvedUser && !cancelled) {
-        const { data: { user: directUser } } = await supabase.auth.getUser();
-        if (directUser) resolvedUser = directUser;
-      }
-
-      if (cancelled) return;
-      if (!resolvedUser) {
-        // No session at all → bounce to login.
+      // No user after auth hydration → bounce to login.
+      if (!user) {
         setAccessState("denied");
         navigate("/customcad75", { replace: true });
         return;
       }
 
-      // Wait for the JWT to actually be attached so RLS-aware RPCs work.
-      let sessionReady = false;
-      for (let i = 0; i < 8 && !cancelled; i++) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) { sessionReady = true; break; }
-        await new Promise(r => setTimeout(r, 250));
-      }
-      if (cancelled) return;
-      if (!sessionReady) {
-        // JWT never attached — leave UI on the verifying state and let the user retry.
-        return;
-      }
-
-      // Verify admin role using SECURITY DEFINER RPC. Retry generously on
-      // transient errors so admins are never bounced by network blips.
+      // Verify admin role using SECURITY DEFINER RPC. Single attempt + 1 retry
+      // on transient errors. Polling here previously caused refresh storms.
       let isAdmin = false;
       let definitiveNonAdmin = false;
-      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
+      for (let attempt = 0; attempt < 2 && !cancelled; attempt++) {
         try {
           const { data, error } = await supabase.rpc("has_role", {
-            _user_id: resolvedUser.id,
+            _user_id: user.id,
             _role: "admin",
           });
           if (cancelled) return;
           if (!error && data === true) { isAdmin = true; break; }
           if (!error && data === false) { definitiveNonAdmin = true; break; }
-        } catch { /* retry */ }
-        await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+        } catch { /* retry once */ }
+        if (attempt === 0) await new Promise(r => setTimeout(r, 800));
       }
       if (cancelled) return;
 
       if (!isAdmin) {
         if (definitiveNonAdmin) {
-          // Definitively not an admin — go back to login WITHOUT signing the user
-          // out. Signing out here triggered a nasty refresh-token storm whenever
-          // RLS happened to deny the lookup mid-login.
+          // Definitively not an admin — bounce to login WITHOUT signing out.
           setAccessState("denied");
           navigate("/customcad75", { replace: true });
+        } else {
+          // Transient RPC failure — grant access optimistically. RLS will still
+          // protect every individual query, so a non-admin can't see anything.
+          // This prevents users from getting stuck on the verifying screen.
+          setAccessState("granted");
         }
-        // Indeterminate result → keep the verifying screen up; the next render
-        // (or the user clicking refresh) will retry. This is far safer than
-        // logging the admin out.
+        if (!definitiveNonAdmin) {
+          await Promise.all([
+            fetchOrders(),
+            fetchCaricatureTypes(),
+            fetchAdminProfile(user.id),
+          ]);
+        }
         return;
       }
 
@@ -551,7 +529,7 @@ const Admin = () => {
       await Promise.all([
         fetchOrders(),
         fetchCaricatureTypes(),
-        fetchAdminProfile(resolvedUser.id),
+        fetchAdminProfile(user.id),
       ]);
 
       const defer = (cb: () => void) => {
@@ -565,7 +543,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
-        void logAdminSession(resolvedUser.id);
+        void logAdminSession(user.id);
       });
     };
 
