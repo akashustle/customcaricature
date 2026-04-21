@@ -463,7 +463,7 @@ const Admin = () => {
     document.title = "CCC Admin Panel";
   }, []);
 
-  // Safety timeout: if loading takes too long, force it off
+  // Safety timeout: if loading takes too long (after access granted), stop the spinner.
   useEffect(() => {
     const timeout = setTimeout(() => { if (loading) setLoading(false); }, 8000);
     return () => clearTimeout(timeout);
@@ -495,13 +495,13 @@ const Admin = () => {
 
       if (cancelled) return;
       if (!resolvedUser) {
+        // No session at all → bounce to login.
+        setAccessState("denied");
         navigate("/customcad75", { replace: true });
         return;
       }
 
-      // Wait for the session token to actually be attached to the supabase client.
-      // Without this, the very first has_role() RPC fires before the JWT lands
-      // → returns false → triggers signOut → infinite refresh-token storm (429s).
+      // Wait for the JWT to actually be attached so RLS-aware RPCs work.
       let sessionReady = false;
       for (let i = 0; i < 8 && !cancelled; i++) {
         const { data: { session } } = await supabase.auth.getSession();
@@ -510,15 +510,15 @@ const Admin = () => {
       }
       if (cancelled) return;
       if (!sessionReady) {
-        // Don't sign out — just bail; AuthProvider will retry naturally.
+        // JWT never attached — leave UI on the verifying state and let the user retry.
         return;
       }
 
       // Verify admin role using SECURITY DEFINER RPC. Retry generously on
-      // transient network/rate-limit errors before signing the user out.
+      // transient errors so admins are never bounced by network blips.
       let isAdmin = false;
       let definitiveNonAdmin = false;
-      for (let attempt = 0; attempt < 5 && !cancelled; attempt++) {
+      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
         try {
           const { data, error } = await supabase.rpc("has_role", {
             _user_id: resolvedUser.id,
@@ -531,16 +531,23 @@ const Admin = () => {
         await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
       }
       if (cancelled) return;
+
       if (!isAdmin) {
-        // Only sign out if we got a definitive "not admin" response.
-        // Otherwise leave the session intact — they can refresh/retry.
         if (definitiveNonAdmin) {
-          await supabase.auth.signOut();
+          // Definitively not an admin — go back to login WITHOUT signing the user
+          // out. Signing out here triggered a nasty refresh-token storm whenever
+          // RLS happened to deny the lookup mid-login.
+          setAccessState("denied");
           navigate("/customcad75", { replace: true });
         }
+        // Indeterminate result → keep the verifying screen up; the next render
+        // (or the user clicking refresh) will retry. This is far safer than
+        // logging the admin out.
         return;
       }
-      // Confirmed admin — load everything
+
+      // Confirmed admin — open the gate, then load data.
+      setAccessState("granted");
       await Promise.all([
         fetchOrders(),
         fetchCaricatureTypes(),
@@ -587,7 +594,8 @@ const Admin = () => {
       })
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
-  }, [user, authLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, authLoading]);
 
   const fetchArtistProfiles = async () => {
     const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
