@@ -217,39 +217,44 @@ const Workshop = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      let query = supabase.from("workshop_users" as any).select("*");
-      if (loginType === "mobile") {
-        if (!mobile.trim() || mobile.trim().length < 10) { toast({ title: "Enter valid mobile", variant: "destructive" }); setLoading(false); return; }
-        query = query.eq("mobile", mobile.trim());
-      } else {
-        if (!email.trim() || !email.includes("@")) { toast({ title: "Enter valid email", variant: "destructive" }); setLoading(false); return; }
-        query = query.eq("email", email.trim().toLowerCase());
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      const users = data as any[];
-      if (!users || users.length === 0) { toast({ title: "Not Registered", description: "Please register first or contact admin.", variant: "destructive" }); setLoading(false); return; }
-      if (!users[0].is_enabled) { toast({ title: "Account Disabled", variant: "destructive" }); setLoading(false); return; }
+      const identifierType = loginType === "mobile" ? "mobile" : "email";
+      const identifier = identifierType === "mobile" ? mobile.trim() : email.trim().toLowerCase();
 
-      // Secret code login
+      if (identifierType === "mobile") {
+        if (!identifier || identifier.length < 10) { toast({ title: "Enter valid mobile", variant: "destructive" }); setLoading(false); return; }
+      } else {
+        if (!identifier || !identifier.includes("@")) { toast({ title: "Enter valid email", variant: "destructive" }); setLoading(false); return; }
+      }
+
+      let credentialType: "password" | "secret_code" | "none" = "none";
+      let credential = "";
       if (loginMethod === "secret_code") {
         if (!loginSecretCode.trim()) { toast({ title: "Enter secret code", variant: "destructive" }); setLoading(false); return; }
-        if (!users[0].secret_code || users[0].secret_code !== loginSecretCode.trim()) {
-          toast({ title: "Invalid Secret Code", variant: "destructive" }); setLoading(false); return;
-        }
-        localStorage.setItem("workshop_user", JSON.stringify(users[0]));
-        toast({ title: `Welcome, ${users[0].name}! 🎨` });
-        navigate("/workshop/dashboard");
-        return;
+        credentialType = "secret_code";
+        credential = loginSecretCode.trim();
+      } else if (isPasswordRequired) {
+        credentialType = "password";
+        credential = loginPassword || "";
       }
 
-      // Password login - only required for upcoming batch
-      if (isPasswordRequired) {
-        if (users[0].password && users[0].password !== loginPassword) {
-          toast({ title: "Incorrect Password", description: "Please enter the correct password.", variant: "destructive" }); setLoading(false); return;
-        }
+      // Verify credentials server-side via SECURITY DEFINER RPC.
+      // Returns the workshop user row only when credentials match (no password field).
+      const { data, error } = await supabase.rpc("workshop_login" as any, {
+        p_identifier: identifier,
+        p_identifier_type: identifierType,
+        p_credential: credential,
+        p_credential_type: credentialType,
+      });
+      if (error) throw error;
+      const users = (data as any[]) || [];
+      if (users.length === 0) {
+        const msg = loginMethod === "secret_code" ? "Invalid Secret Code" : isPasswordRequired ? "Incorrect credentials" : "Not Registered";
+        toast({ title: msg, description: "Please check your details or register first.", variant: "destructive" });
+        setLoading(false);
+        return;
       }
-      // For old batches (march-14-15), no password needed — direct login
+      if (!users[0].is_enabled) { toast({ title: "Account Disabled", variant: "destructive" }); setLoading(false); return; }
+
       localStorage.setItem("workshop_user", JSON.stringify(users[0]));
       toast({ title: `Welcome, ${users[0].name}! 🎨` });
       navigate("/workshop/dashboard");
@@ -270,9 +275,12 @@ const Workshop = () => {
     }
     setSubmittingReg(true);
     try {
-      // Check if already registered in workshop
-      const { data: existing } = await supabase.from("workshop_users" as any).select("id").or(`email.eq.${regForm.email.trim().toLowerCase()},mobile.eq.${regForm.mobile.trim()}`);
-      if (existing && (existing as any[]).length > 0) {
+      // Check if already registered in workshop (server-side, no PII exposure)
+      const { data: alreadyExists } = await supabase.rpc("workshop_user_exists" as any, {
+        p_email: regForm.email.trim().toLowerCase(),
+        p_mobile: regForm.mobile.trim(),
+      });
+      if (alreadyExists === true) {
         toast({ title: "Already Registered", description: "Please login.", variant: "destructive" });
         setView("login");
         setSubmittingReg(false);
