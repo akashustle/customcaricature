@@ -132,13 +132,9 @@ const AdminLogin = () => {
   const [mounted, setMounted] = useState(false);
 
   const confirmAdminAccess = async (userId: string) => {
-    for (let attempt = 0; attempt < 8; attempt++) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        await sleep(250);
-        continue;
-      }
-
+    // Single attempt + one retry. Polling getSession()/has_role here was
+    // triggering a refresh-token storm (50+/sec → 429s).
+    for (let attempt = 0; attempt < 2; attempt++) {
       const { data, error } = await supabase.rpc("has_role", {
         _user_id: userId,
         _role: "admin",
@@ -147,7 +143,7 @@ const AdminLogin = () => {
       if (!error && data === true) return { isAdmin: true, definitive: true };
       if (!error && data === false) return { isAdmin: false, definitive: true };
 
-      await sleep(400 * (attempt + 1));
+      if (attempt === 0) await sleep(800);
     }
 
     return { isAdmin: false, definitive: false };
@@ -158,6 +154,9 @@ const AdminLogin = () => {
   useEffect(() => {
     let cancelled = false;
     const resumeAdminSession = async () => {
+      // Single getSession() call — no polling. AuthProvider already hydrates
+      // from storage on mount, so by the time this effect fires the session
+      // (if any) is available.
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled || !session?.user) return;
       const adminCheck = await confirmAdminAccess(session.user.id);
