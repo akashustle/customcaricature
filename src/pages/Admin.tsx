@@ -305,6 +305,9 @@ const Admin = () => {
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  // Tri-state access gate: 'pending' until role check completes, then 'granted' or 'denied'.
+  // Admin UI is held back until 'granted' so the user never sees a half-rendered panel.
+  const [accessState, setAccessState] = useState<"pending" | "granted" | "denied">("pending");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
