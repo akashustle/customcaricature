@@ -156,21 +156,25 @@ const AdminLogin = () => {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    let cancelled = false;
     const resumeAdminSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      if (cancelled || !session?.user) return;
       const adminCheck = await confirmAdminAccess(session.user.id);
+      if (cancelled) return;
       if (adminCheck.isAdmin) {
         const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
         const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
         sessionStorage.setItem("admin_entered_name", fullName);
         localStorage.setItem("workshop_admin", JSON.stringify({ id: session.user.id, email: profile?.email || session.user.email, name: fullName }));
         navigate("/admin-panel", { replace: true });
-      } else if (adminCheck.definitive) {
-        await supabase.auth.signOut();
       }
+      // Do NOT signOut on definitive non-admin: a logged-in non-admin user simply
+      // stays on the login page. Signing out here would kick admins whose role
+      // check failed transiently (rate limits, network blips) and cause loops.
     };
     resumeAdminSession();
+    return () => { cancelled = true; };
   }, [navigate]);
 
   useEffect(() => {
