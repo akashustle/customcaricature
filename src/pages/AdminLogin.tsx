@@ -139,48 +139,61 @@ const AdminLogin = () => {
   const [locationGranted, setLocationGranted] = useState(false);
   const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
-  const [mounted, setMounted] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<LoginDebugInfo>({
+    authEvent: "idle",
+    handoff: "no handoff in progress",
+    reason: "Awaiting user action.",
+    roleCheck: "not checked",
+    sessionStatus: "checking…",
+    userId: null,
+  });
+  const [showDebug, setShowDebug] = useState(true);
 
-  const confirmAdminAccess = async (userId: string) => {
-    // Single attempt + one retry. Polling getSession()/has_role here was
-    // triggering a refresh-token storm (50+/sec → 429s).
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
+  const updateDebug = (patch: Partial<LoginDebugInfo>) =>
+    setDebugInfo((prev) => ({ ...prev, ...patch }));
+
+  // Live-track auth events so the debug panel reflects exactly what Supabase is doing.
+  useEffect(() => {
+    const handoff = readAdminAuthHandoff();
+    updateDebug({ handoff: handoff ? `pending (expects ${handoff.expectedUserId ?? "any user"})` : "no handoff in progress" });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      updateDebug({
+        sessionStatus: session?.user ? "active session" : "no session",
+        userId: session?.user?.id ?? null,
       });
+    });
 
-      if (!error && data === true) return { isAdmin: true, definitive: true };
-      if (!error && data === false) return { isAdmin: false, definitive: true };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      updateDebug({
+        authEvent: event,
+        sessionStatus: session?.user ? "active session" : "no session",
+        userId: session?.user?.id ?? null,
+      });
+    });
 
-      if (attempt === 0) await sleep(800);
-    }
-
-    return { isAdmin: false, definitive: false };
-  };
-
-  useEffect(() => { setMounted(true); }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     const resumeAdminSession = async () => {
-      // Single getSession() call — no polling. AuthProvider already hydrates
-      // from storage on mount, so by the time this effect fires the session
-      // (if any) is available.
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled || !session?.user) return;
-      const adminCheck = await confirmAdminAccess(session.user.id);
+      const adminCheck = await checkAdminRole(session.user.id);
       if (cancelled) return;
-      if (adminCheck.isAdmin) {
+      updateDebug({
+        roleCheck: `${adminCheck.status} (${adminCheck.attempts} attempt${adminCheck.attempts === 1 ? "" : "s"})`,
+        reason: adminCheck.reason,
+      });
+      if (adminCheck.status === "granted") {
         const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
         const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
         sessionStorage.setItem("admin_entered_name", fullName);
         localStorage.setItem("workshop_admin", JSON.stringify({ id: session.user.id, email: profile?.email || session.user.email, name: fullName }));
+        startAdminAuthHandoff(session.user.id);
         navigate("/admin-panel", { replace: true });
       }
-      // Do NOT signOut on definitive non-admin: a logged-in non-admin user simply
-      // stays on the login page. Signing out here would kick admins whose role
-      // check failed transiently (rate limits, network blips) and cause loops.
     };
     resumeAdminSession();
     return () => { cancelled = true; };
