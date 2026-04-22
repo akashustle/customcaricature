@@ -33,8 +33,6 @@ interface LoginDebugInfo {
   userId: string | null;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const ADMIN_LIST: AdminInfo[] = [
   { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer", emoji: "🧠" },
   { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271", designation: "Chief Operating Officer (COO)", emoji: "⚙️" },
@@ -139,48 +137,61 @@ const AdminLogin = () => {
   const [locationGranted, setLocationGranted] = useState(false);
   const [locationData, setLocationData] = useState<{ lat: number; lng: number } | null>(null);
   const [failedAttempts, setFailedAttempts] = useState(0);
-  const [mounted, setMounted] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<LoginDebugInfo>({
+    authEvent: "idle",
+    handoff: "no handoff in progress",
+    reason: "Awaiting user action.",
+    roleCheck: "not checked",
+    sessionStatus: "checking…",
+    userId: null,
+  });
+  const [showDebug, setShowDebug] = useState(true);
 
-  const confirmAdminAccess = async (userId: string) => {
-    // Single attempt + one retry. Polling getSession()/has_role here was
-    // triggering a refresh-token storm (50+/sec → 429s).
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
+  const updateDebug = (patch: Partial<LoginDebugInfo>) =>
+    setDebugInfo((prev) => ({ ...prev, ...patch }));
+
+  // Live-track auth events so the debug panel reflects exactly what Supabase is doing.
+  useEffect(() => {
+    const handoff = readAdminAuthHandoff();
+    updateDebug({ handoff: handoff ? `pending (expects ${handoff.expectedUserId ?? "any user"})` : "no handoff in progress" });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      updateDebug({
+        sessionStatus: session?.user ? "active session" : "no session",
+        userId: session?.user?.id ?? null,
       });
+    });
 
-      if (!error && data === true) return { isAdmin: true, definitive: true };
-      if (!error && data === false) return { isAdmin: false, definitive: true };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      updateDebug({
+        authEvent: event,
+        sessionStatus: session?.user ? "active session" : "no session",
+        userId: session?.user?.id ?? null,
+      });
+    });
 
-      if (attempt === 0) await sleep(800);
-    }
-
-    return { isAdmin: false, definitive: false };
-  };
-
-  useEffect(() => { setMounted(true); }, []);
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     const resumeAdminSession = async () => {
-      // Single getSession() call — no polling. AuthProvider already hydrates
-      // from storage on mount, so by the time this effect fires the session
-      // (if any) is available.
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled || !session?.user) return;
-      const adminCheck = await confirmAdminAccess(session.user.id);
+      const adminCheck = await checkAdminRole(session.user.id);
       if (cancelled) return;
-      if (adminCheck.isAdmin) {
+      updateDebug({
+        roleCheck: `${adminCheck.status} (${adminCheck.attempts} attempt${adminCheck.attempts === 1 ? "" : "s"})`,
+        reason: adminCheck.reason,
+      });
+      if (adminCheck.status === "granted") {
         const { data: profile } = await supabase.from("profiles").select("full_name, email").eq("user_id", session.user.id).maybeSingle();
         const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
         sessionStorage.setItem("admin_entered_name", fullName);
         localStorage.setItem("workshop_admin", JSON.stringify({ id: session.user.id, email: profile?.email || session.user.email, name: fullName }));
+        startAdminAuthHandoff(session.user.id);
         navigate("/admin-panel", { replace: true });
       }
-      // Do NOT signOut on definitive non-admin: a logged-in non-admin user simply
-      // stays on the login page. Signing out here would kick admins whose role
-      // check failed transiently (rate limits, network blips) and cause loops.
     };
     resumeAdminSession();
     return () => { cancelled = true; };
@@ -326,17 +337,32 @@ const AdminLogin = () => {
         if (authError || !authData.user) { setFailedAttempts(p => p + 1); throw authError || new Error("Login failed"); }
       }
 
-      const expectedUserId = authMethod === "password" ? (await supabase.auth.getUser()).data.user?.id : undefined;
-      const authenticatedUser = await waitForAuthenticatedUser(expectedUserId);
-      if (!authenticatedUser) throw new Error("Auth failed");
+      const expectedUserId = (await supabase.auth.getUser()).data.user?.id ?? null;
+      startAdminAuthHandoff(expectedUserId);
+      updateDebug({ handoff: `waiting for session (expects ${expectedUserId ?? "any user"})`, reason: "Sign-in succeeded — waiting for session hydration." });
 
-      const adminCheck = await confirmAdminAccess(authenticatedUser.id);
-      if (!adminCheck.isAdmin && adminCheck.definitive) {
+      const handoff = await waitForAdminSessionHandoff({ expectedUserId });
+      const authenticatedUser = handoff.user;
+      updateDebug({
+        handoff: `session hydrated via ${handoff.source}`,
+        sessionStatus: "active session",
+        userId: authenticatedUser.id,
+        reason: "Running admin role verification…",
+      });
+
+      const adminCheck = await checkAdminRole(authenticatedUser.id);
+      updateDebug({
+        roleCheck: `${adminCheck.status} (${adminCheck.attempts} attempt${adminCheck.attempts === 1 ? "" : "s"})`,
+        reason: adminCheck.reason,
+      });
+      if (adminCheck.status === "denied") {
+        clearAdminAuthHandoff();
         await supabase.auth.signOut();
         toast({ title: "Access Denied", variant: "destructive" });
         setLoading(false);
         return;
       }
+      // status === "pending" (transient): keep the session, let RLS protect data, push to admin panel.
       await setAdminSessionName(authenticatedUser.id);
       if (locationData) {
         try { await supabase.from("admin_sessions" as any).insert({ user_id: authenticatedUser.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name, device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true } as any); } catch {}
@@ -802,6 +828,30 @@ const AdminLogin = () => {
               </button>
               {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
                 <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
+              )}
+            </div>
+
+            {/* Debug panel — verifies session + role state in real time so we can pinpoint redirects */}
+            <div className="mt-4 rounded-xl border border-border bg-muted/40 px-3 py-2 text-[11px] leading-relaxed font-mono text-muted-foreground">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-foreground">Auth Debug</span>
+                <button
+                  type="button"
+                  onClick={() => setShowDebug((v) => !v)}
+                  className="text-[10px] underline text-muted-foreground hover:text-foreground"
+                >
+                  {showDebug ? "hide" : "show"}
+                </button>
+              </div>
+              {showDebug && (
+                <div className="space-y-0.5">
+                  <div><span className="text-foreground/70">session:</span> {debugInfo.sessionStatus}</div>
+                  <div><span className="text-foreground/70">user id:</span> {debugInfo.userId ?? "—"}</div>
+                  <div><span className="text-foreground/70">role check:</span> {debugInfo.roleCheck}</div>
+                  <div><span className="text-foreground/70">handoff:</span> {debugInfo.handoff}</div>
+                  <div><span className="text-foreground/70">last event:</span> {debugInfo.authEvent}</div>
+                  <div className="pt-1 border-t border-border/50 mt-1"><span className="text-foreground/70">reason:</span> {debugInfo.reason}</div>
+                </div>
               )}
             </div>
           </div>
