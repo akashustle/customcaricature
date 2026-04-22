@@ -339,17 +339,32 @@ const AdminLogin = () => {
         if (authError || !authData.user) { setFailedAttempts(p => p + 1); throw authError || new Error("Login failed"); }
       }
 
-      const expectedUserId = authMethod === "password" ? (await supabase.auth.getUser()).data.user?.id : undefined;
-      const authenticatedUser = await waitForAuthenticatedUser(expectedUserId);
-      if (!authenticatedUser) throw new Error("Auth failed");
+      const expectedUserId = (await supabase.auth.getUser()).data.user?.id ?? null;
+      startAdminAuthHandoff(expectedUserId);
+      updateDebug({ handoff: `waiting for session (expects ${expectedUserId ?? "any user"})`, reason: "Sign-in succeeded — waiting for session hydration." });
 
-      const adminCheck = await confirmAdminAccess(authenticatedUser.id);
-      if (!adminCheck.isAdmin && adminCheck.definitive) {
+      const handoff = await waitForAdminSessionHandoff({ expectedUserId });
+      const authenticatedUser = handoff.user;
+      updateDebug({
+        handoff: `session hydrated via ${handoff.source}`,
+        sessionStatus: "active session",
+        userId: authenticatedUser.id,
+        reason: "Running admin role verification…",
+      });
+
+      const adminCheck = await checkAdminRole(authenticatedUser.id);
+      updateDebug({
+        roleCheck: `${adminCheck.status} (${adminCheck.attempts} attempt${adminCheck.attempts === 1 ? "" : "s"})`,
+        reason: adminCheck.reason,
+      });
+      if (adminCheck.status === "denied") {
+        clearAdminAuthHandoff();
         await supabase.auth.signOut();
         toast({ title: "Access Denied", variant: "destructive" });
         setLoading(false);
         return;
       }
+      // status === "pending" (transient): keep the session, let RLS protect data, push to admin panel.
       await setAdminSessionName(authenticatedUser.id);
       if (locationData) {
         try { await supabase.from("admin_sessions" as any).insert({ user_id: authenticatedUser.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name, device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true } as any); } catch {}
