@@ -46,6 +46,7 @@ import NotificationBell from "@/components/NotificationBell";
 import ExportButton from "@/components/admin/ExportButton";
 import { MessageCircle, Radio } from "lucide-react";
 import AdminInfoPanel from "@/components/admin/AdminInfoPanel";
+import { checkAdminRole, clearAdminAuthHandoff, readAdminAuthHandoff, waitForAdminSessionHandoff } from "@/lib/admin-auth";
 
 // Lazy load all admin tab components for performance
 const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics"));
@@ -470,67 +471,52 @@ const Admin = () => {
   }, [loading]);
 
   useEffect(() => {
-    // Wait for AuthProvider to hydrate from storage. The singleton AuthProvider
-    // already handles session restoration via onAuthStateChange — DO NOT poll
-    // getSession() here, which triggers token refresh storms (50+/sec → 429s).
-    if (authLoading) return;
-
     let cancelled = false;
 
     const init = async () => {
-      // Fallback to the live session once before redirecting. This prevents
-      // a login-success → admin-page → login-page bounce when route navigation
-      // happens a tick before the shared auth context finishes updating.
-      const activeUser = user ?? (await supabase.auth.getSession()).data.session?.user ?? null;
+      // 1) Resolve the user. Order: shared AuthProvider → live session → handoff wait.
+      //    We NEVER redirect to /customcad75 while a handoff is in-flight or while auth
+      //    is still hydrating; that's the race that was causing the bounce.
+      let activeUser = user ?? (await supabase.auth.getSession()).data.session?.user ?? null;
 
-      // No user after auth hydration/session fallback → bounce to login.
       if (!activeUser) {
+        const handoff = readAdminAuthHandoff();
+        if (handoff) {
+          try {
+            const result = await waitForAdminSessionHandoff({
+              expectedUserId: handoff.expectedUserId,
+              timeoutMs: 6000,
+            });
+            activeUser = result.user;
+          } catch { /* fall through to denial */ }
+        }
+      }
+
+      // Still hydrating? Stay on the verifying screen — do NOT redirect.
+      if (!activeUser && authLoading) return;
+
+      if (!activeUser) {
+        clearAdminAuthHandoff();
         setAccessState("denied");
         navigate("/customcad75", { replace: true });
         return;
       }
 
-      // Verify admin role using SECURITY DEFINER RPC. Single attempt + 1 retry
-      // on transient errors. Polling here previously caused refresh storms.
-      let isAdmin = false;
-      let definitiveNonAdmin = false;
-      for (let attempt = 0; attempt < 2 && !cancelled; attempt++) {
-        try {
-          const { data, error } = await supabase.rpc("has_role", {
-            _user_id: activeUser.id,
-            _role: "admin",
-          });
-          if (cancelled) return;
-          if (!error && data === true) { isAdmin = true; break; }
-          if (!error && data === false) { definitiveNonAdmin = true; break; }
-        } catch { /* retry once */ }
-        if (attempt === 0) await new Promise(r => setTimeout(r, 800));
-      }
+      // 2) Role check — only redirect on a *definitive* denial. Transient failures
+      //    keep the user inside the panel; RLS still protects every individual query.
+      const adminCheck = await checkAdminRole(activeUser.id);
       if (cancelled) return;
 
-      if (!isAdmin) {
-        if (definitiveNonAdmin) {
-          // Definitively not an admin — bounce to login WITHOUT signing out.
-          setAccessState("denied");
-          navigate("/customcad75", { replace: true });
-        } else {
-          // Transient RPC failure — grant access optimistically. RLS will still
-          // protect every individual query, so a non-admin can't see anything.
-          // This prevents users from getting stuck on the verifying screen.
-          setAccessState("granted");
-        }
-        if (!definitiveNonAdmin) {
-          await Promise.all([
-            fetchOrders(),
-            fetchCaricatureTypes(),
-            fetchAdminProfile(activeUser.id),
-          ]);
-        }
+      if (adminCheck.status === "denied") {
+        clearAdminAuthHandoff();
+        setAccessState("denied");
+        navigate("/customcad75", { replace: true });
         return;
       }
 
-      // Confirmed admin — open the gate, then load data.
+      clearAdminAuthHandoff();
       setAccessState("granted");
+
       await Promise.all([
         fetchOrders(),
         fetchCaricatureTypes(),
@@ -548,7 +534,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
-        void logAdminSession(activeUser.id);
+        void logAdminSession(activeUser!.id);
       });
     };
 

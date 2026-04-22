@@ -33,8 +33,6 @@ interface LoginDebugInfo {
   userId: string | null;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const ADMIN_LIST: AdminInfo[] = [
   { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer", emoji: "🧠" },
   { name: "Dilip", email: "dilip@gmail.com", mobile: "8369594271", designation: "Chief Operating Officer (COO)", emoji: "⚙️" },
@@ -830,6 +828,30 @@ const AdminLogin = () => {
               </button>
               {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
                 <button onClick={() => navigate("/")} className="text-xs transition-colors font-medium block mx-auto" style={{ color: "#94A3B8" }}>← Back to Home</button>
+              )}
+            </div>
+
+            {/* Debug panel — verifies session + role state in real time so we can pinpoint redirects */}
+            <div className="mt-4 rounded-xl border border-border bg-muted/40 px-3 py-2 text-[11px] leading-relaxed font-mono text-muted-foreground">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-foreground">Auth Debug</span>
+                <button
+                  type="button"
+                  onClick={() => setShowDebug((v) => !v)}
+                  className="text-[10px] underline text-muted-foreground hover:text-foreground"
+                >
+                  {showDebug ? "hide" : "show"}
+                </button>
+              </div>
+              {showDebug && (
+                <div className="space-y-0.5">
+                  <div><span className="text-foreground/70">session:</span> {debugInfo.sessionStatus}</div>
+                  <div><span className="text-foreground/70">user id:</span> {debugInfo.userId ?? "—"}</div>
+                  <div><span className="text-foreground/70">role check:</span> {debugInfo.roleCheck}</div>
+                  <div><span className="text-foreground/70">handoff:</span> {debugInfo.handoff}</div>
+                  <div><span className="text-foreground/70">last event:</span> {debugInfo.authEvent}</div>
+                  <div className="pt-1 border-t border-border/50 mt-1"><span className="text-foreground/70">reason:</span> {debugInfo.reason}</div>
+                </div>
               )}
             </div>
           </div>
