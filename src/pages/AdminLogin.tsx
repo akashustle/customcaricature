@@ -11,33 +11,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, Phone, Shield, Sparkles } from "lucide-react";
 import AdminSplashScreen from "@/components/AdminSplashScreen";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { checkAdminRole, clearAdminAuthHandoff, readAdminAuthHandoff, startAdminAuthHandoff, waitForAdminSessionHandoff } from "@/lib/admin-auth";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitForAuthenticatedUser = async (expectedUserId?: string, timeoutMs = 4000) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user && (!expectedUserId || session.user.id === expectedUserId)) {
-    return session.user;
-  }
-
-  return await new Promise<any>((resolve, reject) => {
-    const timeoutId = window.setTimeout(() => {
-      subscription.unsubscribe();
-      reject(new Error("Session not ready. Please try again."));
-    }, timeoutMs);
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!nextSession?.user) return;
-      if (expectedUserId && nextSession.user.id !== expectedUserId) return;
-      window.clearTimeout(timeoutId);
-      subscription.unsubscribe();
-      resolve(nextSession.user);
-    });
-  });
-};
 
 interface AdminInfo {
   name: string;
@@ -46,6 +23,17 @@ interface AdminInfo {
   designation: string;
   emoji: string;
 }
+
+interface LoginDebugInfo {
+  authEvent: string;
+  handoff: string;
+  reason: string;
+  roleCheck: string;
+  sessionStatus: string;
+  userId: string | null;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const ADMIN_LIST: AdminInfo[] = [
   { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer", emoji: "🧠" },
