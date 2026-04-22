@@ -17,6 +17,28 @@ const withTimeout = async (promise: Promise<any>, ms = 10000) =>
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const waitForAuthenticatedUser = async (expectedUserId?: string, timeoutMs = 4000) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user && (!expectedUserId || session.user.id === expectedUserId)) {
+    return session.user;
+  }
+
+  return await new Promise<any>((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      subscription.unsubscribe();
+      reject(new Error("Session not ready. Please try again."));
+    }, timeoutMs);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!nextSession?.user) return;
+      if (expectedUserId && nextSession.user.id !== expectedUserId) return;
+      window.clearTimeout(timeoutId);
+      subscription.unsubscribe();
+      resolve(nextSession.user);
+    });
+  });
+};
+
 interface AdminInfo {
   name: string;
   email: string;
@@ -316,22 +338,24 @@ const AdminLogin = () => {
         if (authError || !authData.user) { setFailedAttempts(p => p + 1); throw authError || new Error("Login failed"); }
       }
 
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData?.user) throw new Error("Auth failed");
-      const adminCheck = await confirmAdminAccess(userData.user.id);
+      const expectedUserId = authMethod === "password" ? (await supabase.auth.getUser()).data.user?.id : undefined;
+      const authenticatedUser = await waitForAuthenticatedUser(expectedUserId);
+      if (!authenticatedUser) throw new Error("Auth failed");
+
+      const adminCheck = await confirmAdminAccess(authenticatedUser.id);
       if (!adminCheck.isAdmin && adminCheck.definitive) {
         await supabase.auth.signOut();
         toast({ title: "Access Denied", variant: "destructive" });
         setLoading(false);
         return;
       }
-      await setAdminSessionName(userData.user.id);
+      await setAdminSessionName(authenticatedUser.id);
       if (locationData) {
-        try { await supabase.from("admin_sessions" as any).insert({ user_id: userData.user.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name, device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true } as any); } catch {}
+        try { await supabase.from("admin_sessions" as any).insert({ user_id: authenticatedUser.id, admin_name: selectedAdmin.name, entered_name: selectedAdmin.name, device_info: navigator.userAgent.slice(0, 200), location_info: JSON.stringify(locationData), is_active: true } as any); } catch {}
       }
       setFailedAttempts(0);
       sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
-      localStorage.setItem("workshop_admin", JSON.stringify({ id: userData.user.id, email: selectedAdmin.email, name: selectedAdmin.name }));
+      localStorage.setItem("workshop_admin", JSON.stringify({ id: authenticatedUser.id, email: selectedAdmin.email, name: selectedAdmin.name }));
       toast({ title: `Welcome back, ${selectedAdmin.name}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {

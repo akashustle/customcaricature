@@ -478,8 +478,13 @@ const Admin = () => {
     let cancelled = false;
 
     const init = async () => {
-      // No user after auth hydration → bounce to login.
-      if (!user) {
+      // Fallback to the live session once before redirecting. This prevents
+      // a login-success → admin-page → login-page bounce when route navigation
+      // happens a tick before the shared auth context finishes updating.
+      const activeUser = user ?? (await supabase.auth.getSession()).data.session?.user ?? null;
+
+      // No user after auth hydration/session fallback → bounce to login.
+      if (!activeUser) {
         setAccessState("denied");
         navigate("/customcad75", { replace: true });
         return;
@@ -492,7 +497,7 @@ const Admin = () => {
       for (let attempt = 0; attempt < 2 && !cancelled; attempt++) {
         try {
           const { data, error } = await supabase.rpc("has_role", {
-            _user_id: user.id,
+            _user_id: activeUser.id,
             _role: "admin",
           });
           if (cancelled) return;
@@ -518,7 +523,7 @@ const Admin = () => {
           await Promise.all([
             fetchOrders(),
             fetchCaricatureTypes(),
-            fetchAdminProfile(user.id),
+            fetchAdminProfile(activeUser.id),
           ]);
         }
         return;
@@ -529,7 +534,7 @@ const Admin = () => {
       await Promise.all([
         fetchOrders(),
         fetchCaricatureTypes(),
-        fetchAdminProfile(user.id),
+        fetchAdminProfile(activeUser.id),
       ]);
 
       const defer = (cb: () => void) => {
@@ -543,7 +548,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
-        void logAdminSession(user.id);
+        void logAdminSession(activeUser.id);
       });
     };
 
