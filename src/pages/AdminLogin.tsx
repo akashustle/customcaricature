@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import type { Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +32,8 @@ interface LoginDebugInfo {
   sessionStatus: string;
   userId: string | null;
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const ADMIN_LIST: AdminInfo[] = [
   { name: "Akash", email: "akashxbhavans@gmail.com", mobile: "8421199205", designation: "Chief Strategy & Technology Officer", emoji: "🧠" },
