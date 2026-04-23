@@ -33,6 +33,7 @@ const FloatingButtons = () => {
 
   const showWhatsapp = (settings as any).floating_whatsapp?.enabled === true;
   const showInstagram = (settings as any).floating_instagram?.enabled === true;
+  const showDarkToggle = (settings as any).floating_dark_toggle?.enabled === true;
 
   const allowedPaths = Object.keys(PAGE_MESSAGES);
   if (!allowedPaths.includes(location.pathname)) return null;
@@ -41,14 +42,16 @@ const FloatingButtons = () => {
 
   return (
     <div className={`fixed z-[46] flex flex-col gap-3 ${isMobile ? "bottom-[180px] right-4" : "bottom-6 right-6"}`} style={{ pointerEvents: "auto" }}>
-      {/* Theme Toggle */}
-      <button
-        onClick={() => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("theme-user-override", "true"); }}
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-card border border-border text-foreground flex items-center justify-center hover:bg-accent/10 transition-all shadow-lg"
-        aria-label="Toggle theme"
-      >
-        {theme === "dark" ? <Sun className="w-5 h-5 md:w-6 md:h-6" /> : <Moon className="w-5 h-5 md:w-6 md:h-6" />}
-      </button>
+      {/* Theme Toggle — hidden by default, only shows when admin enables floating_dark_toggle */}
+      {showDarkToggle && (
+        <button
+          onClick={() => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("theme-user-override", "true"); }}
+          className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-card border border-border text-foreground flex items-center justify-center hover:bg-accent/10 transition-all shadow-lg"
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? <Sun className="w-5 h-5 md:w-6 md:h-6" /> : <Moon className="w-5 h-5 md:w-6 md:h-6" />}
+        </button>
+      )}
       {/* Instagram - only when admin enabled */}
       {showInstagram && (
         <a

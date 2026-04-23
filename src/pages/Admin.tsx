@@ -2569,6 +2569,13 @@ const Admin = () => {
                     </div>
                     <Switch checked={(settings as any).floating_instagram?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_instagram", { enabled: checked }); toast({ title: checked ? "Instagram float enabled" : "Instagram float hidden" }); }} />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show Dark / Light Mode Toggle</p>
+                      <p className="text-xs text-muted-foreground font-sans">Floating moon/sun button on the homepage (default: off — site is dark mode by default)</p>
+                    </div>
+                    <Switch checked={(settings as any).floating_dark_toggle?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_dark_toggle", { enabled: checked }); toast({ title: checked ? "Dark toggle button enabled" : "Dark toggle button hidden" }); }} />
+                  </div>
                 </CardContent>
               </div>
 

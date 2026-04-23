@@ -216,7 +216,7 @@ const Dashboard = () => {
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
   };
 
-  const uploadAvatar = async (file: File) => {
+  const uploadAvatar = useCallback(async (file: File) => {
     if (!user) return;
     setUploadingAvatar(true);
     try {
@@ -234,7 +234,10 @@ const Dashboard = () => {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     }
     setUploadingAvatar(false);
-  };
+  }, [user]);
+
+  // Expose to ProfileSection (label input handler)
+  useEffect(() => { (window as any).__uploadAvatar = uploadAvatar; return () => { delete (window as any).__uploadAvatar; }; }, [uploadAvatar]);
 
   const changeSecretCode = async () => {
     if (!user || newSecretCode.length !== 4) return;
@@ -396,16 +399,18 @@ const Dashboard = () => {
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U";
 
   return (
-    <div className="min-h-screen bg-[hsl(60_20%_97%)] dark:bg-background pb-28 md:pb-10 overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-28 md:pb-10 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
 
       {/* Desktop top bar */}
-      <header className="hidden md:block sticky top-0 z-40 bg-[hsl(60_20%_97%)]/85 dark:bg-background/85 backdrop-blur-xl border-b border-border/40">
+      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
         <div className="container mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
             <div>
-              <h1 className="font-display text-lg font-bold leading-none">Creative Caricature Club</h1>
+              <h1 className="font-display text-lg font-bold leading-none">
+                Creative <span className="text-gradient-violet">Caricature Club™</span>
+              </h1>
               <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Member portal</p>
             </div>
           </div>
@@ -416,10 +421,19 @@ const Dashboard = () => {
             </Button>
             <button
               onClick={() => setActiveTab("profile")}
-              className="w-10 h-10 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+              className="relative w-10 h-10 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
               aria-label="Open profile"
             >
-              {initials}
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+              {profile?.is_verified && (
+                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
+                  <BadgeCheck className="w-3 h-3" />
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -433,10 +447,19 @@ const Dashboard = () => {
             <NotificationBell />
             <button
               onClick={() => setActiveTab("profile")}
-              className="w-11 h-11 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground shadow-sm"
+              className="relative w-11 h-11 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground shadow-sm"
               aria-label="Open profile"
             >
-              {initials}
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+              {profile?.is_verified && (
+                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
+                  <BadgeCheck className="w-3 h-3" />
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -453,34 +476,34 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6 h-auto w-full bg-white border border-border rounded-2xl p-1.5 flex flex-wrap justify-start gap-1">
               {tabsAvailable.home && (
-                <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Home className="w-4 h-4 mr-2" />Home
                 </TabsTrigger>
               )}
               {tabsAvailable.events && (
-                <TabsTrigger value="events" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="events" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <CalIcon className="w-4 h-4 mr-2" />Events
                 </TabsTrigger>
               )}
               {tabsAvailable.payments && (
-                <TabsTrigger value="payments" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="payments" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Receipt className="w-4 h-4 mr-2" />Payments
                 </TabsTrigger>
               )}
               {tabsAvailable.chat && (
-                <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
                 </TabsTrigger>
               )}
               {tabsAvailable.profile && (
-                <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
                 </TabsTrigger>
               )}
             </TabsList>
 
             <TabsContent value="home">
-              <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+              <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
             </TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
@@ -500,7 +523,7 @@ const Dashboard = () => {
         {/* Mobile tab content */}
         <div className="md:hidden mt-2">
           {activeTab === "home" && (
-            <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+            <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
           )}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
@@ -521,9 +544,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Mobile bottom nav (5 tabs, modern lime style) */}
+      {/* Mobile bottom nav (5 tabs, fade primary style) */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
-        <div className="pointer-events-auto mx-auto max-w-md bg-white border border-border/60 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] px-2 py-2 flex items-center justify-around">
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around">
           {[
             { key: "home", icon: Home, label: "Home" },
             { key: "events", icon: CalIcon, label: "Events" },
@@ -537,7 +560,7 @@ const Dashboard = () => {
                 key={item.key}
                 onClick={() => setActiveTab(item.key)}
                 className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all ${
-                  isActive ? "bg-foreground text-background" : "text-muted-foreground"
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
@@ -547,6 +570,9 @@ const Dashboard = () => {
           })}
         </div>
       </nav>
+
+      {/* Add Event modal */}
+      {profile && <AddEventModal open={addEventOpen} onClose={() => setAddEventOpen(false)} profile={profile} />}
 
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
@@ -1071,29 +1097,42 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 
   return (
     <div className="space-y-4">
-      {/* Modern lime-green profile hero (no brown) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(88_60%_42%)] via-[hsl(84_70%_50%)] to-[hsl(88_55%_55%)] p-6 shadow-xl shadow-primary/10 border border-white/30">
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/20 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-black/10 blur-3xl pointer-events-none" />
+      {/* Modern profile hero — fade primary, dark-mode friendly */}
+      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-center gap-4 mb-5">
-          <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg ring-4 ring-white/50">
-            <span className="text-2xl font-bold text-[hsl(88_60%_28%)] font-display">{initials}</span>
-          </div>
+          <label className="relative cursor-pointer group">
+            <div className="w-20 h-20 rounded-2xl bg-card overflow-hidden flex items-center justify-center shadow-lg ring-4 ring-card/50">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-primary font-display">{initials}</span>
+              )}
+            </div>
+            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-background text-[10px] font-semibold transition">Change</span>
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+              const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
+            }} />
+          </label>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display text-2xl font-bold text-white truncate">{profile?.full_name || "User"}</h3>
-            <p className="text-sm text-white/85 font-sans truncate">{profile?.email || ""}</p>
+            <h3 className="font-display text-2xl font-bold text-foreground truncate flex items-center gap-1.5">
+              {profile?.full_name || "User"}
+              {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
+            </h3>
+            <p className="text-sm text-foreground/75 font-sans truncate">{profile?.email || ""}</p>
             <div className="flex items-center gap-2 mt-1.5">
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span className="text-xs text-white/90 font-sans font-semibold">Active member</span>
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs text-foreground/80 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
             </div>
           </div>
           {!editing ? (
-            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
           ) : (
             <div className="flex gap-1.5">
-              <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Save className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl text-white hover:bg-white/20"><X className="w-4 h-4" /></Button>
+              <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl"><X className="w-4 h-4" /></Button>
             </div>
           )}
         </div>
@@ -2107,8 +2146,8 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
   );
 };
 
-/* ───────── Modern Home Overview (lime-green hero, replaces widgets) ───────── */
-const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab }: any) => {
+/* ───────── Modern Home Overview (soft fade hero, replaces widgets) ───────── */
+const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab, openAddEvent }: any) => {
   const upcomingEvents = events.filter((e: any) => new Date(e.event_date) >= new Date()).slice(0, 2);
   const recentOrders = orders.slice(0, 2);
   const totalEvents = events.length;
@@ -2116,10 +2155,10 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
   return (
     <div className="space-y-5">
-      {/* Hero overview card — lime green */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(82_75%_55%)] via-[hsl(80_70%_60%)] to-[hsl(78_65%_65%)] p-6 shadow-[0_12px_40px_-8px_hsl(82_75%_45%/0.4)]">
-        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-white/25 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-12 w-52 h-52 rounded-full bg-foreground/10 blur-3xl pointer-events-none" />
+      {/* Hero overview card — soft violet fade matching homepage */}
+      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
+        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-12 w-52 h-52 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
         <div className="relative">
           <p className="font-sans text-xs uppercase tracking-wider text-foreground/70 font-semibold">My Activity</p>
           <div className="mt-3 flex items-end gap-3">
@@ -2130,41 +2169,56 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-2">
-            <div className="bg-white/85 backdrop-blur rounded-2xl p-3">
-              <p className="text-[10px] uppercase tracking-wider text-foreground/60 font-sans font-semibold">Events</p>
+            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Events</p>
               <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalEvents}</p>
             </div>
-            <div className="bg-white/85 backdrop-blur rounded-2xl p-3">
-              <p className="text-[10px] uppercase tracking-wider text-foreground/60 font-sans font-semibold">Orders</p>
+            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Orders</p>
               <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalOrders}</p>
             </div>
           </div>
 
           <Button
             onClick={handleBookEvent}
-            className="mt-5 w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-sans font-semibold"
+            className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold"
             size="lg"
           >
             <CalIcon className="w-4 h-4 mr-2" />
-            {canBookEvent ? "Book a New Event" : "Get a Quote"}
+            {canBookEvent ? "Book a Caricature Artist for Your Event" : "Get a Quote"}
           </Button>
+          <p className="mt-2 text-[11px] text-foreground/60 font-sans text-center">Make your guests say "wow" with live caricatures ✨</p>
         </div>
       </div>
+
+      {/* Verified-user upsell (only when not yet verified) */}
+      {!profile?.is_verified && (
+        <div className="rounded-3xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-sans font-semibold text-foreground">Become a verified user</p>
+            <p className="text-[11px] text-muted-foreground font-sans">Book your 1st event to earn the blue tick on your profile.</p>
+          </div>
+          <Button size="sm" onClick={handleBookEvent} className="rounded-full bg-primary text-primary-foreground text-xs">Verify</Button>
+        </div>
+      )}
 
       {/* Quick actions row */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Events", icon: CalIcon, action: () => setActiveTab("events") },
           { label: "Payments", icon: Receipt, action: () => setActiveTab("payments") },
-          { label: "Track", icon: Truck, action: () => navigate("/track-order") },
+          { label: "Add Event", icon: Sparkles, action: openAddEvent, highlight: true },
         ].map((q) => (
           <button
             key={q.label}
             onClick={q.action}
-            className="bg-white border border-border rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+            className={`bg-card border rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform ${q.highlight ? "border-primary/40 shadow-sm shadow-primary/10" : "border-border"}`}
           >
-            <div className="w-10 h-10 rounded-full bg-[hsl(82_75%_92%)] flex items-center justify-center">
-              <q.icon className="w-4.5 h-4.5 text-[hsl(82_75%_30%)]" />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${q.highlight ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
+              <q.icon className="w-4 h-4" />
             </div>
             <span className="text-xs font-sans font-medium text-foreground">{q.label}</span>
           </button>
@@ -2173,7 +2227,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Upcoming events preview */}
       {upcomingEvents.length > 0 && (
-        <div className="bg-white border border-border rounded-3xl p-4">
+        <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Upcoming Events</h3>
             <button onClick={() => setActiveTab("events")} className="text-xs font-sans text-muted-foreground hover:text-foreground">View all →</button>
@@ -2181,14 +2235,14 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           <div className="space-y-2">
             {upcomingEvents.map((ev: any) => (
               <div key={ev.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
-                <div className="w-10 h-10 rounded-xl bg-[hsl(82_75%_55%)] flex items-center justify-center flex-shrink-0">
-                  <CalIcon className="w-5 h-5 text-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+                  <CalIcon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate">{ev.event_type || "Event"}</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.city}</p>
                 </div>
-                <Badge className="bg-[hsl(82_75%_92%)] text-[hsl(82_75%_28%)] border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
+                <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
               </div>
             ))}
           </div>
@@ -2197,15 +2251,15 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Recent orders preview */}
       {recentOrders.length > 0 && (
-        <div className="bg-white border border-border rounded-3xl p-4">
+        <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Recent Orders</h3>
           </div>
           <div className="space-y-2">
             {recentOrders.map((o: any) => (
               <div key={o.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
-                <div className="w-10 h-10 rounded-xl bg-foreground/10 flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 text-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-foreground/10 text-foreground flex items-center justify-center flex-shrink-0">
+                  <Package className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate capitalize">{o.style} · {o.face_count} face(s)</p>
@@ -2219,13 +2273,13 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Empty state */}
       {upcomingEvents.length === 0 && recentOrders.length === 0 && (
-        <div className="bg-white border border-border rounded-3xl p-8 text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[hsl(82_75%_92%)] flex items-center justify-center mb-3">
-            <Sparkles className="w-7 h-7 text-[hsl(82_75%_30%)]" />
+        <div className="bg-card border border-border rounded-3xl p-8 text-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-primary/15 text-primary flex items-center justify-center mb-3">
+            <Sparkles className="w-7 h-7" />
           </div>
-          <h3 className="font-display text-lg font-bold mb-1">Welcome aboard, {profile?.full_name?.split(" ")[0] || "friend"}!</h3>
+          <h3 className="font-display text-lg font-bold mb-1 text-foreground">Welcome aboard, {profile?.full_name?.split(" ")[0] || "friend"}!</h3>
           <p className="text-sm text-muted-foreground font-sans mb-4">Book your first event and let our artists wow your guests.</p>
-          <Button onClick={handleBookEvent} className="rounded-2xl bg-foreground text-background hover:bg-foreground/90">
+          <Button onClick={handleBookEvent} className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
             Book Your First Event
           </Button>
         </div>
