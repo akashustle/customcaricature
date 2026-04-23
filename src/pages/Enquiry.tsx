@@ -180,11 +180,11 @@ const Enquiry = () => {
 
   const handleSubmitInfo = async () => {
     if (!name.trim() || !mobile.trim()) {
-      toast({ title: "Please enter your name and mobile number", variant: "destructive" });
+      toast({ title: "Please enter your name and WhatsApp number", variant: "destructive" });
       return;
     }
     if (mobile.length < 10) {
-      toast({ title: "Please enter a valid mobile number", variant: "destructive" });
+      toast({ title: "Please enter a valid WhatsApp number", variant: "destructive" });
       return;
     }
 

@@ -929,8 +929,8 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                     {order.artist_name && <Row label="Artist" value={order.artist_name} />}
                     <Row label="Expected Delivery" value={order.expected_delivery_date ? new Date(order.expected_delivery_date).toLocaleDateString("en-IN") : "25-30 days from order date"} />
                     {order.payment_status === "confirmed" && (
-                      <div className="bg-green-50 rounded-lg p-3 space-y-1">
-                        <p className="font-semibold text-green-800 text-xs">✅ Payment Confirmed</p>
+                      <div className="bg-primary/10 rounded-lg p-3 space-y-1">
+                        <p className="font-semibold text-primary text-xs">✅ Payment Confirmed</p>
                         {order.razorpay_payment_id && <Row label="Payment ID" value={order.razorpay_payment_id} />}
                         {order.razorpay_order_id && <Row label="Order Ref" value={order.razorpay_order_id} />}
                       </div>
@@ -1586,10 +1586,10 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                           <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4 space-y-3"
+                            className="rounded-2xl border border-primary/30 bg-hero-violet p-4 space-y-3"
                             style={{ perspective: "600px", transform: "rotateX(1deg)" }}
                           >
-                            <p className="text-xs font-sans font-semibold text-emerald-800">✅ Advance paid! Pay remaining to complete.</p>
+                            <p className="text-xs font-sans font-semibold text-primary">✅ Advance paid! Pay remaining to complete.</p>
                             <div className="space-y-1.5">
                               <div className="flex justify-between text-xs font-sans">
                                 <span className="text-muted-foreground">Remaining Balance</span>
@@ -1599,11 +1599,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                                 <span className="text-muted-foreground">Payment Gateway Fee</span>
                                 <span className="font-semibold">{formatPrice(fee)}</span>
                               </div>
-                              <div className="h-px bg-emerald-200" />
+                              <div className="h-px bg-primary/20" />
                               <div className="flex justify-between text-sm font-sans">
-                                <span className="font-bold text-emerald-800">Total Payable</span>
+                                <span className="font-bold text-primary">Total Payable</span>
                                 <motion.span
-                                  className="font-bold text-emerald-700 text-lg"
+                                  className="font-bold text-primary text-lg"
                                   initial={{ scale: 0.8 }}
                                   animate={{ scale: [1, 1.05, 1] }}
                                   transition={{ duration: 0.6, delay: 0.3 }}
@@ -1615,7 +1615,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                           </motion.div>
                           <Button
                             size="sm"
-                            className="rounded-full font-sans w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
+                            className="rounded-full font-sans w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                             disabled={payingEventId === ev.id}
                             onClick={() => handlePayRemaining(ev)}
                           >
@@ -1693,7 +1693,7 @@ const SHOP_STATUS_COLORS: Record<string, string> = {
   pending: "bg-amber-50 text-amber-700 border border-amber-200",
   processing: "bg-blue-50 text-blue-700 border border-blue-200",
   shipped: "bg-cyan-50 text-cyan-700 border border-cyan-200",
-  delivered: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  delivered: "bg-primary/10 text-primary border border-primary/30",
   cancelled: "bg-red-50 text-red-700 border border-red-200",
 };
 
@@ -1797,7 +1797,7 @@ const ShopOrdersList = ({ shopOrders, navigate }: { shopOrders: any[]; navigate:
                       <Badge className={`${SHOP_STATUS_COLORS[order.status] || "bg-muted text-foreground"} border-none text-xs capitalize`}>
                         {order.status === "shipped" ? <><Truck className="w-3 h-3 mr-1" />Shipped</> : order.status}
                       </Badge>
-                      <Badge className={`${order.payment_status === "paid" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"} border-none text-xs`}>
+                      <Badge className={`${order.payment_status === "paid" ? "bg-primary/10 text-primary border border-primary/30" : "bg-amber-50 text-amber-700 border border-amber-200"} border-none text-xs`}>
                         <CreditCard className="w-3 h-3 mr-1" />{order.payment_status === "paid" ? "Paid ✅" : "Pending"}
                       </Badge>
                       {order.tracking_number && (
@@ -2075,7 +2075,7 @@ ${!isEvent ? '<div class="thank-you"><h3>🎨 Thank You for Your Order!</h3><p>Y
                 <p className="font-mono text-sm font-bold">{inv.invoice_number}</p>
                 <p className="text-xs text-muted-foreground font-sans">{new Date(inv.created_at).toLocaleDateString()} • {inv.invoice_type}</p>
               </div>
-              <Badge className={inv.status === "paid" || inv.status === "generated" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-muted text-muted-foreground"}>{inv.status === "generated" ? "paid" : inv.status}</Badge>
+              <Badge className={inv.status === "paid" || inv.status === "generated" ? "bg-primary/10 text-primary border-primary/30" : "bg-muted text-muted-foreground"}>{inv.status === "generated" ? "paid" : inv.status}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <p className="font-display text-lg font-bold text-primary">{formatPrice(inv.total_amount)}</p>
