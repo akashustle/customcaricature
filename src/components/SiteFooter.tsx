@@ -26,6 +26,7 @@ const DEFAULT = {
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
         { label: "Gallery", href: "/gallery/events" },
+        { label: "The Lil Flea", href: "/lil-flea" },
         { label: "FAQs", href: "/faqs" },
         { label: "Support", href: "/support" },
       ],
