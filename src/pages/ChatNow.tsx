@@ -4,9 +4,7 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  CalendarIcon,
   Clock,
-  MapPin,
   Send,
   Sparkles,
   MessageCircle,
@@ -21,9 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { EVENT_TYPES } from "@/lib/event-data";
 import { INDIA_LOCATIONS } from "@/lib/india-locations";
@@ -31,6 +26,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 import SiteShell from "@/components/SiteShell";
+import SelectWithOther from "@/components/ui/select-with-other";
+import MonthYearDatePicker from "@/components/ui/month-year-date-picker";
 
 const WHATSAPP_NUMBER = "918369594271";
 
@@ -54,15 +51,12 @@ const ChatNow = () => {
   const { user } = useAuth();
   const [name, setName] = useState("");
   const [eventType, setEventType] = useState("");
-  const [customEventType, setCustomEventType] = useState("");
   const [eventDate, setEventDate] = useState<Date | undefined>();
   const [startTime, setStartTime] = useState("");
   const [hours, setHours] = useState<number>(2);
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
-  const [customDistrict, setCustomDistrict] = useState("");
   const [city, setCity] = useState("");
-  const [customCity, setCustomCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [fullAddress, setFullAddress] = useState("");
 
