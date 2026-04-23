@@ -81,6 +81,8 @@ const Dashboard = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("home");
+  const [addEventOpen, setAddEventOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [newSecretCode, setNewSecretCode] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -212,6 +214,26 @@ const Dashboard = () => {
     }).eq("user_id", user.id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub?.publicUrl;
+      const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
+      if (dbErr) throw dbErr;
+      setProfile((p) => p ? { ...p, avatar_url: url } : p);
+      toast({ title: "📸 Profile photo updated!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploadingAvatar(false);
   };
 
   const changeSecretCode = async () => {
