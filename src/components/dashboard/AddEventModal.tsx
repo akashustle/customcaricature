@@ -245,6 +245,16 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                 )}
               </div>
 
+              {overlapWarning && (
+                <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <p className="text-[11px] font-sans text-amber-700 dark:text-amber-300 leading-relaxed">{overlapWarning}</p>
+                </div>
+              )}
+              {checkingOverlap && eventDate && startTime && !overlapWarning && (
+                <p className="text-[10px] text-muted-foreground font-sans -mt-2">Checking availability…</p>
+              )}
+
               {/* State / District / City — all with Other fallback */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
