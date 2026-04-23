@@ -14,10 +14,35 @@ import PricingReveal from "@/components/PricingReveal";
 import UrgencyTimer from "@/components/UrgencyTimer";
 import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2, AlertTriangle } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { playCurrencySound, playEnterSound, playCoinDrop, playCashRegister } from "@/lib/sounds";
 
-const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
+const DEFAULT_WHATSAPP = "918369594271";
+const DEFAULT_INSTAGRAM = "https://www.instagram.com/creativecaricatureclub";
+
+const DEFAULT_CMS = {
+  header_title: "Caricature Budgeting",
+  intro_texts: [
+    "🎨 Welcome to Creative Caricature Club™",
+    "💰 Let's find the perfect pricing for you...",
+    "📊 Calculating best rates...",
+    "🎯 Almost there...",
+    "✨ Your personalized pricing is ready!",
+  ],
+  phase_select_title: "What are you looking for?",
+  phase_select_subtitle: "Choose to see personalized pricing",
+  event_card_title: "Live Event Booking",
+  event_card_desc: "Live caricature artist at your event",
+  event_card_badge: "Starting ₹40,000",
+  caric_card_title: "Custom Caricature",
+  caric_card_desc: "Personalized caricature artwork",
+  event_calc_title: "🎪 Event Pricing Calculator",
+  event_cta_label: "Get My Pricing",
+  event_book_label: "Book Your Event Now",
+  caric_calc_title: "🖼️ Custom Caricature Calculator",
+  caric_off_message: "Custom caricature ordering is temporarily paused 🎨",
+  caric_off_subtext: "We'll be back soon — stay tuned!",
+};
 
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
