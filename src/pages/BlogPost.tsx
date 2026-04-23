@@ -136,44 +136,56 @@ const BlogPost = () => {
     return headings;
   }, [post]);
 
-  // Render content with proper heading IDs
+  // Render content with editorial NYT-style typography (drop-cap on first paragraph)
   const renderContent = useCallback((content: string) => {
+    let firstParaRendered = false;
     return content.split("\n\n").map((block, i) => {
       if (block.startsWith("### ")) {
         const text = block.slice(4);
         const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-        return <h3 key={i} id={id} className="font-display text-xl font-semibold mt-8 mb-3 text-foreground scroll-mt-20">{text}</h3>;
+        return <h3 key={i} id={id} className="text-xl md:text-2xl font-bold mt-10 mb-3 text-foreground scroll-mt-20" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{text}</h3>;
       }
       if (block.startsWith("## ")) {
         const text = block.slice(3);
         const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-        return <h2 key={i} id={id} className="font-display text-2xl font-bold mt-10 mb-4 text-foreground scroll-mt-20">{text}</h2>;
+        return <h2 key={i} id={id} className="text-2xl md:text-3xl font-bold mt-12 mb-4 text-foreground scroll-mt-20" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{text}</h2>;
       }
       if (block.startsWith("# ")) {
         const text = block.slice(2);
-        return <h2 key={i} className="font-display text-3xl font-bold mt-10 mb-4 text-foreground">{text}</h2>;
+        return <h2 key={i} className="text-3xl md:text-4xl font-bold mt-12 mb-4 text-foreground" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>{text}</h2>;
       }
       if (block.startsWith("![")) {
         const match = block.match(/!\[([^\]]*)\]\(([^)]+)\)/);
-        if (match) return <img key={i} src={match[2]} alt={match[1]} className="rounded-xl my-6 w-full" loading="lazy" />;
+        if (match) return (
+          <figure key={i} className="my-10">
+            <img src={match[2]} alt={match[1]} className="w-full" loading="lazy" />
+            {match[1] && <figcaption className="mt-2 text-xs italic text-muted-foreground" style={{ fontFamily: "Georgia, serif" }}>{match[1]}</figcaption>}
+          </figure>
+        );
       }
       if (block.startsWith("> ")) {
         return (
-          <blockquote key={i} className="border-l-4 border-primary/40 pl-5 py-3 my-8 bg-primary/5 rounded-r-xl">
-            <p className="text-lg md:text-xl italic text-foreground/80 font-display leading-relaxed">
-              {block.slice(2)}
+          <blockquote key={i} className="border-l-2 border-foreground/40 pl-6 py-2 my-10">
+            <p className="text-2xl md:text-3xl leading-snug text-foreground italic" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              "{block.slice(2)}"
             </p>
           </blockquote>
         );
       }
       if (block.startsWith("- ") || block.startsWith("* ")) {
         const items = block.split("\n").filter(l => l.startsWith("- ") || l.startsWith("* "));
-        return <ul key={i} className="list-disc pl-6 space-y-2 my-4 text-foreground/85 leading-relaxed">{items.map((item, j) => <li key={j}>{item.slice(2)}</li>)}</ul>;
+        return <ul key={i} className="list-disc pl-6 space-y-2 my-6 text-foreground/85 leading-relaxed text-[17px]" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{items.map((item, j) => <li key={j}>{item.slice(2)}</li>)}</ul>;
       }
-      // Regular paragraph — support inline bold
+      // Editorial paragraph — first one gets a drop cap
       const parts = block.split(/(\*\*[^*]+\*\*)/g);
+      const isFirst = !firstParaRendered;
+      if (isFirst) firstParaRendered = true;
       return (
-        <p key={i} className="text-foreground/85 leading-[1.85] mb-5 text-base md:text-[17px]">
+        <p
+          key={i}
+          className={`text-foreground/90 leading-[1.75] mb-6 text-[17px] md:text-[19px] ${isFirst ? "first-letter:font-bold first-letter:text-[64px] md:first-letter:text-[78px] first-letter:mr-2 first-letter:float-left first-letter:leading-[0.85] first-letter:mt-1 first-letter:font-serif" : ""}`}
+          style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+        >
           {parts.map((part, j) => {
             if (part.startsWith("**") && part.endsWith("**")) {
               return <strong key={j} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
@@ -260,57 +272,58 @@ const BlogPost = () => {
         </div>
       </nav>
 
-      {/* ===== HERO COVER (Full-bleed like reference) ===== */}
-      {post.cover_image && (
-        <div className="relative">
-          <div className="h-[280px] sm:h-[380px] md:h-[480px] overflow-hidden">
-            <img
-              src={post.cover_image}
-              alt={post.title}
-              className="w-full h-full object-cover"
-              loading="eager"
-              fetchPriority="high"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-10 max-w-4xl mx-auto">
-            <Badge className={`${CATEGORY_COLORS[post.category] || "bg-primary"} text-white border-0 text-xs font-bold mb-3`}>
-              {CATEGORY_LABELS[post.category] || post.category}
-            </Badge>
-            <h1 className="text-white text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-3 drop-shadow-lg">
-              {post.title}
-            </h1>
-            <div className="flex items-center flex-wrap gap-3 text-white/80 text-xs md:text-sm">
-              <span className="flex items-center gap-1.5">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold">
-                  {post.author_name.charAt(0)}
-                </div>
-                <span className="font-semibold">{post.author_name}</span>
-              </span>
-              <span>•</span>
-              <span>{formattedDate}</span>
-              <span>•</span>
-              <span>{readTime}</span>
+      {/* ===== NYT-STYLE EDITORIAL HEADER ===== */}
+      <header className="border-b border-foreground/10">
+        <div className="container mx-auto max-w-3xl px-5 sm:px-6 pt-8 sm:pt-12 pb-6">
+          <Badge className={`${CATEGORY_COLORS[post.category] || "bg-primary"} text-white border-0 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 rounded-none px-2 py-0.5`}>
+            {CATEGORY_LABELS[post.category] || post.category}
+          </Badge>
+          <h1
+            className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold leading-[1.08] text-foreground mb-4"
+            style={{ fontFamily: "'Playfair Display', 'Times New Roman', Georgia, serif", letterSpacing: "-0.01em" }}
+          >
+            {post.title}
+          </h1>
+          {post.excerpt && (
+            <p
+              className="font-serif text-base sm:text-lg md:text-xl text-foreground/70 leading-relaxed mb-6"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: "italic" }}
+            >
+              {post.excerpt}
+            </p>
+          )}
+          <div className="flex items-center justify-between border-t border-foreground/10 pt-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center text-foreground font-bold text-sm">
+                {post.author_name.charAt(0)}
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">By</p>
+                <p className="text-sm font-bold text-foreground font-sans">{post.author_name}</p>
+              </div>
+            </div>
+            <div className="text-right text-[11px] uppercase tracking-wider text-muted-foreground font-sans">
+              <p>{formattedDate}</p>
+              <p className="mt-0.5">{readTime}</p>
             </div>
           </div>
         </div>
-      )}
+      </header>
 
-      {/* No cover fallback */}
-      {!post.cover_image && (
-        <div className="container mx-auto px-4 pt-8 max-w-4xl">
-          <Badge className={`${CATEGORY_COLORS[post.category] || "bg-primary"} text-white border-0 text-xs font-bold mb-3`}>
-            {CATEGORY_LABELS[post.category] || post.category}
-          </Badge>
-          <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
-            {post.title}
-          </h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-            <span className="flex items-center gap-1"><User className="w-4 h-4" /> {post.author_name}</span>
-            <span>{formattedDate}</span>
-            <span>{readTime}</span>
-          </div>
-        </div>
+      {/* Hero Cover (editorial wide format with caption) */}
+      {post.cover_image && (
+        <figure className="container mx-auto max-w-4xl px-0 sm:px-6 mt-6 mb-8">
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            className="w-full h-auto sm:rounded-sm"
+            loading="eager"
+            fetchPriority="high"
+          />
+          <figcaption className="px-5 sm:px-0 mt-2 text-[11px] text-muted-foreground italic font-serif" style={{ fontFamily: "Georgia, serif" }}>
+            {post.title} — Creative Caricature Club™
+          </figcaption>
+        </figure>
       )}
 
       {/* ===== MAIN CONTENT AREA ===== */}
