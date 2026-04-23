@@ -1,5 +1,7 @@
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -19,7 +21,7 @@ const IntellectualProperty = () => {
           <h1 className="font-display text-xl font-bold">Intellectual Property Policy</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-4 text-sm text-foreground/80">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-4 text-sm text-foreground/80">
         <motion.p {...fadeUp(0.05)}>All artwork created by Creative Caricature Club™ is protected under applicable copyright laws.</motion.p>
         <motion.p {...fadeUp(0.07)}>This includes: caricature designs, illustrations, artwork created during events, digital artwork, merchandise designs, and workshop materials.</motion.p>
         
@@ -39,8 +41,11 @@ const IntellectualProperty = () => {
         <motion.p {...fadeUp(0.32)}>For IP-related queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a>.</motion.p>
       </motion.div>
     </div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </>
   );
 };
+
 
 export default IntellectualProperty;

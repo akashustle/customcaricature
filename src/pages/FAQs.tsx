@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, HelpCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 type FAQ = { q: string; a: string; category?: string };
 
@@ -99,8 +101,11 @@ const FAQs = () => {
           </div>
         )}
       </div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default FAQs;

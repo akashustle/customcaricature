@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.4 } });
 const H = ({ children, d }: { children: React.ReactNode; d: number }) => (
@@ -24,7 +26,7 @@ const Terms = () => {
           <h1 className="font-display text-xl font-bold">Terms & Conditions</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-4 text-sm text-foreground/80">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-4 text-sm text-foreground/80">
         <P d={0.05}>These Terms and Conditions govern the use of the Creative Caricature Club™ websites and services. By accessing the website or purchasing services, the user agrees to comply with these terms.</P>
         
         <H d={0.1}>1. Eligibility</H>
@@ -67,8 +69,11 @@ const Terms = () => {
         <H d={0.72}>13. Contact</H>
         <P d={0.74}>For any queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a> or WhatsApp at <a href="https://wa.me/918369594271" className="text-primary hover:underline">+91 8369594271</a>.</P>
       </motion.div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default Terms;

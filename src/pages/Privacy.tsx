@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.4 } });
 
@@ -18,7 +20,7 @@ const Privacy = () => {
           <h1 className="font-display text-xl font-bold">Privacy Policy</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-4 text-sm text-foreground/80">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-4 text-sm text-foreground/80">
         <motion.p {...fadeUp(0.05)}>Creative Caricature Club™ collects user data for service delivery purposes.</motion.p>
         
         <motion.h2 {...fadeUp(0.1)} className="font-display text-lg font-bold text-foreground pt-2">Information We Collect</motion.h2>
@@ -42,8 +44,11 @@ const Privacy = () => {
         <motion.h2 {...fadeUp(0.4)} className="font-display text-lg font-bold text-foreground pt-2">Contact</motion.h2>
         <motion.p {...fadeUp(0.42)}>For privacy concerns, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a> or WhatsApp at <a href="https://wa.me/918369594271" className="text-primary hover:underline">+91 8369594271</a>.</motion.p>
       </motion.div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default Privacy;

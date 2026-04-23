@@ -38,7 +38,7 @@ const Section = ({
   children: React.ReactNode; soft?: boolean; className?: string;
 }) => (
   <section id={id} className={`px-3 sm:px-4 my-5 sm:my-6 ${className}`}>
-    <div className={`mx-auto max-w-6xl rounded-3xl p-5 sm:p-10 lg:p-14 ${soft ? "bg-section-soft" : "card-soft-white"}`}>
+    <div className={`mx-auto max-w-7xl rounded-3xl p-5 sm:p-10 lg:p-14 ${soft ? "bg-section-soft" : "card-soft-white"}`}>
       {(eyebrow || title) && (
         <div className="text-center mb-7 sm:mb-12">
           {eyebrow && <div className="chip-violet mb-4">{eyebrow}</div>}
@@ -88,7 +88,7 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
 
 const Hero = ({ onBook, onQuote, images }: { onBook: () => void; onQuote: () => void; images: string[] }) => (
   <section className="relative px-3 sm:px-4 mt-3">
-    <div className="mx-auto max-w-6xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
+    <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
       <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
         <div className="chip-violet mx-auto mb-5 sm:mb-6">
           <Sparkles className="w-3.5 h-3.5" />
@@ -419,7 +419,7 @@ const Footer = ({ override }: { override?: any }) => {
   const instaUrl = `https://instagram.com/${igHandle}`;
   return (
     <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-      <div className="mx-auto max-w-6xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10">
+      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -559,7 +559,7 @@ const Index = () => {
             stats: <Stats key="stats" items={stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
+                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
                   <div className="text-center mb-7 sm:mb-10">
                     <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
@@ -573,7 +573,7 @@ const Index = () => {
             gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />,
             clients: (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
-                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white overflow-hidden">
+                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
                   <HomepageTrustedBrands />
                 </div>
               </section>

@@ -41,14 +41,14 @@ const FloatingNav = () => {
   return (
     <header className="relative md:sticky md:top-3 z-40 w-full px-3 sm:px-4 pt-3 md:pt-0">
       <div
-        className={`mx-auto max-w-6xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-shadow ${
+        className={`mx-auto max-w-7xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-shadow ${
           scrolled ? "shadow-[0_10px_40px_-20px_hsl(252_60%_40%/0.25)]" : "shadow-sm"
         }`}
       >
         <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Creative Caricature Club home">
           <img src="/logo.png" alt="CCC" width={32} height={32} className="w-8 h-8 rounded-lg" />
-          <span className="font-bold text-foreground text-base sm:text-lg tracking-tight">
-            Creative <span className="text-gradient-violet">Caricature</span>
+          <span className="font-bold text-foreground text-base sm:text-lg tracking-tight whitespace-nowrap">
+            Creative <span className="text-gradient-violet">Caricature Club</span>
           </span>
         </Link>
 
@@ -85,7 +85,7 @@ const FloatingNav = () => {
       </div>
 
       {open && (
-        <div className="md:hidden mx-auto max-w-6xl mt-2 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-lg p-3 flex flex-col gap-1">
+        <div className="md:hidden mx-auto max-w-7xl mt-2 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-lg p-3 flex flex-col gap-1">
           {links.map((l) => (
             <button
               key={l.label}
