@@ -518,35 +518,35 @@ const BookEvent = () => {
             )}
             <div>
               <Label className="font-sans">Event Date *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !eventDate && "text-muted-foreground")}>
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    {eventDate ? format(eventDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-[100] bg-card border-2 border-primary/20 shadow-2xl rounded-2xl" align="start" sideOffset={4}>
-                  <Calendar
-                    mode="single"
-                    selected={eventDate}
-                    onSelect={(d) => setEventDate(d)}
-                    disabled={(date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      return date < today;
-                    }}
-                    className={cn("p-3 pointer-events-auto rounded-2xl bg-card")}
-                    initialFocus
-                    fromMonth={new Date()}
-                    numberOfMonths={1}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="mt-1">
+                <MonthYearDatePicker
+                  value={eventDate}
+                  onChange={setEventDate}
+                  placeholder="Pick a date"
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="font-sans">Start Time *</Label>
-                <Select value={startTime} onValueChange={setStartTime}>
+                <Select value={startTime} onValueChange={(v) => {
+                  setStartTime(v);
+                  // Auto-update end time based on currently chosen duration (default 2 hrs)
+                  const cur = endTime && startTime
+                    ? (() => {
+                        const [sh, sm] = startTime.split(":").map(Number);
+                        const [eh, em] = endTime.split(":").map(Number);
+                        const diff = ((eh * 60 + em) - (sh * 60 + sm) + 24 * 60) % (24 * 60);
+                        const h = Math.round(diff / 60);
+                        return h >= 1 && h <= 4 ? h : 2;
+                      })()
+                    : 2;
+                  const [h, m] = v.split(":").map(Number);
+                  const total = h * 60 + m + cur * 60;
+                  const newEh = Math.floor(total / 60) % 24;
+                  const newEm = total % 60;
+                  setEndTime(`${String(newEh).padStart(2, "0")}:${String(newEm).padStart(2, "0")}`);
+                }}>
                   <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
                   <SelectContent className="max-h-72">
                     {Array.from({ length: 48 }, (_, i) => {
@@ -559,18 +559,43 @@ const BookEvent = () => {
                 </Select>
               </div>
               <div>
-                <Label className="font-sans">End Time *</Label>
-                <Select value={endTime} onValueChange={setEndTime}>
-                  <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {Array.from({ length: 48 }, (_, i) => {
-                      const h = String(Math.floor(i / 2)).padStart(2, "0");
-                      const m = i % 2 === 0 ? "00" : "30";
-                      const v = `${h}:${m}`;
-                      return <SelectItem key={v} value={v}>{v}</SelectItem>;
-                    })}
-                  </SelectContent>
-                </Select>
+                <Label className="font-sans">Duration *</Label>
+                <div className="grid grid-cols-4 gap-1.5 mt-1">
+                  {[1, 2, 3, 4].map((h) => {
+                    const computeEnd = () => {
+                      if (!startTime) return "";
+                      const [sh, sm] = startTime.split(":").map(Number);
+                      const total = sh * 60 + sm + h * 60;
+                      const eh = Math.floor(total / 60) % 24;
+                      const em = total % 60;
+                      return `${String(eh).padStart(2, "0")}:${String(em).padStart(2, "0")}`;
+                    };
+                    const thisEnd = computeEnd();
+                    const isActive = !!startTime && endTime === thisEnd;
+                    return (
+                      <button
+                        key={h}
+                        type="button"
+                        disabled={!startTime}
+                        onClick={() => setEndTime(thisEnd)}
+                        className={cn(
+                          "h-10 rounded-xl border text-sm font-sans font-semibold transition-all",
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-card border-border text-foreground hover:border-primary/50",
+                          !startTime && "opacity-50 cursor-not-allowed",
+                        )}
+                      >
+                        {h} hr
+                      </button>
+                    );
+                  })}
+                </div>
+                {startTime && endTime && (
+                  <p className="mt-1.5 text-[11px] font-sans text-muted-foreground">
+                    Ends around <span className="font-semibold text-foreground">{endTime}</span>
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
