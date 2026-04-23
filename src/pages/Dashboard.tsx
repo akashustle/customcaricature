@@ -500,7 +500,7 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="home">
-              <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+              <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
             </TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
@@ -520,7 +520,7 @@ const Dashboard = () => {
         {/* Mobile tab content */}
         <div className="md:hidden mt-2">
           {activeTab === "home" && (
-            <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+            <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
           )}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
