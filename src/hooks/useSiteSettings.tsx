@@ -47,6 +47,7 @@ type SiteSettings = {
   homepage_urgency_strip: { enabled: boolean };
   floating_whatsapp: { enabled: boolean };
   floating_instagram: { enabled: boolean };
+  floating_dark_toggle: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -89,6 +90,7 @@ const defaults: SiteSettings = {
   homepage_urgency_strip: { enabled: false },
   floating_whatsapp: { enabled: false },
   floating_instagram: { enabled: false },
+  floating_dark_toggle: { enabled: false },
 };
 
 // Module-level cache so all instances share one fetch result
