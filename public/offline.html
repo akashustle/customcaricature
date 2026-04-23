@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline — Creative Caricature Club</title>
+    <link rel="icon" href="/favicon.png" />
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top,#fdf8f3,#ebd9c2);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#3d3028;padding:24px}
+      .card{text-align:center;max-width:420px}
+      .logo{width:96px;height:96px;border-radius:24px;margin:0 auto 24px;box-shadow:0 20px 60px rgba(176,141,87,0.3);animation:float 3s ease-in-out infinite}
+      h1{font-size:28px;margin-bottom:12px;color:#5a3e1f}
+      p{opacity:.75;line-height:1.6;margin-bottom:24px}
+      button{background:#b08d57;color:#fff;border:0;padding:14px 28px;border-radius:99px;font-weight:600;cursor:pointer;font-size:14px;letter-spacing:.5px}
+      button:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(176,141,87,.4)}
+      @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img src="/logo.png" class="logo" alt="CCC" />
+      <h1>You're offline</h1>
+      <p>It looks like you've lost your connection. Check your internet and try again — we'll get you right back to the art.</p>
+      <button onclick="location.reload()">Try Again</button>
+    </div>
+  </body>
+</html>
