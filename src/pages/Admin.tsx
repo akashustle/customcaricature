@@ -1071,6 +1071,7 @@ const Admin = () => {
               >
                 <HelpCircle className="w-4 h-4" />
               </button>
+              <Suspense fallback={null}><AdminAIAssistant /></Suspense>
               <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
