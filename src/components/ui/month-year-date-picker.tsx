@@ -112,25 +112,35 @@ const MonthYearDatePicker: React.FC<Props> = ({
       <PopoverContent
         className="w-[20rem] max-w-[calc(100vw-1.5rem)] p-3 z-[120] bg-popover pointer-events-auto"
         align="start"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          // Keep popover open when interacting with the Select dropdowns (which portal to body)
+          const target = e.target as HTMLElement | null;
+          if (target?.closest("[data-radix-select-content], [data-radix-select-viewport], [data-radix-popper-content-wrapper]")) {
+            e.preventDefault();
+          }
+        }}
       >
-        {/* Month + Year selectors */}
+        {/* Month + Year selectors — use native selects for guaranteed click behavior inside Popover */}
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <Select value={String(viewMonth)} onValueChange={(v) => setViewMonth(Number(v))}>
-            <SelectTrigger className="h-9 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent className="z-[130] max-h-72">
-              {MONTHS.map((m, i) => (
-                <SelectItem key={m} value={String(i)}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={String(viewYear)} onValueChange={(v) => setViewYear(Number(v))}>
-            <SelectTrigger className="h-9 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent className="z-[130] max-h-72">
-              {years.map((y) => (
-                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            value={viewMonth}
+            onChange={(e) => setViewMonth(Number(e.target.value))}
+            className="h-9 rounded-lg text-xs px-2 bg-background border border-input font-sans focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {MONTHS.map((m, i) => (
+              <option key={m} value={i}>{m}</option>
+            ))}
+          </select>
+          <select
+            value={viewYear}
+            onChange={(e) => setViewYear(Number(e.target.value))}
+            className="h-9 rounded-lg text-xs px-2 bg-background border border-input font-sans focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
         </div>
 
         {/* Weekday labels */}
