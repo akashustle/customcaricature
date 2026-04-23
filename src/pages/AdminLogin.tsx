@@ -406,11 +406,11 @@ const AdminLogin = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center px-3 py-4 sm:p-4"
+      className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center px-2.5 py-3 sm:px-4 sm:py-4"
       style={{
         background: `linear-gradient(135deg, ${BRAND.cream} 0%, #FFFFFF 38%, ${BRAND.light}66 72%, ${BRAND.highlight}33 100%)`,
-        paddingTop: "max(env(safe-area-inset-top), 1rem)",
-        paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
+        paddingTop: "max(env(safe-area-inset-top), 0.75rem)",
+        paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
       }}
     >
       <SEOHead title="Admin Login" noindex />
