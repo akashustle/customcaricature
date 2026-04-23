@@ -1058,6 +1058,108 @@
     letter-spacing: -0.01em;
   }
 
+  /* === ADMIN-SCOPED VAULT THEME OVERRIDE ===
+     Forces the entire admin / workshop-admin tree to use the Vault palette
+     (white/black/lime) regardless of what colours individual components hard-coded.
+     This catches ANY leftover violet / indigo / purple / fuchsia / pink Tailwind
+     utilities inside .admin-panel-font scope and remaps them to lime + ink. */
+  .admin-panel-font {
+    /* Background utilities → white surfaces */
+    [class*="bg-violet-"],
+    [class*="bg-indigo-"],
+    [class*="bg-purple-"],
+    [class*="bg-fuchsia-"] {
+      background-color: hsl(82 75% 55%) !important;
+      color: hsl(0 0% 8%) !important;
+    }
+    /* Subtle/tinted variants → lime tint */
+    [class*="bg-violet-50"], [class*="bg-violet-100"],
+    [class*="bg-indigo-50"], [class*="bg-indigo-100"],
+    [class*="bg-purple-50"], [class*="bg-purple-100"],
+    [class*="bg-fuchsia-50"], [class*="bg-fuchsia-100"] {
+      background-color: hsl(82 75% 95%) !important;
+      color: hsl(0 0% 12%) !important;
+    }
+    /* Text utilities → ink + lime accent */
+    [class*="text-violet-"],
+    [class*="text-indigo-"],
+    [class*="text-purple-"],
+    [class*="text-fuchsia-"] {
+      color: hsl(82 65% 32%) !important;
+    }
+    /* Border utilities → lime border */
+    [class*="border-violet-"],
+    [class*="border-indigo-"],
+    [class*="border-purple-"],
+    [class*="border-fuchsia-"] {
+      border-color: hsl(82 75% 60%) !important;
+    }
+    /* Ring focus → lime focus ring */
+    [class*="ring-violet-"],
+    [class*="ring-indigo-"],
+    [class*="ring-purple-"] {
+      --tw-ring-color: hsl(82 75% 55% / 0.4) !important;
+    }
+    /* Gradient stops with from-/via-/to-violet|indigo|purple → fall back to lime+ink gradient */
+    [class*="from-violet-"], [class*="from-indigo-"], [class*="from-purple-"],
+    [class*="from-fuchsia-"], [class*="from-pink-"] {
+      --tw-gradient-from: hsl(82 75% 55%) var(--tw-gradient-from-position) !important;
+      --tw-gradient-to: hsl(82 75% 55% / 0) var(--tw-gradient-to-position);
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+    }
+    [class*="to-violet-"], [class*="to-indigo-"], [class*="to-purple-"],
+    [class*="to-fuchsia-"], [class*="to-pink-"] {
+      --tw-gradient-to: hsl(0 0% 8%) var(--tw-gradient-to-position) !important;
+    }
+    /* Shadow tints → soft black */
+    [class*="shadow-violet-"], [class*="shadow-indigo-"], [class*="shadow-purple-"],
+    [class*="shadow-fuchsia-"] {
+      --tw-shadow-color: hsl(0 0% 0% / 0.15) !important;
+      --tw-shadow: var(--tw-shadow-colored) !important;
+    }
+  }
+  /* Dark mode admin: keep lime accent, dark surfaces */
+  .dark .admin-panel-font {
+    [class*="bg-violet-"], [class*="bg-indigo-"], [class*="bg-purple-"], [class*="bg-fuchsia-"] {
+      background-color: hsl(82 75% 55%) !important;
+      color: hsl(0 0% 8%) !important;
+    }
+    [class*="bg-violet-50"], [class*="bg-violet-100"],
+    [class*="bg-indigo-50"], [class*="bg-indigo-100"],
+    [class*="bg-purple-50"], [class*="bg-purple-100"] {
+      background-color: hsl(82 60% 18%) !important;
+      color: hsl(82 75% 80%) !important;
+    }
+    [class*="text-violet-"], [class*="text-indigo-"], [class*="text-purple-"], [class*="text-fuchsia-"] {
+      color: hsl(82 75% 65%) !important;
+    }
+  }
+
+  /* Smooth + fast admin tab switching */
+  .admin-tab-content {
+    animation: adminTabFade 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  @keyframes adminTabFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Admin canvas background — soft white with subtle lime glow (matches Vault image) */
+  .admin-canvas-vault {
+    background:
+      radial-gradient(circle at 0% 0%, hsl(82 75% 92% / 0.55), transparent 38%),
+      radial-gradient(circle at 100% 100%, hsl(82 75% 92% / 0.45), transparent 38%),
+      hsl(0 0% 100%);
+    min-height: 100vh;
+  }
+  .dark .admin-canvas-vault {
+    background:
+      radial-gradient(circle at 0% 0%, hsl(82 75% 18% / 0.35), transparent 38%),
+      radial-gradient(circle at 100% 100%, hsl(82 75% 18% / 0.30), transparent 38%),
+      hsl(220 14% 8%);
+  }
+
   /* Premium stat card */
   .premium-stat-card {
     position: relative;
