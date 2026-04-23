@@ -127,45 +127,46 @@
   }
 
   .dark {
-    /* Deep rich dark — premium feel */
-    --background: 25 12% 6%;
-    --foreground: 30 15% 90%;
+    /* Deep ink background — FinRank dark card vibe */
+    --background: 220 15% 7%;
+    --foreground: 60 9% 96%;
 
-    --card: 25 10% 10%;
-    --card-foreground: 30 15% 90%;
+    --card: 220 13% 11%;
+    --card-foreground: 60 9% 96%;
 
-    --popover: 25 10% 10%;
-    --popover-foreground: 30 15% 90%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 60 9% 96%;
 
-    --primary: 30 30% 78%;
-    --primary-foreground: 25 15% 8%;
+    /* Lime stays vivid in dark mode */
+    --primary: 82 82% 60%;
+    --primary-foreground: 220 15% 7%;
 
-    --secondary: 25 8% 14%;
-    --secondary-foreground: 30 15% 80%;
+    --secondary: 220 12% 15%;
+    --secondary-foreground: 60 9% 90%;
 
-    --muted: 25 6% 16%;
-    --muted-foreground: 25 8% 55%;
+    --muted: 220 10% 18%;
+    --muted-foreground: 220 8% 60%;
 
-    --accent: 18 45% 60%;
-    --accent-foreground: 30 40% 98%;
+    --accent: 35 55% 65%;
+    --accent-foreground: 220 15% 7%;
 
-    --destructive: 0 55% 50%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 8% 18%;
-    --input: 25 8% 18%;
-    --ring: 30 30% 60%;
+    --border: 220 10% 20%;
+    --input: 220 10% 20%;
+    --ring: 82 82% 55%;
 
     --radius: 1rem;
 
-    --sidebar-background: 25 10% 8%;
-    --sidebar-foreground: 30 15% 80%;
-    --sidebar-primary: 30 30% 78%;
-    --sidebar-primary-foreground: 25 15% 8%;
-    --sidebar-accent: 25 6% 16%;
-    --sidebar-accent-foreground: 30 15% 80%;
-    --sidebar-border: 25 8% 18%;
-    --sidebar-ring: 30 30% 60%;
+    --sidebar-background: 220 14% 9%;
+    --sidebar-foreground: 60 9% 85%;
+    --sidebar-primary: 82 82% 60%;
+    --sidebar-primary-foreground: 220 15% 7%;
+    --sidebar-accent: 220 10% 18%;
+    --sidebar-accent-foreground: 60 9% 90%;
+    --sidebar-border: 220 10% 20%;
+    --sidebar-ring: 82 82% 55%;
 
     --gold-50: 35 20% 12%;
     --gold-100: 35 18% 16%;
@@ -178,35 +179,37 @@
     --gold-800: 35 32% 80%;
     --gold-900: 35 28% 88%;
 
-    --chart-1: 18 45% 60%;
-    --chart-2: 152 45% 48%;
-    --chart-3: 38 75% 55%;
-    --chart-4: 210 55% 55%;
-    --chart-5: 280 40% 58%;
+    --chart-1: 82 82% 60%;
+    --chart-2: 60 9% 85%;
+    --chart-3: 35 55% 65%;
+    --chart-4: 210 90% 60%;
+    --chart-5: 280 60% 65%;
 
-    --success: 152 45% 45%;
-    --warning: 38 75% 55%;
-    --info: 210 55% 55%;
+    --success: 82 78% 50%;
+    --warning: 38 92% 60%;
+    --info: 210 90% 60%;
 
-    --soft-green: 130 25% 18%;
+    --soft-green: 82 40% 18%;
     --soft-blue: 220 25% 18%;
     --soft-pink: 345 25% 18%;
-    --warm-peach: 20 35% 18%;
-    --light-gold: 40 35% 42%;
+    --warm-peach: 35 30% 18%;
+    --light-gold: 40 45% 50%;
 
-    --brand-cream: 30 12% 12%;
-    --brand-gold: 35 42% 48%;
+    --brand-cream: 220 13% 12%;
+    --brand-gold: 35 55% 55%;
     --brand-terracotta: 18 45% 55%;
     --brand-brown: 25 25% 72%;
-    --brand-warm: 30 8% 14%;
+    --brand-warm: 220 10% 14%;
+    --brand-lime: 82 82% 60%;
+    --brand-ink: 60 9% 96%;
 
-    --admin-bg: 25 12% 6%;
-    --admin-surface: 25 10% 10%;
-    --admin-foreground: 30 15% 90%;
-    --admin-primary: 30 30% 78%;
-    --admin-secondary: 35 42% 48%;
-    --admin-highlight: 18 45% 55%;
-    --admin-border: 25 8% 18%;
+    --admin-bg: 220 15% 7%;
+    --admin-surface: 220 13% 11%;
+    --admin-foreground: 60 9% 96%;
+    --admin-primary: 82 82% 60%;
+    --admin-secondary: 35 55% 55%;
+    --admin-highlight: 60 9% 90%;
+    --admin-border: 220 10% 20%;
     --admin-shadow: 0 0% 0%;
   }
 }
