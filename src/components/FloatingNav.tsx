@@ -47,8 +47,9 @@ const FloatingNav = () => {
       >
         <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Creative Caricature Club home">
           <img src="/logo.png" alt="CCC" width={32} height={32} className="w-8 h-8 rounded-lg" />
-          <span className="font-bold text-foreground text-base sm:text-lg tracking-tight whitespace-nowrap">
-            Creative <span className="text-gradient-violet">Caricature Club</span>
+          <span className="font-bold text-base sm:text-lg tracking-tight whitespace-nowrap">
+            <span className="text-gradient-violet">Creative Caricature Club</span>
+            <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
           </span>
         </Link>
 

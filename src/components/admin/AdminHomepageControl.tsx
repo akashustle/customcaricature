@@ -726,6 +726,14 @@ const AdminHomepageControl = () => {
                         {cols.map((c, ci) => (
                           <div key={ci} className="rounded-lg border border-border/50 p-3 bg-muted/20">
                             <div className="flex items-center gap-2 mb-2">
+                              <div className="flex flex-col">
+                                <Button size="icon" variant="ghost" className="h-5 w-5" disabled={ci === 0} onClick={() => {
+                                  const n = [...cols];[n[ci-1], n[ci]] = [n[ci], n[ci-1]]; setCols(n);
+                                }}><ChevronUp className="w-3 h-3" /></Button>
+                                <Button size="icon" variant="ghost" className="h-5 w-5" disabled={ci === cols.length-1} onClick={() => {
+                                  const n = [...cols];[n[ci+1], n[ci]] = [n[ci], n[ci+1]]; setCols(n);
+                                }}><ChevronDown className="w-3 h-3" /></Button>
+                              </div>
                               <Input className="flex-1" value={c.title || ""} onChange={e => {
                                 const n = [...cols]; n[ci] = { ...n[ci], title: e.target.value }; setCols(n);
                               }} placeholder="Column title" />

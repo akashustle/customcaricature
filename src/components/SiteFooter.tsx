@@ -89,9 +89,10 @@ const SiteFooter = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-2 mb-3">
             <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
-            <div className="text-lg font-extrabold text-foreground tracking-tight leading-tight">
-              Creative<br />
-              <span className="text-gradient-violet">Caricature Club™</span>
+            <div className="text-lg font-extrabold tracking-tight leading-tight">
+              <span className="text-gradient-violet">Creative</span><br />
+              <span className="text-gradient-violet">Caricature Club</span>
+              <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
             </div>
           </div>
           <p className="text-sm text-foreground/70 mt-3 max-w-xl">{f.brand_tagline}</p>
