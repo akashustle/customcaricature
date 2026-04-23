@@ -98,6 +98,7 @@ const NAV_SECTIONS = [
       { id: "hp-reviews", icon: Star, label: "HP Reviews" },
       { id: "brands", icon: Shield, label: "Brands" },
       { id: "pages", icon: FileQuestion, label: "Pages" },
+      { id: "page-content", icon: Type, label: "Page Content (CMS)" },
       { id: "faqs", icon: FileQuestion, label: "FAQs" },
       { id: "files", icon: Layers, label: "Files" },
       { id: "seo", icon: TrendingUp, label: "SEO" },
