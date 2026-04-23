@@ -190,10 +190,10 @@ const Index = () => {
   const hero = content.homepage_hero || {};
   const sections = content.homepage_sections || {};
   const sectionOrder: string[] = sections._order || [
-    "instant_quote", "social_proof", "video", "enquiry_funnel", "portfolio_gallery",
-    "what_you_get", "how_it_works", "scroll_events", "services", "use_cases",
-    "styles", "why_us", "reviews", "trusted_brands", "event_gallery",
-    "caricature_gallery", "before_after", "smart_help"
+    "video", "event_gallery", "instant_quote", "social_proof", "trusted_brands",
+    "use_cases", "services", "enquiry_funnel", "portfolio_gallery", "scroll_events",
+    "why_us", "reviews", "caricature_gallery", "before_after", "smart_help",
+    "what_you_get", "how_it_works", "styles"
   ];
   const isSectionVisible = (id: string) => sections[id]?.visible !== false;
   const getSectionMessage = (id: string) => sections[id]?.message || "";
@@ -355,20 +355,16 @@ const Index = () => {
               )}
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}
                 className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-6">
-                {settings.hide_hero_order_btn?.enabled !== true && settings.custom_caricature_visible?.enabled !== false && (
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Button size="lg" onClick={() => {
-                      navigate(hero.primary_cta_link || (user ? "/order" : "/login"));
-                    }} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
-                      {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </motion.div>
-                )}
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Button size="lg" variant={settings.hide_hero_order_btn?.enabled === true ? "default" : "outline"} onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className={`rounded-full font-body font-semibold text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto ${settings.hide_hero_order_btn?.enabled === true ? "shadow-lg shadow-primary/20" : "border-border hover:bg-card"}`}>
-                    <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Book for Event"}
+                <div>
+                  <Button size="lg" onClick={() => navigate("/book-event")} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto bg-primary hover:bg-primary/90">
+                    {hero.primary_cta || "Book Now"} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                </motion.div>
+                </div>
+                <div>
+                  <Button size="lg" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/enquiry")} className="rounded-full font-body font-semibold text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto border-border hover:bg-card">
+                    <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Get Free Quote"}
+                  </Button>
+                </div>
               </motion.div>
               {/* Trust badges */}
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.6 }}
@@ -555,27 +551,23 @@ const Index = () => {
                     <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">Our Services</h2>
                     <p className="text-muted-foreground font-body max-w-md mx-auto">From personal gifts to grand events, we have you covered</p>
                   </motion.div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-5xl mx-auto">
                     {[
-                      { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event.", action: handleEventClick, cta: "Book for Event", disabled: false },
-                      { icon: Palette, title: "Custom Caricature", desc: "Currently we have paused this service. We'll be back soon!", action: () => {}, cta: "Paused — Back Soon", disabled: true },
-                      { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now", disabled: false },
-                      { icon: ShoppingBag, title: "Merchandise Store", desc: "Caricature-themed apparel and custom printed merchandise.", action: () => {}, cta: "Coming Soon", disabled: true },
-                    ].map((service, i) => (
-                      <motion.div key={service.title} initial={{ opacity: 0, scale: 0.85, rotateY: -20 }} whileInView={{ opacity: 1, scale: 1, rotateY: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.5, type: "spring" }} whileHover={{ scale: 1.04, rotateY: 5 }} className="perspective-1000">
-                        <Card className="card-3d h-full flex flex-col">
-                          <CardContent className="pt-8 pb-6 px-5 flex flex-col flex-1">
-                            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-5">
-                              <service.icon className="w-7 h-7 text-primary" />
-                            </div>
-                            <h3 className="font-calligraphy text-xl font-semibold mb-3 text-foreground">{service.title}</h3>
-                            <p className="text-sm text-muted-foreground font-body leading-relaxed flex-1">{service.desc}</p>
-                            <Button variant={service.disabled ? "secondary" : "outline"} className="mt-5 rounded-full font-body w-full" onClick={service.action} disabled={service.disabled}>
-                              {service.cta} {!service.disabled && <ArrowRight className="w-4 h-4 ml-1" />}
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
+                      { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event.", action: handleEventClick, cta: "Book for Event", disabled: false, gradient: "from-primary/15 to-accent/10", iconBg: "bg-primary text-primary-foreground" },
+                      { icon: Palette, title: "Custom Caricature", desc: "Currently we have paused this service. We'll be back soon!", action: () => {}, cta: "Paused — Back Soon", disabled: true, gradient: "from-muted/40 to-muted/10", iconBg: "bg-muted text-muted-foreground" },
+                      { icon: ShoppingBag, title: "Merchandise Store", desc: "Caricature-themed apparel and custom printed merchandise.", action: () => {}, cta: "Coming Soon", disabled: true, gradient: "from-muted/40 to-muted/10", iconBg: "bg-muted text-muted-foreground" },
+                    ].map((service) => (
+                      <div key={service.title} className={`relative rounded-3xl p-6 bg-gradient-to-br ${service.gradient} border-2 border-border/40 shadow-[0_8px_30px_-8px_hsl(var(--foreground)/0.15)] hover:shadow-[0_16px_40px_-8px_hsl(var(--primary)/0.25)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden`}>
+                        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
+                        <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${service.iconBg} shadow-lg`}>
+                          <service.icon className="w-8 h-8" />
+                        </div>
+                        <h3 className="font-calligraphy text-2xl font-bold mb-2 text-foreground">{service.title}</h3>
+                        <p className="text-sm text-muted-foreground font-body leading-relaxed flex-1 mb-5">{service.desc}</p>
+                        <Button variant={service.disabled ? "secondary" : "default"} className="rounded-full font-body w-full font-semibold" onClick={service.action} disabled={service.disabled}>
+                          {service.cta} {!service.disabled && <ArrowRight className="w-4 h-4 ml-1" />}
+                        </Button>
+                      </div>
                     ))}
                   </div>
                 </div>
