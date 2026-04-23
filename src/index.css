@@ -714,17 +714,17 @@
       0 8px 32px hsl(0 0% 0% / 0.2);
   }
 
-  /* Sidebar nav item states */
+  /* Sidebar nav item states — Vault lime/black active pill */
   .admin-sidebar-item-active {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.18), hsl(var(--primary) / 0.08));
-    color: hsl(var(--foreground));
+    background: hsl(0 0% 8%);
+    color: hsl(0 0% 100%);
     font-weight: 600;
-    box-shadow: 0 1px 3px hsl(var(--primary) / 0.12), inset 0 1px 0 hsl(0 0% 100% / 0.6);
+    box-shadow: 0 4px 12px hsl(0 0% 0% / 0.15), inset 0 1px 0 hsl(0 0% 100% / 0.08);
   }
   .dark .admin-sidebar-item-active {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.1));
-    color: hsl(var(--foreground));
-    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.2);
+    background: hsl(82 75% 55%);
+    color: hsl(0 0% 8%);
+    box-shadow: 0 4px 14px hsl(82 75% 45% / 0.4);
   }
   .admin-sidebar-item-idle {
     color: hsl(var(--muted-foreground));
@@ -741,11 +741,15 @@
     background: hsl(var(--muted) / 0.5);
   }
 
-  /* Sidebar icon states */
+  /* Sidebar icon states — lime accent on active */
   .admin-sidebar-icon-active {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(82 70% 45%));
-    color: hsl(var(--primary-foreground));
-    box-shadow: 0 2px 6px hsl(var(--primary) / 0.35);
+    background: hsl(82 75% 55%);
+    color: hsl(0 0% 8%);
+    box-shadow: 0 3px 10px hsl(82 75% 45% / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.3);
+  }
+  .dark .admin-sidebar-icon-active {
+    background: hsl(0 0% 8%);
+    color: hsl(82 75% 55%);
   }
   .admin-sidebar-icon-idle {
     background: hsl(var(--secondary));
