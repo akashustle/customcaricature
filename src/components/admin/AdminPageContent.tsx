@@ -196,6 +196,36 @@ const AdminPageContent = () => {
           </CardContent></Card>
         </TabsContent>
 
+        {/* CARICATURE BUDGETING */}
+        <TabsContent value="cb" className="space-y-4">
+          <Card><CardHeader><CardTitle className="text-base">Pricing Calculator Page (/caricature-budgeting)</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input placeholder="Header title" value={cb.header_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, header_title: e.target.value })} />
+            <Input placeholder="Phase select title" value={cb.phase_select_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, phase_select_title: e.target.value })} />
+            <Input className="md:col-span-2" placeholder="Phase select subtitle" value={cb.phase_select_subtitle || ""} onChange={e => update("page_caricature_budgeting", { ...cb, phase_select_subtitle: e.target.value })} />
+            <Input placeholder="Event card title" value={cb.event_card_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_title: e.target.value })} />
+            <Input placeholder="Event card description" value={cb.event_card_desc || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_desc: e.target.value })} />
+            <Input placeholder="Event card badge (e.g. Starting ₹40,000)" value={cb.event_card_badge || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_badge: e.target.value })} />
+            <Input placeholder="Caricature card title" value={cb.caric_card_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_card_title: e.target.value })} />
+            <Input placeholder="Caricature card description" value={cb.caric_card_desc || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_card_desc: e.target.value })} />
+            <Input placeholder="Event calculator title" value={cb.event_calc_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_calc_title: e.target.value })} />
+            <Input placeholder="Event CTA button" value={cb.event_cta_label || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_cta_label: e.target.value })} />
+            <Input placeholder="Event book button label" value={cb.event_book_label || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_book_label: e.target.value })} />
+            <Input placeholder="Caricature calculator title" value={cb.caric_calc_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_calc_title: e.target.value })} />
+            <Input placeholder="Custom caric off message" value={cb.caric_off_message || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_off_message: e.target.value })} />
+            <Input placeholder="Custom caric off subtext" value={cb.caric_off_subtext || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_off_subtext: e.target.value })} />
+          </CardContent></Card>
+
+          <Card><CardHeader><CardTitle className="text-base">Intro Animation Texts (5 lines)</CardTitle></CardHeader><CardContent className="space-y-2">
+            {(cb.intro_texts || []).map((t: string, i: number) => (
+              <div key={i} className="flex gap-2">
+                <Input value={t} onChange={e => { const n = [...(cb.intro_texts || [])]; n[i] = e.target.value; update("page_caricature_budgeting", { ...cb, intro_texts: n }); }} />
+                <Button variant="ghost" size="icon" onClick={() => update("page_caricature_budgeting", { ...cb, intro_texts: (cb.intro_texts || []).filter((_: any, j: number) => j !== i) })}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" onClick={() => update("page_caricature_budgeting", { ...cb, intro_texts: [...(cb.intro_texts || []), ""] })}><Plus className="w-3 h-3 mr-1" /> Add Line</Button>
+          </CardContent></Card>
+        </TabsContent>
+
         {/* POLICIES */}
         <TabsContent value="policies" className="space-y-4">
           <p className="text-xs text-muted-foreground">All 9 legal/policy pages now load from the database. Edit the title and content here. Lines starting with a number+dot (e.g. "1. Eligibility") render as headings on the page. Use HTML for links (&lt;a href="..."&gt;).</p>
