@@ -2141,6 +2141,62 @@ export type Database = {
         }
         Relationships: []
       }
+      event_reschedule_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          event_id: string
+          id: string
+          reason: string | null
+          requested_date: string
+          requested_end_time: string
+          requested_start_time: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          reason?: string | null
+          requested_date: string
+          requested_end_time: string
+          requested_start_time: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          reason?: string | null
+          requested_date?: string
+          requested_end_time?: string
+          requested_start_time?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_reschedule_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_fields: {
         Row: {
           created_at: string
@@ -3264,6 +3320,7 @@ export type Database = {
           email: string
           email_verified: boolean | null
           event_booking_allowed: boolean
+          event_edit_allowed: boolean
           full_name: string
           gateway_charges_enabled: boolean
           gender: string | null
@@ -3295,6 +3352,7 @@ export type Database = {
           email: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean
+          event_edit_allowed?: boolean
           full_name: string
           gateway_charges_enabled?: boolean
           gender?: string | null
@@ -3326,6 +3384,7 @@ export type Database = {
           email?: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean
+          event_edit_allowed?: boolean
           full_name?: string
           gateway_charges_enabled?: boolean
           gender?: string | null
