@@ -145,6 +145,89 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       if (error) return { ok: false, error: error.message };
       return { ok: true, id: args.id, status: args.status };
     }
+    if (name === "delete_user_by_email") {
+      const { data: prof } = await supabase.from("profiles").select("user_id").eq("email", args.email).maybeSingle();
+      if (!prof) return { ok: false, error: "user not found" };
+      await supabase.from("profiles").delete().eq("user_id", prof.user_id);
+      try { await supabase.auth.admin.deleteUser(prof.user_id); } catch {}
+      return { ok: true, deleted: args.email };
+    }
+    if (name === "add_event_manually") {
+      const row: any = {
+        client_name: args.client_name, client_mobile: args.client_mobile, client_email: args.client_email,
+        event_date: args.event_date, event_type: args.event_type, city: args.city, state: args.state,
+        total_price: args.total_price, advance_amount: args.advance_amount,
+        venue_name: args.venue_name || "TBD", full_address: args.full_address || "TBD", pincode: args.pincode || "000000",
+        event_start_time: args.event_start_time || "18:00", event_end_time: args.event_end_time || "22:00",
+        country: "India", source: "admin_ai", status: "confirmed",
+      };
+      const { data, error } = await supabase.from("event_bookings").insert(row).select("id").maybeSingle();
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: data?.id };
+    }
+    if (name === "list_recent_events") {
+      let q: any = supabase.from("event_bookings").select("id, client_name, event_date, city, total_price, status").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, events: data };
+    }
+    if (name === "list_recent_orders") {
+      let q: any = supabase.from("orders").select("id, customer_name, amount, status, payment_status, created_at").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, orders: data };
+    }
+    if (name === "update_order_status") {
+      const { error } = await supabase.from("orders").update({ status: args.status, updated_at: new Date().toISOString() }).eq("id", args.order_id);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: args.order_id, status: args.status };
+    }
+    if (name === "recent_signups") {
+      let q: any = supabase.from("profiles").select("user_id, full_name, email, mobile, created_at").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, signups: data };
+    }
+    if (name === "create_coupon") {
+      const { data, error } = await supabase.from("coupons").insert({
+        code: args.code.toUpperCase(), discount_type: args.discount_type, discount_value: args.discount_value,
+        max_uses: args.max_uses || null, valid_until: args.valid_until || null, is_active: true,
+      }).select("id").maybeSingle();
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: data?.id, code: args.code.toUpperCase() };
+    }
+    if (name === "top_cities") {
+      const table = args.metric === "events" ? "event_bookings" : "enquiries";
+      const { data } = await supabase.from(table).select("city").limit(2000);
+      const counts: Record<string, number> = {};
+      (data || []).forEach((r: any) => { if (r.city) counts[r.city] = (counts[r.city] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, args.limit || 10);
+      return { ok: true, metric: args.metric, top: sorted.map(([city, count]) => ({ city, count })) };
+    }
+    if (name === "generate_report") {
+      const since = new Date(Date.now() - (args.since_days || 30) * 86400000).toISOString();
+      let md = "";
+      if (args.kind === "revenue") {
+        const { data: orders } = await supabase.from("orders").select("amount, payment_status, created_at").gte("created_at", since);
+        const { data: events } = await supabase.from("event_bookings").select("advance_amount, negotiated_advance, payment_status, created_at").gte("created_at", since);
+        const orderRev = (orders || []).filter((o: any) => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.amount || 0), 0);
+        const eventRev = (events || []).filter((e: any) => ["paid", "fully_paid", "partial_paid"].includes(e.payment_status)).reduce((s: number, e: any) => s + (e.negotiated_advance || e.advance_amount || 0), 0);
+        md = `**Revenue (last ${args.since_days || 30} days)**\n\n| Source | Amount |\n|---|---|\n| Caricature Orders | ₹${orderRev.toLocaleString("en-IN")} |\n| Events | ₹${eventRev.toLocaleString("en-IN")} |\n| **Total** | **₹${(orderRev + eventRev).toLocaleString("en-IN")}** |`;
+      } else if (args.kind === "events") {
+        const { data } = await supabase.from("event_bookings").select("client_name, event_date, city, total_price, status").gte("created_at", since).order("event_date", { ascending: false }).limit(20);
+        md = `**Recent Events**\n\n| Client | Date | City | Total | Status |\n|---|---|---|---|---|\n` + (data || []).map((e: any) => `| ${e.client_name} | ${e.event_date} | ${e.city} | ₹${(e.total_price || 0).toLocaleString("en-IN")} | ${e.status} |`).join("\n");
+      } else if (args.kind === "orders") {
+        const { data } = await supabase.from("orders").select("customer_name, amount, status, payment_status, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(20);
+        md = `**Recent Orders**\n\n| Customer | Amount | Status | Payment |\n|---|---|---|---|\n` + (data || []).map((o: any) => `| ${o.customer_name} | ₹${(o.amount || 0).toLocaleString("en-IN")} | ${o.status} | ${o.payment_status} |`).join("\n");
+      } else if (args.kind === "enquiries") {
+        const { data } = await supabase.from("enquiries").select("name, mobile, city, status, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(20);
+        md = `**Recent Enquiries**\n\n| Name | Mobile | City | Status |\n|---|---|---|---|\n` + (data || []).map((e: any) => `| ${e.name} | ${e.mobile} | ${e.city || "-"} | ${e.status} |`).join("\n");
+      }
+      return { ok: true, kind: args.kind, markdown: md };
+    }
     return { ok: false, error: `unknown tool ${name}` };
   } catch (e: any) {
     return { ok: false, error: e.message || String(e) };
