@@ -2032,11 +2032,26 @@ body {
 /* ================================================
    Mobile scroll safety — keep body scrollable
    ================================================ */
-html, body { max-width: 100vw; overflow-x: hidden; }
-html, body, #root { -webkit-overflow-scrolling: touch; overscroll-behavior-y: auto; }
+html, body {
+  max-width: 100vw;
+  overflow-x: clip;          /* clip is safer than hidden — does not create scroll-container */
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#root { min-height: 100dvh; }
+
 @media (max-width: 768px) {
-  /* Ensure no descendant container traps vertical scroll */
-  body, #root { min-height: 100dvh; touch-action: pan-y; }
+  html, body, #root {
+    touch-action: pan-y;
+    overflow-y: visible;     /* never trap vertical scroll on mobile */
+  }
+  /* Sticky/fixed elements must never block touch on the rest of the page */
+  [data-sticky-cta], .sticky-cta-wrap { pointer-events: none; }
+  [data-sticky-cta] > *, .sticky-cta-wrap > * { pointer-events: auto; }
+  /* Common offenders that accidentally trap scroll */
+  main, section, footer { overflow: visible !important; }
+  /* But preserve intentionally-clipped marquees/cards */
+  .marquee-mask, [data-keep-overflow], .keep-overflow { overflow: hidden !important; }
 }
 
 /* ================================================
@@ -2059,5 +2074,23 @@ html, body, #root { -webkit-overflow-scrolling: touch; overscroll-behavior-y: au
 .dark .money-neg, .dark .amount-negative, .dark [data-amount="negative"] {
   color: hsl(0 75% 65%);
 }
+
+/* Auto-coloring helper: any inline ₹ figure inside a table cell, badge,
+   list-item or paragraph that is wrapped in <span class="auto-money">…</span>
+   inherits the green/red treatment. Negative amounts must use class="money-neg". */
+.auto-money,
+td:has(> :only-child[data-rupee="positive"]),
+.badge[data-rupee="positive"] {
+  color: hsl(142 70% 38%);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.dark .auto-money { color: hsl(142 65% 55%); }
+td:has(> :only-child[data-rupee="negative"]),
+.badge[data-rupee="negative"] {
+  color: hsl(0 75% 50%);
+  font-weight: 700;
+}
+
 
 

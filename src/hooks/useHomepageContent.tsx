@@ -11,7 +11,8 @@ const KEYS = [
   "homepage_hero", "homepage_video", "homepage_social_proof",
   "homepage_what_you_get", "homepage_why_us", "homepage_use_cases",
   "homepage_smart_help", "homepage_sticky_cta", "homepage_urgency",
-  "homepage_instant_quote", "homepage_sections", "homepage_funnel_config"
+  "homepage_instant_quote", "homepage_sections", "homepage_funnel_config",
+  "homepage_footer", "homepage_section_order"
 ];
 
 const fetchContentOnce = async (): Promise<Record<string, any>> => {

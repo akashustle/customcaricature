@@ -365,8 +365,15 @@ const FAQs = () => {
 
 /* --------------------------------- Footer -------------------------------- */
 
-const Footer = () => {
-  const cols = [
+const DEFAULT_FOOTER = {
+  brand_title: "Creative Caricature Club™",
+  brand_tagline: "India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.",
+  copyright: `© ${new Date().getFullYear()} Creative Caricature Club. All rights reserved.`,
+  tagline_right: "Made with ❤️ for live events.",
+  credit_prefix: "Designed and prompted by",
+  credit_name: "Akash",
+  credit_instagram_handle: "akashustle",
+  columns: [
     {
       title: "Services",
       links: [
@@ -401,7 +408,15 @@ const Footer = () => {
         { label: "Disclaimer", href: "/disclaimer" },
       ],
     },
-  ];
+  ],
+};
+
+const Footer = ({ override }: { override?: any }) => {
+  const f = { ...DEFAULT_FOOTER, ...(override || {}) };
+  const cols: { title: string; links: { label: string; href: string }[] }[] =
+    Array.isArray(f.columns) && f.columns.length ? f.columns : DEFAULT_FOOTER.columns;
+  const igHandle = (f.credit_instagram_handle || "akashustle").replace(/^@/, "");
+  const instaUrl = `https://instagram.com/${igHandle}`;
   return (
     <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
       <div className="mx-auto max-w-6xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10">
@@ -413,16 +428,14 @@ const Footer = () => {
                 Creative<br /><span className="text-gradient-violet">Caricature Club™</span>
               </div>
             </div>
-            <p className="text-sm text-foreground/70 mt-3">
-              India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.
-            </p>
+            <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
           </div>
           {cols.map((c) => (
             <div key={c.title}>
               <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">{c.title}</div>
               <ul className="space-y-2">
                 {c.links.map((l) => (
-                  <li key={l.href}>
+                  <li key={l.href + l.label}>
                     <a href={l.href} className="text-sm text-foreground/75 hover:text-primary transition-colors">{l.label}</a>
                   </li>
                 ))}
@@ -431,8 +444,21 @@ const Footer = () => {
           ))}
         </div>
         <div className="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Creative Caricature Club. All rights reserved.</p>
-          <p>Made with ❤️ for live events.</p>
+          <p>{f.copyright}</p>
+          <p className="flex items-center gap-1.5">
+            <span>{f.tagline_right}</span>
+            <span className="opacity-50">·</span>
+            <span>{f.credit_prefix}</span>
+            <a
+              href={instaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline"
+              aria-label={`${f.credit_name} on Instagram`}
+            >
+              {f.credit_name}
+            </a>
+          </p>
         </div>
       </div>
     </footer>
@@ -524,54 +550,45 @@ const Index = () => {
       <FloatingNav />
 
       <main>
-        {/* 1. Hero with right-to-left continuous marquee */}
-        <Hero onBook={onBook} onQuote={onQuote} images={heroImages} />
-
-        {/* 2. Stats — like reference image */}
-        <Stats items={stats} />
-
-        {/* 3. Video — admin editable, hidden if disabled */}
-        {(content as any).homepage_video?.enabled && (
-          <section id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-            <div className="mx-auto max-w-6xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
-              <div className="text-center mb-7 sm:mb-10">
-                <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
-                  See the <span className="text-gradient-violet">experience live</span>
-                </h2>
-              </div>
-              <HomepageVideo config={(content as any).homepage_video} />
-            </div>
-          </section>
-        )}
-
-        {/* 4. Event Gallery preview + view-all */}
-        <EventGallery images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />
-
-        {/* 5. Trusted Brands (DB-driven, includes SBI etc.) */}
-        <section id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
-          <div className="mx-auto max-w-6xl rounded-3xl card-soft-white overflow-hidden">
-            <HomepageTrustedBrands />
-          </div>
-        </section>
-
-        {/* 6. Services */}
-        <Services onBook={onBook} />
-
-        {/* 7. How it starts */}
-        <HowItStarts onBook={onBook} images={eventGallery} />
-
-        {/* 8. Why us */}
-        <WhyUnique />
-
-        {/* 9. Reviews */}
-        <Reviews />
-
-        {/* 10. FAQs */}
-        <FAQs />
+        {(() => {
+          const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
+            ? (content as any).homepage_section_order.order
+            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
+          const sections: Record<string, React.ReactNode> = {
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} />,
+            stats: <Stats key="stats" items={stats} />,
+            video: (content as any).homepage_video?.enabled ? (
+              <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
+                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
+                  <div className="text-center mb-7 sm:mb-10">
+                    <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+                      See the <span className="text-gradient-violet">experience live</span>
+                    </h2>
+                  </div>
+                  <HomepageVideo config={(content as any).homepage_video} />
+                </div>
+              </section>
+            ) : null,
+            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />,
+            clients: (
+              <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
+                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white overflow-hidden">
+                  <HomepageTrustedBrands />
+                </div>
+              </section>
+            ),
+            services: <Services key="services" onBook={onBook} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} />,
+            why: <WhyUnique key="why" />,
+            reviews: <Reviews key="reviews" />,
+            faqs: <FAQs key="faqs" />,
+          };
+          return order.map(id => sections[id]).filter(Boolean);
+        })()}
       </main>
 
-      <Footer />
+      <Footer override={(content as any).homepage_footer} />
 
       {(settings as any).homepage_sticky_cta_visible?.enabled && (
         <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />
