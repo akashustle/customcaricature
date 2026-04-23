@@ -2043,6 +2043,63 @@ export type Database = {
           },
         ]
       }
+      event_drafts: {
+        Row: {
+          city: string | null
+          created_at: string
+          district: string | null
+          end_time: string | null
+          event_date: string | null
+          event_type: string | null
+          full_address: string | null
+          hours: number | null
+          id: string
+          notes: string | null
+          pincode: string | null
+          start_time: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+          venue_name: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          district?: string | null
+          end_time?: string | null
+          event_date?: string | null
+          event_type?: string | null
+          full_address?: string | null
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          pincode?: string | null
+          start_time?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+          venue_name?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          district?: string | null
+          end_time?: string | null
+          event_date?: string | null
+          event_type?: string | null
+          full_address?: string | null
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          pincode?: string | null
+          start_time?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+          venue_name?: string | null
+        }
+        Relationships: []
+      }
       event_flight_tickets: {
         Row: {
           created_at: string
