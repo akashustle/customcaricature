@@ -150,7 +150,7 @@ const AdminDashboardWidgets = () => {
                     )}
                   </div>
                   <div>
-                    <p className={`text-2xl font-bold tracking-tight admin-panel-font ${isActive ? "vault-figure-neutral" : figureClass}`}>
+                    <p className={`text-2xl font-bold tracking-tight admin-panel-font ${figureClass}`}>
                       {w.value}
                     </p>
                     <p className="text-[10px] mt-1 font-bold uppercase tracking-[0.12em]" style={{ color: isActive ? "hsl(0 0% 18%)" : isDanger ? "hsl(0 60% 40%)" : "hsl(0 0% 50%)" }}>
