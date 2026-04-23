@@ -14,15 +14,44 @@ import PricingReveal from "@/components/PricingReveal";
 import UrgencyTimer from "@/components/UrgencyTimer";
 import { ArrowLeft, Users, MapPin, Palette, Clock, Sparkles, Calendar, MessageCircle, Phone, ArrowRight, Calculator, Volume2, AlertTriangle } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { playCurrencySound, playEnterSound, playCoinDrop, playCashRegister } from "@/lib/sounds";
 
-const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://www.instagram.com/creativecaricatureclub";
+const DEFAULT_WHATSAPP = "918369594271";
+const DEFAULT_INSTAGRAM = "https://www.instagram.com/creativecaricatureclub";
+
+const DEFAULT_CMS = {
+  header_title: "Caricature Budgeting",
+  intro_texts: [
+    "🎨 Welcome to Creative Caricature Club™",
+    "💰 Let's find the perfect pricing for you...",
+    "📊 Calculating best rates...",
+    "🎯 Almost there...",
+    "✨ Your personalized pricing is ready!",
+  ],
+  phase_select_title: "What are you looking for?",
+  phase_select_subtitle: "Choose to see personalized pricing",
+  event_card_title: "Live Event Booking",
+  event_card_desc: "Live caricature artist at your event",
+  event_card_badge: "Starting ₹40,000",
+  caric_card_title: "Custom Caricature",
+  caric_card_desc: "Personalized caricature artwork",
+  event_calc_title: "🎪 Event Pricing Calculator",
+  event_cta_label: "Get My Pricing",
+  event_book_label: "Book Your Event Now",
+  caric_calc_title: "🖼️ Custom Caricature Calculator",
+  caric_off_message: "Custom caricature ordering is temporarily paused 🎨",
+  caric_off_subtext: "We'll be back soon — stay tuned!",
+};
 
 const CaricatureBudgeting = () => {
   const navigate = useNavigate();
   const { types, getPrice } = usePricing();
   const { settings: siteSettings } = useSiteSettings();
+  const cms = useSiteSetting<typeof DEFAULT_CMS>("page_caricature_budgeting", DEFAULT_CMS);
+  const contact = useSiteSetting<any>("global_contact", {});
+  const WHATSAPP_NUMBER = contact?.whatsapp_number || DEFAULT_WHATSAPP;
+  const INSTAGRAM_URL = contact?.instagram_url || DEFAULT_INSTAGRAM;
   const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [phase, setPhase] = useState<"intro" | "event" | "caricature">("intro");
   const [introComplete, setIntroComplete] = useState(false);
@@ -32,7 +61,7 @@ const CaricatureBudgeting = () => {
   // Admin pricing sets for caricature
   const [pricingSets, setPricingSets] = useState<any[]>([]);
   const [selectedPricingSet, setSelectedPricingSet] = useState<string>("");
-  const [showCaricDetails, setShowCaricDetails] = useState(false);
+  const [, setShowCaricDetails] = useState(false);
 
   // Event calculator state
   const [guestCount, setGuestCount] = useState("");
@@ -45,13 +74,7 @@ const CaricatureBudgeting = () => {
   const [faceCount, setFaceCount] = useState(1);
   const [showCaricResult, setShowCaricResult] = useState(false);
 
-  const introTexts = [
-    "🎨 Welcome to Creative Caricature Club™",
-    "💰 Let's find the perfect pricing for you...",
-    "📊 Calculating best rates...",
-    "🎯 Almost there...",
-    "✨ Your personalized pricing is ready!"
-  ];
+  const introTexts = cms.intro_texts || DEFAULT_CMS.intro_texts;
 
   // Play enter sound on mount
   useEffect(() => {
@@ -140,7 +163,7 @@ const CaricatureBudgeting = () => {
         <div className="container mx-auto px-4 py-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}><ArrowLeft className="w-5 h-5" /></Button>
           <Calculator className="w-5 h-5 text-primary" />
-          <h1 className="font-display text-xl font-bold">Caricature Budgeting</h1>
+          <h1 className="font-display text-xl font-bold">{cms.header_title}</h1>
           <Volume2 className="w-4 h-4 text-muted-foreground ml-auto" />
         </div>
       </div>
@@ -183,16 +206,16 @@ const CaricatureBudgeting = () => {
       {/* Phase Selection */}
       {(phase === "intro" && introComplete) && (
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-12">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-2">What are you looking for?</h2>
-          <p className="text-muted-foreground text-center mb-8 text-sm">Choose to see personalized pricing</p>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-center mb-2">{cms.phase_select_title}</h2>
+          <p className="text-muted-foreground text-center mb-8 text-sm">{cms.phase_select_subtitle}</p>
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
               <Card className="cursor-pointer border-2 hover:border-primary transition-all" onClick={() => setPhase("event")}>
                 <CardContent className="p-8 text-center space-y-3">
                   <Calendar className="w-12 h-12 mx-auto text-primary" />
-                  <h3 className="font-display text-xl font-bold">Live Event Booking</h3>
-                  <p className="text-sm text-muted-foreground">Live caricature artist at your event</p>
-                  <Badge className="bg-primary/10 text-primary">Starting ₹40,000</Badge>
+                  <h3 className="font-display text-xl font-bold">{cms.event_card_title}</h3>
+                  <p className="text-sm text-muted-foreground">{cms.event_card_desc}</p>
+                  <Badge className="bg-primary/10 text-primary">{cms.event_card_badge}</Badge>
                 </CardContent>
               </Card>
             </motion.div>
@@ -200,8 +223,8 @@ const CaricatureBudgeting = () => {
               <Card className="cursor-pointer border-2 hover:border-primary transition-all" onClick={() => setPhase("caricature")}>
                 <CardContent className="p-8 text-center space-y-3">
                   <Palette className="w-12 h-12 mx-auto text-primary" />
-                  <h3 className="font-display text-xl font-bold">Custom Caricature</h3>
-                  <p className="text-sm text-muted-foreground">Personalized caricature artwork</p>
+                  <h3 className="font-display text-xl font-bold">{cms.caric_card_title}</h3>
+                  <p className="text-sm text-muted-foreground">{cms.caric_card_desc}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -223,7 +246,7 @@ const CaricatureBudgeting = () => {
 
           <Card>
             <CardContent className="p-6 space-y-5">
-              <h2 className="font-display text-xl font-bold text-center">🎪 Event Pricing Calculator</h2>
+              <h2 className="font-display text-xl font-bold text-center">{cms.event_calc_title}</h2>
 
               <div>
                 <Label className="flex items-center gap-1"><Users className="w-4 h-4" />Expected Guest Count</Label>
@@ -237,7 +260,7 @@ const CaricatureBudgeting = () => {
 
               {!showEventResult && (
                 <Button onClick={calculateEvent} className="w-full rounded-full" disabled={!guestCount || !city}>
-                  <Sparkles className="w-4 h-4 mr-2" />Get My Pricing
+                  <Sparkles className="w-4 h-4 mr-2" />{cms.event_cta_label}
                 </Button>
               )}
             </CardContent>
@@ -280,7 +303,7 @@ const CaricatureBudgeting = () => {
 
                 <div className="space-y-3">
                   <Button className="w-full rounded-full text-base py-6" onClick={() => { logSession("book_event", "/book-event"); navigate("/book-event"); }}>
-                    <Calendar className="w-5 h-5 mr-2" />Book Your Event Now <ArrowRight className="w-5 h-5 ml-2" />
+                    <Calendar className="w-5 h-5 mr-2" />{cms.event_book_label} <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="outline" className="rounded-full" onClick={() => { logSession("enquiry", "/enquiry"); navigate("/enquiry"); }}>📋 Send Enquiry</Button>
@@ -307,7 +330,7 @@ const CaricatureBudgeting = () => {
 
           <Card>
             <CardContent className="p-6 space-y-5">
-              <h2 className="font-display text-xl font-bold text-center">🖼️ Custom Caricature Calculator</h2>
+              <h2 className="font-display text-xl font-bold text-center">{cms.caric_calc_title}</h2>
 
               <div>
                 <Label>Caricature Type</Label>
@@ -377,8 +400,8 @@ const CaricatureBudgeting = () => {
                   {caricatureOff ? (
                     <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-center">
                       <AlertTriangle className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-amber-800">Custom caricature ordering is temporarily paused 🎨</p>
-                      <p className="text-xs text-amber-600 mt-1">We'll be back soon — stay tuned!</p>
+                      <p className="text-sm font-semibold text-amber-800">{cms.caric_off_message}</p>
+                      <p className="text-xs text-amber-600 mt-1">{cms.caric_off_subtext}</p>
                     </div>
                   ) : (
                   <Button className="w-full rounded-full text-base py-6" onClick={() => navigate("/order")}>

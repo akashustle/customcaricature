@@ -13,6 +13,11 @@ const PREFETCH_ROUTES: Array<() => Promise<unknown>> = [
   () => import("@/pages/CaricatureBudgeting"),
   () => import("@/pages/Workshop"),
   () => import("@/pages/Enquiry"),
+  () => import("@/pages/AICaricature"),
+  () => import("@/pages/GalleryPage"),
+  () => import("@/pages/FAQs"),
+  () => import("@/pages/TrackOrder"),
+  () => import("@/pages/Login"),
 ];
 
 const RoutePrefetcher = () => {

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Save, Plus, Trash2, FileText } from "lucide-react";
 
-const KEYS = ["page_about", "page_ai_caricature", "global_contact"];
+const KEYS = ["page_about", "page_ai_caricature", "global_contact", "page_caricature_budgeting"];
 
 const AdminPageContent = () => {
   const [data, setData] = useState<Record<string, any>>({});
@@ -57,6 +57,7 @@ const AdminPageContent = () => {
   const about = data.page_about || {};
   const ai = data.page_ai_caricature || {};
   const contact = data.global_contact || {};
+  const cb = data.page_caricature_budgeting || {};
 
   return (
     <div className="space-y-6 admin-panel-font">
@@ -74,6 +75,7 @@ const AdminPageContent = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="about" className="text-xs">About Page</TabsTrigger>
           <TabsTrigger value="ai" className="text-xs">AI Caricature</TabsTrigger>
+          <TabsTrigger value="cb" className="text-xs">Pricing Calculator</TabsTrigger>
           <TabsTrigger value="contact" className="text-xs">Global Contact</TabsTrigger>
           <TabsTrigger value="policies" className="text-xs">Legal & Policies</TabsTrigger>
         </TabsList>
@@ -191,6 +193,36 @@ const AdminPageContent = () => {
             <Input placeholder="Instagram URL" value={contact.instagram_url || ""} onChange={e => update("global_contact", { ...contact, instagram_url: e.target.value })} />
             <Input placeholder="Facebook URL" value={contact.facebook_url || ""} onChange={e => update("global_contact", { ...contact, facebook_url: e.target.value })} />
             <Input placeholder="YouTube URL" value={contact.youtube_url || ""} onChange={e => update("global_contact", { ...contact, youtube_url: e.target.value })} />
+          </CardContent></Card>
+        </TabsContent>
+
+        {/* CARICATURE BUDGETING */}
+        <TabsContent value="cb" className="space-y-4">
+          <Card><CardHeader><CardTitle className="text-base">Pricing Calculator Page (/caricature-budgeting)</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input placeholder="Header title" value={cb.header_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, header_title: e.target.value })} />
+            <Input placeholder="Phase select title" value={cb.phase_select_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, phase_select_title: e.target.value })} />
+            <Input className="md:col-span-2" placeholder="Phase select subtitle" value={cb.phase_select_subtitle || ""} onChange={e => update("page_caricature_budgeting", { ...cb, phase_select_subtitle: e.target.value })} />
+            <Input placeholder="Event card title" value={cb.event_card_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_title: e.target.value })} />
+            <Input placeholder="Event card description" value={cb.event_card_desc || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_desc: e.target.value })} />
+            <Input placeholder="Event card badge (e.g. Starting ₹40,000)" value={cb.event_card_badge || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_card_badge: e.target.value })} />
+            <Input placeholder="Caricature card title" value={cb.caric_card_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_card_title: e.target.value })} />
+            <Input placeholder="Caricature card description" value={cb.caric_card_desc || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_card_desc: e.target.value })} />
+            <Input placeholder="Event calculator title" value={cb.event_calc_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_calc_title: e.target.value })} />
+            <Input placeholder="Event CTA button" value={cb.event_cta_label || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_cta_label: e.target.value })} />
+            <Input placeholder="Event book button label" value={cb.event_book_label || ""} onChange={e => update("page_caricature_budgeting", { ...cb, event_book_label: e.target.value })} />
+            <Input placeholder="Caricature calculator title" value={cb.caric_calc_title || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_calc_title: e.target.value })} />
+            <Input placeholder="Custom caric off message" value={cb.caric_off_message || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_off_message: e.target.value })} />
+            <Input placeholder="Custom caric off subtext" value={cb.caric_off_subtext || ""} onChange={e => update("page_caricature_budgeting", { ...cb, caric_off_subtext: e.target.value })} />
+          </CardContent></Card>
+
+          <Card><CardHeader><CardTitle className="text-base">Intro Animation Texts (5 lines)</CardTitle></CardHeader><CardContent className="space-y-2">
+            {(cb.intro_texts || []).map((t: string, i: number) => (
+              <div key={i} className="flex gap-2">
+                <Input value={t} onChange={e => { const n = [...(cb.intro_texts || [])]; n[i] = e.target.value; update("page_caricature_budgeting", { ...cb, intro_texts: n }); }} />
+                <Button variant="ghost" size="icon" onClick={() => update("page_caricature_budgeting", { ...cb, intro_texts: (cb.intro_texts || []).filter((_: any, j: number) => j !== i) })}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" onClick={() => update("page_caricature_budgeting", { ...cb, intro_texts: [...(cb.intro_texts || []), ""] })}><Plus className="w-3 h-3 mr-1" /> Add Line</Button>
           </CardContent></Card>
         </TabsContent>
 

@@ -10,27 +10,36 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `You are an autonomous Admin Assistant for the Creative Caricature Club (CCC) admin panel.
+You can perform real operations on the database via tools. The admin sees results as Markdown.
+
 Capabilities you have via tools:
-- toggle_setting(key, enabled): turn site features on/off (e.g. "maintenance_mode", "custom_caricature_visible", "floating_whatsapp", "floating_whatsapp_mobile", "floating_instagram", "hide_shop_from_admin")
-- update_setting(key, value): set any JSON setting in admin_site_settings
-- read_setting(key): read current value
-- update_caricature_price(slug, price): update price for a caricature_types row
-- update_event_price(city|district, price): update enquiry_event_pricing
-- send_broadcast_notification(title, message, link): notify all users
-- delete_user_by_email(email): soft-delete via admin function
-- list_users(search, limit): search users by name/email/mobile
-- count_table(table, since_days): get count from table (orders, event_bookings, enquiries, profiles, etc.)
-- summarize_revenue(since_days): get revenue summary
-- block_event_date(date, reason): block a date in event_blocked_dates
-- list_pending_enquiries(limit): list recent unanswered enquiries
-- update_enquiry_status(id, status): change enquiry status
+- toggle_setting / update_setting / read_setting — site settings (maintenance_mode, custom_caricature_visible, floating_whatsapp, floating_whatsapp_mobile, floating_instagram, hide_shop_from_admin, etc.)
+- update_caricature_price(slug, price) — caricature_types
+- update_event_price(city|district, price) — enquiry_event_pricing
+- send_broadcast_notification(title, message, link) — notify all users
+- delete_user_by_email(email) — soft remove a user
+- list_users(search, limit) — search profiles
+- count_table(table, since_days) — row count
+- summarize_revenue(since_days) — revenue rollup
+- block_event_date(date, reason) — block date
+- list_pending_enquiries(limit) — open enquiries
+- update_enquiry_status(id, status)
+- add_event_manually(client_name, mobile, email, event_date, event_type, city, state, total_price, advance_amount) — create a new event_bookings row
+- list_recent_events(limit, since_days) — recent event bookings
+- list_recent_orders(limit, since_days) — recent caricature orders
+- update_order_status(order_id, status) — set orders.status
+- recent_signups(limit, since_days) — newest profiles
+- create_coupon(code, discount_type, discount_value, max_uses, valid_until) — create coupon
+- top_cities(metric, limit) — top cities by enquiries/events
+- generate_report(kind, since_days) — kind = "revenue" | "events" | "orders" | "enquiries", returns a Markdown table the admin can copy
 
 Behavioral rules:
 1. When the admin gives multiple instructions in one message, execute them sequentially with multiple tool calls.
-2. For destructive actions (deletes, blocking, broadcasts to all users) ALWAYS first reply asking for confirmation BEFORE calling the tool. The admin must reply "yes" or "confirm" to proceed.
-3. Be concise. Speak like a fast assistant. Use bullet lists for reports.
-4. Never invent data — if a tool fails, say so plainly.
-5. Always end with a one-line summary of what you did.`;
+2. For destructive actions (delete_user_by_email, broadcast to all, block date, create event manually) FIRST reply asking for confirmation. The admin must say "yes"/"confirm"/"go ahead" before you call the tool.
+3. Be concise. Use bullet lists, bold key numbers, Markdown tables for reports.
+4. If a tool returns ok:false, surface the error verbatim.
+5. End with a one-line summary of what you did.
+6. If asked for a "report", always call generate_report and render the returned markdown.`;
 
 const tools = [
   { type: "function", function: { name: "toggle_setting", description: "Enable/disable a boolean site setting", parameters: { type: "object", properties: { key: { type: "string" }, enabled: { type: "boolean" } }, required: ["key", "enabled"] } } },
@@ -40,11 +49,20 @@ const tools = [
   { type: "function", function: { name: "update_event_price", description: "Update enquiry_event_pricing by city or district", parameters: { type: "object", properties: { city: { type: "string" }, district: { type: "string" }, price: { type: "number" } }, required: ["price"] } } },
   { type: "function", function: { name: "send_broadcast_notification", description: "Insert a broadcast notification for all users", parameters: { type: "object", properties: { title: { type: "string" }, message: { type: "string" }, link: { type: "string" } }, required: ["title", "message"] } } },
   { type: "function", function: { name: "list_users", description: "Search profiles by name/email/mobile", parameters: { type: "object", properties: { search: { type: "string" }, limit: { type: "number" } } } } },
+  { type: "function", function: { name: "delete_user_by_email", description: "Hard delete a profile + auth user by email", parameters: { type: "object", properties: { email: { type: "string" } }, required: ["email"] } } },
   { type: "function", function: { name: "count_table", description: "Count rows in an allowed table", parameters: { type: "object", properties: { table: { type: "string", enum: ["orders", "event_bookings", "enquiries", "profiles", "ai_chat_sessions", "artists"] }, since_days: { type: "number" } }, required: ["table"] } } },
   { type: "function", function: { name: "summarize_revenue", description: "Sum order + event revenue for the last N days", parameters: { type: "object", properties: { since_days: { type: "number" } } } } },
   { type: "function", function: { name: "block_event_date", description: "Block an event date in event_blocked_dates", parameters: { type: "object", properties: { date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["date"] } } },
   { type: "function", function: { name: "list_pending_enquiries", description: "List recent enquiries with status=new", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
   { type: "function", function: { name: "update_enquiry_status", description: "Update an enquiry status by id", parameters: { type: "object", properties: { id: { type: "string" }, status: { type: "string" } }, required: ["id", "status"] } } },
+  { type: "function", function: { name: "add_event_manually", description: "Create a new event_bookings row manually", parameters: { type: "object", properties: { client_name: { type: "string" }, client_mobile: { type: "string" }, client_email: { type: "string" }, event_date: { type: "string", description: "YYYY-MM-DD" }, event_type: { type: "string" }, city: { type: "string" }, state: { type: "string" }, total_price: { type: "number" }, advance_amount: { type: "number" }, venue_name: { type: "string" }, full_address: { type: "string" }, pincode: { type: "string" }, event_start_time: { type: "string" }, event_end_time: { type: "string" } }, required: ["client_name", "client_mobile", "client_email", "event_date", "event_type", "city", "state", "total_price", "advance_amount"] } } },
+  { type: "function", function: { name: "list_recent_events", description: "List recent event bookings", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "list_recent_orders", description: "List recent caricature orders", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "update_order_status", description: "Update orders.status by id", parameters: { type: "object", properties: { order_id: { type: "string" }, status: { type: "string" } }, required: ["order_id", "status"] } } },
+  { type: "function", function: { name: "recent_signups", description: "Latest user signups", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "create_coupon", description: "Create a coupon code", parameters: { type: "object", properties: { code: { type: "string" }, discount_type: { type: "string", enum: ["percentage", "fixed"] }, discount_value: { type: "number" }, max_uses: { type: "number" }, valid_until: { type: "string" } }, required: ["code", "discount_type", "discount_value"] } } },
+  { type: "function", function: { name: "top_cities", description: "Top cities by enquiries or events", parameters: { type: "object", properties: { metric: { type: "string", enum: ["enquiries", "events"] }, limit: { type: "number" } }, required: ["metric"] } } },
+  { type: "function", function: { name: "generate_report", description: "Generate a Markdown report", parameters: { type: "object", properties: { kind: { type: "string", enum: ["revenue", "events", "orders", "enquiries"] }, since_days: { type: "number" } }, required: ["kind"] } } },
 ];
 
 async function runTool(name: string, args: any, supabase: any, adminId: string): Promise<any> {
@@ -126,6 +144,89 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       const { error } = await supabase.from("enquiries").update({ status: args.status, updated_at: new Date().toISOString() }).eq("id", args.id);
       if (error) return { ok: false, error: error.message };
       return { ok: true, id: args.id, status: args.status };
+    }
+    if (name === "delete_user_by_email") {
+      const { data: prof } = await supabase.from("profiles").select("user_id").eq("email", args.email).maybeSingle();
+      if (!prof) return { ok: false, error: "user not found" };
+      await supabase.from("profiles").delete().eq("user_id", prof.user_id);
+      try { await supabase.auth.admin.deleteUser(prof.user_id); } catch {}
+      return { ok: true, deleted: args.email };
+    }
+    if (name === "add_event_manually") {
+      const row: any = {
+        client_name: args.client_name, client_mobile: args.client_mobile, client_email: args.client_email,
+        event_date: args.event_date, event_type: args.event_type, city: args.city, state: args.state,
+        total_price: args.total_price, advance_amount: args.advance_amount,
+        venue_name: args.venue_name || "TBD", full_address: args.full_address || "TBD", pincode: args.pincode || "000000",
+        event_start_time: args.event_start_time || "18:00", event_end_time: args.event_end_time || "22:00",
+        country: "India", source: "admin_ai", status: "confirmed",
+      };
+      const { data, error } = await supabase.from("event_bookings").insert(row).select("id").maybeSingle();
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: data?.id };
+    }
+    if (name === "list_recent_events") {
+      let q: any = supabase.from("event_bookings").select("id, client_name, event_date, city, total_price, status").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, events: data };
+    }
+    if (name === "list_recent_orders") {
+      let q: any = supabase.from("orders").select("id, customer_name, amount, status, payment_status, created_at").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, orders: data };
+    }
+    if (name === "update_order_status") {
+      const { error } = await supabase.from("orders").update({ status: args.status, updated_at: new Date().toISOString() }).eq("id", args.order_id);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: args.order_id, status: args.status };
+    }
+    if (name === "recent_signups") {
+      let q: any = supabase.from("profiles").select("user_id, full_name, email, mobile, created_at").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (args.since_days) q = q.gte("created_at", new Date(Date.now() - args.since_days * 86400000).toISOString());
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, signups: data };
+    }
+    if (name === "create_coupon") {
+      const { data, error } = await supabase.from("coupons").insert({
+        code: args.code.toUpperCase(), discount_type: args.discount_type, discount_value: args.discount_value,
+        max_uses: args.max_uses || null, valid_until: args.valid_until || null, is_active: true,
+      }).select("id").maybeSingle();
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: data?.id, code: args.code.toUpperCase() };
+    }
+    if (name === "top_cities") {
+      const table = args.metric === "events" ? "event_bookings" : "enquiries";
+      const { data } = await supabase.from(table).select("city").limit(2000);
+      const counts: Record<string, number> = {};
+      (data || []).forEach((r: any) => { if (r.city) counts[r.city] = (counts[r.city] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, args.limit || 10);
+      return { ok: true, metric: args.metric, top: sorted.map(([city, count]) => ({ city, count })) };
+    }
+    if (name === "generate_report") {
+      const since = new Date(Date.now() - (args.since_days || 30) * 86400000).toISOString();
+      let md = "";
+      if (args.kind === "revenue") {
+        const { data: orders } = await supabase.from("orders").select("amount, payment_status, created_at").gte("created_at", since);
+        const { data: events } = await supabase.from("event_bookings").select("advance_amount, negotiated_advance, payment_status, created_at").gte("created_at", since);
+        const orderRev = (orders || []).filter((o: any) => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.amount || 0), 0);
+        const eventRev = (events || []).filter((e: any) => ["paid", "fully_paid", "partial_paid"].includes(e.payment_status)).reduce((s: number, e: any) => s + (e.negotiated_advance || e.advance_amount || 0), 0);
+        md = `**Revenue (last ${args.since_days || 30} days)**\n\n| Source | Amount |\n|---|---|\n| Caricature Orders | ₹${orderRev.toLocaleString("en-IN")} |\n| Events | ₹${eventRev.toLocaleString("en-IN")} |\n| **Total** | **₹${(orderRev + eventRev).toLocaleString("en-IN")}** |`;
+      } else if (args.kind === "events") {
+        const { data } = await supabase.from("event_bookings").select("client_name, event_date, city, total_price, status").gte("created_at", since).order("event_date", { ascending: false }).limit(20);
+        md = `**Recent Events**\n\n| Client | Date | City | Total | Status |\n|---|---|---|---|---|\n` + (data || []).map((e: any) => `| ${e.client_name} | ${e.event_date} | ${e.city} | ₹${(e.total_price || 0).toLocaleString("en-IN")} | ${e.status} |`).join("\n");
+      } else if (args.kind === "orders") {
+        const { data } = await supabase.from("orders").select("customer_name, amount, status, payment_status, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(20);
+        md = `**Recent Orders**\n\n| Customer | Amount | Status | Payment |\n|---|---|---|---|\n` + (data || []).map((o: any) => `| ${o.customer_name} | ₹${(o.amount || 0).toLocaleString("en-IN")} | ${o.status} | ${o.payment_status} |`).join("\n");
+      } else if (args.kind === "enquiries") {
+        const { data } = await supabase.from("enquiries").select("name, mobile, city, status, created_at").gte("created_at", since).order("created_at", { ascending: false }).limit(20);
+        md = `**Recent Enquiries**\n\n| Name | Mobile | City | Status |\n|---|---|---|---|\n` + (data || []).map((e: any) => `| ${e.name} | ${e.mobile} | ${e.city || "-"} | ${e.status} |`).join("\n");
+      }
+      return { ok: true, kind: args.kind, markdown: md };
     }
     return { ok: false, error: `unknown tool ${name}` };
   } catch (e: any) {
