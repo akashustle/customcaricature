@@ -254,6 +254,7 @@ const App = () => {
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
+            <AdminLightThemeForcer />
             
             <Suspense fallback={null}><FloatingButtons /></Suspense>
             <Suspense fallback={null}><MobileBottomNav /></Suspense>
