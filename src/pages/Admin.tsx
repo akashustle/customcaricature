@@ -671,7 +671,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -1774,6 +1774,20 @@ const Admin = () => {
                               />
                               <span className="text-xs font-sans text-muted-foreground">Event Booking</span>
                               {(c as any).event_booking_allowed && <Badge className="bg-primary/20 text-foreground border-none text-[10px]">Allowed</Badge>}
+                            </div>
+                            {/* Allow Event Editing / Reschedule Toggle */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <Switch
+                                checked={(c as any).event_edit_allowed || false}
+                                onCheckedChange={async (checked) => {
+                                  if (!confirm(`${checked ? "Allow" : "Revoke"} event reschedule requests for ${c.full_name}?`)) return;
+                                  await supabase.from("profiles").update({ event_edit_allowed: checked } as any).eq("user_id", c.user_id);
+                                  toast({ title: checked ? "Reschedule allowed" : "Reschedule disabled", description: `for ${c.full_name}` });
+                                  fetchCustomers();
+                                }}
+                              />
+                              <span className="text-xs font-sans text-muted-foreground">Allow Event Editing</span>
+                              {(c as any).event_edit_allowed && <Badge className="bg-emerald-100 text-emerald-800 border-none text-[10px]">Editable</Badge>}
                             </div>
                             {/* International Booking Toggle */}
                             <div className="flex items-center gap-2 pt-1">

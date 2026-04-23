@@ -37,8 +37,9 @@ import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 import AddEventModal from "@/components/dashboard/AddEventModal";
+import RescheduleEventDialog from "@/components/dashboard/RescheduleEventDialog";
 import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
-import { BadgeCheck, Camera } from "lucide-react";
+import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
@@ -2225,21 +2226,27 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
 const DownloadAppCard = () => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
+  const [platform, setPlatform] = useState<"android" | "ios" | "desktop" | "other">("other");
 
   useEffect(() => {
+    // Detect platform
+    const ua = navigator.userAgent || "";
+    if (/iPhone|iPad|iPod/i.test(ua)) setPlatform("ios");
+    else if (/Android/i.test(ua)) setPlatform("android");
+    else if (/Win|Mac|Linux|CrOS/i.test(ua)) setPlatform("desktop");
+
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
     const installedHandler = () => setInstalled(true);
     window.addEventListener("appinstalled", installedHandler);
-    // Hide if already installed (standalone display mode)
+    // Already installed (standalone display mode or iOS standalone)
     if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
+    if ((navigator as any).standalone === true) setInstalled(true);
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
     };
   }, []);
-
-  if (installed) return null;
 
   const handleInstall = async () => {
     if (installPrompt) {
@@ -2247,14 +2254,55 @@ const DownloadAppCard = () => {
       const { outcome } = await installPrompt.userChoice;
       if (outcome === "accepted") setInstalled(true);
       setInstallPrompt(null);
-    } else {
-      // Fallback: iOS Safari instructions
+    } else if (platform === "ios") {
       toast({
-        title: "Install on your phone 📱",
-        description: "Tap the Share button in your browser, then 'Add to Home Screen' to install Creative Caricature Club as an app.",
+        title: "Install on iPhone 📱",
+        description: "Tap the Share icon in Safari, then 'Add to Home Screen'.",
+      });
+    } else if (platform === "android") {
+      toast({
+        title: "Install on Android 📱",
+        description: "Open the browser menu (⋮) and tap 'Add to Home screen' / 'Install app'.",
+      });
+    } else {
+      toast({
+        title: "Install on desktop 💻",
+        description: "Look for the install icon in your browser's address bar.",
       });
     }
   };
+
+  // INSTALLED state — show pretty confirmation
+  if (installed) {
+    return (
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background p-4 shadow-sm">
+        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none" />
+        <div className="relative flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-sans font-bold text-foreground">App installed ✨</p>
+            <p className="text-[11px] text-muted-foreground font-sans mt-0.5">You're using the installed version. Faster loads, push alerts and offline access enabled.</p>
+          </div>
+          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-none text-[10px] font-bold flex-shrink-0">Installed</Badge>
+        </div>
+      </div>
+    );
+  }
+
+  const buttonLabel =
+    installPrompt ? "Install"
+    : platform === "ios" ? "How to Install"
+    : platform === "android" ? "Install Steps"
+    : "Show Steps";
+
+  const supportLine =
+    installPrompt ? "Tap install — one click setup."
+    : platform === "ios" ? "iPhone/iPad — Safari Share → Add to Home Screen."
+    : platform === "android" ? "Android — Chrome menu → Install app."
+    : platform === "desktop" ? "Desktop — install icon in browser address bar."
+    : "Use a modern browser to install the app.";
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-background p-4 shadow-sm">
@@ -2264,15 +2312,15 @@ const DownloadAppCard = () => {
           <Download className="w-6 h-6" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-sans font-bold text-foreground">Download our app for a smoother experience</p>
-          <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Track your event live, get instant updates & one-tap chat with your artist.</p>
+          <p className="text-sm font-sans font-bold text-foreground">Get the app for a smoother experience</p>
+          <p className="text-[11px] text-muted-foreground font-sans mt-0.5">{supportLine}</p>
         </div>
         <Button
           size="sm"
           onClick={handleInstall}
           className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold flex-shrink-0"
         >
-          Install
+          {buttonLabel}
         </Button>
       </div>
     </div>

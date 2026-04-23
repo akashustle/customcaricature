@@ -51,6 +51,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
   const [pincode, setPincode] = useState(profile?.pincode || "");
   const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
   const [checkingOverlap, setCheckingOverlap] = useState(false);
+  const [pastTimeError, setPastTimeError] = useState<string | null>(null);
+  const [hasHardConflict, setHasHardConflict] = useState(false);
 
   useEffect(() => {
     if (open && profile) {
@@ -67,13 +69,37 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
 
   const endTime = addHours(startTime, hours);
 
-  // Overlap check whenever date/start/hours change
+  // Past-time + overlap validation whenever date/start/hours change
   useEffect(() => {
-    if (!eventDate || !startTime) { setOverlapWarning(null); return; }
+    if (!eventDate || !startTime) {
+      setOverlapWarning(null);
+      setPastTimeError(null);
+      setHasHardConflict(false);
+      return;
+    }
+
+    // 1. Past-time block (only relevant if event is today)
+    const now = new Date();
+    const isToday =
+      eventDate.getFullYear() === now.getFullYear() &&
+      eventDate.getMonth() === now.getMonth() &&
+      eventDate.getDate() === now.getDate();
+    const [sh, sm] = startTime.split(":").map(Number);
+    const startDateTime = new Date(eventDate);
+    startDateTime.setHours(sh, sm, 0, 0);
+    if (isToday && startDateTime.getTime() <= now.getTime()) {
+      setPastTimeError("⛔ That start time is already in the past. Pick a future time slot today, or move to a later date.");
+      setHasHardConflict(true);
+      setOverlapWarning(null);
+      return;
+    }
+    setPastTimeError(null);
+
+    // 2. Overlap check
     let cancelled = false;
     setCheckingOverlap(true);
     const dateStr = format(eventDate, "yyyy-MM-dd");
-    const newStartMin = (() => { const [h, m] = startTime.split(":").map(Number); return h * 60 + m; })();
+    const newStartMin = sh * 60 + sm;
     const newEndMin = newStartMin + hours * 60;
     (async () => {
       const { data } = await supabase
@@ -83,17 +109,23 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
         .neq("status", "cancelled");
       if (cancelled) return;
       const conflicts = (data || []).filter((row: any) => {
-        const [sh, sm] = String(row.event_start_time || "00:00").slice(0, 5).split(":").map(Number);
-        const [eh, em] = String(row.event_end_time || "00:00").slice(0, 5).split(":").map(Number);
-        const rs = sh * 60 + sm;
-        const re = eh * 60 + em;
+        const [rsh, rsm] = String(row.event_start_time || "00:00").slice(0, 5).split(":").map(Number);
+        const [reh, rem] = String(row.event_end_time || "00:00").slice(0, 5).split(":").map(Number);
+        const rs = rsh * 60 + rsm;
+        const re = reh * 60 + rem;
         return newStartMin < re && newEndMin > rs;
       });
-      if (conflicts.length > 0) {
+      // Hard block when 3+ events already overlap (global capacity)
+      if (conflicts.length >= 3) {
+        setOverlapWarning(`⛔ This slot is fully booked — 3 events already running between ${startTime} and ${addHours(startTime, hours)}. Please pick another time.`);
+        setHasHardConflict(true);
+      } else if (conflicts.length > 0) {
         const venues = conflicts.map((c: any) => c.venue_name || "Another event").slice(0, 2).join(", ");
         setOverlapWarning(`⚠️ Heads up — ${conflicts.length} event(s) already booked in this slot (${venues}). You can still proceed but artist availability may be limited.`);
+        setHasHardConflict(false);
       } else {
         setOverlapWarning(null);
+        setHasHardConflict(false);
       }
       setCheckingOverlap(false);
     })();
@@ -104,6 +136,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
     if (!eventType) return toast({ title: "Pick an event type", variant: "destructive" });
     if (!eventDate) return toast({ title: "Pick a date", variant: "destructive" });
     if (!startTime) return toast({ title: "Pick a start time", variant: "destructive" });
+    if (pastTimeError) return toast({ title: "Invalid start time", description: pastTimeError, variant: "destructive" });
+    if (hasHardConflict) return toast({ title: "Slot unavailable", description: overlapWarning || "This time slot is fully booked.", variant: "destructive" });
     if (!state || !city || !venueName || !fullAddress || !pincode) {
       return toast({ title: "Please fill all venue details", variant: "destructive" });
     }
@@ -238,13 +272,19 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                 )}
               </div>
 
-              {overlapWarning && (
-                <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-[11px] font-sans text-amber-700 dark:text-amber-300 leading-relaxed">{overlapWarning}</p>
+              {pastTimeError && (
+                <div className="rounded-2xl bg-destructive/10 border border-destructive/30 p-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                  <p className="text-[11px] font-sans text-destructive leading-relaxed font-semibold">{pastTimeError}</p>
                 </div>
               )}
-              {checkingOverlap && eventDate && startTime && !overlapWarning && (
+              {overlapWarning && (
+                <div className={`rounded-2xl border p-3 flex items-start gap-2 ${hasHardConflict ? "bg-destructive/10 border-destructive/30" : "bg-amber-500/10 border-amber-500/30"}`}>
+                  <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${hasHardConflict ? "text-destructive" : "text-amber-600 dark:text-amber-400"}`} />
+                  <p className={`text-[11px] font-sans leading-relaxed ${hasHardConflict ? "text-destructive font-semibold" : "text-amber-700 dark:text-amber-300"}`}>{overlapWarning}</p>
+                </div>
+              )}
+              {checkingOverlap && eventDate && startTime && !overlapWarning && !pastTimeError && (
                 <p className="text-[10px] text-muted-foreground font-sans -mt-2">Checking availability…</p>
               )}
 
@@ -344,9 +384,10 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
 
               <Button
                 onClick={handleSave}
-                className="w-full h-12 rounded-2xl font-sans font-semibold text-base"
+                disabled={hasHardConflict || !!pastTimeError}
+                className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
               >
-                Save &amp; Continue to Booking →
+                {hasHardConflict || pastTimeError ? "Fix the highlighted issue above" : "Save & Continue to Booking →"}
               </Button>
             </div>
           </motion.div>
