@@ -545,8 +545,34 @@ const BookEvent = () => {
               </Popover>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="font-sans">Start Time *</Label><Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} /></div>
-              <div><Label className="font-sans">End Time *</Label><Input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} /></div>
+              <div>
+                <Label className="font-sans">Start Time *</Label>
+                <Select value={startTime} onValueChange={setStartTime}>
+                  <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {Array.from({ length: 48 }, (_, i) => {
+                      const h = String(Math.floor(i / 2)).padStart(2, "0");
+                      const m = i % 2 === 0 ? "00" : "30";
+                      const v = `${h}:${m}`;
+                      return <SelectItem key={v} value={v}>{v}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="font-sans">End Time *</Label>
+                <Select value={endTime} onValueChange={setEndTime}>
+                  <SelectTrigger><SelectValue placeholder="Select time" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {Array.from({ length: 48 }, (_, i) => {
+                      const h = String(Math.floor(i / 2)).padStart(2, "0");
+                      const m = i % 2 === 0 ? "00" : "30";
+                      const v = `${h}:${m}`;
+                      return <SelectItem key={v} value={v}>{v}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
