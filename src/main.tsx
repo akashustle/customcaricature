@@ -2,12 +2,16 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { navigateInternally, normalizeInternalNavigationTarget } from "./lib/internal-navigation";
+import { registerPWA } from "./lib/pwa-register";
 
 // Capture PWA install prompt for programmatic install
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   (window as any).__pwaInstallPrompt = e;
 });
+
+// Register service worker (offline support) — guarded against iframe/preview
+registerPWA();
 
 const nativeWindowOpen = window.open.bind(window);
 window.open = ((url?: string | URL, target?: string, features?: string) => {

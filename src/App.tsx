@@ -20,6 +20,7 @@ import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
 
 // Lazy load non-critical shell components
 const SplashScreen = lazy(() => import("./components/SplashScreen"));
+const PWASplashScreen = lazy(() => import("./components/PWASplashScreen"));
 const FloatingButtons = lazy(() => import("./components/FloatingButtons"));
 const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
 const AppUpdateBanner = lazy(() => import("./components/AppUpdateBanner"));
@@ -243,6 +244,7 @@ const App = () => {
         <DefaultThemeApplier />
         <DeferredInit />
         <RoutePrefetcher />
+        <Suspense fallback={null}><PWASplashScreen /></Suspense>
         <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
