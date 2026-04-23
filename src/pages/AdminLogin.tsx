@@ -406,11 +406,11 @@ const AdminLogin = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center px-3 py-4 sm:p-4"
+      className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center px-2.5 py-3 sm:px-4 sm:py-4"
       style={{
         background: `linear-gradient(135deg, ${BRAND.cream} 0%, #FFFFFF 38%, ${BRAND.light}66 72%, ${BRAND.highlight}33 100%)`,
-        paddingTop: "max(env(safe-area-inset-top), 1rem)",
-        paddingBottom: "max(env(safe-area-inset-bottom), 1rem)",
+        paddingTop: "max(env(safe-area-inset-top), 0.75rem)",
+        paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
       }}
     >
       <SEOHead title="Admin Login" noindex />
@@ -496,7 +496,7 @@ const AdminLogin = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           />
 
-          <div className="relative p-5 sm:p-7 md:p-8 space-y-4 sm:space-y-5">
+          <div className="relative p-4 sm:p-7 md:p-8 space-y-3.5 sm:space-y-5">
             {/* Header — Logo + title (always visible) */}
             <div className="text-center space-y-3">
               <motion.div
@@ -519,7 +519,7 @@ const AdminLogin = () => {
                 <div className="flex items-center justify-center gap-2 mb-1.5">
                   <Shield className="w-5 h-5" style={{ color: BRAND.accent }} />
                   <h1
-                    className="text-[22px] md:text-2xl font-black leading-tight tracking-tight"
+                    className="text-[18px] xs:text-[20px] sm:text-[22px] md:text-2xl font-black leading-tight tracking-tight"
                     style={{
                       background: `linear-gradient(120deg, ${BRAND.primary} 0%, ${BRAND.accent} 45%, ${BRAND.highlight} 80%)`,
                       WebkitBackgroundClip: "text",

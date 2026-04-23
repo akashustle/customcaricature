@@ -132,35 +132,74 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
     return () => { cancelled = true; };
   }, [eventDate, startTime, hours]);
 
-  const handleSave = () => {
-    if (!eventType) return toast({ title: "Pick an event type", variant: "destructive" });
-    if (!eventDate) return toast({ title: "Pick a date", variant: "destructive" });
-    if (!startTime) return toast({ title: "Pick a start time", variant: "destructive" });
-    if (pastTimeError) return toast({ title: "Invalid start time", description: pastTimeError, variant: "destructive" });
-    if (hasHardConflict) return toast({ title: "Slot unavailable", description: overlapWarning || "This time slot is fully booked.", variant: "destructive" });
+  const [savingDraft, setSavingDraft] = useState(false);
+
+  const validate = () => {
+    if (!eventType) { toast({ title: "Pick an event type", variant: "destructive" }); return false; }
+    if (!eventDate) { toast({ title: "Pick a date", variant: "destructive" }); return false; }
+    if (!startTime) { toast({ title: "Pick a start time", variant: "destructive" }); return false; }
+    if (pastTimeError) { toast({ title: "Invalid start time", description: pastTimeError, variant: "destructive" }); return false; }
+    if (hasHardConflict) { toast({ title: "Slot unavailable", description: overlapWarning || "This time slot is fully booked.", variant: "destructive" }); return false; }
     if (!state || !city || !venueName || !fullAddress || !pincode) {
-      return toast({ title: "Please fill all venue details", variant: "destructive" });
+      toast({ title: "Please fill all venue details", variant: "destructive" }); return false;
     }
+    return true;
+  };
 
-    const params = new URLSearchParams({
-      eventType,
-      eventDate: format(eventDate, "yyyy-MM-dd"),
-      startTime,
-      endTime,
-      state,
-      district: district || "",
-      city,
-      venueName,
-      fullAddress,
-      pincode,
-      clientName: profile?.full_name || "",
-      clientMobile: profile?.mobile || "",
-      clientEmail: profile?.email || "",
-      clientInstagram: profile?.instagram_id || "",
-    });
+  const buildParams = () => new URLSearchParams({
+    eventType,
+    eventDate: format(eventDate!, "yyyy-MM-dd"),
+    startTime,
+    endTime,
+    state,
+    district: district || "",
+    city,
+    venueName,
+    fullAddress,
+    pincode,
+    clientName: profile?.full_name || "",
+    clientMobile: profile?.mobile || "",
+    clientEmail: profile?.email || "",
+    clientInstagram: profile?.instagram_id || "",
+  });
 
+  const handleBookNow = () => {
+    if (!validate()) return;
     onClose();
-    navigate(`/book-event?${params.toString()}`);
+    navigate(`/book-event?${buildParams().toString()}`);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!validate()) return;
+    setSavingDraft(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Please sign in", description: "You need to be signed in to save a draft.", variant: "destructive" });
+        return;
+      }
+      const { error } = await (supabase.from("event_drafts" as any).insert({
+        user_id: user.id,
+        event_type: eventType,
+        event_date: format(eventDate!, "yyyy-MM-dd"),
+        start_time: startTime,
+        end_time: endTime,
+        hours,
+        state,
+        district: district || null,
+        city,
+        venue_name: venueName,
+        full_address: fullAddress,
+        pincode,
+      }) as any);
+      if (error) throw error;
+      toast({ title: "Draft saved 📝", description: "We'll remind you on your dashboard to book it." });
+      onClose();
+    } catch (err: any) {
+      toast({ title: "Couldn't save draft", description: err?.message, variant: "destructive" });
+    } finally {
+      setSavingDraft(false);
+    }
   };
 
   return (
@@ -382,13 +421,34 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                 </p>
               </div>
 
-              <Button
-                onClick={handleSave}
-                disabled={hasHardConflict || !!pastTimeError}
-                className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
-              >
-                {hasHardConflict || pastTimeError ? "Fix the highlighted issue above" : "Save & Continue to Booking →"}
-              </Button>
+              {hasHardConflict || pastTimeError ? (
+                <Button
+                  disabled
+                  className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
+                >
+                  Fix the highlighted issue above
+                </Button>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Button
+                    onClick={handleSaveDraft}
+                    disabled={savingDraft}
+                    variant="outline"
+                    className="w-full h-12 rounded-2xl font-sans font-semibold text-sm border-primary/40 text-primary hover:bg-primary/5"
+                  >
+                    {savingDraft ? "Saving…" : "💾 Save as Draft"}
+                  </Button>
+                  <Button
+                    onClick={handleBookNow}
+                    className="w-full h-12 rounded-2xl font-sans font-semibold text-sm"
+                  >
+                    Book Now →
+                  </Button>
+                </div>
+              )}
+              <p className="text-[10px] text-center text-muted-foreground font-sans -mt-1">
+                Save the draft to come back later, or book now to confirm pricing &amp; pay the advance.
+              </p>
             </div>
           </motion.div>
         </>
