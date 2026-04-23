@@ -39,7 +39,7 @@ const AdminDashboardWidgets = () => {
   });
   const [drillData, setDrillData] = useState<{ title: string; rows: any[] } | null>(null);
   const [rawData, setRawData] = useState<{ orders: any[]; events: any[]; customers: any[]; enquiries: any[] }>({ orders: [], events: [], customers: [], enquiries: [] });
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  
 
   const fetchStats = async () => {
     const today = new Date().toISOString().split("T")[0];
