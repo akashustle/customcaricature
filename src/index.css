@@ -1675,3 +1675,88 @@ body {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* =========================================================
+   Adymize-style design helpers (purple/violet aesthetic)
+   ========================================================= */
+.bg-hero-violet {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, hsl(252 90% 80% / 0.55), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, hsl(285 90% 85% / 0.45), transparent 60%),
+    radial-gradient(800px 500px at 10% 30%, hsl(215 95% 88% / 0.45), transparent 60%),
+    linear-gradient(180deg, hsl(245 80% 97%) 0%, hsl(0 0% 100%) 100%);
+}
+.bg-section-soft {
+  background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(245 70% 98%) 100%);
+}
+.text-gradient-violet {
+  background: linear-gradient(135deg, hsl(258 85% 60%) 0%, hsl(225 90% 65%) 50%, hsl(285 80% 70%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.btn-square-dark {
+  background: hsl(240 35% 14%);
+  color: hsl(0 0% 100%);
+  border-radius: 0.65rem;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-dark:hover { background: hsl(252 85% 62%); transform: translateY(-1px); }
+.btn-square-violet {
+  background: linear-gradient(135deg, hsl(252 85% 62%), hsl(258 75% 55%));
+  color: #fff;
+  border-radius: 0.65rem;
+  padding: 0.85rem 1.6rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px -10px hsl(252 85% 62% / 0.55);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-violet:hover { transform: translateY(-1px); box-shadow: 0 14px 30px -10px hsl(252 85% 62% / 0.7); }
+.btn-square-outline {
+  background: hsl(0 0% 100%);
+  color: hsl(240 35% 14%);
+  border: 1px solid hsl(245 30% 88%);
+  border-radius: 0.65rem;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-outline:hover { border-color: hsl(252 85% 62%); color: hsl(252 85% 62%); }
+.chip-violet {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, hsl(285 100% 92%), hsl(245 100% 94%));
+  color: hsl(258 70% 45%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.card-soft-white {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(245 30% 92%);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px -30px hsl(252 60% 40% / 0.18);
+}
+.card-gradient-blob {
+  background:
+    radial-gradient(closest-side at 50% 50%, hsl(285 90% 85% / 0.55), transparent 70%),
+    radial-gradient(closest-side at 30% 70%, hsl(215 95% 90% / 0.55), transparent 70%),
+    radial-gradient(closest-side at 70% 30%, hsl(340 90% 92% / 0.55), transparent 70%),
+    hsl(0 0% 100%);
+  border: 1px solid hsl(245 30% 92%);
+  border-radius: 1.5rem;
+}
