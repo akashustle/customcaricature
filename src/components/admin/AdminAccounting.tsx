@@ -210,7 +210,7 @@ const AdminAccounting = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard icon={IndianRupee} label="Total Revenue" value={fmt(pnl.totalRevenue)} sub={`${pnl.orderCount + pnl.eventCount + pnl.shopOrderCount} transactions`} trend="up" />
-        <StatCard icon={Wallet} label="Total Received" value={fmt(pnl.totalReceived)} sub="Cash in bank" trend="up" />
+        <StatCard icon={Wallet} label="Total Received" value={fmt(pnl.totalReceived)} sub="Net of gateway fees" trend="up" />
         <StatCard icon={Banknote} label="Total Expenses" value={fmt(pnl.totalExpenses)} sub="Artist payouts" trend={pnl.totalExpenses > 0 ? "down" : "neutral"} />
         <StatCard icon={TrendingUp} label="Net Profit" value={fmt(pnl.netProfit)} sub={pnl.totalRevenue > 0 ? `${((pnl.netProfit / pnl.totalRevenue) * 100).toFixed(1)}% margin` : "—"} trend={pnl.netProfit >= 0 ? "up" : "down"} />
       </div>
