@@ -1422,6 +1422,153 @@
   .admin-img-reveal {
     animation: blurUp 0.5s ease-out forwards;
   }
+
+  /* ===== FinRank-inspired pill & floating card system ===== */
+
+  /* Black pill button — primary CTA (FinRank "Get started") */
+  .btn-pill-ink {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background 0.2s ease;
+    box-shadow: 0 4px 14px hsl(var(--foreground) / 0.18), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+  }
+  .btn-pill-ink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.28), inset 0 1px 0 hsl(0 0% 100% / 0.1);
+  }
+  .btn-pill-ink:active { transform: translateY(0); }
+
+  /* Lime pill button — accent CTA */
+  .btn-pill-lime {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+    box-shadow:
+      0 6px 0 hsl(82 78% 38%),
+      0 12px 28px hsl(82 78% 45% / 0.35),
+      inset 0 1px 0 hsl(0 0% 100% / 0.4);
+  }
+  .btn-pill-lime:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 0 hsl(82 78% 38%),
+      0 16px 36px hsl(82 78% 45% / 0.45),
+      inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  }
+  .btn-pill-lime:active {
+    transform: translateY(2px);
+    box-shadow:
+      0 2px 0 hsl(82 78% 38%),
+      0 4px 12px hsl(82 78% 45% / 0.25);
+  }
+  .dark .btn-pill-lime {
+    box-shadow:
+      0 6px 0 hsl(82 80% 30%),
+      0 12px 28px hsl(82 82% 50% / 0.4),
+      inset 0 1px 0 hsl(0 0% 100% / 0.25);
+  }
+
+  /* Outline pill — secondary CTA */
+  .btn-pill-outline {
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px hsl(var(--foreground) / 0.04);
+  }
+  .btn-pill-outline:hover {
+    border-color: hsl(var(--foreground) / 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px hsl(var(--foreground) / 0.08);
+  }
+
+  /* Lime floating card — soft squircle (FinRank Savings Rate card) */
+  .card-lime-float {
+    background: linear-gradient(140deg, hsl(82 80% 65%) 0%, hsl(82 78% 55%) 100%);
+    color: hsl(220 13% 9%);
+    border-radius: 1.75rem;
+    padding: 1.5rem;
+    box-shadow:
+      0 12px 30px hsl(82 78% 45% / 0.35),
+      0 32px 64px -12px hsl(82 78% 40% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.4);
+    transform: translateZ(0);
+  }
+
+  /* Dark floating card — FinRank "Global Financial Score" */
+  .card-ink-float {
+    background: linear-gradient(150deg, hsl(220 13% 13%) 0%, hsl(220 15% 8%) 100%);
+    color: hsl(60 9% 96%);
+    border-radius: 1.75rem;
+    padding: 1.5rem;
+    box-shadow:
+      0 18px 40px hsl(220 13% 9% / 0.3),
+      0 32px 80px -12px hsl(220 13% 9% / 0.4),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+    transform: translateZ(0);
+  }
+
+  /* Premium soft white squircle — testimonial/insight floats */
+  .card-snow-float {
+    background: hsl(0 0% 100%);
+    color: hsl(220 13% 9%);
+    border-radius: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    box-shadow:
+      0 12px 28px hsl(220 13% 9% / 0.08),
+      0 32px 64px -12px hsl(220 13% 9% / 0.1),
+      inset 0 1px 0 hsl(0 0% 100% / 0.6);
+  }
+  .dark .card-snow-float {
+    background: hsl(220 13% 13%);
+    color: hsl(60 9% 96%);
+    box-shadow:
+      0 12px 28px hsl(0 0% 0% / 0.4),
+      0 32px 64px -12px hsl(0 0% 0% / 0.5);
+  }
+
+  /* Lime ring chip — tags/badges */
+  .chip-lime-ring {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--primary) / 0.4);
+    border-radius: 9999px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.12);
+  }
+
+  .dot-lime {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.18);
+  }
+
+  .ring-lime-glow {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3), 0 0 24px hsl(var(--primary) / 0.18);
+  }
+
+  /* Logo gold accent — preserves brand on top of new theme */
+  .text-logo-gold { color: hsl(var(--brand-gold)); }
+  .bg-logo-gold { background-color: hsl(var(--brand-gold)); }
+  .border-logo-gold { border-color: hsl(var(--brand-gold)); }
 }
 
 @keyframes ticker {
