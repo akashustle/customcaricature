@@ -1513,7 +1513,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
               <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <Card>
                   <CardContent className="p-4 space-y-2">
-                    {/* Event Countdown */}
+                    {/* Live status (starting soon / live / just-ended / today) — auto-updates every second */}
+                    <EventLiveStatus event={ev} variant="card" />
+                    {/* Future-day countdown (only when not today / live / just-ended) */}
                     {ev.status === "upcoming" && (() => {
                       const [year, month, day] = ev.event_date.split("-").map(Number);
                       const today = new Date();
@@ -1527,13 +1529,6 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                             <p className="text-xs font-sans text-muted-foreground">
                               {daysLeft === 1 ? "✨ Tomorrow is the big day!" : daysLeft <= 7 ? `🎉 Just ${daysLeft} days to go! Get ready!` : `📅 Days until your special event`}
                             </p>
-                          </div>
-                        );
-                      } else if (daysLeft === 0) {
-                        return (
-                          <div className="bg-green-100 rounded-xl p-3 text-center">
-                            <p className="font-display text-lg font-bold text-green-800">🎊 Today is the Day!</p>
-                            <p className="text-xs font-sans text-green-700">Enjoy your event! Have an amazing time!</p>
                           </div>
                         );
                       }
