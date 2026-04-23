@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
+import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
