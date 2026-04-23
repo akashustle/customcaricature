@@ -824,6 +824,103 @@
     border-color: hsl(var(--primary) / 0.2);
   }
 
+  /* === VAULT-STYLE ADMIN WIDGETS — pill cards, lime accents === */
+  .vault-widget {
+    border-radius: 1.25rem;
+    background: hsl(0 0% 100%);
+    border: 1px solid hsl(0 0% 92%);
+    box-shadow:
+      0 1px 2px hsl(0 0% 0% / 0.04),
+      0 4px 14px hsl(0 0% 0% / 0.04),
+      inset 0 1px 0 hsl(0 0% 100% / 0.9);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .vault-widget:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 16px hsl(0 0% 0% / 0.06),
+      0 16px 32px hsl(0 0% 0% / 0.06);
+  }
+  .dark .vault-widget {
+    background: hsl(220 14% 12%);
+    border: 1px solid hsl(220 14% 18%);
+    box-shadow: 0 4px 14px hsl(0 0% 0% / 0.3);
+  }
+  .vault-widget-active {
+    background: hsl(82 75% 75%);
+    border-color: hsl(82 75% 60%);
+    box-shadow:
+      0 6px 18px hsl(82 75% 45% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.5);
+  }
+  .dark .vault-widget-active {
+    background: hsl(82 75% 55%);
+    border-color: hsl(82 75% 60%);
+    color: hsl(0 0% 8%);
+  }
+  .vault-widget-danger {
+    background: hsl(0 75% 96%);
+    border-color: hsl(0 70% 90%);
+  }
+  .dark .vault-widget-danger {
+    background: hsl(0 50% 18%);
+    border-color: hsl(0 50% 28%);
+  }
+  /* Figure colors — green for positive amounts, red for negative */
+  .vault-figure-positive { color: hsl(142 70% 38%); }
+  .vault-figure-negative { color: hsl(0 75% 50%); }
+  .vault-figure-neutral  { color: hsl(0 0% 12%); }
+  .dark .vault-figure-positive { color: hsl(142 70% 55%); }
+  .dark .vault-figure-negative { color: hsl(0 75% 65%); }
+  .dark .vault-figure-neutral  { color: hsl(0 0% 95%); }
+
+  /* Vault tab pills (Users · 2 etc.) */
+  .vault-tab-pill {
+    border-radius: 9999px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: hsl(0 0% 100%);
+    color: hsl(0 0% 35%);
+    border: 1px solid hsl(0 0% 92%);
+    transition: all 0.2s ease;
+  }
+  .vault-tab-pill:hover { background: hsl(0 0% 97%); }
+  .vault-tab-pill-active {
+    background: hsl(0 0% 8%);
+    color: hsl(0 0% 100%);
+    border-color: hsl(0 0% 8%);
+  }
+  .dark .vault-tab-pill { background: hsl(220 14% 14%); border-color: hsl(220 14% 22%); color: hsl(0 0% 70%); }
+  .dark .vault-tab-pill-active { background: hsl(82 75% 55%); color: hsl(0 0% 8%); border-color: hsl(82 75% 55%); }
+
+  /* Vault list row — pill list item */
+  .vault-list-row {
+    border-radius: 1.25rem;
+    background: hsl(0 0% 100%);
+    border: 1px solid hsl(0 0% 93%);
+    transition: all 0.2s ease;
+  }
+  .vault-list-row:hover {
+    border-color: hsl(82 75% 60%);
+    box-shadow: 0 4px 14px hsl(0 0% 0% / 0.05);
+  }
+  .dark .vault-list-row { background: hsl(220 14% 12%); border-color: hsl(220 14% 20%); }
+
+  /* Vault page bg — soft lime gradient canvas */
+  .vault-canvas {
+    background:
+      radial-gradient(circle at 0% 0%, hsl(82 75% 92% / 0.6), transparent 40%),
+      radial-gradient(circle at 100% 100%, hsl(82 75% 92% / 0.5), transparent 40%),
+      hsl(0 0% 100%);
+  }
+  .dark .vault-canvas {
+    background:
+      radial-gradient(circle at 0% 0%, hsl(82 75% 20% / 0.4), transparent 40%),
+      radial-gradient(circle at 100% 100%, hsl(82 75% 20% / 0.3), transparent 40%),
+      hsl(220 14% 8%);
+  }
+
   /* Admin settings card - premium 3D */
   .admin-settings-card {
     background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--background)));
