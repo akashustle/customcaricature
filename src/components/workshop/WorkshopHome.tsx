@@ -36,9 +36,18 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
 
   const requestLocation = () => {
     if (!navigator.geolocation) return;
+    // Only ask for location once per device on dashboard login (per admin policy)
+    const ASK_KEY = "ccc_workshop_location_asked_v1";
+    if (typeof window !== "undefined" && localStorage.getItem(ASK_KEY) === "done") return;
     navigator.geolocation.getCurrentPosition(
-      async (pos) => { try { await supabase.from("workshop_user_locations" as any).upsert({ user_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude, location_allowed: true, last_updated: new Date().toISOString() } as any, { onConflict: "user_id" }); } catch {} },
-      async () => { try { await supabase.from("workshop_user_locations" as any).upsert({ user_id: user.id, lat: 0, lng: 0, location_allowed: false, last_updated: new Date().toISOString() } as any, { onConflict: "user_id" }); } catch {} }
+      async (pos) => {
+        try { localStorage.setItem(ASK_KEY, "done"); } catch {}
+        try { await supabase.from("workshop_user_locations" as any).upsert({ user_id: user.id, lat: pos.coords.latitude, lng: pos.coords.longitude, location_allowed: true, last_updated: new Date().toISOString() } as any, { onConflict: "user_id" }); } catch {}
+      },
+      async () => {
+        try { localStorage.setItem(ASK_KEY, "done"); } catch {}
+        try { await supabase.from("workshop_user_locations" as any).upsert({ user_id: user.id, lat: 0, lng: 0, location_allowed: false, last_updated: new Date().toISOString() } as any, { onConflict: "user_id" }); } catch {}
+      }
     );
   };
 
