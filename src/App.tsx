@@ -258,12 +258,12 @@ const App = () => {
         <DefaultThemeApplier />
         <DeferredInit />
         <RoutePrefetcher />
-        <Suspense fallback={null}><PWASplashScreen /></Suspense>
-        <Suspense fallback={null}><OfflineDetector /></Suspense>
+        <PWASplashScreen />
+        <OfflineDetector />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
-        <Suspense fallback={null}><AppUpdateBanner /></Suspense>
+        <AppUpdateBanner />
         <BrowserRouter>
           <GlobalMaintenanceGate>
             <AppOnboardingGate />
