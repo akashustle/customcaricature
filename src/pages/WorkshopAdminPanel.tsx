@@ -933,7 +933,7 @@ const WorkshopAdmin = () => {
                       return (
                         <button key={item.key} onClick={() => { onTabChange(item.key); setShowMore(false); }}
                           className={cn("flex flex-col items-center gap-1 py-3 px-1 rounded-xl transition-all",
-                            isActive ? "bg-violet-500/15 text-violet-400" : "text-muted-foreground"
+                            isActive ? "bg-[hsl(82_75%_88%)] text-[hsl(0_0%_8%)] dark:bg-[hsl(82_75%_55%)] dark:text-[hsl(0_0%_8%)]" : "text-muted-foreground"
                           )}>
                           <item.icon size={20} strokeWidth={isActive ? 2 : 1.4} />
                           <span className="text-[10px] font-medium leading-tight text-center">{item.label}</span>
@@ -974,17 +974,17 @@ const WorkshopAdmin = () => {
                 className={cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
                   isActive
-                    ? dm ? "bg-violet-500/15 text-violet-400 font-semibold" : "bg-violet-50 text-violet-700 font-semibold"
+                    ? "admin-sidebar-item-active"
                     : dm ? "text-white/40 hover:text-white/70 hover:bg-white/[0.04]" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all",
-                  isActive ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/30" : dm ? "text-white/40 group-hover:text-white/60" : "text-slate-400 group-hover:text-slate-600"
+                  isActive ? "admin-sidebar-icon-active" : dm ? "text-white/40 group-hover:text-white/60" : "text-slate-400 group-hover:text-slate-600"
                 )}>
                   <item.icon className="w-3.5 h-3.5" />
                 </div>
                 {!collapsed && <span className="truncate">{item.label}</span>}
-                {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />}
+                {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[hsl(82_75%_55%)] animate-pulse" />}
               </button>
             );
           })}
