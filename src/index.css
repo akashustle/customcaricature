@@ -2075,4 +2075,22 @@ html, body {
   color: hsl(0 75% 65%);
 }
 
+/* Auto-coloring helper: any inline ₹ figure inside a table cell, badge,
+   list-item or paragraph that is wrapped in <span class="auto-money">…</span>
+   inherits the green/red treatment. Negative amounts must use class="money-neg". */
+.auto-money,
+td:has(> :only-child[data-rupee="positive"]),
+.badge[data-rupee="positive"] {
+  color: hsl(142 70% 38%);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.dark .auto-money { color: hsl(142 65% 55%); }
+td:has(> :only-child[data-rupee="negative"]),
+.badge[data-rupee="negative"] {
+  color: hsl(0 75% 50%);
+  font-weight: 700;
+}
+
+
 
