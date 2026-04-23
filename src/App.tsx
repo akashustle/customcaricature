@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
+import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
@@ -237,7 +238,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <DefaultThemeApplier />
         <DeferredInit />
@@ -254,6 +255,7 @@ const App = () => {
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
+            <AdminLightThemeForcer />
             
             <Suspense fallback={null}><FloatingButtons /></Suspense>
             <Suspense fallback={null}><MobileBottomNav /></Suspense>

@@ -677,28 +677,64 @@ const ChatSection = ({ userId, userName, fullScreen }: { userId: string; userNam
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
 
+  const fetchMessages = async () => {
+    const { data } = await supabase.from("chat_messages")
+      .select("*")
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .eq("is_artist_chat", false)
+      .eq("deleted", false)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (data) setMessages(data);
+    // mark admin->user messages as read
+    await supabase.from("chat_messages")
+      .update({ read: true } as any)
+      .eq("receiver_id", userId)
+      .eq("is_artist_chat", false)
+      .eq("read", false);
+  };
+
   useEffect(() => {
-    const fetchMessages = async () => {
-      const { data } = await supabase.from("chat_messages")
-        .select("*")
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-        .eq("deleted", false)
-        .order("created_at", { ascending: true })
-        .limit(100);
-      if (data) setMessages(data);
-    };
     fetchMessages();
-    const ch = supabase.channel("user-chat-" + userId)
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () => fetchMessages())
+    const channelId = `user-chat-${userId}-${Date.now()}`;
+    const ch = supabase.channel(channelId)
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages", filter: `sender_id=eq.${userId}` },
+        (payload) => setMessages((prev) => prev.find(m => m.id === (payload.new as any).id) ? prev : [...prev, payload.new]))
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages", filter: `receiver_id=eq.${userId}` },
+        (payload) => setMessages((prev) => prev.find(m => m.id === (payload.new as any).id) ? prev : [...prev, payload.new]))
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_messages" },
+        (payload) => {
+          const n: any = payload.new;
+          if (n.sender_id === userId || n.receiver_id === userId) {
+            setMessages((prev) => prev.map(m => m.id === n.id ? n : m));
+          }
+        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const sendMessage = async () => {
     if (!newMsg.trim()) return;
     setSending(true);
-    await supabase.from("chat_messages").insert({ sender_id: userId, message: newMsg.trim(), is_admin: false, is_artist_chat: false });
+    const text = newMsg.trim();
     setNewMsg("");
+    // optimistic insert so user sees their message immediately
+    const optimistic = { id: `tmp-${Date.now()}`, sender_id: userId, message: text, is_admin: false, created_at: new Date().toISOString(), _optimistic: true };
+    setMessages((prev) => [...prev, optimistic]);
+    const { data, error } = await supabase.from("chat_messages")
+      .insert({ sender_id: userId, message: text, is_admin: false, is_artist_chat: false } as any)
+      .select()
+      .single();
+    if (!error && data) {
+      setMessages((prev) => prev.map(m => m.id === optimistic.id ? data : m));
+    } else if (error) {
+      setMessages((prev) => prev.filter(m => m.id !== optimistic.id));
+      toast({ title: "Failed to send", description: error.message, variant: "destructive" });
+    }
     setSending(false);
   };
 

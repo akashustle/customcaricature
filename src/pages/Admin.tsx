@@ -2447,17 +2447,20 @@ const Admin = () => {
                   <div className="flex items-center justify-between border-t border-border/30 pt-4">
                     <div>
                       <p className="font-sans font-medium text-sm">Default Website Theme</p>
-                      <p className="text-xs text-muted-foreground font-sans">Set default theme for all visitors (light or dark)</p>
+                      <p className="text-xs text-muted-foreground font-sans">
+                        Light, Dark, follow OS, or <b>Auto</b> (warm sunlight 4–11am, light 11am–6pm, dark 6pm–4am)
+                      </p>
                     </div>
                     <Select
                       value={(settings as any).default_theme?.mode || "light"}
                       onValueChange={async (val) => { await updateSetting("default_theme", { mode: val }); toast({ title: `Default theme set to ${val}` }); }}
                     >
-                      <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="light">☀️ Light</SelectItem>
                         <SelectItem value="dark">🌙 Dark</SelectItem>
                         <SelectItem value="system">💻 System</SelectItem>
+                        <SelectItem value="auto">🌅 Auto (time-based)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
