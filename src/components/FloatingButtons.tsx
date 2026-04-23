@@ -3,10 +3,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { gtagWhatsAppClick } from "@/lib/gtag";
 
-const WHATSAPP_NUMBER = "918369594271";
-const INSTAGRAM_URL = "https://instagram.com/creativecaricatureclub";
+const DEFAULT_WHATSAPP = "918369594271";
+const DEFAULT_INSTAGRAM = "https://instagram.com/creativecaricatureclub";
 
 const PAGE_MESSAGES: Record<string, string> = {
   "/": "Hi! I'm interested in your caricature services. Can you tell me more?",
@@ -30,6 +31,9 @@ const FloatingButtons = () => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { settings } = useSiteSettings();
+  const contact = useSiteSetting<any>("global_contact", {});
+  const WHATSAPP_NUMBER = contact?.whatsapp_number || DEFAULT_WHATSAPP;
+  const INSTAGRAM_URL = contact?.instagram_url || (contact?.instagram_handle ? `https://instagram.com/${contact.instagram_handle.replace(/^@/, "")}` : DEFAULT_INSTAGRAM);
 
   // Mobile-specific override: by default WhatsApp float is hidden on mobile (uses MobileBottomNav instead)
   const mobileWhatsappEnabled = (settings as any).floating_whatsapp_mobile?.enabled === true;

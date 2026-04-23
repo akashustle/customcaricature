@@ -122,6 +122,8 @@ const AdminHeatmap = lazy(() => import("@/components/admin/AdminHeatmap"));
 const AdminLilFlea = lazy(() => import("@/components/admin/AdminLilFlea"));
 const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
 const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
+const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
+const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -1069,6 +1071,7 @@ const Admin = () => {
               >
                 <HelpCircle className="w-4 h-4" />
               </button>
+              <Suspense fallback={null}><AdminAIAssistant /></Suspense>
               <AdminFloatingChatButton onClick={() => setActiveTab("live-chat")} />
               <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleAdminRefresh} className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground rounded-xl"><RefreshCw className="w-3.5 h-3.5" /></Button>
@@ -2054,6 +2057,10 @@ const Admin = () => {
 
           <TabsContent value="pages">
             <AdminPages />
+          </TabsContent>
+
+          <TabsContent value="page-content">
+            <AdminPageContent />
           </TabsContent>
 
           <TabsContent value="calculator">

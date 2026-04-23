@@ -1,0 +1,203 @@
+// Admin AI Assistant — Lovable AI gateway with tool calling.
+// Tools allow the assistant to perform admin operations on behalf of the admin.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const SYSTEM_PROMPT = `You are an autonomous Admin Assistant for the Creative Caricature Club (CCC) admin panel.
+Capabilities you have via tools:
+- toggle_setting(key, enabled): turn site features on/off (e.g. "maintenance_mode", "custom_caricature_visible", "floating_whatsapp", "floating_whatsapp_mobile", "floating_instagram", "hide_shop_from_admin")
+- update_setting(key, value): set any JSON setting in admin_site_settings
+- read_setting(key): read current value
+- update_caricature_price(slug, price): update price for a caricature_types row
+- update_event_price(city|district, price): update enquiry_event_pricing
+- send_broadcast_notification(title, message, link): notify all users
+- delete_user_by_email(email): soft-delete via admin function
+- list_users(search, limit): search users by name/email/mobile
+- count_table(table, since_days): get count from table (orders, event_bookings, enquiries, profiles, etc.)
+- summarize_revenue(since_days): get revenue summary
+- block_event_date(date, reason): block a date in event_blocked_dates
+- list_pending_enquiries(limit): list recent unanswered enquiries
+- update_enquiry_status(id, status): change enquiry status
+
+Behavioral rules:
+1. When the admin gives multiple instructions in one message, execute them sequentially with multiple tool calls.
+2. For destructive actions (deletes, blocking, broadcasts to all users) ALWAYS first reply asking for confirmation BEFORE calling the tool. The admin must reply "yes" or "confirm" to proceed.
+3. Be concise. Speak like a fast assistant. Use bullet lists for reports.
+4. Never invent data — if a tool fails, say so plainly.
+5. Always end with a one-line summary of what you did.`;
+
+const tools = [
+  { type: "function", function: { name: "toggle_setting", description: "Enable/disable a boolean site setting", parameters: { type: "object", properties: { key: { type: "string" }, enabled: { type: "boolean" } }, required: ["key", "enabled"] } } },
+  { type: "function", function: { name: "update_setting", description: "Upsert any JSON value into admin_site_settings", parameters: { type: "object", properties: { key: { type: "string" }, value: {} }, required: ["key", "value"] } } },
+  { type: "function", function: { name: "read_setting", description: "Read a single admin_site_settings JSON value", parameters: { type: "object", properties: { key: { type: "string" } }, required: ["key"] } } },
+  { type: "function", function: { name: "update_caricature_price", description: "Set price for a caricature_types row by slug", parameters: { type: "object", properties: { slug: { type: "string" }, price: { type: "number" } }, required: ["slug", "price"] } } },
+  { type: "function", function: { name: "update_event_price", description: "Update enquiry_event_pricing by city or district", parameters: { type: "object", properties: { city: { type: "string" }, district: { type: "string" }, price: { type: "number" } }, required: ["price"] } } },
+  { type: "function", function: { name: "send_broadcast_notification", description: "Insert a broadcast notification for all users", parameters: { type: "object", properties: { title: { type: "string" }, message: { type: "string" }, link: { type: "string" } }, required: ["title", "message"] } } },
+  { type: "function", function: { name: "list_users", description: "Search profiles by name/email/mobile", parameters: { type: "object", properties: { search: { type: "string" }, limit: { type: "number" } } } } },
+  { type: "function", function: { name: "count_table", description: "Count rows in an allowed table", parameters: { type: "object", properties: { table: { type: "string", enum: ["orders", "event_bookings", "enquiries", "profiles", "ai_chat_sessions", "artists"] }, since_days: { type: "number" } }, required: ["table"] } } },
+  { type: "function", function: { name: "summarize_revenue", description: "Sum order + event revenue for the last N days", parameters: { type: "object", properties: { since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "block_event_date", description: "Block an event date in event_blocked_dates", parameters: { type: "object", properties: { date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["date"] } } },
+  { type: "function", function: { name: "list_pending_enquiries", description: "List recent enquiries with status=new", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
+  { type: "function", function: { name: "update_enquiry_status", description: "Update an enquiry status by id", parameters: { type: "object", properties: { id: { type: "string" }, status: { type: "string" } }, required: ["id", "status"] } } },
+];
+
+async function runTool(name: string, args: any, supabase: any, adminId: string): Promise<any> {
+  try {
+    if (name === "toggle_setting") {
+      const { data: existing } = await supabase.from("admin_site_settings").select("value").eq("id", args.key).maybeSingle();
+      const cur = existing?.value || {};
+      const next = { ...(typeof cur === "object" && cur !== null ? cur : {}), enabled: !!args.enabled };
+      await supabase.from("admin_site_settings").upsert({ id: args.key, value: next, updated_at: new Date().toISOString() });
+      return { ok: true, key: args.key, value: next };
+    }
+    if (name === "update_setting") {
+      await supabase.from("admin_site_settings").upsert({ id: args.key, value: args.value, updated_at: new Date().toISOString() });
+      return { ok: true, key: args.key };
+    }
+    if (name === "read_setting") {
+      const { data } = await supabase.from("admin_site_settings").select("value").eq("id", args.key).maybeSingle();
+      return { ok: true, key: args.key, value: data?.value ?? null };
+    }
+    if (name === "update_caricature_price") {
+      const { error } = await supabase.from("caricature_types").update({ price: args.price, updated_at: new Date().toISOString() }).eq("slug", args.slug);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, slug: args.slug, price: args.price };
+    }
+    if (name === "update_event_price") {
+      let q: any = supabase.from("enquiry_event_pricing").update({ price: args.price, updated_at: new Date().toISOString() });
+      if (args.city) q = q.ilike("city", args.city);
+      else if (args.district) q = q.ilike("district", args.district);
+      else return { ok: false, error: "city or district required" };
+      const { error, count } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, updated: count ?? "?", price: args.price };
+    }
+    if (name === "send_broadcast_notification") {
+      const { data: users } = await supabase.from("profiles").select("user_id").limit(5000);
+      const rows = (users || []).map((u: any) => ({ user_id: u.user_id, title: args.title, message: args.message, type: "broadcast", link: args.link || "/" }));
+      if (!rows.length) return { ok: false, error: "no users" };
+      const { error } = await supabase.from("notifications").insert(rows);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, sent_to: rows.length };
+    }
+    if (name === "list_users") {
+      const search = (args.search || "").trim();
+      let q: any = supabase.from("profiles").select("user_id, full_name, email, mobile, city").limit(args.limit || 10);
+      if (search) q = q.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,mobile.ilike.%${search}%`);
+      const { data, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, users: data };
+    }
+    if (name === "count_table") {
+      let q: any = supabase.from(args.table).select("id", { count: "exact", head: true });
+      if (args.since_days) {
+        const since = new Date(Date.now() - args.since_days * 86400000).toISOString();
+        q = q.gte("created_at", since);
+      }
+      const { count, error } = await q;
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, table: args.table, count };
+    }
+    if (name === "summarize_revenue") {
+      const since = new Date(Date.now() - (args.since_days || 30) * 86400000).toISOString();
+      const { data: orders } = await supabase.from("orders").select("amount, payment_status").gte("created_at", since);
+      const { data: events } = await supabase.from("event_bookings").select("advance_amount, negotiated_advance, payment_status").gte("created_at", since);
+      const orderRev = (orders || []).filter((o: any) => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.amount || 0), 0);
+      const eventRev = (events || []).filter((e: any) => ["paid", "fully_paid", "partial_paid"].includes(e.payment_status)).reduce((s: number, e: any) => s + (e.negotiated_advance || e.advance_amount || 0), 0);
+      return { ok: true, since_days: args.since_days || 30, orders_revenue: orderRev, events_revenue: eventRev, total: orderRev + eventRev };
+    }
+    if (name === "block_event_date") {
+      const { error } = await supabase.from("event_blocked_dates").insert({ blocked_date: args.date, reason: args.reason || "Blocked via AI", blocked_by: adminId });
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, date: args.date };
+    }
+    if (name === "list_pending_enquiries") {
+      const { data, error } = await supabase.from("enquiries").select("id, name, mobile, status, created_at").eq("status", "new").order("created_at", { ascending: false }).limit(args.limit || 10);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, enquiries: data };
+    }
+    if (name === "update_enquiry_status") {
+      const { error } = await supabase.from("enquiries").update({ status: args.status, updated_at: new Date().toISOString() }).eq("id", args.id);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: args.id, status: args.status };
+    }
+    return { ok: false, error: `unknown tool ${name}` };
+  } catch (e: any) {
+    return { ok: false, error: e.message || String(e) };
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  try {
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
+
+    const auth = req.headers.get("Authorization") || "";
+    const token = auth.replace("Bearer ", "");
+    const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
+    const { data: { user } } = await userClient.auth.getUser(token);
+    if (!user) return new Response(JSON.stringify({ error: "unauth" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+    const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    if (!roleRow) return new Response(JSON.stringify({ error: "not admin" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const body = await req.json();
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+
+    // Pull a small training corpus from chatbot_training_data marked "admin"
+    const { data: training } = await admin.from("chatbot_training_data").select("question, answer").eq("category", "admin_assistant").eq("is_active", true).limit(50);
+    const trainingPrompt = training && training.length
+      ? `\n\nAdmin-specific knowledge base:\n${training.map((t: any) => `Q: ${t.question}\nA: ${t.answer}`).join("\n\n")}`
+      : "";
+
+    const conv: any[] = [
+      { role: "system", content: SYSTEM_PROMPT + trainingPrompt },
+      ...messages,
+    ];
+
+    // Up to 6 tool-calling rounds
+    for (let round = 0; round < 6; round++) {
+      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: conv, tools, tool_choice: "auto" }),
+      });
+      if (!aiResp.ok) {
+        const t = await aiResp.text();
+        if (aiResp.status === 429) return new Response(JSON.stringify({ error: "Rate limit hit, please retry shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (aiResp.status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted — top up at Settings → Workspace → Usage." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "AI gateway error", detail: t }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const json = await aiResp.json();
+      const msg = json.choices?.[0]?.message;
+      if (!msg) break;
+      conv.push(msg);
+      const calls = msg.tool_calls || [];
+      if (!calls.length) {
+        return new Response(JSON.stringify({ reply: msg.content || "", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      for (const c of calls) {
+        let args: any = {};
+        try { args = JSON.parse(c.function.arguments || "{}"); } catch { args = {}; }
+        const result = await runTool(c.function.name, args, admin, user.id);
+        // Log for audit
+        await admin.from("admin_action_log").insert({ user_id: user.id, admin_name: "AI Assistant", action: `ai_tool:${c.function.name}`, details: JSON.stringify({ args, result }).slice(0, 1000) }).catch(() => {});
+        conv.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(result) });
+      }
+    }
+
+    return new Response(JSON.stringify({ reply: "Reached tool-call limit. Please rephrase the request.", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message || String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});
