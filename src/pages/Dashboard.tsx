@@ -44,6 +44,7 @@ import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
+  age?: number | null; gender?: string | null;
   event_booking_allowed?: boolean; event_edit_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
   is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
 };
@@ -183,9 +184,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, age: (data as any).age ?? null, gender: (data as any).gender || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -210,10 +211,13 @@ const Dashboard = () => {
 
   const saveProfile = async () => {
     if (!editForm || !user) return;
+    const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editForm.full_name, mobile: editForm.mobile, instagram_id: editForm.instagram_id,
       address: editForm.address, city: editForm.city, state: editForm.state, pincode: editForm.pincode,
-    }).eq("user_id", user.id);
+      age: Number.isFinite(ageNum as number) ? ageNum : null,
+      gender: editForm.gender || null,
+    } as any).eq("user_id", user.id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
   };
