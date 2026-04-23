@@ -39,6 +39,11 @@ type SiteSettings = {
   permission_microphone: { enabled: boolean };
   permission_camera: { enabled: boolean };
   admin_location_required: { enabled: boolean };
+  hide_how_it_works: { enabled: boolean };
+  hide_what_you_get: { enabled: boolean };
+  hide_styles_section: { enabled: boolean };
+  hide_start_order_btn: { enabled: boolean };
+  hide_hero_order_btn: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
