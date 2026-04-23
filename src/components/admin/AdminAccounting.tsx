@@ -58,11 +58,21 @@ const AdminAccounting = () => {
     load();
   }, []);
 
+  // Gateway fee is charged on top of price (e.g. 2.6%) and goes to Razorpay — never to us.
+  // Strip it from received amounts so revenue figures reflect only what the business actually keeps.
+  const GATEWAY_PERCENT = 2.6;
+  const stripGatewayFee = (gross: number) => Math.round(gross / (1 + GATEWAY_PERCENT / 100));
+
   const pnl = useMemo(() => {
     const orderRevenue = data.orders.reduce((s, o) => s + (o.negotiated_amount || o.amount || 0), 0);
     const eventRevenue = data.events.reduce((s, e) => s + (e.total_price || 0), 0);
     const eventAdvances = data.events.reduce((s, e) => s + (e.advance_amount || 0), 0);
-    const paymentReceived = data.payments.reduce((s, p) => s + (p.amount || 0), 0);
+    // Net out gateway fee from paid amounts (only online/razorpay rows include it)
+    const paymentReceived = data.payments.reduce((s, p) => {
+      const amt = p.amount || 0;
+      const isOnline = !!p.razorpay_payment_id || (p.description || "").toLowerCase().includes("gateway");
+      return s + (isOnline ? stripGatewayFee(amt) : amt);
+    }, 0);
     const shopRevenue = data.shopOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
 
     const totalRevenue = orderRevenue + eventRevenue + shopRevenue;
@@ -109,7 +119,11 @@ const AdminAccounting = () => {
     data.orders.forEach(o => addMonth(o.created_at, "revenue", o.negotiated_amount || o.amount || 0));
     data.events.forEach(e => addMonth(e.created_at, "revenue", e.total_price || 0));
     data.shopOrders.forEach(o => addMonth(o.created_at, "revenue", o.total_amount || 0));
-    data.payments.forEach(p => addMonth(p.created_at, "received", p.amount || 0));
+    data.payments.forEach(p => {
+      const amt = p.amount || 0;
+      const isOnline = !!p.razorpay_payment_id || (p.description || "").toLowerCase().includes("gateway");
+      addMonth(p.created_at, "received", isOnline ? stripGatewayFee(amt) : amt);
+    });
     data.artistPayouts.forEach(p => addMonth(p.created_at, "expenses", p.calculated_amount || 0));
     return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).map(([month, vals]) => ({
       month: format(new Date(month + "-01"), "MMM yyyy"),
@@ -196,7 +210,7 @@ const AdminAccounting = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard icon={IndianRupee} label="Total Revenue" value={fmt(pnl.totalRevenue)} sub={`${pnl.orderCount + pnl.eventCount + pnl.shopOrderCount} transactions`} trend="up" />
-        <StatCard icon={Wallet} label="Total Received" value={fmt(pnl.totalReceived)} sub="Cash in bank" trend="up" />
+        <StatCard icon={Wallet} label="Total Received" value={fmt(pnl.totalReceived)} sub="Net of gateway fees" trend="up" />
         <StatCard icon={Banknote} label="Total Expenses" value={fmt(pnl.totalExpenses)} sub="Artist payouts" trend={pnl.totalExpenses > 0 ? "down" : "neutral"} />
         <StatCard icon={TrendingUp} label="Net Profit" value={fmt(pnl.netProfit)} sub={pnl.totalRevenue > 0 ? `${((pnl.netProfit / pnl.totalRevenue) * 100).toFixed(1)}% margin` : "—"} trend={pnl.netProfit >= 0 ? "up" : "down"} />
       </div>
