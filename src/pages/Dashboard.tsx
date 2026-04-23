@@ -396,16 +396,18 @@ const Dashboard = () => {
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U";
 
   return (
-    <div className="min-h-screen bg-[hsl(60_20%_97%)] dark:bg-background pb-28 md:pb-10 overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-28 md:pb-10 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
 
       {/* Desktop top bar */}
-      <header className="hidden md:block sticky top-0 z-40 bg-[hsl(60_20%_97%)]/85 dark:bg-background/85 backdrop-blur-xl border-b border-border/40">
+      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
         <div className="container mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
             <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
             <div>
-              <h1 className="font-display text-lg font-bold leading-none">Creative Caricature Club</h1>
+              <h1 className="font-display text-lg font-bold leading-none">
+                Creative <span className="text-gradient-violet">Caricature Club™</span>
+              </h1>
               <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Member portal</p>
             </div>
           </div>
@@ -416,10 +418,19 @@ const Dashboard = () => {
             </Button>
             <button
               onClick={() => setActiveTab("profile")}
-              className="w-10 h-10 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+              className="relative w-10 h-10 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
               aria-label="Open profile"
             >
-              {initials}
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+              {profile?.is_verified && (
+                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
+                  <BadgeCheck className="w-3 h-3" />
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -433,10 +444,19 @@ const Dashboard = () => {
             <NotificationBell />
             <button
               onClick={() => setActiveTab("profile")}
-              className="w-11 h-11 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground shadow-sm"
+              className="relative w-11 h-11 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground shadow-sm"
               aria-label="Open profile"
             >
-              {initials}
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+              {profile?.is_verified && (
+                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
+                  <BadgeCheck className="w-3 h-3" />
+                </span>
+              )}
             </button>
           </div>
         </div>
