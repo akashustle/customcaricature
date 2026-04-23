@@ -51,6 +51,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
   const [pincode, setPincode] = useState(profile?.pincode || "");
   const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
   const [checkingOverlap, setCheckingOverlap] = useState(false);
+  const [pastTimeError, setPastTimeError] = useState<string | null>(null);
+  const [hasHardConflict, setHasHardConflict] = useState(false);
 
   useEffect(() => {
     if (open && profile) {
