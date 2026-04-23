@@ -28,62 +28,62 @@
 
 @layer base {
   :root {
-    /* Warm ivory base, gold/brown brand identity */
-    --background: 35 40% 96%;
-    --foreground: 25 25% 18%;
+    /* Warm cream base, logo-brown brand identity (no gold) */
+    --background: 30 30% 96%;
+    --foreground: 12 30% 18%;
 
-    --card: 35 40% 98%;
-    --card-foreground: 25 25% 18%;
+    --card: 30 35% 98%;
+    --card-foreground: 12 30% 18%;
 
-    --popover: 35 40% 98%;
-    --popover-foreground: 25 25% 18%;
+    --popover: 30 35% 98%;
+    --popover-foreground: 12 30% 18%;
 
-    /* Warm gold primary */
-    --primary: 35 50% 55%;
-    --primary-foreground: 35 40% 98%;
+    /* Warm logo brown primary */
+    --primary: 12 38% 32%;
+    --primary-foreground: 30 35% 98%;
 
     /* Soft warm secondary */
-    --secondary: 35 30% 90%;
-    --secondary-foreground: 25 25% 22%;
+    --secondary: 24 25% 90%;
+    --secondary-foreground: 12 30% 22%;
 
     /* Muted warm */
-    --muted: 35 25% 88%;
-    --muted-foreground: 25 15% 42%;
+    --muted: 24 22% 88%;
+    --muted-foreground: 12 18% 42%;
 
-    /* Terracotta accent */
-    --accent: 18 40% 55%;
-    --accent-foreground: 35 40% 98%;
+    /* Deep brick accent */
+    --accent: 8 45% 42%;
+    --accent-foreground: 30 35% 98%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 25% 84%;
-    --input: 35 25% 84%;
-    --ring: 35 50% 50%;
+    --border: 24 22% 84%;
+    --input: 24 22% 84%;
+    --ring: 12 38% 32%;
 
     --radius: 1rem;
 
-    --sidebar-background: 35 38% 95%;
-    --sidebar-foreground: 25 22% 25%;
-    --sidebar-primary: 35 50% 55%;
-    --sidebar-primary-foreground: 35 40% 98%;
-    --sidebar-accent: 35 25% 90%;
-    --sidebar-accent-foreground: 25 25% 22%;
-    --sidebar-border: 35 25% 86%;
-    --sidebar-ring: 35 50% 50%;
+    --sidebar-background: 30 30% 95%;
+    --sidebar-foreground: 12 25% 25%;
+    --sidebar-primary: 12 38% 32%;
+    --sidebar-primary-foreground: 30 35% 98%;
+    --sidebar-accent: 24 22% 90%;
+    --sidebar-accent-foreground: 12 30% 22%;
+    --sidebar-border: 24 22% 86%;
+    --sidebar-ring: 12 38% 32%;
 
     --success: 142 55% 42%;
     --warning: 38 92% 55%;
     --info: 210 90% 55%;
 
-    /* Extended brand palette */
-    --brand-cream: 35 40% 96%;
-    --brand-gold: 35 50% 55%;
-    --brand-terracotta: 18 40% 55%;
-    --brand-brown: 25 25% 32%;
-    --brand-warm: 35 30% 90%;
-    --brand-lime: 82 78% 55%;
-    --brand-ink: 220 13% 9%;
+    /* Extended brand palette (logo brown family) */
+    --brand-cream: 30 30% 96%;
+    --brand-gold: 12 38% 32%;
+    --brand-terracotta: 8 45% 42%;
+    --brand-brown: 12 38% 28%;
+    --brand-warm: 24 25% 90%;
+    --brand-lime: 145 35% 38%;
+    --brand-ink: 12 30% 14%;
 
     /* Soft accent palette */
     --soft-green: 142 35% 88%;
@@ -105,43 +105,43 @@
     --gold-900: 35 28% 18%;
 
     /* Chart colors */
-    --chart-1: 35 50% 55%;
-    --chart-2: 18 40% 55%;
-    --chart-3: 25 25% 32%;
-    --chart-4: 142 55% 42%;
-    --chart-5: 210 60% 55%;
+    --chart-1: 12 38% 32%;
+    --chart-2: 8 45% 42%;
+    --chart-3: 24 25% 30%;
+    --chart-4: 145 35% 38%;
+    --chart-5: 210 50% 45%;
 
-    --admin-bg: 35 40% 96%;
-    --admin-surface: 35 40% 98%;
-    --admin-foreground: 25 25% 18%;
-    --admin-primary: 35 50% 55%;
-    --admin-secondary: 18 40% 55%;
-    --admin-highlight: 25 25% 28%;
-    --admin-border: 35 25% 84%;
-    --admin-shadow: 25 25% 18%;
+    --admin-bg: 30 30% 96%;
+    --admin-surface: 30 35% 98%;
+    --admin-foreground: 12 30% 18%;
+    --admin-primary: 12 38% 32%;
+    --admin-secondary: 8 45% 42%;
+    --admin-highlight: 12 30% 22%;
+    --admin-border: 24 22% 84%;
+    --admin-shadow: 12 30% 14%;
   }
 
   .dark {
-    --background: 25 15% 10%;
-    --foreground: 35 40% 96%;
+    --background: 12 18% 10%;
+    --foreground: 30 30% 96%;
 
-    --card: 25 15% 14%;
-    --card-foreground: 35 40% 96%;
+    --card: 12 18% 14%;
+    --card-foreground: 30 30% 96%;
 
-    --popover: 25 15% 14%;
-    --popover-foreground: 35 40% 96%;
+    --popover: 12 18% 14%;
+    --popover-foreground: 30 30% 96%;
 
-    --primary: 35 55% 60%;
-    --primary-foreground: 25 15% 10%;
+    --primary: 12 45% 50%;
+    --primary-foreground: 12 18% 10%;
 
-    --secondary: 25 12% 20%;
-    --secondary-foreground: 35 40% 92%;
+    --secondary: 12 14% 20%;
+    --secondary-foreground: 30 30% 92%;
 
-    --muted: 25 10% 22%;
-    --muted-foreground: 35 20% 65%;
+    --muted: 12 12% 22%;
+    --muted-foreground: 30 18% 65%;
 
-    --accent: 18 45% 55%;
-    --accent-foreground: 35 40% 96%;
+    --accent: 8 50% 55%;
+    --accent-foreground: 30 30% 96%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
