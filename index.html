@@ -27,16 +27,33 @@
     <meta name="twitter:image" content="https://portal.creativecaricatureclub.com/logo.png?v=2">
     <meta name="theme-color" content="#fdf8f3" />
 
-    <!-- Favicons — explicit declarations override the platform default Lovable icon in Google search results -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=3" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=3" />
-    <link rel="shortcut icon" href="/favicon.ico?v=3" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png?v=3" />
-    <link rel="mask-icon" href="/logo.png?v=3" color="#3d3028" />
+    <!-- Favicons — explicit declarations override the platform default Lovable icon in Google search results.
+         IMPORTANT: Google requires a favicon at /favicon.ico (root) AND a square 48x48+ image referenced
+         via <link rel="icon"> with a stable URL. Versioned for cache-busting. -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png?v=ccc4" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?v=ccc4" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png?v=ccc4" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=ccc4" />
+    <link rel="shortcut icon" href="/favicon.ico?v=ccc4" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png?v=ccc4" />
+    <link rel="mask-icon" href="/logo.png?v=ccc4" color="#3d3028" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CCC" />
+
+    <!-- JSON-LD organization with explicit logo so Google associates our brand favicon -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Creative Caricature Club",
+      "alternateName": "Creative Caricature Club\u2122",
+      "url": "https://portal.creativecaricatureclub.com/",
+      "logo": "https://portal.creativecaricatureclub.com/logo.png?v=ccc4",
+      "image": "https://portal.creativecaricatureclub.com/logo.png?v=ccc4"
+    }
+    </script>
 
     <!-- Brand: main website is creativecaricatureclub.com; this portal handles event bookings -->
     <link rel="alternate" href="https://creativecaricatureclub.com" hreflang="en-in" />
