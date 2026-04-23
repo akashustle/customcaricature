@@ -11,9 +11,29 @@ const FloatingNav = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setScrolled(y > 8);
+        // Near top → always show. Scrolling down past threshold → hide. Scrolling up → show.
+        if (y < 80) {
+          setHidden(false);
+        } else if (y > lastY + 4) {
+          setHidden(true);
+        } else if (y < lastY - 4) {
+          setHidden(false);
+        }
+        lastY = y;
+        ticking = false;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -37,7 +57,11 @@ const FloatingNav = () => {
   };
 
   return (
-    <header className="relative md:sticky md:top-3 z-40 w-full px-3 sm:px-4 pt-3 md:pt-0">
+    <header
+      className={`sticky top-0 md:top-3 z-40 w-full px-3 sm:px-4 pt-3 md:pt-0 transition-transform duration-300 will-change-transform ${
+        hidden ? "-translate-y-[120%]" : "translate-y-0"
+      }`}
+    >
       <div
         className={`mx-auto max-w-7xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-shadow ${
           scrolled ? "shadow-[0_10px_40px_-20px_hsl(252_60%_40%/0.25)]" : "shadow-sm"
