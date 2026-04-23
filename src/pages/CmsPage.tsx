@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 const CmsPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -48,7 +50,7 @@ const CmsPage = () => {
           <h1 className="font-display text-xl font-bold">{page.title}</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl space-y-3">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl space-y-3">
         {paragraphs.map((para: string, i: number) => {
           const isHeading = /^\d+\./.test(para.trim());
           return isHeading ? (
@@ -60,8 +62,11 @@ const CmsPage = () => {
           );
         })}
       </motion.div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default CmsPage;

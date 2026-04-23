@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Phone, Instagram, Facebook, Youtube, Sparkles, Award, Users, Calendar, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.5 } });
 
@@ -19,7 +21,7 @@ const About = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-6 text-sm text-foreground/80">
+      <div className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-6 text-sm text-foreground/80">
         <motion.div initial={{ scale: 0.8, rotateY: 180, opacity: 0 }} animate={{ scale: 1, rotateY: 0, opacity: 1 }} transition={{ duration: 0.8, type: "spring" }} className="text-center">
           <motion.img src="/logo.png" alt="Creative Caricature Club™" className="w-24 h-24 rounded-2xl mx-auto mb-4 shadow-3d border-glow" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }} />
           <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground text-3d animate-text-glow">Creative Caricature Club™</h2>
@@ -90,8 +92,11 @@ const About = () => {
           </div>
         </motion.div>
       </div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default About;

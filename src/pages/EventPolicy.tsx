@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { lazy, Suspense } from "react";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 
 const fadeUp = (delay: number) => ({ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.4 } });
 
@@ -18,7 +20,7 @@ const EventPolicy = () => {
           <h1 className="font-display text-xl font-bold">Event Booking Policy</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-5 text-sm text-foreground/80">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-5 text-sm text-foreground/80">
         <h2 className="font-display text-2xl font-bold text-foreground text-center">🎭 Live Caricature Event Policy</h2>
 
         <div className="space-y-4">
@@ -84,8 +86,11 @@ const EventPolicy = () => {
           </motion.div>
         </div>
       </motion.div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </div>
   );
 };
+
 
 export default EventPolicy;
