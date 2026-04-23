@@ -39,9 +39,9 @@ const FloatingNav = () => {
   };
 
   return (
-    <header className="sticky top-3 z-40 w-full px-3 sm:px-4">
+    <header className="relative md:sticky md:top-3 z-40 w-full px-3 sm:px-4 pt-3 md:pt-0">
       <div
-        className={`mx-auto max-w-6xl rounded-2xl border border-border/40 bg-card/90 backdrop-blur-xl px-4 sm:px-6 py-3 flex items-center justify-between transition-shadow ${
+        className={`mx-auto max-w-6xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-shadow ${
           scrolled ? "shadow-[0_10px_40px_-20px_hsl(252_60%_40%/0.25)]" : "shadow-sm"
         }`}
       >
