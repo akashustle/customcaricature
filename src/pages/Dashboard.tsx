@@ -473,27 +473,27 @@ const Dashboard = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6 h-auto w-full bg-white border border-border rounded-2xl p-1.5 flex flex-wrap justify-start gap-1">
               {tabsAvailable.home && (
-                <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Home className="w-4 h-4 mr-2" />Home
                 </TabsTrigger>
               )}
               {tabsAvailable.events && (
-                <TabsTrigger value="events" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="events" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <CalIcon className="w-4 h-4 mr-2" />Events
                 </TabsTrigger>
               )}
               {tabsAvailable.payments && (
-                <TabsTrigger value="payments" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="payments" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Receipt className="w-4 h-4 mr-2" />Payments
                 </TabsTrigger>
               )}
               {tabsAvailable.chat && (
-                <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
                 </TabsTrigger>
               )}
               {tabsAvailable.profile && (
-                <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
                 </TabsTrigger>
               )}
@@ -541,9 +541,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Mobile bottom nav (5 tabs, modern lime style) */}
+      {/* Mobile bottom nav (5 tabs, fade primary style) */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
-        <div className="pointer-events-auto mx-auto max-w-md bg-white border border-border/60 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] px-2 py-2 flex items-center justify-around">
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around">
           {[
             { key: "home", icon: Home, label: "Home" },
             { key: "events", icon: CalIcon, label: "Events" },
@@ -557,7 +557,7 @@ const Dashboard = () => {
                 key={item.key}
                 onClick={() => setActiveTab(item.key)}
                 className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all ${
-                  isActive ? "bg-foreground text-background" : "text-muted-foreground"
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
@@ -567,6 +567,9 @@ const Dashboard = () => {
           })}
         </div>
       </nav>
+
+      {/* Add Event modal */}
+      {profile && <AddEventModal open={addEventOpen} onClose={() => setAddEventOpen(false)} profile={profile} />}
 
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
