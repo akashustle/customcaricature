@@ -119,7 +119,11 @@ const AdminAccounting = () => {
     data.orders.forEach(o => addMonth(o.created_at, "revenue", o.negotiated_amount || o.amount || 0));
     data.events.forEach(e => addMonth(e.created_at, "revenue", e.total_price || 0));
     data.shopOrders.forEach(o => addMonth(o.created_at, "revenue", o.total_amount || 0));
-    data.payments.forEach(p => addMonth(p.created_at, "received", p.amount || 0));
+    data.payments.forEach(p => {
+      const amt = p.amount || 0;
+      const isOnline = !!p.razorpay_payment_id || (p.description || "").toLowerCase().includes("gateway");
+      addMonth(p.created_at, "received", isOnline ? stripGatewayFee(amt) : amt);
+    });
     data.artistPayouts.forEach(p => addMonth(p.created_at, "expenses", p.calculated_amount || 0));
     return Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).map(([month, vals]) => ({
       month: format(new Date(month + "-01"), "MMM yyyy"),
