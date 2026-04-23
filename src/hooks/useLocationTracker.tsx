@@ -1,9 +1,16 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const ASK_KEY = "ccc_user_location_asked_v1";
+const isDashboardRoute = () => {
+  if (typeof window === "undefined") return false;
+  return window.location.pathname.startsWith("/dashboard");
+};
+
 /**
  * Tracks user's live location and sends updates to the database.
- * Requests permission on mount, updates every 30 seconds.
+ * Only asks for permission ONCE per device, and only on the user dashboard.
+ * Updates every 30 seconds while permission is granted.
  */
 const useLocationTracker = (userId: string | null) => {
   const watchIdRef = useRef<number | null>(null);
@@ -11,6 +18,11 @@ const useLocationTracker = (userId: string | null) => {
 
   useEffect(() => {
     if (!userId || !navigator.geolocation) return;
+    // Strict policy: only request location on user dashboard route, once per device.
+    if (!isDashboardRoute()) return;
+    const alreadyAsked = typeof window !== "undefined" && localStorage.getItem(ASK_KEY) === "done";
+    // If user previously denied, never re-ask programmatically.
+    let permissionGranted = false;
 
     const updateLocation = (position: GeolocationPosition) => {
       const { latitude, longitude } = position.coords;
