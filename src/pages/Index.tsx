@@ -365,8 +365,15 @@ const FAQs = () => {
 
 /* --------------------------------- Footer -------------------------------- */
 
-const Footer = () => {
-  const cols = [
+const DEFAULT_FOOTER = {
+  brand_title: "Creative Caricature Club™",
+  brand_tagline: "India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.",
+  copyright: `© ${new Date().getFullYear()} Creative Caricature Club. All rights reserved.`,
+  tagline_right: "Made with ❤️ for live events.",
+  credit_prefix: "Designed and prompted by",
+  credit_name: "Akash",
+  credit_instagram_handle: "akashustle",
+  columns: [
     {
       title: "Services",
       links: [
@@ -401,7 +408,15 @@ const Footer = () => {
         { label: "Disclaimer", href: "/disclaimer" },
       ],
     },
-  ];
+  ],
+};
+
+const Footer = ({ override }: { override?: any }) => {
+  const f = { ...DEFAULT_FOOTER, ...(override || {}) };
+  const cols: { title: string; links: { label: string; href: string }[] }[] =
+    Array.isArray(f.columns) && f.columns.length ? f.columns : DEFAULT_FOOTER.columns;
+  const igHandle = (f.credit_instagram_handle || "akashustle").replace(/^@/, "");
+  const instaUrl = `https://instagram.com/${igHandle}`;
   return (
     <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
       <div className="mx-auto max-w-6xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10">
@@ -413,16 +428,14 @@ const Footer = () => {
                 Creative<br /><span className="text-gradient-violet">Caricature Club™</span>
               </div>
             </div>
-            <p className="text-sm text-foreground/70 mt-3">
-              India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.
-            </p>
+            <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
           </div>
           {cols.map((c) => (
             <div key={c.title}>
               <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">{c.title}</div>
               <ul className="space-y-2">
                 {c.links.map((l) => (
-                  <li key={l.href}>
+                  <li key={l.href + l.label}>
                     <a href={l.href} className="text-sm text-foreground/75 hover:text-primary transition-colors">{l.label}</a>
                   </li>
                 ))}
@@ -431,8 +444,21 @@ const Footer = () => {
           ))}
         </div>
         <div className="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} Creative Caricature Club. All rights reserved.</p>
-          <p>Made with ❤️ for live events.</p>
+          <p>{f.copyright}</p>
+          <p className="flex items-center gap-1.5">
+            <span>{f.tagline_right}</span>
+            <span className="opacity-50">·</span>
+            <span>{f.credit_prefix}</span>
+            <a
+              href={instaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline"
+              aria-label={`${f.credit_name} on Instagram`}
+            >
+              {f.credit_name}
+            </a>
+          </p>
         </div>
       </div>
     </footer>
