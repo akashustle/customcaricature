@@ -28,62 +28,69 @@
 
 @layer base {
   :root {
-    /* Pure ivory canvas + crisp white surfaces, warm logo-cream brand accent (NO brown, NO lime, NO dark) */
-    --background: 44 55% 97%;
-    --foreground: 30 18% 18%;
+    /* Adymize-inspired palette — soft lavender canvas, white surfaces, vibrant violet brand */
+    --background: 240 60% 98%;
+    --foreground: 240 35% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 30 18% 18%;
+    --card-foreground: 240 35% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 30 18% 18%;
+    --popover-foreground: 240 35% 14%;
 
-    /* Warm logo cream/honey primary — soft, elegant, ivory-aligned */
-    --primary: 38 65% 55%;
-    --primary-foreground: 30 25% 14%;
+    /* Vibrant violet primary (Adymize purple) */
+    --primary: 252 85% 62%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Soft ivory secondary */
-    --secondary: 44 45% 94%;
-    --secondary-foreground: 30 18% 22%;
+    /* Soft lavender secondary */
+    --secondary: 250 60% 96%;
+    --secondary-foreground: 240 35% 18%;
 
-    /* Muted soft ivory */
-    --muted: 44 35% 93%;
-    --muted-foreground: 30 10% 42%;
+    /* Muted soft lavender */
+    --muted: 245 50% 95%;
+    --muted-foreground: 240 12% 45%;
 
-    /* Warm honey accent */
-    --accent: 35 75% 62%;
-    --accent-foreground: 30 25% 14%;
+    /* Pink/violet accent for gradients */
+    --accent: 285 80% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 52%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 25% 88%;
-    --input: 40 25% 88%;
-    --ring: 38 65% 55%;
+    --border: 245 30% 90%;
+    --input: 245 30% 90%;
+    --ring: 252 85% 62%;
 
-    --radius: 1rem;
+    /* Square-ish buttons with a touch of softness */
+    --radius: 0.75rem;
 
-    --sidebar-background: 44 50% 96%;
-    --sidebar-foreground: 30 14% 22%;
-    --sidebar-primary: 38 65% 55%;
-    --sidebar-primary-foreground: 30 25% 14%;
-    --sidebar-accent: 44 35% 93%;
-    --sidebar-accent-foreground: 30 18% 22%;
-    --sidebar-border: 40 25% 88%;
-    --sidebar-ring: 38 65% 55%;
+    --sidebar-background: 240 60% 98%;
+    --sidebar-foreground: 240 30% 22%;
+    --sidebar-primary: 252 85% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 245 50% 95%;
+    --sidebar-accent-foreground: 240 35% 18%;
+    --sidebar-border: 245 30% 90%;
+    --sidebar-ring: 252 85% 62%;
 
     --success: 142 55% 42%;
     --warning: 38 92% 55%;
     --info: 210 88% 55%;
 
-    /* Extended brand palette (ivory + warm cream — NO brown, NO lime) */
-    --brand-cream: 44 55% 97%;
-    --brand-gold: 38 65% 55%;
-    --brand-terracotta: 35 75% 62%;
-    --brand-brown: 30 18% 18%;
-    --brand-warm: 44 45% 94%;
-    --brand-lime: 38 65% 55%;
-    --brand-ink: 30 22% 12%;
+    /* Adymize-style brand palette — violet + pink gradient family */
+    --brand-cream: 240 60% 98%;
+    --brand-violet: 252 85% 62%;
+    --brand-violet-deep: 258 70% 50%;
+    --brand-pink: 320 80% 75%;
+    --brand-pink-soft: 340 85% 88%;
+    --brand-blue-soft: 215 90% 92%;
+    --brand-ink: 240 35% 14%;
+    /* Legacy aliases — remapped to violet so any old reference stays in palette */
+    --brand-gold: 252 85% 62%;
+    --brand-terracotta: 285 80% 70%;
+    --brand-brown: 240 35% 14%;
+    --brand-warm: 250 60% 96%;
+    --brand-lime: 252 85% 62%;
 
     /* Soft accent palette — warm ivory pastels */
     --soft-green: 145 30% 88%;
@@ -1667,4 +1674,89 @@ body {
 @keyframes tab-fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   Adymize-style design helpers (purple/violet aesthetic)
+   ========================================================= */
+.bg-hero-violet {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, hsl(252 90% 80% / 0.55), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, hsl(285 90% 85% / 0.45), transparent 60%),
+    radial-gradient(800px 500px at 10% 30%, hsl(215 95% 88% / 0.45), transparent 60%),
+    linear-gradient(180deg, hsl(245 80% 97%) 0%, hsl(0 0% 100%) 100%);
+}
+.bg-section-soft {
+  background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(245 70% 98%) 100%);
+}
+.text-gradient-violet {
+  background: linear-gradient(135deg, hsl(258 85% 60%) 0%, hsl(225 90% 65%) 50%, hsl(285 80% 70%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.btn-square-dark {
+  background: hsl(240 35% 14%);
+  color: hsl(0 0% 100%);
+  border-radius: 0.65rem;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-dark:hover { background: hsl(252 85% 62%); transform: translateY(-1px); }
+.btn-square-violet {
+  background: linear-gradient(135deg, hsl(252 85% 62%), hsl(258 75% 55%));
+  color: #fff;
+  border-radius: 0.65rem;
+  padding: 0.85rem 1.6rem;
+  font-weight: 700;
+  box-shadow: 0 10px 24px -10px hsl(252 85% 62% / 0.55);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-violet:hover { transform: translateY(-1px); box-shadow: 0 14px 30px -10px hsl(252 85% 62% / 0.7); }
+.btn-square-outline {
+  background: hsl(0 0% 100%);
+  color: hsl(240 35% 14%);
+  border: 1px solid hsl(245 30% 88%);
+  border-radius: 0.65rem;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-square-outline:hover { border-color: hsl(252 85% 62%); color: hsl(252 85% 62%); }
+.chip-violet {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, hsl(285 100% 92%), hsl(245 100% 94%));
+  color: hsl(258 70% 45%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.card-soft-white {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(245 30% 92%);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 60px -30px hsl(252 60% 40% / 0.18);
+}
+.card-gradient-blob {
+  background:
+    radial-gradient(closest-side at 50% 50%, hsl(285 90% 85% / 0.55), transparent 70%),
+    radial-gradient(closest-side at 30% 70%, hsl(215 95% 90% / 0.55), transparent 70%),
+    radial-gradient(closest-side at 70% 30%, hsl(340 90% 92% / 0.55), transparent 70%),
+    hsl(0 0% 100%);
+  border: 1px solid hsl(245 30% 92%);
+  border-radius: 1.5rem;
 }
