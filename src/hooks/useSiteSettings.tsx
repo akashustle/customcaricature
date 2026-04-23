@@ -44,6 +44,9 @@ type SiteSettings = {
   hide_styles_section: { enabled: boolean };
   hide_start_order_btn: { enabled: boolean };
   hide_hero_order_btn: { enabled: boolean };
+  homepage_urgency_strip: { enabled: boolean };
+  floating_whatsapp: { enabled: boolean };
+  floating_instagram: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -83,6 +86,9 @@ const defaults: SiteSettings = {
   hide_styles_section: { enabled: true },
   hide_start_order_btn: { enabled: true },
   hide_hero_order_btn: { enabled: true },
+  homepage_urgency_strip: { enabled: false },
+  floating_whatsapp: { enabled: false },
+  floating_instagram: { enabled: false },
 };
 
 // Module-level cache so all instances share one fetch result

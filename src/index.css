@@ -28,97 +28,97 @@
 
 @layer base {
   :root {
-    /* Warm cream base, logo-brown brand identity (no gold) */
-    --background: 30 30% 96%;
-    --foreground: 12 30% 18%;
+    /* Bright ivory canvas, warm logo-brown brand identity */
+    --background: 40 50% 98%;
+    --foreground: 14 35% 16%;
 
-    --card: 30 35% 98%;
-    --card-foreground: 12 30% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 14 35% 16%;
 
-    --popover: 30 35% 98%;
-    --popover-foreground: 12 30% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 14 35% 16%;
 
     /* Warm logo brown primary */
-    --primary: 12 38% 32%;
-    --primary-foreground: 30 35% 98%;
+    --primary: 14 42% 34%;
+    --primary-foreground: 40 50% 98%;
 
-    /* Soft warm secondary */
-    --secondary: 24 25% 90%;
-    --secondary-foreground: 12 30% 22%;
+    /* Soft cream secondary */
+    --secondary: 36 38% 94%;
+    --secondary-foreground: 14 35% 22%;
 
-    /* Muted warm */
-    --muted: 24 22% 88%;
-    --muted-foreground: 12 18% 42%;
+    /* Muted ivory */
+    --muted: 36 30% 92%;
+    --muted-foreground: 14 18% 42%;
 
-    /* Deep brick accent */
-    --accent: 8 45% 42%;
-    --accent-foreground: 30 35% 98%;
+    /* Vibrant terracotta accent */
+    --accent: 18 70% 52%;
+    --accent-foreground: 40 50% 98%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 24 22% 84%;
-    --input: 24 22% 84%;
-    --ring: 12 38% 32%;
+    --border: 36 25% 86%;
+    --input: 36 25% 86%;
+    --ring: 14 42% 34%;
 
     --radius: 1rem;
 
-    --sidebar-background: 30 30% 95%;
-    --sidebar-foreground: 12 25% 25%;
-    --sidebar-primary: 12 38% 32%;
-    --sidebar-primary-foreground: 30 35% 98%;
-    --sidebar-accent: 24 22% 90%;
-    --sidebar-accent-foreground: 12 30% 22%;
-    --sidebar-border: 24 22% 86%;
-    --sidebar-ring: 12 38% 32%;
+    --sidebar-background: 40 45% 97%;
+    --sidebar-foreground: 14 30% 22%;
+    --sidebar-primary: 14 42% 34%;
+    --sidebar-primary-foreground: 40 50% 98%;
+    --sidebar-accent: 36 30% 92%;
+    --sidebar-accent-foreground: 14 35% 22%;
+    --sidebar-border: 36 25% 88%;
+    --sidebar-ring: 14 42% 34%;
 
-    --success: 142 55% 42%;
-    --warning: 38 92% 55%;
-    --info: 210 90% 55%;
+    --success: 142 60% 42%;
+    --warning: 38 95% 55%;
+    --info: 210 92% 55%;
 
-    /* Extended brand palette (logo brown family) */
-    --brand-cream: 30 30% 96%;
-    --brand-gold: 12 38% 32%;
-    --brand-terracotta: 8 45% 42%;
-    --brand-brown: 12 38% 28%;
-    --brand-warm: 24 25% 90%;
-    --brand-lime: 145 35% 38%;
-    --brand-ink: 12 30% 14%;
+    /* Extended brand palette (vibrant ivory + brown family) */
+    --brand-cream: 40 50% 98%;
+    --brand-gold: 14 42% 34%;
+    --brand-terracotta: 18 70% 52%;
+    --brand-brown: 14 42% 28%;
+    --brand-warm: 36 38% 94%;
+    --brand-lime: 145 50% 42%;
+    --brand-ink: 14 35% 14%;
 
-    /* Soft accent palette */
-    --soft-green: 142 35% 88%;
-    --soft-blue: 210 50% 90%;
-    --soft-pink: 345 55% 90%;
-    --warm-peach: 25 70% 90%;
-    --light-gold: 40 65% 75%;
+    /* Soft accent palette — vibrant pastels */
+    --soft-green: 142 55% 88%;
+    --soft-blue: 210 70% 90%;
+    --soft-pink: 345 75% 90%;
+    --warm-peach: 25 85% 88%;
+    --light-gold: 40 80% 75%;
 
     /* Brown scale (kept var names for backwards compat) */
-    --gold-50: 30 30% 97%;
-    --gold-100: 24 25% 92%;
-    --gold-200: 24 22% 86%;
-    --gold-300: 24 22% 76%;
-    --gold-400: 12 28% 58%;
-    --gold-500: 12 38% 32%;
-    --gold-600: 12 42% 26%;
-    --gold-700: 12 38% 22%;
-    --gold-800: 12 35% 16%;
-    --gold-900: 12 30% 12%;
+    --gold-50: 40 50% 98%;
+    --gold-100: 36 38% 94%;
+    --gold-200: 36 25% 86%;
+    --gold-300: 24 25% 76%;
+    --gold-400: 14 32% 58%;
+    --gold-500: 14 42% 34%;
+    --gold-600: 14 45% 28%;
+    --gold-700: 14 42% 22%;
+    --gold-800: 14 38% 16%;
+    --gold-900: 14 32% 12%;
 
-    /* Chart colors */
-    --chart-1: 12 38% 32%;
-    --chart-2: 8 45% 42%;
-    --chart-3: 24 25% 30%;
-    --chart-4: 145 35% 38%;
-    --chart-5: 210 50% 45%;
+    /* Chart colors — vibrant */
+    --chart-1: 14 42% 34%;
+    --chart-2: 18 70% 52%;
+    --chart-3: 145 50% 42%;
+    --chart-4: 210 70% 50%;
+    --chart-5: 38 90% 55%;
 
-    --admin-bg: 30 30% 96%;
-    --admin-surface: 30 35% 98%;
-    --admin-foreground: 12 30% 18%;
-    --admin-primary: 12 38% 32%;
-    --admin-secondary: 8 45% 42%;
-    --admin-highlight: 12 30% 22%;
-    --admin-border: 24 22% 84%;
-    --admin-shadow: 12 30% 14%;
+    --admin-bg: 40 50% 98%;
+    --admin-surface: 0 0% 100%;
+    --admin-foreground: 14 35% 16%;
+    --admin-primary: 14 42% 34%;
+    --admin-secondary: 18 70% 52%;
+    --admin-highlight: 14 35% 22%;
+    --admin-border: 36 25% 86%;
+    --admin-shadow: 14 30% 14%;
   }
 
   .dark {

@@ -284,6 +284,39 @@ const AdminMaintenance = () => {
               </div>
               <Switch checked={hideStartOrderBtn} onCheckedChange={(v) => updateSiteSetting("hide_start_order_btn", { enabled: v })} />
             </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-border/30">
+              <div>
+                <p className="text-sm font-medium">Show "Only X slots left" urgency strip</p>
+                <p className="text-xs text-muted-foreground">Top-of-page urgency banner. OFF by default.</p>
+              </div>
+              <Switch
+                checked={(siteSettings as any).homepage_urgency_strip?.enabled === true}
+                onCheckedChange={(v) => updateSiteSetting("homepage_urgency_strip", { enabled: v })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Show floating WhatsApp button</p>
+                <p className="text-xs text-muted-foreground">Bottom-right floating WhatsApp / quote CTA</p>
+              </div>
+              <Switch
+                checked={(siteSettings as any).floating_whatsapp?.enabled === true}
+                onCheckedChange={(v) => updateSiteSetting("floating_whatsapp", { enabled: v })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Show floating Instagram button</p>
+                <p className="text-xs text-muted-foreground">Bottom-right floating Instagram CTA</p>
+              </div>
+              <Switch
+                checked={(siteSettings as any).floating_instagram?.enabled === true}
+                onCheckedChange={(v) => updateSiteSetting("floating_instagram", { enabled: v })}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5 pt-2 border-t border-border/40">

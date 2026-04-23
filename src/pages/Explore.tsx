@@ -23,12 +23,12 @@ const ICON_MAP: Record<string, any> = {
   star: Star, graduation: GraduationCap, chat: MessageCircle, help: HelpCircle, phone: Phone,
 };
 
-const DEFAULT_SECTIONS: ExploreSection[] = [
-  { id: "order", title: "Custom Caricatures", subtitle: "Order hand-crafted caricature art from your photos", image_url: "", link: "/order", icon: "palette", sort_order: 1, is_visible: true },
-  { id: "events", title: "Book for Events", subtitle: "Live caricature artists for weddings, parties & corporate events", image_url: "", link: "/book-event", icon: "calendar", sort_order: 2, is_visible: true },
-  { id: "shop", title: "Shop", subtitle: "Browse caricature merchandise and gifts", image_url: "", link: "/shop", icon: "shopping", sort_order: 3, is_visible: true },
-  { id: "gallery", title: "Gallery", subtitle: "Explore our portfolio of caricature masterpieces", image_url: "", link: "/gallery/caricatures", icon: "star", sort_order: 4, is_visible: true },
-  { id: "workshop", title: "Workshop", subtitle: "Learn caricature art with professional artists", image_url: "", link: "/workshop", icon: "graduation", sort_order: 5, is_visible: true },
+const DEFAULT_SECTIONS: (ExploreSection & { disabled?: boolean; disabled_message?: string })[] = [
+  { id: "events", title: "Book for Event", subtitle: "Live caricature artists for weddings, parties & corporate events", image_url: "", link: "/book-event", icon: "calendar", sort_order: 1, is_visible: true },
+  { id: "order", title: "Custom Caricatures", subtitle: "Currently unavailable — we'll be back soon!", image_url: "", link: "/order", icon: "palette", sort_order: 2, is_visible: true, disabled: true, disabled_message: "Currently unavailable" },
+  { id: "gallery", title: "Gallery", subtitle: "Explore our portfolio of caricature masterpieces", image_url: "", link: "/gallery/caricatures", icon: "star", sort_order: 3, is_visible: true },
+  { id: "workshop", title: "Workshop", subtitle: "Learn caricature art with professional artists", image_url: "", link: "/workshop", icon: "graduation", sort_order: 4, is_visible: true },
+  { id: "shop", title: "Shop", subtitle: "Coming soon — caricature merchandise & gifts", image_url: "", link: "/shop", icon: "shopping", sort_order: 5, is_visible: true, disabled: true, disabled_message: "Coming soon" },
   { id: "chat", title: "Live Chat", subtitle: "Get instant help with your queries", image_url: "", link: "/live-chat", icon: "chat", sort_order: 6, is_visible: true },
   { id: "about", title: "About Us", subtitle: "Our story, team & journey", image_url: "", link: "/about", icon: "users", sort_order: 7, is_visible: true },
   { id: "faq", title: "FAQs", subtitle: "Frequently asked questions answered", image_url: "", link: "/faqs", icon: "help", sort_order: 8, is_visible: true },
@@ -37,7 +37,7 @@ const DEFAULT_SECTIONS: ExploreSection[] = [
 
 const Explore = () => {
   const navigate = useNavigate();
-  const [sections, setSections] = useState<ExploreSection[]>(DEFAULT_SECTIONS);
+  const [sections, setSections] = useState<(ExploreSection & { disabled?: boolean; disabled_message?: string })[]>(DEFAULT_SECTIONS);
 
   useEffect(() => {
     const fetch = async () => {
@@ -88,33 +88,39 @@ const Explore = () => {
         <div className="grid grid-cols-1 gap-4">
           {sections.map((section, i) => {
             const IconComp = ICON_MAP[section.icon] || Palette;
+            const isDisabled = section.disabled === true;
             return (
               <motion.div
                 key={section.id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                transition={{ delay: i * 0.04 }}
+                whileHover={isDisabled ? {} : { y: -2 }}
+                whileTap={isDisabled ? {} : { scale: 0.98 }}
               >
                 <Card
-                  className="cursor-pointer overflow-hidden border border-border/60 hover:border-primary/30 hover:shadow-lg transition-all group"
-                  onClick={() => navigate(section.link)}
+                  className={`overflow-hidden border transition-all group ${isDisabled ? "border-border/40 bg-muted/30 opacity-70 cursor-not-allowed" : "cursor-pointer border-border/60 hover:border-primary/40 hover:shadow-lg"}`}
+                  onClick={() => !isDisabled && navigate(section.link)}
                 >
                   <CardContent className="p-0">
                     <div className="flex items-center gap-4 p-4">
                       {section.image_url ? (
                         <img src={section.image_url} alt={section.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
                       ) : (
-                        <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                          <IconComp className="w-7 h-7 text-primary" />
+                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${isDisabled ? "bg-muted" : "bg-primary/10 group-hover:bg-primary/20"}`}>
+                          <IconComp className={`w-7 h-7 ${isDisabled ? "text-muted-foreground" : "text-primary"}`} />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-display text-base font-semibold text-foreground">{section.title}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-display text-base font-semibold text-foreground">{section.title}</h3>
+                          {isDisabled && section.disabled_message && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/15 text-accent">{section.disabled_message}</span>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{section.subtitle}</p>
                       </div>
-                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                      {!isDisabled && <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />}
                     </div>
                   </CardContent>
                 </Card>
