@@ -57,11 +57,17 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "logo.png", "badge-96.png", "badge-72.png", "sw-push.js"],
+      injectRegister: null, // we register manually via src/lib/pwa-register.ts (iframe-guarded)
+      devOptions: { enabled: false }, // never run SW in dev/preview
+      includeAssets: ["favicon.png", "logo.png", "badge-96.png", "badge-72.png", "sw-push.js", "offline.html"],
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2,webp,avif}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         importScripts: ["/sw-push.js"],
+        navigateFallback: "/offline.html",
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -97,7 +103,16 @@ export default defineConfig(({ mode }) => ({
             },
           },
         ],
-        navigateFallbackDenylist: [/^\/~oauth/],
+        navigateFallbackDenylist: [
+          /^\/~oauth/,
+          /^\/customcad75/,
+          /^\/admin-panel/,
+          /^\/cccworkshop2006/,
+          /^\/workshop-admin-panel/,
+          /^\/CFCAdmin936/,
+          /^\/shop-admin/,
+          /^\/api\//,
+        ],
       },
       manifest: {
         name: "Creative Caricature Club",

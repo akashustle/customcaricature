@@ -45,11 +45,11 @@ const BeforeAfterSlider = ({ item }: { item: BeforeAfterItem }) => {
       onTouchMove={(e) => handleMove(e.touches[0].clientX)}
     >
       {/* After (full background) */}
-      <img src={item.after_image_url} alt="After" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={item.after_image_url} alt="After" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
 
       {/* Before (clipped) */}
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
-        <img src={item.before_image_url} alt="Before" className="absolute inset-0 w-full h-full object-cover" style={{ minWidth: containerRef.current ? `${containerRef.current.offsetWidth}px` : "100%" }} />
+        <img src={item.before_image_url} alt="Before" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" style={{ minWidth: containerRef.current ? `${containerRef.current.offsetWidth}px` : "100%" }} />
       </div>
 
       {/* Slider line */}
