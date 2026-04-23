@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, Calendar, Sparkles, Palette, Camera, Star, Plus, Minus,
-  CheckCircle2, MessageCircle, MapPin, Clock, Users, Award, Quote, Trophy, Heart,
+  ArrowRight, Calendar, Sparkles, Star, Plus, Minus,
+  CheckCircle2, Users, Award, Quote, Trophy, Heart,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -139,7 +139,7 @@ const Services = ({ onBook }: { onBook: () => void }) => {
       subtitle="Our full focus is on live event caricatures — fast, fun, photo-perfect entertainment your guests will remember forever."
     >
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-        {items.map((s, i) => (
+        {items.map((s) => (
           <div key={s.title} className="card-gradient-blob p-6 sm:p-8 group">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -432,7 +432,9 @@ const Index = () => {
 
       <Footer />
 
-      {settings.homepage_sticky_cta_visible?.enabled && <HomepageStickyCTA />}
+      {(settings as any).homepage_sticky_cta_visible?.enabled && (
+        <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />
+      )}
     </div>
   );
 };
