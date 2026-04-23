@@ -28,145 +28,138 @@
 
 @layer base {
   :root {
-    /* FinRank-inspired: Off-white base, lime green primary, near-black ink */
-    --background: 60 9% 97%;
-    --foreground: 220 13% 9%;
+    /* Warm ivory base, gold/brown brand identity */
+    --background: 35 40% 96%;
+    --foreground: 25 25% 18%;
 
-    /* Pure white cards for crisp contrast */
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 9%;
+    --card: 35 40% 98%;
+    --card-foreground: 25 25% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 9%;
+    --popover: 35 40% 98%;
+    --popover-foreground: 25 25% 18%;
 
-    /* Lime/electric green primary — vivid, modern */
-    --primary: 82 78% 55%;
-    --primary-foreground: 220 13% 9%;
+    /* Warm gold primary */
+    --primary: 35 50% 55%;
+    --primary-foreground: 35 40% 98%;
 
-    /* Soft neutral secondary */
-    --secondary: 60 6% 94%;
-    --secondary-foreground: 220 13% 18%;
+    /* Soft warm secondary */
+    --secondary: 35 30% 90%;
+    --secondary-foreground: 25 25% 22%;
 
-    /* Muted */
-    --muted: 60 6% 92%;
-    --muted-foreground: 220 8% 45%;
+    /* Muted warm */
+    --muted: 35 25% 88%;
+    --muted-foreground: 25 15% 42%;
 
-    /* Warm gold accent — kept for logo touchpoints */
-    --accent: 35 50% 60%;
-    --accent-foreground: 220 13% 9%;
+    /* Terracotta accent */
+    --accent: 18 40% 55%;
+    --accent-foreground: 35 40% 98%;
 
-    /* Destructive */
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders — very light neutral */
-    --border: 60 6% 88%;
-    --input: 60 6% 88%;
-    --ring: 82 78% 50%;
+    --border: 35 25% 84%;
+    --input: 35 25% 84%;
+    --ring: 35 50% 50%;
 
     --radius: 1rem;
 
-    /* Sidebar */
-    --sidebar-background: 60 9% 97%;
-    --sidebar-foreground: 220 10% 25%;
-    --sidebar-primary: 82 78% 55%;
-    --sidebar-primary-foreground: 220 13% 9%;
-    --sidebar-accent: 60 6% 92%;
-    --sidebar-accent-foreground: 220 13% 18%;
-    --sidebar-border: 60 6% 90%;
-    --sidebar-ring: 82 78% 50%;
+    --sidebar-background: 35 38% 95%;
+    --sidebar-foreground: 25 22% 25%;
+    --sidebar-primary: 35 50% 55%;
+    --sidebar-primary-foreground: 35 40% 98%;
+    --sidebar-accent: 35 25% 90%;
+    --sidebar-accent-foreground: 25 25% 22%;
+    --sidebar-border: 35 25% 86%;
+    --sidebar-ring: 35 50% 50%;
 
-    /* Semantic */
-    --success: 82 78% 45%;
+    --success: 142 55% 42%;
     --warning: 38 92% 55%;
     --info: 210 90% 55%;
 
-    /* Extended brand palette — gold kept for logo */
-    --brand-cream: 60 9% 96%;
-    --brand-gold: 35 50% 60%;
+    /* Extended brand palette */
+    --brand-cream: 35 40% 96%;
+    --brand-gold: 35 50% 55%;
     --brand-terracotta: 18 40% 55%;
     --brand-brown: 25 25% 32%;
-    --brand-warm: 60 6% 92%;
+    --brand-warm: 35 30% 90%;
     --brand-lime: 82 78% 55%;
     --brand-ink: 220 13% 9%;
 
-    /* Accent palette — lime-forward */
-    --soft-green: 82 78% 90%;
-    --soft-blue: 220 60% 92%;
-    --soft-pink: 345 60% 92%;
-    --warm-peach: 35 80% 92%;
-    --light-gold: 40 65% 69%;
+    /* Soft accent palette */
+    --soft-green: 142 35% 88%;
+    --soft-blue: 210 50% 90%;
+    --soft-pink: 345 55% 90%;
+    --warm-peach: 25 70% 90%;
+    --light-gold: 40 65% 75%;
 
-    /* Gold scale — kept for logo accents */
+    /* Gold scale */
     --gold-50: 35 40% 97%;
     --gold-100: 35 38% 94%;
     --gold-200: 35 35% 88%;
     --gold-300: 35 32% 78%;
     --gold-400: 35 40% 65%;
-    --gold-500: 35 45% 55%;
-    --gold-600: 35 42% 48%;
-    --gold-700: 35 38% 38%;
-    --gold-800: 35 32% 28%;
-    --gold-900: 35 28% 20%;
+    --gold-500: 35 50% 55%;
+    --gold-600: 35 48% 45%;
+    --gold-700: 35 42% 35%;
+    --gold-800: 35 35% 26%;
+    --gold-900: 35 28% 18%;
 
-    /* Chart colors — lime first */
-    --chart-1: 82 78% 55%;
-    --chart-2: 220 13% 15%;
-    --chart-3: 35 50% 60%;
-    --chart-4: 210 90% 55%;
-    --chart-5: 280 60% 60%;
+    /* Chart colors */
+    --chart-1: 35 50% 55%;
+    --chart-2: 18 40% 55%;
+    --chart-3: 25 25% 32%;
+    --chart-4: 142 55% 42%;
+    --chart-5: 210 60% 55%;
 
-    --admin-bg: 60 9% 97%;
-    --admin-surface: 0 0% 100%;
-    --admin-foreground: 220 13% 9%;
-    --admin-primary: 82 78% 55%;
-    --admin-secondary: 35 50% 60%;
-    --admin-highlight: 220 13% 12%;
-    --admin-border: 60 6% 88%;
-    --admin-shadow: 220 13% 9%;
+    --admin-bg: 35 40% 96%;
+    --admin-surface: 35 40% 98%;
+    --admin-foreground: 25 25% 18%;
+    --admin-primary: 35 50% 55%;
+    --admin-secondary: 18 40% 55%;
+    --admin-highlight: 25 25% 28%;
+    --admin-border: 35 25% 84%;
+    --admin-shadow: 25 25% 18%;
   }
 
   .dark {
-    /* Deep ink background — FinRank dark card vibe */
-    --background: 220 15% 7%;
-    --foreground: 60 9% 96%;
+    --background: 25 15% 10%;
+    --foreground: 35 40% 96%;
 
-    --card: 220 13% 11%;
-    --card-foreground: 60 9% 96%;
+    --card: 25 15% 14%;
+    --card-foreground: 35 40% 96%;
 
-    --popover: 220 13% 11%;
-    --popover-foreground: 60 9% 96%;
+    --popover: 25 15% 14%;
+    --popover-foreground: 35 40% 96%;
 
-    /* Lime stays vivid in dark mode */
-    --primary: 82 82% 60%;
-    --primary-foreground: 220 15% 7%;
+    --primary: 35 55% 60%;
+    --primary-foreground: 25 15% 10%;
 
-    --secondary: 220 12% 15%;
-    --secondary-foreground: 60 9% 90%;
+    --secondary: 25 12% 20%;
+    --secondary-foreground: 35 40% 92%;
 
-    --muted: 220 10% 18%;
-    --muted-foreground: 220 8% 60%;
+    --muted: 25 10% 22%;
+    --muted-foreground: 35 20% 65%;
 
-    --accent: 35 55% 65%;
-    --accent-foreground: 220 15% 7%;
+    --accent: 18 45% 55%;
+    --accent-foreground: 35 40% 96%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 10% 20%;
-    --input: 220 10% 20%;
-    --ring: 82 82% 55%;
+    --border: 25 10% 24%;
+    --input: 25 10% 24%;
+    --ring: 35 55% 55%;
 
     --radius: 1rem;
 
-    --sidebar-background: 220 14% 9%;
-    --sidebar-foreground: 60 9% 85%;
-    --sidebar-primary: 82 82% 60%;
-    --sidebar-primary-foreground: 220 15% 7%;
-    --sidebar-accent: 220 10% 18%;
-    --sidebar-accent-foreground: 60 9% 90%;
-    --sidebar-border: 220 10% 20%;
-    --sidebar-ring: 82 82% 55%;
+    --sidebar-background: 25 15% 12%;
+    --sidebar-foreground: 35 35% 85%;
+    --sidebar-primary: 35 55% 60%;
+    --sidebar-primary-foreground: 25 15% 10%;
+    --sidebar-accent: 25 10% 22%;
+    --sidebar-accent-foreground: 35 40% 92%;
+    --sidebar-border: 25 10% 24%;
+    --sidebar-ring: 35 55% 55%;
 
     --gold-50: 35 20% 12%;
     --gold-100: 35 18% 16%;
@@ -179,37 +172,37 @@
     --gold-800: 35 32% 80%;
     --gold-900: 35 28% 88%;
 
-    --chart-1: 82 82% 60%;
-    --chart-2: 60 9% 85%;
-    --chart-3: 35 55% 65%;
-    --chart-4: 210 90% 60%;
-    --chart-5: 280 60% 65%;
+    --chart-1: 35 55% 60%;
+    --chart-2: 18 45% 55%;
+    --chart-3: 35 35% 85%;
+    --chart-4: 142 55% 50%;
+    --chart-5: 210 60% 60%;
 
-    --success: 82 78% 50%;
+    --success: 142 55% 50%;
     --warning: 38 92% 60%;
     --info: 210 90% 60%;
 
-    --soft-green: 82 40% 18%;
-    --soft-blue: 220 25% 18%;
+    --soft-green: 142 25% 18%;
+    --soft-blue: 210 25% 18%;
     --soft-pink: 345 25% 18%;
-    --warm-peach: 35 30% 18%;
+    --warm-peach: 25 30% 18%;
     --light-gold: 40 45% 50%;
 
-    --brand-cream: 220 13% 12%;
+    --brand-cream: 25 15% 14%;
     --brand-gold: 35 55% 55%;
     --brand-terracotta: 18 45% 55%;
     --brand-brown: 25 25% 72%;
-    --brand-warm: 220 10% 14%;
+    --brand-warm: 25 12% 18%;
     --brand-lime: 82 82% 60%;
-    --brand-ink: 60 9% 96%;
+    --brand-ink: 35 40% 96%;
 
-    --admin-bg: 220 15% 7%;
-    --admin-surface: 220 13% 11%;
-    --admin-foreground: 60 9% 96%;
-    --admin-primary: 82 82% 60%;
-    --admin-secondary: 35 55% 55%;
-    --admin-highlight: 60 9% 90%;
-    --admin-border: 220 10% 20%;
+    --admin-bg: 25 15% 10%;
+    --admin-surface: 25 15% 14%;
+    --admin-foreground: 35 40% 96%;
+    --admin-primary: 35 55% 60%;
+    --admin-secondary: 18 45% 55%;
+    --admin-highlight: 35 35% 85%;
+    --admin-border: 25 10% 24%;
     --admin-shadow: 0 0% 0%;
   }
 }

@@ -11,8 +11,7 @@ Updated: now
 - Data retention: Admin UI deletions are non-destructive and permanently backed up in Google Sheets 'Mini Database'.
 - Data privacy constraint: 'x-guest-session-id' header required for AI chat; path-based RLS for documents.
 - Reactivity: 30s staleTime for global settings, 'useAutoUpdate' hook polls for builds every 45s.
-- Theme: FinRank-inspired — off-white #f5f5ec base, lime green primary (HSL 82 78% 55%), near-black ink (HSL 220 13% 9%). Warm gold (HSL 35 50% 60%) reserved for logo touchpoints only.
-- Use semantic tokens only: btn-pill-ink (black CTA), btn-pill-lime (green raised CTA), card-lime-float, card-ink-float, card-snow-float, chip-lime-ring.
+- Theme: Warm ivory/cream base (HSL 35 40% 96%), warm gold primary (HSL 35 50% 55%), terracotta accent (HSL 18 40% 55%), brown foreground. User reverted from FinRank lime green theme.
 
 ## Memories
 - [Caricature Dynamic Rates](mem://business-rules/pricing/caricature-dynamic-rates) — Supabase Realtime pricing for caricatures with manual override
