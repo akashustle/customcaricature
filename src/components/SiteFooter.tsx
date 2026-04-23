@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 
 const DEFAULT = {
   brand_tagline:
@@ -68,6 +69,7 @@ const fetchFooter = async () => {
 
 const SiteFooter = () => {
   const [override, setOverride] = useState<any>(cached);
+  const contact = useSiteSetting<any>("global_contact", {});
 
   useEffect(() => {
     let mounted = true;
@@ -81,7 +83,8 @@ const SiteFooter = () => {
 
   const f = { ...DEFAULT, ...(override || {}) };
   const cols = Array.isArray(f.columns) && f.columns.length ? f.columns : DEFAULT.columns;
-  const igHandle = (f.credit_instagram_handle || "akashustle").replace(/^@/, "");
+  // Prefer global_contact for credit handle so the admin can edit social handles in one place.
+  const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
 
   return (
     <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
