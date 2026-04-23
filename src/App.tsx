@@ -18,14 +18,28 @@ import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
 
-// Lazy load non-critical shell components
+// Lazy-loaded shell components — wrapped in a passthrough so Radix Slot / AnimatePresence
+// can't forward refs into the lazy boundary (which causes ref warnings).
+const lazyShell = <P,>(loader: () => Promise<{ default: React.ComponentType<P> }>) => {
+  const L = lazy(loader);
+  // Wrap in a real, non-forwardRef function component so React stops trying to attach a ref.
+  const Wrapper = (props: P) => (
+    <Suspense fallback={null}>
+      {/* @ts-expect-error generic prop pass-through */}
+      <L {...props} />
+    </Suspense>
+  );
+  Wrapper.displayName = "LazyShell";
+  return Wrapper;
+};
+
 const SplashScreen = lazy(() => import("./components/SplashScreen"));
-const PWASplashScreen = lazy(() => import("./components/PWASplashScreen"));
-const FloatingButtons = lazy(() => import("./components/FloatingButtons"));
-const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
-const AppUpdateBanner = lazy(() => import("./components/AppUpdateBanner"));
+const PWASplashScreen = lazyShell(() => import("./components/PWASplashScreen"));
+const FloatingButtons = lazyShell(() => import("./components/FloatingButtons"));
+const MobileBottomNav = lazyShell(() => import("./components/MobileBottomNav"));
+const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
-const OfflineDetector = lazy(() => import("./components/OfflineDetector"));
+const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
@@ -244,12 +258,12 @@ const App = () => {
         <DefaultThemeApplier />
         <DeferredInit />
         <RoutePrefetcher />
-        <Suspense fallback={null}><PWASplashScreen /></Suspense>
-        <Suspense fallback={null}><OfflineDetector /></Suspense>
+        <PWASplashScreen />
+        <OfflineDetector />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
-        <Suspense fallback={null}><AppUpdateBanner /></Suspense>
+        <AppUpdateBanner />
         <BrowserRouter>
           <GlobalMaintenanceGate>
             <AppOnboardingGate />
@@ -259,8 +273,8 @@ const App = () => {
             <InternalNavigationBridge />
             <AdminLightThemeForcer />
             
-            <Suspense fallback={null}><FloatingButtons /></Suspense>
-            <Suspense fallback={null}><MobileBottomNav /></Suspense>
+            <FloatingButtons />
+            <MobileBottomNav />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
