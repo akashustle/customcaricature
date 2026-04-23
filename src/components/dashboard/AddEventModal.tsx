@@ -136,6 +136,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
     if (!eventType) return toast({ title: "Pick an event type", variant: "destructive" });
     if (!eventDate) return toast({ title: "Pick a date", variant: "destructive" });
     if (!startTime) return toast({ title: "Pick a start time", variant: "destructive" });
+    if (pastTimeError) return toast({ title: "Invalid start time", description: pastTimeError, variant: "destructive" });
+    if (hasHardConflict) return toast({ title: "Slot unavailable", description: overlapWarning || "This time slot is fully booked.", variant: "destructive" });
     if (!state || !city || !venueName || !fullAddress || !pincode) {
       return toast({ title: "Please fill all venue details", variant: "destructive" });
     }
