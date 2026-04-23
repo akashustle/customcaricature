@@ -550,54 +550,45 @@ const Index = () => {
       <FloatingNav />
 
       <main>
-        {/* 1. Hero with right-to-left continuous marquee */}
-        <Hero onBook={onBook} onQuote={onQuote} images={heroImages} />
-
-        {/* 2. Stats — like reference image */}
-        <Stats items={stats} />
-
-        {/* 3. Video — admin editable, hidden if disabled */}
-        {(content as any).homepage_video?.enabled && (
-          <section id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-            <div className="mx-auto max-w-6xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
-              <div className="text-center mb-7 sm:mb-10">
-                <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
-                  See the <span className="text-gradient-violet">experience live</span>
-                </h2>
-              </div>
-              <HomepageVideo config={(content as any).homepage_video} />
-            </div>
-          </section>
-        )}
-
-        {/* 4. Event Gallery preview + view-all */}
-        <EventGallery images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />
-
-        {/* 5. Trusted Brands (DB-driven, includes SBI etc.) */}
-        <section id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
-          <div className="mx-auto max-w-6xl rounded-3xl card-soft-white overflow-hidden">
-            <HomepageTrustedBrands />
-          </div>
-        </section>
-
-        {/* 6. Services */}
-        <Services onBook={onBook} />
-
-        {/* 7. How it starts */}
-        <HowItStarts onBook={onBook} images={eventGallery} />
-
-        {/* 8. Why us */}
-        <WhyUnique />
-
-        {/* 9. Reviews */}
-        <Reviews />
-
-        {/* 10. FAQs */}
-        <FAQs />
+        {(() => {
+          const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
+            ? (content as any).homepage_section_order.order
+            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
+          const sections: Record<string, React.ReactNode> = {
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} />,
+            stats: <Stats key="stats" items={stats} />,
+            video: (content as any).homepage_video?.enabled ? (
+              <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
+                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
+                  <div className="text-center mb-7 sm:mb-10">
+                    <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+                      See the <span className="text-gradient-violet">experience live</span>
+                    </h2>
+                  </div>
+                  <HomepageVideo config={(content as any).homepage_video} />
+                </div>
+              </section>
+            ) : null,
+            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />,
+            clients: (
+              <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
+                <div className="mx-auto max-w-6xl rounded-3xl card-soft-white overflow-hidden">
+                  <HomepageTrustedBrands />
+                </div>
+              </section>
+            ),
+            services: <Services key="services" onBook={onBook} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} />,
+            why: <WhyUnique key="why" />,
+            reviews: <Reviews key="reviews" />,
+            faqs: <FAQs key="faqs" />,
+          };
+          return order.map(id => sections[id]).filter(Boolean);
+        })()}
       </main>
 
-      <Footer />
+      <Footer override={(content as any).homepage_footer} />
 
       {(settings as any).homepage_sticky_cta_visible?.enabled && (
         <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />
