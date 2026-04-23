@@ -557,13 +557,10 @@ const Index = () => {
                   </motion.div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
                     {[
-                      { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event.", action: handleEventClick, cta: "Book for Event" },
-                      { icon: Palette, title: "Custom Caricature", desc: "Hand-crafted caricatures from your photos. Perfect for gifts & wall art.", action: handleOrderClick, cta: "Order Now" },
-                      { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now" },
-                      ...(settings.shop_nav_visible?.enabled !== false ? [{
-                        icon: ShoppingBag, title: "Merchandise Store", desc: "Caricature-themed apparel and custom printed merchandise.",
-                        action: () => navigate("/shop"), cta: "Shop Now"
-                      }] : [{ icon: ShoppingBag, title: "Merchandise Store", desc: "Coming soon!", action: () => {}, cta: "Coming Soon" }]),
+                      { icon: Sparkles, title: "Live Event Caricature", desc: "Professional artists at your wedding, birthday, or corporate event.", action: handleEventClick, cta: "Book for Event", disabled: false },
+                      { icon: Palette, title: "Custom Caricature", desc: "Currently we have paused this service. We'll be back soon!", action: () => {}, cta: "Paused — Back Soon", disabled: true },
+                      { icon: Award, title: "Corporate Events", desc: "Elevate your corporate gatherings with live caricature entertainment.", action: handleEventClick, cta: "Enquire Now", disabled: false },
+                      { icon: ShoppingBag, title: "Merchandise Store", desc: "Caricature-themed apparel and custom printed merchandise.", action: () => {}, cta: "Coming Soon", disabled: true },
                     ].map((service, i) => (
                       <motion.div key={service.title} initial={{ opacity: 0, scale: 0.85, rotateY: -20 }} whileInView={{ opacity: 1, scale: 1, rotateY: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, duration: 0.5, type: "spring" }} whileHover={{ scale: 1.04, rotateY: 5 }} className="perspective-1000">
                         <Card className="card-3d h-full flex flex-col">
@@ -573,8 +570,8 @@ const Index = () => {
                             </div>
                             <h3 className="font-calligraphy text-xl font-semibold mb-3 text-foreground">{service.title}</h3>
                             <p className="text-sm text-muted-foreground font-body leading-relaxed flex-1">{service.desc}</p>
-                            <Button variant={service.cta === "Coming Soon" ? "secondary" : "outline"} className="mt-5 rounded-full font-body w-full" onClick={service.action} disabled={service.cta === "Coming Soon"}>
-                              {service.cta} {service.cta !== "Coming Soon" && <ArrowRight className="w-4 h-4 ml-1" />}
+                            <Button variant={service.disabled ? "secondary" : "outline"} className="mt-5 rounded-full font-body w-full" onClick={service.action} disabled={service.disabled}>
+                              {service.cta} {!service.disabled && <ArrowRight className="w-4 h-4 ml-1" />}
                             </Button>
                           </CardContent>
                         </Card>
@@ -659,11 +656,13 @@ const Index = () => {
                 <Calendar className="w-5 h-5 mr-2" /> Book Your Event
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
-              <Button size="xl" variant="outline" onClick={handleOrderClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
-                <Palette className="w-5 h-5 mr-2" /> Start Your Order
-              </Button>
-            </motion.div>
+            {settings.hide_start_order_btn?.enabled !== true && settings.custom_caricature_visible?.enabled !== false && (
+              <motion.div whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.95 }}>
+                <Button size="xl" variant="outline" onClick={handleOrderClick} className="rounded-full font-body font-semibold border-border hover:bg-card">
+                  <Palette className="w-5 h-5 mr-2" /> Start Your Order
+                </Button>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </section>
