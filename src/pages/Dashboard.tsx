@@ -1115,98 +1115,78 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 
 const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
-  const memberSince = profile?.email ? "Member" : "";
 
   return (
     <div className="space-y-4">
-      {/* Profile Hero Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl"
-        style={{ perspective: "800px" }}
-      >
-        <div className="bg-gradient-to-br from-primary/20 via-background to-secondary/30 p-6 border border-border/40 rounded-3xl"
-          style={{ transform: "rotateX(1deg)", transformStyle: "preserve-3d" }}>
-          {/* Glass overlay */}
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] rounded-3xl pointer-events-none" />
-          <div className="relative flex items-center gap-4 mb-5">
-            <motion.div
-              whileHover={{ scale: 1.08, rotateY: 10 }}
-              className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <span className="text-2xl font-bold text-primary-foreground font-display">{initials}</span>
-            </motion.div>
-            <div className="flex-1">
-              <h3 className="font-display text-xl font-bold text-foreground">{profile?.full_name || "User"}</h3>
-              <p className="text-sm text-muted-foreground font-sans">{profile?.email || ""}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs text-muted-foreground font-sans">{memberSince}</span>
-              </div>
+      {/* Modern lime-green profile hero (no brown) */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(88_60%_42%)] via-[hsl(84_70%_50%)] to-[hsl(88_55%_55%)] p-6 shadow-xl shadow-primary/10 border border-white/30">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/20 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-black/10 blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-center gap-4 mb-5">
+          <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg ring-4 ring-white/50">
+            <span className="text-2xl font-bold text-[hsl(88_60%_28%)] font-display">{initials}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-display text-2xl font-bold text-white truncate">{profile?.full_name || "User"}</h3>
+            <p className="text-sm text-white/85 font-sans truncate">{profile?.email || ""}</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-xs text-white/90 font-sans font-semibold">Active member</span>
             </div>
-            {!editing ? (
-              <Button variant="outline" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
-            ) : (
-              <div className="flex gap-1.5">
-                <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl"><X className="w-4 h-4" /></Button>
+          </div>
+          {!editing ? (
+            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+          ) : (
+            <div className="flex gap-1.5">
+              <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Save className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl text-white hover:bg-white/20"><X className="w-4 h-4" /></Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* White detail card */}
+      <div className="bg-white rounded-3xl p-5 border border-border shadow-sm">
+        {editing && editForm ? (
+          <div className="space-y-3">
+            <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
+            <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
+            <div><Label className="font-sans text-xs text-muted-foreground">Mobile</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} className="rounded-xl" /></div>
+            <div><Label className="font-sans text-xs text-muted-foreground">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} className="rounded-xl" /></div>
+            <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} className="rounded-xl" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="font-sans text-xs text-muted-foreground">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} className="rounded-xl" /></div>
+            </div>
+            <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} className="rounded-xl" /></div>
+          </div>
+        ) : profile ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { label: "Mobile", value: profile.mobile ? `+91 ${profile.mobile}` : "Not set" },
+              { label: "Instagram", value: profile.instagram_id || "Not set" },
+              { label: "City", value: profile.city || "Not set" },
+              { label: "State", value: profile.state || "Not set" },
+              { label: "Pincode", value: profile.pincode || "Not set" },
+              { label: "Secret Code", value: profile.secret_code || "Not set" },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl p-3 border border-border bg-secondary/40">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">{item.label}</p>
+                <p className="text-sm font-sans font-semibold text-foreground mt-0.5 truncate">{item.value}</p>
+              </div>
+            ))}
+            {profile.address && (
+              <div className="sm:col-span-2 rounded-2xl p-3 border border-border bg-secondary/40">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Full Address</p>
+                <p className="text-sm font-sans font-medium text-foreground mt-0.5">{[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(", ")}</p>
               </div>
             )}
           </div>
-
-          {editing && editForm ? (
-            <div className="space-y-3">
-              <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">Mobile</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} className="rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} className="rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} className="rounded-xl" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label className="font-sans text-xs text-muted-foreground">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} className="rounded-xl" /></div>
-                <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} className="rounded-xl" /></div>
-              </div>
-              <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} className="rounded-xl" /></div>
-            </div>
-          ) : profile ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {[
-                { label: "📱 Mobile", value: profile.mobile ? `+91 ${profile.mobile}` : "Not set" },
-                { label: "📸 Instagram", value: profile.instagram_id || "Not set" },
-                { label: "📍 City", value: profile.city || "Not set" },
-                { label: "🏠 State", value: profile.state || "Not set" },
-                { label: "📮 Pincode", value: profile.pincode || "Not set" },
-                { label: "🔐 Secret Code", value: profile.secret_code || "Not set" },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/30"
-                >
-                  <p className="text-[10px] text-muted-foreground font-sans">{item.label}</p>
-                  <p className="text-sm font-sans font-medium text-foreground mt-0.5">{item.value}</p>
-                </motion.div>
-              ))}
-              {profile.address && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                  className="sm:col-span-2 bg-background/60 backdrop-blur-sm rounded-xl p-3 border border-border/30"
-                >
-                  <p className="text-[10px] text-muted-foreground font-sans">🏡 Full Address</p>
-                  <p className="text-sm font-sans font-medium text-foreground mt-0.5">{[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(", ")}</p>
-                </motion.div>
-              )}
-            </div>
-          ) : (
-            <p className="text-muted-foreground font-sans">No profile data found.</p>
-          )}
-        </div>
-      </motion.div>
+        ) : (
+          <p className="text-muted-foreground font-sans">No profile data found.</p>
+        )}
+      </div>
     </div>
   );
 };

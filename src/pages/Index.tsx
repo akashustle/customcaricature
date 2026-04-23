@@ -790,8 +790,8 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Sticky CTA (Mobile) */}
-      <HomepageStickyCTA config={content.homepage_sticky_cta} />
+      {/* Sticky CTA (Mobile) — only renders when admin enables both content + visibility */}
+      <HomepageStickyCTA config={{ ...content.homepage_sticky_cta, admin_visible: (settings as any).homepage_sticky_cta_visible?.enabled === true }} />
     </div>
   );
 };
