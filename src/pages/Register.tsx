@@ -362,7 +362,7 @@ const Register = () => {
             <p className="text-center text-sm font-sans mt-4 text-muted-foreground">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
           </CardContent>
         </Card>
-        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans">Creative Caricature Club™ © {new Date().getFullYear()}</p>
+        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans"><span className="text-gradient-violet font-semibold">Creative Caricature Club</span><span className="align-super text-[0.6em] ml-0.5">™</span> © {new Date().getFullYear()}</p>
       </motion.div>
     </div>
     </>
