@@ -311,7 +311,7 @@ const AdminEnquiries = () => {
                           {e.city && <p className="text-xs text-muted-foreground font-sans">📍 {e.city}, {e.district && `${e.district}, `}{e.state}</p>}
                           {e.event_date && <p className="text-xs text-muted-foreground font-sans">📅 {new Date(e.event_date).toLocaleDateString("en-IN")}</p>}
                           {e.estimated_price && (
-                            <p className="text-xs font-sans text-primary font-medium">💰 ₹{Number(e.estimated_price).toLocaleString("en-IN")} ({e.pricing_source})</p>
+                            <p className="text-xs font-sans font-medium">💰 <span className="money">₹{Number(e.estimated_price).toLocaleString("en-IN")}</span> ({e.pricing_source})</p>
                           )}
                           {e.link_clicked_at && (
                             <p className="text-[10px] text-green-600 font-sans">🔗 Link clicked at {new Date(e.link_clicked_at).toLocaleString("en-IN")}</p>
@@ -526,7 +526,7 @@ const AdminEnquiries = () => {
                           <TableCell className="text-xs font-sans">{r.state || <span className="text-muted-foreground italic">All</span>}</TableCell>
                           <TableCell className="text-xs font-sans">{r.district || <span className="text-muted-foreground italic">All</span>}</TableCell>
                           <TableCell className="text-xs font-sans">{r.city || <span className="text-muted-foreground italic">All</span>}</TableCell>
-                          <TableCell className="text-xs font-sans text-right font-bold">₹{Number(r.price).toLocaleString("en-IN")}</TableCell>
+                          <TableCell className="text-xs font-sans text-right money">₹{Number(r.price).toLocaleString("en-IN")}</TableCell>
                           <TableCell className="text-xs font-sans text-center">{r.priority}</TableCell>
                           <TableCell className="text-center"><Switch checked={r.is_active} onCheckedChange={v => togglePricingActive(r.id, v)} /></TableCell>
                           <TableCell className="text-right">
@@ -570,7 +570,7 @@ const AdminEnquiries = () => {
               {previewResult && (
                 <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 animate-in fade-in duration-200">
                   <p className="text-xs text-muted-foreground font-sans">Resolved Price</p>
-                  <p className="font-display text-2xl font-bold text-primary">₹{previewResult.price.toLocaleString("en-IN")}</p>
+                  <p className="font-display text-2xl money">₹{previewResult.price.toLocaleString("en-IN")}</p>
                   <p className="text-xs text-muted-foreground font-sans mt-1">Source: {previewResult.source}</p>
                 </div>
               )}

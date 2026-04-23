@@ -239,7 +239,7 @@ const TrackOrder = () => {
                             {new Date(order.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                           </p>
                         </div>
-                        <p className="text-xl font-bold" style={{ color: "hsl(36, 45%, 42%)" }}>{formatPrice(order.amount)}</p>
+                        <p className="text-xl font-bold money">{formatPrice(order.amount)}</p>
                       </div>
                       <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: "spring" }} className="mt-3">
                         <Badge className="text-xs px-3 py-1 border-0" style={{
@@ -445,7 +445,7 @@ const TrackOrder = () => {
                             {new Date(shopOrder.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                           </p>
                         </div>
-                        <p className="text-xl font-bold" style={{ color: "hsl(210, 55%, 40%)" }}>{formatPrice(shopOrder.total_amount)}</p>
+                        <p className="text-xl font-bold money">{formatPrice(shopOrder.total_amount)}</p>
                       </div>
                       <div className="mt-3 flex gap-2 flex-wrap">
                         <Badge className="text-xs border-0 px-3 py-1" style={{
@@ -498,7 +498,7 @@ const TrackOrder = () => {
                                 <p className="text-sm font-medium" style={{ color: "hsl(30, 30%, 25%)" }}>{item.product_name || "Product"}</p>
                                 <p className="text-xs" style={{ color: "hsl(30, 12%, 56%)" }}>Qty: {item.quantity}</p>
                               </div>
-                              <p className="font-semibold text-sm" style={{ color: "hsl(210, 55%, 40%)" }}>{formatPrice(item.price * item.quantity)}</p>
+                              <p className="font-semibold text-sm money">{formatPrice(item.price * item.quantity)}</p>
                             </div>
                           ))}
                         </div>

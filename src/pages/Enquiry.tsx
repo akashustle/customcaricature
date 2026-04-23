@@ -640,7 +640,7 @@ const Enquiry = () => {
                       {/* Pricing Card */}
                       {priceData && (
                         <div className="p-4 rounded-2xl bg-gradient-to-r from-primary/5 to-accent/10 border border-primary/20 text-center">
-                          <p className="font-display text-3xl font-bold text-primary">
+                          <p className="font-display text-3xl font-bold money">
                             ₹{priceData.price.toLocaleString("en-IN")}
                             {priceData.per_face && <span className="text-sm font-sans font-normal text-muted-foreground">/face</span>}
                           </p>
