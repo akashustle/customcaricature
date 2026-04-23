@@ -44,7 +44,7 @@ import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
-  event_booking_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
+  event_booking_allowed?: boolean; event_edit_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
   is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
 };
 
@@ -183,9 +183,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -507,7 +507,7 @@ const Dashboard = () => {
             <TabsContent value="home">
               <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
             </TabsContent>
-            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
+            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="profile">
@@ -527,7 +527,7 @@ const Dashboard = () => {
           {activeTab === "home" && (
             <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
           )}
-          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "chat" && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
@@ -1231,7 +1231,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
   );
 };
 
-const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
+const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed = false }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string; editAllowed?: boolean }) => {
   const { settings: _siteSettings } = useSiteSettings();
   const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
   const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({});
@@ -1241,6 +1241,29 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
   const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
   const [_payPreview, _setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
+  const [rescheduleEvent, setRescheduleEvent] = useState<any>(null);
+  const [pendingRescheduleIds, setPendingRescheduleIds] = useState<Set<string>>(new Set());
+
+  // Track which events already have a pending reschedule request so we can disable the button
+  useEffect(() => {
+    if (!userId || events.length === 0) return;
+    const ids = events.map((e: any) => e.id);
+    (async () => {
+      const { data } = await (supabase.from("event_reschedule_requests" as any).select("event_id, status") as any).in("event_id", ids).eq("status", "pending");
+      const set = new Set<string>();
+      (data || []).forEach((r: any) => set.add(r.event_id));
+      setPendingRescheduleIds(set);
+    })();
+    const ch = supabase.channel(`reschedule-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_reschedule_requests", filter: `user_id=eq.${userId}` }, async () => {
+        const { data } = await (supabase.from("event_reschedule_requests" as any).select("event_id, status") as any).in("event_id", ids).eq("status", "pending");
+        const set = new Set<string>();
+        (data || []).forEach((r: any) => set.add(r.event_id));
+        setPendingRescheduleIds(set);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId, events.length]);
 
   // Separate upcoming and past events
   const now = new Date();
@@ -1704,6 +1727,20 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       );
                     })()}
 
+                    {/* Reschedule action — only when admin enabled it for this user and event is upcoming */}
+                    {editAllowed && ev.status !== "completed" && ev.status !== "cancelled" && new Date(ev.event_date) >= new Date(new Date().setHours(0,0,0,0)) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full rounded-full font-sans text-xs border-primary/40 text-primary hover:bg-primary/5"
+                        disabled={pendingRescheduleIds.has(ev.id)}
+                        onClick={() => setRescheduleEvent(ev)}
+                      >
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        {pendingRescheduleIds.has(ev.id) ? "Reschedule request pending" : "Request Reschedule"}
+                      </Button>
+                    )}
+
                     {/* Show Event Details toggle (for completed/fully paid) */}
                     {(ev.status === "completed" || fullyPaid) && (
                       <Button
@@ -1759,6 +1796,15 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             );
           })}
         </div>
+      )}
+      {rescheduleEvent && userId && (
+        <RescheduleEventDialog
+          open={!!rescheduleEvent}
+          onClose={() => setRescheduleEvent(null)}
+          event={rescheduleEvent}
+          userId={userId}
+          onSubmitted={() => setRescheduleEvent(null)}
+        />
       )}
     </>
   );
@@ -2223,10 +2269,14 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
 
 /* ───────── Modern Home Overview (soft fade hero, replaces widgets) ───────── */
 /* App Download card — promote PWA install to event-booked users */
+const PWA_DISMISS_KEY = "ccc_pwa_install_dismissed_v1";
 const DownloadAppCard = () => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
   const [platform, setPlatform] = useState<"android" | "ios" | "desktop" | "other">("other");
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    try { return localStorage.getItem(PWA_DISMISS_KEY) === "1"; } catch { return false; }
+  });
 
   useEffect(() => {
     // Detect platform
@@ -2237,11 +2287,20 @@ const DownloadAppCard = () => {
 
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
-    const installedHandler = () => setInstalled(true);
+    const installedHandler = () => {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    };
     window.addEventListener("appinstalled", installedHandler);
     // Already installed (standalone display mode or iOS standalone)
-    if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
-    if ((navigator as any).standalone === true) setInstalled(true);
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    }
+    if ((navigator as any).standalone === true) {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    }
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
@@ -2252,28 +2311,40 @@ const DownloadAppCard = () => {
     if (installPrompt) {
       installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      if (outcome === "accepted") setInstalled(true);
+      if (outcome === "accepted") {
+        setInstalled(true);
+        try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      }
       setInstallPrompt(null);
     } else if (platform === "ios") {
       toast({
         title: "Install on iPhone 📱",
         description: "Tap the Share icon in Safari, then 'Add to Home Screen'.",
       });
+      // Mark as dismissed once instructions shown — user is acting on it
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     } else if (platform === "android") {
       toast({
         title: "Install on Android 📱",
         description: "Open the browser menu (⋮) and tap 'Add to Home screen' / 'Install app'.",
       });
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     } else {
       toast({
         title: "Install on desktop 💻",
         description: "Look for the install icon in your browser's address bar.",
       });
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     }
   };
 
-  // INSTALLED state — show pretty confirmation
+  // INSTALLED state — show pretty confirmation (only first session post-install)
   if (installed) {
+    // Hide entirely once user has clicked install (after re-render)
+    if (dismissed) return null;
     return (
       <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background p-4 shadow-sm">
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none" />
@@ -2290,6 +2361,9 @@ const DownloadAppCard = () => {
       </div>
     );
   }
+
+  // If user already dismissed/installed previously — never show again
+  if (dismissed) return null;
 
   const buttonLabel =
     installPrompt ? "Install"
@@ -2323,6 +2397,15 @@ const DownloadAppCard = () => {
           {buttonLabel}
         </Button>
       </div>
+      <button
+        onClick={() => {
+          try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+          setDismissed(true);
+        }}
+        className="absolute top-2 right-2 text-[10px] text-muted-foreground/70 hover:text-foreground/80 underline font-sans"
+      >
+        Don't show again
+      </button>
     </div>
   );
 };

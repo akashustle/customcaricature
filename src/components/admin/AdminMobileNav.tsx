@@ -7,7 +7,7 @@ import {
   Shield, Activity, Brain, ShieldCheck, Type, FormInput, Palette,
   Calculator, FileQuestion, Layers, TrendingUp, UserCheck,
   Gift, Ticket, ToggleLeft, AlertTriangle, MessageCircle, Receipt,
-  CalendarDays, LineChart, GripHorizontal, X
+  CalendarDays, LineChart, GripHorizontal, X, RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +22,7 @@ const PRIMARY_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "orders", label: "Orders", icon: Package },
   { id: "events", label: "Events", icon: Calendar },
+  { id: "reschedule-requests", label: "Reschedules", icon: RefreshCw },
   { id: "payments", label: "Payments", icon: Receipt },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "revenue", label: "Revenue", icon: DollarSign },
