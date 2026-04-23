@@ -9,6 +9,7 @@ import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import RoutePrefetcher from "./components/RoutePrefetcher";
+import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
@@ -204,6 +205,26 @@ const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/** Visitor splash screen — only renders when admin has explicitly enabled it. */
+const HomepageSplashGate = ({ onComplete }: { onComplete: () => void }) => {
+  const { settings, loading } = useSiteSettings();
+  // While settings load, do nothing (default-off behavior).
+  if (loading) return null;
+  if (settings.homepage_splash_enabled?.enabled !== true) {
+    onComplete();
+    return null;
+  }
+  return <Suspense fallback={null}><SplashScreen onComplete={onComplete} /></Suspense>;
+};
+
+/** App onboarding slides — only renders when admin has explicitly enabled it. */
+const AppOnboardingGate = () => {
+  const { settings, loading } = useSiteSettings();
+  if (loading) return null;
+  if (settings.app_onboarding_enabled?.enabled !== true) return null;
+  return <Suspense fallback={null}><AppOnboarding /></Suspense>;
+};
+
 const App = () => {
   // Splash on EVERY full page reload (skip only on admin-style routes).
   const [showSplash, setShowSplash] = useState(() => {
@@ -223,11 +244,11 @@ const App = () => {
         <Suspense fallback={null}><OfflineDetector /></Suspense>
         <Toaster />
         <Sonner />
-        {showSplash && <Suspense fallback={null}><SplashScreen onComplete={() => setShowSplash(false)} /></Suspense>}
+        {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
         <Suspense fallback={null}><AppUpdateBanner /></Suspense>
         <BrowserRouter>
           <GlobalMaintenanceGate>
-            <Suspense fallback={null}><AppOnboarding /></Suspense>
+            <AppOnboardingGate />
             <ScrollToTop />
             <RouteMemoryTracker />
             <RouteMemoryRedirector />
