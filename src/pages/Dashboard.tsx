@@ -216,7 +216,7 @@ const Dashboard = () => {
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
   };
 
-  const uploadAvatar = async (file: File) => {
+  const uploadAvatar = useCallback(async (file: File) => {
     if (!user) return;
     setUploadingAvatar(true);
     try {
@@ -234,7 +234,10 @@ const Dashboard = () => {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     }
     setUploadingAvatar(false);
-  };
+  }, [user]);
+
+  // Expose to ProfileSection (label input handler)
+  useEffect(() => { (window as any).__uploadAvatar = uploadAvatar; return () => { delete (window as any).__uploadAvatar; }; }, [uploadAvatar]);
 
   const changeSecretCode = async () => {
     if (!user || newSecretCode.length !== 4) return;
@@ -1094,29 +1097,42 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 
   return (
     <div className="space-y-4">
-      {/* Modern lime-green profile hero (no brown) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(88_60%_42%)] via-[hsl(84_70%_50%)] to-[hsl(88_55%_55%)] p-6 shadow-xl shadow-primary/10 border border-white/30">
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/20 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-black/10 blur-3xl pointer-events-none" />
+      {/* Modern profile hero — fade primary, dark-mode friendly */}
+      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
 
         <div className="relative flex items-center gap-4 mb-5">
-          <div className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-lg ring-4 ring-white/50">
-            <span className="text-2xl font-bold text-[hsl(88_60%_28%)] font-display">{initials}</span>
-          </div>
+          <label className="relative cursor-pointer group">
+            <div className="w-20 h-20 rounded-2xl bg-card overflow-hidden flex items-center justify-center shadow-lg ring-4 ring-card/50">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-primary font-display">{initials}</span>
+              )}
+            </div>
+            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-background text-[10px] font-semibold transition">Change</span>
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+              const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
+            }} />
+          </label>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display text-2xl font-bold text-white truncate">{profile?.full_name || "User"}</h3>
-            <p className="text-sm text-white/85 font-sans truncate">{profile?.email || ""}</p>
+            <h3 className="font-display text-2xl font-bold text-foreground truncate flex items-center gap-1.5">
+              {profile?.full_name || "User"}
+              {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
+            </h3>
+            <p className="text-sm text-foreground/75 font-sans truncate">{profile?.email || ""}</p>
             <div className="flex items-center gap-2 mt-1.5">
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span className="text-xs text-white/90 font-sans font-semibold">Active member</span>
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs text-foreground/80 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
             </div>
           </div>
           {!editing ? (
-            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
           ) : (
             <div className="flex gap-1.5">
-              <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-white text-[hsl(88_60%_28%)] hover:bg-white/90"><Save className="w-4 h-4" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl text-white hover:bg-white/20"><X className="w-4 h-4" /></Button>
+              <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl"><X className="w-4 h-4" /></Button>
             </div>
           )}
         </div>
