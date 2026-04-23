@@ -1742,6 +1742,32 @@ const Admin = () => {
                             <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
                           </div>
                           <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Age</Label>
+                              <Input
+                                value={(editCustomerData as any).age == null ? "" : String((editCustomerData as any).age)}
+                                onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 3) setEditCustomerData({ ...editCustomerData, age: d ? parseInt(d, 10) : null } as any); }}
+                                maxLength={3}
+                                type="tel"
+                                inputMode="numeric"
+                                placeholder="e.g. 28"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Gender</Label>
+                              <select
+                                value={(editCustomerData as any).gender || ""}
+                                onChange={(e) => setEditCustomerData({ ...editCustomerData, gender: e.target.value || null } as any)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                              >
+                                <option value="">Not set</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                              </select>
+                            </div>
+                          </div>
                           <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
                           <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
                           <div className="grid grid-cols-3 gap-3">
