@@ -83,6 +83,9 @@ export default {
         "soft-pink": "hsl(var(--soft-pink))",
         "warm-peach": "hsl(var(--warm-peach))",
         "light-gold": "hsl(var(--light-gold))",
+        "brand-lime": "hsl(var(--brand-lime))",
+        "brand-gold": "hsl(var(--brand-gold))",
+        "brand-ink": "hsl(var(--brand-ink))",
       },
       borderRadius: {
         lg: "var(--radius)",
