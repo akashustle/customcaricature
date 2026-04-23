@@ -21,7 +21,7 @@ const DefaultThemeApplier = () => {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute("content", resolvedTheme === "dark" ? "#0a0a0a" : "#fdf8f3");
+      meta.setAttribute("content", resolvedTheme === "dark" ? "#0a0a0a" : "#fbf6e9");
     }
   }, [resolvedTheme]);
 
