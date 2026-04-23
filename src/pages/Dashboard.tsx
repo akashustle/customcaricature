@@ -39,6 +39,7 @@ import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/
 import AddEventModal from "@/components/dashboard/AddEventModal";
 import RescheduleEventDialog from "@/components/dashboard/RescheduleEventDialog";
 import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
+import EventDraftsCard from "@/components/dashboard/EventDraftsCard";
 import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 
 type Profile = {
@@ -2415,6 +2416,7 @@ const DownloadAppCard = () => {
 };
 
 const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab, openAddEvent }: any) => {
+  const { user } = useAuth();
   const upcomingEvents = events.filter((e: any) => new Date(e.event_date) >= new Date()).slice(0, 2);
   const recentOrders = orders.slice(0, 2);
   const totalEvents = events.length;
@@ -2422,6 +2424,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
   return (
     <div className="space-y-5">
+      {/* Saved event drafts — gentle reminder to finish booking */}
+      {user && <EventDraftsCard userId={user.id} profile={profile} />}
+
       {/* Hero overview card — soft violet fade matching homepage */}
       <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
         <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
