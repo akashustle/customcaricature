@@ -519,7 +519,7 @@ const AdminLogin = () => {
                 <div className="flex items-center justify-center gap-2 mb-1.5">
                   <Shield className="w-5 h-5" style={{ color: BRAND.accent }} />
                   <h1
-                    className="text-[22px] md:text-2xl font-black leading-tight tracking-tight"
+                    className="text-[18px] xs:text-[20px] sm:text-[22px] md:text-2xl font-black leading-tight tracking-tight"
                     style={{
                       background: `linear-gradient(120deg, ${BRAND.primary} 0%, ${BRAND.accent} 45%, ${BRAND.highlight} 80%)`,
                       WebkitBackgroundClip: "text",
