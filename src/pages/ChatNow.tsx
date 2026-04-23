@@ -53,60 +53,67 @@ const ChatNow = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
   const [eventType, setEventType] = useState("");
+  const [customEventType, setCustomEventType] = useState("");
   const [eventDate, setEventDate] = useState<Date | undefined>();
   const [startTime, setStartTime] = useState("");
   const [hours, setHours] = useState<number>(2);
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
+  const [customDistrict, setCustomDistrict] = useState("");
   const [city, setCity] = useState("");
+  const [customCity, setCustomCity] = useState("");
   const [pincode, setPincode] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
 
   // Pre-fill from profile if logged in
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("full_name, mobile, state, city, pincode")
+      .select("full_name, mobile, state, city, pincode, address")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setName((n) => n || data.full_name || "");
-          setWhatsapp((w) => w || data.mobile || "");
           setState((s) => s || data.state || "");
           setCity((c) => c || data.city || "");
           setPincode((p) => p || data.pincode || "");
+          setFullAddress((a) => a || (data as any).address || "");
         }
       });
   }, [user]);
 
   const states = Object.keys(INDIA_LOCATIONS).sort();
   const districts = state ? Object.keys(INDIA_LOCATIONS[state] || {}).sort() : [];
-  const cities = state && district ? INDIA_LOCATIONS[state]?.[district] || [] : [];
+  const cities = state && district && district !== "__other__" ? INDIA_LOCATIONS[state]?.[district] || [] : [];
   const endTime = addHours(startTime, hours);
+
+  const finalDistrict = district === "__other__" ? customDistrict : district;
+  const finalCity = city === "__other__" ? customCity : city;
+  const finalEventType = eventType === "other" ? customEventType : eventType;
 
   const handleSend = () => {
     if (!name.trim()) return toast({ title: "Please enter your name", variant: "destructive" });
-    if (whatsapp.length < 10)
-      return toast({ title: "Please enter a valid WhatsApp number", variant: "destructive" });
 
     const eventLabel =
-      EVENT_TYPES.find((t) => t.value === eventType)?.label || eventType || "—";
+      eventType === "other"
+        ? customEventType || "Other"
+        : EVENT_TYPES.find((t) => t.value === eventType)?.label || "—";
     const dateStr = eventDate ? format(eventDate, "EEEE, do MMMM yyyy") : "Not decided yet";
     const timeStr = startTime ? `${startTime} – ${endTime} (${hours} hr)` : "Not decided yet";
-    const location = [city, district, state].filter(Boolean).join(", ") || "Not specified";
+    const location = [finalCity, finalDistrict, state].filter(Boolean).join(", ") || "Not specified";
 
     const message =
       `Hey! 👋 I came from your booking portal and I wanted to know more about live caricature for my event.\n\n` +
       `Below are my details:\n` +
       `• Name: ${name}\n` +
-      `• WhatsApp: +91 ${whatsapp}\n` +
       `• Event type: ${eventLabel}\n` +
       `• Date: ${dateStr}\n` +
       `• Time: ${timeStr}\n` +
       `• Location: ${location}\n` +
+      (fullAddress ? `• Address: ${fullAddress}\n` : "") +
       `• Pincode: ${pincode || "—"}\n\n` +
       `Please share pricing & next steps. Thank you!`;
 
@@ -115,13 +122,13 @@ const ChatNow = () => {
       .from("enquiries")
       .insert({
         name,
-        mobile: whatsapp,
+        mobile: "—",
         enquiry_type: "live_caricature",
-        event_type: eventType || null,
+        event_type: finalEventType || null,
         event_date: eventDate ? format(eventDate, "yyyy-MM-dd") : null,
         state: state || null,
-        district: district || null,
-        city: city || null,
+        district: finalDistrict || null,
+        city: finalCity || null,
         source: "chat_now_whatsapp",
         user_id: user?.id || null,
       } as any)
