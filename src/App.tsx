@@ -273,8 +273,8 @@ const App = () => {
             <InternalNavigationBridge />
             <AdminLightThemeForcer />
             
-            <Suspense fallback={null}><FloatingButtons /></Suspense>
-            <Suspense fallback={null}><MobileBottomNav /></Suspense>
+            <FloatingButtons />
+            <MobileBottomNav />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
