@@ -6,28 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Sparkles, ArrowLeft, Loader2, ShoppingCart, Shirt, Coffee, Image as ImageIcon, Frame } from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Loader2, ShoppingCart, Shirt, Coffee, Image as ImageIcon, Frame, Palette, Gift, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 
-const PRODUCT_TYPES = [
-  { id: "tshirt", label: "T-Shirt", icon: Shirt },
-  { id: "mug", label: "Mug", icon: Coffee },
-  { id: "poster", label: "Poster", icon: ImageIcon },
-  { id: "frame", label: "Frame", icon: Frame },
-];
+const PRODUCT_ICON_MAP: Record<string, any> = { Shirt, Coffee, ImageIcon, Frame, Palette, Gift, Package };
 
-const STYLES = [
-  { id: "classic", label: "Classic", color: "from-amber-400 to-orange-500" },
-  { id: "cartoon", label: "Cartoon", color: "from-blue-400 to-purple-500" },
-  { id: "pop_art", label: "Pop Art", color: "from-pink-400 to-red-500" },
-  { id: "minimal", label: "Minimal", color: "from-gray-400 to-gray-600" },
-];
+const DEFAULT_AI_PAGE = {
+  header_title: "AI Caricature Generator",
+  step1_title: "Upload Your Photo",
+  step1_subtitle: "Upload a clear face photo for the best caricature result",
+  step1_button: "Choose Photo",
+  step2_title: "Choose Style",
+  step2_button_idle: "Generate Caricature",
+  step2_button_loading: "Generating Caricature...",
+  step3_title: "Your Caricature Preview",
+  step3_button_back: "Regenerate",
+  step3_button_next: "Print on Product →",
+  step4_title: "Choose Product",
+  step4_button: "Add to Cart",
+  styles: [
+    { id: "classic", label: "Classic", color: "from-amber-400 to-orange-500" },
+    { id: "cartoon", label: "Cartoon", color: "from-blue-400 to-purple-500" },
+    { id: "pop_art", label: "Pop Art", color: "from-pink-400 to-red-500" },
+    { id: "minimal", label: "Minimal", color: "from-gray-400 to-gray-600" },
+  ],
+  products: [
+    { id: "tshirt", label: "T-Shirt", icon: "Shirt" },
+    { id: "mug", label: "Mug", icon: "Coffee" },
+    { id: "poster", label: "Poster", icon: "ImageIcon" },
+    { id: "frame", label: "Frame", icon: "Frame" },
+  ],
+};
 
 const AICaricature = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const page = useSiteSetting("page_ai_caricature", DEFAULT_AI_PAGE) as typeof DEFAULT_AI_PAGE;
+  const STYLES = page.styles || DEFAULT_AI_PAGE.styles;
+  const PRODUCT_TYPES = (page.products || DEFAULT_AI_PAGE.products).map(p => ({ ...p, icon: PRODUCT_ICON_MAP[p.icon] || Shirt }));
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [caricatureImage, setCaricatureImage] = useState<string | null>(null);
   const [selectedStyle, setSelectedStyle] = useState("classic");
@@ -116,7 +135,7 @@ const AICaricature = () => {
       <div className="bg-card border-b border-border sticky top-0 z-40 px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/shop")}><ArrowLeft className="w-5 h-5" /></Button>
         <Sparkles className="w-5 h-5 text-primary" />
-        <h1 className="font-display text-lg font-bold">AI Caricature Generator</h1>
+        <h1 className="font-display text-lg font-bold">{page.header_title}</h1>
       </div>
 
       <div className="max-w-lg mx-auto p-4 space-y-4">
@@ -136,11 +155,11 @@ const AICaricature = () => {
                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                     <Upload className="w-10 h-10 text-primary" />
                   </div>
-                  <h2 className="font-display text-2xl font-bold">Upload Your Photo</h2>
-                  <p className="text-sm text-muted-foreground font-sans">Upload a clear face photo for the best caricature result</p>
+                  <h2 className="font-display text-2xl font-bold">{page.step1_title}</h2>
+                  <p className="text-sm text-muted-foreground font-sans">{page.step1_subtitle}</p>
                   <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
                   <Button size="lg" className="rounded-full" onClick={() => fileRef.current?.click()}>
-                    <Upload className="w-4 h-4 mr-2" />Choose Photo
+                    <Upload className="w-4 h-4 mr-2" />{page.step1_button}
                   </Button>
                 </CardContent>
               </Card>
@@ -155,7 +174,7 @@ const AICaricature = () => {
                   <img src={uploadedImage} alt="Uploaded" className="w-full h-full object-cover" />
                 </div>
               )}
-              <h2 className="font-display text-xl font-bold text-center">Choose Style</h2>
+              <h2 className="font-display text-xl font-bold text-center">{page.step2_title}</h2>
               <div className="grid grid-cols-2 gap-3">
                 {STYLES.map(s => (
                   <Card key={s.id} className={`cursor-pointer transition-all ${selectedStyle === s.id ? "ring-2 ring-primary scale-[1.02]" : ""}`}
@@ -168,7 +187,7 @@ const AICaricature = () => {
                 ))}
               </div>
               <Button className="w-full rounded-full" size="lg" onClick={generateCaricature} disabled={generating}>
-                {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating Caricature...</> : <><Sparkles className="w-4 h-4 mr-2" />Generate Caricature</>}
+                {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{page.step2_button_loading}</> : <><Sparkles className="w-4 h-4 mr-2" />{page.step2_button_idle}</>}
               </Button>
             </motion.div>
           )}
@@ -176,16 +195,16 @@ const AICaricature = () => {
           {/* STEP 3: Preview */}
           {step === "preview" && caricatureImage && (
             <motion.div key="preview" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-              <h2 className="font-display text-xl font-bold text-center">Your Caricature Preview</h2>
+              <h2 className="font-display text-xl font-bold text-center">{page.step3_title}</h2>
               <div className="aspect-square rounded-2xl overflow-hidden border-2 border-primary bg-muted">
                 <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain" />
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1 rounded-full" onClick={() => { setStep("style"); setCaricatureImage(null); }}>
-                  Regenerate
+                  {page.step3_button_back}
                 </Button>
                 <Button className="flex-1 rounded-full" onClick={() => setStep("product")}>
-                  Print on Product →
+                  {page.step3_button_next}
                 </Button>
               </div>
             </motion.div>
@@ -194,7 +213,7 @@ const AICaricature = () => {
           {/* STEP 4: Product Selection */}
           {step === "product" && (
             <motion.div key="product" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-              <h2 className="font-display text-xl font-bold text-center">Choose Product</h2>
+              <h2 className="font-display text-xl font-bold text-center">{page.step4_title}</h2>
               {caricatureImage && (
                 <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto border-2 border-primary">
                   <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain" />
@@ -212,7 +231,7 @@ const AICaricature = () => {
                 ))}
               </div>
               <Button className="w-full rounded-full" size="lg" onClick={addToCartWithCaricature} disabled={!selectedProduct}>
-                <ShoppingCart className="w-4 h-4 mr-2" />Add to Cart
+                <ShoppingCart className="w-4 h-4 mr-2" />{page.step4_button}
               </Button>
             </motion.div>
           )}
