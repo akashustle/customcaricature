@@ -39,11 +39,13 @@ import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/
 import AddEventModal from "@/components/dashboard/AddEventModal";
 import RescheduleEventDialog from "@/components/dashboard/RescheduleEventDialog";
 import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
+import EventDraftsCard from "@/components/dashboard/EventDraftsCard";
 import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
+  age?: number | null; gender?: string | null;
   event_booking_allowed?: boolean; event_edit_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
   is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
 };
@@ -183,9 +185,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, age: (data as any).age ?? null, gender: (data as any).gender || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -210,10 +212,13 @@ const Dashboard = () => {
 
   const saveProfile = async () => {
     if (!editForm || !user) return;
+    const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editForm.full_name, mobile: editForm.mobile, instagram_id: editForm.instagram_id,
       address: editForm.address, city: editForm.city, state: editForm.state, pincode: editForm.pincode,
-    }).eq("user_id", user.id);
+      age: Number.isFinite(ageNum as number) ? ageNum : null,
+      gender: editForm.gender || null,
+    } as any).eq("user_id", user.id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
   };
@@ -1189,6 +1194,36 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">WhatsApp Number</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} type="tel" inputMode="numeric" className="rounded-xl" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="font-sans text-xs text-muted-foreground">Age</Label>
+                <Input
+                  value={editForm.age == null ? "" : String(editForm.age)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const d = e.target.value.replace(/\D/g, "");
+                    if (d.length <= 3) setEditForm({ ...editForm, age: d ? parseInt(d, 10) : null });
+                  }}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={3}
+                  placeholder="e.g. 28"
+                  className="rounded-xl"
+                />
+              </div>
+              <div>
+                <Label className="font-sans text-xs text-muted-foreground">Gender</Label>
+                <select
+                  value={editForm.gender || ""}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value || null })}
+                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm font-sans"
+                >
+                  <option value="">Not set</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
             <div><Label className="font-sans text-xs text-muted-foreground">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} autoComplete="street-address" className="rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-3">
@@ -1205,6 +1240,8 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { label: "Mobile", value: profile.mobile ? `+91 ${profile.mobile}` : "Not set" },
+              { label: "Age", value: profile.age ? String(profile.age) : "Not set" },
+              { label: "Gender", value: profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : "Not set" },
               { label: "Instagram", value: profile.instagram_id || "Not set" },
               { label: "City", value: profile.city || "Not set" },
               { label: "State", value: profile.state || "Not set" },
@@ -2411,6 +2448,7 @@ const DownloadAppCard = () => {
 };
 
 const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab, openAddEvent }: any) => {
+  const { user } = useAuth();
   const upcomingEvents = events.filter((e: any) => new Date(e.event_date) >= new Date()).slice(0, 2);
   const recentOrders = orders.slice(0, 2);
   const totalEvents = events.length;
@@ -2418,6 +2456,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
   return (
     <div className="space-y-5">
+      {/* Saved event drafts — gentle reminder to finish booking */}
+      {user && <EventDraftsCard userId={user.id} profile={profile} />}
+
       {/* Hero overview card — soft violet fade matching homepage */}
       <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
         <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />

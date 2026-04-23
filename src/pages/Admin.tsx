@@ -204,6 +204,8 @@ type Profile = {
   state: string | null;
   pincode: string | null;
   secret_code: string | null;
+  age: number | null;
+  gender: string | null;
   created_at: string;
 };
 
@@ -672,7 +674,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -831,6 +833,8 @@ const Admin = () => {
   };
 
   const saveCustomerEdit = async (userId: string) => {
+    const ageVal = (editCustomerData as any).age;
+    const ageNum = ageVal != null && String(ageVal).trim() !== "" ? parseInt(String(ageVal), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editCustomerData.full_name,
       mobile: editCustomerData.mobile,
@@ -839,6 +843,8 @@ const Admin = () => {
       city: editCustomerData.city,
       state: editCustomerData.state,
       pincode: editCustomerData.pincode,
+      age: Number.isFinite(ageNum as number) ? ageNum : null,
+      gender: (editCustomerData as any).gender || null,
     } as any).eq("user_id", userId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -1736,6 +1742,32 @@ const Admin = () => {
                             <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
                           </div>
                           <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Age</Label>
+                              <Input
+                                value={(editCustomerData as any).age == null ? "" : String((editCustomerData as any).age)}
+                                onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 3) setEditCustomerData({ ...editCustomerData, age: d ? parseInt(d, 10) : null } as any); }}
+                                maxLength={3}
+                                type="tel"
+                                inputMode="numeric"
+                                placeholder="e.g. 28"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Gender</Label>
+                              <select
+                                value={(editCustomerData as any).gender || ""}
+                                onChange={(e) => setEditCustomerData({ ...editCustomerData, gender: e.target.value || null } as any)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                              >
+                                <option value="">Not set</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                              </select>
+                            </div>
+                          </div>
                           <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
                           <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
                           <div className="grid grid-cols-3 gap-3">

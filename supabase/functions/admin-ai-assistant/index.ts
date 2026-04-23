@@ -96,9 +96,9 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       if (args.city) q = q.ilike("city", args.city);
       else if (args.district) q = q.ilike("district", args.district);
       else return { ok: false, error: "city or district required" };
-      const { error, count } = await q;
+      const { data: rows, error } = await q.select("id");
       if (error) return { ok: false, error: error.message };
-      return { ok: true, updated: count ?? "?", price: args.price };
+      return { ok: true, updated: rows?.length ?? 0, price: args.price };
     }
     if (name === "send_broadcast_notification") {
       const { data: users } = await supabase.from("profiles").select("user_id").limit(5000);
@@ -293,10 +293,15 @@ Deno.serve(async (req) => {
       }
       for (const c of calls) {
         let args: any = {};
-        try { args = JSON.parse(c.function.arguments || "{}"); } catch { args = {}; }
-        const result = await runTool(c.function.name, args, admin, user.id);
+        try { args = JSON.parse(c.function?.arguments || "{}"); } catch { args = {}; }
+        let result: any;
+        try {
+          result = await runTool(c.function?.name || "", args, admin, user.id);
+        } catch (toolErr: any) {
+          result = { ok: false, error: `Tool '${c.function?.name}' threw: ${toolErr?.message || String(toolErr)}` };
+        }
         // Log for audit
-        await admin.from("admin_action_log").insert({ user_id: user.id, admin_name: "AI Assistant", action: `ai_tool:${c.function.name}`, details: JSON.stringify({ args, result }).slice(0, 1000) }).catch(() => {});
+        await admin.from("admin_action_log").insert({ user_id: user.id, admin_name: "AI Assistant", action: `ai_tool:${c.function?.name}`, details: JSON.stringify({ args, result }).slice(0, 1000) }).catch(() => {});
         conv.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(result) });
       }
     }
