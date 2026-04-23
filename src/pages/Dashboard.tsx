@@ -507,7 +507,7 @@ const Dashboard = () => {
             <TabsContent value="home">
               <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
             </TabsContent>
-            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
+            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="profile">
@@ -527,7 +527,7 @@ const Dashboard = () => {
           {activeTab === "home" && (
             <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} openAddEvent={() => setAddEventOpen(true)} />
           )}
-          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
           {activeTab === "chat" && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
@@ -1231,7 +1231,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
   );
 };
 
-const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string }) => {
+const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed = false }: { events: any[]; canBookEvent: boolean; handleBookEvent: () => void; userId?: string; editAllowed?: boolean }) => {
   const { settings: _siteSettings } = useSiteSettings();
   const [artistMap, setArtistMap] = useState<Record<string, { name: string; portfolio_url: string | null }>>({});
   const [eventArtists, setEventArtists] = useState<Record<string, string[]>>({});
@@ -1241,6 +1241,29 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
   const [eventReviews, setEventReviews] = useState<Record<string, any>>({});
   const [_partialConfig, setPartialConfig] = useState<{ enabled: boolean; partial_1_amount: number; partial_2_amount: number } | null>(null);
   const [_payPreview, _setPayPreview] = useState<{ ev: any; remaining: number; fee: number; total: number } | null>(null);
+  const [rescheduleEvent, setRescheduleEvent] = useState<any>(null);
+  const [pendingRescheduleIds, setPendingRescheduleIds] = useState<Set<string>>(new Set());
+
+  // Track which events already have a pending reschedule request so we can disable the button
+  useEffect(() => {
+    if (!userId || events.length === 0) return;
+    const ids = events.map((e: any) => e.id);
+    (async () => {
+      const { data } = await (supabase.from("event_reschedule_requests" as any).select("event_id, status") as any).in("event_id", ids).eq("status", "pending");
+      const set = new Set<string>();
+      (data || []).forEach((r: any) => set.add(r.event_id));
+      setPendingRescheduleIds(set);
+    })();
+    const ch = supabase.channel(`reschedule-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "event_reschedule_requests", filter: `user_id=eq.${userId}` }, async () => {
+        const { data } = await (supabase.from("event_reschedule_requests" as any).select("event_id, status") as any).in("event_id", ids).eq("status", "pending");
+        const set = new Set<string>();
+        (data || []).forEach((r: any) => set.add(r.event_id));
+        setPendingRescheduleIds(set);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId, events.length]);
 
   // Separate upcoming and past events
   const now = new Date();
@@ -1704,6 +1727,20 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                       );
                     })()}
 
+                    {/* Reschedule action — only when admin enabled it for this user and event is upcoming */}
+                    {editAllowed && ev.status !== "completed" && ev.status !== "cancelled" && new Date(ev.event_date) >= new Date(new Date().setHours(0,0,0,0)) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full rounded-full font-sans text-xs border-primary/40 text-primary hover:bg-primary/5"
+                        disabled={pendingRescheduleIds.has(ev.id)}
+                        onClick={() => setRescheduleEvent(ev)}
+                      >
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        {pendingRescheduleIds.has(ev.id) ? "Reschedule request pending" : "Request Reschedule"}
+                      </Button>
+                    )}
+
                     {/* Show Event Details toggle (for completed/fully paid) */}
                     {(ev.status === "completed" || fullyPaid) && (
                       <Button
@@ -1759,6 +1796,15 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             );
           })}
         </div>
+      )}
+      {rescheduleEvent && userId && (
+        <RescheduleEventDialog
+          open={!!rescheduleEvent}
+          onClose={() => setRescheduleEvent(null)}
+          event={rescheduleEvent}
+          userId={userId}
+          onSubmitted={() => setRescheduleEvent(null)}
+        />
       )}
     </>
   );
