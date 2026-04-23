@@ -1194,6 +1194,36 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">WhatsApp Number</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} type="tel" inputMode="numeric" className="rounded-xl" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="font-sans text-xs text-muted-foreground">Age</Label>
+                <Input
+                  value={editForm.age == null ? "" : String(editForm.age)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const d = e.target.value.replace(/\D/g, "");
+                    if (d.length <= 3) setEditForm({ ...editForm, age: d ? parseInt(d, 10) : null });
+                  }}
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={3}
+                  placeholder="e.g. 28"
+                  className="rounded-xl"
+                />
+              </div>
+              <div>
+                <Label className="font-sans text-xs text-muted-foreground">Gender</Label>
+                <select
+                  value={editForm.gender || ""}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value || null })}
+                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm font-sans"
+                >
+                  <option value="">Not set</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
             <div><Label className="font-sans text-xs text-muted-foreground">Instagram</Label><Input value={editForm.instagram_id || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, instagram_id: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} autoComplete="street-address" className="rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-3">
@@ -1210,6 +1240,8 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { label: "Mobile", value: profile.mobile ? `+91 ${profile.mobile}` : "Not set" },
+              { label: "Age", value: profile.age ? String(profile.age) : "Not set" },
+              { label: "Gender", value: profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : "Not set" },
               { label: "Instagram", value: profile.instagram_id || "Not set" },
               { label: "City", value: profile.city || "Not set" },
               { label: "State", value: profile.state || "Not set" },

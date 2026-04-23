@@ -204,6 +204,8 @@ type Profile = {
   state: string | null;
   pincode: string | null;
   secret_code: string | null;
+  age: number | null;
+  gender: string | null;
   created_at: string;
 };
 
@@ -672,7 +674,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -831,6 +833,8 @@ const Admin = () => {
   };
 
   const saveCustomerEdit = async (userId: string) => {
+    const ageVal = (editCustomerData as any).age;
+    const ageNum = ageVal != null && String(ageVal).trim() !== "" ? parseInt(String(ageVal), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editCustomerData.full_name,
       mobile: editCustomerData.mobile,
@@ -839,6 +843,8 @@ const Admin = () => {
       city: editCustomerData.city,
       state: editCustomerData.state,
       pincode: editCustomerData.pincode,
+      age: Number.isFinite(ageNum as number) ? ageNum : null,
+      gender: (editCustomerData as any).gender || null,
     } as any).eq("user_id", userId);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
