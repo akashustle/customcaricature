@@ -129,87 +129,93 @@
   }
 
   .dark {
-    --background: 12 18% 10%;
-    --foreground: 30 30% 96%;
+    /* Dark mode — deep ink canvas with same violet brand */
+    --background: 240 25% 8%;
+    --foreground: 240 25% 96%;
 
-    --card: 12 18% 14%;
-    --card-foreground: 30 30% 96%;
+    --card: 240 22% 12%;
+    --card-foreground: 240 25% 96%;
 
-    --popover: 12 18% 14%;
-    --popover-foreground: 30 30% 96%;
+    --popover: 240 22% 12%;
+    --popover-foreground: 240 25% 96%;
 
-    --primary: 12 45% 50%;
-    --primary-foreground: 12 18% 10%;
+    --primary: 252 85% 68%;
+    --primary-foreground: 240 25% 8%;
 
-    --secondary: 12 14% 20%;
-    --secondary-foreground: 30 30% 92%;
+    --secondary: 240 18% 16%;
+    --secondary-foreground: 240 25% 94%;
 
-    --muted: 12 12% 22%;
-    --muted-foreground: 30 18% 65%;
+    --muted: 240 16% 18%;
+    --muted-foreground: 240 14% 70%;
 
-    --accent: 8 50% 55%;
-    --accent-foreground: 30 30% 96%;
+    --accent: 285 80% 72%;
+    --accent-foreground: 240 25% 8%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 12 12% 24%;
-    --input: 12 12% 24%;
-    --ring: 12 45% 50%;
+    --border: 240 16% 22%;
+    --input: 240 16% 22%;
+    --ring: 252 85% 68%;
 
-    --radius: 1rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 12 18% 12%;
-    --sidebar-foreground: 30 28% 85%;
-    --sidebar-primary: 12 45% 50%;
-    --sidebar-primary-foreground: 12 18% 10%;
-    --sidebar-accent: 12 12% 22%;
-    --sidebar-accent-foreground: 30 30% 92%;
-    --sidebar-border: 12 12% 24%;
-    --sidebar-ring: 12 45% 50%;
+    --sidebar-background: 240 22% 10%;
+    --sidebar-foreground: 240 25% 88%;
+    --sidebar-primary: 252 85% 68%;
+    --sidebar-primary-foreground: 240 25% 8%;
+    --sidebar-accent: 240 16% 18%;
+    --sidebar-accent-foreground: 240 25% 94%;
+    --sidebar-border: 240 16% 22%;
+    --sidebar-ring: 252 85% 68%;
 
-    --gold-50: 12 18% 12%;
-    --gold-100: 12 16% 16%;
-    --gold-200: 12 14% 22%;
-    --gold-300: 12 22% 32%;
-    --gold-400: 12 30% 42%;
-    --gold-500: 12 38% 50%;
-    --gold-600: 12 42% 58%;
-    --gold-700: 12 38% 68%;
-    --gold-800: 12 32% 78%;
-    --gold-900: 12 28% 88%;
+    --gold-50: 240 22% 12%;
+    --gold-100: 240 20% 16%;
+    --gold-200: 240 18% 22%;
+    --gold-300: 248 30% 32%;
+    --gold-400: 252 50% 45%;
+    --gold-500: 252 70% 55%;
+    --gold-600: 252 80% 65%;
+    --gold-700: 252 70% 75%;
+    --gold-800: 252 50% 85%;
+    --gold-900: 252 30% 92%;
 
-    --chart-1: 12 45% 50%;
-    --chart-2: 8 50% 55%;
-    --chart-3: 30 28% 85%;
-    --chart-4: 145 40% 50%;
-    --chart-5: 210 55% 55%;
+    --chart-1: 252 85% 68%;
+    --chart-2: 285 80% 72%;
+    --chart-3: 215 80% 70%;
+    --chart-4: 145 50% 55%;
+    --chart-5: 38 90% 60%;
 
-    --success: 145 50% 48%;
-    --warning: 38 92% 60%;
-    --info: 210 90% 60%;
+    --success: 145 55% 55%;
+    --warning: 38 90% 60%;
+    --info: 215 90% 65%;
 
     --soft-green: 145 25% 18%;
-    --soft-blue: 210 25% 18%;
-    --soft-pink: 345 25% 18%;
-    --warm-peach: 12 28% 18%;
-    --light-gold: 12 38% 50%;
+    --soft-blue: 215 25% 18%;
+    --soft-pink: 285 25% 18%;
+    --warm-peach: 30 25% 18%;
+    --light-gold: 252 60% 22%;
 
-    --brand-cream: 12 18% 14%;
-    --brand-gold: 12 45% 50%;
-    --brand-terracotta: 8 50% 55%;
-    --brand-brown: 30 28% 72%;
-    --brand-warm: 12 14% 18%;
-    --brand-lime: 145 50% 50%;
-    --brand-ink: 30 30% 96%;
+    --brand-cream: 240 22% 12%;
+    --brand-violet: 252 85% 68%;
+    --brand-violet-deep: 258 75% 60%;
+    --brand-pink: 320 80% 78%;
+    --brand-pink-soft: 340 70% 80%;
+    --brand-blue-soft: 215 80% 75%;
+    --brand-ink: 240 25% 96%;
+    --brand-gold: 252 85% 68%;
+    --brand-terracotta: 285 80% 72%;
+    --brand-brown: 240 25% 88%;
+    --brand-warm: 240 18% 14%;
+    --brand-lime: 252 85% 68%;
 
-    --admin-bg: 12 18% 10%;
-    --admin-surface: 12 18% 14%;
-    --admin-foreground: 30 30% 96%;
-    --admin-primary: 12 45% 50%;
-    --admin-secondary: 8 50% 55%;
-    --admin-highlight: 30 28% 85%;
-    --admin-border: 12 12% 24%;
+    --admin-bg: 240 25% 8%;
+    --admin-surface: 240 22% 12%;
+    --admin-foreground: 240 25% 96%;
+    --admin-primary: 252 85% 68%;
+    --admin-secondary: 285 80% 72%;
+    --admin-highlight: 240 25% 88%;
+    --admin-border: 240 16% 22%;
     --admin-shadow: 0 0% 0%;
   }
 }
@@ -1760,3 +1766,63 @@ body {
   border: 1px solid hsl(245 30% 92%);
   border-radius: 1.5rem;
 }
+
+/* Dark-mode aware overrides for violet helpers */
+.dark .bg-hero-violet {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, hsl(252 85% 35% / 0.55), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, hsl(285 80% 35% / 0.45), transparent 60%),
+    radial-gradient(800px 500px at 10% 30%, hsl(215 80% 30% / 0.4), transparent 60%),
+    linear-gradient(180deg, hsl(240 30% 10%) 0%, hsl(240 25% 8%) 100%);
+}
+.dark .bg-section-soft {
+  background: linear-gradient(180deg, hsl(240 22% 12%) 0%, hsl(240 25% 9%) 100%);
+}
+.dark .card-soft-white {
+  background: hsl(240 22% 12%);
+  border-color: hsl(240 16% 22%);
+}
+.dark .card-gradient-blob {
+  background:
+    radial-gradient(closest-side at 50% 50%, hsl(252 70% 35% / 0.35), transparent 70%),
+    radial-gradient(closest-side at 30% 70%, hsl(215 70% 30% / 0.3), transparent 70%),
+    radial-gradient(closest-side at 70% 30%, hsl(285 70% 35% / 0.3), transparent 70%),
+    hsl(240 22% 12%);
+  border-color: hsl(240 16% 22%);
+}
+.dark .btn-square-outline {
+  background: hsl(240 22% 14%);
+  color: hsl(240 25% 92%);
+  border-color: hsl(240 16% 26%);
+}
+.dark .btn-square-dark {
+  background: hsl(240 25% 96%);
+  color: hsl(240 25% 8%);
+}
+.dark .btn-square-dark:hover { background: hsl(252 85% 68%); color: #fff; }
+.dark .chip-violet {
+  background: linear-gradient(135deg, hsl(285 50% 25%), hsl(252 50% 25%));
+  color: hsl(285 90% 88%);
+}
+
+/* ================================================
+   Continuous marquee — right-to-left infinite scroll
+   ================================================ */
+@keyframes marquee-rtl {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl var(--marquee-duration, 40s) linear infinite;
+  will-change: transform;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
