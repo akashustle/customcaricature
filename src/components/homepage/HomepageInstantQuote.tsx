@@ -27,16 +27,16 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
             {cfg.title || "Check your event price in 30 seconds 🎨"}
           </h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div>
               <Button
                 size="xl"
-                onClick={() => navigate("/caricature-budgeting")}
+                onClick={() => navigate("/book-event")}
                 className="rounded-full font-body font-semibold shadow-lg shadow-primary/20"
               >
                 {cfg.button_text || "Get Instant Quote"} <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            </div>
+            <div>
               <Button
                 size="xl"
                 variant="outline"
@@ -45,7 +45,7 @@ const HomepageInstantQuote = ({ config }: { config: any }) => {
               >
                 <CalendarCheck className="w-5 h-5 mr-2" /> Check Event Pricing
               </Button>
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>

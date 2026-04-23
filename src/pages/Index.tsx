@@ -355,19 +355,17 @@ const Index = () => {
               )}
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.5 }}
                 className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-6">
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Button size="lg" onClick={() => {
-                    if (settings.custom_caricature_visible?.enabled === false) {
-                      import("@/components/CaricatureOffToast").then(m => m.showCaricatureOffMessage());
-                    } else {
+                {settings.hide_hero_order_btn?.enabled !== true && settings.custom_caricature_visible?.enabled !== false && (
+                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                    <Button size="lg" onClick={() => {
                       navigate(hero.primary_cta_link || (user ? "/order" : "/login"));
-                    }
-                  }} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
-                    {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </motion.div>
+                    }} className="rounded-full font-body font-semibold shadow-lg shadow-primary/20 text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
+                      {hero.primary_cta || "Order Your Caricature"} <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </motion.div>
+                )}
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                  <Button size="lg" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className="rounded-full font-body font-semibold border-border hover:bg-card text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto">
+                  <Button size="lg" variant={settings.hide_hero_order_btn?.enabled === true ? "default" : "outline"} onClick={() => navigate(hero.secondary_cta_link || "/book-event")} className={`rounded-full font-body font-semibold text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto ${settings.hide_hero_order_btn?.enabled === true ? "shadow-lg shadow-primary/20" : "border-border hover:bg-card"}`}>
                     <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Book for Event"}
                   </Button>
                 </motion.div>
