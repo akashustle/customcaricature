@@ -96,9 +96,9 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       if (args.city) q = q.ilike("city", args.city);
       else if (args.district) q = q.ilike("district", args.district);
       else return { ok: false, error: "city or district required" };
-      const { error, count } = await q;
+      const { data: rows, error } = await q.select("id");
       if (error) return { ok: false, error: error.message };
-      return { ok: true, updated: count ?? "?", price: args.price };
+      return { ok: true, updated: rows?.length ?? 0, price: args.price };
     }
     if (name === "send_broadcast_notification") {
       const { data: users } = await supabase.from("profiles").select("user_id").limit(5000);
