@@ -34,7 +34,9 @@ export const INDIA_STATES_CITIES: Record<string, string[]> = {
 export const EVENT_TYPES = [
   { value: "wedding", label: "Wedding" },
   { value: "corporate", label: "Corporate" },
+  { value: "engagement", label: "Engagement" },
   { value: "birthday", label: "Birthday Party" },
+  { value: "baby_shower", label: "Baby Shower" },
   { value: "other", label: "Other Event" },
 ] as const;
 

@@ -1,21 +1,35 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
+/**
+ * Applies the admin-controlled default theme site-wide and reacts to admin
+ * changes in real-time. The very first user choice is remembered locally so
+ * we don't yank the theme away from a user who actively toggled it — but
+ * subsequent admin updates *do* override stale local preferences.
+ */
 const DefaultThemeApplier = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const { settings } = useSiteSettings();
+  const lastAdminMode = useRef<string | null>(null);
 
   useEffect(() => {
-    // Only apply default theme if user hasn't manually changed it
-    const userOverride = localStorage.getItem("theme-user-override");
-    if (userOverride) return;
+    const adminMode = (settings as any)?.default_theme?.mode as string | undefined;
+    if (!adminMode || !["light", "dark", "system"].includes(adminMode)) return;
 
-    const defaultMode = (settings as any)?.default_theme?.mode;
-    if (defaultMode && ["light", "dark", "system"].includes(defaultMode)) {
-      setTheme(defaultMode);
+    // First load → always honour admin's default unless user actively toggled
+    // Subsequent updates → override even stale preferences so realtime works
+    if (lastAdminMode.current === null) {
+      const userOverride = localStorage.getItem("theme-user-override");
+      if (!userOverride) setTheme(adminMode);
+    } else if (lastAdminMode.current !== adminMode) {
+      // Admin changed mode → propagate live to every visitor
+      localStorage.removeItem("theme-user-override");
+      setTheme(adminMode);
     }
-  }, [(settings as any)?.default_theme?.mode]);
+
+    lastAdminMode.current = adminMode;
+  }, [(settings as any)?.default_theme?.mode, setTheme]);
 
   // Update browser theme-color meta tag to match current theme
   useEffect(() => {
