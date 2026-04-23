@@ -2127,8 +2127,8 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
   );
 };
 
-/* ───────── Modern Home Overview (lime-green hero, replaces widgets) ───────── */
-const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab }: any) => {
+/* ───────── Modern Home Overview (soft fade hero, replaces widgets) ───────── */
+const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab, openAddEvent }: any) => {
   const upcomingEvents = events.filter((e: any) => new Date(e.event_date) >= new Date()).slice(0, 2);
   const recentOrders = orders.slice(0, 2);
   const totalEvents = events.length;
@@ -2136,10 +2136,10 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
   return (
     <div className="space-y-5">
-      {/* Hero overview card — lime green */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(82_75%_55%)] via-[hsl(80_70%_60%)] to-[hsl(78_65%_65%)] p-6 shadow-[0_12px_40px_-8px_hsl(82_75%_45%/0.4)]">
-        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-white/25 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-12 w-52 h-52 rounded-full bg-foreground/10 blur-3xl pointer-events-none" />
+      {/* Hero overview card — soft violet fade matching homepage */}
+      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
+        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-12 w-52 h-52 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
         <div className="relative">
           <p className="font-sans text-xs uppercase tracking-wider text-foreground/70 font-semibold">My Activity</p>
           <div className="mt-3 flex items-end gap-3">
@@ -2150,41 +2150,56 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-2">
-            <div className="bg-white/85 backdrop-blur rounded-2xl p-3">
-              <p className="text-[10px] uppercase tracking-wider text-foreground/60 font-sans font-semibold">Events</p>
+            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Events</p>
               <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalEvents}</p>
             </div>
-            <div className="bg-white/85 backdrop-blur rounded-2xl p-3">
-              <p className="text-[10px] uppercase tracking-wider text-foreground/60 font-sans font-semibold">Orders</p>
+            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Orders</p>
               <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalOrders}</p>
             </div>
           </div>
 
           <Button
             onClick={handleBookEvent}
-            className="mt-5 w-full h-12 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-sans font-semibold"
+            className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold"
             size="lg"
           >
             <CalIcon className="w-4 h-4 mr-2" />
-            {canBookEvent ? "Book a New Event" : "Get a Quote"}
+            {canBookEvent ? "Book a Caricature Artist for Your Event" : "Get a Quote"}
           </Button>
+          <p className="mt-2 text-[11px] text-foreground/60 font-sans text-center">Make your guests say "wow" with live caricatures ✨</p>
         </div>
       </div>
+
+      {/* Verified-user upsell (only when not yet verified) */}
+      {!profile?.is_verified && (
+        <div className="rounded-3xl border border-primary/30 bg-primary/5 p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-sans font-semibold text-foreground">Become a verified user</p>
+            <p className="text-[11px] text-muted-foreground font-sans">Book your 1st event to earn the blue tick on your profile.</p>
+          </div>
+          <Button size="sm" onClick={handleBookEvent} className="rounded-full bg-primary text-primary-foreground text-xs">Verify</Button>
+        </div>
+      )}
 
       {/* Quick actions row */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Events", icon: CalIcon, action: () => setActiveTab("events") },
           { label: "Payments", icon: Receipt, action: () => setActiveTab("payments") },
-          { label: "Track", icon: Truck, action: () => navigate("/track-order") },
+          { label: "Add Event", icon: Sparkles, action: openAddEvent, highlight: true },
         ].map((q) => (
           <button
             key={q.label}
             onClick={q.action}
-            className="bg-white border border-border rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+            className={`bg-card border rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform ${q.highlight ? "border-primary/40 shadow-sm shadow-primary/10" : "border-border"}`}
           >
-            <div className="w-10 h-10 rounded-full bg-[hsl(82_75%_92%)] flex items-center justify-center">
-              <q.icon className="w-4.5 h-4.5 text-[hsl(82_75%_30%)]" />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${q.highlight ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
+              <q.icon className="w-4 h-4" />
             </div>
             <span className="text-xs font-sans font-medium text-foreground">{q.label}</span>
           </button>
@@ -2193,7 +2208,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Upcoming events preview */}
       {upcomingEvents.length > 0 && (
-        <div className="bg-white border border-border rounded-3xl p-4">
+        <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Upcoming Events</h3>
             <button onClick={() => setActiveTab("events")} className="text-xs font-sans text-muted-foreground hover:text-foreground">View all →</button>
@@ -2201,14 +2216,14 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           <div className="space-y-2">
             {upcomingEvents.map((ev: any) => (
               <div key={ev.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
-                <div className="w-10 h-10 rounded-xl bg-[hsl(82_75%_55%)] flex items-center justify-center flex-shrink-0">
-                  <CalIcon className="w-5 h-5 text-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+                  <CalIcon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate">{ev.event_type || "Event"}</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.city}</p>
                 </div>
-                <Badge className="bg-[hsl(82_75%_92%)] text-[hsl(82_75%_28%)] border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
+                <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
               </div>
             ))}
           </div>
@@ -2217,15 +2232,15 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Recent orders preview */}
       {recentOrders.length > 0 && (
-        <div className="bg-white border border-border rounded-3xl p-4">
+        <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Recent Orders</h3>
           </div>
           <div className="space-y-2">
             {recentOrders.map((o: any) => (
               <div key={o.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
-                <div className="w-10 h-10 rounded-xl bg-foreground/10 flex items-center justify-center flex-shrink-0">
-                  <Package className="w-5 h-5 text-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-foreground/10 text-foreground flex items-center justify-center flex-shrink-0">
+                  <Package className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate capitalize">{o.style} · {o.face_count} face(s)</p>
@@ -2239,13 +2254,13 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
       {/* Empty state */}
       {upcomingEvents.length === 0 && recentOrders.length === 0 && (
-        <div className="bg-white border border-border rounded-3xl p-8 text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[hsl(82_75%_92%)] flex items-center justify-center mb-3">
-            <Sparkles className="w-7 h-7 text-[hsl(82_75%_30%)]" />
+        <div className="bg-card border border-border rounded-3xl p-8 text-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-primary/15 text-primary flex items-center justify-center mb-3">
+            <Sparkles className="w-7 h-7" />
           </div>
-          <h3 className="font-display text-lg font-bold mb-1">Welcome aboard, {profile?.full_name?.split(" ")[0] || "friend"}!</h3>
+          <h3 className="font-display text-lg font-bold mb-1 text-foreground">Welcome aboard, {profile?.full_name?.split(" ")[0] || "friend"}!</h3>
           <p className="text-sm text-muted-foreground font-sans mb-4">Book your first event and let our artists wow your guests.</p>
-          <Button onClick={handleBookEvent} className="rounded-2xl bg-foreground text-background hover:bg-foreground/90">
+          <Button onClick={handleBookEvent} className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
             Book Your First Event
           </Button>
         </div>
