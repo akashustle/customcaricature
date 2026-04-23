@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, MapPin, X, Sparkles } from "lucide-react";
+import { Clock, MapPin, X, Sparkles, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPES } from "@/lib/event-data";
 import { INDIA_LOCATIONS } from "@/lib/india-locations";
 import SelectWithOther from "@/components/ui/select-with-other";
@@ -55,6 +56,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
   const [venueName, setVenueName] = useState("");
   const [fullAddress, setFullAddress] = useState(profile?.address || "");
   const [pincode, setPincode] = useState(profile?.pincode || "");
+  const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
+  const [checkingOverlap, setCheckingOverlap] = useState(false);
 
   useEffect(() => {
     if (open && profile) {
@@ -70,6 +73,39 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
   const cities = state && district && INDIA_LOCATIONS[state]?.[district] ? INDIA_LOCATIONS[state][district] : [];
 
   const endTime = addHours(startTime, hours);
+
+  // Overlap check whenever date/start/hours change
+  useEffect(() => {
+    if (!eventDate || !startTime) { setOverlapWarning(null); return; }
+    let cancelled = false;
+    setCheckingOverlap(true);
+    const dateStr = format(eventDate, "yyyy-MM-dd");
+    const newStartMin = (() => { const [h, m] = startTime.split(":").map(Number); return h * 60 + m; })();
+    const newEndMin = newStartMin + hours * 60;
+    (async () => {
+      const { data } = await supabase
+        .from("event_bookings")
+        .select("id, event_date, event_start_time, event_end_time, venue_name, status")
+        .eq("event_date", dateStr)
+        .neq("status", "cancelled");
+      if (cancelled) return;
+      const conflicts = (data || []).filter((row: any) => {
+        const [sh, sm] = String(row.event_start_time || "00:00").slice(0, 5).split(":").map(Number);
+        const [eh, em] = String(row.event_end_time || "00:00").slice(0, 5).split(":").map(Number);
+        const rs = sh * 60 + sm;
+        const re = eh * 60 + em;
+        return newStartMin < re && newEndMin > rs;
+      });
+      if (conflicts.length > 0) {
+        const venues = conflicts.map((c: any) => c.venue_name || "Another event").slice(0, 2).join(", ");
+        setOverlapWarning(`⚠️ Heads up — ${conflicts.length} event(s) already booked in this slot (${venues}). You can still proceed but artist availability may be limited.`);
+      } else {
+        setOverlapWarning(null);
+      }
+      setCheckingOverlap(false);
+    })();
+    return () => { cancelled = true; };
+  }, [eventDate, startTime, hours]);
 
   const handleSave = () => {
     if (!eventType) return toast({ title: "Pick an event type", variant: "destructive" });
@@ -208,6 +244,16 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                   </p>
                 )}
               </div>
+
+              {overlapWarning && (
+                <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <p className="text-[11px] font-sans text-amber-700 dark:text-amber-300 leading-relaxed">{overlapWarning}</p>
+                </div>
+              )}
+              {checkingOverlap && eventDate && startTime && !overlapWarning && (
+                <p className="text-[10px] text-muted-foreground font-sans -mt-2">Checking availability…</p>
+              )}
 
               {/* State / District / City — all with Other fallback */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

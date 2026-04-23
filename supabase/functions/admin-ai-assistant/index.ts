@@ -43,7 +43,7 @@ Behavioral rules:
 
 const tools = [
   { type: "function", function: { name: "toggle_setting", description: "Enable/disable a boolean site setting", parameters: { type: "object", properties: { key: { type: "string" }, enabled: { type: "boolean" } }, required: ["key", "enabled"] } } },
-  { type: "function", function: { name: "update_setting", description: "Upsert any JSON value into admin_site_settings", parameters: { type: "object", properties: { key: { type: "string" }, value: {} }, required: ["key", "value"] } } },
+  { type: "function", function: { name: "update_setting", description: "Upsert a JSON value into admin_site_settings. Pass value as a JSON-encoded string.", parameters: { type: "object", properties: { key: { type: "string" }, value_json: { type: "string", description: "The value to store, JSON-encoded (e.g. '{\"enabled\":true}' or '\"some text\"' or '42')" } }, required: ["key", "value_json"] } } },
   { type: "function", function: { name: "read_setting", description: "Read a single admin_site_settings JSON value", parameters: { type: "object", properties: { key: { type: "string" } }, required: ["key"] } } },
   { type: "function", function: { name: "update_caricature_price", description: "Set price for a caricature_types row by slug", parameters: { type: "object", properties: { slug: { type: "string" }, price: { type: "number" } }, required: ["slug", "price"] } } },
   { type: "function", function: { name: "update_event_price", description: "Update enquiry_event_pricing by city or district", parameters: { type: "object", properties: { city: { type: "string" }, district: { type: "string" }, price: { type: "number" } }, required: ["price"] } } },
@@ -75,8 +75,12 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       return { ok: true, key: args.key, value: next };
     }
     if (name === "update_setting") {
-      await supabase.from("admin_site_settings").upsert({ id: args.key, value: args.value, updated_at: new Date().toISOString() });
-      return { ok: true, key: args.key };
+      let value: any = args.value;
+      if (args.value_json !== undefined) {
+        try { value = JSON.parse(args.value_json); } catch { value = args.value_json; }
+      }
+      await supabase.from("admin_site_settings").upsert({ id: args.key, value, updated_at: new Date().toISOString() });
+      return { ok: true, key: args.key, value };
     }
     if (name === "read_setting") {
       const { data } = await supabase.from("admin_site_settings").select("value").eq("id", args.key).maybeSingle();
@@ -271,7 +275,7 @@ Deno.serve(async (req) => {
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: conv, tools, tool_choice: "auto" }),
+        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: conv, tools, tool_choice: "auto" }),
       });
       if (!aiResp.ok) {
         const t = await aiResp.text();
