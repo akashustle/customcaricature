@@ -2221,6 +2221,64 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
 };
 
 /* ───────── Modern Home Overview (soft fade hero, replaces widgets) ───────── */
+/* App Download card — promote PWA install to event-booked users */
+const DownloadAppCard = () => {
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    const installedHandler = () => setInstalled(true);
+    window.addEventListener("appinstalled", installedHandler);
+    // Hide if already installed (standalone display mode)
+    if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
+
+  if (installed) return null;
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === "accepted") setInstalled(true);
+      setInstallPrompt(null);
+    } else {
+      // Fallback: iOS Safari instructions
+      toast({
+        title: "Install on your phone 📱",
+        description: "Tap the Share button in your browser, then 'Add to Home Screen' to install Creative Caricature Club as an app.",
+      });
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-accent/5 to-background p-4 shadow-sm">
+      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
+      <div className="relative flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+          <Download className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-sans font-bold text-foreground">Download our app for a smoother experience</p>
+          <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Track your event live, get instant updates & one-tap chat with your artist.</p>
+        </div>
+        <Button
+          size="sm"
+          onClick={handleInstall}
+          className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold flex-shrink-0"
+        >
+          Install
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent, handleBookEvent, setActiveTab, openAddEvent }: any) => {
   const upcomingEvents = events.filter((e: any) => new Date(e.event_date) >= new Date()).slice(0, 2);
   const recentOrders = orders.slice(0, 2);
