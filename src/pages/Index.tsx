@@ -70,7 +70,7 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
         {tracks.map((src, i) => (
           <div
             key={i}
-            className="shrink-0 w-40 sm:w-52 md:w-60 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)]"
+            className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)]"
           >
             <img
               src={src}
@@ -153,9 +153,9 @@ const EventGallery = ({ images, onView }: { images: string[]; onView: () => void
       title={<>Our <span className="text-gradient-violet">event gallery</span></>}
       subtitle="Real moments from real events — weddings, corporate parties, baby showers and brand activations."
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
         {preview.map((src, i) => (
-          <div key={i} className={`rounded-2xl overflow-hidden border border-border/40 bg-card ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-square"}`}>
+          <div key={i} className={`rounded-2xl overflow-hidden border border-border/40 bg-card ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}>
             <img src={src} alt={`Event ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           </div>
         ))}
