@@ -384,9 +384,10 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
 
               <Button
                 onClick={handleSave}
-                className="w-full h-12 rounded-2xl font-sans font-semibold text-base"
+                disabled={hasHardConflict || !!pastTimeError}
+                className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
               >
-                Save &amp; Continue to Booking →
+                {hasHardConflict || pastTimeError ? "Fix the highlighted issue above" : "Save & Continue to Booking →"}
               </Button>
             </div>
           </motion.div>
