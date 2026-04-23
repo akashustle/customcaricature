@@ -358,243 +358,170 @@ const Dashboard = () => {
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
+  // Tab availability — admin can toggle (we only expose 5 main tabs in the new UI)
+  const tabsAvailable = {
+    home: true,
+    events: dt.events !== false,
+    payments: dt.payments !== false,
+    chat: dt.chat !== false,
+    profile: dt.profile !== false,
+  };
+
+  const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U";
+
   return (
-    <div className="min-h-screen bg-background pb-24 md:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-[hsl(60_20%_97%)] dark:bg-background pb-28 md:pb-10 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
-      {/* App-style header */}
-      {/* App-style header with glass effect */}
-      <header className="sticky top-0 z-40 border-b border-border/20" style={{ background: "linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
-        <div className="container mx-auto px-3 sm:px-4 py-3 flex items-center justify-between">
-          <motion.div 
-            className="flex items-center gap-2.5 cursor-pointer" 
-            onClick={() => navigate("/")}
-            whileTap={{ scale: 0.95 }}
-          >
-            <div className="relative">
-              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-2xl shadow-lg border border-border/30" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.12)" }} />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
-            </div>
+
+      {/* Desktop top bar */}
+      <header className="hidden md:block sticky top-0 z-40 bg-[hsl(60_20%_97%)]/85 dark:bg-background/85 backdrop-blur-xl border-b border-border/40">
+        <div className="container mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
             <div>
-              <h1 className="font-display text-lg font-bold text-foreground leading-tight">Dashboard</h1>
-              <p className="text-[10px] text-muted-foreground font-sans leading-none">Welcome back!</p>
+              <h1 className="font-display text-lg font-bold leading-none">Creative Caricature Club</h1>
+              <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Member portal</p>
             </div>
-          </motion.div>
-          <div className="flex items-center gap-1">
+          </div>
+          <div className="flex items-center gap-2">
             <NotificationBell />
-            <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans h-9 w-9 p-0 rounded-xl">
+            <Button variant="ghost" size="sm" onClick={handleRefresh} className="font-sans rounded-full h-9 w-9 p-0">
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="font-sans h-9 w-9 p-0 rounded-xl md:w-auto md:px-3">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline ml-1">Logout</span>
-            </Button>
+            <button
+              onClick={() => setActiveTab("profile")}
+              className="w-10 h-10 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+              aria-label="Open profile"
+            >
+              {initials}
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto max-w-5xl px-2 sm:px-3 md:px-4 py-3 md:py-6">
-        <LiveGreeting name={profile?.full_name} />
+      <div className="container mx-auto max-w-5xl px-4 sm:px-5 md:px-6 pt-5 md:pt-8">
+        {/* Mobile inline greeting + avatar */}
+        <div className="md:hidden flex items-center justify-between mb-5">
+          <LiveGreeting name={profile?.full_name} />
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setActiveTab("profile")}
+              className="w-11 h-11 rounded-full bg-white border-2 border-[hsl(82_75%_55%)] flex items-center justify-center font-bold text-foreground shadow-sm"
+              aria-label="Open profile"
+            >
+              {initials}
+            </button>
+          </div>
+        </div>
 
-        {/* Payment Reminders */}
+        {/* Desktop greeting */}
+        <div className="hidden md:block mb-6">
+          <LiveGreeting name={profile?.full_name} />
+        </div>
+
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
 
-        {/* Quick Actions — 5 new features */}
-        <div className="grid grid-cols-5 gap-2 mb-5">
-          {[
-            { label: "Track", icon: Truck, action: () => navigate("/track-order"), gradient: "from-cyan-500 to-blue-500" },
-            { label: "Support", icon: MessageCircle, action: () => navigate("/support"), gradient: "from-pink-500 to-rose-500" },
-            { label: "Gallery", icon: Sparkles, action: () => navigate("/gallery/caricature"), gradient: "from-amber-500 to-orange-500" },
-            { label: "FAQs", icon: FileText, action: () => navigate("/faqs"), gradient: "from-teal-500 to-emerald-500" },
-            { label: "Explore", icon: Star, action: () => navigate("/explore"), gradient: "from-purple-500 to-indigo-500" },
-          ].map((item, i) => (
-            <motion.button
-              key={item.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 + i * 0.05, type: "spring", stiffness: 300 }}
-              whileTap={{ scale: 0.85 }}
-              onClick={item.action}
-              className="flex flex-col items-center gap-1 py-2"
-            >
-              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md`}>
-                <item.icon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-[10px] font-sans text-muted-foreground font-medium">{item.label}</span>
-            </motion.button>
-          ))}
-        </div>
-
-        {/* Smart Suggestions */}
-        <DashboardSuggestions orders={orders} events={events} shopOrders={shopOrders} profile={profile} navigate={navigate} canBookEvent={canBookEvent} />
-
-        {/* Stat cards — vibrant 3D mobile-first */}
-        <div className="grid grid-cols-3 gap-2.5 mb-5">
-          {[
-            { label: "Orders", value: orders.length, icon: Package, gradient: "from-blue-500 to-indigo-600", glow: "shadow-blue-500/25" },
-            { label: "Events", value: events.length, icon: CalIcon, gradient: "from-violet-500 to-purple-600", glow: "shadow-violet-500/25" },
-            { label: "Delivered", value: orders.filter(o => o.status === "delivered").length, icon: Truck, gradient: "from-emerald-500 to-green-600", glow: "shadow-emerald-500/25" },
-          ].map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 20 }}
-              whileHover={{ y: -4, scale: 1.04 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className={`relative overflow-hidden rounded-2xl p-3 bg-gradient-to-br ${s.gradient} shadow-lg ${s.glow}`}
-                style={{ transform: "perspective(600px) rotateX(2deg)", transformStyle: "preserve-3d" }}>
-                {/* Glass overlay */}
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] rounded-2xl" />
-                <div className="relative text-center text-white">
-                  <div className="w-9 h-9 rounded-xl mx-auto mb-1.5 flex items-center justify-center bg-white/20 backdrop-blur-sm shadow-inner">
-                    <s.icon className="w-4 h-4 text-white drop-shadow-sm" />
-                  </div>
-                  <p className="text-2xl font-bold font-display drop-shadow-sm">{s.value}</p>
-                  <p className="text-[10px] text-white/80 font-sans font-medium">{s.label}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Shop Quick Stats */}
-        {shopOrders.length > 0 && (
-          <div className="grid grid-cols-1 gap-3 mb-6 sm:grid-cols-3">
-            {[
-              { label: "Shop Orders", value: shopOrders.length, icon: Store, gradient: "from-purple-500 to-violet-500", bgGradient: "from-purple-500/10 to-violet-500/5" },
-              { label: "Shipped", value: shopOrders.filter(o => o.status === "shipped").length, icon: Truck, gradient: "from-amber-500 to-orange-500", bgGradient: "from-amber-500/10 to-orange-500/5" },
-              { label: "Spent", value: `₹${shopOrders.filter(o => o.payment_status === "paid").reduce((s: number, o: any) => s + (o.total_amount || 0), 0).toLocaleString()}`, icon: CreditCard, gradient: "from-pink-500 to-rose-500", bgGradient: "from-pink-500/10 to-rose-500/5" },
-            ].map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.08 }}
-              >
-                <Card className="overflow-hidden relative border border-border/60 hover:border-border transition-all hover:shadow-md">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${s.bgGradient} pointer-events-none`} />
-                  <CardContent className="p-3 relative">
-                    <div className="text-center">
-                      <p className="text-lg font-bold font-display animate-count-up">{s.value}</p>
-                      <p className="text-[10px] text-muted-foreground font-sans">{s.label}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        <div className="hidden md:block">
+        {/* Desktop tab strip */}
+        <div className="hidden md:block mt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6 h-auto w-full flex-wrap justify-start">
-              {dt.orders && <TabsTrigger value="orders" className="flex-1 font-sans"><Package className="w-4 h-4 mr-2" />Orders</TabsTrigger>}
-              {dt.events && <TabsTrigger value="events" className="flex-1 font-sans"><CalIcon className="w-4 h-4 mr-2" />Events</TabsTrigger>}
-              {dt.shop && settings.shop_nav_visible?.enabled !== false && (
-                <TabsTrigger value="shop" className="flex-1 font-sans"><Store className="w-4 h-4 mr-2" />Shop</TabsTrigger>
+            <TabsList className="mb-6 h-auto w-full bg-white border border-border rounded-2xl p-1.5 flex flex-wrap justify-start gap-1">
+              {tabsAvailable.home && (
+                <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                  <Home className="w-4 h-4 mr-2" />Home
+                </TabsTrigger>
               )}
-              {dt.chat && <TabsTrigger value="chat" className="flex-1 font-sans"><MessageCircle className="w-4 h-4 mr-2" />Chat</TabsTrigger>}
-              {dt.payments && <TabsTrigger value="payments" className="flex-1 font-sans"><Receipt className="w-4 h-4 mr-2" />Payments</TabsTrigger>}
-              {dt.invoices && <TabsTrigger value="invoices" className="flex-1 font-sans"><FileText className="w-4 h-4 mr-2" />Invoices</TabsTrigger>}
-              {dt.alerts && <TabsTrigger value="alerts" className="flex-1 font-sans"><Bell className="w-4 h-4 mr-2" />Alerts</TabsTrigger>}
-              {dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && (
-                <TabsTrigger value="workshop" className="flex-1 font-sans"><GraduationCap className="w-4 h-4 mr-2" />Workshop</TabsTrigger>
+              {tabsAvailable.events && (
+                <TabsTrigger value="events" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                  <CalIcon className="w-4 h-4 mr-2" />Events
+                </TabsTrigger>
               )}
-              {dt.profile && <TabsTrigger value="profile" className="flex-1 font-sans"><User className="w-4 h-4 mr-2" />Profile</TabsTrigger>}
-              {dt.settings && <TabsTrigger value="settings" className="flex-1 font-sans"><Settings className="w-4 h-4 mr-2" />Settings</TabsTrigger>}
+              {tabsAvailable.payments && (
+                <TabsTrigger value="payments" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                  <Receipt className="w-4 h-4 mr-2" />Payments
+                </TabsTrigger>
+              )}
+              {tabsAvailable.chat && (
+                <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                  <MessageCircle className="w-4 h-4 mr-2" />Chat
+                </TabsTrigger>
+              )}
+              {tabsAvailable.profile && (
+                <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-[hsl(82_75%_55%)] data-[state=active]:text-foreground">
+                  <User className="w-4 h-4 mr-2" />Profile
+                </TabsTrigger>
+              )}
             </TabsList>
-            {dt.orders && <TabsContent value="orders"><OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} /></TabsContent>}
-            {dt.events && <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>}
-            {dt.shop && settings.shop_nav_visible?.enabled !== false && (
-              <TabsContent value="shop"><ShopOrdersList shopOrders={shopOrders} navigate={navigate} /></TabsContent>
-            )}
-            {dt.chat && <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>}
-            {dt.payments && <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>}
-            {dt.invoices && <TabsContent value="invoices">{user && <InvoicesList userId={user.id} />}</TabsContent>}
-            {dt.alerts && <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>}
-            {dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && (
-              <TabsContent value="workshop"><WorkshopSection profile={profile} user={user} navigate={navigate} /></TabsContent>
-            )}
-            {dt.profile && <TabsContent value="profile"><ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} /></TabsContent>}
-            {dt.settings && <TabsContent value="settings">
-              <SettingsSection
+
+            <TabsContent value="home">
+              <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+            </TabsContent>
+            <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} /></TabsContent>
+            <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
+            <TabsContent value="profile">
+              <ProfileWithLogout
+                profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
+                handleLogout={handleLogout}
                 newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
                 currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
                 confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
               />
-            </TabsContent>}
+            </TabsContent>
           </Tabs>
         </div>
 
-        <div className="md:hidden">
-          {activeTab === "orders" && dt.orders && <OrdersList orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder} payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id} />}
-          {activeTab === "events" && dt.events && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
-          {activeTab === "shop" && dt.shop && settings.shop_nav_visible?.enabled !== false && <ShopOrdersList shopOrders={shopOrders} navigate={navigate} />}
-          {activeTab === "chat" && dt.chat && user && (
-            <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(56px + env(safe-area-inset-bottom))" }}>
+        {/* Mobile tab content */}
+        <div className="md:hidden mt-2">
+          {activeTab === "home" && (
+            <DashboardHomeOverview profile={profile} orders={orders} events={events} navigate={navigate} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} setActiveTab={setActiveTab} />
+          )}
+          {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} />}
+          {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "chat" && user && (
+            <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
             </div>
           )}
-          {activeTab === "payments" && dt.payments && user && <PaymentHistory userId={user.id} />}
-          {activeTab === "invoices" && dt.invoices && user && <InvoicesList userId={user.id} />}
-          {activeTab === "alerts" && dt.alerts && user && <AlertsSection userId={user.id} />}
-          {activeTab === "workshop" && dt.workshop && (settings as any).workshop_dashboard_visible?.enabled && <WorkshopSection profile={profile} user={user} navigate={navigate} />}
-          {activeTab === "profile" && dt.profile && <ProfileSection profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile} />}
-          {activeTab === "settings" && dt.settings && (
-            <SettingsSection
+          {activeTab === "profile" && (
+            <ProfileWithLogout
+              profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
+              handleLogout={handleLogout}
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
               currentPassword={currentPassword} setCurrentPassword={setCurrentPassword} newPassword={newPassword} setNewPassword={setNewPassword}
               confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
             />
           )}
         </div>
-
-        {/* Admin-built dynamic blocks (editable from Admin → User Dashboard Builder) */}
-        <div className="px-2 md:px-0 mt-4 mb-24 md:mb-6">
-          <DashboardPageBuilder />
-        </div>
-
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-          <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
-            {[
-              { icon: Home, key: "home", action: () => navigate("/") },
-              ...(dt.orders ? [{ icon: Package, key: "orders", action: () => setActiveTab("orders") }] : []),
-              ...(dt.events ? [{ icon: CalIcon, key: "events", action: () => setActiveTab("events") }] : []),
-              ...(dt.shop && settings.shop_nav_visible?.enabled !== false ? [{ icon: Store, key: "shop", action: () => setActiveTab("shop") }] : []),
-              ...(dt.chat ? [{ icon: MessageCircle, key: "chat", action: () => setActiveTab("chat") }] : []),
-              ...(dt.payments ? [{ icon: CreditCard, key: "payments", action: () => setActiveTab("payments") }] : []),
-              ...(dt.invoices ? [{ icon: FileText, key: "invoices", action: () => setActiveTab("invoices") }] : []),
-              ...(dt.alerts ? [{ icon: Bell, key: "alerts", action: () => setActiveTab("alerts") }] : []),
-              ...(dt.workshop && (settings as any).workshop_dashboard_visible?.enabled ? [{ icon: GraduationCap, key: "workshop", action: () => setActiveTab("workshop") }] : []),
-              ...(dt.profile ? [{ icon: User, key: "profile", action: () => setActiveTab("profile") }] : []),
-              ...(dt.settings ? [{ icon: Settings, key: "settings", action: () => setActiveTab("settings") }] : []),
-            ].map((item, idx) => {
-              const isActive = item.key === "home" ? false : activeTab === item.key;
-              return (
-                <motion.button key={`${item.key}-${idx}`} onClick={item.action} whileTap={{ scale: 0.75 }}
-                  className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0">
-                  <item.icon
-                    className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
-                    size={isActive ? 24 : 20}
-                    strokeWidth={isActive ? 2.2 : 1.4}
-                    fill={isActive && item.icon === Home ? "currentColor" : "none"}
-                  />
-                  {isActive && (
-                    <motion.div layoutId="dash-insta-dot"
-                      className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }} />
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-          <div className="h-[env(safe-area-inset-bottom)]" />
+      {/* Mobile bottom nav (5 tabs, modern lime style) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
+        <div className="pointer-events-auto mx-auto max-w-md bg-white border border-border/60 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] px-2 py-2 flex items-center justify-around">
+          {[
+            { key: "home", icon: Home, label: "Home" },
+            { key: "events", icon: CalIcon, label: "Events" },
+            { key: "payments", icon: Receipt, label: "Payments" },
+            { key: "chat", icon: MessageCircle, label: "Chat" },
+            { key: "profile", icon: User, label: "Me" },
+          ].filter(t => (tabsAvailable as any)[t.key]).map((item) => {
+            const isActive = activeTab === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => setActiveTab(item.key)}
+                className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all ${
+                  isActive ? "bg-foreground text-background" : "text-muted-foreground"
+                }`}
+              >
+                <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
+                <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </nav>
+
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
       {portalPaymentRequest && (
