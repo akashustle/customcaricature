@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEventPricing } from "@/hooks/useEventPricing";
@@ -33,6 +33,7 @@ declare global {
 
 const BookEvent = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { pricing: dbPricing } = useEventPricing();
   const { settings } = useSiteSettings();
@@ -208,6 +209,43 @@ const BookEvent = () => {
     setAvailabilityChecked(false);
     setIsAvailable(false);
   }, [eventDate, actualCity, intlCity]);
+
+  // Pre-fill from URL search params (used by dashboard "Add Event" modal & enquiries)
+  useEffect(() => {
+    const get = (k: string) => searchParams.get(k) || "";
+    const et = get("eventType");
+    if (et) setEventType(et);
+    const ed = get("eventDate");
+    if (ed) {
+      const [y, m, d] = ed.split("-").map(Number);
+      if (y && m && d) setEventDate(new Date(y, m - 1, d));
+    }
+    const st = get("startTime");
+    if (st) setStartTime(st);
+    const en = get("endTime");
+    if (en) setEndTime(en);
+    const s = get("state");
+    if (s) setState(s);
+    const dist = get("district");
+    if (dist) setDistrict(dist);
+    const c = get("city");
+    if (c) setCity(c);
+    const venue = get("venueName");
+    if (venue) setVenueName(venue);
+    const addr = get("fullAddress");
+    if (addr) setFullAddress(addr);
+    const pin = get("pincode");
+    if (pin) setPincode(pin);
+    const cn = get("clientName");
+    if (cn) setClientName(cn);
+    const cm = get("clientMobile");
+    if (cm) setClientMobile(cm);
+    const ce = get("clientEmail");
+    if (ce) setClientEmail(ce);
+    const ci = get("clientInstagram");
+    if (ci) setClientInstagram(ci);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkAvailability = async () => {
     const checkCity = isInternational ? intlCity : actualCity;
