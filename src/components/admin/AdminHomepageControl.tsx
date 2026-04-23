@@ -621,6 +621,150 @@ const AdminHomepageControl = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ============== HOME ORDER (live homepage section reorder) ============== */}
+        <TabsContent value="home_order">
+          <Card className="admin-glass-card">
+            <CardHeader><CardTitle className="text-base">Live Homepage — Section Order</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-xs text-muted-foreground mb-3">
+                Drag-free reorder of the live homepage sections (Hero, Stats, Video, Gallery, Clients, Services, How, Why, Reviews, FAQs).
+              </p>
+              {(() => {
+                const DEFAULTS = ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
+                const labels: Record<string, string> = {
+                  hero: "Hero (image marquee)", stats: "Stats counters", video: "Video", gallery: "Event Gallery",
+                  clients: "Trusted Brands / Clients", services: "Services", how: "How it Starts", why: "Why Us",
+                  reviews: "Reviews", faqs: "FAQs",
+                };
+                const order: string[] = Array.isArray(settings.homepage_section_order?.order)
+                  ? settings.homepage_section_order.order
+                  : DEFAULTS;
+                const move = (i: number, dir: "up" | "down") => {
+                  const next = [...order];
+                  const j = dir === "up" ? i - 1 : i + 1;
+                  if (j < 0 || j >= next.length) return;
+                  [next[i], next[j]] = [next[j], next[i]];
+                  updateSetting("homepage_section_order", { order: next });
+                };
+                const reset = () => updateSetting("homepage_section_order", { order: DEFAULTS });
+                return (
+                  <>
+                    {order.map((id, i) => (
+                      <div key={id} className="flex items-center justify-between py-2 px-3 rounded-lg border border-border/50 hover:bg-muted/30">
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col">
+                            <button onClick={() => move(i, "up")} disabled={i === 0} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => move(i, "down")} disabled={i === order.length - 1} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+                          </div>
+                          <span className="text-sm font-medium">{i + 1}.</span>
+                          <span className="text-sm">{labels[id] || id}</span>
+                        </div>
+                        <code className="text-[10px] text-muted-foreground">{id}</code>
+                      </div>
+                    ))}
+                    <Button size="sm" variant="outline" onClick={reset} className="mt-2">Reset to Default</Button>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ============== FOOTER EDITOR ============== */}
+        <TabsContent value="footer">
+          <Card className="admin-glass-card">
+            <CardHeader><CardTitle className="text-base">Footer Content</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              {(() => {
+                const f = settings.homepage_footer || {};
+                const set = (patch: any) => updateSetting("homepage_footer", { ...f, ...patch });
+                const cols: any[] = Array.isArray(f.columns) ? f.columns : [];
+                const setCols = (next: any[]) => set({ columns: next });
+                return (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Brand Tagline</label>
+                        <Textarea rows={2} value={f.brand_tagline || ""} onChange={e => set({ brand_tagline: e.target.value })} placeholder="India's #1 live caricature studio…" />
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs font-semibold text-muted-foreground mb-1 block">Copyright Text</label>
+                          <Input value={f.copyright || ""} onChange={e => set({ copyright: e.target.value })} placeholder="© 2026 Creative Caricature Club…" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-semibold text-muted-foreground mb-1 block">Right Tagline</label>
+                          <Input value={f.tagline_right || ""} onChange={e => set({ tagline_right: e.target.value })} placeholder="Made with ❤️ for live events." />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-border/40">
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Credit Prefix</label>
+                        <Input value={f.credit_prefix || ""} onChange={e => set({ credit_prefix: e.target.value })} placeholder="Designed and prompted by" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Credit Name</label>
+                        <Input value={f.credit_name || ""} onChange={e => set({ credit_name: e.target.value })} placeholder="Akash" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-muted-foreground mb-1 block">Instagram Handle (no @)</label>
+                        <Input value={f.credit_instagram_handle || ""} onChange={e => set({ credit_instagram_handle: e.target.value })} placeholder="akashustle" />
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-border/40">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-semibold">Footer Columns</h4>
+                        <Button size="sm" variant="outline" onClick={() => setCols([...cols, { title: "New Column", links: [] }])}>
+                          <Plus className="w-3.5 h-3.5 mr-1" /> Add Column
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {cols.map((c, ci) => (
+                          <div key={ci} className="rounded-lg border border-border/50 p-3 bg-muted/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Input className="flex-1" value={c.title || ""} onChange={e => {
+                                const n = [...cols]; n[ci] = { ...n[ci], title: e.target.value }; setCols(n);
+                              }} placeholder="Column title" />
+                              <Button size="sm" variant="ghost" onClick={() => setCols(cols.filter((_, i) => i !== ci))}>
+                                <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              {(c.links || []).map((l: any, li: number) => (
+                                <div key={li} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                  <Input value={l.label || ""} placeholder="Label" onChange={e => {
+                                    const n = [...cols]; n[ci].links[li] = { ...n[ci].links[li], label: e.target.value }; setCols(n);
+                                  }} />
+                                  <Input value={l.href || ""} placeholder="/path or https://" onChange={e => {
+                                    const n = [...cols]; n[ci].links[li] = { ...n[ci].links[li], href: e.target.value }; setCols(n);
+                                  }} />
+                                  <Button size="sm" variant="ghost" onClick={() => {
+                                    const n = [...cols]; n[ci].links = (n[ci].links || []).filter((_: any, i: number) => i !== li); setCols(n);
+                                  }}>
+                                    <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                                  </Button>
+                                </div>
+                              ))}
+                              <Button size="sm" variant="outline" onClick={() => {
+                                const n = [...cols]; n[ci].links = [...(n[ci].links || []), { label: "", href: "" }]; setCols(n);
+                              }}>
+                                <Plus className="w-3.5 h-3.5 mr-1" /> Add Link
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
