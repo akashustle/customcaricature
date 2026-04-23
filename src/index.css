@@ -28,74 +28,76 @@
 
 @layer base {
   :root {
-    /* CCC Brand: Soft warm ivory #fdf8f3 base — gentle, premium, airy */
-    --background: 30 43% 97%;
-    --foreground: 25 20% 18%;
+    /* FinRank-inspired: Off-white base, lime green primary, near-black ink */
+    --background: 60 9% 97%;
+    --foreground: 220 13% 9%;
 
-    /* Warm cream cards */
-    --card: 30 40% 99%;
-    --card-foreground: 25 20% 18%;
+    /* Pure white cards for crisp contrast */
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 9%;
 
-    --popover: 30 40% 99%;
-    --popover-foreground: 25 20% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 9%;
 
-    /* Warm brown primary — soft, not dark */
-    --primary: 25 25% 32%;
-    --primary-foreground: 30 40% 98%;
+    /* Lime/electric green primary — vivid, modern */
+    --primary: 82 78% 55%;
+    --primary-foreground: 220 13% 9%;
 
-    /* Light warm secondary */
-    --secondary: 30 20% 94%;
-    --secondary-foreground: 25 18% 35%;
+    /* Soft neutral secondary */
+    --secondary: 60 6% 94%;
+    --secondary-foreground: 220 13% 18%;
 
     /* Muted */
-    --muted: 30 15% 93%;
-    --muted-foreground: 25 10% 50%;
+    --muted: 60 6% 92%;
+    --muted-foreground: 220 8% 45%;
 
-    /* Soft warm accent — muted rose-brown instead of orange */
-    --accent: 18 40% 55%;
-    --accent-foreground: 30 40% 98%;
+    /* Warm gold accent — kept for logo touchpoints */
+    --accent: 35 50% 60%;
+    --accent-foreground: 220 13% 9%;
 
     /* Destructive */
-    --destructive: 0 50% 55%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders — very light */
-    --border: 30 18% 88%;
-    --input: 30 18% 88%;
-    --ring: 25 25% 45%;
+    /* Borders — very light neutral */
+    --border: 60 6% 88%;
+    --input: 60 6% 88%;
+    --ring: 82 78% 50%;
 
     --radius: 1rem;
 
     /* Sidebar */
-    --sidebar-background: 30 30% 96%;
-    --sidebar-foreground: 25 18% 30%;
-    --sidebar-primary: 25 25% 32%;
-    --sidebar-primary-foreground: 30 40% 98%;
-    --sidebar-accent: 30 18% 92%;
-    --sidebar-accent-foreground: 25 18% 30%;
-    --sidebar-border: 30 18% 90%;
-    --sidebar-ring: 25 25% 45%;
+    --sidebar-background: 60 9% 97%;
+    --sidebar-foreground: 220 10% 25%;
+    --sidebar-primary: 82 78% 55%;
+    --sidebar-primary-foreground: 220 13% 9%;
+    --sidebar-accent: 60 6% 92%;
+    --sidebar-accent-foreground: 220 13% 18%;
+    --sidebar-border: 60 6% 90%;
+    --sidebar-ring: 82 78% 50%;
 
     /* Semantic */
-    --success: 152 45% 42%;
-    --warning: 38 75% 52%;
-    --info: 210 55% 50%;
+    --success: 82 78% 45%;
+    --warning: 38 92% 55%;
+    --info: 210 90% 55%;
 
-    /* Extended brand palette */
-    --brand-cream: 30 35% 96%;
+    /* Extended brand palette — gold kept for logo */
+    --brand-cream: 60 9% 96%;
     --brand-gold: 35 50% 60%;
     --brand-terracotta: 18 40% 55%;
     --brand-brown: 25 25% 32%;
-    --brand-warm: 30 22% 90%;
+    --brand-warm: 60 6% 92%;
+    --brand-lime: 82 78% 55%;
+    --brand-ink: 220 13% 9%;
 
-    /* Accent palette — soft action colors */
-    --soft-green: 130 60% 90%;
+    /* Accent palette — lime-forward */
+    --soft-green: 82 78% 90%;
     --soft-blue: 220 60% 92%;
     --soft-pink: 345 60% 92%;
-    --warm-peach: 20 100% 92%;
+    --warm-peach: 35 80% 92%;
     --light-gold: 40 65% 69%;
 
-    /* Gold scale */
+    /* Gold scale — kept for logo accents */
     --gold-50: 35 40% 97%;
     --gold-100: 35 38% 94%;
     --gold-200: 35 35% 88%;
@@ -107,21 +109,21 @@
     --gold-800: 35 32% 28%;
     --gold-900: 35 28% 20%;
 
-    /* Chart colors */
-    --chart-1: 18 40% 55%;
-    --chart-2: 152 45% 42%;
-    --chart-3: 38 75% 52%;
-    --chart-4: 210 55% 50%;
-    --chart-5: 280 40% 55%;
+    /* Chart colors — lime first */
+    --chart-1: 82 78% 55%;
+    --chart-2: 220 13% 15%;
+    --chart-3: 35 50% 60%;
+    --chart-4: 210 90% 55%;
+    --chart-5: 280 60% 60%;
 
-    --admin-bg: 30 43% 97%;
-    --admin-surface: 30 40% 99%;
-    --admin-foreground: 25 20% 18%;
-    --admin-primary: 25 25% 32%;
+    --admin-bg: 60 9% 97%;
+    --admin-surface: 0 0% 100%;
+    --admin-foreground: 220 13% 9%;
+    --admin-primary: 82 78% 55%;
     --admin-secondary: 35 50% 60%;
-    --admin-highlight: 18 40% 55%;
-    --admin-border: 30 18% 88%;
-    --admin-shadow: 25 25% 32%;
+    --admin-highlight: 220 13% 12%;
+    --admin-border: 60 6% 88%;
+    --admin-shadow: 220 13% 9%;
   }
 
   .dark {
