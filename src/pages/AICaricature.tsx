@@ -6,23 +6,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Sparkles, ArrowLeft, Loader2, ShoppingCart, Shirt, Coffee, Image as ImageIcon, Frame } from "lucide-react";
+import { Upload, Sparkles, ArrowLeft, Loader2, ShoppingCart, Shirt, Coffee, Image as ImageIcon, Frame, Palette, Gift, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
 
-const PRODUCT_TYPES = [
-  { id: "tshirt", label: "T-Shirt", icon: Shirt },
-  { id: "mug", label: "Mug", icon: Coffee },
-  { id: "poster", label: "Poster", icon: ImageIcon },
-  { id: "frame", label: "Frame", icon: Frame },
-];
+const PRODUCT_ICON_MAP: Record<string, any> = { Shirt, Coffee, ImageIcon, Frame, Palette, Gift, Package };
 
-const STYLES = [
-  { id: "classic", label: "Classic", color: "from-amber-400 to-orange-500" },
-  { id: "cartoon", label: "Cartoon", color: "from-blue-400 to-purple-500" },
-  { id: "pop_art", label: "Pop Art", color: "from-pink-400 to-red-500" },
-  { id: "minimal", label: "Minimal", color: "from-gray-400 to-gray-600" },
-];
+const DEFAULT_AI_PAGE = {
+  header_title: "AI Caricature Generator",
+  step1_title: "Upload Your Photo",
+  step1_subtitle: "Upload a clear face photo for the best caricature result",
+  step1_button: "Choose Photo",
+  step2_title: "Choose Style",
+  step2_button_idle: "Generate Caricature",
+  step2_button_loading: "Generating Caricature...",
+  step3_title: "Your Caricature Preview",
+  step3_button_back: "Regenerate",
+  step3_button_next: "Print on Product →",
+  step4_title: "Choose Product",
+  step4_button: "Add to Cart",
+  styles: [
+    { id: "classic", label: "Classic", color: "from-amber-400 to-orange-500" },
+    { id: "cartoon", label: "Cartoon", color: "from-blue-400 to-purple-500" },
+    { id: "pop_art", label: "Pop Art", color: "from-pink-400 to-red-500" },
+    { id: "minimal", label: "Minimal", color: "from-gray-400 to-gray-600" },
+  ],
+  products: [
+    { id: "tshirt", label: "T-Shirt", icon: "Shirt" },
+    { id: "mug", label: "Mug", icon: "Coffee" },
+    { id: "poster", label: "Poster", icon: "ImageIcon" },
+    { id: "frame", label: "Frame", icon: "Frame" },
+  ],
+};
 
 const AICaricature = () => {
   const navigate = useNavigate();
