@@ -2279,7 +2279,10 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         </div>
       )}
 
-      {/* Quick actions row */}
+      {/* Download App card — shown to users with at least one event booked */}
+      {events.length > 0 && <DownloadAppCard />}
+
+
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Events", icon: CalIcon, action: () => setActiveTab("events") },
