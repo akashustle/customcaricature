@@ -36,10 +36,14 @@ import PaymentSuccessOverlay from "@/components/PaymentSuccessOverlay";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
+import AddEventModal from "@/components/dashboard/AddEventModal";
+import { BadgeCheck, Camera } from "lucide-react";
+
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
   event_booking_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
+  is_verified?: boolean; avatar_url?: string | null;
 };
 
 type Order = {
@@ -77,6 +81,8 @@ const Dashboard = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("home");
+  const [addEventOpen, setAddEventOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [newSecretCode, setNewSecretCode] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -175,9 +181,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed || false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -208,6 +214,26 @@ const Dashboard = () => {
     }).eq("user_id", user.id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
     else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub?.publicUrl;
+      const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
+      if (dbErr) throw dbErr;
+      setProfile((p) => p ? { ...p, avatar_url: url } : p);
+      toast({ title: "📸 Profile photo updated!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    }
+    setUploadingAvatar(false);
   };
 
   const changeSecretCode = async () => {

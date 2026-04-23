@@ -3271,6 +3271,7 @@ export type Database = {
           instagram_id: string | null
           international_booking_allowed: boolean
           is_manual: boolean
+          is_verified: boolean
           mobile: string
           pincode: string | null
           registration_lat: number | null
@@ -3301,6 +3302,7 @@ export type Database = {
           instagram_id?: string | null
           international_booking_allowed?: boolean
           is_manual?: boolean
+          is_verified?: boolean
           mobile: string
           pincode?: string | null
           registration_lat?: number | null
@@ -3331,6 +3333,7 @@ export type Database = {
           instagram_id?: string | null
           international_booking_allowed?: boolean
           is_manual?: boolean
+          is_verified?: boolean
           mobile?: string
           pincode?: string | null
           registration_lat?: number | null

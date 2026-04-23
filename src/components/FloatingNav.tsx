@@ -70,7 +70,7 @@ const FloatingNav = () => {
           ) : (
             <button onClick={() => navigate("/login")} className="btn-square-outline text-sm">Login</button>
           )}
-          <button onClick={() => navigate("/enquiry")} className="btn-square-dark text-sm">
+          <button onClick={() => navigate("/chat-now")} className="btn-square-dark text-sm">
             <MessageCircle className="w-4 h-4" /> Chat Now
           </button>
         </div>
@@ -101,7 +101,7 @@ const FloatingNav = () => {
             ) : (
               <button onClick={() => navigate("/login")} className="btn-square-outline flex-1 justify-center text-sm">Login</button>
             )}
-            <button onClick={() => navigate("/enquiry")} className="btn-square-dark flex-1 justify-center text-sm">
+            <button onClick={() => { setOpen(false); navigate("/chat-now"); }} className="btn-square-dark flex-1 justify-center text-sm">
               <MessageCircle className="w-4 h-4" /> Chat Now
             </button>
           </div>

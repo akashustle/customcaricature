@@ -82,6 +82,7 @@ const SEOLandingPage = lazy(() => import("./pages/SEOLandingPage"));
 const LilFlea = lazy(() => import("./pages/LilFlea"));
 const LilFleaGallery = lazy(() => import("./pages/LilFleaGallery"));
 const ClaimLink = lazy(() => import("./pages/ClaimLink"));
+const ChatNow = lazy(() => import("./pages/ChatNow"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -310,6 +311,7 @@ const App = () => {
                 <Route path="/lil-flea" element={<LilFlea />} />
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
                 <Route path="/claim-link" element={<ClaimLink />} />
+                <Route path="/chat-now" element={<ChatNow />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />
