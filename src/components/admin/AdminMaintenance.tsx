@@ -153,6 +153,11 @@ const AdminMaintenance = () => {
   const workshopSplashEnabled = (siteSettings as any).workshop_splash_enabled?.enabled === true;
   const appOnboardingEnabled = (siteSettings as any).app_onboarding_enabled?.enabled === true;
   const adminLocationRequired = (siteSettings as any).admin_location_required?.enabled ?? false;
+  const hideHowItWorks = (siteSettings as any).hide_how_it_works?.enabled ?? true;
+  const hideWhatYouGet = (siteSettings as any).hide_what_you_get?.enabled ?? true;
+  const hideStyles = (siteSettings as any).hide_styles_section?.enabled ?? true;
+  const hideStartOrderBtn = (siteSettings as any).hide_start_order_btn?.enabled ?? true;
+  const hideHeroOrderBtn = (siteSettings as any).hide_hero_order_btn?.enabled ?? true;
 
   if (loading) return <div className="flex items-center justify-center py-10"><Wrench className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
 
@@ -210,6 +215,8 @@ const AdminMaintenance = () => {
             <div>
               <p className="text-sm font-medium">Require Location for Admin Login</p>
               <p className="text-xs text-muted-foreground">Block admin dashboard if location is denied</p>
+            </div>
+            <Switch checked={adminLocationRequired} onCheckedChange={(v) => updateSiteSetting("admin_location_required", { enabled: v })} />
           </div>
           <div className="flex items-center justify-between">
             <div>
@@ -232,8 +239,53 @@ const AdminMaintenance = () => {
             </div>
             <Switch checked={appOnboardingEnabled} onCheckedChange={(v) => updateSiteSetting("app_onboarding_enabled", { enabled: v })} />
           </div>
-            <Switch checked={adminLocationRequired} onCheckedChange={(v) => updateSiteSetting("admin_location_required", { enabled: v })} />
+
+          {/* Homepage section visibility — hide-toggles default ON (sections hidden) */}
+          <div className="space-y-3 pt-3 border-t border-border/40">
+            <Label className="text-sm font-medium flex items-center gap-2"><Home className="w-4 h-4" /> Homepage Section Visibility</Label>
+            <p className="text-[10px] text-muted-foreground">Toggle ON to HIDE these sections on the homepage. Turn OFF to show them again.</p>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Hide hero "Order Caricature" button</p>
+                <p className="text-xs text-muted-foreground">Removes the Start Your Caricature CTA in the hero section</p>
+              </div>
+              <Switch checked={hideHeroOrderBtn} onCheckedChange={(v) => updateSiteSetting("hide_hero_order_btn", { enabled: v })} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Hide "How It Works" / Simple Process</p>
+                <p className="text-xs text-muted-foreground">Hides the 3-step custom-caricature explainer</p>
+              </div>
+              <Switch checked={hideHowItWorks} onCheckedChange={(v) => updateSiteSetting("hide_how_it_works", { enabled: v })} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Hide "What You Get" section</p>
+                <p className="text-xs text-muted-foreground">Hides the photo-to-art experience checklist</p>
+              </div>
+              <Switch checked={hideWhatYouGet} onCheckedChange={(v) => updateSiteSetting("hide_what_you_get", { enabled: v })} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Hide "Pick Your Style / Our Styles" section</p>
+                <p className="text-xs text-muted-foreground">Hides the caricature style picker</p>
+              </div>
+              <Switch checked={hideStyles} onCheckedChange={(v) => updateSiteSetting("hide_styles_section", { enabled: v })} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Hide final-CTA "Start Your Order" button</p>
+                <p className="text-xs text-muted-foreground">Hides the order CTA on "Make Your Event Unforgettable"</p>
+              </div>
+              <Switch checked={hideStartOrderBtn} onCheckedChange={(v) => updateSiteSetting("hide_start_order_btn", { enabled: v })} />
+            </div>
           </div>
+
           <div className="space-y-1.5 pt-2 border-t border-border/40">
             <Label className="text-sm font-medium flex items-center gap-2"><MessageCircle className="w-4 h-4" /> Maintenance WhatsApp Prefilled Message</Label>
             <div className="flex gap-2">

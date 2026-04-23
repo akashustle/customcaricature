@@ -39,6 +39,11 @@ type SiteSettings = {
   permission_microphone: { enabled: boolean };
   permission_camera: { enabled: boolean };
   admin_location_required: { enabled: boolean };
+  hide_how_it_works: { enabled: boolean };
+  hide_what_you_get: { enabled: boolean };
+  hide_styles_section: { enabled: boolean };
+  hide_start_order_btn: { enabled: boolean };
+  hide_hero_order_btn: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -73,6 +78,11 @@ const defaults: SiteSettings = {
   permission_microphone: { enabled: false },
   permission_camera: { enabled: false },
   admin_location_required: { enabled: false },
+  hide_how_it_works: { enabled: true },
+  hide_what_you_get: { enabled: true },
+  hide_styles_section: { enabled: true },
+  hide_start_order_btn: { enabled: true },
+  hide_hero_order_btn: { enabled: true },
 };
 
 // Module-level cache so all instances share one fetch result
