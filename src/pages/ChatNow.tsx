@@ -84,17 +84,15 @@ const ChatNow = () => {
   const cities = state && district && district !== "__other__" ? INDIA_LOCATIONS[state]?.[district] || [] : [];
   const endTime = addHours(startTime, hours);
 
-  const finalDistrict = district === "__other__" ? customDistrict : district;
-  const finalCity = city === "__other__" ? customCity : city;
-  const finalEventType = eventType === "other" ? customEventType : eventType;
+  const finalDistrict = district;
+  const finalCity = city;
+  const finalEventType = eventType;
 
   const handleSend = () => {
     if (!name.trim()) return toast({ title: "Please enter your name", variant: "destructive" });
 
-    const eventLabel =
-      eventType === "other"
-        ? customEventType || "Other"
-        : EVENT_TYPES.find((t) => t.value === eventType)?.label || "—";
+    const knownEvent = EVENT_TYPES.find((t) => t.value === eventType);
+    const eventLabel = knownEvent?.label || eventType || "—";
     const dateStr = eventDate ? format(eventDate, "EEEE, do MMMM yyyy") : "Not decided yet";
     const timeStr = startTime ? `${startTime} – ${endTime} (${hours} hr)` : "Not decided yet";
     const location = [finalCity, finalDistrict, state].filter(Boolean).join(", ") || "Not specified";
