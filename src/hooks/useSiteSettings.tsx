@@ -46,7 +46,9 @@ type SiteSettings = {
   hide_hero_order_btn: { enabled: boolean };
   homepage_urgency_strip: { enabled: boolean };
   floating_whatsapp: { enabled: boolean };
+  floating_whatsapp_mobile: { enabled: boolean };
   floating_instagram: { enabled: boolean };
+  floating_instagram_mobile: { enabled: boolean };
   floating_dark_toggle: { enabled: boolean };
 };
 
@@ -89,7 +91,9 @@ const defaults: SiteSettings = {
   hide_hero_order_btn: { enabled: true },
   homepage_urgency_strip: { enabled: false },
   floating_whatsapp: { enabled: false },
+  floating_whatsapp_mobile: { enabled: false },
   floating_instagram: { enabled: false },
+  floating_instagram_mobile: { enabled: false },
   floating_dark_toggle: { enabled: false },
 };
 

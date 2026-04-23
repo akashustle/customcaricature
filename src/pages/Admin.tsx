@@ -2560,10 +2560,17 @@ const Admin = () => {
                 <CardContent className="space-y-4 p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-sans font-medium text-sm">Show WhatsApp Float</p>
-                      <p className="text-xs text-muted-foreground font-sans">Display floating WhatsApp button (default: off)</p>
+                      <p className="font-sans font-medium text-sm">Show WhatsApp Float (Desktop)</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display floating WhatsApp button on desktop (default: off)</p>
                     </div>
-                    <Switch checked={(settings as any).floating_whatsapp?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_whatsapp", { enabled: checked }); toast({ title: checked ? "WhatsApp float enabled" : "WhatsApp float hidden" }); }} />
+                    <Switch checked={(settings as any).floating_whatsapp?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_whatsapp", { enabled: checked }); toast({ title: checked ? "WhatsApp float enabled (desktop)" : "WhatsApp float hidden (desktop)" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Show WhatsApp Float (Mobile)</p>
+                      <p className="text-xs text-muted-foreground font-sans">Display floating WhatsApp button on mobile (default: off — mobile already has bottom nav)</p>
+                    </div>
+                    <Switch checked={(settings as any).floating_whatsapp_mobile?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("floating_whatsapp_mobile", { enabled: checked }); toast({ title: checked ? "WhatsApp float enabled (mobile)" : "WhatsApp float hidden (mobile)" }); }} />
                   </div>
                   <div className="flex items-center justify-between border-t border-border/30 pt-4">
                     <div>

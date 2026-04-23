@@ -31,8 +31,11 @@ const FloatingButtons = () => {
   const { theme, setTheme } = useTheme();
   const { settings } = useSiteSettings();
 
-  const showWhatsapp = (settings as any).floating_whatsapp?.enabled === true;
-  const showInstagram = (settings as any).floating_instagram?.enabled === true;
+  // Mobile-specific override: by default WhatsApp float is hidden on mobile (uses MobileBottomNav instead)
+  const mobileWhatsappEnabled = (settings as any).floating_whatsapp_mobile?.enabled === true;
+  const desktopWhatsappEnabled = (settings as any).floating_whatsapp?.enabled === true;
+  const showWhatsapp = isMobile ? mobileWhatsappEnabled : desktopWhatsappEnabled;
+  const showInstagram = (settings as any).floating_instagram?.enabled === true && (!isMobile || (settings as any).floating_instagram_mobile?.enabled === true);
   const showDarkToggle = (settings as any).floating_dark_toggle?.enabled === true;
 
   const allowedPaths = Object.keys(PAGE_MESSAGES);
