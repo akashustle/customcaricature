@@ -338,8 +338,8 @@ const AdminLilFlea = () => {
                         <div className="flex gap-1">
                           <Button size="sm" variant="ghost" className="text-white h-8 w-8 p-0" onClick={() => moveImage(img.id, "up")}><ChevronUp className="w-4 h-4" /></Button>
                           <Button size="sm" variant="ghost" className="text-white h-8 w-8 p-0" onClick={() => moveImage(img.id, "down")}><ChevronDown className="w-4 h-4" /></Button>
-                          <Button size="sm" variant="ghost" className={`h-8 w-8 p-0 ${img.is_featured ? "text-amber-400" : "text-white"}`} onClick={() => toggleFeatured(img.id, img.is_featured)}><Star className="w-4 h-4" fill={img.is_featured ? "currentColor" : "none"} /></Button>
-                          <Button size="sm" variant="ghost" className="text-red-400 h-8 w-8 p-0" onClick={() => handleDelete(img.id)}><Trash2 className="w-4 h-4" /></Button>
+                          <Button size="sm" variant="ghost" className={`h-8 w-8 p-0 ${img.is_featured ? "text-amber-500" : "text-foreground hover:text-primary"}`} onClick={() => toggleFeatured(img.id, img.is_featured)}><Star className="w-4 h-4" fill={img.is_featured ? "currentColor" : "none"} /></Button>
+                          <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 h-8 w-8 p-0" onClick={() => handleDelete(img.id)}><Trash2 className="w-4 h-4" /></Button>
                         </div>
                         <Input
                           placeholder="Caption"

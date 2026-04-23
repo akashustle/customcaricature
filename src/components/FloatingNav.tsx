@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageCircle, Menu, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/useAuth";
 const FloatingNav = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,6 @@ const FloatingNav = () => {
   ];
 
   const goAnchor = (href: string) => {
-    setOpen(false);
     if (href.startsWith("#")) {
       const el = document.querySelector(href);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });

@@ -333,10 +333,10 @@ const AdminPayments = () => {
                   <p className="text-xs text-muted-foreground font-sans mt-0.5">{p.description || "—"}</p>
                   <p className="text-xs text-muted-foreground font-sans">{formatDateTime(p.created_at)}</p>
                 </div>
-                <p className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">{formatPrice(p.amount)}</p>
+                <p className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent">{formatPrice(p.amount)}</p>
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
-                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">{p.status === "confirmed" ? "Paid ✅" : p.status}</Badge>
+                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-xs">{p.status === "confirmed" ? "Paid ✅" : p.status}</Badge>
                 <Badge variant="outline" className="text-xs border-border text-muted-foreground">{PAYMENT_TYPE_LABELS[p.payment_type] || p.payment_type}</Badge>
               </div>
               {p.razorpay_payment_id && (
