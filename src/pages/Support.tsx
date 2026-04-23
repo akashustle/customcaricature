@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { Phone, Mail, MapPin, Clock, Instagram, MessageCircle, Youtube, Facebook, Send, CheckCircle2, ArrowLeft, Headphones, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 import { motion } from "framer-motion";
 
 const Support = () => {
@@ -205,8 +206,11 @@ const Support = () => {
           </div>
         </div>
       </div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </>
   );
 };
+
 
 export default Support;

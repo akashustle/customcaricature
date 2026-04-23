@@ -1,5 +1,7 @@
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -19,7 +21,7 @@ const WorkshopPolicy = () => {
           <h1 className="font-display text-xl font-bold">Workshop Policy</h1>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-2xl font-body space-y-4 text-sm text-foreground/80">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="container mx-auto px-4 py-8 max-w-5xl font-body space-y-4 text-sm text-foreground/80">
         <motion.p {...fadeUp(0.05)}>Creative Caricature Club™ conducts professional workshops for learning caricature art.</motion.p>
         
         <motion.h2 {...fadeUp(0.1)} className="font-display text-lg font-bold text-foreground pt-2">Registration</motion.h2>
@@ -41,8 +43,11 @@ const WorkshopPolicy = () => {
         <motion.p {...fadeUp(0.37)}>For workshop queries, contact us at <a href="mailto:creativecaricatureclub@gmail.com" className="text-primary hover:underline">creativecaricatureclub@gmail.com</a> or WhatsApp at <a href="https://wa.me/918369594271" className="text-primary hover:underline">+91 8369594271</a>.</motion.p>
       </motion.div>
     </div>
+      <Suspense fallback={null}><SiteFooter /></Suspense>
+
     </>
   );
 };
+
 
 export default WorkshopPolicy;
