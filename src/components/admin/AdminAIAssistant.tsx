@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Sparkles, Send, Loader2, Bot, User as UserIcon, Trash2, Wand2 } from "lucide-react";
+import { Sparkles, Send, Loader2, Bot, User as UserIcon, Trash2, Wand2, Bug, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 

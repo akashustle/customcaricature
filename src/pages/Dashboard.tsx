@@ -37,8 +37,9 @@ import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 import AddEventModal from "@/components/dashboard/AddEventModal";
+import RescheduleEventDialog from "@/components/dashboard/RescheduleEventDialog";
 import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
-import { BadgeCheck, Camera } from "lucide-react";
+import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
