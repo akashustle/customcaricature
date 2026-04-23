@@ -369,7 +369,7 @@ const AdminMiniDatabase = () => {
                                     ))}
                                     <TableCell>
                                       {s.key !== "sync_analytics" && (
-                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                                           onClick={() => initiateDelete(s.key, row.id || row.user_id, row.full_name || row.customer_name || row.client_name || row.name || "this record")}>
                                           <Trash2 className="w-3 h-3" />
                                         </Button>

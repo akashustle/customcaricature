@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageCircle, Menu, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/useAuth";
 const FloatingNav = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,6 @@ const FloatingNav = () => {
   ];
 
   const goAnchor = (href: string) => {
-    setOpen(false);
     if (href.startsWith("#")) {
       const el = document.querySelector(href);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -76,38 +74,16 @@ const FloatingNav = () => {
           </button>
         </div>
 
+        {/* Mobile / Tablet: direct Chat Now CTA — replaces the hamburger */}
         <button
-          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-card"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
+          onClick={() => navigate("/chat-now")}
+          className="md:hidden inline-flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-full bg-foreground text-background text-xs font-semibold shadow-sm active:scale-95 transition-transform whitespace-nowrap"
+          aria-label="Chat Now"
         >
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          <MessageCircle className="w-4 h-4" />
+          Chat Now
         </button>
       </div>
-
-      {open && (
-        <div className="md:hidden mx-auto max-w-7xl mt-2 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl shadow-lg p-3 flex flex-col gap-1">
-          {links.map((l) => (
-            <button
-              key={l.label}
-              onClick={() => goAnchor(l.href)}
-              className="text-left px-3 py-2 rounded-lg text-sm font-semibold text-foreground hover:bg-secondary"
-            >
-              {l.label}
-            </button>
-          ))}
-          <div className="flex gap-2 pt-2">
-            {user ? (
-              <button onClick={() => navigate("/dashboard")} className="btn-square-outline flex-1 justify-center text-sm">My Account</button>
-            ) : (
-              <button onClick={() => navigate("/login")} className="btn-square-outline flex-1 justify-center text-sm">Login</button>
-            )}
-            <button onClick={() => { setOpen(false); navigate("/chat-now"); }} className="btn-square-dark flex-1 justify-center text-sm">
-              <MessageCircle className="w-4 h-4" /> Chat Now
-            </button>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
