@@ -498,8 +498,10 @@ const Index = () => {
               </section>
             );
           case "what_you_get":
+            if (settings.hide_what_you_get?.enabled === true) return null;
             return <div key={sectionId} id="section-what-you-get" className="cv-auto"><HomepageWhatYouGet config={content.homepage_what_you_get} /></div>;
           case "how_it_works":
+            if (settings.hide_how_it_works?.enabled === true) return null;
             return (
               <section key={sectionId} className="container mx-auto px-4 py-16 md:py-24 cv-auto" id="section-how-it-works">
                 <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-12 md:mb-16">
@@ -585,6 +587,7 @@ const Index = () => {
           case "use_cases":
             return <div key={sectionId} id="section-use-cases" className="cv-auto"><HomepageUseCases config={content.homepage_use_cases} /></div>;
           case "styles":
+            if (settings.hide_styles_section?.enabled === true) return null;
             return (
               <section key={sectionId} className="py-16 md:py-24 overflow-hidden cv-auto" id="section-styles">
                 <div className="container mx-auto px-4">
