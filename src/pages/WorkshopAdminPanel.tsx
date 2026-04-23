@@ -641,7 +641,7 @@ const WorkshopAdmin = () => {
 
   // Theme — Premium SaaS aesthetic (uses semantic tokens for dark mode)
   const dm = darkMode;
-  const bg = "bg-background";
+  const bg = "admin-canvas-vault";
   const cardBg = "bg-card border-border";
   const textPrimary = "text-foreground font-semibold";
   const textSecondary = "text-muted-foreground font-medium";
