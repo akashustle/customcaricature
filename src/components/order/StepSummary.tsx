@@ -181,7 +181,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
 
           <div className="border-t border-border pt-4 flex justify-between items-center">
             <span className="font-sans font-semibold text-lg">Total</span>
-            <span className="font-display text-3xl font-bold text-primary">{formatPrice(amount)}</span>
+            <span className="font-display text-3xl font-bold money">{formatPrice(amount)}</span>
           </div>
         </CardContent>
       </Card>

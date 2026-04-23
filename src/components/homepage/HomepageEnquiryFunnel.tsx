@@ -274,9 +274,9 @@ const HomepageEnquiryFunnel = () => {
                       return pricing ? (
                         <div className="bg-success/5 border border-success/20 rounded-xl p-4 mb-4 text-left">
                           <p className="text-xs font-body font-semibold text-success mb-1">Estimated Starting Price</p>
-                          <p className="text-2xl font-bold text-foreground">₹{pricing.total_price?.toLocaleString("en-IN")}</p>
+                          <p className="text-2xl font-bold money">₹{pricing.total_price?.toLocaleString("en-IN")}</p>
                           <p className="text-xs text-muted-foreground font-body mt-1">
-                            Advance: ₹{pricing.advance_amount?.toLocaleString("en-IN")} · 1 Artist · {isMumbai ? "Mumbai" : "Pan India"}
+                            Advance: <span className="money">₹{pricing.advance_amount?.toLocaleString("en-IN")}</span> · 1 Artist · {isMumbai ? "Mumbai" : "Pan India"}
                           </p>
                         </div>
                       ) : null;

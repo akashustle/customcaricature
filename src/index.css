@@ -1927,3 +1927,35 @@ body {
   .marquee-track { animation: none; }
 }
 
+/* ================================================
+   Mobile scroll safety — keep body scrollable
+   ================================================ */
+html, body { max-width: 100vw; overflow-x: hidden; }
+html, body, #root { -webkit-overflow-scrolling: touch; overscroll-behavior-y: auto; }
+@media (max-width: 768px) {
+  /* Ensure no descendant container traps vertical scroll */
+  body, #root { min-height: 100dvh; touch-action: pan-y; }
+}
+
+/* ================================================
+   Money colors — green for positive, red for negative
+   Use class="money", or data-amount-negative for red.
+   ================================================ */
+.money, .amount-positive, [data-amount="positive"] {
+  color: hsl(142 70% 38%);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.dark .money, .dark .amount-positive, .dark [data-amount="positive"] {
+  color: hsl(142 65% 55%);
+}
+.money-neg, .amount-negative, [data-amount="negative"] {
+  color: hsl(0 75% 50%);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.dark .money-neg, .dark .amount-negative, .dark [data-amount="negative"] {
+  color: hsl(0 75% 65%);
+}
+
+
