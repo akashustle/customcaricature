@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Save, Plus, Trash2, FileText } from "lucide-react";
 
-const KEYS = ["page_about", "page_ai_caricature", "global_contact"];
+const KEYS = ["page_about", "page_ai_caricature", "global_contact", "page_caricature_budgeting"];
 
 const AdminPageContent = () => {
   const [data, setData] = useState<Record<string, any>>({});
@@ -57,6 +57,7 @@ const AdminPageContent = () => {
   const about = data.page_about || {};
   const ai = data.page_ai_caricature || {};
   const contact = data.global_contact || {};
+  const cb = data.page_caricature_budgeting || {};
 
   return (
     <div className="space-y-6 admin-panel-font">
@@ -74,6 +75,7 @@ const AdminPageContent = () => {
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="about" className="text-xs">About Page</TabsTrigger>
           <TabsTrigger value="ai" className="text-xs">AI Caricature</TabsTrigger>
+          <TabsTrigger value="cb" className="text-xs">Pricing Calculator</TabsTrigger>
           <TabsTrigger value="contact" className="text-xs">Global Contact</TabsTrigger>
           <TabsTrigger value="policies" className="text-xs">Legal & Policies</TabsTrigger>
         </TabsList>
