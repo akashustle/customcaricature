@@ -647,10 +647,11 @@ const WorkshopAdmin = () => {
   const textSecondary = "text-muted-foreground font-medium";
   const textMuted = "text-muted-foreground/60";
   const sidebarBg = "bg-card/95 border-border";
-  const activeTabClass = "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold";
+  // Vault theme — black active pill with lime icon, lime primary buttons
+  const activeTabClass = "bg-[hsl(0_0%_8%)] text-white shadow-[0_4px_12px_hsl(0_0%_0%/0.18)] font-semibold";
   const inactiveTab = "text-muted-foreground hover:text-foreground hover:bg-muted";
-  const btnPrimary = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 font-semibold";
-  const inputClass = "bg-secondary border-border text-foreground font-medium placeholder:text-muted-foreground rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20";
+  const btnPrimary = "bg-[hsl(82_75%_55%)] hover:bg-[hsl(82_75%_48%)] text-[hsl(0_0%_8%)] shadow-[0_4px_14px_hsl(82_75%_45%/0.35)] font-semibold";
+  const inputClass = "bg-secondary border-border text-foreground font-medium placeholder:text-muted-foreground rounded-xl focus:border-[hsl(82_75%_55%)] focus:ring-[hsl(82_75%_55%)]/30";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }}
@@ -1012,7 +1013,7 @@ const WorkshopAdmin = () => {
             </div>
             <div className="flex gap-1 items-center">
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
+                className="w-8 h-8 rounded-full bg-[hsl(82_75%_55%)] flex items-center justify-center text-[hsl(0_0%_8%)] text-xs font-bold shadow-[0_4px_12px_hsl(82_75%_45%/0.35)]">
                 {adminInfo?.name?.[0]?.toUpperCase() || "A"}
               </button>
               <Button variant="ghost" size="sm" onClick={fetchAll} className={`h-8 w-8 p-0 ${textMuted}`}><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
@@ -1053,7 +1054,7 @@ const WorkshopAdmin = () => {
                     <div className="flex items-center gap-2">
                       <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
                         className={`hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-xl ${dm ? "bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.06]" : "bg-slate-50 border-slate-200/60 hover:bg-slate-100"} border transition-all`}>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
+                        <div className="w-8 h-8 rounded-full bg-[hsl(82_75%_55%)] flex items-center justify-center text-[hsl(0_0%_8%)] text-xs font-bold shadow-[0_4px_12px_hsl(82_75%_45%/0.35)]">
                           {adminInfo?.name?.[0]?.toUpperCase() || "A"}
                         </div>
                         <div className="text-left">
