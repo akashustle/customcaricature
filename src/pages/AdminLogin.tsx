@@ -407,6 +407,9 @@ const AdminLogin = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(135deg, ${BRAND.cream} 0%, #FFFFFF 38%, ${BRAND.light}66 72%, ${BRAND.highlight}33 100%)`,
+      }}
     >
       <SEOHead title="Admin Login" noindex />
 
@@ -511,20 +514,23 @@ const AdminLogin = () => {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="flex items-center justify-center gap-2 mb-1">
+                <div className="flex items-center justify-center gap-2 mb-1.5">
                   <Shield className="w-5 h-5" style={{ color: BRAND.accent }} />
                   <h1
-                    className="text-2xl font-black"
+                    className="text-[22px] md:text-2xl font-black leading-tight tracking-tight"
                     style={{
-                      background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`,
+                      background: `linear-gradient(120deg, ${BRAND.primary} 0%, ${BRAND.accent} 45%, ${BRAND.highlight} 80%)`,
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                     }}
                   >
-                    Admin Console
+                    Creative Caricature Club
                   </h1>
                 </div>
-                <p className="text-sm font-medium" style={{ color: "#64748B" }}>{getGreeting()}</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: BRAND.accent }}>
+                  Admin Console
+                </p>
+                <p className="text-sm font-medium mt-1" style={{ color: "#64748B" }}>{getGreeting()}</p>
               </motion.div>
 
               {/* Step indicators */}

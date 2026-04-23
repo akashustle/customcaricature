@@ -6,13 +6,6 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { EVENT_TYPES } from "@/lib/event-data";
@@ -202,19 +195,19 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
 
                 <div>
                   <Label className="text-xs font-sans text-muted-foreground">Start time *</Label>
-                  <Select value={startTime} onValueChange={setStartTime}>
-                    <SelectTrigger className="rounded-xl mt-1 h-11">
-                      <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
+                  <div className="relative mt-1">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                    <select
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full h-11 pl-10 pr-3 rounded-xl border border-input bg-background text-sm font-sans text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    >
+                      <option value="" disabled>Select</option>
                       {TIME_SLOTS.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
+                        <option key={t} value={t}>{t}</option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                  </div>
                 </div>
               </div>
 

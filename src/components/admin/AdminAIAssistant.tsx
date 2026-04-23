@@ -44,12 +44,25 @@ const AdminAIAssistant = () => {
       const { data, error } = await supabase.functions.invoke("admin-ai-assistant", {
         body: { messages: next.map(m => ({ role: m.role, content: m.content })) },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to read the function response body for the real error message
+        let detail = error.message || String(error);
+        try {
+          const ctx = (error as any).context;
+          if (ctx?.body) {
+            const txt = typeof ctx.body === "string" ? ctx.body : await new Response(ctx.body).text();
+            const parsed = JSON.parse(txt);
+            if (parsed?.error) detail = parsed.error;
+          }
+        } catch {}
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
       setMessages(prev => [...prev, { role: "assistant", content: data?.reply || "(no reply)" }]);
     } catch (e: any) {
-      toast({ title: "AI error", description: e.message || String(e), variant: "destructive" });
-      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${e.message || "Request failed"}` }]);
+      const msg = e.message || String(e);
+      toast({ title: "AI error", description: msg, variant: "destructive" });
+      setMessages(prev => [...prev, { role: "assistant", content: `⚠️ ${msg}` }]);
     } finally {
       setBusy(false);
     }
