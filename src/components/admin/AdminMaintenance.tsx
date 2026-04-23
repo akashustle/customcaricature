@@ -210,7 +210,28 @@ const AdminMaintenance = () => {
             <div>
               <p className="text-sm font-medium">Require Location for Admin Login</p>
               <p className="text-xs text-muted-foreground">Block admin dashboard if location is denied</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Homepage Splash Screen</p>
+              <p className="text-xs text-muted-foreground">Show splash animation to public visitors</p>
             </div>
+            <Switch checked={homepageSplashEnabled} onCheckedChange={(v) => updateSiteSetting("homepage_splash_enabled", { enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Workshop Splash Screen</p>
+              <p className="text-xs text-muted-foreground">Show splash on workshop area</p>
+            </div>
+            <Switch checked={workshopSplashEnabled} onCheckedChange={(v) => updateSiteSetting("workshop_splash_enabled", { enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">App Onboarding Slides</p>
+              <p className="text-xs text-muted-foreground">Show 3-slide onboarding to first-time visitors</p>
+            </div>
+            <Switch checked={appOnboardingEnabled} onCheckedChange={(v) => updateSiteSetting("app_onboarding_enabled", { enabled: v })} />
+          </div>
             <Switch checked={adminLocationRequired} onCheckedChange={(v) => updateSiteSetting("admin_location_required", { enabled: v })} />
           </div>
           <div className="space-y-1.5 pt-2 border-t border-border/40">
