@@ -59,7 +59,7 @@ const DEFAULT_FIELDS: Record<string, Partial<FormField>[]> = {
     { field_key: "client_name", label: "Client Name", field_type: "text", placeholder: "Full name", is_required: true },
     { field_key: "client_email", label: "Email", field_type: "email", placeholder: "you@email.com", is_required: true },
     { field_key: "client_mobile", label: "Mobile", field_type: "tel", placeholder: "+91...", is_required: true },
-    { field_key: "event_type", label: "Event Type", field_type: "select", placeholder: "Select event type", is_required: true, options: { items: ["Wedding", "Birthday", "Corporate", "College Fest", "Other"] } },
+    { field_key: "event_type", label: "Event Type", field_type: "select", placeholder: "Select event type", is_required: true, options: { items: ["Wedding", "Birthday", "Corporate", "Baby Shower", "Other"] } },
     { field_key: "event_date", label: "Event Date", field_type: "date", placeholder: "Select date", is_required: true },
     { field_key: "event_start_time", label: "Start Time", field_type: "text", placeholder: "HH:MM", is_required: true },
     { field_key: "event_end_time", label: "End Time", field_type: "text", placeholder: "HH:MM", is_required: true },

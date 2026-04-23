@@ -21,7 +21,10 @@ const HomepageStickyCTA = ({ config }: { config: any }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!config?.enabled || !visible) return null;
+  // Hidden by default — admin must explicitly enable BOTH
+  // `homepage_sticky_cta.enabled` AND `homepage_sticky_cta.admin_visible`
+  // to surface the floating mobile bar above the bottom nav.
+  if (!config?.enabled || !config?.admin_visible || !visible) return null;
 
   return (
     <motion.div

@@ -81,7 +81,7 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
           })}
         </div>
 
-        {/* Monthly Counter - single number */}
+        {/* Monthly highlight — text-only, no booking number shown */}
         {monthlyCounter && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -91,7 +91,7 @@ const HomepageSocialProof = ({ config }: { config: any }) => {
           >
             <TrendingUp className="w-5 h-5 text-primary" />
             <p className="text-sm font-body font-semibold text-primary">
-              🔥 {monthlyCounter.label || "Events Booked This Month"}: {monthlyCounter.count || 40}
+              🔥 {monthlyCounter.label || "Booking fast for upcoming events — secure your date today!"}
             </p>
           </motion.div>
         )}
