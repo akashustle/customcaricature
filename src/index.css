@@ -92,17 +92,17 @@
     --warm-peach: 25 70% 90%;
     --light-gold: 40 65% 75%;
 
-    /* Gold scale */
-    --gold-50: 35 40% 97%;
-    --gold-100: 35 38% 94%;
-    --gold-200: 35 35% 88%;
-    --gold-300: 35 32% 78%;
-    --gold-400: 35 40% 65%;
-    --gold-500: 35 50% 55%;
-    --gold-600: 35 48% 45%;
-    --gold-700: 35 42% 35%;
-    --gold-800: 35 35% 26%;
-    --gold-900: 35 28% 18%;
+    /* Brown scale (kept var names for backwards compat) */
+    --gold-50: 30 30% 97%;
+    --gold-100: 24 25% 92%;
+    --gold-200: 24 22% 86%;
+    --gold-300: 24 22% 76%;
+    --gold-400: 12 28% 58%;
+    --gold-500: 12 38% 32%;
+    --gold-600: 12 42% 26%;
+    --gold-700: 12 38% 22%;
+    --gold-800: 12 35% 16%;
+    --gold-900: 12 30% 12%;
 
     /* Chart colors */
     --chart-1: 12 38% 32%;
@@ -146,63 +146,63 @@
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 10% 24%;
-    --input: 25 10% 24%;
-    --ring: 35 55% 55%;
+    --border: 12 12% 24%;
+    --input: 12 12% 24%;
+    --ring: 12 45% 50%;
 
     --radius: 1rem;
 
-    --sidebar-background: 25 15% 12%;
-    --sidebar-foreground: 35 35% 85%;
-    --sidebar-primary: 35 55% 60%;
-    --sidebar-primary-foreground: 25 15% 10%;
-    --sidebar-accent: 25 10% 22%;
-    --sidebar-accent-foreground: 35 40% 92%;
-    --sidebar-border: 25 10% 24%;
-    --sidebar-ring: 35 55% 55%;
+    --sidebar-background: 12 18% 12%;
+    --sidebar-foreground: 30 28% 85%;
+    --sidebar-primary: 12 45% 50%;
+    --sidebar-primary-foreground: 12 18% 10%;
+    --sidebar-accent: 12 12% 22%;
+    --sidebar-accent-foreground: 30 30% 92%;
+    --sidebar-border: 12 12% 24%;
+    --sidebar-ring: 12 45% 50%;
 
-    --gold-50: 35 20% 12%;
-    --gold-100: 35 18% 16%;
-    --gold-200: 35 16% 22%;
-    --gold-300: 35 22% 32%;
-    --gold-400: 35 30% 42%;
-    --gold-500: 35 38% 52%;
-    --gold-600: 35 42% 60%;
-    --gold-700: 35 38% 70%;
-    --gold-800: 35 32% 80%;
-    --gold-900: 35 28% 88%;
+    --gold-50: 12 18% 12%;
+    --gold-100: 12 16% 16%;
+    --gold-200: 12 14% 22%;
+    --gold-300: 12 22% 32%;
+    --gold-400: 12 30% 42%;
+    --gold-500: 12 38% 50%;
+    --gold-600: 12 42% 58%;
+    --gold-700: 12 38% 68%;
+    --gold-800: 12 32% 78%;
+    --gold-900: 12 28% 88%;
 
-    --chart-1: 35 55% 60%;
-    --chart-2: 18 45% 55%;
-    --chart-3: 35 35% 85%;
-    --chart-4: 142 55% 50%;
-    --chart-5: 210 60% 60%;
+    --chart-1: 12 45% 50%;
+    --chart-2: 8 50% 55%;
+    --chart-3: 30 28% 85%;
+    --chart-4: 145 40% 50%;
+    --chart-5: 210 55% 55%;
 
-    --success: 142 55% 50%;
+    --success: 145 50% 48%;
     --warning: 38 92% 60%;
     --info: 210 90% 60%;
 
-    --soft-green: 142 25% 18%;
+    --soft-green: 145 25% 18%;
     --soft-blue: 210 25% 18%;
     --soft-pink: 345 25% 18%;
-    --warm-peach: 25 30% 18%;
-    --light-gold: 40 45% 50%;
+    --warm-peach: 12 28% 18%;
+    --light-gold: 12 38% 50%;
 
-    --brand-cream: 25 15% 14%;
-    --brand-gold: 35 55% 55%;
-    --brand-terracotta: 18 45% 55%;
-    --brand-brown: 25 25% 72%;
-    --brand-warm: 25 12% 18%;
-    --brand-lime: 82 82% 60%;
-    --brand-ink: 35 40% 96%;
+    --brand-cream: 12 18% 14%;
+    --brand-gold: 12 45% 50%;
+    --brand-terracotta: 8 50% 55%;
+    --brand-brown: 30 28% 72%;
+    --brand-warm: 12 14% 18%;
+    --brand-lime: 145 50% 50%;
+    --brand-ink: 30 30% 96%;
 
-    --admin-bg: 25 15% 10%;
-    --admin-surface: 25 15% 14%;
-    --admin-foreground: 35 40% 96%;
-    --admin-primary: 35 55% 60%;
-    --admin-secondary: 18 45% 55%;
-    --admin-highlight: 35 35% 85%;
-    --admin-border: 25 10% 24%;
+    --admin-bg: 12 18% 10%;
+    --admin-surface: 12 18% 14%;
+    --admin-foreground: 30 30% 96%;
+    --admin-primary: 12 45% 50%;
+    --admin-secondary: 8 50% 55%;
+    --admin-highlight: 30 28% 85%;
+    --admin-border: 12 12% 24%;
     --admin-shadow: 0 0% 0%;
   }
 }
