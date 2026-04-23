@@ -10,27 +10,36 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `You are an autonomous Admin Assistant for the Creative Caricature Club (CCC) admin panel.
+You can perform real operations on the database via tools. The admin sees results as Markdown.
+
 Capabilities you have via tools:
-- toggle_setting(key, enabled): turn site features on/off (e.g. "maintenance_mode", "custom_caricature_visible", "floating_whatsapp", "floating_whatsapp_mobile", "floating_instagram", "hide_shop_from_admin")
-- update_setting(key, value): set any JSON setting in admin_site_settings
-- read_setting(key): read current value
-- update_caricature_price(slug, price): update price for a caricature_types row
-- update_event_price(city|district, price): update enquiry_event_pricing
-- send_broadcast_notification(title, message, link): notify all users
-- delete_user_by_email(email): soft-delete via admin function
-- list_users(search, limit): search users by name/email/mobile
-- count_table(table, since_days): get count from table (orders, event_bookings, enquiries, profiles, etc.)
-- summarize_revenue(since_days): get revenue summary
-- block_event_date(date, reason): block a date in event_blocked_dates
-- list_pending_enquiries(limit): list recent unanswered enquiries
-- update_enquiry_status(id, status): change enquiry status
+- toggle_setting / update_setting / read_setting — site settings (maintenance_mode, custom_caricature_visible, floating_whatsapp, floating_whatsapp_mobile, floating_instagram, hide_shop_from_admin, etc.)
+- update_caricature_price(slug, price) — caricature_types
+- update_event_price(city|district, price) — enquiry_event_pricing
+- send_broadcast_notification(title, message, link) — notify all users
+- delete_user_by_email(email) — soft remove a user
+- list_users(search, limit) — search profiles
+- count_table(table, since_days) — row count
+- summarize_revenue(since_days) — revenue rollup
+- block_event_date(date, reason) — block date
+- list_pending_enquiries(limit) — open enquiries
+- update_enquiry_status(id, status)
+- add_event_manually(client_name, mobile, email, event_date, event_type, city, state, total_price, advance_amount) — create a new event_bookings row
+- list_recent_events(limit, since_days) — recent event bookings
+- list_recent_orders(limit, since_days) — recent caricature orders
+- update_order_status(order_id, status) — set orders.status
+- recent_signups(limit, since_days) — newest profiles
+- create_coupon(code, discount_type, discount_value, max_uses, valid_until) — create coupon
+- top_cities(metric, limit) — top cities by enquiries/events
+- generate_report(kind, since_days) — kind = "revenue" | "events" | "orders" | "enquiries", returns a Markdown table the admin can copy
 
 Behavioral rules:
 1. When the admin gives multiple instructions in one message, execute them sequentially with multiple tool calls.
-2. For destructive actions (deletes, blocking, broadcasts to all users) ALWAYS first reply asking for confirmation BEFORE calling the tool. The admin must reply "yes" or "confirm" to proceed.
-3. Be concise. Speak like a fast assistant. Use bullet lists for reports.
-4. Never invent data — if a tool fails, say so plainly.
-5. Always end with a one-line summary of what you did.`;
+2. For destructive actions (delete_user_by_email, broadcast to all, block date, create event manually) FIRST reply asking for confirmation. The admin must say "yes"/"confirm"/"go ahead" before you call the tool.
+3. Be concise. Use bullet lists, bold key numbers, Markdown tables for reports.
+4. If a tool returns ok:false, surface the error verbatim.
+5. End with a one-line summary of what you did.
+6. If asked for a "report", always call generate_report and render the returned markdown.`;
 
 const tools = [
   { type: "function", function: { name: "toggle_setting", description: "Enable/disable a boolean site setting", parameters: { type: "object", properties: { key: { type: "string" }, enabled: { type: "boolean" } }, required: ["key", "enabled"] } } },
@@ -40,11 +49,20 @@ const tools = [
   { type: "function", function: { name: "update_event_price", description: "Update enquiry_event_pricing by city or district", parameters: { type: "object", properties: { city: { type: "string" }, district: { type: "string" }, price: { type: "number" } }, required: ["price"] } } },
   { type: "function", function: { name: "send_broadcast_notification", description: "Insert a broadcast notification for all users", parameters: { type: "object", properties: { title: { type: "string" }, message: { type: "string" }, link: { type: "string" } }, required: ["title", "message"] } } },
   { type: "function", function: { name: "list_users", description: "Search profiles by name/email/mobile", parameters: { type: "object", properties: { search: { type: "string" }, limit: { type: "number" } } } } },
+  { type: "function", function: { name: "delete_user_by_email", description: "Hard delete a profile + auth user by email", parameters: { type: "object", properties: { email: { type: "string" } }, required: ["email"] } } },
   { type: "function", function: { name: "count_table", description: "Count rows in an allowed table", parameters: { type: "object", properties: { table: { type: "string", enum: ["orders", "event_bookings", "enquiries", "profiles", "ai_chat_sessions", "artists"] }, since_days: { type: "number" } }, required: ["table"] } } },
   { type: "function", function: { name: "summarize_revenue", description: "Sum order + event revenue for the last N days", parameters: { type: "object", properties: { since_days: { type: "number" } } } } },
   { type: "function", function: { name: "block_event_date", description: "Block an event date in event_blocked_dates", parameters: { type: "object", properties: { date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["date"] } } },
   { type: "function", function: { name: "list_pending_enquiries", description: "List recent enquiries with status=new", parameters: { type: "object", properties: { limit: { type: "number" } } } } },
   { type: "function", function: { name: "update_enquiry_status", description: "Update an enquiry status by id", parameters: { type: "object", properties: { id: { type: "string" }, status: { type: "string" } }, required: ["id", "status"] } } },
+  { type: "function", function: { name: "add_event_manually", description: "Create a new event_bookings row manually", parameters: { type: "object", properties: { client_name: { type: "string" }, client_mobile: { type: "string" }, client_email: { type: "string" }, event_date: { type: "string", description: "YYYY-MM-DD" }, event_type: { type: "string" }, city: { type: "string" }, state: { type: "string" }, total_price: { type: "number" }, advance_amount: { type: "number" }, venue_name: { type: "string" }, full_address: { type: "string" }, pincode: { type: "string" }, event_start_time: { type: "string" }, event_end_time: { type: "string" } }, required: ["client_name", "client_mobile", "client_email", "event_date", "event_type", "city", "state", "total_price", "advance_amount"] } } },
+  { type: "function", function: { name: "list_recent_events", description: "List recent event bookings", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "list_recent_orders", description: "List recent caricature orders", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "update_order_status", description: "Update orders.status by id", parameters: { type: "object", properties: { order_id: { type: "string" }, status: { type: "string" } }, required: ["order_id", "status"] } } },
+  { type: "function", function: { name: "recent_signups", description: "Latest user signups", parameters: { type: "object", properties: { limit: { type: "number" }, since_days: { type: "number" } } } } },
+  { type: "function", function: { name: "create_coupon", description: "Create a coupon code", parameters: { type: "object", properties: { code: { type: "string" }, discount_type: { type: "string", enum: ["percentage", "fixed"] }, discount_value: { type: "number" }, max_uses: { type: "number" }, valid_until: { type: "string" } }, required: ["code", "discount_type", "discount_value"] } } },
+  { type: "function", function: { name: "top_cities", description: "Top cities by enquiries or events", parameters: { type: "object", properties: { metric: { type: "string", enum: ["enquiries", "events"] }, limit: { type: "number" } }, required: ["metric"] } } },
+  { type: "function", function: { name: "generate_report", description: "Generate a Markdown report", parameters: { type: "object", properties: { kind: { type: "string", enum: ["revenue", "events", "orders", "enquiries"] }, since_days: { type: "number" } }, required: ["kind"] } } },
 ];
 
 async function runTool(name: string, args: any, supabase: any, adminId: string): Promise<any> {
