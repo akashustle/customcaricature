@@ -58,11 +58,21 @@ const AdminAccounting = () => {
     load();
   }, []);
 
+  // Gateway fee is charged on top of price (e.g. 2.6%) and goes to Razorpay — never to us.
+  // Strip it from received amounts so revenue figures reflect only what the business actually keeps.
+  const GATEWAY_PERCENT = 2.6;
+  const stripGatewayFee = (gross: number) => Math.round(gross / (1 + GATEWAY_PERCENT / 100));
+
   const pnl = useMemo(() => {
     const orderRevenue = data.orders.reduce((s, o) => s + (o.negotiated_amount || o.amount || 0), 0);
     const eventRevenue = data.events.reduce((s, e) => s + (e.total_price || 0), 0);
     const eventAdvances = data.events.reduce((s, e) => s + (e.advance_amount || 0), 0);
-    const paymentReceived = data.payments.reduce((s, p) => s + (p.amount || 0), 0);
+    // Net out gateway fee from paid amounts (only online/razorpay rows include it)
+    const paymentReceived = data.payments.reduce((s, p) => {
+      const amt = p.amount || 0;
+      const isOnline = !!p.razorpay_payment_id || (p.description || "").toLowerCase().includes("gateway");
+      return s + (isOnline ? stripGatewayFee(amt) : amt);
+    }, 0);
     const shopRevenue = data.shopOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
 
     const totalRevenue = orderRevenue + eventRevenue + shopRevenue;
