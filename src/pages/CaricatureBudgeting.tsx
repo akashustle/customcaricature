@@ -48,6 +48,10 @@ const CaricatureBudgeting = () => {
   const navigate = useNavigate();
   const { types, getPrice } = usePricing();
   const { settings: siteSettings } = useSiteSettings();
+  const cms = useSiteSetting<typeof DEFAULT_CMS>("page_caricature_budgeting", DEFAULT_CMS);
+  const contact = useSiteSetting<any>("global_contact", {});
+  const WHATSAPP_NUMBER = contact?.whatsapp_number || DEFAULT_WHATSAPP;
+  const INSTAGRAM_URL = contact?.instagram_url || DEFAULT_INSTAGRAM;
   const caricatureOff = siteSettings.custom_caricature_visible?.enabled === false;
   const [phase, setPhase] = useState<"intro" | "event" | "caricature">("intro");
   const [introComplete, setIntroComplete] = useState(false);
@@ -57,7 +61,7 @@ const CaricatureBudgeting = () => {
   // Admin pricing sets for caricature
   const [pricingSets, setPricingSets] = useState<any[]>([]);
   const [selectedPricingSet, setSelectedPricingSet] = useState<string>("");
-  const [showCaricDetails, setShowCaricDetails] = useState(false);
+  const [, setShowCaricDetails] = useState(false);
 
   // Event calculator state
   const [guestCount, setGuestCount] = useState("");
@@ -70,13 +74,7 @@ const CaricatureBudgeting = () => {
   const [faceCount, setFaceCount] = useState(1);
   const [showCaricResult, setShowCaricResult] = useState(false);
 
-  const introTexts = [
-    "🎨 Welcome to Creative Caricature Club™",
-    "💰 Let's find the perfect pricing for you...",
-    "📊 Calculating best rates...",
-    "🎯 Almost there...",
-    "✨ Your personalized pricing is ready!"
-  ];
+  const introTexts = cms.intro_texts || DEFAULT_CMS.intro_texts;
 
   // Play enter sound on mount
   useEffect(() => {
