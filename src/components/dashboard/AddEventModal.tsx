@@ -421,13 +421,34 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                 </p>
               </div>
 
-              <Button
-                onClick={handleSave}
-                disabled={hasHardConflict || !!pastTimeError}
-                className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
-              >
-                {hasHardConflict || pastTimeError ? "Fix the highlighted issue above" : "Save & Continue to Booking →"}
-              </Button>
+              {hasHardConflict || pastTimeError ? (
+                <Button
+                  disabled
+                  className="w-full h-12 rounded-2xl font-sans font-semibold text-base disabled:opacity-50"
+                >
+                  Fix the highlighted issue above
+                </Button>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Button
+                    onClick={handleSaveDraft}
+                    disabled={savingDraft}
+                    variant="outline"
+                    className="w-full h-12 rounded-2xl font-sans font-semibold text-sm border-primary/40 text-primary hover:bg-primary/5"
+                  >
+                    {savingDraft ? "Saving…" : "💾 Save as Draft"}
+                  </Button>
+                  <Button
+                    onClick={handleBookNow}
+                    className="w-full h-12 rounded-2xl font-sans font-semibold text-sm"
+                  >
+                    Book Now →
+                  </Button>
+                </div>
+              )}
+              <p className="text-[10px] text-center text-muted-foreground font-sans -mt-1">
+                Save the draft to come back later, or book now to confirm pricing &amp; pay the advance.
+              </p>
             </div>
           </motion.div>
         </>
