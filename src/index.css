@@ -28,62 +28,69 @@
 
 @layer base {
   :root {
-    /* Pure ivory canvas + crisp white surfaces, warm logo-cream brand accent (NO brown, NO lime, NO dark) */
-    --background: 44 55% 97%;
-    --foreground: 30 18% 18%;
+    /* Adymize-inspired palette — soft lavender canvas, white surfaces, vibrant violet brand */
+    --background: 240 60% 98%;
+    --foreground: 240 35% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 30 18% 18%;
+    --card-foreground: 240 35% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 30 18% 18%;
+    --popover-foreground: 240 35% 14%;
 
-    /* Warm logo cream/honey primary — soft, elegant, ivory-aligned */
-    --primary: 38 65% 55%;
-    --primary-foreground: 30 25% 14%;
+    /* Vibrant violet primary (Adymize purple) */
+    --primary: 252 85% 62%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Soft ivory secondary */
-    --secondary: 44 45% 94%;
-    --secondary-foreground: 30 18% 22%;
+    /* Soft lavender secondary */
+    --secondary: 250 60% 96%;
+    --secondary-foreground: 240 35% 18%;
 
-    /* Muted soft ivory */
-    --muted: 44 35% 93%;
-    --muted-foreground: 30 10% 42%;
+    /* Muted soft lavender */
+    --muted: 245 50% 95%;
+    --muted-foreground: 240 12% 45%;
 
-    /* Warm honey accent */
-    --accent: 35 75% 62%;
-    --accent-foreground: 30 25% 14%;
+    /* Pink/violet accent for gradients */
+    --accent: 285 80% 70%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 52%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 25% 88%;
-    --input: 40 25% 88%;
-    --ring: 38 65% 55%;
+    --border: 245 30% 90%;
+    --input: 245 30% 90%;
+    --ring: 252 85% 62%;
 
-    --radius: 1rem;
+    /* Square-ish buttons with a touch of softness */
+    --radius: 0.75rem;
 
-    --sidebar-background: 44 50% 96%;
-    --sidebar-foreground: 30 14% 22%;
-    --sidebar-primary: 38 65% 55%;
-    --sidebar-primary-foreground: 30 25% 14%;
-    --sidebar-accent: 44 35% 93%;
-    --sidebar-accent-foreground: 30 18% 22%;
-    --sidebar-border: 40 25% 88%;
-    --sidebar-ring: 38 65% 55%;
+    --sidebar-background: 240 60% 98%;
+    --sidebar-foreground: 240 30% 22%;
+    --sidebar-primary: 252 85% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 245 50% 95%;
+    --sidebar-accent-foreground: 240 35% 18%;
+    --sidebar-border: 245 30% 90%;
+    --sidebar-ring: 252 85% 62%;
 
     --success: 142 55% 42%;
     --warning: 38 92% 55%;
     --info: 210 88% 55%;
 
-    /* Extended brand palette (ivory + warm cream — NO brown, NO lime) */
-    --brand-cream: 44 55% 97%;
-    --brand-gold: 38 65% 55%;
-    --brand-terracotta: 35 75% 62%;
-    --brand-brown: 30 18% 18%;
-    --brand-warm: 44 45% 94%;
-    --brand-lime: 38 65% 55%;
-    --brand-ink: 30 22% 12%;
+    /* Adymize-style brand palette — violet + pink gradient family */
+    --brand-cream: 240 60% 98%;
+    --brand-violet: 252 85% 62%;
+    --brand-violet-deep: 258 70% 50%;
+    --brand-pink: 320 80% 75%;
+    --brand-pink-soft: 340 85% 88%;
+    --brand-blue-soft: 215 90% 92%;
+    --brand-ink: 240 35% 14%;
+    /* Legacy aliases — remapped to violet so any old reference stays in palette */
+    --brand-gold: 252 85% 62%;
+    --brand-terracotta: 285 80% 70%;
+    --brand-brown: 240 35% 14%;
+    --brand-warm: 250 60% 96%;
+    --brand-lime: 252 85% 62%;
 
     /* Soft accent palette — warm ivory pastels */
     --soft-green: 145 30% 88%;
