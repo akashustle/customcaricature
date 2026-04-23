@@ -395,8 +395,8 @@ const AdminLogin = () => {
     else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); }
   };
 
-  // Show splash first for new visitors (if enabled in admin settings)
-  const splashEnabled = (siteSettingsData as any).admin_splash_enabled?.enabled !== false;
+  // Show splash first for new visitors (only if explicitly enabled in admin settings)
+  const splashEnabled = (siteSettingsData as any).admin_splash_enabled?.enabled === true;
   if (showSplash && splashEnabled) {
     return <AdminSplashScreen onComplete={() => setShowSplash(false)} />;
   }

@@ -31,6 +31,9 @@ type SiteSettings = {
   dashboard_tabs: DashboardTabs;
   custom_caricature_visible: { enabled: boolean };
   admin_splash_enabled: { enabled: boolean };
+  homepage_splash_enabled: { enabled: boolean };
+  workshop_splash_enabled: { enabled: boolean };
+  app_onboarding_enabled: { enabled: boolean };
   permission_location: { enabled: boolean };
   permission_notifications: { enabled: boolean };
   permission_microphone: { enabled: boolean };
@@ -61,9 +64,12 @@ const defaults: SiteSettings = {
   login_popup_visible: { enabled: false },
   dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
   custom_caricature_visible: { enabled: false },
-  admin_splash_enabled: { enabled: true },
+  admin_splash_enabled: { enabled: false },
+  homepage_splash_enabled: { enabled: false },
+  workshop_splash_enabled: { enabled: false },
+  app_onboarding_enabled: { enabled: false },
   permission_location: { enabled: false },
-  permission_notifications: { enabled: true },
+  permission_notifications: { enabled: false },
   permission_microphone: { enabled: false },
   permission_camera: { enabled: false },
   admin_location_required: { enabled: false },
