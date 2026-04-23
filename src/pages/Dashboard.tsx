@@ -43,7 +43,7 @@ type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
   event_booking_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
-  is_verified?: boolean; avatar_url?: string | null;
+  is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
 };
 
 type Order = {
@@ -181,9 +181,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -1122,9 +1122,15 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
             </h3>
             <p className="text-sm text-foreground/75 font-sans truncate">{profile?.email || ""}</p>
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs text-foreground/80 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
+              {profile?.created_at && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-foreground/60 font-sans bg-card/60 backdrop-blur px-2 py-0.5 rounded-full border border-border/40">
+                  <CalIcon className="w-3 h-3" />
+                  Member since {new Date(profile.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                </span>
+              )}
             </div>
           </div>
           {!editing ? (

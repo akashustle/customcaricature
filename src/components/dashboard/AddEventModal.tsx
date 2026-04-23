@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar as CalendarIcon, Clock, MapPin, X, Sparkles } from "lucide-react";
+import { Clock, MapPin, X, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { EVENT_TYPES } from "@/lib/event-data";
 import { INDIA_LOCATIONS } from "@/lib/india-locations";
+import SelectWithOther from "@/components/ui/select-with-other";
+import MonthYearDatePicker from "@/components/ui/month-year-date-picker";
 
 interface AddEventModalProps {
   open: boolean;
@@ -67,9 +66,8 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
   }, [open, profile]);
 
   const states = Object.keys(INDIA_LOCATIONS).sort();
-  const districts = state ? Object.keys(INDIA_LOCATIONS[state] || {}).sort() : [];
-  const cities =
-    state && district ? INDIA_LOCATIONS[state]?.[district] || [] : [];
+  const districts = state && INDIA_LOCATIONS[state] ? Object.keys(INDIA_LOCATIONS[state]).sort() : [];
+  const cities = state && district && INDIA_LOCATIONS[state]?.[district] ? INDIA_LOCATIONS[state][district] : [];
 
   const endTime = addHours(startTime, hours);
 
@@ -92,7 +90,6 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
       venueName,
       fullAddress,
       pincode,
-      // pre-fill client info from profile too
       clientName: profile?.full_name || "",
       clientMobile: profile?.mobile || "",
       clientEmail: profile?.email || "",
@@ -141,51 +138,30 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
             </div>
 
             <div className="p-5 space-y-4">
-              {/* Event type */}
+              {/* Event type with Other-manual fallback */}
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">Event type *</Label>
-                <Select value={eventType} onValueChange={setEventType}>
-                  <SelectTrigger className="rounded-xl mt-1 h-11">
-                    <SelectValue placeholder="Choose your event" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EVENT_TYPES.map((t) => (
-                      <SelectItem key={t.value} value={t.value}>
-                        {t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SelectWithOther
+                  value={eventType}
+                  onChange={setEventType}
+                  options={EVENT_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+                  placeholder="Choose your event"
+                  otherPlaceholder="Type event type"
+                  className="mt-1"
+                />
               </div>
 
-              {/* Date + Start time + Hours */}
+              {/* Date + Start time */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-sans text-muted-foreground">Event date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full mt-1 h-11 rounded-xl justify-start font-normal",
-                          !eventDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {eventDate ? format(eventDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={eventDate}
-                        onSelect={setEventDate}
-                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <div className="mt-1">
+                    <MonthYearDatePicker
+                      value={eventDate}
+                      onChange={setEventDate}
+                      placeholder="Pick a date"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -233,79 +209,52 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                 )}
               </div>
 
-              {/* State / District / City */}
+              {/* State / District / City — all with Other fallback */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs font-sans text-muted-foreground">State *</Label>
-                  <Select
+                  <SelectWithOther
                     value={state}
-                    onValueChange={(v) => {
+                    onChange={(v) => {
                       setState(v);
                       setDistrict("");
                       setCity("");
                     }}
-                  >
-                    <SelectTrigger className="rounded-xl mt-1 h-11">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {states.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={states}
+                    placeholder="Select"
+                    otherPlaceholder="State name"
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label className="text-xs font-sans text-muted-foreground">District</Label>
-                  <Select
+                  <SelectWithOther
                     value={district}
-                    onValueChange={(v) => {
+                    onChange={(v) => {
                       setDistrict(v);
                       setCity("");
                     }}
+                    options={districts}
+                    placeholder="Select"
+                    otherPlaceholder="District name"
                     disabled={!state}
-                  >
-                    <SelectTrigger className="rounded-xl mt-1 h-11">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {districts.map((d) => (
-                        <SelectItem key={d} value={d}>
-                          {d}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label className="text-xs font-sans text-muted-foreground">City *</Label>
-                  {cities.length > 0 ? (
-                    <Select value={city} onValueChange={setCity}>
-                      <SelectTrigger className="rounded-xl mt-1 h-11">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-72">
-                        {cities.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Enter city"
-                      className="rounded-xl mt-1 h-11"
-                    />
-                  )}
+                  <SelectWithOther
+                    value={city}
+                    onChange={setCity}
+                    options={cities}
+                    placeholder="Select"
+                    otherPlaceholder="City name"
+                    disabled={!state}
+                    className="mt-1"
+                  />
                 </div>
               </div>
 
-              {/* Venue */}
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">Venue name *</Label>
                 <Input
@@ -325,6 +274,7 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                   onChange={(e) => setFullAddress(e.target.value)}
                   placeholder="Street, area, landmark"
                   className="rounded-xl mt-1 h-11"
+                  autoComplete="street-address"
                 />
               </div>
 
@@ -339,6 +289,9 @@ const AddEventModal = ({ open, onClose, profile }: AddEventModalProps) => {
                   placeholder="6-digit pincode"
                   className="rounded-xl mt-1 h-11"
                   maxLength={6}
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
                 />
               </div>
 
