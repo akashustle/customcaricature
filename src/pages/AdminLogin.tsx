@@ -496,7 +496,7 @@ const AdminLogin = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
           />
 
-          <div className="relative p-5 sm:p-7 md:p-8 space-y-4 sm:space-y-5">
+          <div className="relative p-4 sm:p-7 md:p-8 space-y-3.5 sm:space-y-5">
             {/* Header — Logo + title (always visible) */}
             <div className="text-center space-y-3">
               <motion.div
