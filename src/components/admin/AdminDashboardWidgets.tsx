@@ -7,34 +7,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const ICON_TINTS: Record<string, string> = {
-  "Total Revenue": "hsl(210 55% 50%)",
-  "Pending Revenue": "hsl(210 45% 60%)",
-  "Total Orders": "hsl(250 50% 55%)",
-  "Today's Orders": "hsl(270 45% 55%)",
-  "Pending": "hsl(38 75% 52%)",
-  "Delivered": "hsl(152 45% 42%)",
-  "Total Events": "hsl(220 55% 52%)",
-  "Upcoming": "hsl(195 60% 48%)",
-  "Customers": "hsl(200 50% 52%)",
-  "Enquiries": "hsl(175 50% 42%)",
-  "Workshop": "hsl(280 40% 55%)",
-  "Sessions": "hsl(220 10% 45%)",
-};
+// Widget tone: which widgets get the lime-active "highlight" treatment vs danger tint
+const ACTIVE_WIDGETS = new Set(["Total Revenue", "Today's Orders"]);
+const DANGER_WIDGETS = new Set(["Pending", "Pending Revenue"]);
 
-const ICON_BG_TINTS: Record<string, string> = {
-  "Total Revenue": "hsl(210 55% 96%)",
-  "Pending Revenue": "hsl(210 45% 96%)",
-  "Total Orders": "hsl(250 50% 96%)",
-  "Today's Orders": "hsl(270 45% 96%)",
-  "Pending": "hsl(38 75% 96%)",
-  "Delivered": "hsl(152 45% 95%)",
-  "Total Events": "hsl(220 55% 96%)",
-  "Upcoming": "hsl(195 60% 96%)",
-  "Customers": "hsl(200 50% 96%)",
-  "Enquiries": "hsl(175 50% 95%)",
-  "Workshop": "hsl(280 40% 96%)",
-  "Sessions": "hsl(220 10% 95%)",
+// Helper to detect if a numeric value should display as positive (green) or negative (red)
+const figureToneFor = (label: string, raw: any): "positive" | "negative" | "neutral" => {
+  if (typeof raw === "number" && raw < 0) return "negative";
+  if (typeof raw === "string" && raw.trim().startsWith("-")) return "negative";
+  // Money / count widgets — show in green when > 0
+  const moneyOrCount = ["Total Revenue", "Today's Orders", "Total Orders", "Customers", "Total Events", "Upcoming", "Delivered", "Workshop", "Sessions"];
+  if (moneyOrCount.includes(label)) {
+    if (typeof raw === "number" && raw > 0) return "positive";
+    if (typeof raw === "string" && /[1-9]/.test(raw)) return "positive";
+  }
+  if (label === "Pending Revenue" || label === "Pending") {
+    if ((typeof raw === "number" && raw > 0) || (typeof raw === "string" && /[1-9]/.test(raw))) return "negative";
+  }
+  return "neutral";
 };
 
 const AdminDashboardWidgets = () => {
