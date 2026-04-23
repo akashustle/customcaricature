@@ -1122,9 +1122,15 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
             </h3>
             <p className="text-sm text-foreground/75 font-sans truncate">{profile?.email || ""}</p>
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs text-foreground/80 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
+              {profile?.created_at && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-foreground/60 font-sans bg-card/60 backdrop-blur px-2 py-0.5 rounded-full border border-border/40">
+                  <CalIcon className="w-3 h-3" />
+                  Member since {new Date(profile.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                </span>
+              )}
             </div>
           </div>
           {!editing ? (
