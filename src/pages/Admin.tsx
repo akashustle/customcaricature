@@ -113,6 +113,7 @@ const AdminFeatureGating = lazy(() => import("@/components/admin/AdminFeatureGat
 const AdminCalendar = lazy(() => import("@/components/admin/AdminCalendar"));
 const AdminWebsiteAnalytics = lazy(() => import("@/components/admin/AdminWebsiteAnalytics"));
 const AdminQuickQuestions = lazy(() => import("@/components/admin/AdminQuickQuestions"));
+const AdminRescheduleRequests = lazy(() => import("@/components/admin/AdminRescheduleRequests"));
 const AdminColleagues = lazy(() => import("@/components/admin/AdminColleagues"));
 const AdminFAQs = lazy(() => import("@/components/admin/AdminFAQs"));
 const AdminGoogleSheet = lazy(() => import("@/components/admin/AdminGoogleSheet"));
@@ -1515,6 +1516,11 @@ const Admin = () => {
           {/* Events Tab */}
           <TabsContent value="events">
             <AdminEvents customers={customers as any} />
+          </TabsContent>
+
+          {/* Reschedule Requests Tab */}
+          <TabsContent value="reschedule-requests">
+            <AdminRescheduleRequests />
           </TabsContent>
 
           {/* Payments Tab */}

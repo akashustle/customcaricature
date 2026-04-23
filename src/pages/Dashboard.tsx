@@ -183,9 +183,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
