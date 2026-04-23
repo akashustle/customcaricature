@@ -25,7 +25,7 @@ const COMMON_EVENT_TYPES = [
   { value: "wedding", label: "Wedding" },
   { value: "birthday", label: "Birthday Party" },
   { value: "corporate", label: "Corporate Event" },
-  { value: "college_fest", label: "College Fest" },
+  { value: "baby_shower", label: "Baby Shower" },
   { value: "anniversary", label: "Anniversary" },
   { value: "other", label: "Other (type manually)" },
 ];

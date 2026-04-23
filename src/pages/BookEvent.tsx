@@ -411,7 +411,7 @@ const BookEvent = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <SEOHead title="Book Live Caricature Artist for Wedding & Events | Mumbai, India" description="Book professional live caricature artists for weddings, corporate events, birthday parties & college fests. Creative Caricature Club™ provides on-the-spot caricature entertainment across Mumbai, India & internationally." canonical="/book-event" />
+      <SEOHead title="Book Live Caricature Artist for Wedding & Events | Mumbai, India" description="Book professional live caricature artists for weddings, corporate events, birthday parties & baby showers. Creative Caricature Club™ provides on-the-spot caricature entertainment across Mumbai, India & internationally." canonical="/book-event" />
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}><ArrowLeft className="w-4 h-4" /></Button>

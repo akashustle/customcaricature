@@ -14,7 +14,7 @@ const DEFAULT_EVENT_TYPES = [
   { id: "wedding", label: "Wedding", emoji: "💍", hot: true },
   { id: "birthday", label: "Birthday", emoji: "🎂" },
   { id: "corporate", label: "Corporate", emoji: "🏢", hot: true },
-  { id: "college", label: "College Fest", emoji: "🎓" },
+  { id: "baby_shower", label: "Baby Shower", emoji: "🍼" },
   { id: "engagement", label: "Engagement", emoji: "💑" },
   { id: "reception", label: "Reception", emoji: "🥂" },
   { id: "other", label: "Other", emoji: "🎉" },

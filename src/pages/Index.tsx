@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Palette, Heart, Laugh, Crown, Minimize2, Sparkles, Clock, Truck, Camera, MessageCircle, ArrowRight, User, LogOut, Package, Search, X, ChevronLeft, ChevronRight, Star, Users, Calendar, Award, Zap, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -160,11 +160,8 @@ const Index = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [redirectChecked, setRedirectChecked] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const heroGalleryY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  // Scroll-coupled transforms removed — they were the source of the "frame dots"
+  // jitter while scrolling on the homepage. Hero is now a static, snappy block.
   const maintenance = useMaintenanceCheck("home");
 
   // Smart redirect: logged-in users go to their dashboard (deferred to not block paint)
@@ -190,7 +187,9 @@ const Index = () => {
   const hero = content.homepage_hero || {};
   const sections = content.homepage_sections || {};
   const sectionOrder: string[] = sections._order || [
-    "video", "event_gallery", "instant_quote", "social_proof", "trusted_brands",
+    // Optimized funnel: hook with video → social proof gallery → instant quote →
+    // brand trust → stats → use cases → services menu → enquiry → portfolio
+    "video", "event_gallery", "instant_quote", "trusted_brands", "social_proof",
     "use_cases", "services", "enquiry_funnel", "portfolio_gallery", "scroll_events",
     "why_us", "reviews", "caricature_gallery", "before_after", "smart_help",
     "what_you_get", "how_it_works", "styles"
@@ -304,7 +303,7 @@ const Index = () => {
           <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/5 blur-[100px]" />
           <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/5 blur-[120px]" />
         </div>
-        <motion.div style={{ y: heroY, opacity: heroOpacity, scale: heroScale }} className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
+        <div className="container mx-auto px-4 pt-8 pb-12 md:py-28 lg:py-36 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 xl:gap-24">
             {/* Mobile: Compact logo + branding */}
             <div className="flex flex-col items-center lg:hidden w-full">
@@ -361,8 +360,8 @@ const Index = () => {
                   </Button>
                 </div>
                 <div>
-                  <Button size="lg" variant="outline" onClick={() => navigate(hero.secondary_cta_link || "/enquiry")} className="rounded-full font-body font-semibold text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto border-border hover:bg-card">
-                    <Zap className="w-4 h-4 mr-2" /> {hero.secondary_cta || "Get Free Quote"}
+                  <Button size="lg" variant="outline" onClick={() => navigate("/enquiry")} className="rounded-full font-body font-semibold text-sm md:text-base px-6 md:px-8 h-12 w-full sm:w-auto border-border hover:bg-card">
+                    <Zap className="w-4 h-4 mr-2" /> Check Event Pricing
                   </Button>
                 </div>
               </motion.div>
@@ -389,9 +388,8 @@ const Index = () => {
             </motion.div>
 
             {/* Right: Premium gallery mosaic for desktop */}
-            <motion.div initial={{ opacity: 0, scale: 0.85, rotateY: -10 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              style={{ y: heroGalleryY }}
-              className="hidden lg:block flex-shrink-0 w-[480px] xl:w-[540px] relative perspective-1000">
+            <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="hidden lg:block flex-shrink-0 w-[480px] xl:w-[540px] relative">
               {/* Decorative frame */}
               <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
               <div className="relative grid grid-cols-12 grid-rows-6 gap-3 h-[520px] xl:h-[580px]">
@@ -441,7 +439,7 @@ const Index = () => {
             </motion.div>
 
           </div>
-        </motion.div>
+        </div>
         {settings.custom_caricature_visible?.enabled !== false && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }}
           className="glass-crystal border-t border-border/20">
@@ -792,8 +790,8 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Sticky CTA (Mobile) */}
-      <HomepageStickyCTA config={content.homepage_sticky_cta} />
+      {/* Sticky CTA (Mobile) — only renders when admin enables both content + visibility */}
+      <HomepageStickyCTA config={{ ...content.homepage_sticky_cta, admin_visible: (settings as any).homepage_sticky_cta_visible?.enabled === true }} />
     </div>
   );
 };
