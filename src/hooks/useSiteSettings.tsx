@@ -78,6 +78,11 @@ const defaults: SiteSettings = {
   permission_microphone: { enabled: false },
   permission_camera: { enabled: false },
   admin_location_required: { enabled: false },
+  hide_how_it_works: { enabled: true },
+  hide_what_you_get: { enabled: true },
+  hide_styles_section: { enabled: true },
+  hide_start_order_btn: { enabled: true },
+  hide_hero_order_btn: { enabled: true },
 };
 
 // Module-level cache so all instances share one fetch result
