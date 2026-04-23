@@ -70,7 +70,7 @@ const defaults: SiteSettings = {
   artist_payment_system: { enabled: false },
   allow_registration_maintenance: { enabled: false },
   login_popup_visible: { enabled: false },
-  dashboard_tabs: { orders: true, events: true, shop: true, chat: true, payments: true, invoices: true, alerts: true, workshop: true, profile: true, settings: true },
+  dashboard_tabs: { orders: false, events: true, shop: false, chat: true, payments: true, invoices: false, alerts: false, workshop: false, profile: true, settings: false },
   custom_caricature_visible: { enabled: false },
   admin_splash_enabled: { enabled: false },
   homepage_splash_enabled: { enabled: false },

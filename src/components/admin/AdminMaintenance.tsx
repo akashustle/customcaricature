@@ -317,6 +317,17 @@ const AdminMaintenance = () => {
                 onCheckedChange={(v) => updateSiteSetting("floating_instagram", { enabled: v })}
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Show mobile sticky CTA bar</p>
+                <p className="text-xs text-muted-foreground">Two horizontal floating buttons above the mobile bottom nav. OFF by default.</p>
+              </div>
+              <Switch
+                checked={(siteSettings as any).homepage_sticky_cta_visible?.enabled === true}
+                onCheckedChange={(v) => updateSiteSetting("homepage_sticky_cta_visible", { enabled: v })}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5 pt-2 border-t border-border/40">
