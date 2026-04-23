@@ -37,6 +37,7 @@ import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 import AddEventModal from "@/components/dashboard/AddEventModal";
+import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
 import { BadgeCheck, Camera } from "lucide-react";
 
 type Profile = {
@@ -1459,11 +1460,43 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
             <p className="text-xs font-sans font-semibold text-primary mb-2">🎯 Upcoming Events</p>
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
               {upcomingEvents.slice(0, 3).map((ev: any) => {
-                const daysLeft = Math.ceil((new Date(ev.event_date).getTime() - Date.now()) / 86400000);
+                // Date-only diff so "today" = 0, "tomorrow" = 1
+                const [y, m, d] = ev.event_date.split("-").map(Number);
+                const eventDay = new Date(y, (m || 1) - 1, d || 1).getTime();
+                const today = new Date();
+                const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                const daysLeft = Math.round((eventDay - todayDay) / 86400000);
+                const phase = computePhase(ev, Date.now()).phase;
+                const isToday = daysLeft === 0;
                 return (
-                  <motion.div key={ev.id} whileHover={{ scale: 1.03 }} className="flex-shrink-0 bg-background/80 backdrop-blur-sm rounded-xl p-3 min-w-[140px] border border-border/30">
-                    <p className="text-2xl font-bold font-display text-primary">{daysLeft}</p>
-                    <p className="text-[10px] text-muted-foreground font-sans">days left</p>
+                  <motion.div key={ev.id} whileHover={{ scale: 1.03 }} className="flex-shrink-0 bg-background/80 backdrop-blur-sm rounded-xl p-3 min-w-[150px] border border-border/30">
+                    {phase === "live" ? (
+                      <>
+                        <div className="flex items-center gap-1.5">
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                          </span>
+                          <p className="text-sm font-bold font-display text-emerald-600">LIVE</p>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground font-sans">guests enjoying ✨</p>
+                      </>
+                    ) : phase === "just_ended" ? (
+                      <>
+                        <p className="text-sm font-bold font-display text-primary">Just ended 🎊</p>
+                        <p className="text-[10px] text-muted-foreground font-sans">hope it was magical</p>
+                      </>
+                    ) : isToday ? (
+                      <>
+                        <p className="text-sm font-bold font-display text-primary">TODAY 🎉</p>
+                        <p className="text-[10px] text-muted-foreground font-sans">starts {ev.event_start_time}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold font-display text-primary">{daysLeft}</p>
+                        <p className="text-[10px] text-muted-foreground font-sans">{daysLeft === 1 ? "day left" : "days left"}</p>
+                      </>
+                    )}
                     <p className="text-xs font-sans font-medium mt-1 truncate">{ev.event_type}</p>
                     <p className="text-[10px] text-muted-foreground font-sans truncate">{ev.city}</p>
                   </motion.div>
@@ -1512,7 +1545,9 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
               <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <Card>
                   <CardContent className="p-4 space-y-2">
-                    {/* Event Countdown */}
+                    {/* Live status (starting soon / live / just-ended / today) — auto-updates every second */}
+                    <EventLiveStatus event={ev} variant="card" />
+                    {/* Future-day countdown (only when not today / live / just-ended) */}
                     {ev.status === "upcoming" && (() => {
                       const [year, month, day] = ev.event_date.split("-").map(Number);
                       const today = new Date();
@@ -1526,13 +1561,6 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId }: { events:
                             <p className="text-xs font-sans text-muted-foreground">
                               {daysLeft === 1 ? "✨ Tomorrow is the big day!" : daysLeft <= 7 ? `🎉 Just ${daysLeft} days to go! Get ready!` : `📅 Days until your special event`}
                             </p>
-                          </div>
-                        );
-                      } else if (daysLeft === 0) {
-                        return (
-                          <div className="bg-green-100 rounded-xl p-3 text-center">
-                            <p className="font-display text-lg font-bold text-green-800">🎊 Today is the Day!</p>
-                            <p className="text-xs font-sans text-green-700">Enjoy your event! Have an amazing time!</p>
                           </div>
                         );
                       }
@@ -2287,6 +2315,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate">{ev.event_type || "Event"}</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.city}</p>
+                  <div className="mt-1">
+                    <EventLiveStatus event={ev} variant="compact" />
+                  </div>
                 </div>
                 <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
               </div>
