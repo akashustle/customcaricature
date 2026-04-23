@@ -2315,6 +2315,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                 <div className="flex-1 min-w-0">
                   <p className="font-sans font-semibold text-sm truncate">{ev.event_type || "Event"}</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.city}</p>
+                  <div className="mt-1">
+                    <EventLiveStatus event={ev} variant="compact" />
+                  </div>
                 </div>
                 <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
               </div>
