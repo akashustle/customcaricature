@@ -4,9 +4,7 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
-  CalendarIcon,
   Clock,
-  MapPin,
   Send,
   Sparkles,
   MessageCircle,
@@ -21,9 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { EVENT_TYPES } from "@/lib/event-data";
 import { INDIA_LOCATIONS } from "@/lib/india-locations";
@@ -31,6 +26,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 import SiteShell from "@/components/SiteShell";
+import SelectWithOther from "@/components/ui/select-with-other";
+import MonthYearDatePicker from "@/components/ui/month-year-date-picker";
 
 const WHATSAPP_NUMBER = "918369594271";
 
@@ -53,7 +50,6 @@ const ChatNow = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState<Date | undefined>();
   const [startTime, setStartTime] = useState("");
@@ -62,51 +58,56 @@ const ChatNow = () => {
   const [district, setDistrict] = useState("");
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
 
   // Pre-fill from profile if logged in
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("full_name, mobile, state, city, pincode")
+      .select("full_name, mobile, state, city, pincode, address")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setName((n) => n || data.full_name || "");
-          setWhatsapp((w) => w || data.mobile || "");
           setState((s) => s || data.state || "");
           setCity((c) => c || data.city || "");
           setPincode((p) => p || data.pincode || "");
+          setFullAddress((a) => a || (data as any).address || "");
         }
       });
   }, [user]);
 
   const states = Object.keys(INDIA_LOCATIONS).sort();
   const districts = state ? Object.keys(INDIA_LOCATIONS[state] || {}).sort() : [];
-  const cities = state && district ? INDIA_LOCATIONS[state]?.[district] || [] : [];
+  const cities = state && district && district !== "__other__" ? INDIA_LOCATIONS[state]?.[district] || [] : [];
   const endTime = addHours(startTime, hours);
+
+  const finalDistrict = district === "__other__" ? customDistrict : district;
+  const finalCity = city === "__other__" ? customCity : city;
+  const finalEventType = eventType === "other" ? customEventType : eventType;
 
   const handleSend = () => {
     if (!name.trim()) return toast({ title: "Please enter your name", variant: "destructive" });
-    if (whatsapp.length < 10)
-      return toast({ title: "Please enter a valid WhatsApp number", variant: "destructive" });
 
     const eventLabel =
-      EVENT_TYPES.find((t) => t.value === eventType)?.label || eventType || "—";
+      eventType === "other"
+        ? customEventType || "Other"
+        : EVENT_TYPES.find((t) => t.value === eventType)?.label || "—";
     const dateStr = eventDate ? format(eventDate, "EEEE, do MMMM yyyy") : "Not decided yet";
     const timeStr = startTime ? `${startTime} – ${endTime} (${hours} hr)` : "Not decided yet";
-    const location = [city, district, state].filter(Boolean).join(", ") || "Not specified";
+    const location = [finalCity, finalDistrict, state].filter(Boolean).join(", ") || "Not specified";
 
     const message =
       `Hey! 👋 I came from your booking portal and I wanted to know more about live caricature for my event.\n\n` +
       `Below are my details:\n` +
       `• Name: ${name}\n` +
-      `• WhatsApp: +91 ${whatsapp}\n` +
       `• Event type: ${eventLabel}\n` +
       `• Date: ${dateStr}\n` +
       `• Time: ${timeStr}\n` +
       `• Location: ${location}\n` +
+      (fullAddress ? `• Address: ${fullAddress}\n` : "") +
       `• Pincode: ${pincode || "—"}\n\n` +
       `Please share pricing & next steps. Thank you!`;
 
@@ -115,13 +116,13 @@ const ChatNow = () => {
       .from("enquiries")
       .insert({
         name,
-        mobile: whatsapp,
+        mobile: "—",
         enquiry_type: "live_caricature",
-        event_type: eventType || null,
+        event_type: finalEventType || null,
         event_date: eventDate ? format(eventDate, "yyyy-MM-dd") : null,
         state: state || null,
-        district: district || null,
-        city: city || null,
+        district: finalDistrict || null,
+        city: finalCity || null,
         source: "chat_now_whatsapp",
         user_id: user?.id || null,
       } as any)
@@ -170,76 +171,39 @@ const ChatNow = () => {
 
           {/* Form */}
           <div className="p-5 sm:p-7 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs font-sans text-muted-foreground">Your name *</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Full name"
-                  className="rounded-xl mt-1 h-11"
-                />
-              </div>
-              <div>
-                <Label className="text-xs font-sans text-muted-foreground">
-                  WhatsApp number * (10 digits)
-                </Label>
-                <Input
-                  value={whatsapp}
-                  onChange={(e) => {
-                    const d = e.target.value.replace(/\D/g, "");
-                    if (d.length <= 10) setWhatsapp(d);
-                  }}
-                  placeholder="10-digit WhatsApp number"
-                  maxLength={10}
-                  className="rounded-xl mt-1 h-11"
-                />
-              </div>
+            <div>
+              <Label className="text-xs font-sans text-muted-foreground">Your name *</Label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full name"
+                className="rounded-xl mt-1 h-11"
+                autoComplete="name"
+              />
             </div>
 
             <div>
               <Label className="text-xs font-sans text-muted-foreground">Event type</Label>
-              <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger className="rounded-xl mt-1 h-11">
-                  <SelectValue placeholder="Choose your event" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EVENT_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SelectWithOther
+                value={eventType}
+                onChange={setEventType}
+                options={EVENT_TYPES.map(t => ({ value: t.value, label: t.label }))}
+                placeholder="Choose your event"
+                otherPlaceholder="Type event type"
+                className="mt-1"
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">Event date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full mt-1 h-11 rounded-xl justify-start font-normal",
-                        !eventDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {eventDate ? format(eventDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={eventDate}
-                      onSelect={setEventDate}
-                      disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="mt-1">
+                  <MonthYearDatePicker
+                    value={eventDate}
+                    onChange={setEventDate}
+                    placeholder="Pick a date"
+                  />
+                </div>
               </div>
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">Start time</Label>
@@ -284,72 +248,57 @@ const ChatNow = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">State</Label>
-                <Select
+                <SelectWithOther
                   value={state}
-                  onValueChange={(v) => {
+                  onChange={(v) => {
                     setState(v);
                     setDistrict("");
                     setCity("");
                   }}
-                >
-                  <SelectTrigger className="rounded-xl mt-1 h-11">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {states.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={states}
+                  placeholder="Select"
+                  otherPlaceholder="State name"
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">District</Label>
-                <Select
+                <SelectWithOther
                   value={district}
-                  onValueChange={(v) => {
+                  onChange={(v) => {
                     setDistrict(v);
                     setCity("");
                   }}
+                  options={districts}
+                  placeholder="Select"
+                  otherPlaceholder="District name"
                   disabled={!state}
-                >
-                  <SelectTrigger className="rounded-xl mt-1 h-11">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {districts.map((d) => (
-                      <SelectItem key={d} value={d}>
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label className="text-xs font-sans text-muted-foreground">City</Label>
-                {cities.length > 0 ? (
-                  <Select value={city} onValueChange={setCity}>
-                    <SelectTrigger className="rounded-xl mt-1 h-11">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {cities.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Enter city"
-                    className="rounded-xl mt-1 h-11"
-                  />
-                )}
+                <SelectWithOther
+                  value={city}
+                  onChange={setCity}
+                  options={cities}
+                  placeholder="Select"
+                  otherPlaceholder="City name"
+                  disabled={!state}
+                  className="mt-1"
+                />
               </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-sans text-muted-foreground">Full address of event</Label>
+              <Input
+                value={fullAddress}
+                onChange={(e) => setFullAddress(e.target.value)}
+                placeholder="Venue / street / area / landmark"
+                className="rounded-xl mt-1 h-11"
+                autoComplete="street-address"
+              />
             </div>
 
             <div>
@@ -363,6 +312,9 @@ const ChatNow = () => {
                 maxLength={6}
                 placeholder="6-digit pincode"
                 className="rounded-xl mt-1 h-11"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="postal-code"
               />
             </div>
 

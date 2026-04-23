@@ -419,8 +419,36 @@ const Footer = ({ override }: { override?: any }) => {
   const instaUrl = `https://instagram.com/${igHandle}`;
   return (
     <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-5 sm:p-10">
+        {/* Brand block — full width on mobile, top-left on desktop */}
+        <div className="mb-6 sm:mb-0 sm:hidden">
+          <div className="flex items-center gap-2 mb-3">
+            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
+            <div className="text-lg font-extrabold text-foreground tracking-tight leading-tight">
+              Creative<br /><span className="text-gradient-violet">Caricature Club™</span>
+            </div>
+          </div>
+          <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
+        </div>
+
+        {/* Mobile: 2-column compact link grid */}
+        <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5">
+          {cols.map((c) => (
+            <div key={c.title}>
+              <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">{c.title}</div>
+              <ul className="space-y-1.5">
+                {c.links.slice(0, 5).map((l) => (
+                  <li key={l.href + l.label}>
+                    <a href={l.href} className="text-[13px] text-foreground/75 hover:text-primary transition-colors">{l.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: original 4-column grid */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
