@@ -44,7 +44,7 @@ import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
   address: string | null; city: string | null; state: string | null; pincode: string | null;
-  event_booking_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
+  event_booking_allowed?: boolean; event_edit_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
   is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
 };
 
