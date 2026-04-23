@@ -101,91 +101,68 @@ const AdminDashboardWidgets = () => {
     setDrillData({ title, rows });
   };
 
-  const widgets: { icon: any; label: string; value: string | number; trend?: { value: string; up: boolean }; drill?: string }[] = [
-    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
-    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), drill: "revenue" },
-    { icon: Package, label: "Total Orders", value: stats.totalOrders, drill: "orders" },
-    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
-    { icon: Clock, label: "Pending", value: stats.pendingOrders },
-    { icon: Star, label: "Delivered", value: stats.completedOrders },
-    { icon: Calendar, label: "Total Events", value: stats.totalEvents, drill: "events" },
-    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents },
-    { icon: Users, label: "Customers", value: stats.totalCustomers, trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
-    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, drill: "enquiries" },
-    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers },
-    { icon: Activity, label: "Sessions", value: stats.activeSessions },
+  const widgets: { icon: any; label: string; value: string | number; raw: number; trend?: { value: string; up: boolean }; drill?: string }[] = [
+    { icon: DollarSign, label: "Total Revenue", value: formatPrice(stats.totalRevenue), raw: stats.totalRevenue, trend: stats.weekRevenue > 0 ? { value: formatPrice(stats.weekRevenue) + " /wk", up: true } : undefined, drill: "revenue" },
+    { icon: TrendingUp, label: "Pending Revenue", value: formatPrice(stats.pendingRevenue), raw: stats.pendingRevenue, drill: "revenue" },
+    { icon: Package, label: "Total Orders", value: stats.totalOrders, raw: stats.totalOrders, drill: "orders" },
+    { icon: Zap, label: "Today's Orders", value: stats.todayOrders, raw: stats.todayOrders, trend: stats.todayRevenue > 0 ? { value: formatPrice(stats.todayRevenue), up: true } : undefined },
+    { icon: Clock, label: "Pending", value: stats.pendingOrders, raw: stats.pendingOrders },
+    { icon: Star, label: "Delivered", value: stats.completedOrders, raw: stats.completedOrders },
+    { icon: Calendar, label: "Total Events", value: stats.totalEvents, raw: stats.totalEvents, drill: "events" },
+    { icon: Globe, label: "Upcoming", value: stats.upcomingEvents, raw: stats.upcomingEvents },
+    { icon: Users, label: "Customers", value: stats.totalCustomers, raw: stats.totalCustomers, trend: stats.newCustomersToday > 0 ? { value: `+${stats.newCustomersToday} today`, up: true } : undefined, drill: "customers" },
+    { icon: MessageCircle, label: "Enquiries", value: `${stats.pendingEnquiries}/${stats.totalEnquiries}`, raw: stats.totalEnquiries, drill: "enquiries" },
+    { icon: ShoppingBag, label: "Workshop", value: stats.workshopUsers, raw: stats.workshopUsers },
+    { icon: Activity, label: "Sessions", value: stats.activeSessions, raw: stats.activeSessions },
   ];
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
         {widgets.map((w, i) => {
-          const tint = ICON_TINTS[w.label] || "hsl(var(--primary))";
-          const tintBg = ICON_BG_TINTS[w.label] || "hsl(var(--secondary))";
-          return (
-            <motion.div key={w.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.4, ease: "easeOut" }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              whileTap={{ scale: 0.98 }}
-              onMouseEnter={() => setHoveredIdx(i)}
-              onMouseLeave={() => setHoveredIdx(null)}
-              onClick={() => w.drill && openDrill(w.drill)}
-              className={`${w.drill ? "cursor-pointer" : "cursor-default"}`}>
-              <div
-                className="relative overflow-hidden rounded-2xl p-4 transition-all duration-300"
-                style={{
-                  background: "hsl(0 0% 100%)",
-                  border: "1px solid hsl(0 0% 93%)",
-                  boxShadow: hoveredIdx === i
-                    ? "0 12px 40px -10px hsla(0,0%,0%,0.1), 0 0 0 1px hsla(0,0%,0%,0.03)"
-                    : "0 2px 8px -2px hsla(0,0%,0%,0.06), 0 0 0 1px hsla(0,0%,0%,0.02), inset 0 1px 0 hsla(0,0%,100%,0.8)",
-                }}
-              >
-                {/* Subtle glow on hover */}
-                {hoveredIdx === i && (
-                  <motion.div
-                    className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none"
-                    style={{ background: tintBg, filter: "blur(20px)", opacity: 0.6 }}
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1.2, opacity: 0.6 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
+          const isActive = ACTIVE_WIDGETS.has(w.label) && w.raw > 0;
+          const isDanger = DANGER_WIDGETS.has(w.label) && w.raw > 0;
+          const tone = figureToneFor(w.label, w.raw);
+          const figureClass =
+            tone === "positive" ? "vault-figure-positive"
+            : tone === "negative" ? "vault-figure-negative"
+            : "vault-figure-neutral";
+          const cardClass = isActive ? "vault-widget vault-widget-active" : isDanger ? "vault-widget vault-widget-danger" : "vault-widget";
+          // Icon tints adapt to card variant
+          const iconColor = isActive ? "hsl(0 0% 8%)" : isDanger ? "hsl(0 75% 50%)" : "hsl(0 0% 25%)";
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-3">
-                    <motion.div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: tintBg }}
-                      animate={hoveredIdx === i ? { scale: 1.08 } : { scale: 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <w.icon className="w-[18px] h-[18px]" style={{ color: tint }} strokeWidth={1.8} />
-                    </motion.div>
-                    {w.trend && (
-                      <div className={`flex items-center gap-0.5 text-[9px] font-semibold px-2 py-0.5 rounded-full ${w.trend.up ? 'text-emerald-600' : 'text-amber-600'}`}
-                        style={{ background: w.trend.up ? 'hsl(152 45% 95%)' : 'hsl(38 75% 95%)' }}>
-                        {w.trend.up ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
-                        {w.trend.value}
-                      </div>
-                    )}
-                    {w.drill && !w.trend && (
-                      <motion.div
-                        animate={hoveredIdx === i ? { opacity: 1 } : { opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <Eye className="w-3.5 h-3.5" style={{ color: "hsl(0 0% 72%)" }} />
-                      </motion.div>
+          return (
+            <motion.div
+              key={w.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03, duration: 0.3, ease: "easeOut" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => w.drill && openDrill(w.drill)}
+              className={w.drill ? "cursor-pointer" : "cursor-default"}
+            >
+              <div className={`${cardClass} relative overflow-hidden p-4 h-full`}>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <w.icon className="w-5 h-5" style={{ color: iconColor }} strokeWidth={1.8} />
+                    {w.drill && (
+                      <Eye className="w-3 h-3 opacity-40" style={{ color: iconColor }} />
                     )}
                   </div>
-                  <p className="text-xl font-bold tracking-tight admin-panel-font" style={{ color: "hsl(0 0% 12%)" }}>
-                    {w.value}
-                  </p>
-                  <p className="text-[10px] mt-0.5 font-medium uppercase tracking-wider" style={{ color: "hsl(0 0% 55%)" }}>
-                    {w.label}
-                  </p>
+                  <div>
+                    <p className={`text-2xl font-bold tracking-tight admin-panel-font ${isActive ? "vault-figure-neutral" : figureClass}`}>
+                      {w.value}
+                    </p>
+                    <p className="text-[10px] mt-1 font-bold uppercase tracking-[0.12em]" style={{ color: isActive ? "hsl(0 0% 18%)" : isDanger ? "hsl(0 60% 40%)" : "hsl(0 0% 50%)" }}>
+                      {w.label}
+                    </p>
+                    {w.trend && (
+                      <div className="flex items-center gap-0.5 mt-1.5 text-[9px] font-semibold">
+                        {w.trend.up ? <ArrowUp className="w-2.5 h-2.5 vault-figure-positive" /> : <ArrowDown className="w-2.5 h-2.5 vault-figure-negative" />}
+                        <span className={w.trend.up ? "vault-figure-positive" : "vault-figure-negative"}>{w.trend.value}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
