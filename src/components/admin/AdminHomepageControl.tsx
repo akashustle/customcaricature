@@ -199,6 +199,8 @@ const AdminHomepageControl = () => {
           <TabsTrigger value="usecases" className="text-xs">Use Cases</TabsTrigger>
           <TabsTrigger value="help" className="text-xs">Smart Help</TabsTrigger>
           <TabsTrigger value="sticky" className="text-xs">Sticky CTA</TabsTrigger>
+          <TabsTrigger value="home_order" className="text-xs">Home Order</TabsTrigger>
+          <TabsTrigger value="footer" className="text-xs">Footer</TabsTrigger>
         </TabsList>
 
         {/* Sections Visibility */}
