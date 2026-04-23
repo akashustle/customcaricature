@@ -641,16 +641,17 @@ const WorkshopAdmin = () => {
 
   // Theme — Premium SaaS aesthetic (uses semantic tokens for dark mode)
   const dm = darkMode;
-  const bg = "bg-background";
+  const bg = "admin-canvas-vault";
   const cardBg = "bg-card border-border";
   const textPrimary = "text-foreground font-semibold";
   const textSecondary = "text-muted-foreground font-medium";
   const textMuted = "text-muted-foreground/60";
   const sidebarBg = "bg-card/95 border-border";
-  const activeTabClass = "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold";
+  // Vault theme — black active pill with lime icon, lime primary buttons
+  const activeTabClass = "bg-[hsl(0_0%_8%)] text-white shadow-[0_4px_12px_hsl(0_0%_0%/0.18)] font-semibold";
   const inactiveTab = "text-muted-foreground hover:text-foreground hover:bg-muted";
-  const btnPrimary = "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/20 font-semibold";
-  const inputClass = "bg-secondary border-border text-foreground font-medium placeholder:text-muted-foreground rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20";
+  const btnPrimary = "bg-[hsl(82_75%_55%)] hover:bg-[hsl(82_75%_48%)] text-[hsl(0_0%_8%)] shadow-[0_4px_14px_hsl(82_75%_45%/0.35)] font-semibold";
+  const inputClass = "bg-secondary border-border text-foreground font-medium placeholder:text-muted-foreground rounded-xl focus:border-[hsl(82_75%_55%)] focus:ring-[hsl(82_75%_55%)]/30";
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
     <motion.div initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: "easeOut" }}
@@ -1012,7 +1013,7 @@ const WorkshopAdmin = () => {
             </div>
             <div className="flex gap-1 items-center">
               <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
+                className="w-8 h-8 rounded-full bg-[hsl(82_75%_55%)] flex items-center justify-center text-[hsl(0_0%_8%)] text-xs font-bold shadow-[0_4px_12px_hsl(82_75%_45%/0.35)]">
                 {adminInfo?.name?.[0]?.toUpperCase() || "A"}
               </button>
               <Button variant="ghost" size="sm" onClick={fetchAll} className={`h-8 w-8 p-0 ${textMuted}`}><RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} /></Button>
@@ -1053,7 +1054,7 @@ const WorkshopAdmin = () => {
                     <div className="flex items-center gap-2">
                       <button onClick={() => { setAdminProfileEdit(true); setAdminEditData({ name: adminInfo?.name || "", email: adminInfo?.email || "", password: "" }); }}
                         className={`hidden lg:flex items-center gap-2.5 px-3 py-2 rounded-xl ${dm ? "bg-white/[0.04] border-white/[0.06] hover:bg-white/[0.06]" : "bg-slate-50 border-slate-200/60 hover:bg-slate-100"} border transition-all`}>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/25">
+                        <div className="w-8 h-8 rounded-full bg-[hsl(82_75%_55%)] flex items-center justify-center text-[hsl(0_0%_8%)] text-xs font-bold shadow-[0_4px_12px_hsl(82_75%_45%/0.35)]">
                           {adminInfo?.name?.[0]?.toUpperCase() || "A"}
                         </div>
                         <div className="text-left">
@@ -1079,52 +1080,42 @@ const WorkshopAdmin = () => {
                       <RefreshButton />
                     </div>
                   </div>
-                  {/* Premium 3D Flash Card Stat Widgets */}
+                  {/* Vault-style stat widgets — white pills, lime accent */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "Total Students", value: filteredUsers.length, icon: Users, gradient: "from-violet-600 to-indigo-600", bgGlow: "bg-violet-500", emoji: "🎓", change: "+12%" },
-                      { label: "Online Reg", value: registeredOnline.length, icon: Users, gradient: "from-emerald-600 to-teal-600", bgGlow: "bg-emerald-500", emoji: "🌐", change: "+8%" },
-                      { label: "Manual Added", value: manuallyAdded.length, icon: UserPlus, gradient: "from-amber-500 to-orange-500", bgGlow: "bg-amber-500", emoji: "✏️", change: "+3%" },
-                      { label: "Assignments", value: filteredAssignments.length, icon: FileText, gradient: "from-blue-600 to-cyan-600", bgGlow: "bg-blue-500", emoji: "📝", change: "+5%" },
-                      { label: "Videos", value: filteredVideos.length, icon: Video, gradient: "from-pink-600 to-rose-600", bgGlow: "bg-pink-500", emoji: "🎬", change: "+2%" },
-                      { label: "Live Sessions", value: filteredSessions.length, icon: Radio, gradient: "from-red-600 to-orange-600", bgGlow: "bg-red-500", emoji: "📡", change: "Live" },
-                      { label: "Feedbacks", value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, gradient: "from-indigo-600 to-purple-600", bgGlow: "bg-indigo-500", emoji: "💬", change: "+7%" },
-                      { label: "Certificates", value: filteredCertificates.length, icon: Award, gradient: "from-fuchsia-600 to-pink-600", bgGlow: "bg-fuchsia-500", emoji: "🏆", change: "New" },
-                    ].map((s, idx) => (
-                      <motion.div key={s.label}
-                        initial={{ opacity: 0, y: 20, rotateX: -10 }}
-                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                        transition={{ duration: 0.5, delay: idx * 0.06, type: "spring", bounce: 0.3 }}
-                        whileHover={{ y: -6, scale: 1.04, rotateY: 3, rotateX: -2, boxShadow: dm ? "0 25px 50px -12px rgba(124,58,237,0.25)" : "0 25px 50px -12px rgba(0,0,0,0.12)" }}
-                        whileTap={{ scale: 0.97 }}
-                        style={{ perspective: "800px", transformStyle: "preserve-3d" }}
-                        className={`${dm ? "bg-white/[0.05] border-white/[0.08]" : "bg-white border-slate-200/50"} border rounded-2xl p-4 cursor-pointer group relative overflow-hidden backdrop-blur-sm`}>
-                        {/* Animated glow orb */}
-                        <motion.div className={`absolute top-0 right-0 w-24 h-24 ${s.bgGlow} opacity-[0.06] rounded-full blur-2xl translate-x-8 -translate-y-8`}
-                          animate={{ scale: [1, 1.3, 1], opacity: [0.06, 0.12, 0.06] }} transition={{ duration: 3, repeat: Infinity, delay: idx * 0.2 }} />
-                        {/* Shimmer effect */}
-                        <motion.div className="absolute inset-0 pointer-events-none"
-                          style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.08) 55%, transparent 60%)" }}
-                          animate={{ x: ["-100%", "200%"] }} transition={{ duration: 3, repeat: Infinity, repeatDelay: 5, delay: idx * 0.5 }} />
-                        <div className="relative z-10">
-                          <div className="flex items-start justify-between mb-3">
-                            <motion.div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${s.gradient} flex items-center justify-center shadow-lg`}
-                              whileHover={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 0.5 }}>
-                              <s.icon className="w-5 h-5 text-white" />
-                            </motion.div>
-                            <span className="text-lg">{s.emoji}</span>
+                      { label: "Total Students", value: filteredUsers.length, icon: Users, tone: "active",  emoji: "🎓" },
+                      { label: "Online Reg",     value: registeredOnline.length, icon: Users, tone: "neutral", emoji: "🌐" },
+                      { label: "Manual Added",   value: manuallyAdded.length, icon: UserPlus, tone: "neutral", emoji: "✏️" },
+                      { label: "Assignments",    value: filteredAssignments.length, icon: FileText, tone: "neutral", emoji: "📝" },
+                      { label: "Videos",         value: filteredVideos.length, icon: Video, tone: "neutral", emoji: "🎬" },
+                      { label: "Live Sessions",  value: filteredSessions.length, icon: Radio, tone: filteredSessions.length > 0 ? "active" : "neutral", emoji: "📡" },
+                      { label: "Feedbacks",      value: filteredFeedbacks.filter(f => f.message !== "[Google Review Click]").length, icon: MessageSquare, tone: "neutral", emoji: "💬" },
+                      { label: "Certificates",   value: filteredCertificates.length, icon: Award, tone: "neutral", emoji: "🏆" },
+                    ].map((s, idx) => {
+                      const isActive = s.tone === "active" && Number(s.value) > 0;
+                      const cardCls = isActive ? "vault-widget vault-widget-active" : "vault-widget";
+                      const iconColor = isActive ? "hsl(0 0% 8%)" : "hsl(0 0% 25%)";
+                      const figureCls = Number(s.value) > 0 ? "vault-figure-positive" : "vault-figure-neutral";
+                      return (
+                        <motion.div key={s.label}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.04, ease: "easeOut" }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`${cardCls} relative overflow-hidden p-4 cursor-pointer`}>
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                              <s.icon className="w-5 h-5" style={{ color: iconColor }} strokeWidth={1.8} />
+                              <span className="text-base opacity-70">{s.emoji}</span>
+                            </div>
+                            <div>
+                              <p className={`text-2xl font-bold tracking-tight admin-panel-font ${figureCls}`}>{s.value}</p>
+                              <p className="text-[10px] mt-1 font-bold uppercase tracking-[0.12em]" style={{ color: isActive ? "hsl(0 0% 18%)" : "hsl(0 0% 50%)" }}>{s.label}</p>
+                            </div>
                           </div>
-                          <motion.p className={`text-3xl font-extrabold ${textPrimary} tracking-tight`}
-                            initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={{ delay: idx * 0.08 + 0.3, type: "spring" }}>
-                            {s.value}
-                          </motion.p>
-                          <div className="flex items-center justify-between mt-1">
-                            <p className={`text-xs ${textMuted}`}>{s.label}</p>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${s.change.startsWith("+") ? "bg-emerald-500/10 text-emerald-600" : "bg-violet-500/10 text-violet-600"}`}>{s.change}</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <GlassCard>
