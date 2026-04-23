@@ -2059,6 +2059,10 @@ const Admin = () => {
             <AdminPages />
           </TabsContent>
 
+          <TabsContent value="page-content">
+            <AdminPageContent />
+          </TabsContent>
+
           <TabsContent value="calculator">
             <AdminCalculatorHistory />
           </TabsContent>
