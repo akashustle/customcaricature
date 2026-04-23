@@ -37,6 +37,7 @@ import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 
 import AddEventModal from "@/components/dashboard/AddEventModal";
+import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
 import { BadgeCheck, Camera } from "lucide-react";
 
 type Profile = {
