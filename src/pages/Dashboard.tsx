@@ -2223,10 +2223,14 @@ const DashboardSuggestions = ({ orders, events, shopOrders, profile, navigate, c
 
 /* ───────── Modern Home Overview (soft fade hero, replaces widgets) ───────── */
 /* App Download card — promote PWA install to event-booked users */
+const PWA_DISMISS_KEY = "ccc_pwa_install_dismissed_v1";
 const DownloadAppCard = () => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
   const [platform, setPlatform] = useState<"android" | "ios" | "desktop" | "other">("other");
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    try { return localStorage.getItem(PWA_DISMISS_KEY) === "1"; } catch { return false; }
+  });
 
   useEffect(() => {
     // Detect platform
@@ -2237,11 +2241,20 @@ const DownloadAppCard = () => {
 
     const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
-    const installedHandler = () => setInstalled(true);
+    const installedHandler = () => {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    };
     window.addEventListener("appinstalled", installedHandler);
     // Already installed (standalone display mode or iOS standalone)
-    if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
-    if ((navigator as any).standalone === true) setInstalled(true);
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    }
+    if ((navigator as any).standalone === true) {
+      setInstalled(true);
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    }
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
@@ -2252,28 +2265,40 @@ const DownloadAppCard = () => {
     if (installPrompt) {
       installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      if (outcome === "accepted") setInstalled(true);
+      if (outcome === "accepted") {
+        setInstalled(true);
+        try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      }
       setInstallPrompt(null);
     } else if (platform === "ios") {
       toast({
         title: "Install on iPhone 📱",
         description: "Tap the Share icon in Safari, then 'Add to Home Screen'.",
       });
+      // Mark as dismissed once instructions shown — user is acting on it
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     } else if (platform === "android") {
       toast({
         title: "Install on Android 📱",
         description: "Open the browser menu (⋮) and tap 'Add to Home screen' / 'Install app'.",
       });
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     } else {
       toast({
         title: "Install on desktop 💻",
         description: "Look for the install icon in your browser's address bar.",
       });
+      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+      setDismissed(true);
     }
   };
 
-  // INSTALLED state — show pretty confirmation
+  // INSTALLED state — show pretty confirmation (only first session post-install)
   if (installed) {
+    // Hide entirely once user has clicked install (after re-render)
+    if (dismissed) return null;
     return (
       <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background p-4 shadow-sm">
         <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none" />
@@ -2290,6 +2315,9 @@ const DownloadAppCard = () => {
       </div>
     );
   }
+
+  // If user already dismissed/installed previously — never show again
+  if (dismissed) return null;
 
   const buttonLabel =
     installPrompt ? "Install"
@@ -2323,6 +2351,15 @@ const DownloadAppCard = () => {
           {buttonLabel}
         </Button>
       </div>
+      <button
+        onClick={() => {
+          try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+          setDismissed(true);
+        }}
+        className="absolute top-2 right-2 text-[10px] text-muted-foreground/70 hover:text-foreground/80 underline font-sans"
+      >
+        Don't show again
+      </button>
     </div>
   );
 };
