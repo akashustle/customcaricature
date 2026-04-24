@@ -322,25 +322,25 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
             <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
               <Badge className="text-[10px] font-semibold border-0"
-                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 60% 35%)" }}>
+                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 70% 22%)" }}>
                 {profileData.student_type === "registered_online" ? "🎨 Online Student" : "🎨 Workshop Student"}
               </Badge>
               {profileData.roll_number && (
                 <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.plum}30`, color: darkMode ? palette.plum : "hsl(335 45% 35%)" }}>
+                  style={{ background: `${palette.plum}30`, color: darkMode ? palette.plum : "hsl(335 60% 28%)" }}>
                   Roll #{profileData.roll_number}
                 </Badge>
               )}
               {profileData.skill_level && (
                 <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.sage}30`, color: darkMode ? palette.sage : "hsl(150 35% 25%)" }}>
+                  style={{ background: `${palette.sage}30`, color: darkMode ? palette.sage : "hsl(150 55% 18%)" }}>
                   {profileData.skill_level}
                 </Badge>
               )}
             </div>
 
             <p className="text-xs md:text-sm mt-2 opacity-80"
-              style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 20% 30%)" }}>
+              style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 22%)" }}>
               {profileData.email || profileData.mobile} • {profileData.city || "City not set"}, {profileData.country || "India"}
             </p>
 
@@ -353,7 +353,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   style={{ background: `linear-gradient(90deg, ${palette.coral}, ${palette.gold}, ${palette.sage})` }} />
               </div>
               <span className="text-xs font-bold"
-                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 30%)" }}>
+                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 35% 22%)" }}>
                 {completeness}%
               </span>
             </div>
@@ -396,7 +396,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 Become a Verified Student <BadgeCheck className="w-5 h-5" style={{ color: palette.sky }} />
               </h3>
               <p className="text-xs md:text-sm mt-0.5"
-                style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 35%)" }}>
+                style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 35% 28%)" }}>
                 {isPending
                   ? "Your verification is under review. We'll notify you once approved."
                   : "Complete your profile and submit for verification to get a blue tick on your profile."}
@@ -404,7 +404,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             </div>
             {isPending ? (
               <Badge className="text-xs font-bold border-0 px-3 py-1.5"
-                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 60% 30%)" }}>
+                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 70% 22%)" }}>
                 <Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Pending Review
               </Badge>
             ) : (
@@ -432,7 +432,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {personalDetails.map((d) => (
               <div key={d.key} className={d.key === "why_join" ? "md:col-span-2" : ""}>
-                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                   {d.label}
                 </Label>
                 {d.key === "why_join" ? (
@@ -457,7 +457,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
             {/* Country / State / City */}
             <div>
-              <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+              <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                 Country
               </Label>
               <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
@@ -469,7 +469,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             {form.country === "India" ? (
               <>
                 <div>
-                  <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                  <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                     State *
                   </Label>
                   <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
@@ -479,7 +479,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 </div>
                 <div className="md:col-span-2">
                   <div className="flex items-center justify-between mb-1">
-                    <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                    <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                       City *
                     </Label>
                     <button type="button" onClick={() => setCityMode(cityMode === "select" ? "manual" : "select")}
@@ -500,7 +500,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </>
             ) : (
               <div className="md:col-span-2">
-                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                   City *
                 </Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -510,7 +510,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
             {readOnlyDetails.map((d) => (
               <div key={d.label}>
-                <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                   {d.label} (locked)
                 </Label>
                 <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60" />
@@ -624,7 +624,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             ))}
           </div>
           {profileData.payment_status === "pending" && (
-            <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
+            <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 40% 30%)" }}>
               Payment status will be updated once confirmed by admin.
             </p>
           )}
@@ -665,13 +665,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     Submit for Verification
                   </h3>
                   <p className="text-sm text-center"
-                    style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>
+                    style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 35% 30%)" }}>
                     By submitting, you confirm all your profile details are accurate. Once approved, you'll get a verified blue tick on your profile.
                   </p>
                   <div className="rounded-xl p-3 text-xs space-y-1"
                     style={{ background: darkMode ? "hsl(var(--muted) / 0.5)" : `${palette.sky}15` }}>
                     <div className="flex items-center justify-between">
-                      <span style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>Profile completeness</span>
+                      <span style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 35% 30%)" }}>Profile completeness</span>
                       <span className="font-bold" style={{ color: completeness >= 80 ? "hsl(150 60% 35%)" : palette.coral }}>{completeness}%</span>
                     </div>
                     {completeness < 80 && (
@@ -705,7 +705,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     <h3 className="text-xl font-bold" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(220 40% 25%)" }}>
                       Verifying your profile...
                     </h3>
-                    <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>
+                    <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 35% 30%)" }}>
                       Please wait a moment
                     </p>
                   </div>
@@ -723,7 +723,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     <h3 className="text-xl font-bold" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 40% 25%)" }}>
                       ⏳ Taking longer than expected
                     </h3>
-                    <p className="text-sm mt-2" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                    <p className="text-sm mt-2" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                       Your verification request has been received. Our team will review and approve it within <span className="font-bold" style={{ color: palette.coral }}>24 hours</span>.
                     </p>
                     <p className="text-xs mt-2 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 45%)" }}>
