@@ -19,6 +19,8 @@ import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import SiteFooter from "@/components/SiteFooter";
 import HomepageImageLightbox from "@/components/homepage/HomepageImageLightbox";
+import WatermarkedImage from "@/components/WatermarkedImage";
+import EventPaymentTimeline from "@/components/EventPaymentTimeline"; // unused here but ensures bundle inclusion in dev preview
 
 import g1 from "@/assets/gallery/gallery-1.jpeg";
 import g2 from "@/assets/gallery/gallery-2.jpeg";
