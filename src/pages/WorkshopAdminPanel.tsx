@@ -1236,7 +1236,7 @@ const WorkshopAdmin = () => {
                             <div><Label>Instagram ID</Label><Input value={newUser.instagram_id} onChange={e => setNewUser({...newUser, instagram_id: e.target.value})} /></div>
                             <div className="grid grid-cols-3 gap-3">
                               <div><Label>Age</Label><Input type="number" value={newUser.age} onChange={e => setNewUser({...newUser, age: e.target.value})} /></div>
-                              <div><Label>Gender</Label><Select value={newUser.gender} onValueChange={v => setNewUser({...newUser, gender: v})}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
+                              <div><Label>Gender</Label><Select value={newUser.gender} onValueChange={v => setNewUser({...newUser, gender: v})}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent></Select></div>
                               <div><Label>Profession</Label><Input value={newUser.occupation} onChange={e => setNewUser({...newUser, occupation: e.target.value})} /></div>
                             </div>
                             <div><Label>Why join?</Label><Textarea value={newUser.why_join} onChange={e => setNewUser({...newUser, why_join: e.target.value})} rows={2} /></div>
@@ -2185,7 +2185,7 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label className={`${textSecondary} text-xs`}>Age</Label><Input type="number" value={editData.age || ""} onChange={e => setEditData({...editData, age: e.target.value})} className={inputClass} /></div>
-            <div><Label className={`${textSecondary} text-xs`}>Gender</Label><Select value={editData.gender || ""} onValueChange={v => setEditData({...editData, gender: v})}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
+            <div><Label className={`${textSecondary} text-xs`}>Gender</Label><Select value={editData.gender || ""} onValueChange={v => setEditData({...editData, gender: v})}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent></Select></div>
             <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editData.slot} onValueChange={v => setEditData({...editData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3</SelectItem><SelectItem value="6pm-9pm">6–9</SelectItem></SelectContent></Select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">

@@ -4,9 +4,10 @@
  * lets users submit themselves for blue-tick verification by completing the
  * required profile fields.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SelectWithOther from "@/components/ui/select-with-other";
 import { toast } from "@/hooks/use-toast";
-import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight, Camera } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
 
 // Ivory / coral / sage palette to match WorkshopProfile
@@ -58,6 +59,9 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<"form" | "loading" | "longer">("form");
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [localAvatarUrl, setLocalAvatarUrl] = useState<string | null>(profile?.avatar_url || null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     full_name: profile?.full_name || "",
     mobile: profile?.mobile || "",
@@ -74,6 +78,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   });
 
   useEffect(() => {
+    setLocalAvatarUrl(profile?.avatar_url || null);
     setForm({
       full_name: profile?.full_name || "",
       mobile: profile?.mobile || "",
@@ -103,10 +108,40 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
     return Array.from(new Set(all)).sort();
   })();
 
+  // Avatar upload — saves to public 'avatars' bucket, then writes URL to
+  // profiles.avatar_url. Fast: skips heavy mini-DB sync on the trigger.
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please pick a photo under 4 MB.", variant: "destructive" });
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase.from("profiles")
+        .update({ avatar_url: url } as any).eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setLocalAvatarUrl(url);
+      onProfileSaved?.();
+      toast({ title: "📸 Photo uploaded", description: "Now finish the form and submit for review." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   // Completeness check
   const completenessFields = [
     form.full_name, form.mobile, form.age, form.gender,
-    form.occupation, form.city, form.address, profile?.avatar_url,
+    form.occupation, form.city, form.address, localAvatarUrl,
     form.why_join, (form.country === "India" ? form.state : true),
   ];
   const completeness = Math.round((completenessFields.filter(Boolean).length / completenessFields.length) * 100);
@@ -140,10 +175,10 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
         return;
       }
     }
-    if (!profile?.avatar_url) {
+    if (!localAvatarUrl) {
       toast({
         title: "📸 Profile photo required",
-        description: "Please upload your own profile photo first — verification needs your real face.",
+        description: "Please upload your own real profile photo first — tap the camera icon at the top of this dialog.",
         variant: "destructive",
       });
       return;
@@ -314,6 +349,58 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                     </div>
                   </div>
 
+                  {/* Avatar upload — required for verification */}
+                  <div
+                    className="flex items-center gap-3 rounded-2xl border-2 border-dashed p-3"
+                    style={{
+                      borderColor: localAvatarUrl ? "hsl(150 50% 60%)" : palette.coral,
+                      background: localAvatarUrl ? "hsl(150 60% 96%)" : "hsl(8 80% 96%)",
+                    }}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="w-16 h-16 border-2 shadow-md" style={{ borderColor: "white" }}>
+                        <AvatarImage src={localAvatarUrl || undefined} className="object-cover" />
+                        <AvatarFallback
+                          className="text-lg font-bold text-white"
+                          style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                        >
+                          {(form.full_name || "U").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploadingAvatar}
+                        className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-lg border-2"
+                        style={{ background: palette.coral, borderColor: "white" }}
+                        aria-label="Upload profile photo"
+                      >
+                        {uploadingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                      </button>
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleAvatarUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold" style={{ color: localAvatarUrl ? "hsl(150 50% 25%)" : "hsl(8 50% 30%)" }}>
+                        {localAvatarUrl ? "✓ Profile photo added" : "Profile photo required *"}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: localAvatarUrl ? "hsl(150 30% 35%)" : "hsl(8 35% 40%)" }}>
+                        {localAvatarUrl
+                          ? "Looks great! Tap the camera to change it."
+                          : "Tap the camera icon to upload a clear photo of your real face."}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <div className="md:col-span-2">
                       <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Full name *</Label>
@@ -471,11 +558,49 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                       You'll get a notification once approved.
                     </p>
                   </div>
-                  <Button onClick={() => { setOpen(false); setStage("form"); }}
-                    className="w-full rounded-full font-bold text-white border-0 shadow-md"
-                    style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
-                    Got it, thanks! <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
+
+                  {/* Final-step nudge: book an event for the blue tick */}
+                  <div
+                    className="rounded-2xl p-3 text-left flex items-center gap-3 shadow-sm"
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.sky}15, ${palette.coral}15)`,
+                      border: `1px solid ${palette.sky}50`,
+                    }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow"
+                      style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold" style={{ color: "hsl(220 40% 25%)" }}>
+                        Final step for the blue tick
+                      </p>
+                      <p className="text-[11px] leading-snug" style={{ color: "hsl(220 30% 35%)" }}>
+                        Once admin approves your details, just book your first event — and the verified blue tick will appear on your profile automatically.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {onBookEvent && (
+                      <Button
+                        onClick={() => { setOpen(false); setStage("form"); onBookEvent?.(); }}
+                        className="flex-1 rounded-full font-bold text-white border-0 shadow-md"
+                        style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                      >
+                        <Sparkles className="w-4 h-4 mr-1.5" /> {canBookEvent ? "Book Event Now" : "Get a Quote"}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => { setOpen(false); setStage("form"); }}
+                      className={`${onBookEvent ? "" : "flex-1 "}rounded-full font-bold text-white border-0 shadow-md`}
+                      style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}
+                    >
+                      Got it <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </motion.div>
