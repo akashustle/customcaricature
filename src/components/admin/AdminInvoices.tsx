@@ -123,28 +123,40 @@ const AdminInvoices = () => {
         </div>
       </div>
 
-      {/* 3D Widgets with drill-down */}
+      {/* 3D White-glass Widgets — matched to Revenue dashboard */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Invoices", value: invoices.length, gradient: "from-blue-50 to-indigo-50", iconBg: "from-blue-500 to-indigo-500", border: "border-l-blue-500", icon: FileText, data: invoices },
-          { label: "Paid", value: invoices.filter(i => i.status === "paid").length, gradient: "from-emerald-50 to-green-50", iconBg: "from-emerald-500 to-green-500", border: "border-l-emerald-500", icon: DollarSign, data: invoices.filter(i => i.status === "paid") },
-          { label: "Draft", value: draftCount, gradient: "from-amber-50 to-orange-50", iconBg: "from-amber-500 to-orange-500", border: "border-l-amber-500", icon: Edit2, data: invoices.filter(i => i.status === "draft") },
-          { label: "Revenue", value: formatPrice(totalRevenue), gradient: "from-violet-50 to-purple-50", iconBg: "from-violet-500 to-purple-500", border: "border-l-violet-500", icon: TrendingUp, data: invoices.filter(i => i.status === "paid") },
+          { label: "Total Invoices", value: invoices.length, iconBg: "from-blue-400 to-indigo-500", icon: FileText, data: invoices },
+          { label: "Paid", value: invoices.filter(i => i.status === "paid").length, iconBg: "from-emerald-400 to-teal-500", icon: DollarSign, data: invoices.filter(i => i.status === "paid") },
+          { label: "Draft", value: draftCount, iconBg: "from-amber-400 to-orange-500", icon: Edit2, data: invoices.filter(i => i.status === "draft") },
+          { label: "Revenue", value: formatPrice(totalRevenue), iconBg: "from-violet-400 to-purple-500", icon: TrendingUp, data: invoices.filter(i => i.status === "paid") },
         ].map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            whileHover={{ y: -4, scale: 1.03 }}
+          <motion.div key={s.label}
+            initial={{ opacity: 0, y: 30, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.05, duration: 0.45, type: "spring", stiffness: 200, damping: 22 }}
+            whileHover={{ y: -8, scale: 1.05, transition: { duration: 0.2 } }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => setWidgetDrill({ title: s.label, data: s.data })}
-            className="cursor-pointer">
-            <div className={`admin-widget-3d bg-gradient-to-br ${s.gradient} border-l-4 ${s.border}`}>
-              <div className="p-3 relative">
+            className="cursor-pointer group"
+            style={{ perspective: "600px" }}>
+            <div className="relative overflow-hidden rounded-2xl p-3.5 transition-all"
+              style={{
+                background: "rgba(255,255,255,0.95)",
+                backdropFilter: "blur(20px)",
+                boxShadow: "0 8px 25px -8px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.6) inset",
+              }}>
+              <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${s.iconBg} blur-2xl opacity-20 group-hover:opacity-40 transition-opacity`} />
+              <div className="relative z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.iconBg} flex items-center justify-center shadow-lg`}>
-                    <s.icon className="w-4 h-4 text-white" />
+                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${s.iconBg} flex items-center justify-center shadow-lg`}
+                    style={{ boxShadow: "0 6px 20px -4px rgba(0,0,0,0.2)" }}>
+                    <s.icon className="w-5 h-5 text-white" />
                   </div>
-                  <Eye className="w-3 h-3 text-muted-foreground/50" />
+                  <Eye className="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-xl font-extrabold text-foreground leading-tight">{s.value}</p>
-                <p className="text-[10px] text-muted-foreground font-sans mt-0.5 font-medium">{s.label}</p>
+                <p className="text-xl font-extrabold text-gray-900 leading-tight truncate tracking-tight">{s.value}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5 font-semibold uppercase tracking-wider">{s.label}</p>
               </div>
             </div>
           </motion.div>

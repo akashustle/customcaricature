@@ -26,7 +26,7 @@ const ICON_MAP: Record<string, any> = {
 const DEFAULT_SECTIONS: (ExploreSection & { disabled?: boolean; disabled_message?: string })[] = [
   { id: "events", title: "Book for Event", subtitle: "Live caricature artists for weddings, parties & corporate events", image_url: "", link: "/book-event", icon: "calendar", sort_order: 1, is_visible: true },
   { id: "order", title: "Custom Caricatures", subtitle: "Currently unavailable — we'll be back soon!", image_url: "", link: "/order", icon: "palette", sort_order: 2, is_visible: true, disabled: true, disabled_message: "Currently unavailable" },
-  { id: "gallery", title: "Gallery", subtitle: "Explore our portfolio of caricature masterpieces", image_url: "", link: "/gallery/caricatures", icon: "star", sort_order: 3, is_visible: true },
+  { id: "gallery", title: "Gallery", subtitle: "Explore our portfolio of caricature masterpieces", image_url: "", link: "/gallery/events", icon: "star", sort_order: 3, is_visible: true },
   { id: "workshop", title: "Workshop", subtitle: "Learn caricature art with professional artists", image_url: "", link: "/workshop", icon: "graduation", sort_order: 4, is_visible: true },
   { id: "shop", title: "Shop", subtitle: "Coming soon — caricature merchandise & gifts", image_url: "", link: "/shop", icon: "shopping", sort_order: 5, is_visible: true, disabled: true, disabled_message: "Coming soon" },
   { id: "chat", title: "Live Chat", subtitle: "Get instant help with your queries", image_url: "", link: "/live-chat", icon: "chat", sort_order: 6, is_visible: true },
