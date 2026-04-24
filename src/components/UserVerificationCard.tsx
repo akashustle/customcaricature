@@ -327,7 +327,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                       <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Gender *</Label>
                       <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
                         <SelectTrigger className="mt-1 rounded-xl bg-card"><SelectValue placeholder="Select" /></SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[200] bg-popover">
                           <SelectItem value="Male">Male</SelectItem>
                           <SelectItem value="Female">Female</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
@@ -344,38 +344,31 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                       <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Country</Label>
                       <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
                         <SelectTrigger className="mt-1 rounded-xl bg-card"><SelectValue /></SelectTrigger>
-                        <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent className="z-[200] bg-popover">{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     {form.country === "India" ? (
                       <>
                         <div>
                           <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>State *</Label>
-                          <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
-                            <SelectTrigger className="mt-1 rounded-xl bg-card"><SelectValue placeholder="Select state" /></SelectTrigger>
-                            <SelectContent>{states.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                          </Select>
+                          <SelectWithOther
+                            value={form.state}
+                            onChange={(v) => setForm({ ...form, state: v, city: "" })}
+                            options={states}
+                            placeholder="Select state"
+                            triggerClassName="mt-1 bg-card"
+                          />
                         </div>
                         <div className="md:col-span-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>City *</Label>
-                            <button type="button" onClick={() => setCityMode(cityMode === "select" ? "manual" : "select")}
-                              className="text-[10px] font-bold underline" style={{ color: palette.coral }}>
-                              {cityMode === "select" ? "Type manually" : "Choose from list"}
-                            </button>
-                          </div>
-                          {cityMode === "select" && form.state && citiesForState.length > 0 ? (
-                            <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
-                              <SelectTrigger className="mt-1 rounded-xl bg-card"><SelectValue placeholder="Select city" /></SelectTrigger>
-                              <SelectContent>
-                                {citiesForState.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                <SelectItem value="__other__">Others (type manually)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                              placeholder="Type your city" className="mt-1 rounded-xl bg-card" />
-                          )}
+                          <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>City *</Label>
+                          <SelectWithOther
+                            value={form.city}
+                            onChange={(v) => setForm({ ...form, city: v })}
+                            options={citiesForState}
+                            placeholder={form.state ? "Select city" : "Pick a state first"}
+                            disabled={!form.state}
+                            triggerClassName="mt-1 bg-card"
+                          />
                         </div>
                       </>
                     ) : (
