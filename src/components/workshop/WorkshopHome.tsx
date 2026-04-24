@@ -16,10 +16,11 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
   const audioRef = useRef<HTMLAudioElement>(null);
   const [countdownFinished, setCountdownFinished] = useState(false);
 
-  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
-  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
-  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
+  // White 3D aesthetic — matches the user dashboard hero card
+  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white border-white/80";
+  const textPrimary = dm ? "text-white font-bold" : "text-slate-900 font-bold";
+  const textSecondary = dm ? "text-white/60 font-medium" : "text-slate-600 font-medium";
+  const textMuted = dm ? "text-white/40" : "text-slate-400";
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
