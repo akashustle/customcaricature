@@ -128,6 +128,7 @@ const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"))
 const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
 const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
 const EditRequestsInbox = lazy(() => import("@/components/admin/EditRequestsInbox"));
+const AdminProfileVerification = lazy(() => import("@/components/admin/AdminProfileVerification"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -2002,6 +2003,12 @@ const Admin = () => {
 
           <TabsContent value="reviews">
             <AdminReviews />
+          </TabsContent>
+
+          <TabsContent value="verification">
+            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+              <AdminProfileVerification adminName={adminProfile?.full_name || "Admin"} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="edit-requests">

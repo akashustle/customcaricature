@@ -77,6 +77,7 @@ const NAV_SECTIONS = [
       { id: "event-users", icon: UserCheck, label: "Event Users" },
       { id: "artists", icon: PenTool, label: "Artists" },
       { id: "reviews", icon: Star, label: "Reviews" },
+      { id: "verification", icon: ShieldCheck, label: "Verification" },
       { id: "edit-requests", icon: FileText, label: "Edit Requests" },
     ],
   },
