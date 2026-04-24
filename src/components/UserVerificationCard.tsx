@@ -112,8 +112,12 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   // profiles.avatar_url. Fast: skips heavy mini-DB sync on the trigger.
   const handleAvatarUpload = async (file: File) => {
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Please pick a photo under 4 MB.", variant: "destructive" });
+    // Validate size, type, and minimum quality up-front so we never block on
+    // the DB sync trigger and never hit a "statement timeout" mid-write.
+    const { validateImageUpload } = await import("@/lib/image-upload-validator");
+    const check = await validateImageUpload(file);
+    if (check.valid === false) {
+      toast({ title: check.title, description: check.message, variant: "destructive" });
       return;
     }
     setUploadingAvatar(true);
@@ -121,7 +125,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${userId}/avatar-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars")
-        .upload(path, file, { upsert: true, cacheControl: "3600" });
+        .upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type || undefined });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       const url = pub.publicUrl;
@@ -132,7 +136,11 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
       onProfileSaved?.();
       toast({ title: "📸 Photo uploaded", description: "Now finish the form and submit for review." });
     } catch (e: any) {
-      toast({ title: "Upload failed", description: e?.message || "Try again.", variant: "destructive" });
+      const msg = e?.message || "";
+      const friendly = /timeout|canceling statement/i.test(msg)
+        ? "The server took too long. Please try a smaller photo (under 2 MB) or check your internet."
+        : msg || "Try again.";
+      toast({ title: "Upload failed", description: friendly, variant: "destructive" });
     } finally {
       setUploadingAvatar(false);
     }

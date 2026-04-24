@@ -47,9 +47,11 @@ const Support = () => {
     }
   };
 
+  const WA_PREFILL = "Hi Creative Caricature Club! 👋 I'm reaching out from your website and need some help. Can you assist me?";
+  const WA_HREF = `https://wa.me/918369594271?text=${encodeURIComponent(WA_PREFILL)}`;
   const socials = [
     { icon: Instagram, label: "@creativecaricatureclub", href: "https://instagram.com/creativecaricatureclub", color: "from-rose-400 to-rose-500" },
-    { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/918369594271", color: "from-emerald-400 to-emerald-500" },
+    { icon: MessageCircle, label: "WhatsApp", href: WA_HREF, color: "from-emerald-400 to-emerald-500" },
     { icon: Youtube, label: "YouTube", href: "https://youtube.com/@creativecaricatureclub", color: "from-red-400 to-red-500" },
     { icon: Facebook, label: "Facebook", href: "https://facebook.com/creativecaricatureclub", color: "from-blue-400 to-blue-500" },
     { icon: Mail, label: "creativecaricatureclub@gmail.com", href: "mailto:creativecaricatureclub@gmail.com", color: "from-amber-400 to-amber-500" },
@@ -69,7 +71,7 @@ const Support = () => {
                 <h2 className="font-calligraphy text-3xl font-bold text-3d">Message Sent!</h2>
                 <p className="text-sm text-muted-foreground font-body">We'll get back to you as soon as possible.</p>
                 <div className="flex flex-col gap-2 pt-4">
-                  <Button onClick={() => window.open("https://wa.me/918369594271", "_blank")} className="w-full font-body bg-emerald-500 hover:bg-emerald-600 text-white btn-3d rounded-full h-12">
+                  <Button onClick={() => window.open(WA_HREF, "_blank")} className="w-full font-body bg-emerald-500 hover:bg-emerald-600 text-white btn-3d rounded-full h-12">
                     <MessageCircle className="w-4 h-4 mr-2" /> Chat on WhatsApp
                   </Button>
                   <Button variant="outline" onClick={() => navigate("/")} className="font-body rounded-full">
