@@ -488,9 +488,9 @@ const Index = () => {
             stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
-                  <div className="text-center mb-7 sm:mb-10">
-                    <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
+                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
+                  <div className="text-center mb-5 sm:mb-7">
+                    <div className="chip-violet mb-3"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                       See the <span className="text-gradient-violet">experience live</span>
                     </h2>
