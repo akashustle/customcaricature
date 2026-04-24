@@ -127,6 +127,7 @@ const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
 const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
 const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
+const EditRequestsInbox = lazy(() => import("@/components/admin/EditRequestsInbox"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -2001,6 +2002,12 @@ const Admin = () => {
 
           <TabsContent value="reviews">
             <AdminReviews />
+          </TabsContent>
+
+          <TabsContent value="edit-requests">
+            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+              <EditRequestsInbox scope="profile" adminName={adminProfile?.full_name || "Admin"} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="voice">
