@@ -1,19 +1,40 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X, CreditCard, MapPin, Key, Camera, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X,
+  CreditCard, MapPin, Key, Camera, Loader2, BadgeCheck, ShieldCheck,
+  Sparkles, Globe, ChevronRight, ArrowRight,
+} from "lucide-react";
+import { getStates, getCities } from "@/lib/india-locations";
+
+/**
+ * Premium colourful 3D Workshop Profile Card.
+ * Inspired by ivory paper / coral / sage / soft gold palette from the user's
+ * reference image. All colours are HSL semantic-friendly so they look great
+ * in both dark + light modes, and they don't override the global theme.
+ */
+
+const COUNTRIES = ["India", "USA", "UK", "UAE", "Canada", "Australia", "Singapore", "Germany", "Other"];
 
 const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifySubmitting, setVerifySubmitting] = useState(false);
+  const [verifyStage, setVerifyStage] = useState<"idle" | "loading" | "longer">("idle");
   const fileRef = useRef<HTMLInputElement>(null);
   const [profileData, setProfileData] = useState<any>(user);
+
   const [form, setForm] = useState({
     name: user.name || "",
     email: user.email || "",
@@ -23,7 +44,13 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
     occupation: user.occupation || "",
     gender: user.gender || "",
     why_join: user.why_join || "",
+    country: user.country || "India",
+    state: user.state || "",
+    city: user.city || "",
   });
+  const [cityMode, setCityMode] = useState<"select" | "manual">(
+    user.city && user.state && getCities(user.state, user.city).length > 0 ? "select" : "manual"
+  );
 
   useEffect(() => {
     setProfileData(user);
@@ -36,16 +63,17 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
       occupation: user.occupation || "",
       gender: user.gender || "",
       why_join: user.why_join || "",
+      country: user.country || "India",
+      state: user.state || "",
+      city: user.city || "",
     });
   }, [user]);
 
-  const dm = darkMode;
-  const cardBg = dm ? "bg-card/80 border-border" : "bg-card border-border";
-  const textPrimary = dm ? "text-foreground font-bold" : "text-foreground font-bold";
-  const textMuted = dm ? "text-muted-foreground" : "text-muted-foreground";
-  const itemBg = dm ? "bg-muted/30 border-border" : "bg-muted/20 border-border";
-  const iconBg = dm ? "bg-primary/20" : "bg-primary/15";
-  const inputClass = dm ? "bg-background border-border text-foreground" : "bg-background border-border";
+  const states = useMemo(() => getStates(), []);
+  const citiesForState = useMemo(
+    () => (form.state && form.country === "India" ? getCities(form.state, "") : []),
+    [form.state, form.country]
+  );
 
   const callUpdate = async (extra: Record<string, any>) => {
     const payload = {
@@ -78,14 +106,7 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       const url = pub.publicUrl;
 
-      const { data, error } = await callUpdate({
-        name: form.name, email: form.email || null, mobile: form.mobile,
-        instagram_id: form.instagram_id || null,
-        age: form.age ? parseInt(form.age, 10) : null,
-        occupation: form.occupation || null, gender: form.gender || null,
-        why_join: form.why_join || null,
-        avatar_url: url,
-      });
+      const { data, error } = await callUpdate({ avatar_url: url });
       if (error || !data?.success) throw new Error(data?.error || error?.message || "Upload failed");
       applyUpdated(data.user || { ...profileData, avatar_url: url });
       toast({ title: "✅ Photo updated" });
@@ -97,6 +118,12 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
   };
 
   const handleSave = async () => {
+    if (form.country === "India" && (!form.state || !form.city)) {
+      toast({ title: "Please add your State and City", variant: "destructive" }); return;
+    }
+    if (form.country !== "India" && !form.city) {
+      toast({ title: "Please add your City", variant: "destructive" }); return;
+    }
     setSaving(true);
     const { data, error } = await callUpdate({
       name: form.name,
@@ -107,6 +134,9 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
       occupation: form.occupation || null,
       gender: form.gender || null,
       why_join: form.why_join || null,
+      country: form.country || "India",
+      state: form.country === "India" ? (form.state || null) : (form.state || null),
+      city: form.city || null,
     });
     if (error || !data?.success) {
       toast({ title: "Error updating profile", description: data?.error || error?.message || "Please try again.", variant: "destructive" });
@@ -119,7 +149,47 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
     setSaving(false);
   };
 
-  const details = [
+  // Verification flow
+  const completeness = (() => {
+    const fields = [profileData.name, profileData.email, profileData.mobile, profileData.age, profileData.occupation, profileData.country, profileData.city, profileData.gender, profileData.instagram_id, profileData.why_join, profileData.avatar_url];
+    const filled = fields.filter(Boolean).length;
+    return Math.round((filled / fields.length) * 100);
+  })();
+
+  const handleSubmitVerification = async () => {
+    if (completeness < 80) {
+      toast({ title: "Profile not complete", description: "Please complete at least 80% of your profile (avatar, mobile, city, occupation, etc.).", variant: "destructive" });
+      return;
+    }
+    setVerifySubmitting(true);
+    setVerifyStage("loading");
+    try {
+      const { data, error } = await callUpdate({
+        verification_status: "pending",
+        verification_submitted_at: new Date().toISOString(),
+      });
+      if (error || !data?.success) throw new Error(data?.error || error?.message);
+      applyUpdated(data.user || { ...profileData, verification_status: "pending", verification_submitted_at: new Date().toISOString() });
+
+      // Show 5 sec processing, then "taking longer than expected" message
+      setTimeout(() => {
+        setVerifyStage("longer");
+      }, 5000);
+    } catch (e: any) {
+      toast({ title: "Submit failed", description: e.message, variant: "destructive" });
+      setVerifyStage("idle");
+      setVerifyOpen(false);
+    } finally {
+      setVerifySubmitting(false);
+    }
+  };
+
+  const verificationStatus: string = profileData.verification_status || (profileData.is_verified ? "verified" : "unverified");
+  const isVerified = profileData.is_verified === true || verificationStatus === "verified";
+  const isPending = verificationStatus === "pending";
+
+  // Detail rendering
+  const personalDetails = [
     { icon: User, label: "Name", value: profileData.name, key: "name" },
     { icon: Mail, label: "Email", value: profileData.email, key: "email" },
     { icon: Phone, label: "Mobile", value: profileData.mobile, key: "mobile" },
@@ -127,13 +197,17 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
     { icon: User, label: "Age", value: profileData.age || "—", key: "age" },
     { icon: Briefcase, label: "Occupation", value: profileData.occupation || "—", key: "occupation" },
     { icon: User, label: "Gender", value: profileData.gender || "—", key: "gender" },
-    { icon: User, label: "Why Join", value: profileData.why_join || "—", key: "why_join" },
+    { icon: Sparkles, label: "Why Join", value: profileData.why_join || "—", key: "why_join" },
+  ];
+
+  const locationDetails = [
+    { icon: Globe, label: "Country", value: profileData.country || "India" },
+    { icon: MapPin, label: "State", value: profileData.state || "—" },
+    { icon: MapPin, label: "City", value: profileData.city || "—" },
   ];
 
   const readOnlyDetails = [
-    {
-      icon: Calendar,
-      label: "Workshop Date",
+    { icon: Calendar, label: "Workshop Date",
       value: profileData.workshop_date
         ? new Date(profileData.workshop_date + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
         : "—",
@@ -141,7 +215,6 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
     { icon: Clock, label: "Slot",
       value: profileData.slot === "12pm-3pm" ? "12:00 PM – 3:00 PM" : profileData.slot === "6pm-9pm" ? "6:00 PM – 9:00 PM" : profileData.slot,
     },
-    { icon: MapPin, label: "Location", value: [profileData.city, profileData.state, profileData.country].filter(Boolean).join(", ") || "—" },
     { icon: Key, label: "Secret Code", value: profileData.secret_code || "—" },
   ];
 
@@ -152,108 +225,519 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
 
   const initials = (profileData.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
 
-  return (
-    <div className={`backdrop-blur-xl ${cardBg} border rounded-3xl p-5 shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.25)]`}>
-      {/* Avatar header */}
-      <div className="flex items-center gap-4 mb-5">
-        <div className="relative">
-          <Avatar className="w-20 h-20 border-2 border-primary/40 shadow-lg">
-            <AvatarImage src={profileData.avatar_url || undefined} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-primary-foreground text-2xl font-bold">{initials}</AvatarFallback>
-          </Avatar>
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:scale-110 transition"
-            aria-label="Change profile photo"
-          >
-            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
-          </button>
-          <input
-            ref={fileRef} type="file" accept="image/*" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 className={`${textPrimary} text-xl truncate`}>{profileData.name || "Workshop Student"}</h2>
-          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] mt-1">
-            {profileData.student_type === "registered_online" ? "Online Student" : "Workshop Student"}
-          </Badge>
-        </div>
-        {!editing && (
-          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className={`${textMuted} text-xs rounded-xl`}>
-            <Edit2 className="w-3 h-3 mr-1" /> Edit
-          </Button>
-        )}
-      </div>
+  // Palette tokens (inspired by reference: ivory, coral, sage, gold)
+  const palette = {
+    ivory: "hsl(38 60% 96%)",
+    coral: "hsl(8 78% 70%)",
+    gold: "hsl(36 78% 60%)",
+    sage: "hsl(150 30% 65%)",
+    plum: "hsl(335 45% 55%)",
+    sky: "hsl(200 70% 70%)",
+  };
 
-      {editing ? (
-        <div className="space-y-3">
-          {details.map((d) => (
-            <div key={d.key}>
-              <Label className={`${textMuted} text-xs`}>{d.label}</Label>
-              <Input
-                value={(form as any)[d.key] || ""}
-                onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
-                className={inputClass}
-                type={d.key === "age" ? "number" : "text"}
-                maxLength={d.key === "mobile" ? 10 : undefined}
-              />
+  return (
+    <div className="space-y-5">
+      {/* ============== HERO PROFILE CARD ============== */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, rotateX: -5 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        transition={{ duration: 0.6, type: "spring" }}
+        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]"
+        style={{
+          background: darkMode
+            ? `linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.8) 100%)`
+            : `linear-gradient(135deg, ${palette.ivory} 0%, hsl(38 50% 92%) 50%, hsl(38 55% 88%) 100%)`,
+          borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* 3D ambient orbs */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${palette.coral}, transparent 70%)` }} />
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl opacity-30 pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${palette.sage}, transparent 70%)` }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${palette.gold}, transparent 70%)` }} />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-5">
+          {/* Avatar */}
+          <motion.div className="relative" whileHover={{ scale: 1.05, rotate: 2 }}>
+            <div className="absolute -inset-2 rounded-full blur-md opacity-70"
+              style={{ background: `conic-gradient(from 0deg, ${palette.coral}, ${palette.gold}, ${palette.sage}, ${palette.plum}, ${palette.coral})` }} />
+            <Avatar className="relative w-28 h-28 md:w-32 md:h-32 border-4 shadow-2xl"
+              style={{ borderColor: palette.ivory }}>
+              <AvatarImage src={profileData.avatar_url || undefined} className="object-cover" />
+              <AvatarFallback className="text-3xl md:text-4xl font-bold text-white"
+                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
+              style={{ background: palette.coral, borderColor: palette.ivory, color: "white" }}
+              aria-label="Change profile photo"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
+          </motion.div>
+
+          {/* Identity */}
+          <div className="flex-1 min-w-0 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight"
+                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
+                {profileData.name || "Workshop Student"}
+              </h2>
+              {isVerified && (
+                <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring" }}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-lg"
+                  style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}
+                  title="Verified student">
+                  <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} fill="currentColor" />
+                </motion.div>
+              )}
             </div>
-          ))}
-          {readOnlyDetails.map((d) => (
-            <div key={d.label}>
-              <Label className={`${textMuted} text-xs`}>{d.label} (cannot be changed)</Label>
-              <Input value={d.value} disabled className={`${inputClass} opacity-60`} />
+
+            <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
+              <Badge className="text-[10px] font-semibold border-0"
+                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 60% 35%)" }}>
+                {profileData.student_type === "registered_online" ? "🎨 Online Student" : "🎨 Workshop Student"}
+              </Badge>
+              {profileData.roll_number && (
+                <Badge className="text-[10px] font-semibold border-0"
+                  style={{ background: `${palette.plum}30`, color: darkMode ? palette.plum : "hsl(335 45% 35%)" }}>
+                  Roll #{profileData.roll_number}
+                </Badge>
+              )}
+              {profileData.skill_level && (
+                <Badge className="text-[10px] font-semibold border-0"
+                  style={{ background: `${palette.sage}30`, color: darkMode ? palette.sage : "hsl(150 35% 25%)" }}>
+                  {profileData.skill_level}
+                </Badge>
+              )}
             </div>
-          ))}
-          <div className="flex gap-2 pt-2">
-            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl">
-              <Save className="w-4 h-4 mr-1" /> {saving ? "Saving..." : "Save"}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setEditing(false)} className={`${textMuted} rounded-xl`}>
-              <X className="w-4 h-4 mr-1" /> Cancel
-            </Button>
+
+            <p className="text-xs md:text-sm mt-2 opacity-80"
+              style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 20% 30%)" }}>
+              {profileData.email || profileData.mobile} • {profileData.city || "City not set"}, {profileData.country || "India"}
+            </p>
+
+            {/* Profile completeness ring */}
+            <div className="mt-3 flex items-center gap-2">
+              <div className="flex-1 h-2 rounded-full overflow-hidden"
+                style={{ background: darkMode ? "hsl(var(--muted))" : "hsl(38 30% 80%)" }}>
+                <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} transition={{ duration: 1 }}
+                  className="h-full rounded-full"
+                  style={{ background: `linear-gradient(90deg, ${palette.coral}, ${palette.gold}, ${palette.sage})` }} />
+              </div>
+              <span className="text-xs font-bold"
+                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 30%)" }}>
+                {completeness}%
+              </span>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[...details.map((d) => ({ ...d, value: d.value })), ...readOnlyDetails].map((d) => (
-            <div key={d.label} className={`flex items-center gap-3 p-3 rounded-xl ${itemBg} border shadow-sm`}>
-              <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0 shadow-inner`}>
-                <d.icon className="w-4 h-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className={`text-[10px] ${textMuted} uppercase tracking-wider`}>{d.label}</p>
-                <p className={`${textPrimary} text-sm truncate`}>{d.value}</p>
-              </div>
+
+          {/* Action buttons */}
+          {!editing && (
+            <div className="flex md:flex-col gap-2">
+              <Button size="sm" onClick={() => setEditing(true)}
+                className="rounded-full font-semibold shadow-md text-white border-0"
+                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
+                <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit
+              </Button>
             </div>
-          ))}
+          )}
         </div>
+      </motion.div>
+
+      {/* ============== VERIFICATION CARD ============== */}
+      {!isVerified && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.2)]"
+          style={{
+            background: darkMode
+              ? `linear-gradient(135deg, hsl(220 30% 12%), hsl(220 25% 18%))`
+              : `linear-gradient(135deg, hsl(200 70% 95%), hsl(200 60% 90%))`,
+            borderColor: palette.sky,
+          }}>
+          <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none"
+            style={{ background: palette.sky }} />
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
+              style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}>
+              <ShieldCheck className="w-7 h-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-base md:text-lg flex items-center gap-2"
+                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(220 50% 25%)" }}>
+                Become a Verified Student <BadgeCheck className="w-5 h-5" style={{ color: palette.sky }} />
+              </h3>
+              <p className="text-xs md:text-sm mt-0.5"
+                style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 35%)" }}>
+                {isPending
+                  ? "Your verification is under review. We'll notify you once approved."
+                  : "Complete your profile and submit for verification to get a blue tick on your profile."}
+              </p>
+            </div>
+            {isPending ? (
+              <Badge className="text-xs font-bold border-0 px-3 py-1.5"
+                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 60% 30%)" }}>
+                <Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Pending Review
+              </Badge>
+            ) : (
+              <Button onClick={() => setVerifyOpen(true)} size="sm"
+                className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0"
+                style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
+                Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              </Button>
+            )}
+          </div>
+        </motion.div>
       )}
 
-      {/* Payment Details Section */}
-      <div className="mt-6 pt-4 border-t border-border">
-        <h3 className={`${textPrimary} text-base mb-3`}>💳 Payment Details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {paymentInfo.map((d) => (
-            <div key={d.label} className={`flex items-center gap-3 p-3 rounded-xl ${itemBg} border shadow-sm`}>
-              <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0 shadow-inner`}>
-                <d.icon className="w-4 h-4 text-primary" />
+      {/* ============== EDIT FORM ============== */}
+      {editing && (
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+          className="rounded-[24px] p-5 border-2 shadow-lg"
+          style={{
+            background: darkMode ? "hsl(var(--card))" : palette.ivory,
+            borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+          }}>
+          <h3 className="font-bold text-lg mb-4" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
+            ✏️ Edit Profile
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {personalDetails.map((d) => (
+              <div key={d.key} className={d.key === "why_join" ? "md:col-span-2" : ""}>
+                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                  {d.label}
+                </Label>
+                {d.key === "why_join" ? (
+                  <Textarea value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    rows={2} className="mt-1 rounded-xl" />
+                ) : d.key === "gender" ? (
+                  <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                      <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    className="mt-1 rounded-xl" type={d.key === "age" ? "number" : "text"} maxLength={d.key === "mobile" ? 10 : undefined} />
+                )}
               </div>
-              <div className="min-w-0">
-                <p className={`text-[10px] ${textMuted} uppercase tracking-wider`}>{d.label}</p>
-                <p className={`${textPrimary} text-sm truncate`}>{d.value}</p>
-              </div>
+            ))}
+
+            {/* Country / State / City */}
+            <div>
+              <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                Country
+              </Label>
+              <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
+                <SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
-          ))}
-        </div>
-        {profileData.payment_status === "pending" && (
-          <p className={`text-xs ${textMuted} mt-2`}>Payment status will be updated once confirmed by admin.</p>
+
+            {form.country === "India" ? (
+              <>
+                <div>
+                  <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                    State *
+                  </Label>
+                  <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
+                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectContent>{states.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                      City *
+                    </Label>
+                    <button type="button" onClick={() => setCityMode(cityMode === "select" ? "manual" : "select")}
+                      className="text-[10px] font-bold underline" style={{ color: palette.coral }}>
+                      {cityMode === "select" ? "Type manually" : "Choose from list"}
+                    </button>
+                  </div>
+                  {cityMode === "select" && form.state && citiesForState.length > 0 ? (
+                    <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
+                      <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select city" /></SelectTrigger>
+                      <SelectContent>{citiesForState.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                    </Select>
+                  ) : (
+                    <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      placeholder="Type your city" className="mt-1 rounded-xl" />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="md:col-span-2">
+                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                  City *
+                </Label>
+                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="Your city" className="mt-1 rounded-xl" />
+              </div>
+            )}
+
+            {readOnlyDetails.map((d) => (
+              <div key={d.label}>
+                <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                  {d.label} (locked)
+                </Label>
+                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60" />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2 pt-4 mt-4 border-t" style={{ borderColor: darkMode ? "hsl(var(--border))" : `${palette.gold}40` }}>
+            <Button onClick={handleSave} disabled={saving} className="rounded-full font-bold text-white border-0 shadow-md"
+              style={{ background: `linear-gradient(135deg, ${palette.sage}, hsl(150 40% 45%))` }}>
+              <Save className="w-4 h-4 mr-1.5" /> {saving ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button variant="ghost" onClick={() => setEditing(false)} className="rounded-full">
+              <X className="w-4 h-4 mr-1.5" /> Cancel
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ============== PERSONAL INFO GRID ============== */}
+      {!editing && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          style={{
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(8 60% 96%), hsl(8 50% 92%))`,
+            borderColor: darkMode ? "hsl(var(--border))" : palette.coral,
+          }}>
+          <h3 className="font-bold text-base mb-3 flex items-center gap-2"
+            style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(8 50% 30%)" }}>
+            <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm"
+              style={{ background: palette.coral }}>👤</span>
+            Personal Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            {personalDetails.map((d, i) => (
+              <DetailItem key={d.label} icon={d.icon} label={d.label} value={d.value} darkMode={darkMode}
+                color={[palette.coral, palette.gold, palette.sage, palette.plum, palette.sky][i % 5]} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ============== LOCATION CARD ============== */}
+      {!editing && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          style={{
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(150 40% 96%), hsl(150 35% 91%))`,
+            borderColor: darkMode ? "hsl(var(--border))" : palette.sage,
+          }}>
+          <h3 className="font-bold text-base mb-3 flex items-center gap-2"
+            style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(150 40% 25%)" }}>
+            <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm"
+              style={{ background: palette.sage }}>🌍</span>
+            Location
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            {locationDetails.map((d, i) => (
+              <DetailItem key={d.label} icon={d.icon} label={d.label} value={d.value} darkMode={darkMode}
+                color={[palette.sage, palette.sky, palette.gold][i]} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ============== WORKSHOP DETAILS CARD ============== */}
+      {!editing && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          style={{
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(36 60% 96%), hsl(36 55% 90%))`,
+            borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+          }}>
+          <h3 className="font-bold text-base mb-3 flex items-center gap-2"
+            style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(30 50% 25%)" }}>
+            <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm"
+              style={{ background: palette.gold }}>🎨</span>
+            Workshop Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            {readOnlyDetails.map((d, i) => (
+              <DetailItem key={d.label} icon={d.icon} label={d.label} value={d.value} darkMode={darkMode}
+                color={[palette.gold, palette.coral, palette.plum][i]} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ============== PAYMENT CARD ============== */}
+      {!editing && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          style={{
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(335 40% 96%), hsl(335 35% 91%))`,
+            borderColor: darkMode ? "hsl(var(--border))" : palette.plum,
+          }}>
+          <h3 className="font-bold text-base mb-3 flex items-center gap-2"
+            style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(335 40% 25%)" }}>
+            <span className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm"
+              style={{ background: palette.plum }}>💳</span>
+            Payment Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            {paymentInfo.map((d, i) => (
+              <DetailItem key={d.label} icon={d.icon} label={d.label} value={d.value} darkMode={darkMode}
+                color={[palette.plum, palette.coral][i]} />
+            ))}
+          </div>
+          {profileData.payment_status === "pending" && (
+            <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
+              Payment status will be updated once confirmed by admin.
+            </p>
+          )}
+        </motion.div>
+      )}
+
+      {/* ============== VERIFICATION MODAL ============== */}
+      <AnimatePresence>
+        {verifyOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => verifyStage === "idle" && setVerifyOpen(false)}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md rounded-[28px] p-6 shadow-2xl border-2 overflow-hidden"
+              style={{
+                background: darkMode ? "hsl(var(--card))" : palette.ivory,
+                borderColor: palette.sky,
+              }}
+              onClick={(e) => e.stopPropagation()}>
+              <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none"
+                style={{ background: palette.sky }} />
+
+              {verifyStage === "idle" && (
+                <div className="relative z-10 space-y-4">
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto rounded-2xl shadow-lg"
+                    style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}>
+                    <ShieldCheck className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-center"
+                    style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(220 40% 25%)" }}>
+                    Submit for Verification
+                  </h3>
+                  <p className="text-sm text-center"
+                    style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>
+                    By submitting, you confirm all your profile details are accurate. Once approved, you'll get a verified blue tick on your profile.
+                  </p>
+                  <div className="rounded-xl p-3 text-xs space-y-1"
+                    style={{ background: darkMode ? "hsl(var(--muted) / 0.5)" : `${palette.sky}15` }}>
+                    <div className="flex items-center justify-between">
+                      <span style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>Profile completeness</span>
+                      <span className="font-bold" style={{ color: completeness >= 80 ? "hsl(150 60% 35%)" : palette.coral }}>{completeness}%</span>
+                    </div>
+                    {completeness < 80 && (
+                      <p className="text-[11px]" style={{ color: palette.coral }}>
+                        ⚠️ Complete at least 80% (avatar, mobile, city, occupation, etc.)
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button onClick={handleSubmitVerification} disabled={verifySubmitting || completeness < 80}
+                      className="flex-1 rounded-full font-bold text-white border-0 shadow-md"
+                      style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
+                      <ShieldCheck className="w-4 h-4 mr-1.5" /> Submit
+                    </Button>
+                    <Button variant="ghost" onClick={() => setVerifyOpen(false)} className="rounded-full">Cancel</Button>
+                  </div>
+                </div>
+              )}
+
+              {verifyStage === "loading" && (
+                <div className="relative z-10 py-6 text-center space-y-4">
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="w-20 h-20 mx-auto rounded-full border-4 border-transparent shadow-lg"
+                    style={{
+                      borderTopColor: palette.sky,
+                      borderRightColor: palette.coral,
+                      borderBottomColor: palette.gold,
+                      borderLeftColor: palette.sage,
+                    }} />
+                  <div>
+                    <h3 className="text-xl font-bold" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(220 40% 25%)" }}>
+                      Verifying your profile...
+                    </h3>
+                    <p className="text-sm mt-1" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(220 30% 40%)" }}>
+                      Please wait a moment
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {verifyStage === "longer" && (
+                <div className="relative z-10 py-4 text-center space-y-4">
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+                    className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg"
+                    style={{ background: `linear-gradient(135deg, ${palette.gold}, ${palette.coral})` }}>
+                    <Clock className="w-10 h-10 text-white" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-bold" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 40% 25%)" }}>
+                      ⏳ Taking longer than expected
+                    </h3>
+                    <p className="text-sm mt-2" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 35%)" }}>
+                      Your verification request has been received. Our team will review and approve it within <span className="font-bold" style={{ color: palette.coral }}>24 hours</span>.
+                    </p>
+                    <p className="text-xs mt-2 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 45%)" }}>
+                      You'll get a notification once approved. You can keep using the workshop in the meantime.
+                    </p>
+                  </div>
+                  <Button onClick={() => { setVerifyOpen(false); setVerifyStage("idle"); }}
+                    className="w-full rounded-full font-bold text-white border-0 shadow-md"
+                    style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
+                    Got it, thanks! <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
+
+const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
+  <motion.div whileHover={{ scale: 1.02, y: -2 }}
+    className="flex items-center gap-3 p-3 rounded-2xl border shadow-sm transition-all"
+    style={{
+      background: darkMode ? "hsl(var(--muted) / 0.4)" : "hsl(0 0% 100% / 0.7)",
+      borderColor: darkMode ? "hsl(var(--border))" : `${color}40`,
+      backdropFilter: "blur(8px)",
+    }}>
+    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md"
+      style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
+      <Icon className="w-4.5 h-4.5 text-white" />
+    </div>
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] font-bold uppercase tracking-wider"
+        style={{ color: darkMode ? "hsl(var(--muted-foreground))" : `${color}` }}>
+        {label}
+      </p>
+      <p className="text-sm font-bold truncate"
+        style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
+        {value}
+      </p>
+    </div>
+  </motion.div>
+);
 
 export default WorkshopProfile;
