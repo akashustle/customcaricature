@@ -41,7 +41,7 @@ const DEFAULT_FIELDS: Record<string, Partial<FormField>[]> = {
     { field_key: "instagram_id", label: "Instagram ID", field_type: "text", placeholder: "@yourhandle", is_required: false },
     { field_key: "city", label: "City", field_type: "text", placeholder: "Your city", is_required: false },
     { field_key: "state", label: "State", field_type: "select", placeholder: "Select state", is_required: false },
-    { field_key: "gender", label: "Gender", field_type: "select", placeholder: "Select gender", is_required: false, options: { items: ["Male", "Female", "Other"] } },
+    { field_key: "gender", label: "Gender", field_type: "select", placeholder: "Select gender", is_required: false, options: { items: ["Male", "Female"] } },
     { field_key: "age", label: "Age", field_type: "number", placeholder: "Your age", is_required: false },
   ],
   enquiry: [
