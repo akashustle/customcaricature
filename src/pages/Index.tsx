@@ -507,11 +507,11 @@ const Index = () => {
                 </div>
               </section>
             ),
-            services: <Services key="services" onBook={onBook} />,
-            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} />,
-            why: <WhyUnique key="why" />,
-            reviews: <Reviews key="reviews" />,
-            faqs: <FAQs key="faqs" />,
+            services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} />,
+            why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
+            reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
+            faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
           };
           return order.map(id => sections[id]).filter(Boolean);
         })()}
