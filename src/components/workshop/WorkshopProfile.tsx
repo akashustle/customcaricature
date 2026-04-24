@@ -435,15 +435,21 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {personalDetails.map((d) => (
               <div key={d.key} className={d.key === "why_join" ? "md:col-span-2" : ""}>
-                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                <Label className="text-xs font-semibold text-slate-600">
                   {d.label}
                 </Label>
                 {d.key === "why_join" ? (
-                  <Textarea value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
-                    rows={2} className="mt-1 rounded-xl" />
+                  <Textarea
+                    value={(form as any)[d.key] || ""}
+                    onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    rows={2}
+                    className="mt-1 rounded-xl shadow-none bg-white"
+                  />
                 ) : d.key === "gender" ? (
                   <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Male">Male</SelectItem>
                       <SelectItem value="Female">Female</SelectItem>
@@ -452,8 +458,14 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Input value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
-                    className="mt-1 rounded-xl" type={d.key === "age" ? "number" : "text"} maxLength={d.key === "mobile" ? 10 : undefined} />
+                  <IconInput
+                    icon={d.icon}
+                    value={(form as any)[d.key] || ""}
+                    onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    type={d.key === "age" ? "number" : "text"}
+                    maxLength={d.key === "mobile" ? 10 : undefined}
+                    placeholder={d.label}
+                  />
                 )}
               </div>
             ))}
