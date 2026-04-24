@@ -760,6 +760,28 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   );
 };
 
+const IconInput = ({
+  icon: Icon,
+  className = "",
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { icon: any }) => (
+  <div className="relative mt-1">
+    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+    <input
+      {...props}
+      className={
+        "flex h-11 w-full rounded-xl border border-slate-200 bg-white text-slate-900 " +
+        "pl-10 pr-3 py-2 text-sm placeholder:text-slate-400 " +
+        "focus-visible:outline-none focus-visible:border-primary " +
+        "focus-visible:shadow-[0_0_0_4px_hsl(var(--primary)/0.12)] " +
+        "transition-[box-shadow,border-color] duration-200 " +
+        "disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-slate-50 " +
+        className
+      }
+    />
+  </div>
+);
+
 const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
   <motion.div whileHover={{ scale: 1.02, y: -2 }}
     className="flex items-center gap-3 p-3 rounded-2xl border shadow-sm transition-all"
@@ -773,12 +795,10 @@ const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
       <Icon className="w-4.5 h-4.5 text-white" />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] font-bold uppercase tracking-wider"
-        style={{ color: darkMode ? "hsl(var(--muted-foreground))" : `${color}` }}>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
         {label}
       </p>
-      <p className="text-sm font-bold truncate"
-        style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
+      <p className="text-sm font-bold truncate text-slate-900">
         {value}
       </p>
     </div>
