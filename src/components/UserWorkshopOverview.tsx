@@ -36,13 +36,9 @@ const UserWorkshopOverview = ({ authUserId }: Props) => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data: wsUsers } = await supabase
-        .from("workshop_users" as any)
-        .select("*")
-        .eq("auth_user_id" as any, authUserId)
-        .order("workshop_date", { ascending: false })
-        .limit(1);
-      const wsUser: any = wsUsers?.[0];
+      const q: any = supabase.from("workshop_users" as any).select("*");
+      const { data: wsUsers } = await q.eq("auth_user_id", authUserId).order("workshop_date", { ascending: false }).limit(1);
+      const wsUser: any = (wsUsers as any)?.[0];
       setWs(wsUser || null);
 
       if (wsUser?.id) {
