@@ -50,6 +50,7 @@ type SiteSettings = {
   floating_instagram: { enabled: boolean };
   floating_instagram_mobile: { enabled: boolean };
   floating_dark_toggle: { enabled: boolean };
+  disable_right_click: { enabled: boolean };
 };
 
 const defaults: SiteSettings = {
@@ -95,6 +96,7 @@ const defaults: SiteSettings = {
   floating_instagram: { enabled: false },
   floating_instagram_mobile: { enabled: false },
   floating_dark_toggle: { enabled: false },
+  disable_right_click: { enabled: false },
 };
 
 // Module-level cache so all instances share one fetch result
