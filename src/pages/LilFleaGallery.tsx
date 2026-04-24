@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 
 const LilFleaGallery = () => {
   const [images, setImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const userInteractingRef = useRef(false);
+  const userInteractTimeoutRef = useRef<number | null>(null);
 
   const fetchImages = useCallback(async () => {
     const { data } = await supabase.from("lil_flea_gallery").select("*").order("sort_order");
@@ -15,35 +18,62 @@ const LilFleaGallery = () => {
 
   useEffect(() => {
     fetchImages();
-
     const channel = supabase
       .channel("lil-flea-gallery-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_gallery" }, () => {
-        fetchImages();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "lil_flea_gallery" }, () => fetchImages())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [fetchImages]);
 
-  // Infinite upward auto-scroll — fast & smooth via RAF
+  // Infinite UPWARD auto-scroll, but pause when user manually scrolls / drags.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || images.length === 0) return;
-    let raf: number;
-    const speed = 1.5;
-    const scroll = () => {
-      el.scrollTop += speed;
-      if (el.scrollTop >= el.scrollHeight / 2) {
-        el.scrollTop = 0;
-      }
-      raf = requestAnimationFrame(scroll);
+
+    // Start in the middle so we can scroll both directions seamlessly.
+    const initToMiddle = () => {
+      const half = el.scrollHeight / 2;
+      if (half > 0) el.scrollTop = half;
     };
-    raf = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(raf);
-  }, [images]);
+    initToMiddle();
+    // Re-init after images render
+    const t = setTimeout(initToMiddle, 200);
+
+    let raf: number;
+    const speed = 1.6; // px/frame upward — slightly fast
+    const tick = () => {
+      if (autoScroll && !userInteractingRef.current && el) {
+        el.scrollTop -= speed;
+        if (el.scrollTop <= 0) {
+          el.scrollTop = el.scrollHeight / 2;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const handleUserScroll = () => {
+      userInteractingRef.current = true;
+      if (userInteractTimeoutRef.current) window.clearTimeout(userInteractTimeoutRef.current);
+      userInteractTimeoutRef.current = window.setTimeout(() => {
+        userInteractingRef.current = false;
+      }, 1500);
+      // Wrap around if user drags to extremes
+      if (el.scrollTop <= 0) el.scrollTop = el.scrollHeight / 2;
+      else if (el.scrollTop >= el.scrollHeight - el.clientHeight) el.scrollTop = el.scrollHeight / 2;
+    };
+
+    el.addEventListener("wheel", handleUserScroll, { passive: true });
+    el.addEventListener("touchmove", handleUserScroll, { passive: true });
+    el.addEventListener("scroll", handleUserScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t);
+      el.removeEventListener("wheel", handleUserScroll);
+      el.removeEventListener("touchmove", handleUserScroll);
+      el.removeEventListener("scroll", handleUserScroll);
+    };
+  }, [images, autoScroll]);
 
   // Keyboard nav for lightbox
   useEffect(() => {
@@ -58,7 +88,8 @@ const LilFleaGallery = () => {
   }, [lightboxIdx, images.length]);
 
   const allUrls = images.map(i => i.image_url);
-  const doubled = [...allUrls, ...allUrls];
+  // Triple for seamless wraparound in both directions
+  const tripled = [...allUrls, ...allUrls, ...allUrls];
 
   return (
     <>
@@ -77,10 +108,20 @@ const LilFleaGallery = () => {
               </div>
               <div>
                 <h1 className="text-base font-black text-foreground">Lil Flea Gallery</h1>
-                <p className="text-xs text-muted-foreground">{images.length} Images</p>
+                <p className="text-xs text-muted-foreground">{images.length} Images · scroll up or down</p>
               </div>
             </div>
-            <a href="/lil-flea" className="text-sm font-semibold text-accent hover:underline">← Back</a>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setAutoScroll(s => !s)}
+                className="text-[11px] font-semibold flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 hover:bg-muted/70 transition"
+                aria-label={autoScroll ? "Pause auto-scroll" : "Play auto-scroll"}
+              >
+                {autoScroll ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                {autoScroll ? "Pause" : "Auto"}
+              </button>
+              <a href="/lil-flea" className="text-sm font-semibold text-accent hover:underline">← Back</a>
+            </div>
           </div>
         </div>
 
@@ -99,19 +140,23 @@ const LilFleaGallery = () => {
             </a>
           </div>
         ) : (
-          /* Infinite scroll container */
-          <div ref={scrollRef} className="h-[calc(100vh-57px)] overflow-hidden">
+          /* Infinite scroll container — vertical, both directions */
+          <div
+            ref={scrollRef}
+            className="overflow-y-auto scrollbar-hide overscroll-contain"
+            style={{ height: "calc(100vh - 65px)" }}
+          >
             <div className="columns-2 sm:columns-3 md:columns-4 gap-2 p-3">
-              {doubled.map((url, i) => (
+              {tripled.map((url, i) => (
                 <div
                   key={`${url}-${i}`}
-                  className="break-inside-avoid mb-2 cursor-pointer rounded-lg overflow-hidden shadow-sm border border-border/30 hover:shadow-md transition-shadow"
+                  className="break-inside-avoid mb-2 cursor-pointer rounded-lg overflow-hidden shadow-sm border border-border/30 hover:shadow-md transition-shadow active:scale-[0.98]"
                   onClick={() => setLightboxIdx(i % allUrls.length)}
                 >
                   <img
                     src={url}
                     alt={`Lil Flea photo ${(i % allUrls.length) + 1}`}
-                    className="w-full object-cover"
+                    className="w-full object-cover pointer-events-none"
                     loading={i < 12 ? "eager" : "lazy"}
                   />
                 </div>
@@ -124,20 +169,20 @@ const LilFleaGallery = () => {
       {/* Lightbox */}
       {lightboxIdx !== null && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/90 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/90 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setLightboxIdx(null)}
         >
-          <button onClick={() => setLightboxIdx(null)} className="absolute top-4 right-4 z-10 text-background/80 hover:text-background" aria-label="Close"><X className="w-7 h-7" /></button>
+          <button onClick={() => setLightboxIdx(null)} className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/90 hover:bg-background/30" aria-label="Close"><X className="w-6 h-6" /></button>
           <button
             onClick={e => { e.stopPropagation(); setLightboxIdx(i => i !== null ? (i - 1 + allUrls.length) % allUrls.length : 0); }}
-            className="absolute left-3 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/80 hover:bg-background/30"
+            className="absolute left-3 z-10 w-11 h-11 rounded-full bg-background/20 flex items-center justify-center text-background/90 hover:bg-background/30"
             aria-label="Previous"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={e => { e.stopPropagation(); setLightboxIdx(i => i !== null ? (i + 1) % allUrls.length : 0); }}
-            className="absolute right-3 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/80 hover:bg-background/30"
+            className="absolute right-3 z-10 w-11 h-11 rounded-full bg-background/20 flex items-center justify-center text-background/90 hover:bg-background/30"
             aria-label="Next"
           >
             <ChevronRight className="w-6 h-6" />
@@ -146,10 +191,10 @@ const LilFleaGallery = () => {
             key={lightboxIdx}
             src={allUrls[lightboxIdx]}
             alt="Gallery preview"
-            className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl"
+            className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
           />
-          <p className="absolute bottom-5 text-sm text-background/50 font-semibold">{lightboxIdx + 1} / {allUrls.length}</p>
+          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-background/70 font-semibold bg-foreground/30 px-3 py-1 rounded-full">{lightboxIdx + 1} / {allUrls.length}</p>
         </div>
       )}
     </>
