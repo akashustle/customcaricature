@@ -1712,6 +1712,16 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                       />
                     )}
 
+                    {/* Post-Event Balance Popup — permanent until paid/approved */}
+                    {userId && ev.status === "completed" && remaining > 0 && !fullyPaid && (
+                      <PostEventBalancePopup
+                        event={ev}
+                        userId={userId}
+                        remaining={remaining}
+                        onPaid={() => fetchEvents(userId)}
+                      />
+                    )}
+
                     {/* Pay partial 2 to complete advance - ONLY if PaymentStatusTracker not handling it */}
 
                     {/* Pay remaining balance button with preview */}
