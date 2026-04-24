@@ -224,6 +224,7 @@ const AdminHomepageControl = () => {
           <TabsTrigger value="help" className="text-xs">Smart Help</TabsTrigger>
           <TabsTrigger value="sticky" className="text-xs">Sticky CTA</TabsTrigger>
           <TabsTrigger value="home_order" className="text-xs">Home Order</TabsTrigger>
+          <TabsTrigger value="faqs" className="text-xs">FAQs</TabsTrigger>
           <TabsTrigger value="footer" className="text-xs">Footer</TabsTrigger>
         </TabsList>
 
