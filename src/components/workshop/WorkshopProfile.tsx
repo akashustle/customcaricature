@@ -14,7 +14,7 @@ import {
   CreditCard, MapPin, Key, Camera, Loader2, BadgeCheck, ShieldCheck,
   Sparkles, Globe, ChevronRight, ArrowRight,
 } from "lucide-react";
-import { getStates, getCities } from "@/lib/india-locations";
+import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -48,9 +48,7 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
     state: user.state || "",
     city: user.city || "",
   });
-  const [cityMode, setCityMode] = useState<"select" | "manual">(
-    user.city && user.state && getCities(user.state, user.city).length > 0 ? "select" : "manual"
-  );
+  const [cityMode, setCityMode] = useState<"select" | "manual">("select");
 
   useEffect(() => {
     setProfileData(user);
@@ -70,10 +68,14 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
   }, [user]);
 
   const states = useMemo(() => getStates(), []);
-  const citiesForState = useMemo(
-    () => (form.state && form.country === "India" ? getCities(form.state, "") : []),
-    [form.state, form.country]
-  );
+  // Flatten all cities for the chosen state across districts (city-only dropdown)
+  const citiesForState = useMemo(() => {
+    if (!form.state || form.country !== "India") return [];
+    const districts = INDIA_LOCATIONS[form.state];
+    if (!districts) return [];
+    const all = Object.values(districts).flat();
+    return Array.from(new Set(all)).sort();
+  }, [form.state, form.country]);
 
   const callUpdate = async (extra: Record<string, any>) => {
     const payload = {
