@@ -22,6 +22,7 @@ import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
+import PostEventBalancePopup from "@/components/PostEventBalancePopup";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 // Lightweight wrapper so it sits inside the dashboard layout
@@ -201,6 +202,8 @@ const Dashboard = () => {
   };
 
   const fetchEvents = async (userId: string) => {
+    // Auto-complete past events whose end time has passed (best-effort)
+    try { await supabase.rpc("auto_complete_past_events" as any); } catch { /* non-fatal */ }
     const { data } = await supabase.from("event_bookings").select("*").eq("user_id", userId).order("event_date", { ascending: false });
     if (data) setEvents(data as any);
   };
@@ -1706,6 +1709,15 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                         advanceAmount={advanceAmount}
                         paymentStatus={ev.payment_status}
                         userId={userId}
+                      />
+                    )}
+
+                    {/* Post-Event Balance Popup — permanent until paid/approved */}
+                    {userId && ev.status === "completed" && remaining > 0 && !fullyPaid && (
+                      <PostEventBalancePopup
+                        event={ev}
+                        userId={userId}
+                        remaining={remaining}
                       />
                     )}
 

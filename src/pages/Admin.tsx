@@ -59,6 +59,7 @@ const AdminCustomerIntlPricing = lazy(() => import("@/components/admin/AdminCust
 const AdminInternationalPricing = lazy(() => import("@/components/admin/AdminInternationalPricing"));
 const AdminPartialAdvanceConfig = lazy(() => import("@/components/admin/AdminPartialAdvanceConfig"));
 const AdminPayments = lazy(() => import("@/components/admin/AdminPayments"));
+const AdminEventPaymentClaims = lazy(() => import("@/components/admin/AdminEventPaymentClaims"));
 const AdminLiveLocations = lazy(() => import("@/components/admin/AdminLiveLocations"));
 const AdminReviews = lazy(() => import("@/components/admin/AdminReviews"));
 const AdminLiveChatLeads = lazy(() => import("@/components/admin/AdminLiveChatLeads"));
@@ -1533,6 +1534,11 @@ const Admin = () => {
           {/* Payments Tab */}
           <TabsContent value="payments">
             <AdminPayments />
+          </TabsContent>
+
+          {/* Post-Event Payment Claims Tab */}
+          <TabsContent value="event-payment-claims">
+            <AdminEventPaymentClaims />
           </TabsContent>
 
           {/* Event Users Tab */}

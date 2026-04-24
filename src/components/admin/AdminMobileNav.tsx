@@ -24,6 +24,7 @@ const PRIMARY_ITEMS = [
   { id: "events", label: "Events", icon: Calendar },
   { id: "reschedule-requests", label: "Reschedules", icon: RefreshCw },
   { id: "payments", label: "Payments", icon: Receipt },
+  { id: "event-payment-claims", label: "Claims", icon: Receipt },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "revenue", label: "Revenue", icon: DollarSign },
   { id: "enquiries", label: "Enquiries", icon: ClipboardList },
