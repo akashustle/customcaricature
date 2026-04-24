@@ -65,7 +65,7 @@ const AccountSwitcherCard = ({ authUserId, fullName, email, mobile }: Props) => 
               {workshopUser?.name || "Your"} workshop dashboard is ready. Switch any time.
             </p>
           </div>
-          <Button onClick={switchToWorkshop} size="sm"
+          <Button onClick={() => { void switchToWorkshop(); }} size="sm"
             className="rounded-full font-semibold shadow-md text-white border-0"
             style={{ background: `linear-gradient(135deg, ${palette.sage}, hsl(150 40% 45%))` }}>
             Switch <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
