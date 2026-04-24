@@ -324,8 +324,9 @@ const WhyUnique = ({ config }: { config?: any }) => {
 
 /* --------------------------------- Reviews ------------------------------- */
 
-const Reviews = () => {
-  const reviews = [
+const Reviews = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const reviews = (c.items && Array.isArray(c.items) && c.items.length) ? c.items : [
     { name: "Naman D.", role: "Wedding · Mumbai", text: "Booked 3 artists for our reception — guests loved their caricatures so much they were the talk of the night!" },
     { name: "Rahul R.", role: "Corporate Event · Delhi", text: "Smooth booking, professional artists, perfect timing. Our team got 200+ caricatures done in 4 hours flawlessly." },
     { name: "Priya S.", role: "Baby Shower · Bengaluru", text: "Such a unique gift idea for guests! Everyone took home their own caricature. Highly recommend." },
@@ -333,11 +334,11 @@ const Reviews = () => {
   return (
     <Section
       id="reviews"
-      eyebrow="Reviews • Reviews"
-      title={<>Hear from <span className="text-gradient-violet">them</span></>}
+      eyebrow={c.eyebrow || "Reviews • Reviews"}
+      title={<>{c.title_pre || "Hear from"} <span className="text-gradient-violet">{c.title_highlight || "them"}</span></>}
     >
       <div className="grid md:grid-cols-3 gap-5">
-        {reviews.map((r, i) => (
+        {reviews.map((r: any, i: number) => (
           <div key={i} className="card-gradient-blob p-5 sm:p-6 flex flex-col">
             <Quote className="w-7 h-7 text-primary/40" />
             <p className="mt-3 text-foreground/80 leading-relaxed text-sm sm:text-base">{r.text}</p>
@@ -357,8 +358,9 @@ const Reviews = () => {
 
 /* --------------------------------- FAQs ---------------------------------- */
 
-const FAQs = () => {
-  const items = [
+const FAQs = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const items = (c.items && Array.isArray(c.items) && c.items.length) ? c.items : [
     { q: "Why should I choose Creative Caricature Club over other studios?", a: "We are India's largest live-caricature network — 12+ years of craft, 800+ events, vetted top artists, transparent flat pricing and a dedicated event manager for every booking." },
     { q: "How far in advance should I book my event?", a: "We recommend 2–4 weeks for weddings and corporate events. For peak season (Nov–Feb) lock your date as early as possible. Last-minute bookings may still be possible based on availability." },
     { q: "Do you travel outside Mumbai or India?", a: "Yes! We serve all major Indian cities and travel worldwide for destination weddings and global corporate events. Contact us for an international quote." },
@@ -368,11 +370,11 @@ const FAQs = () => {
   return (
     <Section
       id="faqs"
-      eyebrow="Help • Help"
-      title={<>Need <span className="text-gradient-violet">help?</span></>}
+      eyebrow={c.eyebrow || "Help • Help"}
+      title={<>{c.title_pre || "Need"} <span className="text-gradient-violet">{c.title_highlight || "help?"}</span></>}
     >
       <div className="divide-y divide-border/60">
-        {items.map((it, i) => (
+        {items.map((it: any, i: number) => (
           <button
             key={i}
             onClick={() => setOpen(open === i ? null : i)}
