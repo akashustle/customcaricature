@@ -5454,6 +5454,7 @@ export type Database = {
           id: string
           instagram_id: string | null
           is_enabled: boolean
+          is_verified: boolean
           mobile: string
           name: string
           occupation: string | null
@@ -5474,6 +5475,11 @@ export type Database = {
           student_type: string
           terms_accepted: boolean | null
           updated_at: string
+          verification_notes: string | null
+          verification_status: string
+          verification_submitted_at: string | null
+          verified_at: string | null
+          verified_by: string | null
           video_access_enabled: boolean
           video_download_allowed: boolean
           why_join: string | null
@@ -5494,6 +5500,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           is_enabled?: boolean
+          is_verified?: boolean
           mobile: string
           name: string
           occupation?: string | null
@@ -5514,6 +5521,11 @@ export type Database = {
           student_type?: string
           terms_accepted?: boolean | null
           updated_at?: string
+          verification_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           video_access_enabled?: boolean
           video_download_allowed?: boolean
           why_join?: string | null
@@ -5534,6 +5546,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           is_enabled?: boolean
+          is_verified?: boolean
           mobile?: string
           name?: string
           occupation?: string | null
@@ -5554,6 +5567,11 @@ export type Database = {
           student_type?: string
           terms_accepted?: boolean | null
           updated_at?: string
+          verification_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
           video_access_enabled?: boolean
           video_download_allowed?: boolean
           why_join?: string | null
