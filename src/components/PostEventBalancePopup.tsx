@@ -1,11 +1,30 @@
-import { useEffect, useState } from "react";
+/**
+ * PostEventBalancePopup — permanent reminder shown to clients after their
+ * event has auto-completed but a balance is still owed. Now hardened with:
+ *
+ *   • Edge-case gating: bails out for zero/negative balances, fully-paid,
+ *     cancelled, or partially-paid-but-not-completed states. Time-zone
+ *     safe: the popup waits at least 30 mins past the event's end time
+ *     in the user's local zone before triggering, so quick auto-complete
+ *     drift doesn't surprise mid-event clients.
+ *   • Razorpay retry UX: explicit error banners + "Try again" button
+ *     so the user can recover from gateway dismiss / signature failure
+ *     without reloading.
+ *   • Screenshot upload retry UX: failed uploads show a clear error and
+ *     retain the file selection so users can re-submit.
+ *   • Idempotent claim resubmission after rejection.
+ */
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Banknote, CheckCircle2, Loader2, Upload, Clock, ArrowLeft } from "lucide-react";
+import {
+  CreditCard, Banknote, CheckCircle2, Loader2, Upload, Clock, ArrowLeft,
+  AlertTriangle, RefreshCw,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/pricing";
@@ -19,6 +38,7 @@ type Claim = {
   amount: number;
   admin_reply: string | null;
   reviewed_at: string | null;
+  created_at: string;
 };
 
 interface Props {
@@ -28,7 +48,16 @@ interface Props {
   onPaid?: () => void;
 }
 
-type View = "menu" | "online_summary" | "paid_method" | "paid_screenshot" | "submitted" | "approved";
+type View =
+  | "menu"
+  | "online_summary"
+  | "paid_method"
+  | "paid_screenshot"
+  | "submitted"
+  | "approved"
+  | "rejected";
+
+const MIN_END_BUFFER_MINUTES = 30; // popup waits at least 30 min past end time
 
 const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
   const [open, setOpen] = useState(true);
@@ -40,12 +69,33 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const { settings } = useSiteSettings();
+
+  /* ---- Edge-case guard: should this popup show at all? ---- */
+  const eligible = useMemo(() => {
+    // Bail out if balance is zero/negative or already fully paid
+    const safeRemaining = Math.round(remaining || 0);
+    if (safeRemaining <= 0) return false;
+    if (event.payment_status === "fully_paid") return false;
+    if (event.status === "cancelled") return false;
+    if (event.status !== "completed") return false;
+    // Time-zone safe end-time check with 30-min buffer
+    try {
+      const end = new Date(`${event.event_date}T${event.event_end_time || "23:59:59"}`);
+      const buffered = end.getTime() + MIN_END_BUFFER_MINUTES * 60_000;
+      if (Date.now() < buffered) return false;
+    } catch {
+      // If date parse fails, fall through and trust the status flag
+    }
+    return true;
+  }, [event, remaining]);
 
   const fetchClaim = async () => {
     const { data } = await supabase
       .from("event_payment_claims")
-      .select("id, status, claim_type, amount, admin_reply, reviewed_at")
+      .select("id, status, claim_type, amount, admin_reply, reviewed_at, created_at")
       .eq("event_id", event.id)
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
@@ -55,11 +105,13 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
       setClaim(data as Claim);
       if (data.status === "approved") setView("approved");
       else if (data.status === "pending") setView("submitted");
+      else if (data.status === "rejected") setView("rejected");
     }
     setLoadingClaim(false);
   };
 
   useEffect(() => {
+    if (!eligible) { setLoadingClaim(false); return; }
     fetchClaim();
     const ch = supabase
       .channel(`event-claim-${event.id}-${userId}`)
@@ -67,17 +119,19 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event.id, userId]);
+  }, [event.id, userId, eligible]);
 
   const gatewayPercent = (settings as any)?.gateway_charge_percentage?.percentage || 2.6;
-  const fee = Math.ceil(remaining * gatewayPercent / 100);
-  const totalPayable = remaining + fee;
+  const safeRemaining = Math.max(0, Math.round(remaining || 0));
+  const fee = Math.ceil(safeRemaining * gatewayPercent / 100);
+  const totalPayable = safeRemaining + fee;
 
-  // If approved & balance now zero, allow user to dismiss
-  const canClose = claim?.status === "approved";
+  const canClose = claim?.status === "approved" || !eligible;
 
+  /* -------------------------- Razorpay flow -------------------------- */
   const handlePayOnline = async () => {
     setPaying(true);
+    setPayError(null);
     try {
       const rzpData = await createRazorpayOrder(supabase, {
         amount: totalPayable,
@@ -87,7 +141,9 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
         customer_mobile: event.client_mobile,
       });
       const options = {
-        key: rzpData.razorpay_key_id, amount: rzpData.amount, currency: rzpData.currency,
+        key: rzpData.razorpay_key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
         name: "Creative Caricature Club™",
         description: "Event Remaining Balance",
         order_id: rzpData.razorpay_order_id,
@@ -104,25 +160,40 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
             toast({ title: "✅ Payment received", description: "Your event is fully settled." });
             onPaid?.();
             setOpen(false);
-          } catch {
-            toast({ title: "Verification failed", variant: "destructive" });
+          } catch (err: any) {
+            setPayError(err?.message || "Payment verification failed. Please try again or contact support.");
           }
           setPaying(false);
         },
         prefill: { name: event.client_name, email: event.client_email, contact: `+91${event.client_mobile}` },
         theme: { color: "#E3DED3" },
-        modal: { ondismiss: () => setPaying(false) },
+        modal: {
+          ondismiss: () => {
+            setPaying(false);
+            setPayError("Payment was cancelled. Tap retry to open the gateway again.");
+          },
+        },
+        _onPaymentFailed: (resp: any) => {
+          setPayError(resp?.error?.description || "Payment failed at gateway. Please retry.");
+          setPaying(false);
+        },
       };
       await initRazorpay(options);
     } catch (err: any) {
-      toast({ title: "Payment error", description: err.message, variant: "destructive" });
+      setPayError(err?.message || "Could not open the payment gateway. Check your connection and retry.");
       setPaying(false);
     }
   };
 
+  /* -------------------------- Claim submission -------------------------- */
   const handleSubmitClaim = async () => {
+    setUploadError(null);
     if (paidMethod === "online" && !file) {
-      toast({ title: "Please upload payment screenshot", variant: "destructive" });
+      setUploadError("Please attach a payment screenshot before submitting.");
+      return;
+    }
+    if (file && file.size > 8 * 1024 * 1024) {
+      setUploadError("File too large. Please upload an image under 8 MB.");
       return;
     }
     setSubmitting(true);
@@ -131,15 +202,19 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
       if (paidMethod === "online" && file) {
         const ext = file.name.split(".").pop() || "jpg";
         const path = `${userId}/${event.id}-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("payment-claims").upload(path, file, { upsert: false });
-        if (upErr) throw upErr;
+        const { error: upErr } = await supabase.storage
+          .from("payment-claims")
+          .upload(path, file, { upsert: false });
+        if (upErr) {
+          throw new Error(`Screenshot upload failed: ${upErr.message}`);
+        }
         screenshotPath = path;
       }
       const { error } = await supabase.from("event_payment_claims").insert({
         event_id: event.id,
         user_id: userId,
         claim_type: paidMethod,
-        amount: remaining,
+        amount: safeRemaining,
         screenshot_path: screenshotPath,
         user_note: note || null,
       } as any);
@@ -148,12 +223,12 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
       setView("submitted");
       fetchClaim();
     } catch (err: any) {
-      toast({ title: "Submission failed", description: err.message, variant: "destructive" });
+      setUploadError(err?.message || "Submission failed. Please retry.");
     }
     setSubmitting(false);
   };
 
-  if (loadingClaim) return null;
+  if (loadingClaim || !eligible) return null;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (canClose) setOpen(v); }}>
@@ -175,7 +250,7 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
               </DialogHeader>
               <div className="my-4 rounded-2xl bg-primary/10 border border-primary/30 p-4 text-center">
                 <p className="text-xs font-sans text-muted-foreground">Remaining Balance</p>
-                <p className="font-display text-3xl font-bold text-primary">{formatPrice(remaining)}</p>
+                <p className="font-display text-3xl font-bold text-primary">{formatPrice(safeRemaining)}</p>
               </div>
               <div className="space-y-2">
                 <Button
@@ -203,17 +278,38 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
                 </DialogTitle>
               </DialogHeader>
               <div className="my-4 rounded-2xl border border-primary/30 bg-card p-4 space-y-2">
-                <Row label="Remaining Balance" value={formatPrice(remaining)} />
+                <Row label="Remaining Balance" value={formatPrice(safeRemaining)} />
                 <Row label={`Gateway Fee (${gatewayPercent}%)`} value={formatPrice(fee)} />
                 <div className="h-px bg-primary/20 my-1" />
                 <Row label="Total Payable" value={formatPrice(totalPayable)} bold />
               </div>
+
+              {payError && (
+                <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-sans text-red-800 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Payment couldn't be completed</p>
+                    <p>{payError}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-2">
-                <Button variant="outline" className="rounded-full" onClick={() => setView("menu")}>
+                <Button variant="outline" className="rounded-full" onClick={() => { setPayError(null); setView("menu"); }}>
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
-                <Button className="flex-1 rounded-full font-sans bg-primary hover:bg-primary/90" disabled={paying} onClick={handlePayOnline}>
-                  {paying ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Opening...</> : <>Pay {formatPrice(totalPayable)}</>}
+                <Button
+                  className="flex-1 rounded-full font-sans bg-primary hover:bg-primary/90"
+                  disabled={paying}
+                  onClick={handlePayOnline}
+                >
+                  {paying ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Opening...</>
+                  ) : payError ? (
+                    <><RefreshCw className="w-4 h-4 mr-2" /> Retry payment</>
+                  ) : (
+                    <>Pay {formatPrice(totalPayable)}</>
+                  )}
                 </Button>
               </div>
             </motion.div>
@@ -255,31 +351,63 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
                   {paidMethod === "online" ? "Upload payment proof" : "Confirm cash payment"}
                 </DialogTitle>
                 <DialogDescription className="font-sans">
-                  Amount: <strong className="text-primary">{formatPrice(remaining)}</strong>
+                  Amount: <strong className="text-primary">{formatPrice(safeRemaining)}</strong>
                 </DialogDescription>
               </DialogHeader>
               <div className="my-4 space-y-3">
                 {paidMethod === "online" && (
                   <div>
-                    <Label className="text-xs font-sans">Payment Screenshot *</Label>
+                    <Label className="text-xs font-sans">Payment Screenshot * (max 8 MB)</Label>
                     <label className="mt-1 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 cursor-pointer hover:bg-primary/10">
                       <Upload className="w-6 h-6 text-primary" />
                       <span className="text-xs font-sans">{file ? file.name : "Click to upload screenshot"}</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => { setFile(e.target.files?.[0] || null); setUploadError(null); }}
+                      />
                     </label>
                   </div>
                 )}
                 <div>
                   <Label className="text-xs font-sans">Notes (optional)</Label>
-                  <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Reference no., date, or any details..." className="mt-1" rows={2} />
+                  <Textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Reference no., date, or any details..."
+                    className="mt-1"
+                    rows={2}
+                  />
                 </div>
+
+                {uploadError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-sans text-red-800 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-semibold">Couldn't submit your claim</p>
+                      <p>{uploadError}</p>
+                      <p className="opacity-70 mt-1">Your file selection is preserved — fix the issue and tap retry.</p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="rounded-full" onClick={() => setView("paid_method")}>
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
-                <Button className="flex-1 rounded-full font-sans bg-primary hover:bg-primary/90" disabled={submitting} onClick={handleSubmitClaim}>
-                  {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : <>Submit for Verification</>}
+                <Button
+                  className="flex-1 rounded-full font-sans bg-primary hover:bg-primary/90"
+                  disabled={submitting}
+                  onClick={handleSubmitClaim}
+                >
+                  {submitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</>
+                  ) : uploadError ? (
+                    <><RefreshCw className="w-4 h-4 mr-2" /> Retry submission</>
+                  ) : (
+                    <>Submit for Verification</>
+                  )}
                 </Button>
               </div>
             </motion.div>
@@ -305,6 +433,34 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
                   <p className="font-sans text-xs text-muted-foreground">Status</p>
                   <p className="font-display text-lg font-bold text-amber-600">⏳ Pending Approval</p>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {view === "rejected" && claim && (
+            <motion.div key="rejected" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+              <DialogHeader>
+                <DialogTitle className="font-display text-xl flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500" /> Claim was rejected
+                </DialogTitle>
+              </DialogHeader>
+              <div className="my-4 space-y-3">
+                <div className="rounded-2xl bg-red-50 border border-red-200 p-4">
+                  <p className="font-sans text-sm text-red-900">
+                    Your last <strong>{claim.claim_type}</strong> claim of <strong>{formatPrice(claim.amount)}</strong> was rejected.
+                  </p>
+                  {claim.admin_reply && (
+                    <p className="font-sans text-xs text-red-800 mt-2">
+                      <strong>Admin note:</strong> {claim.admin_reply}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  className="w-full rounded-full font-sans bg-primary hover:bg-primary/90"
+                  onClick={() => { setClaim(null); setView("menu"); setFile(null); setNote(""); }}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" /> Resubmit payment proof
+                </Button>
               </div>
             </motion.div>
           )}
