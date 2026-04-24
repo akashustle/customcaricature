@@ -175,10 +175,10 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
         return;
       }
     }
-    if (!profile?.avatar_url) {
+    if (!localAvatarUrl) {
       toast({
         title: "📸 Profile photo required",
-        description: "Please upload your own profile photo first — verification needs your real face.",
+        description: "Please upload your own real profile photo first — tap the camera icon at the top of this dialog.",
         variant: "destructive",
       });
       return;
