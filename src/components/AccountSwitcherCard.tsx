@@ -28,7 +28,7 @@ type Props = {
 };
 
 const AccountSwitcherCard = ({ authUserId, fullName, email, mobile }: Props) => {
-  const { hasWorkshop, workshopUser, switchToWorkshop, ensureLink } = useWorkshopLink(authUserId);
+  const { hasWorkshop, workshopUser, switchToWorkshop, ensureLink, retrying, lastError, manualRetry } = useWorkshopLink(authUserId);
   const [linking, setLinking] = useState(false);
 
   const handleCreate = async () => {
@@ -37,12 +37,14 @@ const AccountSwitcherCard = ({ authUserId, fullName, email, mobile }: Props) => 
       const ws = await ensureLink(fullName || "Student", email || undefined, mobile || undefined);
       if (ws) {
         toast({ title: "🎓 Workshop account ready", description: "Both accounts are now linked." });
-        setTimeout(switchToWorkshop, 400);
+        setTimeout(() => { void switchToWorkshop(); }, 400);
       } else {
-        toast({ title: "Could not link", description: "Please try again or contact support.", variant: "destructive" });
+        toast({ title: "Could not link", description: "We'll keep trying in the background. You can retry below.", variant: "destructive" });
       }
     } finally { setLinking(false); }
   };
+
+  const showRecovery = !!lastError && !hasWorkshop;
 
   if (hasWorkshop) {
     return (
