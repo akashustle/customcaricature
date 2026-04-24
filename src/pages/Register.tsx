@@ -141,14 +141,29 @@ const Register = () => {
   const handleGoogleVerify = async () => {
     setOtpLoading(true);
     try {
+      // Mark that we're mid-registration so we can resume on Step 2 after redirect
+      try { localStorage.setItem("ccc_register_google_pending", "1"); } catch {}
+      // Persist current step so we land back on the verify step (not dashboard)
+      const draftKey = REGISTER_STORAGE_KEY;
+      try {
+        const current = JSON.parse(localStorage.getItem(draftKey) || "{}");
+        localStorage.setItem(draftKey, JSON.stringify({ ...current, _step: 2 }));
+      } catch {}
+
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        // Force the OAuth callback to land back on /register so we never
+        // accidentally drop the user on /dashboard mid-signup.
+        redirect_uri: window.location.origin + "/register?google_verified=1",
       });
       if (result.error) {
         toast({ title: "Google verification failed", description: String(result.error), variant: "destructive" });
         return;
       }
-      // After Google auth, check user info
+      if (result.redirected) {
+        // Browser is about to redirect to Google — bail out so we don't sign-out below.
+        return;
+      }
+      // Some flows return tokens directly without a redirect — handle that here.
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user) {
         const googleEmail = userData.user.email || "";
@@ -161,8 +176,8 @@ const Register = () => {
         setEmailVerified(true);
         setVerificationMethod("google");
         setEmailError("");
-        toast({ title: "Google Verified! ✅", description: `Verified as ${googleEmail}` });
-        // Sign out so registration can proceed fresh
+        toast({ title: "Email Verified! ✅", description: "Continue filling your details below." });
+        try { localStorage.removeItem("ccc_register_google_pending"); } catch {}
         await supabase.auth.signOut();
       }
     } catch (err: any) {
@@ -171,6 +186,46 @@ const Register = () => {
       setOtpLoading(false);
     }
   };
+
+  // After returning from Google OAuth: capture the email, mark verified, sign
+  // back out so the user finishes the password step, and stay on Step 2.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const verified = url.searchParams.get("google_verified");
+    const pending = (() => { try { return localStorage.getItem("ccc_register_google_pending"); } catch { return null; } })();
+    if (!verified && !pending) return;
+
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data?.user) {
+          const googleEmail = data.user.email || "";
+          const meta = data.user.user_metadata || {};
+          setForm(prev => ({
+            ...prev,
+            email: googleEmail || prev.email,
+            fullName: meta.full_name || meta.name || prev.fullName,
+          }));
+          setEmailVerified(true);
+          setVerificationMethod("google");
+          setEmailError("");
+          setStep(2);
+          toast({
+            title: "Email Verified! ✅",
+            description: "Now fill in the rest of your details to finish creating your account.",
+          });
+          // Sign back out so the user finishes signup with a password.
+          await supabase.auth.signOut();
+        }
+      } finally {
+        try { localStorage.removeItem("ccc_register_google_pending"); } catch {}
+        // Clean the query param so refreshes don't loop the toast.
+        url.searchParams.delete("google_verified");
+        window.history.replaceState({}, "", url.pathname + url.search);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const nextStep = () => {
     if (step === 1 && !canGoStep2) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }

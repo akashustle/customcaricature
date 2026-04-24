@@ -225,12 +225,12 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-base md:text-lg flex items-center gap-2" style={{ color: "hsl(220 50% 25%)" }}>
-              Become a Verified User <BadgeCheck className="w-5 h-5" style={{ color: palette.sky }} />
+              Get your blue tick <BadgeCheck className="w-5 h-5" style={{ color: palette.sky }} />
             </h3>
             <p className="text-xs md:text-sm mt-0.5" style={{ color: "hsl(220 30% 35%)" }}>
               {isPending
                 ? "Your verification is under review. We'll notify you once approved."
-                : "Fill in all your details and submit. Once approved, you'll get a blue tick on your profile."}
+                : "Two steps unlock the blue tick — fill in all your profile details and book your first event. We'll verify you automatically once both are done."}
             </p>
           </div>
           {isPending ? (
@@ -242,7 +242,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
             <Button onClick={() => setOpen(true)} size="sm"
               className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0"
               style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
-              Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              Complete profile <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Button>
           )}
         </div>
@@ -258,7 +258,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold" style={{ color: "hsl(20 40% 25%)" }}>Book your first event</p>
               <p className="text-[11px]" style={{ color: "hsl(20 30% 40%)" }}>
-                Booking + verified profile = instant blue tick.
+                Booking + a complete profile gives you the blue tick automatically.
               </p>
             </div>
             <Button size="sm" onClick={onBookEvent}
