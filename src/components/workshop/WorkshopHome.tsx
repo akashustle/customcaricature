@@ -125,7 +125,21 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
   };
 
   const GlassCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-    <div className={`backdrop-blur-xl ${cardBg} border rounded-2xl p-5 shadow-sm ${className}`}>{children}</div>
+    <div
+      className={`relative overflow-hidden rounded-3xl p-5 border ${dm ? cardBg : "border-white/80"} ${className}`}
+      style={
+        dm
+          ? undefined
+          : {
+              background:
+                "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)",
+              boxShadow:
+                "0 20px 45px -25px hsl(252 60% 40% / 0.18), 0 4px 16px -10px hsl(252 60% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.95)",
+            }
+      }
+    >
+      {children}
+    </div>
   );
 
   const statusBadge = (status: string) => {
