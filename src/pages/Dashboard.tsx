@@ -630,6 +630,17 @@ const Dashboard = () => {
       {/* Add Event modal */}
       {profile && <AddEventModal open={addEventOpen} onClose={() => setAddEventOpen(false)} profile={profile} />}
 
+      {/* Edit-request dialog (locked-profile request flow) */}
+      {user && (
+        <EditRequestDialog
+          open={editRequestOpen}
+          onClose={() => setEditRequestOpen(false)}
+          scope="profile"
+          userId={user.id}
+          userName={profile?.full_name || profile?.email || null}
+        />
+      )}
+
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
       {portalPaymentRequest && (
