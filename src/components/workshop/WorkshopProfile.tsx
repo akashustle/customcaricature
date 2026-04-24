@@ -38,6 +38,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifySubmitting, setVerifySubmitting] = useState(false);
   const [verifyStage, setVerifyStage] = useState<"idle" | "loading" | "longer">("idle");
+  const [editRequestOpen, setEditRequestOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [profileData, setProfileData] = useState<any>(user);
 
