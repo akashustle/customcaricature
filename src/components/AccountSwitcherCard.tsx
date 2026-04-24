@@ -76,31 +76,40 @@ const AccountSwitcherCard = ({ authUserId, fullName, email, mobile }: Props) => 
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.18)]"
-      style={{ background: `linear-gradient(135deg, hsl(335 60% 96%), hsl(8 60% 92%))`, borderColor: palette.plum }}>
-      <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none" style={{ background: palette.plum }} />
-      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
-          style={{ background: `linear-gradient(135deg, ${palette.plum}, ${palette.coral})` }}>
-          <Sparkles className="w-6 h-6 text-white" />
+    <div className="space-y-3">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.18)]"
+        style={{ background: `linear-gradient(135deg, hsl(335 60% 96%), hsl(8 60% 92%))`, borderColor: palette.plum }}>
+        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none" style={{ background: palette.plum }} />
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
+            style={{ background: `linear-gradient(135deg, ${palette.plum}, ${palette.coral})` }}>
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-base" style={{ color: "hsl(335 40% 25%)" }}>
+              Unlock your Workshop Dashboard
+            </h3>
+            <p className="text-xs mt-0.5" style={{ color: "hsl(335 30% 35%)" }}>
+              One click links your workshop account so you can join classes, claim certificates & more.
+            </p>
+          </div>
+          <Button onClick={handleCreate} disabled={linking || retrying} size="sm"
+            className="rounded-full font-semibold shadow-md text-white border-0"
+            style={{ background: `linear-gradient(135deg, ${palette.plum}, ${palette.coral})` }}>
+            {(linking || retrying) ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5 mr-1.5" />}
+            {linking ? "Linking…" : retrying ? "Retrying…" : "Create & Link"}
+          </Button>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-base" style={{ color: "hsl(335 40% 25%)" }}>
-            Unlock your Workshop Dashboard
-          </h3>
-          <p className="text-xs mt-0.5" style={{ color: "hsl(335 30% 35%)" }}>
-            One click links your workshop account so you can join classes, claim certificates & more.
-          </p>
-        </div>
-        <Button onClick={handleCreate} disabled={linking} size="sm"
-          className="rounded-full font-semibold shadow-md text-white border-0"
-          style={{ background: `linear-gradient(135deg, ${palette.plum}, ${palette.coral})` }}>
-          {linking ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5 mr-1.5" />}
-          {linking ? "Linking…" : "Create & Link"}
-        </Button>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      <WorkshopLinkRecoveryBanner
+        show={showRecovery}
+        retrying={retrying}
+        message={lastError}
+        onRetry={() => { void manualRetry(fullName || "Student", email || undefined, mobile || undefined); }}
+      />
+    </div>
   );
 };
 
