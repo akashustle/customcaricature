@@ -107,6 +107,7 @@ const ContactIcon = ({ name }: { name?: string }) => {
   if (name === "email") return <Mail className={cls} />;
   if (name === "instagram") return <Instagram className={cls} />;
   if (name === "youtube") return <Youtube className={cls} />;
+  if (name === "website") return <Globe className={cls} />;
   return null;
 };
 
