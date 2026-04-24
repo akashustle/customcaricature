@@ -3422,6 +3422,48 @@ export type Database = {
           },
         ]
       }
+      profile_edit_requests: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          edits_granted: number
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_user_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          edits_granted?: number
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          edits_granted?: number
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_verification_history: {
         Row: {
           action: string
@@ -3464,10 +3506,13 @@ export type Database = {
           age: number | null
           avatar_url: string | null
           city: string | null
+          country: string | null
           created_at: string
           created_from_workshop: boolean
           display_id: string | null
           district: string | null
+          edit_lock_reason: string | null
+          edits_remaining: number
           email: string
           email_verified: boolean | null
           event_booking_allowed: boolean
@@ -3505,10 +3550,13 @@ export type Database = {
           age?: number | null
           avatar_url?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
           created_from_workshop?: boolean
           display_id?: string | null
           district?: string | null
+          edit_lock_reason?: string | null
+          edits_remaining?: number
           email: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean
@@ -3546,10 +3594,13 @@ export type Database = {
           age?: number | null
           avatar_url?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
           created_from_workshop?: boolean
           display_id?: string | null
           district?: string | null
+          edit_lock_reason?: string | null
+          edits_remaining?: number
           email?: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean
@@ -5257,6 +5308,48 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_edit_requests: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          edits_granted: number
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_user_id: string | null
+          status: string
+          updated_at: string
+          workshop_user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          edits_granted?: number
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          updated_at?: string
+          workshop_user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          edits_granted?: number
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_user_id?: string | null
+          status?: string
+          updated_at?: string
+          workshop_user_id?: string
+        }
+        Relationships: []
+      }
       workshop_feedback: {
         Row: {
           admin_reply: string | null
@@ -5569,6 +5662,8 @@ export type Database = {
           country: string | null
           created_at: string
           district: string | null
+          edit_lock_reason: string | null
+          edits_remaining: number
           email: string
           gender: string | null
           id: string
@@ -5617,6 +5712,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           district?: string | null
+          edit_lock_reason?: string | null
+          edits_remaining?: number
           email: string
           gender?: string | null
           id?: string
@@ -5665,6 +5762,8 @@ export type Database = {
           country?: string | null
           created_at?: string
           district?: string | null
+          edit_lock_reason?: string | null
+          edits_remaining?: number
           email?: string
           gender?: string | null
           id?: string

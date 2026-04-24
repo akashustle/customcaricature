@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
 import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
+import EditRequestDialog from "@/components/EditRequestDialog";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -37,6 +38,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verifySubmitting, setVerifySubmitting] = useState(false);
   const [verifyStage, setVerifyStage] = useState<"idle" | "loading" | "longer">("idle");
+  const [editRequestOpen, setEditRequestOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [profileData, setProfileData] = useState<any>(user);
 
@@ -116,6 +118,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       const { data, error } = await callUpdate({ avatar_url: url });
       if (error || !data?.success) throw new Error(data?.error || error?.message || "Upload failed");
       applyUpdated(data.user || { ...profileData, avatar_url: url });
+      await consumeEditIfNeeded();
       toast({ title: "✅ Photo updated" });
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -161,6 +164,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       return;
     }
     applyUpdated(data.user || { ...profileData, ...form, age: form.age ? parseInt(form.age, 10) : null });
+    await consumeEditIfNeeded();
     toast({ title: "✅ Profile Updated!" });
     setEditing(false);
     setSaving(false);
@@ -204,6 +208,19 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   const verificationStatus: string = profileData.verification_status || (profileData.is_verified ? "verified" : "unverified");
   const isVerified = profileData.is_verified === true || verificationStatus === "verified";
   const isPending = verificationStatus === "pending";
+  // Once verified the user can't edit until an admin grants edits_remaining > 0.
+  const editsRemaining: number = Number(profileData.edits_remaining ?? 0);
+  const editLocked = isVerified && editsRemaining <= 0;
+  const consumeEditIfNeeded = async () => {
+    if (!isVerified) return;
+    if (editsRemaining <= 0) return;
+    try {
+      await (supabase.from("workshop_users") as any)
+        .update({ edits_remaining: Math.max(0, editsRemaining - 1) })
+        .eq("id", profileData.id);
+      applyUpdated({ ...profileData, edits_remaining: Math.max(0, editsRemaining - 1) });
+    } catch {/* non-fatal */}
+  };
 
   // Detail rendering
   const personalDetails = [
@@ -291,13 +308,17 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </AvatarFallback>
             </Avatar>
             <button
-              onClick={() => fileRef.current?.click()}
+              onClick={() => {
+                if (editLocked) { setEditRequestOpen(true); return; }
+                fileRef.current?.click();
+              }}
               disabled={uploading}
               className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
-              style={{ background: palette.coral, borderColor: palette.ivory, color: "white" }}
-              aria-label="Change profile photo"
+              style={{ background: editLocked ? "hsl(40 90% 55%)" : palette.coral, borderColor: palette.ivory, color: "white" }}
+              aria-label={editLocked ? "Request edit to change photo" : "Change profile photo"}
+              title={editLocked ? "Request edit access to change photo" : "Change profile photo"}
             >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : editLocked ? <span className="text-[10px] font-bold">🔒</span> : <Camera className="w-4 h-4" />}
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
@@ -365,11 +386,19 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           {/* Action buttons */}
           {!editing && (
             <div className="flex md:flex-col gap-2">
-              <Button size="sm" onClick={() => setEditing(true)}
-                className="rounded-full font-semibold shadow-md text-white border-0"
-                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-                <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit
-              </Button>
+              {editLocked ? (
+                <Button size="sm" onClick={() => setEditRequestOpen(true)}
+                  className="rounded-full font-semibold shadow-md text-white border-0"
+                  style={{ background: `linear-gradient(135deg, hsl(40 90% 55%), hsl(20 85% 55%))` }}>
+                  🔒 Request Edit
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => setEditing(true)}
+                  className="rounded-full font-semibold shadow-md text-white border-0"
+                  style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
+                  <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -755,6 +784,15 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Edit-request dialog for verified students */}
+      <EditRequestDialog
+        open={editRequestOpen}
+        onClose={() => setEditRequestOpen(false)}
+        scope="workshop"
+        userId={profileData.id}
+        userName={profileData.name}
+      />
     </div>
   );
 };
