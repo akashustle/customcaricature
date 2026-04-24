@@ -690,7 +690,15 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
                   <div className="flex items-center gap-2 md:gap-4 flex-wrap">
                     {/* Name & Date */}
                     <div className="flex-1 min-w-[120px]">
-                      <p className="font-sans font-semibold text-sm truncate">{ev.client_name}</p>
+                      <p className="font-sans font-semibold text-sm truncate flex items-center gap-1">
+                        {ev.client_name}
+                        {(() => {
+                          const c = customers.find(x => x.user_id === ev.user_id);
+                          return c?.is_verified ? (
+                            <span title="Verified customer" className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-500 text-white text-[10px]">✓</span>
+                          ) : null;
+                        })()}
+                      </p>
                       <p className="text-[11px] text-muted-foreground font-sans">
                         {new Date(ev.event_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} · {ev.event_start_time}
                       </p>
