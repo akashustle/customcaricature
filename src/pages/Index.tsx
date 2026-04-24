@@ -18,6 +18,7 @@ import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import SiteFooter from "@/components/SiteFooter";
+import HomepageImageLightbox from "@/components/homepage/HomepageImageLightbox";
 
 import g1 from "@/assets/gallery/gallery-1.jpeg";
 import g2 from "@/assets/gallery/gallery-2.jpeg";
@@ -58,7 +59,7 @@ const Section = ({
 
 /* ----------------------- Hero with continuous marquee ---------------------- */
 
-const HeroMarquee = ({ images }: { images: string[] }) => {
+const HeroMarquee = ({ images, onImageClick }: { images: string[]; onImageClick?: (i: number) => void }) => {
   // Duplicate the array so the -50% transform creates a seamless loop
   const tracks = [...images, ...images];
   const duration = Math.max(28, images.length * 4);
@@ -69,9 +70,12 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
         style={{ ["--marquee-duration" as any]: `${duration}s` }}
       >
         {tracks.map((src, i) => (
-          <div
+          <button
+            type="button"
             key={i}
-            className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)]"
+            onClick={() => onImageClick?.(i % images.length)}
+            className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)] transition-transform hover:scale-[1.02] cursor-zoom-in"
+            aria-label={`Open image ${(i % images.length) + 1}`}
           >
             <img
               src={src}
@@ -80,7 +84,7 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
               loading={i < 4 ? "eager" : "lazy"}
               decoding="async"
             />
-          </div>
+          </button>
         ))}
       </div>
     </div>
