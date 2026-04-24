@@ -270,8 +270,11 @@ const Workshop = () => {
     if (!regForm.termsAccepted || !regForm.noticeRead) {
       toast({ title: "Please accept Terms & Conditions and the Notice", variant: "destructive" }); return;
     }
-    if (!regForm.state || !regForm.city) {
+    if (regForm.country === "India" && (!regForm.state || !regForm.city)) {
       toast({ title: "Please select your State and City", variant: "destructive" }); return;
+    }
+    if (regForm.country !== "India" && !regForm.city) {
+      toast({ title: "Please enter your City", variant: "destructive" }); return;
     }
     setSubmittingReg(true);
     try {
@@ -488,23 +491,23 @@ const Workshop = () => {
       // Step 3: Location
       <div key="step2" className="space-y-4">
         <h3 className="font-body font-bold text-foreground">Your Location</h3>
-        {allowInternational && (
-          <div>
-            <Label>Country *</Label>
-            <Select value={regForm.country} onValueChange={v => setRegForm({...regForm, country: v, state: "", district: "", city: ""})}>
-              <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select country" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="India">🇮🇳 India</SelectItem>
-                <SelectItem value="USA">🇺🇸 USA</SelectItem>
-                <SelectItem value="UK">🇬🇧 UK</SelectItem>
-                <SelectItem value="UAE">🇦🇪 UAE</SelectItem>
-                <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
-                <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
-                <SelectItem value="Other">🌍 Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        <div>
+          <Label>Country *</Label>
+          <Select value={regForm.country} onValueChange={v => setRegForm({...regForm, country: v, state: "", district: "", city: ""})}>
+            <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select country (default India)" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="India">🇮🇳 India</SelectItem>
+              <SelectItem value="USA">🇺🇸 USA</SelectItem>
+              <SelectItem value="UK">🇬🇧 UK</SelectItem>
+              <SelectItem value="UAE">🇦🇪 UAE</SelectItem>
+              <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
+              <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
+              <SelectItem value="Singapore">🇸🇬 Singapore</SelectItem>
+              <SelectItem value="Germany">🇩🇪 Germany</SelectItem>
+              <SelectItem value="Other">🌍 Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         {regForm.country === "India" ? (
           <>
             <div>
@@ -540,7 +543,9 @@ const Workshop = () => {
           </>
         ) : (
           <>
-            <div><Label>State/Province</Label><Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Your state or province" /></div>
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+              🌍 You're registering from <span className="font-bold text-primary">{regForm.country}</span>. Just enter your city — state is optional.
+            </div>
             <div><Label>City *</Label><Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Your city" /></div>
           </>
         )}
@@ -604,7 +609,10 @@ const Workshop = () => {
                   <Button onClick={() => {
                     if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.age)) { toast({ title: "Fill all required fields", variant: "destructive" }); return; }
                     if (regStep === 1 && (!regForm.skill_level || !regForm.artist_background_type || !regForm.why_suitable)) { toast({ title: "Fill all background fields", variant: "destructive" }); return; }
-                    if (regStep === 2 && (!regForm.state || !regForm.city)) { toast({ title: "Please select your location", variant: "destructive" }); return; }
+                    if (regStep === 2) {
+                      if (regForm.country === "India" && (!regForm.state || !regForm.city)) { toast({ title: "Please select your State and City", variant: "destructive" }); return; }
+                      if (regForm.country !== "India" && !regForm.city) { toast({ title: "Please enter your City", variant: "destructive" }); return; }
+                    }
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (

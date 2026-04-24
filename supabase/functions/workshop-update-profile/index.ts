@@ -55,7 +55,13 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     };
 
-    const allowedFields = ["name", "mobile", "email", "instagram_id", "age", "occupation", "why_join", "gender", "avatar_url"];
+    const allowedFields = [
+      "name", "mobile", "email", "instagram_id", "age", "occupation",
+      "why_join", "gender", "avatar_url",
+      "country", "state", "city", "district",
+      "skill_level", "artist_background_type", "artist_background",
+      "verification_status", "verification_submitted_at", "verification_notes"
+    ];
     for (const field of allowedFields) {
       if (Object.prototype.hasOwnProperty.call(body, field)) {
         updates[field] = body[field] ?? null;
