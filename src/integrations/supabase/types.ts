@@ -3422,6 +3422,42 @@ export type Database = {
           },
         ]
       }
+      profile_verification_history: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          performed_by: string | null
+          performed_by_user_id: string | null
+          previous_status: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_by_user_id?: string | null
+          previous_status?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_by_user_id?: string | null
+          previous_status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -3443,6 +3479,7 @@ export type Database = {
           is_manual: boolean
           is_verified: boolean
           mobile: string
+          occupation: string | null
           pincode: string | null
           registration_lat: number | null
           registration_lng: number | null
@@ -3454,6 +3491,12 @@ export type Database = {
           updated_at: string
           user_id: string
           verification_method: string | null
+          verification_notes: string | null
+          verification_status: string
+          verification_submitted_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+          why_join: string | null
         }
         Insert: {
           address?: string | null
@@ -3475,6 +3518,7 @@ export type Database = {
           is_manual?: boolean
           is_verified?: boolean
           mobile: string
+          occupation?: string | null
           pincode?: string | null
           registration_lat?: number | null
           registration_lng?: number | null
@@ -3486,6 +3530,12 @@ export type Database = {
           updated_at?: string
           user_id: string
           verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          why_join?: string | null
         }
         Update: {
           address?: string | null
@@ -3507,6 +3557,7 @@ export type Database = {
           is_manual?: boolean
           is_verified?: boolean
           mobile?: string
+          occupation?: string | null
           pincode?: string | null
           registration_lat?: number | null
           registration_lng?: number | null
@@ -3518,6 +3569,12 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verification_submitted_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          why_join?: string | null
         }
         Relationships: []
       }
@@ -5500,6 +5557,7 @@ export type Database = {
           age: number | null
           artist_background: string | null
           artist_background_type: string | null
+          auth_user_id: string | null
           avatar_url: string | null
           city: string | null
           country: string | null
@@ -5546,6 +5604,7 @@ export type Database = {
           age?: number | null
           artist_background?: string | null
           artist_background_type?: string | null
+          auth_user_id?: string | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
@@ -5592,6 +5651,7 @@ export type Database = {
           age?: number | null
           artist_background?: string | null
           artist_background_type?: string | null
+          auth_user_id?: string | null
           avatar_url?: string | null
           city?: string | null
           country?: string | null
