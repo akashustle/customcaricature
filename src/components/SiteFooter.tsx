@@ -194,7 +194,7 @@ const SiteFooter = () => {
                   {c.title}
                 </div>
                 <ul className="space-y-1.5 text-[13px]">
-                  {(c.links || []).slice(0, 5).map((l, i) => (
+                  {(c.links || []).slice(0, 12).map((l, i) => (
                     <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
                   ))}
                 </ul>
