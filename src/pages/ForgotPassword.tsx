@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, AlertTriangle, KeyRound, Eye, EyeOff, Lock } from "lucide-react";
+import { Loader2, AlertTriangle, KeyRound, Eye, EyeOff } from "lucide-react";
+import AuthShell from "@/components/auth/AuthShell";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -59,64 +59,60 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 pb-16 md:pb-0">
-      <Card className="w-full max-w-md" style={{ boxShadow: "var(--shadow-card)" }}>
-        <CardHeader className="text-center">
-          <img src="/logo.png" alt="CCC" className="w-16 h-16 mx-auto mb-2 rounded-xl cursor-pointer" onClick={() => navigate("/")} />
-          <CardTitle className="font-display text-2xl">Password Recovery</CardTitle>
-          <CardDescription className="font-sans">
-            Reset your password using your email and secret code
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleResetWithSecret} className="space-y-4">
-            <div>
-              <Label className="font-sans">Email</Label>
-              <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); }} required placeholder="Enter your registered email" />
-            </div>
-            <div>
-              <Label className="font-sans flex items-center gap-1"><KeyRound className="w-3 h-3" />4-digit Secret Code</Label>
-              <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required placeholder="Enter your secret code" />
-              <p className="text-[10px] text-muted-foreground font-sans mt-1">Your secret code was provided during registration</p>
-            </div>
-            <div>
-              <Label className="font-sans">New Password (min 6 characters)</Label>
-              <div className="relative">
-                <Input type={showNewPw ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} />
-                <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <Label className="font-sans">Confirm Password</Label>
-              <div className="relative">
-                <Input type={showConfirmPw ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-            {newPassword && confirmPassword && newPassword !== confirmPassword && (
-              <p className="text-xs text-destructive font-sans">Passwords don't match</p>
-            )}
-            {errorMsg && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-                <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-destructive font-sans font-medium">{errorMsg}</p>
-              </div>
-            )}
-            <Button type="submit" disabled={loading || !email || secretCode.length !== 4 || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full rounded-full font-sans bg-primary hover:bg-primary/90">
-              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
-            </Button>
-          </form>
+    <AuthShell
+      title="Password Recovery"
+      subtitle="Reset using your email + 4-digit secret code"
+      badge="Reset"
+      heroTitle="Forgot your password?"
+      heroSubtitle="No worries — use your registered email and the 4-digit secret code we generated for you to set a new one."
+      accent="rose"
+    >
+      <form onSubmit={handleResetWithSecret} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label className="font-sans text-sm text-slate-700">Email</Label>
+          <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); }} required placeholder="Enter your registered email" />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="font-sans text-sm text-slate-700 flex items-center gap-1"><KeyRound className="w-3.5 h-3.5" />4-digit Secret Code</Label>
+          <Input value={secretCode} onChange={(e) => validateSecretCode(e.target.value)} maxLength={4} type="password" required placeholder="• • • •" className="font-mono text-center text-xl tracking-[0.5em] h-12" />
+          <p className="text-[11px] text-slate-500 font-sans">Your secret code was provided during registration.</p>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="font-sans text-sm text-slate-700">New Password (min 6 characters)</Label>
+          <div className="relative">
+            <Input type={showNewPw ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6} className="pr-10" />
+            <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="font-sans text-sm text-slate-700">Confirm Password</Label>
+          <div className="relative">
+            <Input type={showConfirmPw ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="pr-10" />
+            <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+              {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+        {newPassword && confirmPassword && newPassword !== confirmPassword && (
+          <p className="text-xs text-destructive font-sans">Passwords don't match</p>
+        )}
+        {errorMsg && (
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/30">
+            <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-destructive font-sans font-medium">{errorMsg}</p>
+          </div>
+        )}
+        <Button type="submit" disabled={loading || !email || secretCode.length !== 4 || newPassword.length < 6 || newPassword !== confirmPassword} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)]">
+          {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
+        </Button>
+      </form>
 
-          <p className="text-center text-sm font-sans mt-4">
-            <a href="/login" className="text-primary hover:underline">Back to Login</a>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+      <p className="text-center text-sm font-sans mt-5 text-slate-500">
+        <a href="/login" className="text-primary hover:underline font-medium">← Back to Login</a>
+      </p>
+    </AuthShell>
   );
 };
 
