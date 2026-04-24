@@ -243,6 +243,19 @@ const AppOnboardingGate = () => {
   return <Suspense fallback={null}><AppOnboarding /></Suspense>;
 };
 
+/**
+ * Gate the /admin-panel route. Without a session "admin_panel_unlocked"
+ * flag set by the AdminLogin (/customcad75) flow OR an existing admin
+ * Supabase session, render NotFound — that way deep-linking /admin-panel
+ * directly behaves exactly like /admin and /admin-login (404).
+ */
+const AdminPanelGate = ({ children }: { children: React.ReactNode }) => {
+  const flag = typeof window !== "undefined" ? sessionStorage.getItem("admin_panel_unlocked") : null;
+  const hasWorkshopAdmin = typeof window !== "undefined" ? !!localStorage.getItem("workshop_admin") : false;
+  if (!flag && !hasWorkshopAdmin) return <Suspense fallback={<PageLoader />}><NotFound /></Suspense>;
+  return <>{children}</>;
+};
+
 const App = () => {
   // Splash on EVERY full page reload (skip only on admin-style routes).
   const [showSplash, setShowSplash] = useState(() => {
@@ -273,6 +286,7 @@ const App = () => {
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
             <AdminLightThemeForcer />
+            <RightClickBlocker />
             
             <FloatingButtons />
             <MobileBottomNav />
