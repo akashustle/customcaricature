@@ -575,6 +575,9 @@ const Dashboard = () => {
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
             </div>
           )}
+          {activeTab === "workshop" && tabsAvailable.workshop && user && (
+            <UserWorkshopOverview authUserId={user.id} />
+          )}
           {activeTab === "profile" && (
             <ProfileWithLogout
               userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
