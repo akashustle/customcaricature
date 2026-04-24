@@ -9,6 +9,7 @@ import { GraduationCap, ArrowRight, Loader2, Sparkles, Link2 } from "lucide-reac
 import { useWorkshopLink } from "@/hooks/useWorkshopLink";
 import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
+import WorkshopLinkRecoveryBanner from "@/components/WorkshopLinkRecoveryBanner";
 
 const palette = {
   ivory: "hsl(38 60% 96%)",
