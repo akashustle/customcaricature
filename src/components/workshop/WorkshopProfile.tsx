@@ -532,10 +532,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== PERSONAL INFO GRID ============== */}
       {!editing && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(8 60% 96%), hsl(8 50% 92%))`,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.coral,
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, #ffffff 0%, #fff7f5 100%)`,
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(8 60% 50% / 0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <h3 className="font-bold text-base mb-3 flex items-center gap-2"
             style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(8 50% 30%)" }}>
