@@ -12,9 +12,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X,
   CreditCard, MapPin, Key, Camera, Loader2, BadgeCheck, ShieldCheck,
-  Sparkles, Globe, ChevronRight, ArrowRight,
+  Sparkles, Globe, ChevronRight, ArrowRight, Cake, Users as UsersIcon, Map, Wallet, IndianRupee,
 } from "lucide-react";
-import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
+import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
 import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
@@ -230,21 +230,21 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     } catch {/* non-fatal */}
   };
 
-  // Detail rendering
+  // Detail rendering — distinct icon per field so the round chip never looks blank.
   const personalDetails = [
     { icon: User, label: "Name", value: profileData.name, key: "name" },
     { icon: Mail, label: "Email", value: profileData.email, key: "email" },
     { icon: Phone, label: "Mobile", value: profileData.mobile, key: "mobile" },
     { icon: Instagram, label: "Instagram", value: profileData.instagram_id || "—", key: "instagram_id" },
-    { icon: User, label: "Age", value: profileData.age || "—", key: "age" },
+    { icon: Cake, label: "Age", value: profileData.age || "—", key: "age" },
     { icon: Briefcase, label: "Occupation", value: profileData.occupation || "—", key: "occupation" },
-    { icon: User, label: "Gender", value: profileData.gender || "—", key: "gender" },
+    { icon: UsersIcon, label: "Gender", value: profileData.gender || "—", key: "gender" },
     { icon: Sparkles, label: "Why Join", value: profileData.why_join || "—", key: "why_join" },
   ];
 
   const locationDetails = [
     { icon: Globe, label: "Country", value: profileData.country || "India" },
-    { icon: MapPin, label: "State", value: profileData.state || "—" },
+    { icon: Map, label: "State", value: profileData.state || "—" },
     { icon: MapPin, label: "City", value: profileData.city || "—" },
   ];
 
@@ -261,8 +261,8 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   ];
 
   const paymentInfo = [
-    { icon: CreditCard, label: "Payment Status", value: (profileData.payment_status || "pending").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) },
-    { icon: CreditCard, label: "Amount Paid", value: profileData.payment_amount ? `₹${profileData.payment_amount}` : "—" },
+    { icon: Wallet, label: "Payment Status", value: (profileData.payment_status || "pending").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) },
+    { icon: IndianRupee, label: "Amount Paid", value: profileData.payment_amount ? `₹${profileData.payment_amount}` : "—" },
   ];
 
   const initials = (profileData.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
