@@ -418,6 +418,7 @@ const Dashboard = () => {
     events: dt.events !== false,
     payments: dt.payments !== false,
     chat: dt.chat !== false,
+    workshop: hasWorkshop, // only visible for workshop-origin users
     profile: dt.profile !== false,
   };
 
