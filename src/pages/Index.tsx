@@ -484,8 +484,8 @@ const Index = () => {
             ? (content as any).homepage_section_order.order
             : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
           const sections: Record<string, React.ReactNode> = {
-            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} />,
-            stats: <Stats key="stats" items={stats} />,
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} />,
+            stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
