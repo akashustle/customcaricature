@@ -34,6 +34,7 @@ const NAV_SECTIONS = [
     label: "Finance",
     items: [
       { id: "payments", icon: Receipt, label: "Payments" },
+      { id: "event-payment-claims", icon: Receipt, label: "Payment Claims" },
       { id: "invoices", icon: FileText, label: "Invoices" },
       { id: "revenue", icon: DollarSign, label: "Revenue" },
       { id: "accounting", icon: Calculator, label: "Accounting" },
