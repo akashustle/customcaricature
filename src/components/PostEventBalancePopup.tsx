@@ -158,10 +158,9 @@ const PostEventBalancePopup = ({ event, userId, remaining, onPaid }: Props) => {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (canClose) setOpen(v); }}>
       <DialogContent
-        className="max-w-md bg-gradient-to-br from-card via-background to-card border-2 border-primary/20 shadow-2xl"
+        className={`max-w-md bg-gradient-to-br from-card via-background to-card border-2 border-primary/20 shadow-2xl ${canClose ? "" : "[&>button.absolute]:hidden"}`}
         onPointerDownOutside={(e) => { if (!canClose) e.preventDefault(); }}
         onEscapeKeyDown={(e) => { if (!canClose) e.preventDefault(); }}
-        showCloseButton={canClose}
       >
         <AnimatePresence mode="wait">
           {view === "menu" && (
