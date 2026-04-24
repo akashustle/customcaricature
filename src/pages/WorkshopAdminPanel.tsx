@@ -38,6 +38,7 @@ import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
 import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
 import AdminWorkshopVerification from "@/components/workshop/AdminWorkshopVerification";
+import EditRequestsInbox from "@/components/admin/EditRequestsInbox";
 
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
@@ -49,6 +50,7 @@ const sidebarItems = [
   { key: "registered", icon: Users, label: "Registered" },
   { key: "manual", icon: UserPlus, label: "Manual Users" },
   { key: "verification", icon: Shield, label: "Verification" },
+  { key: "edit-requests", icon: FileText, label: "Edit Requests" },
   { key: "live", icon: Radio, label: "Live Sessions" },
   { key: "live-requests", icon: MonitorPlay, label: "Live Requests" },
   { key: "videos", icon: Video, label: "Videos" },
@@ -1954,6 +1956,18 @@ const WorkshopAdmin = () => {
                   </div>
                   <GlassCard>
                     <AdminWorkshopVerification adminName={adminInfo?.name || "Workshop Admin"} />
+                  </GlassCard>
+                </div>
+              )}
+
+              {tab === "edit-requests" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary}`}>Profile Edit Requests</h1>
+                    <RefreshButton />
+                  </div>
+                  <GlassCard>
+                    <EditRequestsInbox scope="workshop" adminName={adminInfo?.name || "Workshop Admin"} />
                   </GlassCard>
                 </div>
               )}
