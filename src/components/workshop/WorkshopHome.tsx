@@ -259,23 +259,62 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
       )}
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <GlassCard>
-          <p className={`${dm ? "text-purple-400" : "text-purple-500"} text-sm font-bold mb-1`}>
-            {now.getHours() < 12 ? "Good Morning ☀️" : now.getHours() < 17 ? "Good Afternoon 🌤️" : "Good Evening 🌙"}
-          </p>
-          <h2 className={`text-2xl ${textPrimary} mb-1`}>Hello, {user.name?.split(" ")[0]}! 👋</h2>
-          <p className={`${textMuted} text-sm`}>Welcome to Creative Caricature Club™ Workshop {user.roll_number && `· Roll #${user.roll_number}`}</p>
-          <div className="mt-4 flex flex-wrap gap-4">
-            <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
-              <Calendar className="w-4 h-4 text-purple-400" />
-              {now.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
+        <div
+          className="relative overflow-hidden rounded-3xl p-6 border border-white/80"
+          style={
+            dm
+              ? { background: "linear-gradient(135deg, #241f33 0%, #1a1626 100%)" }
+              : {
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)",
+                  boxShadow:
+                    "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 8px 24px -12px hsl(252 60% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.95)",
+                }
+          }
+        >
+          {/* ambient orbs */}
+          {!dm && (
+            <>
+              <motion.div
+                aria-hidden
+                className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-50 pointer-events-none"
+                style={{ background: "radial-gradient(circle, hsl(262 80% 75%), transparent 70%)" }}
+                animate={{ scale: [1, 1.08, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                aria-hidden
+                className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
+                style={{ background: "radial-gradient(circle, hsl(330 80% 78%), transparent 70%)" }}
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              />
+            </>
+          )}
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`${dm ? "text-purple-400" : "text-purple-600"} text-sm font-bold`}>
+                {now.getHours() < 12 ? "Good Morning ☀️" : now.getHours() < 17 ? "Good Afternoon 🌤️" : "Good Evening 🌙"}
+              </span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
             </div>
-            <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
-              <Clock className="w-4 h-4 text-pink-400" />
-              {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            <h2 className={`text-2xl ${textPrimary} mb-1`}>Hello, {user.name?.split(" ")[0]}! 👋</h2>
+            <p className={`${textMuted} text-sm`}>Welcome to Creative Caricature Club™ Workshop {user.roll_number && `· Roll #${user.roll_number}`}</p>
+            <div className="mt-4 flex flex-wrap gap-4">
+              <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
+                <Calendar className="w-4 h-4 text-purple-500" />
+                {now.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
+              </div>
+              <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
+                <Clock className="w-4 h-4 text-pink-500" />
+                {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              </div>
             </div>
           </div>
-        </GlassCard>
+        </div>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
