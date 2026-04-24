@@ -13,6 +13,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, UserPlus, Mail, Loader2 } fr
 import LocationDropdowns from "@/components/LocationDropdowns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthShell from "@/components/auth/AuthShell";
 
 const STEPS = [
   { id: 1, title: "Personal Info", desc: "Tell us about yourself", emoji: "👤" },
@@ -279,62 +280,37 @@ const Register = () => {
   return (
     <>
     <SEOHead title="Register" description="Create your Creative Caricature Club™ account to order caricatures, book events and join workshops." canonical="/register" noindex />
-    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-6 pb-24 md:pb-6 relative overflow-hidden bg-background">
-      {/* Layered 3D background */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 30% 0%, hsl(var(--primary) / 0.18), transparent 55%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.14), transparent 55%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--secondary)/0.45) 100%)" }} />
-      {/* Floating orbs for depth */}
-      <motion.div
-        aria-hidden
-        className="absolute -top-24 -left-20 w-80 h-80 rounded-full opacity-40 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 70%)" }}
-        animate={{ y: [0, 18, 0], x: [0, 10, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="absolute -bottom-24 -right-16 w-96 h-96 rounded-full opacity-35 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.45), transparent 70%)" }}
-        animate={{ y: [0, -22, 0], x: [0, -12, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
+    <AuthShell
+      title="Create Account"
+      subtitle="Join our caricature community"
+      badge="Sign Up"
+      heroTitle="Join Creative Caricature Club"
+      heroSubtitle="Create your account in 4 quick steps and start booking caricature artists for your next event."
+      accent="violet"
+    >
+      {/* Progress */}
+      <div className="flex items-center justify-between mb-5 px-1">
+        {STEPS.map((s, i) => (
+          <div key={s.id} className="flex items-center">
+            <motion.button
+              type="button"
+              onClick={() => { if (s.id < step || stepValid(s.id - 1)) setStep(s.id); }}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${
+                step === s.id ? "bg-primary text-primary-foreground shadow-lg scale-105" : step > s.id ? "bg-primary/20 text-foreground" : "bg-slate-100 text-slate-400"
+              }`}
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            >
+              {step > s.id ? <Check className="w-4 h-4" /> : s.emoji}
+            </motion.button>
+            {i < STEPS.length - 1 && <div className={`w-6 md:w-10 h-0.5 mx-1 rounded-full transition-all ${step > s.id ? "bg-primary/40" : "bg-slate-200"}`} />}
+          </div>
+        ))}
+      </div>
+      <p className="text-center text-sm font-sans text-slate-500 mb-4">
+        <span className="font-semibold text-slate-900">{STEPS[step - 1].title}</span> — {STEPS[step - 1].desc}
+      </p>
 
-      <motion.div initial={{ y: 16, opacity: 0, rotateX: -6 }} animate={{ y: 0, opacity: 1, rotateX: 0 }} transition={{ duration: 0.55 }} style={{ perspective: 1200 }} className="w-full max-w-md relative z-10">
-        <Card className="border-border/40 overflow-hidden bg-card/85 backdrop-blur-xl shadow-[0_30px_80px_-30px_hsl(252_60%_25%/0.45),0_8px_24px_-12px_hsl(252_60%_25%/0.3),inset_0_1px_0_hsl(0_0%_100%/0.5)]">
-          {/* Top gradient bar for premium feel */}
-          <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
-          <CardHeader className="text-center pb-2 pt-6">
-            <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -3, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-              <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden mx-auto shadow-xl ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
-              </div>
-            </motion.div>
-            <CardTitle className="font-display text-2xl text-foreground">Create Account</CardTitle>
-            <CardDescription className="font-sans text-sm text-muted-foreground">Join our caricature community</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Progress */}
-            <div className="flex items-center justify-between mb-5 px-1">
-              {STEPS.map((s, i) => (
-                <div key={s.id} className="flex items-center">
-                  <motion.button
-                    onClick={() => { if (s.id < step || stepValid(s.id - 1)) setStep(s.id); }}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${
-                      step === s.id ? "bg-primary text-primary-foreground shadow-lg scale-105" : step > s.id ? "bg-primary/20 text-foreground" : "bg-muted text-muted-foreground"
-                    }`}
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  >
-                    {step > s.id ? <Check className="w-4 h-4" /> : s.emoji}
-                  </motion.button>
-                  {i < STEPS.length - 1 && <div className={`w-6 md:w-10 h-0.5 mx-1 rounded-full transition-all ${step > s.id ? "bg-primary/40" : "bg-muted"}`} />}
-                </div>
-              ))}
-            </div>
-            <p className="text-center text-sm font-sans text-muted-foreground mb-4">
-              <span className="font-semibold text-foreground">{STEPS[step - 1].title}</span> — {STEPS[step - 1].desc}
-            </p>
-
-            <form onSubmit={handleRegister}>
+      <form onSubmit={handleRegister}>
               <AnimatePresence mode="wait">
                 {step === 1 && (
                   <motion.div key="s1" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }} className="space-y-3">
@@ -450,13 +426,9 @@ const Register = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </form>
-            <p className="text-center text-sm font-sans mt-4 text-muted-foreground">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
-          </CardContent>
-        </Card>
-        <p className="text-center text-xs text-muted-foreground/60 mt-4 font-sans"><span className="text-gradient-violet font-semibold">Creative Caricature Club</span><span className="align-super text-[0.6em] ml-0.5">™</span> © {new Date().getFullYear()}</p>
-      </motion.div>
-    </div>
+      </form>
+      <p className="text-center text-sm font-sans mt-4 text-slate-500">Already have an account? <a href="/login" className="text-primary hover:underline font-medium">Sign In</a></p>
+    </AuthShell>
     </>
   );
 };
