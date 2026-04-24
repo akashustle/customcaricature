@@ -59,40 +59,30 @@ const CustomVideoPlayer = forwardRef<HTMLElement, { url: string }>(({ url }, ref
   };
 
   return (
-    <section ref={ref as React.Ref<HTMLElement>} className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <VideoHeader />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-border relative group cursor-pointer"
-          onClick={togglePlay}
-        >
-          <video
-            ref={videoRef}
-            src={url}
-            className="w-full aspect-video object-cover"
-            playsInline
-            autoPlay
-            loop
-            muted
-            preload="metadata"
-          />
-          <div className={`absolute inset-0 flex items-center justify-center bg-foreground/10 transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg">
-              {playing ? <Pause className="h-6 w-6 text-foreground" /> : <Play className="ml-0.5 h-6 w-6 text-foreground" />}
-            </div>
-          </div>
-          <button
-            onClick={toggleMute}
-            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-md z-10 hover:bg-background transition-colors"
-          >
-            {muted ? <VolumeX className="h-4 w-4 text-foreground" /> : <Volume2 className="h-4 w-4 text-foreground" />}
-          </button>
-        </motion.div>
+    <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-border relative group cursor-pointer" onClick={togglePlay}>
+      <video
+        ref={videoRef}
+        src={url}
+        className="w-full aspect-video object-cover bg-black"
+        playsInline
+        autoPlay
+        loop
+        muted
+        preload="metadata"
+      />
+      <div className={`absolute inset-0 flex items-center justify-center bg-foreground/10 transition-opacity duration-300 ${playing ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-lg">
+          {playing ? <Pause className="h-7 w-7 text-foreground" /> : <Play className="ml-0.5 h-7 w-7 text-foreground" />}
+        </div>
       </div>
-    </section>
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-md z-10 hover:bg-background transition-colors"
+        aria-label={muted ? "Unmute" : "Mute"}
+      >
+        {muted ? <VolumeX className="h-4 w-4 text-foreground" /> : <Volume2 className="h-4 w-4 text-foreground" />}
+      </button>
+    </div>
   );
 });
 CustomVideoPlayer.displayName = "CustomVideoPlayer";
