@@ -321,19 +321,22 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             </div>
 
             <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
-              <Badge className="text-[10px] font-semibold border-0"
-                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 70% 22%)" }}>
-                {profileData.student_type === "registered_online" ? "🎨 Online Student" : "🎨 Workshop Student"}
+              <Badge
+                className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+              >
+                🎨 {profileData.student_type === "registered_online" ? "Online Student" : "Workshop Student"}
               </Badge>
               {profileData.roll_number && (
-                <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.plum}30`, color: darkMode ? palette.plum : "hsl(335 60% 28%)" }}>
+                <Badge
+                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                >
                   Roll #{profileData.roll_number}
                 </Badge>
               )}
               {profileData.skill_level && (
-                <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.sage}30`, color: darkMode ? palette.sage : "hsl(150 55% 18%)" }}>
+                <Badge
+                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                >
                   {profileData.skill_level}
                 </Badge>
               )}
