@@ -64,16 +64,19 @@ const EventPaymentTimeline = ({ event, userId }: Props) => {
     (ph || []).forEach((p: any) => {
       const isRemaining = /remaining/i.test(p.payment_type || "");
       const isAdvance = /advance|partial/i.test(p.payment_type || "");
+      const isReversal = /revers|refund|cancell/i.test(p.payment_type || "") || /revers|refund/i.test(p.description || "");
       list.push({
         ts: p.created_at,
-        icon: isRemaining ? ShieldCheck : isAdvance ? CreditCard : Sparkles,
-        title: isRemaining
+        icon: isReversal ? XCircle : isRemaining ? ShieldCheck : isAdvance ? CreditCard : Sparkles,
+        title: isReversal
+          ? `Payment reversed (${formatPrice(Math.abs(p.amount))})`
+          : isRemaining
           ? `Remaining balance settled (${formatPrice(p.amount)})`
           : isAdvance
           ? `Advance payment received (${formatPrice(p.amount)})`
           : `Payment recorded (${formatPrice(p.amount)})`,
         desc: p.description || undefined,
-        tone: "success",
+        tone: isReversal ? "warn" : "success",
       });
     });
 
@@ -118,6 +121,30 @@ const EventPaymentTimeline = ({ event, userId }: Props) => {
       }
     });
 
+    // 5. Reverse-detection: if the booking's current payment_status is "weaker" than what the
+    //    payment history suggests, the admin must have reverted/refunded — surface that.
+    try {
+      const settled = (ph || []).some((p: any) => /remaining|fully/i.test(p.payment_type || ""));
+      const advanceLogged = (ph || []).some((p: any) => /advance|partial/i.test(p.payment_type || ""));
+      if (settled && event.payment_status !== "fully_paid") {
+        list.push({
+          ts: event.updated_at || new Date().toISOString(),
+          icon: AlertCircle,
+          title: "Payment status reverted by admin",
+          desc: `Status changed back to "${event.payment_status || "pending"}". Earlier confirmations are no longer active. Please reach out if this is unexpected.`,
+          tone: "warn",
+        });
+      } else if (advanceLogged && (event.payment_status === "pending" || event.payment_status === null)) {
+        list.push({
+          ts: event.updated_at || new Date().toISOString(),
+          icon: AlertCircle,
+          title: "Advance payment reverted by admin",
+          desc: "Your previously confirmed advance has been moved back to pending.",
+          tone: "warn",
+        });
+      }
+    } catch { /* skip */ }
+
     // Sort chronologically
     list.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
     setEntries(list);
@@ -130,10 +157,11 @@ const EventPaymentTimeline = ({ event, userId }: Props) => {
       .channel(`event-timeline-${event.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "event_payment_claims", filter: `event_id=eq.${event.id}` }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "payment_history", filter: `booking_id=eq.${event.id}` }, () => load())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "event_bookings", filter: `id=eq.${event.id}` }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event.id, userId]);
+  }, [event.id, userId, event.payment_status, event.status]);
 
   if (loading) return null;
   if (entries.length === 0) return null;
