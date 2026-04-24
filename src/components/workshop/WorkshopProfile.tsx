@@ -617,10 +617,6 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
             <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
               Payment status will be updated once confirmed by admin.
             </p>
-          {profileData.payment_status === "pending" && (
-            <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
-              Payment status will be updated once confirmed by admin.
-            </p>
           )}
         </motion.div>
       )}
