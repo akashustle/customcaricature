@@ -242,14 +242,14 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
   const initials = (profileData.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
 
-  // Palette tokens (inspired by reference: ivory, coral, sage, gold)
+  // Lighter, whiter palette — soft accents, white surfaces
   const palette = {
-    ivory: "hsl(38 60% 96%)",
-    coral: "hsl(8 78% 70%)",
-    gold: "hsl(36 78% 60%)",
-    sage: "hsl(150 30% 65%)",
-    plum: "hsl(335 45% 55%)",
-    sky: "hsl(200 70% 70%)",
+    ivory: "#ffffff",
+    coral: "hsl(8 78% 72%)",
+    gold: "hsl(36 85% 65%)",
+    sage: "hsl(150 45% 68%)",
+    plum: "hsl(335 55% 65%)",
+    sky: "hsl(210 90% 70%)",
   };
 
   return (
