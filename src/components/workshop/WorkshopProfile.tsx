@@ -386,11 +386,19 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           {/* Action buttons */}
           {!editing && (
             <div className="flex md:flex-col gap-2">
-              <Button size="sm" onClick={() => setEditing(true)}
-                className="rounded-full font-semibold shadow-md text-white border-0"
-                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-                <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit
-              </Button>
+              {editLocked ? (
+                <Button size="sm" onClick={() => setEditRequestOpen(true)}
+                  className="rounded-full font-semibold shadow-md text-white border-0"
+                  style={{ background: `linear-gradient(135deg, hsl(40 90% 55%), hsl(20 85% 55%))` }}>
+                  🔒 Request Edit
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => setEditing(true)}
+                  className="rounded-full font-semibold shadow-md text-white border-0"
+                  style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
+                  <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+                </Button>
+              )}
             </div>
           )}
         </div>
