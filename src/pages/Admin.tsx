@@ -678,7 +678,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop");
     if (error) {
       console.error("Error fetching customers:", error);
     }
