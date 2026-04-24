@@ -127,6 +127,30 @@ const AdminHomepageControl = () => {
   const instantQuote = settings.homepage_instant_quote || {};
   const homepageSections = settings.homepage_sections || {};
   const funnelConfig = settings.homepage_funnel_config || {};
+  const faqs = settings.homepage_faqs || {};
+  const faqItems: { q: string; a: string }[] = Array.isArray(faqs.items) ? faqs.items : [];
+
+  const setFaqField = (field: string, value: any) => {
+    updateSetting("homepage_faqs", { ...faqs, [field]: value });
+  };
+  const updateFaqItem = (index: number, patch: Partial<{ q: string; a: string }>) => {
+    const next = [...faqItems];
+    next[index] = { ...next[index], ...patch };
+    setFaqField("items", next);
+  };
+  const addFaqItem = () => {
+    setFaqField("items", [...faqItems, { q: "New question?", a: "Answer goes here." }]);
+  };
+  const removeFaqItem = (index: number) => {
+    setFaqField("items", faqItems.filter((_, i) => i !== index));
+  };
+  const moveFaqItem = (index: number, dir: "up" | "down") => {
+    const swap = dir === "up" ? index - 1 : index + 1;
+    if (swap < 0 || swap >= faqItems.length) return;
+    const next = [...faqItems];
+    [next[index], next[swap]] = [next[swap], next[index]];
+    setFaqField("items", next);
+  };
 
   const DEFAULT_SECTION_ORDER = [
     { id: "instant_quote", label: "Instant Quote", hint: "CTA card with pricing link" },
