@@ -2162,6 +2162,62 @@ export type Database = {
         }
         Relationships: []
       }
+      event_payment_claims: {
+        Row: {
+          admin_reply: string | null
+          amount: number
+          claim_type: string
+          created_at: string
+          event_id: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_path: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          user_note: string | null
+        }
+        Insert: {
+          admin_reply?: string | null
+          amount?: number
+          claim_type: string
+          created_at?: string
+          event_id: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          user_note?: string | null
+        }
+        Update: {
+          admin_reply?: string | null
+          amount?: number
+          claim_type?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          user_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payment_claims_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_pricing: {
         Row: {
           advance_amount: number
@@ -5787,6 +5843,7 @@ export type Database = {
         Args: { _auth_user_id: string; _event_id: string }
         Returns: boolean
       }
+      auto_complete_past_events: { Args: never; Returns: number }
       detect_login_role: {
         Args: { p_identifier: string; p_identifier_type: string }
         Returns: Json
