@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
+import RightClickBlocker from "./components/RightClickBlocker";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
@@ -242,6 +243,19 @@ const AppOnboardingGate = () => {
   return <Suspense fallback={null}><AppOnboarding /></Suspense>;
 };
 
+/**
+ * Gate the /admin-panel route. Without a session "admin_panel_unlocked"
+ * flag set by the AdminLogin (/customcad75) flow OR an existing admin
+ * Supabase session, render NotFound — that way deep-linking /admin-panel
+ * directly behaves exactly like /admin and /admin-login (404).
+ */
+const AdminPanelGate = ({ children }: { children: React.ReactNode }) => {
+  const flag = typeof window !== "undefined" ? sessionStorage.getItem("admin_panel_unlocked") : null;
+  const hasWorkshopAdmin = typeof window !== "undefined" ? !!localStorage.getItem("workshop_admin") : false;
+  if (!flag && !hasWorkshopAdmin) return <Suspense fallback={<PageLoader />}><NotFound /></Suspense>;
+  return <>{children}</>;
+};
+
 const App = () => {
   // Splash on EVERY full page reload (skip only on admin-style routes).
   const [showSplash, setShowSplash] = useState(() => {
@@ -272,6 +286,7 @@ const App = () => {
             <RouteMemoryRedirector />
             <InternalNavigationBridge />
             <AdminLightThemeForcer />
+            <RightClickBlocker />
             
             <FloatingButtons />
             <MobileBottomNav />
@@ -284,9 +299,10 @@ const App = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/customcad75" element={<AdminLogin />} />
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin" element={<Navigate to="/login" replace />} />
-                <Route path="/admin-panel" element={<Admin />} />
+                {/* Public-search-friendly admin slugs are intentionally hidden — show a 404 so they don't leak. */}
+                <Route path="/admin-login" element={<NotFound />} />
+                <Route path="/admin" element={<NotFound />} />
+                <Route path="/admin-panel" element={<AdminPanelGate><Admin /></AdminPanelGate>} />
                 <Route path="/about" element={<About />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />

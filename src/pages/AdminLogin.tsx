@@ -189,6 +189,7 @@ const AdminLogin = () => {
         const fullName = profile?.full_name || session.user.user_metadata?.full_name || "Admin";
         sessionStorage.setItem("admin_entered_name", fullName);
         localStorage.setItem("workshop_admin", JSON.stringify({ id: session.user.id, email: profile?.email || session.user.email, name: fullName }));
+        sessionStorage.setItem("admin_panel_unlocked", "1");
         startAdminAuthHandoff(session.user.id);
         navigate("/admin-panel", { replace: true });
       }
@@ -370,6 +371,7 @@ const AdminLogin = () => {
       setFailedAttempts(0);
       sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
       localStorage.setItem("workshop_admin", JSON.stringify({ id: authenticatedUser.id, email: selectedAdmin.email, name: selectedAdmin.name }));
+      sessionStorage.setItem("admin_panel_unlocked", "1");
       toast({ title: `Welcome back, ${selectedAdmin.name}! 🎉` });
       navigate("/admin-panel", { replace: true });
     } catch (err: any) {
