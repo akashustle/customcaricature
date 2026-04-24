@@ -2004,6 +2004,12 @@ const Admin = () => {
             <AdminReviews />
           </TabsContent>
 
+          <TabsContent value="edit-requests">
+            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+              <EditRequestsInbox scope="profile" adminName={adminProfile?.full_name || "Admin"} />
+            </Suspense>
+          </TabsContent>
+
           <TabsContent value="voice">
             <AdminVoiceMonitor />
           </TabsContent>
