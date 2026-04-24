@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
 import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
+import EditRequestDialog from "@/components/EditRequestDialog";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
