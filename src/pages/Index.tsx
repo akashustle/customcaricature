@@ -111,9 +111,13 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
     );
   };
   return (
-    <section className="relative px-3 sm:px-4 mt-3">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
-        <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
+    // Edge-to-edge hero: pulled up so the floating header sits *over* the
+    // violet fade. The header has its own backdrop-blur card, so the colour
+    // bleeds beautifully behind it.
+    <section className="relative -mt-[68px] md:-mt-[84px]">
+      <div className="relative bg-hero-violet overflow-hidden border-b border-border/40">
+        {/* extra top padding compensates for the overlapping floating header */}
+        <div className="px-4 sm:px-10 lg:px-14 pt-[96px] sm:pt-[140px] lg:pt-[180px] pb-8 sm:pb-14 lg:pb-20 text-center max-w-7xl mx-auto">
           <div className="chip-violet mx-auto mb-5 sm:mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             {c.chip_text || "India's #1 Live Caricature Studio"}
