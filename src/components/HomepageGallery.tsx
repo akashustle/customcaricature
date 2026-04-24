@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import WatermarkedImage from "@/components/WatermarkedImage";
 
 type GalleryItem = {
   id: string;
@@ -58,15 +59,20 @@ const HomepageGallery = ({ table, title, subtitle }: {
             <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % items.length); }} className="absolute right-4 text-background/80 hover:text-background z-10">
               <ChevronRight className="w-10 h-10" />
             </button>
-            <motion.img
+            <motion.div
               key={lightboxIndex}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              src={items[lightboxIndex].image_url}
-              alt={items[lightboxIndex].caption || "Gallery"}
-              className="max-w-[90vw] max-h-[90vh] object-contain rounded-2xl"
+              className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <WatermarkedImage
+                src={items[lightboxIndex].image_url}
+                alt={items[lightboxIndex].caption || "Gallery"}
+                className="rounded-2xl max-h-[90vh]"
+                imgClassName="!object-contain"
+              />
+            </motion.div>
             {items[lightboxIndex].caption && (
               <p className="absolute bottom-12 text-background/80 font-body text-sm bg-foreground/40 px-4 py-1 rounded-full">
                 {items[lightboxIndex].caption}
@@ -95,14 +101,10 @@ const HomepageGallery = ({ table, title, subtitle }: {
                 className="rounded-2xl overflow-hidden cursor-pointer shadow-md border border-border/50 bg-card"
                 onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
               >
-                <img
+                <WatermarkedImage
                   src={item.image_url}
                   alt={item.caption || `${title} ${i + 1}`}
-                  className="w-full h-48 md:h-56 object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  width={300}
-                  height={224}
+                  className="w-full h-48 md:h-56"
                 />
                 {item.caption && (
                   <p className="px-3 py-2 text-xs font-body text-muted-foreground truncate">{item.caption}</p>

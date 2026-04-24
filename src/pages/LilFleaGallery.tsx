@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
+import WatermarkedImage from "@/components/WatermarkedImage";
 
 const LilFleaGallery = () => {
   const [images, setImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
@@ -153,10 +154,10 @@ const LilFleaGallery = () => {
                   className="break-inside-avoid mb-2 cursor-pointer rounded-lg overflow-hidden shadow-sm border border-border/30 hover:shadow-md transition-shadow active:scale-[0.98]"
                   onClick={() => setLightboxIdx(i % allUrls.length)}
                 >
-                  <img
+                  <WatermarkedImage
                     src={url}
                     alt={`Lil Flea photo ${(i % allUrls.length) + 1}`}
-                    className="w-full object-cover pointer-events-none"
+                    className="w-full"
                     loading={i < 12 ? "eager" : "lazy"}
                   />
                 </div>
@@ -187,13 +188,18 @@ const LilFleaGallery = () => {
           >
             <ChevronRight className="w-6 h-6" />
           </button>
-          <img
+          <div
             key={lightboxIdx}
-            src={allUrls[lightboxIdx]}
-            alt="Gallery preview"
-            className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200"
+            className="max-w-[92vw] max-h-[85vh] animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
-          />
+          >
+            <WatermarkedImage
+              src={allUrls[lightboxIdx]}
+              alt="Gallery preview"
+              className="rounded-2xl shadow-2xl max-h-[85vh]"
+              imgClassName="!object-contain"
+            />
+          </div>
           <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-background/70 font-semibold bg-foreground/30 px-3 py-1 rounded-full">{lightboxIdx + 1} / {allUrls.length}</p>
         </div>
       )}
