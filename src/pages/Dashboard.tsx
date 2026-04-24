@@ -22,8 +22,9 @@ import CelebrationBanner from "@/components/CelebrationBanner";
 import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
-import PostEventBalancePopup from "@/components/PostEventBalancePopup";
+import EventBalanceFullScreen from "@/components/EventBalanceFullScreen";
 import EventPaymentTimeline from "@/components/EventPaymentTimeline";
+import ReferAFriendCard from "@/components/ReferAFriendCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 // Lightweight wrapper so it sits inside the dashboard layout
@@ -412,6 +413,14 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background pb-28 md:pb-10 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
+
+      {/* Permanent fullscreen 3D balance page — shown across the whole dashboard
+          for any completed event with a remaining balance. Auto-hides when admin
+          approves manual claim or online payment succeeds. Reacts to admin
+          status reversals via the events realtime subscription. */}
+      {user && events.length > 0 && (
+        <EventBalanceFullScreen events={events} userId={user.id} />
+      )}
 
       {/* Desktop top bar */}
       <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
@@ -1713,14 +1722,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                       />
                     )}
 
-                    {/* Post-Event Balance Popup — permanent until paid/approved */}
-                    {userId && ev.status === "completed" && remaining > 0 && !fullyPaid && (
-                      <PostEventBalancePopup
-                        event={ev}
-                        userId={userId}
-                        remaining={remaining}
-                      />
-                    )}
+                    {/* Per-row popup removed — replaced by global EventBalanceFullScreen overlay rendered at dashboard root */}
 
                     {/* Audit timeline: booking → advance → completion → claim → admin decision */}
                     {userId && (ev.status === "completed" || ev.payment_status === "fully_paid") && (
@@ -2628,6 +2630,12 @@ const ProfileWithLogout = (props: any) => {
         setEditForm={props.setEditForm}
         saveProfile={props.saveProfile}
         setProfile={props.setProfile}
+      />
+
+      {/* Refer a friend — light 3D referral card */}
+      <ReferAFriendCard
+        fullName={props.profile?.full_name}
+        secretCode={props.profile?.secret_code}
       />
 
       {/* Account & security */}
