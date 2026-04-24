@@ -534,13 +534,14 @@ const AboutUs = ({ config, stats: statsItems }: { config?: any; stats?: { label:
                 <div className="text-xs text-muted-foreground">{c.signoff_role || "Creative Caricature Club"}</div>
               </div>
             </div>
-            {websiteUrl && (
-              <div className="mt-4 pt-4 border-t border-border/40 text-center">
-                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline">
-                  Visit our main studio website →
-                </a>
-              </div>
-            )}
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+};
+
+// (Removed: external "Visit our main studio website" CTA — the link now lives in the footer.)
           </div>
         </div>
       </div>
@@ -602,13 +603,7 @@ const StillConfused = ({ config }: { config?: any }) => {
             </a>
           </div>
 
-          <p className="mt-5 text-xs text-foreground/55">
-            Visit{" "}
-            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-              creativecaricatureclub.com
-            </a>{" "}
-            for more about our studio.
-          </p>
+          {/* (Studio website mention removed — see footer "Main Web" link.) */}
         </div>
       </div>
     </section>
