@@ -114,31 +114,33 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
     );
   };
   return (
-    // Hero: keep the violet fade edge-to-edge but bring the inner content
-    // back into a tightly-aligned container so it reads premium, not cheap.
-    //  • -mx-* escapes parent side-padding so the bg reaches the edges.
-    //  • Negative top margin tucks under the FloatingNav (~64-88px tall).
-    //  • A bottom rounded edge softens the transition into the next section.
-    //  • Inner padding is tuned per breakpoint to keep CTAs comfortably
-    //    below the header at every screen size.
-    <section className="relative -mx-3 sm:-mx-4 -mt-[64px] sm:-mt-[72px] md:-mt-[88px]">
-      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40 sm:rounded-b-[32px]">
-        {/* Soft ambient orb to give the fade a focal centre */}
-        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[80%] max-w-[900px] h-[420px] rounded-full opacity-60 blur-3xl"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }} />
+    // Hero: contained inside a centered rounded card (matches the rest of the
+    // homepage) so the violet fade reads premium instead of full-bleed cheap.
+    //  • Outer wrapper provides the same side-padding rhythm as <Section/>.
+    //  • Card pulls up to tuck under the FloatingNav via negative top margin.
+    //  • A subtle radial wash + ambient orb give the gradient a focal centre
+    //    without bleeding to the screen edges.
+    <section className="px-3 sm:px-4 pt-3 sm:pt-4">
+      <div className="relative mx-auto max-w-7xl rounded-[28px] sm:rounded-[36px] overflow-hidden bg-hero-violet border border-border/50 shadow-[0_30px_80px_-40px_hsl(252_60%_40%/0.35)] -mt-[60px] sm:-mt-[68px] md:-mt-[80px]">
+        {/* Soft ambient orb behind the headline */}
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[78%] max-w-[820px] h-[360px] rounded-full opacity-55 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.22), transparent 70%)" }} />
+        {/* Soft corner glow */}
+        <div className="pointer-events-none absolute -bottom-28 -right-20 w-[420px] h-[420px] rounded-full opacity-40 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.20), transparent 70%)" }} />
 
-        <div className="relative px-5 sm:px-8 lg:px-12 pt-[100px] sm:pt-[130px] md:pt-[160px] lg:pt-[190px] pb-8 sm:pb-12 lg:pb-16 text-center max-w-5xl mx-auto">
-          <div className="chip-violet mx-auto mb-5 sm:mb-7">
+        <div className="relative px-5 sm:px-10 lg:px-16 pt-[96px] sm:pt-[120px] md:pt-[140px] lg:pt-[160px] pb-6 sm:pb-10 text-center max-w-4xl mx-auto">
+          <div className="chip-violet mx-auto mb-5 sm:mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             {c.chip_text || "India's #1 Live Caricature Studio"}
           </div>
-          <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.02] sm:leading-[0.98] max-w-4xl mx-auto">
+          <h1 className="text-[2.25rem] sm:text-5xl md:text-6xl lg:text-[4.25rem] font-black tracking-tight text-foreground leading-[1.05] sm:leading-[1] max-w-3xl mx-auto">
             {renderHeadline()}
           </h1>
-          <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-[15px] sm:text-lg text-foreground/75 leading-relaxed">
+          <p className="mt-4 sm:mt-5 max-w-xl mx-auto text-[14.5px] sm:text-base md:text-lg text-foreground/70 leading-relaxed">
             {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
           </p>
-          <div className="mt-7 sm:mt-9 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
             <button onClick={onBook} className="btn-square-violet justify-center">
               <Calendar className="w-5 h-5" /> {c.primary_cta || "Book Your Event"} <ArrowRight className="w-4 h-4" />
             </button>
@@ -149,7 +151,7 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
         </div>
         {/* Continuous right-to-left marquee */}
         <HeroMarquee images={images} onImageClick={onImageClick} />
-        <div className="h-8 sm:h-12" />
+        <div className="h-6 sm:h-10" />
       </div>
     </section>
   );
