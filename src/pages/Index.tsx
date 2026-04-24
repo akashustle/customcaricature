@@ -139,12 +139,13 @@ const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote
 
 /* ------------------------------- Stat Strip ------------------------------ */
 
-const Stats = ({ items }: { items: { label: string; value: string }[] }) => {
+const Stats = ({ items, config }: { items: { label: string; value: string }[]; config?: any }) => {
+  const list = (config?.items && Array.isArray(config.items) && config.items.length) ? config.items : items;
   const icons = [Calendar, Users, Award, Star];
   return (
     <Section id="stats">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        {items.map((s, i) => {
+        {list.map((s: any, i: number) => {
           const Icon = icons[i % icons.length];
           return (
             <div key={s.label} className="rounded-2xl bg-secondary/60 border border-border/30 p-4 sm:p-5 text-center">
@@ -237,8 +238,9 @@ const Services = ({ onBook, config }: { onBook: () => void; config?: any }) => {
 
 /* -------------------------- How it Starts -------------------------------- */
 
-const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] }) => {
-  const steps = [
+const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: string[]; config?: any }) => {
+  const c = config || {};
+  const steps = (c.steps && Array.isArray(c.steps) && c.steps.length) ? c.steps : [
     { n: "1", title: "Share your event", body: "Tell us your date, city, guest count and event type. We'll match the right artists." },
     { n: "2", title: "Lock the booking", body: "Pay a small advance to confirm your slot. We handle artists, travel and logistics." },
     { n: "3", title: "Wow your guests", body: "Our artists arrive on time and create stunning live caricatures your guests take home." },
@@ -247,12 +249,12 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
   return (
     <Section
       id="how"
-      eyebrow="Onboarding • Onboarding"
-      title={<>How it <span className="text-gradient-violet">starts?</span></>}
+      eyebrow={c.eyebrow || "Onboarding • Onboarding"}
+      title={<>{c.title_pre || "How it"} <span className="text-gradient-violet">{c.title_highlight || "starts?"}</span></>}
     >
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         <div className="space-y-6">
-          {steps.map((s) => (
+          {steps.map((s: any) => (
             <div key={s.n} className="flex gap-4 sm:gap-5">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-primary/10 text-primary font-bold text-lg flex items-center justify-center shrink-0 border-2 border-primary/20">
                 {s.n}
@@ -264,7 +266,7 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
             </div>
           ))}
           <button onClick={onBook} className="btn-square-violet mt-3">
-            <Calendar className="w-4 h-4" /> Start your booking
+            <Calendar className="w-4 h-4" /> {c.cta_label || "Start your booking"}
           </button>
         </div>
         <div className="card-gradient-blob p-4 sm:p-8">
@@ -283,21 +285,22 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
 
 /* ------------------------------- Why Us / VS ----------------------------- */
 
-const WhyUnique = () => {
-  const others = ["Slow turnaround time", "Inconsistent artist quality", "Hidden charges & surprises", "Hard to reach when needed"];
-  const ours = ["On-time, every time", "Trained, vetted top artists", "Transparent flat pricing", "Dedicated event manager"];
+const WhyUnique = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const others = (c.others && Array.isArray(c.others) && c.others.length) ? c.others : ["Slow turnaround time", "Inconsistent artist quality", "Hidden charges & surprises", "Hard to reach when needed"];
+  const ours = (c.ours && Array.isArray(c.ours) && c.ours.length) ? c.ours : ["On-time, every time", "Trained, vetted top artists", "Transparent flat pricing", "Dedicated event manager"];
   return (
     <Section
       id="why-us"
-      eyebrow="Special • Special"
-      title={<>What makes us <span className="text-gradient-violet">unique?</span></>}
-      subtitle="Creative Caricature Club V/S Others"
+      eyebrow={c.eyebrow || "Special • Special"}
+      title={<>{c.title_pre || "What makes us"} <span className="text-gradient-violet">{c.title_highlight || "unique?"}</span></>}
+      subtitle={c.subtitle || "Creative Caricature Club V/S Others"}
     >
       <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
         <div className="rounded-2xl bg-secondary/40 border border-border/40 p-5 sm:p-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-foreground/5 px-4 py-1.5 text-xs font-bold tracking-wider text-foreground/70">OTHERS</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-foreground/5 px-4 py-1.5 text-xs font-bold tracking-wider text-foreground/70">{c.others_label || "OTHERS"}</div>
           <ul className="mt-5 space-y-3">
-            {others.map((t) => (
+            {others.map((t: string) => (
               <li key={t} className="flex items-center gap-3 text-foreground/70 text-sm sm:text-base">
                 <Minus className="w-5 h-5 rounded-full p-1 bg-foreground/10" /> {t}
               </li>
@@ -305,9 +308,9 @@ const WhyUnique = () => {
           </ul>
         </div>
         <div className="rounded-2xl bg-card border border-primary/20 p-5 sm:p-8 shadow-[0_20px_60px_-30px_hsl(252_85%_62%/0.45)]">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-bold tracking-wider text-white">CREATIVE CARICATURE CLUB</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-bold tracking-wider text-white">{c.ours_label || "CREATIVE CARICATURE CLUB"}</div>
           <ul className="mt-5 space-y-3">
-            {ours.map((t) => (
+            {ours.map((t: string) => (
               <li key={t} className="flex items-center gap-3 text-foreground font-medium text-sm sm:text-base">
                 <CheckCircle2 className="w-5 h-5 text-primary" /> {t}
               </li>
