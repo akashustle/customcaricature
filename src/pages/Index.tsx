@@ -111,40 +111,42 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
     );
   };
   return (
-    // True edge-to-edge hero. We:
-    //  • escape any parent side-padding using `-mx-3 sm:-mx-4` so the violet
-    //    fade reaches every screen edge (the SiteShell pads its main wrap).
-    //  • pull the section UP under the floating header with a negative top
-    //    margin tuned per breakpoint:
-    //       mobile  : header is sticky at top:0 with pt-3 → ~64px tall
-    //       desktop : header floats at top:3 with no pt → ~76px tall
-    //  • re-add matching top padding inside so the headline + CTA never sit
-    //    underneath the header.
+    // Hero: keep the violet fade edge-to-edge but bring the inner content
+    // back into a tightly-aligned container so it reads premium, not cheap.
+    //  • -mx-* escapes parent side-padding so the bg reaches the edges.
+    //  • Negative top margin tucks under the FloatingNav (~64-88px tall).
+    //  • A bottom rounded edge softens the transition into the next section.
+    //  • Inner padding is tuned per breakpoint to keep CTAs comfortably
+    //    below the header at every screen size.
     <section className="relative -mx-3 sm:-mx-4 -mt-[64px] sm:-mt-[72px] md:-mt-[88px]">
-      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40">
-        <div className="px-4 sm:px-10 lg:px-14 pt-[88px] sm:pt-[120px] md:pt-[150px] lg:pt-[190px] pb-8 sm:pb-14 lg:pb-20 text-center max-w-7xl mx-auto">
-          <div className="chip-violet mx-auto mb-5 sm:mb-6">
+      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40 sm:rounded-b-[32px]">
+        {/* Soft ambient orb to give the fade a focal centre */}
+        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[80%] max-w-[900px] h-[420px] rounded-full opacity-60 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }} />
+
+        <div className="relative px-5 sm:px-8 lg:px-12 pt-[100px] sm:pt-[130px] md:pt-[160px] lg:pt-[190px] pb-8 sm:pb-12 lg:pb-16 text-center max-w-5xl mx-auto">
+          <div className="chip-violet mx-auto mb-5 sm:mb-7">
             <Sparkles className="w-3.5 h-3.5" />
             {c.chip_text || "India's #1 Live Caricature Studio"}
           </div>
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
+          <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.02] sm:leading-[0.98] max-w-4xl mx-auto">
             {renderHeadline()}
           </h1>
-          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/75 px-2">
+          <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-[15px] sm:text-lg text-foreground/75 leading-relaxed">
             {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
           </p>
-          <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
+          <div className="mt-7 sm:mt-9 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
+            <button onClick={onBook} className="btn-square-violet justify-center">
               <Calendar className="w-5 h-5" /> {c.primary_cta || "Book Your Event"} <ArrowRight className="w-4 h-4" />
             </button>
-            <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
+            <button onClick={onQuote} className="btn-square-outline justify-center">
               <Sparkles className="w-5 h-5" /> {c.secondary_cta || "Get Free Quote"}
             </button>
           </div>
         </div>
         {/* Continuous right-to-left marquee */}
         <HeroMarquee images={images} onImageClick={onImageClick} />
-        <div className="h-6 sm:h-10" />
+        <div className="h-8 sm:h-12" />
       </div>
     </section>
   );
