@@ -98,6 +98,15 @@ const Dashboard = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [hasWorkshop, setHasWorkshop] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const { data } = await supabase.from("workshop_users" as any)
+        .select("id").eq("auth_user_id", user.id).maybeSingle();
+      setHasWorkshop(!!data);
+    })();
+  }, [user?.id]);
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
   const [portalPaymentRequest, setPortalPaymentRequest] = useState<any>(null);
@@ -409,6 +418,7 @@ const Dashboard = () => {
     events: dt.events !== false,
     payments: dt.payments !== false,
     chat: dt.chat !== false,
+    workshop: hasWorkshop, // only visible for workshop-origin users
     profile: dt.profile !== false,
   };
 
@@ -519,6 +529,11 @@ const Dashboard = () => {
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
                 </TabsTrigger>
               )}
+              {tabsAvailable.workshop && (
+                <TabsTrigger value="workshop" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <GraduationCap className="w-4 h-4 mr-2" />Workshop
+                </TabsTrigger>
+              )}
               {tabsAvailable.profile && (
                 <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
@@ -532,6 +547,9 @@ const Dashboard = () => {
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
+            {tabsAvailable.workshop && (
+              <TabsContent value="workshop">{user && <UserWorkshopOverview authUserId={user.id} />}</TabsContent>
+            )}
             <TabsContent value="profile">
               <ProfileWithLogout
                 userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
@@ -556,6 +574,9 @@ const Dashboard = () => {
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
             </div>
+          )}
+          {activeTab === "workshop" && tabsAvailable.workshop && user && (
+            <UserWorkshopOverview authUserId={user.id} />
           )}
           {activeTab === "profile" && (
             <ProfileWithLogout
@@ -2545,6 +2566,16 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
             </div>
           </div>
         </motion.div>
+      )}
+
+      {/* Workshop quick-switch (only for workshop-origin users) */}
+      {user && (
+        <AccountSwitcherCard
+          authUserId={user.id}
+          fullName={profile?.full_name}
+          email={profile?.email}
+          mobile={profile?.mobile}
+        />
       )}
 
       {/* Saved event drafts — gentle reminder to finish booking */}
