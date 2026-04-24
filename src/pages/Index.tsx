@@ -166,7 +166,7 @@ const Stats = ({ items, config }: { items: { label: string; value: string }[]; c
 
 /* ----------------------------- Event Gallery ----------------------------- */
 
-const EventGallery = ({ images, onView }: { images: string[]; onView: () => void }) => {
+const EventGallery = ({ images, onView, onImageClick }: { images: string[]; onView: () => void; onImageClick?: (i: number) => void }) => {
   if (images.length === 0) return null;
   const preview = images.slice(0, 8);
   return (
@@ -178,9 +178,15 @@ const EventGallery = ({ images, onView }: { images: string[]; onView: () => void
     >
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
         {preview.map((src, i) => (
-          <div key={i} className={`rounded-2xl overflow-hidden border border-border/40 bg-card ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}>
+          <button
+            type="button"
+            key={i}
+            onClick={() => onImageClick?.(i)}
+            className={`rounded-2xl overflow-hidden border border-border/40 bg-card transition-transform hover:scale-[1.02] cursor-zoom-in ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}
+            aria-label={`Open event image ${i + 1}`}
+          >
             <img src={src} alt={`Event ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-          </div>
+          </button>
         ))}
       </div>
       <div className="text-center mt-7">
