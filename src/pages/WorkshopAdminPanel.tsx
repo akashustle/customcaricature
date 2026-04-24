@@ -2185,7 +2185,7 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><Label className={`${textSecondary} text-xs`}>Age</Label><Input type="number" value={editData.age || ""} onChange={e => setEditData({...editData, age: e.target.value})} className={inputClass} /></div>
-            <div><Label className={`${textSecondary} text-xs`}>Gender</Label><Select value={editData.gender || ""} onValueChange={v => setEditData({...editData, gender: v})}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
+            <div><Label className={`${textSecondary} text-xs`}>Gender</Label><Select value={editData.gender || ""} onValueChange={v => setEditData({...editData, gender: v})}><SelectTrigger className={inputClass}><SelectValue placeholder="—" /></SelectTrigger><SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem></SelectContent></Select></div>
             <div><Label className={`${textSecondary} text-xs`}>Slot</Label><Select value={editData.slot} onValueChange={v => setEditData({...editData, slot: v})}><SelectTrigger className={inputClass}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12pm-3pm">12–3</SelectItem><SelectItem value="6pm-9pm">6–9</SelectItem></SelectContent></Select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
