@@ -57,17 +57,6 @@ const WorkshopBookingLinkCard = ({ workshopUser, darkMode = false, onLinked }: P
 
   const isAlreadyLinked = !!workshopUser.auth_user_id;
 
-  const linkExisting = async (authUserId: string) => {
-    const { error } = await supabase
-      .from("workshop_users" as any)
-      .update({ auth_user_id: authUserId } as any)
-      .eq("id", workshopUser.id);
-    if (error) throw error;
-    const next = { ...workshopUser, auth_user_id: authUserId };
-    localStorage.setItem("workshop_user", JSON.stringify(next));
-    window.dispatchEvent(new CustomEvent("workshop-user-updated", { detail: next }));
-    onLinked?.(authUserId);
-  };
 
   const handleSignUp = async () => {
     if (!form.full_name || form.full_name.trim().length < 2) {
