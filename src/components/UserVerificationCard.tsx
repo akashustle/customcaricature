@@ -140,6 +140,14 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
         return;
       }
     }
+    if (!profile?.avatar_url) {
+      toast({
+        title: "📸 Profile photo required",
+        description: "Please upload your own profile photo first — verification needs your real face.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (completeness < 80) {
       toast({ title: "Profile incomplete", description: "Please complete at least 80% of details.", variant: "destructive" });
       return;
