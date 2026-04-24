@@ -760,6 +760,21 @@ const UserCard = ({ u, expandedUser, setExpandedUser, editingUser, setEditingUse
                   <div><span className="text-muted-foreground">Occupation:</span> {u.occupation || "—"}</div>
                   <div><span className="text-muted-foreground">Type:</span> {u.student_type}</div>
                 </div>
+                {u.auth_user_id && (
+                  <div className="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200">
+                    <div>
+                      <p className="text-xs font-semibold text-blue-900">Booking ⇄ Workshop sync</p>
+                      <p className="text-[10px] text-blue-700">Auto-mirror profile fields between accounts</p>
+                    </div>
+                    <Switch
+                      checked={u.sync_enabled !== false}
+                      onCheckedChange={async (v) => {
+                        await (supabase.from("workshop_users" as any) as any).update({ sync_enabled: v }).eq("id", u.id);
+                        toast({ title: v ? "Sync enabled" : "Sync disabled" });
+                      }}
+                    />
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Button size="sm" variant="outline" onClick={() => { setEditingUser(u.id); setEditData(u); }}><Edit2 className="w-3.5 h-3.5 mr-1" />Edit</Button>
                   <Button size="sm" variant="outline" onClick={() => setCertUserId(u.id)}><Award className="w-3.5 h-3.5 mr-1" />Certificate</Button>
