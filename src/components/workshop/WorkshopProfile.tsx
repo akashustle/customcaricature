@@ -259,12 +259,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
         initial={{ opacity: 0, y: 20, rotateX: -5 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
-        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]"
+        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border shadow-[0_30px_60px_-25px_rgba(80,60,150,0.18)]"
         style={{
           background: darkMode
             ? `linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.8) 100%)`
-            : `linear-gradient(135deg, ${palette.ivory} 0%, hsl(38 50% 92%) 50%, hsl(38 55% 88%) 100%)`,
-          borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+            : `linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)`,
+          borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.95)",
+          boxShadow: darkMode ? undefined : "0 30px 60px -25px hsl(252 60% 40% / 0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
           transformStyle: "preserve-3d",
         }}
       >
