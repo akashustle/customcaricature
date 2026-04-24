@@ -2,9 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard, ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import WorkshopHome from "@/components/workshop/WorkshopHome";
 import WorkshopCertificates from "@/components/workshop/WorkshopCertificates";
@@ -17,13 +26,13 @@ import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineA
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
+// Brand-aligned palette — primary uses CCC site primary, with curated accents
 const ACCENT_COLORS = [
+  { name: "CCC Brand", primary: "hsl(var(--primary))", secondary: "hsl(var(--accent))" },
   { name: "Violet", primary: "#7c3aed", secondary: "#a855f7" },
   { name: "Terracotta", primary: "#c2703e", secondary: "#d4854f" },
   { name: "Teal", primary: "#0d9488", secondary: "#14b8a6" },
   { name: "Rose", primary: "#be123c", secondary: "#e11d48" },
-  { name: "Blue", primary: "#1d4ed8", secondary: "#2563eb" },
-  { name: "Amber", primary: "#b45309", secondary: "#d97706" },
 ];
 
 const playNotifSound = () => {
@@ -40,19 +49,6 @@ const playNotifSound = () => {
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
     osc.start();
     osc.stop(ctx.currentTime + 0.35);
-    setTimeout(() => {
-      const osc2 = ctx.createOscillator();
-      const g2 = ctx.createGain();
-      osc2.type = "sine";
-      osc2.frequency.value = 1046;
-      g2.gain.value = 0.0001;
-      osc2.connect(g2);
-      g2.connect(ctx.destination);
-      g2.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
-      g2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
-      osc2.start();
-      osc2.stop(ctx.currentTime + 0.3);
-    }, 150);
   } catch {}
 };
 
@@ -60,8 +56,8 @@ const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
   { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
   { key: "videos", icon: Video, label: "Videos", settingKey: "global_video_access" },
-  { key: "assignments", icon: FileText, label: "Assignments", settingKey: "assignment_submission_enabled" },
-  { key: "certificates", icon: Award, label: "Certificates", settingKey: "certificate_visibility" },
+  { key: "assignments", icon: FileText, label: "Tasks", settingKey: "assignment_submission_enabled" },
+  { key: "certificates", icon: Award, label: "Certs", settingKey: "certificate_visibility" },
   { key: "feedback", icon: MessageSquare, label: "Feedback", settingKey: "feedback_visibility" },
   { key: "profile", icon: User, label: "Profile", settingKey: null },
 ];
@@ -144,15 +140,6 @@ const WorkshopDashboard = () => {
 
   if (!workshopUser) return null;
 
-  const dm = darkMode;
-  const bg = dm ? "bg-background" : "bg-background";
-  const headerBg = dm ? "bg-card/98 border-border" : "bg-card/98 border-border";
-  const textPrimary = dm ? "text-foreground font-bold" : "text-foreground font-bold";
-  const textSecondary = dm ? "text-muted-foreground font-medium" : "text-muted-foreground font-medium";
-  const activeClass = `text-primary-foreground shadow-lg font-semibold`;
-  const activeStyle = { background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})`, boxShadow: `0 4px 15px ${accent.primary}30` };
-  const inactiveClass = "text-muted-foreground font-medium";
-
   const visibleTabs = allTabs.filter(tab => {
     if (!tab.settingKey) return true;
     return settings[tab.settingKey]?.enabled !== false;
@@ -161,6 +148,11 @@ const WorkshopDashboard = () => {
   if (!visibleTabs.find(t => t.key === activeTab)) {
     setActiveTab("home");
   }
+
+  // Active tab style — uses brand gradient from CSS tokens
+  const activeStyle = accentIdx === 0
+    ? { background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))`, boxShadow: `0 8px 24px -8px hsl(var(--primary) / 0.45)` }
+    : { background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})`, boxShadow: `0 8px 24px -8px ${accent.primary}55` };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -175,74 +167,119 @@ const WorkshopDashboard = () => {
     }
   };
 
+  const initials = (workshopUser.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
+
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 ${bg} transition-colors duration-300 relative`}>
-      {/* Background orbs — pure CSS for zero JS overhead */}
+    <div className="min-h-screen pb-24 md:pb-8 bg-background transition-colors duration-300 relative overflow-hidden">
+      {/* 3D ambient background — branded soft orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-20 -right-20 w-[400px] h-[400px] rounded-full opacity-[0.04] blur-[100px] ws-orb-1"
-          style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }} />
-        <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-[0.03] blur-[80px] ws-orb-2"
-          style={{ background: `linear-gradient(225deg, ${accent.secondary}, ${accent.primary})` }} />
+        <div className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full opacity-[0.10] blur-[120px] ws-orb-1"
+          style={{ background: `radial-gradient(circle, hsl(var(--primary) / 0.6), transparent 70%)` }} />
+        <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full opacity-[0.08] blur-[100px] ws-orb-2"
+          style={{ background: `radial-gradient(circle, hsl(var(--accent) / 0.6), transparent 70%)` }} />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full opacity-[0.05] blur-[120px]"
+          style={{ background: `radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)` }} />
       </div>
 
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
       <WorkshopCountdownOverlay user={workshopUser} />
 
-      {/* Header - Premium Glassmorphism */}
-      <motion.div className={`sticky top-0 z-40 backdrop-blur-2xl ${headerBg} border-b`}
+      {/* Header — greeting LEFT, profile dropdown RIGHT */}
+      <motion.div className="sticky top-0 z-40 backdrop-blur-2xl bg-card/85 border-b border-border/60 shadow-[0_4px_20px_-8px_hsl(var(--foreground)/0.08)]"
         initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}>
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div className="relative"
-              whileHover={{ scale: 1.1, rotateY: 15 }}>
-              <div className="absolute -inset-0.5 rounded-xl blur-sm opacity-40"
-                style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }} />
-              <img src="/logo.png" alt="CCC" className="relative w-9 h-9 rounded-xl shadow-sm ring-1 ring-black/[0.04]" />
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          {/* LEFT: Greeting with logo */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <motion.div className="relative flex-shrink-0" whileHover={{ scale: 1.06, rotate: -2 }}>
+              <div className="absolute -inset-1 rounded-2xl blur opacity-50"
+                style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }} />
+              <img src="/logo.png" alt="CCC" className="relative w-10 h-10 rounded-2xl shadow-md ring-1 ring-foreground/[0.06]" />
             </motion.div>
-            <div>
-              <motion.h1 className={`${textPrimary} text-sm md:text-base tracking-tight`}
-                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-                {getGreeting()} {workshopUser.name?.split(" ")[0]}! 🎨
-              </motion.h1>
-              <motion.p className={`${textSecondary} text-[10px] md:text-xs`}
-                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-                CCC Workshop {workshopUser.roll_number && `· Roll #${workshopUser.roll_number}`}
+            <div className="min-w-0">
+              <motion.p className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-primary/80"
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
+                {getGreeting()}
               </motion.p>
+              <motion.h1 className="text-foreground font-bold text-sm md:text-base tracking-tight truncate"
+                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.25 }}>
+                {workshopUser.name?.split(" ")[0] || "Student"} 🎨
+                {workshopUser.roll_number && <span className="ml-1 text-[10px] font-semibold text-muted-foreground">#{workshopUser.roll_number}</span>}
+              </motion.h1>
             </div>
           </div>
-          <div className="flex gap-1">
-            {/* Desktop only: Home, Theme, Dark Mode */}
+
+          {/* RIGHT: Profile dropdown menu */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <div className="hidden md:flex gap-1">
-              {[
-                { icon: Home, action: () => navigate("/dashboard"), tip: "Dashboard" },
-                { icon: Palette, action: () => setShowColorPicker(!showColorPicker), tip: "Theme" },
-                { icon: darkMode ? Sun : Moon, action: () => setDarkMode(!darkMode), tip: "Mode" },
-              ].map((btn, i) => (
-                <motion.div key={i} whileHover={{ scale: 1.1, y: -1 }} whileTap={{ scale: 0.9 }}>
-                  <Button variant="ghost" size="sm" onClick={btn.action} className={`${textSecondary} rounded-xl`} title={btn.tip}>
-                    <btn.icon className="w-4 h-4" />
-                  </Button>
-                </motion.div>
-              ))}
-            </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className={`${textSecondary} rounded-xl`}>
-                <LogOut className="w-4 h-4 mr-1" /> <span className="hidden sm:inline">Logout</span>
+              <Button variant="ghost" size="icon" onClick={() => setShowColorPicker(!showColorPicker)} className="rounded-xl text-muted-foreground" title="Theme color">
+                <Palette className="w-4 h-4" />
               </Button>
-            </motion.div>
+              <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-xl text-muted-foreground" title="Dark / Light">
+                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </Button>
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm">
+                  <Avatar className="w-8 h-8 ring-2 ring-primary/20">
+                    <AvatarImage src={workshopUser.avatar_url || undefined} />
+                    <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
+                      style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl border-border/70">
+                <DropdownMenuLabel className="flex items-center gap-2 py-2.5">
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={workshopUser.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs font-bold text-primary-foreground"
+                      style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate">{workshopUser.name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{workshopUser.email || workshopUser.mobile}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => setActiveTab("profile")}>
+                  <User className="w-4 h-4 mr-2" /> View / Edit Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setShowColorPicker(!showColorPicker)}>
+                  <Palette className="w-4 h-4 mr-2" /> Theme color
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setDarkMode(!darkMode)}>
+                  {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />} {darkMode ? "Light mode" : "Dark mode"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
+                  <LayoutDashboard className="w-4 h-4 mr-2" /> Main Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="rounded-lg cursor-pointer text-destructive focus:text-destructive" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" /> Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
         <AnimatePresence>
           {showColorPicker && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="max-w-5xl mx-auto px-4 pb-3 flex gap-2 items-center">
-                <span className={`${textSecondary} text-xs`}>Theme:</span>
+              <div className="max-w-5xl mx-auto px-4 pb-3 flex gap-2 items-center flex-wrap">
+                <span className="text-muted-foreground text-xs font-semibold">Theme:</span>
                 {ACCENT_COLORS.map((c, i) => (
                   <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
-                    whileHover={{ scale: 1.2, y: -2 }} whileTap={{ scale: 0.9 }}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-125 border-foreground shadow-lg" : "border-transparent"}`}
-                    style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
+                    whileHover={{ scale: 1.18, y: -2 }} whileTap={{ scale: 0.9 }}
+                    className={`w-8 h-8 rounded-full border-2 transition-transform ${accentIdx === i ? "scale-110 border-foreground shadow-md" : "border-transparent"}`}
+                    style={{ background: c.primary === "hsl(var(--primary))"
+                      ? `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))`
+                      : `linear-gradient(135deg, ${c.primary}, ${c.secondary})` }}
                     title={c.name} />
                 ))}
               </div>
@@ -251,56 +288,67 @@ const WorkshopDashboard = () => {
         </AnimatePresence>
       </motion.div>
 
-      {/* Desktop Tab Bar */}
-      <div className="hidden md:block max-w-5xl mx-auto px-4 pt-4">
-        <div className={`bg-card border-border border rounded-2xl p-1.5 flex gap-1`}>
+      {/* Desktop Tab Bar — 3D pill */}
+      <div className="hidden md:block max-w-5xl mx-auto px-4 pt-5">
+        <div className="bg-card border border-border/60 rounded-2xl p-1.5 flex gap-1 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.12)]">
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               style={activeTab === tab.key ? activeStyle : {}}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${activeTab === tab.key ? activeClass : `${inactiveClass} hover:bg-muted`}`}>
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${
+                activeTab === tab.key ? "text-primary-foreground font-semibold" : "text-muted-foreground font-medium hover:bg-muted"
+              }`}>
               <tab.icon className="w-4 h-4" />{tab.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Content — lightweight fade */}
+      {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
         <div key={activeTab} className="tab-content-enter">
           {renderContent()}
         </div>
-        {/* Admin-built dynamic blocks (editable from Workshop Admin → Dashboard Builder) */}
         <PageBuilderRenderer page="workshop-dashboard-builder" className="mt-6" />
       </div>
 
-      {/* Mobile Bottom Nav - Instagram Style */}
+      {/* Mobile Bottom Nav — every tab including Profile, 3D */}
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className={`backdrop-blur-lg bg-card/95 border-border border-t`}>
-          <div className="flex items-center h-[56px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
+        <div className="backdrop-blur-xl bg-card/95 border-border/70 border-t shadow-[0_-8px_30px_-10px_hsl(var(--foreground)/0.18)]">
+          <div className="flex items-center h-[60px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
+              const isProfile = tab.key === "profile";
               return (
                 <motion.button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  whileTap={{ scale: 0.75 }}
-                  className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-                  <tab.icon
-                    className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
-                    size={isActive ? 26 : 22}
-                    strokeWidth={isActive ? 2.2 : 1.4}
-                    fill={isActive && tab.icon === Home ? "currentColor" : "none"}
-                  />
+                  whileTap={{ scale: 0.85 }}
+                  className="flex flex-col items-center justify-center min-w-[52px] flex-1 h-full relative">
+                  {isProfile ? (
+                    <Avatar className={`w-7 h-7 transition-all ${isActive ? "ring-2 ring-primary scale-110" : "ring-1 ring-border/60 opacity-70"}`}>
+                      <AvatarImage src={workshopUser.avatar_url || undefined} />
+                      <AvatarFallback className="text-[9px] font-bold text-primary-foreground"
+                        style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <tab.icon
+                      className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
+                      size={isActive ? 24 : 21}
+                      strokeWidth={isActive ? 2.4 : 1.6}
+                      fill={isActive && tab.icon === Home ? "currentColor" : "none"}
+                    />
+                  )}
+                  <span className={`text-[9px] mt-0.5 font-semibold transition-colors ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>
+                    {tab.label}
+                  </span>
                   {isActive && (
                     <motion.div layoutId="ws-dash-dot"
-                      className={`absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground`}
+                      className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary"
                       transition={{ type: "spring", stiffness: 500, damping: 30 }} />
                   )}
                 </motion.button>
               );
             })}
-            <motion.button onClick={() => navigate("/dashboard")} whileTap={{ scale: 0.75 }}
-              className="flex items-center justify-center min-w-[48px] w-14 h-14 relative flex-shrink-0">
-              <LayoutDashboard className="w-[22px] h-[22px] text-muted-foreground" strokeWidth={1.4} />
-            </motion.button>
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
