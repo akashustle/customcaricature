@@ -186,8 +186,24 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       });
       return;
     }
-    if (completeness < 80) {
-      toast({ title: "Profile not complete", description: "Please complete at least 80% of your profile (avatar, mobile, city, occupation, etc.).", variant: "destructive" });
+    if (completeness < 100) {
+      const missing: string[] = [];
+      if (!profileData.name) missing.push("Name");
+      if (!profileData.email) missing.push("Email");
+      if (!profileData.mobile) missing.push("Mobile");
+      if (!profileData.age) missing.push("Age");
+      if (!profileData.occupation) missing.push("Occupation");
+      if (!profileData.country) missing.push("Country");
+      if (!profileData.city) missing.push("City");
+      if (!profileData.gender) missing.push("Gender");
+      if (!profileData.instagram_id) missing.push("Instagram");
+      if (!profileData.why_join) missing.push("Why join");
+      if (!profileData.avatar_url) missing.push("Profile photo");
+      toast({
+        title: "100% profile required",
+        description: `Please fill: ${missing.join(", ")} to request the blue tick.`,
+        variant: "destructive",
+      });
       return;
     }
     setVerifySubmitting(true);
