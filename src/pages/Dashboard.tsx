@@ -98,6 +98,15 @@ const Dashboard = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [hasWorkshop, setHasWorkshop] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const { data } = await supabase.from("workshop_users" as any)
+        .select("id").eq("auth_user_id", user.id).maybeSingle();
+      setHasWorkshop(!!data);
+    })();
+  }, [user?.id]);
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
   const [portalPaymentRequest, setPortalPaymentRequest] = useState<any>(null);
