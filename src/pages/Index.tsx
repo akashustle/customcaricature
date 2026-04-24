@@ -189,38 +189,46 @@ const EventGallery = ({ images, onView }: { images: string[]; onView: () => void
 
 /* -------------------------------- Services ------------------------------- */
 
-const Services = ({ onBook }: { onBook: () => void }) => {
-  const items = [
-    { icon: Calendar, title: "Live Event Caricatures", body: "Professional artists drawing guests live at weddings, corporate parties, baby showers and brand activations across India." },
-    { icon: Sparkles, title: "International Bookings", body: "We travel worldwide. Custom packages for destination weddings and global corporate events." },
-    { icon: Trophy, title: "Brand Activations", body: "Engage your audience at expos, mall activations and product launches with on-the-spot caricatures." },
-    { icon: Heart, title: "Personal Celebrations", body: "Birthdays, anniversaries, baby showers, retirements — make every guest feel special." },
-  ];
+const ICON_MAP: Record<string, any> = { Calendar, Sparkles, Trophy, Heart, Users, Award, Star };
+
+const Services = ({ onBook, config }: { onBook: () => void; config?: any }) => {
+  const c = config || {};
+  const items = (c.items && Array.isArray(c.items) && c.items.length ? c.items : [
+    { icon: "Calendar", title: "Live Event Caricatures", body: "Professional artists drawing guests live at weddings, corporate parties, baby showers and brand activations across India." },
+    { icon: "Sparkles", title: "International Bookings", body: "We travel worldwide. Custom packages for destination weddings and global corporate events." },
+    { icon: "Trophy", title: "Brand Activations", body: "Engage your audience at expos, mall activations and product launches with on-the-spot caricatures." },
+    { icon: "Heart", title: "Personal Celebrations", body: "Birthdays, anniversaries, baby showers, retirements — make every guest feel special." },
+  ]);
+  const titlePre = c.title_pre || "What we";
+  const titleHl = c.title_highlight || "do best";
   return (
     <Section
       id="services"
-      eyebrow="Services • Services"
-      title={<>What we <span className="text-gradient-violet">do best</span></>}
-      subtitle="Our full focus is on live event caricatures — fast, fun, photo-perfect entertainment your guests will remember forever."
+      eyebrow={c.eyebrow || "Services • Services"}
+      title={<>{titlePre} <span className="text-gradient-violet">{titleHl}</span></>}
+      subtitle={c.subtitle || "Our full focus is on live event caricatures — fast, fun, photo-perfect entertainment your guests will remember forever."}
     >
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-        {items.map((s) => (
-          <div key={s.title} className="card-gradient-blob p-5 sm:p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <s.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground">{s.title}</h3>
-                <p className="text-sm sm:text-base text-foreground/70 mt-1.5">{s.body}</p>
+        {items.map((s: any) => {
+          const Icon = ICON_MAP[s.icon] || Calendar;
+          return (
+            <div key={s.title} className="card-gradient-blob p-5 sm:p-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground">{s.title}</h3>
+                  <p className="text-sm sm:text-base text-foreground/70 mt-1.5">{s.body}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="text-center mt-8">
         <button onClick={onBook} className="btn-square-violet">
-          <Calendar className="w-4 h-4" /> Book for your event <ArrowRight className="w-4 h-4" />
+          <Calendar className="w-4 h-4" /> {c.cta_label || "Book for your event"} <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </Section>
