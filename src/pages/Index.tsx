@@ -425,6 +425,75 @@ const FAQs = ({ config }: { config?: any }) => {
   );
 };
 
+/* ----------------------- Still Confused / Final CTA ---------------------- */
+
+const StillConfused = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const contact = useSiteSetting<any>("global_contact", {});
+  const wa = (contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const igHandle = (contact?.instagram_handle || "creativecaricatureclub").replace(/^@/, "");
+  const igUrl = contact?.instagram_url || `https://instagram.com/${igHandle}`;
+  const waMessage = contact?.whatsapp_prefill_message
+    || "Hi Creative Caricature Club! 👋 I'm a bit confused about packages — can you help me decide what's best for my event?";
+
+  return (
+    <section id="still-confused" className="px-3 sm:px-4 my-5 sm:my-6">
+      <div className="relative mx-auto max-w-7xl rounded-3xl overflow-hidden bg-hero-violet border border-border/40 p-6 sm:p-12 lg:p-16 text-center">
+        {/* Ambient orbs */}
+        <div className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full opacity-50 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.30), transparent 70%)" }} />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full opacity-40 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.25), transparent 70%)" }} />
+
+        <div className="relative">
+          <div className="chip-violet mx-auto mb-5">
+            <Sparkles className="w-3.5 h-3.5" />
+            {c.eyebrow || "Still need help?"}
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+            {c.title_pre || "Still"} <span className="text-gradient-violet">{c.title_highlight || "confused?"}</span>
+          </h2>
+          <p className="mt-4 max-w-xl mx-auto text-foreground/75 text-sm sm:text-base">
+            {c.subtitle || "Talk to our event managers on WhatsApp or slide into our DMs on Instagram. We'll help you pick the perfect package in minutes."}
+          </p>
+
+          <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
+            <a
+              href={`https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-[0_10px_30px_-10px_hsl(142_70%_40%/0.6)] transition-transform hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, hsl(142 70% 45%), hsl(150 65% 38%))" }}
+            >
+              <MessageCircle className="w-5 h-5" />
+              {c.whatsapp_label || "Chat on WhatsApp"}
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href={igUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-[0_10px_30px_-10px_hsl(330_75%_50%/0.6)] transition-transform hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(280 70% 55%) 60%, hsl(35 95% 55%))" }}
+            >
+              <Instagram className="w-5 h-5" />
+              {c.instagram_label || "Message on Instagram"}
+            </a>
+          </div>
+
+          <p className="mt-5 text-xs text-foreground/55">
+            Visit{" "}
+            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+              creativecaricatureclub.com
+            </a>{" "}
+            for more about our studio.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 /* ============================== Main Index =============================== */
 
 const Index = () => {
