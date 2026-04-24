@@ -242,14 +242,14 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
   const initials = (profileData.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
 
-  // Palette tokens (inspired by reference: ivory, coral, sage, gold)
+  // Lighter, whiter palette — soft accents, white surfaces
   const palette = {
-    ivory: "hsl(38 60% 96%)",
-    coral: "hsl(8 78% 70%)",
-    gold: "hsl(36 78% 60%)",
-    sage: "hsl(150 30% 65%)",
-    plum: "hsl(335 45% 55%)",
-    sky: "hsl(200 70% 70%)",
+    ivory: "#ffffff",
+    coral: "hsl(8 78% 72%)",
+    gold: "hsl(36 85% 65%)",
+    sage: "hsl(150 45% 68%)",
+    plum: "hsl(335 55% 65%)",
+    sky: "hsl(210 90% 70%)",
   };
 
   return (
@@ -259,12 +259,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
         initial={{ opacity: 0, y: 20, rotateX: -5 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
-        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border-2 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)]"
+        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border shadow-[0_30px_60px_-25px_rgba(80,60,150,0.18)]"
         style={{
           background: darkMode
             ? `linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.8) 100%)`
-            : `linear-gradient(135deg, ${palette.ivory} 0%, hsl(38 50% 92%) 50%, hsl(38 55% 88%) 100%)`,
-          borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+            : `linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)`,
+          borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.95)",
+          boxShadow: darkMode ? undefined : "0 30px 60px -25px hsl(252 60% 40% / 0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
           transformStyle: "preserve-3d",
         }}
       >
@@ -374,12 +375,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== VERIFICATION CARD ============== */}
       {!isVerified && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.2)]"
+          className="relative overflow-hidden rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
             background: darkMode
               ? `linear-gradient(135deg, hsl(220 30% 12%), hsl(220 25% 18%))`
-              : `linear-gradient(135deg, hsl(200 70% 95%), hsl(200 60% 90%))`,
-            borderColor: palette.sky,
+              : `linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)`,
+            borderColor: darkMode ? palette.sky : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(210 80% 50% / 0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none"
             style={{ background: palette.sky }} />
@@ -419,10 +421,10 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== EDIT FORM ============== */}
       {editing && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-          className="rounded-[24px] p-5 border-2 shadow-lg"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : palette.ivory,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+            background: darkMode ? "hsl(var(--card))" : "#ffffff",
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(226,232,240,0.9)",
           }}>
           <h3 className="font-bold text-lg mb-4" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
             ✏️ Edit Profile
@@ -531,10 +533,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== PERSONAL INFO GRID ============== */}
       {!editing && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(8 60% 96%), hsl(8 50% 92%))`,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.coral,
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, #ffffff 0%, #fff7f5 100%)`,
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(8 60% 50% / 0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <h3 className="font-bold text-base mb-3 flex items-center gap-2"
             style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(8 50% 30%)" }}>
@@ -554,10 +557,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== LOCATION CARD ============== */}
       {!editing && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(150 40% 96%), hsl(150 35% 91%))`,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.sage,
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, #ffffff 0%, #f3fbf7 100%)`,
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(150 50% 40% / 0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <h3 className="font-bold text-base mb-3 flex items-center gap-2"
             style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(150 40% 25%)" }}>
@@ -577,10 +581,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== WORKSHOP DETAILS CARD ============== */}
       {!editing && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(36 60% 96%), hsl(36 55% 90%))`,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, #ffffff 0%, #fffaf0 100%)`,
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(36 60% 45% / 0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <h3 className="font-bold text-base mb-3 flex items-center gap-2"
             style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(30 50% 25%)" }}>
@@ -600,10 +605,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== PAYMENT CARD ============== */}
       {!editing && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-          className="rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, hsl(335 40% 96%), hsl(335 35% 91%))`,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.plum,
+            background: darkMode ? "hsl(var(--card))" : `linear-gradient(135deg, #ffffff 0%, #fdf6fa 100%)`,
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(335 50% 45% / 0.15), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <h3 className="font-bold text-base mb-3 flex items-center gap-2"
             style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(335 40% 25%)" }}>
