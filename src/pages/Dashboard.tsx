@@ -224,7 +224,7 @@ const Dashboard = () => {
     const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editForm.full_name, mobile: editForm.mobile, instagram_id: editForm.instagram_id,
-      address: editForm.address, city: editForm.city, state: editForm.state, pincode: editForm.pincode,
+      address: editForm.address, city: editForm.city, state: editForm.state, district: editForm.district || null, pincode: editForm.pincode,
       age: Number.isFinite(ageNum as number) ? ageNum : null,
       gender: editForm.gender || null,
     } as any).eq("user_id", user.id);
