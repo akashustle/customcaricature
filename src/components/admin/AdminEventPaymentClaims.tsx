@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, CheckCircle2, XCircle, Banknote, CreditCard, Eye, Image as ImageIcon, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Banknote, CreditCard, Image as ImageIcon, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/pricing";
 import { motion } from "framer-motion";
