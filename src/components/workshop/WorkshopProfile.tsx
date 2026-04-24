@@ -206,6 +206,19 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   const verificationStatus: string = profileData.verification_status || (profileData.is_verified ? "verified" : "unverified");
   const isVerified = profileData.is_verified === true || verificationStatus === "verified";
   const isPending = verificationStatus === "pending";
+  // Once verified the user can't edit until an admin grants edits_remaining > 0.
+  const editsRemaining: number = Number(profileData.edits_remaining ?? 0);
+  const editLocked = isVerified && editsRemaining <= 0;
+  const consumeEditIfNeeded = async () => {
+    if (!isVerified) return;
+    if (editsRemaining <= 0) return;
+    try {
+      await (supabase.from("workshop_users") as any)
+        .update({ edits_remaining: Math.max(0, editsRemaining - 1) })
+        .eq("id", profileData.id);
+      applyUpdated({ ...profileData, edits_remaining: Math.max(0, editsRemaining - 1) });
+    } catch {/* non-fatal */}
+  };
 
   // Detail rendering
   const personalDetails = [
