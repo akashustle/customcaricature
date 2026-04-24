@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail } from "lucide-react";
 
 type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
 type Column = { title: string; links: Link[] };
@@ -49,6 +49,7 @@ const DEFAULT: {
       links: [
         { label: "WhatsApp", icon: "whatsapp" },
         { label: "Call Us", icon: "phone" },
+        { label: "Email Us", icon: "email" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
       ],
@@ -95,10 +96,13 @@ const ContactIcon = ({ name }: { name?: string }) => {
   const cls = "w-3.5 h-3.5";
   if (name === "whatsapp") return <MessageCircle className={cls} />;
   if (name === "phone") return <Phone className={cls} />;
+  if (name === "email") return <Mail className={cls} />;
   if (name === "instagram") return <Instagram className={cls} />;
   if (name === "youtube") return <Youtube className={cls} />;
   return null;
 };
+
+const WA_PREFILL = "Hi Creative Caricature Club! 👋 I just visited your website and would love to know more about your live caricature services for my event. Can you help me?";
 
 const SiteFooter = () => {
   const [override, setOverride] = useState<any>(cached);
@@ -125,12 +129,15 @@ const SiteFooter = () => {
   const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
   const wa = (contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
   const phone = contact?.phone_number || contact?.whatsapp_number || "918369594271";
+  const email = contact?.email || "creativecaricatureclub@gmail.com";
   const igUrl = contact?.instagram_url || `https://instagram.com/creativecaricatureclub`;
   const ytUrl = contact?.youtube_url || `https://www.youtube.com/@creativecaricatureclub`;
+  const waMessage = contact?.whatsapp_prefill_message || WA_PREFILL;
 
   const resolveContactHref = (icon?: string) => {
-    if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent("Hi! I'd like to know more.")}`;
+    if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`;
     if (icon === "phone") return `tel:+${phone.replace(/[^0-9]/g, "")}`;
+    if (icon === "email") return `mailto:${email}?subject=${encodeURIComponent("Enquiry from website")}`;
     if (icon === "instagram") return igUrl;
     if (icon === "youtube") return ytUrl;
     return "#";
@@ -187,7 +194,7 @@ const SiteFooter = () => {
                   {c.title}
                 </div>
                 <ul className="space-y-1.5 text-[13px]">
-                  {(c.links || []).slice(0, 5).map((l, i) => (
+                  {(c.links || []).slice(0, 12).map((l, i) => (
                     <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
                   ))}
                 </ul>

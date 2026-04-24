@@ -18,6 +18,7 @@ import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import SiteFooter from "@/components/SiteFooter";
+import HomepageImageLightbox from "@/components/homepage/HomepageImageLightbox";
 
 import g1 from "@/assets/gallery/gallery-1.jpeg";
 import g2 from "@/assets/gallery/gallery-2.jpeg";
@@ -58,7 +59,7 @@ const Section = ({
 
 /* ----------------------- Hero with continuous marquee ---------------------- */
 
-const HeroMarquee = ({ images }: { images: string[] }) => {
+const HeroMarquee = ({ images, onImageClick }: { images: string[]; onImageClick?: (i: number) => void }) => {
   // Duplicate the array so the -50% transform creates a seamless loop
   const tracks = [...images, ...images];
   const duration = Math.max(28, images.length * 4);
@@ -69,9 +70,12 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
         style={{ ["--marquee-duration" as any]: `${duration}s` }}
       >
         {tracks.map((src, i) => (
-          <div
+          <button
+            type="button"
             key={i}
-            className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)]"
+            onClick={() => onImageClick?.(i % images.length)}
+            className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)] transition-transform hover:scale-[1.02] cursor-zoom-in"
+            aria-label={`Open image ${(i % images.length) + 1}`}
           >
             <img
               src={src}
@@ -80,14 +84,14 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
               loading={i < 4 ? "eager" : "lazy"}
               decoding="async"
             />
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
 };
 
-const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any }) => {
+const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any; onImageClick?: (i: number) => void }) => {
   const c = config || {};
   const headline: string = c.headline || "Live Caricature For Unforgettable Events";
   const highlight: string = c.headline_highlight || "Caricature";
@@ -130,7 +134,7 @@ const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote
           </div>
         </div>
         {/* Continuous right-to-left marquee */}
-        <HeroMarquee images={images} />
+        <HeroMarquee images={images} onImageClick={onImageClick} />
         <div className="h-6 sm:h-10" />
       </div>
     </section>
@@ -162,7 +166,7 @@ const Stats = ({ items, config }: { items: { label: string; value: string }[]; c
 
 /* ----------------------------- Event Gallery ----------------------------- */
 
-const EventGallery = ({ images, onView }: { images: string[]; onView: () => void }) => {
+const EventGallery = ({ images, onView, onImageClick }: { images: string[]; onView: () => void; onImageClick?: (i: number) => void }) => {
   if (images.length === 0) return null;
   const preview = images.slice(0, 8);
   return (
@@ -174,9 +178,15 @@ const EventGallery = ({ images, onView }: { images: string[]; onView: () => void
     >
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
         {preview.map((src, i) => (
-          <div key={i} className={`rounded-2xl overflow-hidden border border-border/40 bg-card ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}>
+          <button
+            type="button"
+            key={i}
+            onClick={() => onImageClick?.(i)}
+            className={`rounded-2xl overflow-hidden border border-border/40 bg-card transition-transform hover:scale-[1.02] cursor-zoom-in ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}
+            aria-label={`Open event image ${i + 1}`}
+          >
             <img src={src} alt={`Event ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-          </div>
+          </button>
         ))}
       </div>
       <div className="text-center mt-7">
@@ -238,14 +248,15 @@ const Services = ({ onBook, config }: { onBook: () => void; config?: any }) => {
 
 /* -------------------------- How it Starts -------------------------------- */
 
-const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: string[]; config?: any }) => {
+const HowItStarts = ({ onBook, images, config, onImageClick }: { onBook: () => void; images: string[]; config?: any; onImageClick?: (allImages: string[], i: number) => void }) => {
   const c = config || {};
   const steps = (c.steps && Array.isArray(c.steps) && c.steps.length) ? c.steps : [
     { n: "1", title: "Share your event", body: "Tell us your date, city, guest count and event type. We'll match the right artists." },
     { n: "2", title: "Lock the booking", body: "Pay a small advance to confirm your slot. We handle artists, travel and logistics." },
     { n: "3", title: "Wow your guests", body: "Our artists arrive on time and create stunning live caricatures your guests take home." },
   ];
-  const previews = (images.length >= 4 ? images : fallbackImages).slice(0, 4);
+  const sourceImgs = images.length >= 4 ? images : fallbackImages;
+  const previews = sourceImgs.slice(0, 4);
   return (
     <Section
       id="how"
@@ -272,9 +283,15 @@ const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: s
         <div className="card-gradient-blob p-4 sm:p-8">
           <div className="grid grid-cols-2 gap-3">
             {previews.map((src, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden aspect-square border border-border/40">
+              <button
+                type="button"
+                key={i}
+                onClick={() => onImageClick?.(sourceImgs, i)}
+                className="rounded-2xl overflow-hidden aspect-square border border-border/40 transition-transform hover:scale-[1.03] cursor-zoom-in"
+                aria-label={`Open image ${i + 1}`}
+              >
                 <img src={src} alt={`Live event caricature ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -405,6 +422,7 @@ const Index = () => {
   const maintenance = useMaintenanceCheck("home");
 
   const [eventGallery, setEventGallery] = useState<string[]>([]);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   // Fetch event gallery (admin-managed) — fallback to bundled images so hero never empty.
   useEffect(() => {
@@ -484,13 +502,13 @@ const Index = () => {
             ? (content as any).homepage_section_order.order
             : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
           const sections: Record<string, React.ReactNode> = {
-            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} />,
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
             stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
-                  <div className="text-center mb-7 sm:mb-10">
-                    <div className="chip-violet mb-4"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
+                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
+                  <div className="text-center mb-5 sm:mb-7">
+                    <div className="chip-violet mb-3"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
                       See the <span className="text-gradient-violet">experience live</span>
                     </h2>
@@ -499,7 +517,7 @@ const Index = () => {
                 </div>
               </section>
             ) : null,
-            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />,
+            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
             clients: (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
@@ -508,7 +526,7 @@ const Index = () => {
               </section>
             ),
             services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
-            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
             reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
@@ -518,6 +536,13 @@ const Index = () => {
       </main>
 
       <SiteFooter />
+
+      <HomepageImageLightbox
+        images={lightbox?.images || []}
+        index={lightbox?.index ?? null}
+        onClose={() => setLightbox(null)}
+        onChange={(i) => setLightbox((prev) => prev ? { ...prev, index: i } : null)}
+      />
 
       {(settings as any).homepage_sticky_cta_visible?.enabled && (
         <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />
