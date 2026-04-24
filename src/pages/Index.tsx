@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Calendar, Sparkles, Star, Plus, Minus,
   CheckCircle2, Users, Award, Quote, Trophy, Heart, Image as ImageIcon, PlayCircle,
-  MessageCircle, Instagram,
+  MessageCircle, Instagram, Youtube, Mail, Globe,
 } from "lucide-react";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { MAIN_SITE_URL } from "@/lib/site-config";
