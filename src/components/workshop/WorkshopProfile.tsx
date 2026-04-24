@@ -163,6 +163,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       return;
     }
     applyUpdated(data.user || { ...profileData, ...form, age: form.age ? parseInt(form.age, 10) : null });
+    await consumeEditIfNeeded();
     toast({ title: "✅ Profile Updated!" });
     setEditing(false);
     setSaving(false);
