@@ -19,6 +19,7 @@ import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
 import SiteFooter from "@/components/SiteFooter";
 import HomepageImageLightbox from "@/components/homepage/HomepageImageLightbox";
+import WatermarkedImage from "@/components/WatermarkedImage";
 
 import g1 from "@/assets/gallery/gallery-1.jpeg";
 import g2 from "@/assets/gallery/gallery-2.jpeg";
@@ -77,12 +78,11 @@ const HeroMarquee = ({ images, onImageClick }: { images: string[]; onImageClick?
             className="shrink-0 w-56 sm:w-72 md:w-80 lg:w-96 aspect-[3/4] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-[0_20px_50px_-25px_hsl(252_60%_40%/0.35)] transition-transform hover:scale-[1.02] cursor-zoom-in"
             aria-label={`Open image ${(i % images.length) + 1}`}
           >
-            <img
+            <WatermarkedImage
               src={src}
               alt={`Live caricature ${(i % images.length) + 1}`}
-              className="w-full h-full object-cover"
               loading={i < 4 ? "eager" : "lazy"}
-              decoding="async"
+              className="w-full h-full"
             />
           </button>
         ))}
@@ -185,7 +185,7 @@ const EventGallery = ({ images, onView, onImageClick }: { images: string[]; onVi
             className={`rounded-2xl overflow-hidden border border-border/40 bg-card transition-transform hover:scale-[1.02] cursor-zoom-in ${i === 0 ? "md:row-span-2 md:col-span-2 aspect-square md:aspect-auto" : "aspect-[4/5]"}`}
             aria-label={`Open event image ${i + 1}`}
           >
-            <img src={src} alt={`Event ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+            <WatermarkedImage src={src} alt={`Event ${i + 1}`} className="w-full h-full" loading="lazy" />
           </button>
         ))}
       </div>
@@ -290,7 +290,7 @@ const HowItStarts = ({ onBook, images, config, onImageClick }: { onBook: () => v
                 className="rounded-2xl overflow-hidden aspect-square border border-border/40 transition-transform hover:scale-[1.03] cursor-zoom-in"
                 aria-label={`Open image ${i + 1}`}
               >
-                <img src={src} alt={`Live event caricature ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                <WatermarkedImage src={src} alt={`Live event caricature ${i + 1}`} className="w-full h-full" loading="lazy" />
               </button>
             ))}
           </div>

@@ -88,7 +88,7 @@ const AdminEventPaymentClaims = () => {
           amount: claim.amount,
           payment_type: claim.claim_type === "cash" ? "event_remaining_cash" : "event_remaining_offline",
           status: "completed",
-          notes: `Admin-approved ${claim.claim_type} payment claim. ${reply[claim.id] || ""}`.trim(),
+          description: `Admin-approved ${claim.claim_type} payment claim. ${reply[claim.id] || ""}`.trim(),
         } as any);
 
         await supabase.from("notifications").insert({

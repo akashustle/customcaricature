@@ -23,6 +23,7 @@ import ReviewForm from "@/components/ReviewForm";
 import EventCompletionNotice from "@/components/EventCompletionNotice";
 import PaymentStatusTracker from "@/components/PaymentStatusTracker";
 import PostEventBalancePopup from "@/components/PostEventBalancePopup";
+import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 // Lightweight wrapper so it sits inside the dashboard layout
@@ -1719,6 +1720,11 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                         userId={userId}
                         remaining={remaining}
                       />
+                    )}
+
+                    {/* Audit timeline: booking → advance → completion → claim → admin decision */}
+                    {userId && (ev.status === "completed" || ev.payment_status === "fully_paid") && (
+                      <EventPaymentTimeline event={ev} userId={userId} />
                     )}
 
                     {/* Pay partial 2 to complete advance - ONLY if PaymentStatusTracker not handling it */}

@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import WatermarkedImage from "@/components/WatermarkedImage";
 
 interface Props {
   images: string[];
@@ -58,13 +59,18 @@ const HomepageImageLightbox = ({ images, index, onClose, onChange }: Props) => {
       >
         <ChevronRight className="w-6 h-6" />
       </button>
-      <img
+      <div
         key={index}
-        src={images[index]}
-        alt={`Image ${index + 1}`}
-        className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200"
+        className="max-w-[92vw] max-h-[85vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
-      />
+      >
+        <WatermarkedImage
+          src={images[index]}
+          alt={`Image ${index + 1}`}
+          className="rounded-2xl shadow-2xl max-h-[85vh]"
+          imgClassName="!object-contain"
+        />
+      </div>
       <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-background/70 font-semibold bg-foreground/30 px-3 py-1 rounded-full">
         {index + 1} / {images.length}
       </p>
