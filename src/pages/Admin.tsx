@@ -1798,6 +1798,14 @@ const Admin = () => {
                                 <span title="Verified" className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[11px] font-bold shadow-sm">✓</span>
                               )}
                               {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
+                              {(c as any).created_from_workshop && (
+                                <Badge
+                                  title="This booking account was auto-created from a workshop signup"
+                                  className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none text-[10px] font-bold shadow-sm"
+                                >
+                                  🎨 Auto Created (Workshop)
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
                             {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
