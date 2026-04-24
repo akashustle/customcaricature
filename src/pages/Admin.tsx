@@ -127,6 +127,7 @@ const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
 const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
 const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
+const EditRequestsInbox = lazy(() => import("@/components/admin/EditRequestsInbox"));
 
 const AdminTabLoader = () => (
   <div className="flex items-center justify-center py-16">
