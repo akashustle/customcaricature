@@ -178,6 +178,14 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   })();
 
   const handleSubmitVerification = async () => {
+    if (!profileData.avatar_url) {
+      toast({
+        title: "📸 Profile photo required",
+        description: "Please upload your own profile photo first — verification needs your real face.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (completeness < 80) {
       toast({ title: "Profile not complete", description: "Please complete at least 80% of your profile (avatar, mobile, city, occupation, etc.).", variant: "destructive" });
       return;
