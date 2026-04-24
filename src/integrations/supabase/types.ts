@@ -5593,6 +5593,7 @@ export type Database = {
           slot: string
           state: string | null
           student_type: string
+          sync_enabled: boolean
           terms_accepted: boolean | null
           updated_at: string
           verification_notes: string | null
@@ -5640,6 +5641,7 @@ export type Database = {
           slot: string
           state?: string | null
           student_type?: string
+          sync_enabled?: boolean
           terms_accepted?: boolean | null
           updated_at?: string
           verification_notes?: string | null
@@ -5687,6 +5689,7 @@ export type Database = {
           slot?: string
           state?: string | null
           student_type?: string
+          sync_enabled?: boolean
           terms_accepted?: boolean | null
           updated_at?: string
           verification_notes?: string | null
