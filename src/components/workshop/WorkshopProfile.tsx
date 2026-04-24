@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -321,19 +321,22 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             </div>
 
             <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
-              <Badge className="text-[10px] font-semibold border-0"
-                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 70% 22%)" }}>
-                {profileData.student_type === "registered_online" ? "🎨 Online Student" : "🎨 Workshop Student"}
+              <Badge
+                className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+              >
+                🎨 {profileData.student_type === "registered_online" ? "Online Student" : "Workshop Student"}
               </Badge>
               {profileData.roll_number && (
-                <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.plum}30`, color: darkMode ? palette.plum : "hsl(335 60% 28%)" }}>
+                <Badge
+                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                >
                   Roll #{profileData.roll_number}
                 </Badge>
               )}
               {profileData.skill_level && (
-                <Badge className="text-[10px] font-semibold border-0"
-                  style={{ background: `${palette.sage}30`, color: darkMode ? palette.sage : "hsl(150 55% 18%)" }}>
+                <Badge
+                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                >
                   {profileData.skill_level}
                 </Badge>
               )}
@@ -432,15 +435,21 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {personalDetails.map((d) => (
               <div key={d.key} className={d.key === "why_join" ? "md:col-span-2" : ""}>
-                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                <Label className="text-xs font-semibold text-slate-600">
                   {d.label}
                 </Label>
                 {d.key === "why_join" ? (
-                  <Textarea value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
-                    rows={2} className="mt-1 rounded-xl" />
+                  <Textarea
+                    value={(form as any)[d.key] || ""}
+                    onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    rows={2}
+                    className="mt-1 rounded-xl shadow-none bg-white"
+                  />
                 ) : d.key === "gender" ? (
                   <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Male">Male</SelectItem>
                       <SelectItem value="Female">Female</SelectItem>
@@ -449,8 +458,14 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Input value={(form as any)[d.key] || ""} onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
-                    className="mt-1 rounded-xl" type={d.key === "age" ? "number" : "text"} maxLength={d.key === "mobile" ? 10 : undefined} />
+                  <IconInput
+                    icon={d.icon}
+                    value={(form as any)[d.key] || ""}
+                    onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
+                    type={d.key === "age" ? "number" : "text"}
+                    maxLength={d.key === "mobile" ? 10 : undefined}
+                    placeholder={d.label}
+                  />
                 )}
               </div>
             ))}
@@ -461,7 +476,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 Country
               </Label>
               <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
-                <SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue /></SelectTrigger>
                 <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -473,7 +488,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     State *
                   </Label>
                   <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
-                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select state" /></SelectTrigger>
                     <SelectContent>{states.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -489,12 +504,12 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   </div>
                   {cityMode === "select" && form.state && citiesForState.length > 0 ? (
                     <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
-                      <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select city" /></SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select city" /></SelectTrigger>
                       <SelectContent>{citiesForState.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : (
                     <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                      placeholder="Type your city" className="mt-1 rounded-xl" />
+                      placeholder="Type your city" className="mt-1 rounded-xl shadow-none bg-white" />
                   )}
                 </div>
               </>
@@ -504,7 +519,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   City *
                 </Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  placeholder="Your city" className="mt-1 rounded-xl" />
+                  placeholder="Your city" className="mt-1 rounded-xl shadow-none bg-white" />
               </div>
             )}
 
@@ -513,7 +528,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                   {d.label} (locked)
                 </Label>
-                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60" />
+                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60 shadow-none bg-white" />
               </div>
             ))}
           </div>
@@ -745,6 +760,28 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   );
 };
 
+const IconInput = ({
+  icon: Icon,
+  className = "",
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { icon: any }) => (
+  <div className="relative mt-1">
+    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+    <input
+      {...props}
+      className={
+        "flex h-11 w-full rounded-xl border border-slate-200 bg-white text-slate-900 " +
+        "pl-10 pr-3 py-2 text-sm placeholder:text-slate-400 " +
+        "focus-visible:outline-none focus-visible:border-primary " +
+        "focus-visible:shadow-[0_0_0_4px_hsl(var(--primary)/0.12)] " +
+        "transition-[box-shadow,border-color] duration-200 " +
+        "disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-slate-50 " +
+        className
+      }
+    />
+  </div>
+);
+
 const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
   <motion.div whileHover={{ scale: 1.02, y: -2 }}
     className="flex items-center gap-3 p-3 rounded-2xl border shadow-sm transition-all"
@@ -758,12 +795,10 @@ const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
       <Icon className="w-4.5 h-4.5 text-white" />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] font-bold uppercase tracking-wider"
-        style={{ color: darkMode ? "hsl(var(--muted-foreground))" : `${color}` }}>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
         {label}
       </p>
-      <p className="text-sm font-bold truncate"
-        style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
+      <p className="text-sm font-bold truncate text-slate-900">
         {value}
       </p>
     </div>
