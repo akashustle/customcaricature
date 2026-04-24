@@ -2371,36 +2371,30 @@ const DownloadAppCard = () => {
   }, []);
 
   const handleInstall = async () => {
+    // Permanently dismiss on first click — never show again, regardless of outcome.
+    try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
+    setDismissed(true);
+
     if (installPrompt) {
       installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      if (outcome === "accepted") {
-        setInstalled(true);
-        try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
-      }
+      if (outcome === "accepted") setInstalled(true);
       setInstallPrompt(null);
     } else if (platform === "ios") {
       toast({
         title: "Install on iPhone 📱",
         description: "Tap the Share icon in Safari, then 'Add to Home Screen'.",
       });
-      // Mark as dismissed once instructions shown — user is acting on it
-      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
-      setDismissed(true);
     } else if (platform === "android") {
       toast({
         title: "Install on Android 📱",
         description: "Open the browser menu (⋮) and tap 'Add to Home screen' / 'Install app'.",
       });
-      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
-      setDismissed(true);
     } else {
       toast({
         title: "Install on desktop 💻",
         description: "Look for the install icon in your browser's address bar.",
       });
-      try { localStorage.setItem(PWA_DISMISS_KEY, "1"); } catch {}
-      setDismissed(true);
     }
   };
 
