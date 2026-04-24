@@ -2105,3 +2105,51 @@ td:has(> :only-child[data-rupee="negative"]),
 
 
 
+
+/* ============================================================
+   GLOBAL CONTRAST SAFETY NET (non-admin pages)
+   Dark-mode users on the public site sometimes saw pale Tailwind
+   badges (bg-*-100 with text-*-800) collapse into low-contrast
+   dark-on-dark because the parent card switched to a dark surface.
+   This forces any bg-{color}-50/100/200 badge to keep its bright
+   surface and dark text — outside the admin scope.
+   ============================================================ */
+:where(:not(.admin-panel-font) :not(.admin-panel-font *)) {
+  /* No-op grouping selector to ensure scope. Real rules below. */
+}
+
+/* Force readable contrast for pale-bg pill / badge utilities everywhere
+   except inside the admin/workshop-admin panel (which has its own theme). */
+body:not(.admin-page) [class*="bg-amber-50"],
+body:not(.admin-page) [class*="bg-amber-100"],
+body:not(.admin-page) [class*="bg-amber-200"] { color: hsl(28 80% 22%); }
+body:not(.admin-page) [class*="bg-yellow-50"],
+body:not(.admin-page) [class*="bg-yellow-100"],
+body:not(.admin-page) [class*="bg-yellow-200"] { color: hsl(38 80% 22%); }
+body:not(.admin-page) [class*="bg-green-50"],
+body:not(.admin-page) [class*="bg-green-100"],
+body:not(.admin-page) [class*="bg-green-200"],
+body:not(.admin-page) [class*="bg-emerald-50"],
+body:not(.admin-page) [class*="bg-emerald-100"] { color: hsl(142 60% 22%); }
+body:not(.admin-page) [class*="bg-blue-50"],
+body:not(.admin-page) [class*="bg-blue-100"],
+body:not(.admin-page) [class*="bg-blue-200"],
+body:not(.admin-page) [class*="bg-sky-50"],
+body:not(.admin-page) [class*="bg-sky-100"] { color: hsl(220 70% 25%); }
+body:not(.admin-page) [class*="bg-red-50"],
+body:not(.admin-page) [class*="bg-red-100"],
+body:not(.admin-page) [class*="bg-rose-100"] { color: hsl(0 65% 32%); }
+
+/* When a Tailwind text-{color}-{700+} is explicitly set, let it win. */
+body:not(.admin-page) [class*="text-amber-7"],
+body:not(.admin-page) [class*="text-amber-8"],
+body:not(.admin-page) [class*="text-amber-9"],
+body:not(.admin-page) [class*="text-green-7"],
+body:not(.admin-page) [class*="text-green-8"],
+body:not(.admin-page) [class*="text-blue-7"],
+body:not(.admin-page) [class*="text-blue-8"],
+body:not(.admin-page) [class*="text-red-7"],
+body:not(.admin-page) [class*="text-red-8"] {
+  /* allow author-provided color */
+  color: revert-layer;
+}
