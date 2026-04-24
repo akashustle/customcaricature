@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Calendar, Sparkles, Star, Plus, Minus,
   CheckCircle2, Users, Award, Quote, Trophy, Heart, Image as ImageIcon, PlayCircle,
+  MessageCircle, Instagram,
 } from "lucide-react";
+import { useSiteSetting } from "@/hooks/useSiteSetting";
+import { MAIN_SITE_URL } from "@/lib/site-config";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -111,40 +114,42 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
     );
   };
   return (
-    // True edge-to-edge hero. We:
-    //  • escape any parent side-padding using `-mx-3 sm:-mx-4` so the violet
-    //    fade reaches every screen edge (the SiteShell pads its main wrap).
-    //  • pull the section UP under the floating header with a negative top
-    //    margin tuned per breakpoint:
-    //       mobile  : header is sticky at top:0 with pt-3 → ~64px tall
-    //       desktop : header floats at top:3 with no pt → ~76px tall
-    //  • re-add matching top padding inside so the headline + CTA never sit
-    //    underneath the header.
+    // Hero: keep the violet fade edge-to-edge but bring the inner content
+    // back into a tightly-aligned container so it reads premium, not cheap.
+    //  • -mx-* escapes parent side-padding so the bg reaches the edges.
+    //  • Negative top margin tucks under the FloatingNav (~64-88px tall).
+    //  • A bottom rounded edge softens the transition into the next section.
+    //  • Inner padding is tuned per breakpoint to keep CTAs comfortably
+    //    below the header at every screen size.
     <section className="relative -mx-3 sm:-mx-4 -mt-[64px] sm:-mt-[72px] md:-mt-[88px]">
-      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40">
-        <div className="px-4 sm:px-10 lg:px-14 pt-[88px] sm:pt-[120px] md:pt-[150px] lg:pt-[190px] pb-8 sm:pb-14 lg:pb-20 text-center max-w-7xl mx-auto">
-          <div className="chip-violet mx-auto mb-5 sm:mb-6">
+      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40 sm:rounded-b-[32px]">
+        {/* Soft ambient orb to give the fade a focal centre */}
+        <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[80%] max-w-[900px] h-[420px] rounded-full opacity-60 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), transparent 70%)" }} />
+
+        <div className="relative px-5 sm:px-8 lg:px-12 pt-[100px] sm:pt-[130px] md:pt-[160px] lg:pt-[190px] pb-8 sm:pb-12 lg:pb-16 text-center max-w-5xl mx-auto">
+          <div className="chip-violet mx-auto mb-5 sm:mb-7">
             <Sparkles className="w-3.5 h-3.5" />
             {c.chip_text || "India's #1 Live Caricature Studio"}
           </div>
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
+          <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.02] sm:leading-[0.98] max-w-4xl mx-auto">
             {renderHeadline()}
           </h1>
-          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/75 px-2">
+          <p className="mt-5 sm:mt-6 max-w-xl mx-auto text-[15px] sm:text-lg text-foreground/75 leading-relaxed">
             {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
           </p>
-          <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
+          <div className="mt-7 sm:mt-9 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
+            <button onClick={onBook} className="btn-square-violet justify-center">
               <Calendar className="w-5 h-5" /> {c.primary_cta || "Book Your Event"} <ArrowRight className="w-4 h-4" />
             </button>
-            <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
+            <button onClick={onQuote} className="btn-square-outline justify-center">
               <Sparkles className="w-5 h-5" /> {c.secondary_cta || "Get Free Quote"}
             </button>
           </div>
         </div>
         {/* Continuous right-to-left marquee */}
         <HeroMarquee images={images} onImageClick={onImageClick} />
-        <div className="h-6 sm:h-10" />
+        <div className="h-8 sm:h-12" />
       </div>
     </section>
   );
@@ -420,6 +425,75 @@ const FAQs = ({ config }: { config?: any }) => {
   );
 };
 
+/* ----------------------- Still Confused / Final CTA ---------------------- */
+
+const StillConfused = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const contact = useSiteSetting<any>("global_contact", {});
+  const wa = (contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const igHandle = (contact?.instagram_handle || "creativecaricatureclub").replace(/^@/, "");
+  const igUrl = contact?.instagram_url || `https://instagram.com/${igHandle}`;
+  const waMessage = contact?.whatsapp_prefill_message
+    || "Hi Creative Caricature Club! 👋 I'm a bit confused about packages — can you help me decide what's best for my event?";
+
+  return (
+    <section id="still-confused" className="px-3 sm:px-4 my-5 sm:my-6">
+      <div className="relative mx-auto max-w-7xl rounded-3xl overflow-hidden bg-hero-violet border border-border/40 p-6 sm:p-12 lg:p-16 text-center">
+        {/* Ambient orbs */}
+        <div className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full opacity-50 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.30), transparent 70%)" }} />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full opacity-40 blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.25), transparent 70%)" }} />
+
+        <div className="relative">
+          <div className="chip-violet mx-auto mb-5">
+            <Sparkles className="w-3.5 h-3.5" />
+            {c.eyebrow || "Still need help?"}
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+            {c.title_pre || "Still"} <span className="text-gradient-violet">{c.title_highlight || "confused?"}</span>
+          </h2>
+          <p className="mt-4 max-w-xl mx-auto text-foreground/75 text-sm sm:text-base">
+            {c.subtitle || "Talk to our event managers on WhatsApp or slide into our DMs on Instagram. We'll help you pick the perfect package in minutes."}
+          </p>
+
+          <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto">
+            <a
+              href={`https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-[0_10px_30px_-10px_hsl(142_70%_40%/0.6)] transition-transform hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, hsl(142 70% 45%), hsl(150 65% 38%))" }}
+            >
+              <MessageCircle className="w-5 h-5" />
+              {c.whatsapp_label || "Chat on WhatsApp"}
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href={igUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-[0_10px_30px_-10px_hsl(330_75%_50%/0.6)] transition-transform hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, hsl(330 80% 55%), hsl(280 70% 55%) 60%, hsl(35 95% 55%))" }}
+            >
+              <Instagram className="w-5 h-5" />
+              {c.instagram_label || "Message on Instagram"}
+            </a>
+          </div>
+
+          <p className="mt-5 text-xs text-foreground/55">
+            Visit{" "}
+            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+              creativecaricatureclub.com
+            </a>{" "}
+            for more about our studio.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 /* ============================== Main Index =============================== */
 
 const Index = () => {
@@ -509,7 +583,7 @@ const Index = () => {
         {(() => {
           const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
             ? (content as any).homepage_section_order.order
-            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
+            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs", "still_confused"];
           const sections: Record<string, React.ReactNode> = {
             hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
             stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
@@ -539,6 +613,7 @@ const Index = () => {
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
             reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
+            still_confused: <StillConfused key="still_confused" config={(content as any).homepage_still_confused} />,
           };
           return order.map(id => sections[id]).filter(Boolean);
         })()}

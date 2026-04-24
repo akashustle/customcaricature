@@ -219,9 +219,25 @@ const WorkshopDashboard = () => {
               </Button>
             </div>
 
+            {/* Mobile: tap avatar → directly opens Profile tab (no data dropdown) */}
+            <button
+              onClick={() => setActiveTab("profile")}
+              className="md:hidden flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm"
+              aria-label="Open profile"
+            >
+              <Avatar className="w-8 h-8 ring-2 ring-primary/20">
+                <AvatarImage src={workshopUser.avatar_url || undefined} />
+                <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
+                  style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+
+            {/* Desktop keeps the rich dropdown menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm">
+                <button className="hidden md:flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm">
                   <Avatar className="w-8 h-8 ring-2 ring-primary/20">
                     <AvatarImage src={workshopUser.avatar_url || undefined} />
                     <AvatarFallback className="text-[10px] font-bold text-primary-foreground"

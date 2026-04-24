@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
+import { MAIN_SITE_URL } from "@/lib/site-config";
 
 type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
 type Column = { title: string; links: Link[] };
@@ -28,8 +29,12 @@ const DEFAULT: {
     {
       title: "Services",
       links: [
-        { label: "Event", href: "/book-event" },
+        { label: "Book an Event", href: "/book-event" },
         { label: "Workshop", href: "/workshop" },
+        { label: "AI Caricature", href: "/ai-caricature" },
+        { label: "Order Caricature", href: "/order" },
+        { label: "Shop", href: "/shop" },
+        { label: "The Lil Flea", href: "/lil-flea" },
         { label: "Custom Caricature", coming_soon: true },
         { label: "Merchandise", coming_soon: true },
       ],
@@ -39,27 +44,30 @@ const DEFAULT: {
       links: [
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
-        { label: "Gallery", href: "/gallery/events" },
+        { label: "Event Gallery", href: "/gallery/events" },
+        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
+        { label: "Explore", href: "/explore" },
         { label: "FAQs", href: "/faqs" },
         { label: "Support", href: "/support" },
+        { label: "Get a Quote", href: "/enquiry" },
+        { label: "Track Order", href: "/track-order" },
       ],
     },
     {
-      title: "Contact",
+      title: "Talk to us",
       links: [
         { label: "WhatsApp", icon: "whatsapp" },
         { label: "Call Us", icon: "phone" },
         { label: "Email Us", icon: "email" },
+        { label: "Live Chat", href: "/live-chat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
+        { label: "creativecaricatureclub.com", icon: "website" },
       ],
     },
     {
-      title: "Quick Links",
+      title: "Policies",
       links: [
-        { label: "The Lil Flea", href: "/lil-flea" },
-        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
-        { label: "Track Order", href: "/track-order" },
         { label: "Privacy Policy", href: "/privacy" },
         { label: "Terms of Service", href: "/terms" },
         { label: "Refund Policy", href: "/refund" },
@@ -99,6 +107,7 @@ const ContactIcon = ({ name }: { name?: string }) => {
   if (name === "email") return <Mail className={cls} />;
   if (name === "instagram") return <Instagram className={cls} />;
   if (name === "youtube") return <Youtube className={cls} />;
+  if (name === "website") return <Globe className={cls} />;
   return null;
 };
 
@@ -120,10 +129,12 @@ const SiteFooter = () => {
   }, []);
 
   const f = { ...DEFAULT, ...(override || {}) };
-  // Always merge fresh defaults if admin hasn't migrated to 4-column layout yet.
-  // If saved footer columns don't include "Contact", fall back to DEFAULT.columns.
+  // Always merge fresh defaults if admin hasn't migrated to new column layout yet.
+  // If saved footer columns don't include "Talk" + "Policies", fall back to DEFAULT.columns.
   const savedCols: Column[] = Array.isArray(f.columns) && f.columns.length ? f.columns : [];
-  const hasNewLayout = savedCols.some((c) => /contact/i.test(c.title)) && savedCols.some((c) => /quick/i.test(c.title));
+  const hasNewLayout =
+    savedCols.some((c) => /talk|contact/i.test(c.title)) &&
+    savedCols.some((c) => /polic|legal|quick/i.test(c.title));
   const cols: Column[] = hasNewLayout ? savedCols : DEFAULT.columns;
 
   const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
@@ -140,6 +151,7 @@ const SiteFooter = () => {
     if (icon === "email") return `mailto:${email}?subject=${encodeURIComponent("Enquiry from website")}`;
     if (icon === "instagram") return igUrl;
     if (icon === "youtube") return ytUrl;
+    if (icon === "website") return MAIN_SITE_URL;
     return "#";
   };
 
@@ -154,7 +166,7 @@ const SiteFooter = () => {
     const isContact = !!l.icon;
     const href = isContact ? resolveContactHref(l.icon) : l.href || "#";
     const externalProps = isContact || l.external ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
-    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5";
+    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5 leading-snug";
     return (
       <a
         href={l.coming_soon ? "#" : href}
@@ -163,8 +175,8 @@ const SiteFooter = () => {
         {...(!l.coming_soon ? externalProps : {})}
       >
         {isContact && <ContactIcon name={l.icon} />}
-        <span>{l.label}</span>
-        {l.coming_soon && <Pause className="w-3 h-3 text-warning" aria-label="Coming soon" />}
+        <span className="truncate">{l.label}</span>
+        {l.coming_soon && <Pause className="w-3 h-3 text-warning flex-shrink-0" aria-label="Coming soon" />}
       </a>
     );
   };
@@ -172,18 +184,22 @@ const SiteFooter = () => {
   return (
     <>
       <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-        <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-5 sm:p-10">
+        <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10 lg:p-12">
           {/* Brand */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center gap-2 mb-3">
-              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
+          <div className="mb-7 sm:mb-10 max-w-xl">
+            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 mb-3 group">
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-11 h-11 rounded-xl shadow-sm" />
               <div className="text-lg font-extrabold tracking-tight leading-tight">
                 <span className="text-gradient-violet">Creative</span><br />
                 <span className="text-gradient-violet">Caricature Club</span>
                 <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
               </div>
-            </div>
-            <p className="text-sm text-foreground/70 mt-3 max-w-xl">{f.brand_tagline}</p>
+            </a>
+            <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
+            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+              <Globe className="w-3.5 h-3.5" /> creativecaricatureclub.com <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
 
           {/* Mobile: 2 cols × 2 rows */}

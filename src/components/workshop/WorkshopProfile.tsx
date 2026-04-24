@@ -26,7 +26,11 @@ import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCa
 
 const COUNTRIES = ["India", "USA", "UK", "UAE", "Canada", "Australia", "Singapore", "Germany", "Other"];
 
-const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
+const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; darkMode?: boolean }) => {
+  // Profile card is always rendered in a light, paper-like palette so all
+  // text stays clearly visible regardless of the global theme. Per design
+  // request: don't use dark colours here.
+  const darkMode = false;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
