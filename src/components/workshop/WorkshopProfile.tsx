@@ -15,6 +15,7 @@ import {
   Sparkles, Globe, ChevronRight, ArrowRight,
 } from "lucide-react";
 import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
+import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -616,9 +617,20 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
             <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
               Payment status will be updated once confirmed by admin.
             </p>
+          {profileData.payment_status === "pending" && (
+            <p className="text-xs mt-3 italic" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(335 30% 40%)" }}>
+              Payment status will be updated once confirmed by admin.
+            </p>
           )}
         </motion.div>
       )}
+
+      {/* ============== BOOKING ACCOUNT LINK CARD ============== */}
+      <WorkshopBookingLinkCard
+        workshopUser={profileData}
+        darkMode={darkMode}
+        onLinked={(authId) => setProfileData({ ...profileData, auth_user_id: authId })}
+      />
 
       {/* ============== VERIFICATION MODAL ============== */}
       <AnimatePresence>
