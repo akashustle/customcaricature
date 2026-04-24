@@ -529,6 +529,11 @@ const Dashboard = () => {
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
                 </TabsTrigger>
               )}
+              {tabsAvailable.workshop && (
+                <TabsTrigger value="workshop" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <GraduationCap className="w-4 h-4 mr-2" />Workshop
+                </TabsTrigger>
+              )}
               {tabsAvailable.profile && (
                 <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
@@ -542,6 +547,9 @@ const Dashboard = () => {
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
+            {tabsAvailable.workshop && (
+              <TabsContent value="workshop">{user && <UserWorkshopOverview authUserId={user.id} />}</TabsContent>
+            )}
             <TabsContent value="profile">
               <ProfileWithLogout
                 userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
