@@ -15,6 +15,7 @@ import {
   Sparkles, Globe, ChevronRight, ArrowRight,
 } from "lucide-react";
 import { getStates, getDistricts, getCities, INDIA_LOCATIONS } from "@/lib/india-locations";
+import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -619,6 +620,13 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
           )}
         </motion.div>
       )}
+
+      {/* ============== BOOKING ACCOUNT LINK CARD ============== */}
+      <WorkshopBookingLinkCard
+        workshopUser={profileData}
+        darkMode={darkMode}
+        onLinked={(authId) => setProfileData({ ...profileData, auth_user_id: authId })}
+      />
 
       {/* ============== VERIFICATION MODAL ============== */}
       <AnimatePresence>

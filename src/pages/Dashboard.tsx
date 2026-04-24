@@ -25,6 +25,10 @@ import PaymentStatusTracker from "@/components/PaymentStatusTracker";
 import EventBalanceFullScreen from "@/components/EventBalanceFullScreen";
 import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
+import UserVerificationCard from "@/components/UserVerificationCard";
+import UserWorkshopOverview from "@/components/UserWorkshopOverview";
+import AccountSwitcherCard from "@/components/AccountSwitcherCard";
+// useWorkshopLink consumed inside AccountSwitcherCard / UserWorkshopOverview
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 // Lightweight wrapper so it sits inside the dashboard layout
@@ -530,6 +534,7 @@ const Dashboard = () => {
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="profile">
               <ProfileWithLogout
+                userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
                 profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
                 handleLogout={handleLogout}
                 newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
@@ -554,6 +559,7 @@ const Dashboard = () => {
           )}
           {activeTab === "profile" && (
             <ProfileWithLogout
+              userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
               profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
               handleLogout={handleLogout}
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
@@ -2631,6 +2637,30 @@ const ProfileWithLogout = (props: any) => {
         saveProfile={props.saveProfile}
         setProfile={props.setProfile}
       />
+
+      {/* Verification CTA — student-style blue tick */}
+      {props.userId && (
+        <UserVerificationCard
+          userId={props.userId}
+          profile={props.profile}
+          onProfileSaved={props.refreshProfile}
+          onBookEvent={props.openAddEvent}
+          canBookEvent={props.canBookEvent}
+        />
+      )}
+
+      {/* Workshop overview & cross-account switcher */}
+      {props.userId && (
+        <>
+          <AccountSwitcherCard
+            authUserId={props.userId}
+            fullName={props.profile?.full_name}
+            email={props.profile?.email}
+            mobile={props.profile?.mobile}
+          />
+          <UserWorkshopOverview authUserId={props.userId} />
+        </>
+      )}
 
       {/* Refer a friend — light 3D referral card */}
       <ReferAFriendCard
