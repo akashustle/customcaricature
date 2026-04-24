@@ -476,7 +476,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 Country
               </Label>
               <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
-                <SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue /></SelectTrigger>
                 <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -488,7 +488,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     State *
                   </Label>
                   <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
-                    <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select state" /></SelectTrigger>
                     <SelectContent>{states.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
@@ -504,12 +504,12 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   </div>
                   {cityMode === "select" && form.state && citiesForState.length > 0 ? (
                     <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
-                      <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Select city" /></SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select city" /></SelectTrigger>
                       <SelectContent>{citiesForState.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : (
                     <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                      placeholder="Type your city" className="mt-1 rounded-xl" />
+                      placeholder="Type your city" className="mt-1 rounded-xl shadow-none bg-white" />
                   )}
                 </div>
               </>
@@ -519,7 +519,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   City *
                 </Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  placeholder="Your city" className="mt-1 rounded-xl" />
+                  placeholder="Your city" className="mt-1 rounded-xl shadow-none bg-white" />
               </div>
             )}
 
@@ -528,7 +528,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
                   {d.label} (locked)
                 </Label>
-                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60" />
+                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60 shadow-none bg-white" />
               </div>
             ))}
           </div>
