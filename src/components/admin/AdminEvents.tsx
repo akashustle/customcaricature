@@ -44,7 +44,7 @@ type EventBooking = {
   assigned_artist_id: string | null;
 };
 type ArtistAssignment = { event_id: string; artist_id: string };
-type Profile = { user_id: string; full_name: string; email: string; mobile: string; };
+type Profile = { user_id: string; full_name: string; email: string; mobile: string; is_verified?: boolean | null; verification_status?: string | null; };
 
 const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
