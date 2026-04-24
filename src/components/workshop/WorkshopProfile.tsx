@@ -118,6 +118,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       const { data, error } = await callUpdate({ avatar_url: url });
       if (error || !data?.success) throw new Error(data?.error || error?.message || "Upload failed");
       applyUpdated(data.user || { ...profileData, avatar_url: url });
+      await consumeEditIfNeeded();
       toast({ title: "✅ Photo updated" });
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
