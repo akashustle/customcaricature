@@ -1247,9 +1247,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} autoComplete="street-address" className="rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="font-sans text-xs text-muted-foreground">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} autoComplete="address-level2" className="rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} autoComplete="address-level1" className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">District</Label><Input value={editForm.district || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, district: e.target.value })} className="rounded-xl" /></div>
             </div>
-            <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} type="tel" inputMode="numeric" autoComplete="postal-code" className="rounded-xl" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} autoComplete="address-level1" className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} type="tel" inputMode="numeric" autoComplete="postal-code" className="rounded-xl" /></div>
+            </div>
             <div className="flex gap-2 pt-2 sm:hidden">
               <Button onClick={saveProfile} className="flex-1 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-sans"><Save className="w-4 h-4 mr-1" />Save Changes</Button>
               <Button variant="outline" onClick={() => { setEditing(false); setEditForm(profile); }} className="rounded-xl font-sans"><X className="w-4 h-4" /></Button>
