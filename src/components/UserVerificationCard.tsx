@@ -558,11 +558,49 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                       You'll get a notification once approved.
                     </p>
                   </div>
-                  <Button onClick={() => { setOpen(false); setStage("form"); }}
-                    className="w-full rounded-full font-bold text-white border-0 shadow-md"
-                    style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
-                    Got it, thanks! <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
+
+                  {/* Final-step nudge: book an event for the blue tick */}
+                  <div
+                    className="rounded-2xl p-3 text-left flex items-center gap-3 shadow-sm"
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.sky}15, ${palette.coral}15)`,
+                      border: `1px solid ${palette.sky}50`,
+                    }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow"
+                      style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold" style={{ color: "hsl(220 40% 25%)" }}>
+                        Final step for the blue tick
+                      </p>
+                      <p className="text-[11px] leading-snug" style={{ color: "hsl(220 30% 35%)" }}>
+                        Once admin approves your details, just book your first event — and the verified blue tick will appear on your profile automatically.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {onBookEvent && (
+                      <Button
+                        onClick={() => { setOpen(false); setStage("form"); onBookEvent?.(); }}
+                        className="flex-1 rounded-full font-bold text-white border-0 shadow-md"
+                        style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                      >
+                        <Sparkles className="w-4 h-4 mr-1.5" /> {canBookEvent ? "Book Event Now" : "Get a Quote"}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => { setOpen(false); setStage("form"); }}
+                      className={`${onBookEvent ? "" : "flex-1 "}rounded-full font-bold text-white border-0 shadow-md`}
+                      style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}
+                    >
+                      Got it <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </motion.div>
