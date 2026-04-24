@@ -89,46 +89,61 @@ const WorkshopBookingLinkCard = ({ workshopUser, darkMode = false, onLinked }: P
     setSubmitting(true);
     setMode("linking");
     try {
-      // 1. Try sign-up
-      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
+      const cleanEmail = form.email.trim().toLowerCase();
+      const cleanMobile = form.mobile.replace(/\D/g, "");
+
+      // 1. Server-side: create + email-confirm + seed profile + link
+      //    workshop_users.auth_user_id, all in one go.
+      const { data, error } = await supabase.functions.invoke(
+        "create-booking-from-workshop",
+        {
+          body: {
+            workshop_user_id: workshopUser.id,
+            password: form.password,
+            email: cleanEmail,
+            mobile: cleanMobile,
             full_name: form.full_name.trim(),
-            mobile: form.mobile.replace(/\D/g, ""),
-            city: workshopUser.city || "",
-            state: workshopUser.state || "",
           },
         },
-      });
+      );
 
-      let authUserId: string | null = signUpData.user?.id || null;
-
-      // If user already exists, try login
-      if (signUpErr && /already registered|already exists|already been/i.test(signUpErr.message)) {
-        const { data: loginData, error: loginErr } = await supabase.auth.signInWithPassword({
-          email: form.email.trim().toLowerCase(),
-          password: form.password,
-        });
-        if (loginErr) {
-          throw new Error("An account with this email already exists. Please log in to your booking account first to link it.");
-        }
-        authUserId = loginData.user?.id || null;
-      } else if (signUpErr) {
-        throw signUpErr;
+      if (error) throw error;
+      if (!data?.success || !data?.user_id) {
+        throw new Error(data?.error || "Could not create booking account");
       }
 
-      if (!authUserId) throw new Error("Could not create or find your account.");
+      // 2. Sign the user in immediately. Email is already confirmed
+      //    server-side, so this works on the very first attempt — no OTP.
+      const { error: loginErr } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: form.password,
+      });
+      if (loginErr) {
+        // Account exists but the password we just used doesn't match (i.e.
+        // the user previously signed up with a different password). Surface
+        // a friendly recovery hint instead of a cryptic error.
+        throw new Error(
+          data.status === "linked_existing"
+            ? "Your booking account already exists. Please log in with your existing password from the login page."
+            : loginErr.message,
+        );
+      }
 
-      await linkExisting(authUserId);
+      // 3. Update local workshop record so the rest of the app immediately
+      //    knows we're linked (no refresh needed).
+      const next = { ...workshopUser, auth_user_id: data.user_id };
+      try { localStorage.setItem("workshop_user", JSON.stringify(next)); } catch {}
+      window.dispatchEvent(new CustomEvent("workshop-user-updated", { detail: next }));
+      onLinked?.(data.user_id);
 
       setMode("done");
-      toast({ title: "✅ Accounts linked!", description: "Your workshop and booking accounts are now connected." });
+      toast({
+        title: "✅ Booking account ready!",
+        description: "You're signed in. Switch to the booking dashboard any time.",
+      });
     } catch (e: any) {
-      toast({ title: "Linking failed", description: e.message, variant: "destructive" });
-      setMode(mode === "linking" ? "ws" : mode);
+      toast({ title: "Linking failed", description: e.message || String(e), variant: "destructive" });
+      setMode("ws");
     } finally {
       setSubmitting(false);
     }
