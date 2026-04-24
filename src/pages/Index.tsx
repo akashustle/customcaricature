@@ -422,6 +422,7 @@ const Index = () => {
   const maintenance = useMaintenanceCheck("home");
 
   const [eventGallery, setEventGallery] = useState<string[]>([]);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   // Fetch event gallery (admin-managed) — fallback to bundled images so hero never empty.
   useEffect(() => {
@@ -501,7 +502,7 @@ const Index = () => {
             ? (content as any).homepage_section_order.order
             : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
           const sections: Record<string, React.ReactNode> = {
-            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} />,
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
             stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
@@ -516,7 +517,7 @@ const Index = () => {
                 </div>
               </section>
             ) : null,
-            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} />,
+            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
             clients: (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
@@ -525,7 +526,7 @@ const Index = () => {
               </section>
             ),
             services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
-            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
             reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
@@ -535,6 +536,13 @@ const Index = () => {
       </main>
 
       <SiteFooter />
+
+      <HomepageImageLightbox
+        images={lightbox?.images || []}
+        index={lightbox?.index ?? null}
+        onClose={() => setLightbox(null)}
+        onChange={(i) => setLightbox((prev) => prev ? { ...prev, index: i } : null)}
+      />
 
       {(settings as any).homepage_sticky_cta_visible?.enabled && (
         <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />
