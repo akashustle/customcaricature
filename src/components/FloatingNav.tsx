@@ -12,6 +12,9 @@ const FloatingNav = () => {
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
+  // Scroll-driven background opacity: 0.55 at top → 0.95 after ~200px so the
+  // violet hero fade reads through the header initially, then becomes opaque.
+  const [bgOpacity, setBgOpacity] = useState(0.55);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -22,6 +25,9 @@ const FloatingNav = () => {
       window.requestAnimationFrame(() => {
         const y = window.scrollY;
         setScrolled(y > 8);
+        // Map 0..200px → 0.55..0.95
+        const t = Math.min(1, Math.max(0, y / 200));
+        setBgOpacity(0.55 + t * 0.4);
         // Near top → always show. Scrolling down past threshold → hide. Scrolling up → show.
         if (y < 80) {
           setHidden(false);
@@ -63,7 +69,8 @@ const FloatingNav = () => {
       }`}
     >
       <div
-        className={`mx-auto max-w-7xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-shadow ${
+        style={{ backgroundColor: `hsl(var(--card) / ${bgOpacity})` }}
+        className={`mx-auto max-w-7xl rounded-2xl border border-border/40 backdrop-blur-xl px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between transition-[background-color,box-shadow] duration-200 ${
           scrolled ? "shadow-[0_10px_40px_-20px_hsl(252_60%_40%/0.25)]" : "shadow-sm"
         }`}
       >
