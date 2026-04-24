@@ -78,6 +78,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   });
 
   useEffect(() => {
+    setLocalAvatarUrl(profile?.avatar_url || null);
     setForm({
       full_name: profile?.full_name || "",
       mobile: profile?.mobile || "",
@@ -107,10 +108,40 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
     return Array.from(new Set(all)).sort();
   })();
 
+  // Avatar upload — saves to public 'avatars' bucket, then writes URL to
+  // profiles.avatar_url. Fast: skips heavy mini-DB sync on the trigger.
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please pick a photo under 4 MB.", variant: "destructive" });
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars")
+        .upload(path, file, { upsert: true, cacheControl: "3600" });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const { error: dbErr } = await supabase.from("profiles")
+        .update({ avatar_url: url } as any).eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      setLocalAvatarUrl(url);
+      onProfileSaved?.();
+      toast({ title: "📸 Photo uploaded", description: "Now finish the form and submit for review." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   // Completeness check
   const completenessFields = [
     form.full_name, form.mobile, form.age, form.gender,
-    form.occupation, form.city, form.address, profile?.avatar_url,
+    form.occupation, form.city, form.address, localAvatarUrl,
     form.why_join, (form.country === "India" ? form.state : true),
   ];
   const completeness = Math.round((completenessFields.filter(Boolean).length / completenessFields.length) * 100);
