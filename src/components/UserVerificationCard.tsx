@@ -242,7 +242,14 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
             </p>
           </div>
           {isPending ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-300 bg-amber-50 text-amber-900 shadow-sm">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex-shrink-0"
+              style={{
+                background: "hsl(38 95% 92%)",
+                color: "hsl(28 80% 22%)",
+                border: "1px solid hsl(38 90% 70%)",
+              }}
+            >
               <Loader2 className="w-3 h-3 animate-spin" /> Pending Review
             </span>
           ) : (
