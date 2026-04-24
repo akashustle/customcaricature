@@ -805,16 +805,23 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
 
                     {/* Action Controls */}
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
-                      <Select value={ev.status} onValueChange={v => updateEventStatus(ev.id, v)}>
+                      <Select value={ev.status || "upcoming"} onValueChange={v => updateEventStatus(ev.id, v)}>
                         <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>{Object.entries(EVENT_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+                        <SelectContent>
+                          <SelectItem value="upcoming">Upcoming</SelectItem>
+                          <SelectItem value="live">Live Now</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="refunded">Refunded</SelectItem>
+                        </SelectContent>
                       </Select>
-                      <Select value={ev.payment_status} onValueChange={v => updatePaymentStatus(ev.id, v)}>
+                      <Select value={ev.payment_status || "pending"} onValueChange={v => updatePaymentStatus(ev.id, v)}>
                         <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="partial_1_paid">Partial 1 Paid</SelectItem>
                           <SelectItem value="partial_2_paid">Partial 2 Paid</SelectItem>
+                          <SelectItem value="partial">Partial (Generic)</SelectItem>
                           <SelectItem value="confirmed">Advance Received</SelectItem>
                           <SelectItem value="fully_paid">Fully Paid</SelectItem>
                           <SelectItem value="refunded">Refunded</SelectItem>
