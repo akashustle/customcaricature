@@ -306,13 +306,17 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </AvatarFallback>
             </Avatar>
             <button
-              onClick={() => fileRef.current?.click()}
+              onClick={() => {
+                if (editLocked) { setEditRequestOpen(true); return; }
+                fileRef.current?.click();
+              }}
               disabled={uploading}
               className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
-              style={{ background: palette.coral, borderColor: palette.ivory, color: "white" }}
-              aria-label="Change profile photo"
+              style={{ background: editLocked ? "hsl(40 90% 55%)" : palette.coral, borderColor: palette.ivory, color: "white" }}
+              aria-label={editLocked ? "Request edit to change photo" : "Change profile photo"}
+              title={editLocked ? "Request edit access to change photo" : "Change profile photo"}
             >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : editLocked ? <span className="text-[10px] font-bold">🔒</span> : <Camera className="w-4 h-4" />}
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
