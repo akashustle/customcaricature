@@ -844,7 +844,7 @@ const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
     }}>
     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md"
       style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
-      <Icon className="w-4.5 h-4.5 text-white" />
+      <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
     </div>
     <div className="min-w-0 flex-1">
       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
