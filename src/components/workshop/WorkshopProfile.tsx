@@ -421,10 +421,10 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== EDIT FORM ============== */}
       {editing && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-          className="rounded-[24px] p-5 border-2 shadow-lg"
+          className="rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
-            background: darkMode ? "hsl(var(--card))" : palette.ivory,
-            borderColor: darkMode ? "hsl(var(--border))" : palette.gold,
+            background: darkMode ? "hsl(var(--card))" : "#ffffff",
+            borderColor: darkMode ? "hsl(var(--border))" : "rgba(226,232,240,0.9)",
           }}>
           <h3 className="font-bold text-lg mb-4" style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
             ✏️ Edit Profile
