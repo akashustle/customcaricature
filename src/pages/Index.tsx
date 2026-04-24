@@ -111,13 +111,18 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
     );
   };
   return (
-    // Edge-to-edge hero: pulled up so the floating header sits *over* the
-    // violet fade. The header has its own backdrop-blur card, so the colour
-    // bleeds beautifully behind it.
-    <section className="relative -mt-[68px] md:-mt-[84px]">
-      <div className="relative bg-hero-violet overflow-hidden border-b border-border/40">
-        {/* extra top padding compensates for the overlapping floating header */}
-        <div className="px-4 sm:px-10 lg:px-14 pt-[96px] sm:pt-[140px] lg:pt-[180px] pb-8 sm:pb-14 lg:pb-20 text-center max-w-7xl mx-auto">
+    // True edge-to-edge hero. We:
+    //  • escape any parent side-padding using `-mx-3 sm:-mx-4` so the violet
+    //    fade reaches every screen edge (the SiteShell pads its main wrap).
+    //  • pull the section UP under the floating header with a negative top
+    //    margin tuned per breakpoint:
+    //       mobile  : header is sticky at top:0 with pt-3 → ~64px tall
+    //       desktop : header floats at top:3 with no pt → ~76px tall
+    //  • re-add matching top padding inside so the headline + CTA never sit
+    //    underneath the header.
+    <section className="relative -mx-3 sm:-mx-4 -mt-[64px] sm:-mt-[72px] md:-mt-[88px]">
+      <div className="relative w-full bg-hero-violet overflow-hidden border-b border-border/40">
+        <div className="px-4 sm:px-10 lg:px-14 pt-[88px] sm:pt-[120px] md:pt-[150px] lg:pt-[190px] pb-8 sm:pb-14 lg:pb-20 text-center max-w-7xl mx-auto">
           <div className="chip-violet mx-auto mb-5 sm:mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             {c.chip_text || "India's #1 Live Caricature Studio"}
@@ -125,7 +130,7 @@ const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () =>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
             {renderHeadline()}
           </h1>
-          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/70 px-2">
+          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/75 px-2">
             {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
           </p>
           <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
