@@ -5,6 +5,7 @@ import { X, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+import WatermarkedImage from "@/components/WatermarkedImage";
 
 type GalleryItem = {
   id: string;
@@ -87,14 +88,19 @@ const GalleryPage = () => {
             <button onClick={() => setLightboxOpen(false)} className="absolute top-4 right-4 text-background/80 hover:text-background z-10"><X className="w-8 h-8" /></button>
             <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i - 1 + items.length) % items.length); }} className="absolute left-4 text-background/80 hover:text-background z-10"><ChevronLeft className="w-10 h-10" /></button>
             <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i + 1) % items.length); }} className="absolute right-4 text-background/80 hover:text-background z-10"><ChevronRight className="w-10 h-10" /></button>
-            <motion.img
+            <motion.div
               key={lightboxIndex}
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              src={items[lightboxIndex].image_url}
-              alt={items[lightboxIndex].caption || "Gallery"}
-              className="max-w-[90vw] max-h-[85vh] object-contain rounded-2xl"
+              className="max-w-[90vw] max-h-[85vh] flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <WatermarkedImage
+                src={items[lightboxIndex].image_url}
+                alt={items[lightboxIndex].caption || "Gallery"}
+                className="rounded-2xl max-h-[85vh]"
+                imgClassName="!object-contain"
+              />
+            </motion.div>
             {items[lightboxIndex].caption && (
               <p className="absolute bottom-14 text-background/80 font-body text-sm bg-foreground/40 px-4 py-1 rounded-full">{items[lightboxIndex].caption}</p>
             )}
@@ -129,11 +135,10 @@ const GalleryPage = () => {
                 className="break-inside-avoid rounded-xl overflow-hidden cursor-pointer shadow-md border border-border/40 bg-card mb-3"
                 onClick={() => { setLightboxIndex(i % items.length); setLightboxOpen(true); }}
               >
-                <img
+                <WatermarkedImage
                   src={item.image_url}
                   alt={item.caption || `${title} ${(i % items.length) + 1}`}
-                  className="w-full object-cover"
-                  loading="lazy"
+                  className="w-full"
                 />
                 {item.caption && (
                   <p className="px-3 py-2 text-xs font-body text-muted-foreground truncate">{item.caption}</p>

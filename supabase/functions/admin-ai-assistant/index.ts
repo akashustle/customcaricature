@@ -33,13 +33,15 @@ Capabilities you have via tools:
 - top_cities(metric, limit) — top cities by enquiries/events
 - generate_report(kind, since_days) — kind = "revenue" | "events" | "orders" | "enquiries", returns a Markdown table the admin can copy
 
-Behavioral rules:
-1. When the admin gives multiple instructions in one message, execute them sequentially with multiple tool calls.
-2. For destructive actions (delete_user_by_email, broadcast to all, block date, create event manually) FIRST reply asking for confirmation. The admin must say "yes"/"confirm"/"go ahead" before you call the tool.
-3. Be concise. Use bullet lists, bold key numbers, Markdown tables for reports.
-4. If a tool returns ok:false, surface the error verbatim.
-5. End with a one-line summary of what you did.
-6. If asked for a "report", always call generate_report and render the returned markdown.`;
+Behavioral rules (AGENTIC — act, do not stall):
+1. You are an AGENT. When the admin asks for an action you have a tool for, CALL THE TOOL IMMEDIATELY. Do not ask "are you sure?" for routine ops like toggle_setting, update_setting, update_caricature_price, update_event_price, update_enquiry_status, update_order_status, block_event_date, create_coupon, list_*, count_*, summarize_revenue, generate_report, recent_signups, top_cities, read_setting.
+2. Chain multiple tool calls in one turn when the user requests multiple things.
+3. ONLY ask for explicit confirmation before: delete_user_by_email, send_broadcast_notification (to all users), add_event_manually. For these, wait for "yes"/"confirm"/"go ahead".
+4. For "turn on/off maintenance mode for N minutes" — call toggle_setting with key="maintenance_mode" enabled=true immediately, then mention you've set it (auto-revert is not implemented yet, the admin can disable manually).
+5. Be concise. Use bullet lists, bold key numbers, Markdown tables for reports.
+6. If a tool returns ok:false, surface the error verbatim and suggest a fix.
+7. End with a one-line summary of what you did.
+8. If asked for a "report", always call generate_report and render the returned markdown.`;
 
 const tools = [
   { type: "function", function: { name: "toggle_setting", description: "Enable/disable a boolean site setting", parameters: { type: "object", properties: { key: { type: "string" }, enabled: { type: "boolean" } }, required: ["key", "enabled"] } } },
@@ -300,8 +302,17 @@ Deno.serve(async (req) => {
         } catch (toolErr: any) {
           result = { ok: false, error: `Tool '${c.function?.name}' threw: ${toolErr?.message || String(toolErr)}` };
         }
-        // Log for audit
-        await admin.from("admin_action_log").insert({ user_id: user.id, admin_name: "AI Assistant", action: `ai_tool:${c.function?.name}`, details: JSON.stringify({ args, result }).slice(0, 1000) }).catch(() => {});
+        // Log for audit (Supabase query builders are PromiseLike but not Promises — wrap in try/catch)
+        try {
+          await admin.from("admin_action_log").insert({
+            user_id: user.id,
+            admin_name: "AI Assistant",
+            action: `ai_tool:${c.function?.name}`,
+            details: JSON.stringify({ args, result }).slice(0, 1000),
+          });
+        } catch (logErr) {
+          console.warn("admin_action_log insert failed (non-fatal):", logErr);
+        }
         conv.push({ role: "tool", tool_call_id: c.id, content: JSON.stringify(result) });
       }
     }
