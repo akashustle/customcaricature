@@ -15,7 +15,8 @@ const KEYS = [
   "homepage_footer", "homepage_section_order",
   // Newly editable live-homepage sections (synced with admin Homepage Control)
   "homepage_stats", "homepage_services", "homepage_how_it_starts",
-  "homepage_why_unique", "homepage_reviews", "homepage_faqs"
+  "homepage_why_unique", "homepage_reviews", "homepage_faqs",
+  "homepage_about", "homepage_still_confused", "global_contact"
 ];
 
 const fetchContentOnce = async (): Promise<Record<string, any>> => {

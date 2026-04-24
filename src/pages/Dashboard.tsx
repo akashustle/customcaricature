@@ -1159,36 +1159,53 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
 
   return (
     <div className="space-y-4">
-      {/* Modern profile hero — fade primary, dark-mode friendly */}
-      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
+      {/* White 3D profile hero */}
+      <div
+        className="relative overflow-hidden rounded-3xl p-6 border border-white/80"
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)",
+          boxShadow:
+            "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 12px 30px -12px hsl(220 30% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(15,23,42,0.04)",
+        }}
+      >
+        {/* Soft 3D ambient orbs */}
+        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(252 90% 75% / 0.35), transparent 70%)", filter: "blur(28px)" }} />
+        <div className="absolute -bottom-14 -left-14 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(280 80% 78% / 0.30), transparent 70%)", filter: "blur(32px)" }} />
+        <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
         <div className="relative flex items-center gap-4 mb-5">
           <label className="relative cursor-pointer group">
-            <div className="w-20 h-20 rounded-2xl bg-card overflow-hidden flex items-center justify-center shadow-lg ring-4 ring-card/50">
+            <div
+              className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
+              style={{
+                boxShadow:
+                  "0 14px 30px -10px hsl(252 60% 40% / 0.30), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(15,23,42,0.06)",
+              }}
+            >
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-2xl font-bold text-primary font-display">{initials}</span>
               )}
             </div>
-            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-background text-[10px] font-semibold transition">Change</span>
+            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">Change</span>
             <input type="file" accept="image/*" className="hidden" onChange={(e) => {
               const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
             }} />
           </label>
           <div className="flex-1 min-w-0">
-            <h3 className="font-display text-2xl font-bold text-foreground truncate flex items-center gap-1.5">
+            <h3 className="font-display text-2xl font-bold text-slate-900 truncate flex items-center gap-1.5">
               {profile?.full_name || "User"}
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
             </h3>
-            <p className="text-sm text-foreground/75 font-sans truncate">{profile?.email || ""}</p>
+            <p className="text-sm text-slate-600 font-sans truncate">{profile?.email || ""}</p>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs text-foreground/80 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
+              <span className="text-xs text-slate-700 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
               {profile?.created_at && (
-                <span className="inline-flex items-center gap-1 text-[10px] text-foreground/60 font-sans bg-card/60 backdrop-blur px-2 py-0.5 rounded-full border border-border/40">
+                <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-sans bg-white/80 backdrop-blur px-2 py-0.5 rounded-full border border-slate-200">
                   <CalIcon className="w-3 h-3" />
                   Member since {new Date(profile.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
                 </span>
@@ -1196,7 +1213,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             </div>
           </div>
           {!editing ? (
-            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
           ) : (
             <div className="flex gap-1.5">
               <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"><Save className="w-4 h-4" /></Button>

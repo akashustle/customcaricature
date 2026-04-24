@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Calendar, Sparkles, Star, Plus, Minus,
   CheckCircle2, Users, Award, Quote, Trophy, Heart, Image as ImageIcon, PlayCircle,
-  MessageCircle, Instagram,
+  MessageCircle, Instagram, Youtube, Mail, Globe,
 } from "lucide-react";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { MAIN_SITE_URL } from "@/lib/site-config";
@@ -429,8 +429,9 @@ const FAQs = ({ config }: { config?: any }) => {
 
 /* ------------------------------ About Us ------------------------------ */
 
-const AboutUs = ({ config }: { config?: any }) => {
+const AboutUs = ({ config, stats: statsItems }: { config?: any; stats?: { label: string; value: string }[] }) => {
   const c = config || {};
+  const contact = useSiteSetting<any>("global_contact", {});
   const eyebrow = c.eyebrow || "About • About";
   const titlePre = c.title_pre || "Who is";
   const titleHl = c.title_highlight || "Creative Caricature?";
@@ -438,11 +439,32 @@ const AboutUs = ({ config }: { config?: any }) => {
     || "Creative Caricature Club is India's largest live-caricature studio, hand-built by passionate artists over 12+ years. From intimate baby showers to 3,000-guest weddings and global brand activations, our trained network of artists turns every event into a keepsake your guests will frame for life.";
   const points: { label: string; value: string }[] = (c.points && Array.isArray(c.points) && c.points.length)
     ? c.points
-    : [
+    : (statsItems && statsItems.length ? statsItems : [
         { label: "Years crafting smiles", value: "12+" },
         { label: "Live events delivered", value: "800+" },
         { label: "Caricatures drawn live", value: "120K+" },
-      ];
+        { label: "Average rating", value: "4.9 / 5" },
+      ]);
+
+  const ratingValue = c.rating_value || "4.9";
+  const ratingCount = c.rating_count || "1,200+ reviews";
+
+  const wa = (contact?.whatsapp_number || c.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const igHandle = (contact?.instagram_handle || c.instagram_handle || "creativecaricatureclub").replace(/^@/, "");
+  const igUrl = contact?.instagram_url || c.instagram_url || `https://instagram.com/${igHandle}`;
+  const ytUrl = contact?.youtube_url || c.youtube_url || "https://youtube.com/@creativecaricatureclub";
+  const googleUrl = contact?.google_profile_url || c.google_profile_url || "https://g.page/creativecaricatureclub";
+  const email = contact?.email || c.email || "hello@creativecaricatureclub.com";
+  const websiteUrl = contact?.website_url || c.website_url || MAIN_SITE_URL;
+
+  const socials = [
+    { id: "instagram", label: "Instagram", href: igUrl, Icon: Instagram, gradient: "linear-gradient(135deg, hsl(330 80% 55%), hsl(280 70% 55%) 60%, hsl(35 95% 55%))" },
+    { id: "youtube", label: "YouTube", href: ytUrl, Icon: Youtube, gradient: "linear-gradient(135deg, hsl(0 85% 55%), hsl(0 70% 45%))" },
+    { id: "google", label: "Google", href: googleUrl, Icon: Globe, gradient: "linear-gradient(135deg, hsl(217 90% 55%), hsl(142 70% 45%))" },
+    { id: "whatsapp", label: "WhatsApp", href: `https://wa.me/${wa}`, Icon: MessageCircle, gradient: "linear-gradient(135deg, hsl(142 70% 45%), hsl(150 65% 38%))" },
+    { id: "email", label: "Email", href: `mailto:${email}`, Icon: Mail, gradient: "linear-gradient(135deg, hsl(252 85% 62%), hsl(280 75% 55%))" },
+  ].filter(s => Array.isArray(c.hidden_socials) ? !c.hidden_socials.includes(s.id) : true);
+
   return (
     <Section
       id="about"
@@ -452,26 +474,48 @@ const AboutUs = ({ config }: { config?: any }) => {
       <div className="grid lg:grid-cols-5 gap-6 sm:gap-8 items-center">
         <div className="lg:col-span-3 space-y-5">
           <p className="text-foreground/80 leading-relaxed text-base sm:text-lg">{body}</p>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-2">
-            {points.map((p) => (
+
+          {/* Stats grid (merged from old Stats section) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-2">
+            {points.slice(0, 4).map((p) => (
               <div key={p.label} className="rounded-2xl bg-secondary/60 border border-border/40 p-3 sm:p-4 text-center">
                 <div className="text-xl sm:text-2xl font-extrabold text-gradient-violet">{p.value}</div>
                 <div className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{p.label}</div>
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 pt-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold">
-              <Heart className="w-3.5 h-3.5" /> Hand-drawn live
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 text-accent-foreground px-3 py-1 text-xs font-semibold">
-              <Users className="w-3.5 h-3.5" /> Vetted artist network
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 text-warning px-3 py-1 text-xs font-semibold">
-              <Award className="w-3.5 h-3.5" /> 4.9/5 rated
-            </span>
+
+          {/* Rating row */}
+          <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-1">
+              {[1,2,3,4,5].map(i => (
+                <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-warning text-warning" />
+              ))}
+            </div>
+            <div className="text-sm font-semibold text-foreground">
+              {ratingValue} <span className="text-muted-foreground font-normal">· {ratingCount}</span>
+            </div>
+          </div>
+
+          {/* Social icons */}
+          <div className="flex flex-wrap gap-2.5 pt-2">
+            {socials.map(({ id, label, href, Icon, gradient }) => (
+              <a
+                key={id}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                title={label}
+                className="group inline-flex items-center justify-center w-11 h-11 rounded-2xl text-white shadow-md transition-transform hover:scale-110"
+                style={{ background: gradient }}
+              >
+                <Icon className="w-5 h-5" />
+              </a>
+            ))}
           </div>
         </div>
+
         <div className="lg:col-span-2 relative">
           <div className="relative rounded-3xl overflow-hidden bg-hero-violet p-6 sm:p-8 border border-border/40 shadow-[0_20px_60px_-30px_hsl(252_85%_62%/0.45)]">
             <div className="pointer-events-none absolute -top-16 -left-12 w-56 h-56 rounded-full opacity-50 blur-3xl"
@@ -490,6 +534,13 @@ const AboutUs = ({ config }: { config?: any }) => {
                 <div className="text-xs text-muted-foreground">{c.signoff_role || "Creative Caricature Club"}</div>
               </div>
             </div>
+            {websiteUrl && (
+              <div className="mt-4 pt-4 border-t border-border/40 text-center">
+                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline">
+                  Visit our main studio website →
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -651,17 +702,21 @@ const Index = () => {
 
       <main>
         {(() => {
-          const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
+          const rawOrder: string[] = Array.isArray((content as any).homepage_section_order?.order)
             ? (content as any).homepage_section_order.order
-            : ["hero", "stats", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
-          // Always make sure the new About section renders even on legacy
-          // saved orders that don't include it yet.
-          const finalOrder = order.includes("about")
-            ? order
-            : [...order.slice(0, Math.max(order.indexOf("clients") + 1, 1)), "about", ...order.slice(Math.max(order.indexOf("clients") + 1, 1))];
+            : ["hero", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
+          // Strip legacy "stats" entry — stats now live inside the About section.
+          let order = rawOrder.filter(s => s !== "stats");
+          // Make sure About is present.
+          if (!order.includes("about")) {
+            const afterClients = Math.max(order.indexOf("clients") + 1, 1);
+            order = [...order.slice(0, afterClients), "about", ...order.slice(afterClients)];
+          }
+          // Make sure "Still confused" always closes the page.
+          if (!order.includes("still_confused")) order = [...order, "still_confused"];
+
           const sections: Record<string, React.ReactNode> = {
             hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
-            stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
@@ -683,7 +738,7 @@ const Index = () => {
                 </div>
               </section>
             ),
-            about: <AboutUs key="about" config={(content as any).homepage_about} />,
+            about: <AboutUs key="about" config={(content as any).homepage_about} stats={stats} />,
             services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
             how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
@@ -691,7 +746,7 @@ const Index = () => {
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
             still_confused: <StillConfused key="still_confused" config={(content as any).homepage_still_confused} />,
           };
-          return finalOrder.map(id => sections[id]).filter(Boolean);
+          return order.map(id => sections[id]).filter(Boolean);
         })()}
       </main>
 
