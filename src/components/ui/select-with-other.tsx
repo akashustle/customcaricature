@@ -109,7 +109,7 @@ const SelectWithOther: React.FC<Props> = ({
       <SelectTrigger className={cn("rounded-xl h-11", triggerClassName, className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="max-h-72 z-[120] bg-popover">
+      <SelectContent className="max-h-72 z-[300] bg-popover">
         {opts.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}
