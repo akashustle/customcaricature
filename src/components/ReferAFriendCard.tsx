@@ -23,17 +23,18 @@ const ReferAFriendCard = ({ fullName, secretCode }: Props) => {
   }, [secretCode]);
 
   const referralUrl = useMemo(() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "https://creativecaricatureclub.com";
-    return `${base}/register?ref=${referralCode}`;
+    const base = "https://creativecaricatureclub.com";
+    return `${base}/?ref=${referralCode}`;
   }, [referralCode]);
 
-  const shareText = `🎨 Hey! I've been ordering caricatures with Creative Caricature Club™ and they're amazing. Use my code ${referralCode} for a special welcome offer: ${referralUrl}`;
+  const firstName = fullName ? fullName.split(" ")[0] : "";
+  const shareText = `Hey! 🎨 I just booked Creative Caricature Club™ for my event and honestly — every single guest left with the cutest live caricature of themselves. They were over the moon!\n\nIf you have a wedding, birthday, party or any get-together coming up, you HAVE to get them. Your guests will literally take a smile (and a memory) home with them.\n\nUse my code ${referralCode} when you enquire — they'll know I sent you 💛\n\n${referralUrl}\n\n— ${firstName || "Sent with love"}`;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
-      toast({ title: "📋 Copied!", description: "Share this with your friends." });
+      toast({ title: "📋 Copied!", description: "Share this with your family & friends." });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast({ title: "Couldn't copy", description: "Long-press the code to copy manually.", variant: "destructive" });
@@ -78,13 +79,13 @@ const ReferAFriendCard = ({ fullName, secretCode }: Props) => {
           </div>
           <div className="flex-1">
             <p className="text-[10px] uppercase tracking-[0.16em] font-sans font-semibold text-amber-700/80 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Refer & Earn
+              <Sparkles className="w-3 h-3" /> Share the joy
             </p>
             <h3 className="font-display text-lg font-bold text-foreground leading-tight">
-              Invite a friend, share the joy
+              Share with family & friends
             </h3>
             <p className="text-xs font-sans text-foreground/70 mt-0.5">
-              Your friends get a welcome offer — you get our heartfelt thanks (and surprises 🎁).
+              Help them turn their next event into a memory their guests carry home — a smile, a sketch, a story.
             </p>
           </div>
         </div>
