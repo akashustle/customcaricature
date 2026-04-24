@@ -258,7 +258,7 @@ const OrderConfirmation = ({ orderId }: Props) => {
                     Home
                   </Button>
                   <Button
-                    onClick={() => window.open("https://wa.me/918369594271", "_blank")}
+                    onClick={() => window.open(`https://wa.me/918369594271?text=${encodeURIComponent("Hi Creative Caricature Club! 👋 I just placed a caricature order and need some help. Can you assist me?")}`, "_blank")}
                     variant="outline"
                     className="h-11 rounded-2xl font-sans border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                   >

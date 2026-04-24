@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
 import { MAIN_SITE_URL } from "@/lib/site-config";
 
 type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
@@ -62,7 +62,8 @@ const DEFAULT: {
         { label: "Live Chat", href: "/live-chat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
-        { label: "Main Web — creativecaricatureclub.com", icon: "website" },
+        { label: "Facebook", icon: "facebook" },
+        { label: "Main Web", icon: "website" },
       ],
     },
     {
@@ -107,6 +108,7 @@ const ContactIcon = ({ name }: { name?: string }) => {
   if (name === "email") return <Mail className={cls} />;
   if (name === "instagram") return <Instagram className={cls} />;
   if (name === "youtube") return <Youtube className={cls} />;
+  if (name === "facebook") return <Facebook className={cls} />;
   if (name === "website") return <Globe className={cls} />;
   return null;
 };
@@ -145,12 +147,15 @@ const SiteFooter = () => {
   const ytUrl = contact?.youtube_url || `https://www.youtube.com/@creativecaricatureclub`;
   const waMessage = contact?.whatsapp_prefill_message || WA_PREFILL;
 
+  const fbUrl = contact?.facebook_url || `https://facebook.com/creativecaricatureclub`;
+
   const resolveContactHref = (icon?: string) => {
     if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`;
     if (icon === "phone") return `tel:+${phone.replace(/[^0-9]/g, "")}`;
     if (icon === "email") return `mailto:${email}?subject=${encodeURIComponent("Enquiry from website")}`;
     if (icon === "instagram") return igUrl;
     if (icon === "youtube") return ytUrl;
+    if (icon === "facebook") return fbUrl;
     if (icon === "website") return MAIN_SITE_URL;
     return "#";
   };
@@ -198,7 +203,7 @@ const SiteFooter = () => {
             <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
             <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-              <Globe className="w-3.5 h-3.5" /> Main Web — creativecaricatureclub.com <ExternalLink className="w-3 h-3" />
+              <Globe className="w-3.5 h-3.5" /> Main Web <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
