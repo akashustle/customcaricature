@@ -349,6 +349,58 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                     </div>
                   </div>
 
+                  {/* Avatar upload — required for verification */}
+                  <div
+                    className="flex items-center gap-3 rounded-2xl border-2 border-dashed p-3"
+                    style={{
+                      borderColor: localAvatarUrl ? "hsl(150 50% 60%)" : palette.coral,
+                      background: localAvatarUrl ? "hsl(150 60% 96%)" : "hsl(8 80% 96%)",
+                    }}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="w-16 h-16 border-2 shadow-md" style={{ borderColor: "white" }}>
+                        <AvatarImage src={localAvatarUrl || undefined} className="object-cover" />
+                        <AvatarFallback
+                          className="text-lg font-bold text-white"
+                          style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+                        >
+                          {(form.full_name || "U").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploadingAvatar}
+                        className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-white shadow-lg border-2"
+                        style={{ background: palette.coral, borderColor: "white" }}
+                        aria-label="Upload profile photo"
+                      >
+                        {uploadingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                      </button>
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleAvatarUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold" style={{ color: localAvatarUrl ? "hsl(150 50% 25%)" : "hsl(8 50% 30%)" }}>
+                        {localAvatarUrl ? "✓ Profile photo added" : "Profile photo required *"}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: localAvatarUrl ? "hsl(150 30% 35%)" : "hsl(8 35% 40%)" }}>
+                        {localAvatarUrl
+                          ? "Looks great! Tap the camera to change it."
+                          : "Tap the camera icon to upload a clear photo of your real face."}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     <div className="md:col-span-2">
                       <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Full name *</Label>
