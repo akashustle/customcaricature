@@ -542,12 +542,6 @@ const AboutUs = ({ config, stats: statsItems }: { config?: any; stats?: { label:
 };
 
 // (Removed: external "Visit our main studio website" CTA — the link now lives in the footer.)
-          </div>
-        </div>
-      </div>
-    </Section>
-  );
-};
 
 const StillConfused = ({ config }: { config?: any }) => {
   const c = config || {};
