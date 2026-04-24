@@ -87,38 +87,55 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
   );
 };
 
-const Hero = ({ onBook, onQuote, images }: { onBook: () => void; onQuote: () => void; images: string[] }) => (
-  <section className="relative px-3 sm:px-4 mt-3">
-    <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
-      <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
-        <div className="chip-violet mx-auto mb-5 sm:mb-6">
-          <Sparkles className="w-3.5 h-3.5" />
-          India's #1 Live Caricature Studio
+const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any }) => {
+  const c = config || {};
+  const headline: string = c.headline || "Live Caricature For Unforgettable Events";
+  const highlight: string = c.headline_highlight || "Caricature";
+  // Render the highlight word in gradient inside the headline if present.
+  const renderHeadline = () => {
+    if (!highlight || !headline.includes(highlight)) {
+      return <>{headline}</>;
+    }
+    const [before, ...rest] = headline.split(highlight);
+    const after = rest.join(highlight);
+    return (
+      <>
+        {before}
+        <span className="text-gradient-violet">{highlight}</span>
+        {after}
+      </>
+    );
+  };
+  return (
+    <section className="relative px-3 sm:px-4 mt-3">
+      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
+        <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
+          <div className="chip-violet mx-auto mb-5 sm:mb-6">
+            <Sparkles className="w-3.5 h-3.5" />
+            {c.chip_text || "India's #1 Live Caricature Studio"}
+          </div>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
+            {renderHeadline()}
+          </h1>
+          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/70 px-2">
+            {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
+          </p>
+          <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
+              <Calendar className="w-5 h-5" /> {c.primary_cta || "Book Your Event"} <ArrowRight className="w-4 h-4" />
+            </button>
+            <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
+              <Sparkles className="w-5 h-5" /> {c.secondary_cta || "Get Free Quote"}
+            </button>
+          </div>
         </div>
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
-          Live <span className="text-gradient-violet">Caricature</span>
-          <br />
-          For Unforgettable Events
-        </h1>
-        <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/70 px-2">
-          Book professional caricature artists for weddings, corporate parties, baby showers
-          &amp; brand activations across India and worldwide.
-        </p>
-        <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
-            <Calendar className="w-5 h-5" /> Book Your Event <ArrowRight className="w-4 h-4" />
-          </button>
-          <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
-            <Sparkles className="w-5 h-5" /> Get Free Quote
-          </button>
-        </div>
+        {/* Continuous right-to-left marquee */}
+        <HeroMarquee images={images} />
+        <div className="h-6 sm:h-10" />
       </div>
-      {/* Continuous right-to-left marquee */}
-      <HeroMarquee images={images} />
-      <div className="h-6 sm:h-10" />
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------- Stat Strip ------------------------------ */
 
