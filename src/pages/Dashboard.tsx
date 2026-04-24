@@ -103,12 +103,46 @@ const Dashboard = () => {
   const [hasWorkshop, setHasWorkshop] = useState(false);
   useEffect(() => {
     if (!user?.id) return;
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase.from("workshop_users" as any)
+      // 1) Direct link by auth_user_id
+      const { data: linked } = await supabase.from("workshop_users" as any)
         .select("id").eq("auth_user_id", user.id).maybeSingle();
-      setHasWorkshop(!!data);
+      if (cancelled) return;
+      if (linked) { setHasWorkshop(true); return; }
+
+      // 2) Fallback: match by email/mobile from profiles. If found, also
+      //    auto-link in the background so subsequent loads are instant.
+      const { data: prof } = await supabase.from("profiles")
+        .select("email, mobile, full_name").eq("user_id", user.id).maybeSingle();
+      if (cancelled || !prof) return;
+
+      const email = (prof.email || user.email || "").toLowerCase().trim();
+      const mobile = (prof.mobile || "").replace(/\D/g, "");
+      if (!email && !mobile) return;
+
+      let match: any = null;
+      if (email) {
+        const { data } = await supabase.from("workshop_users" as any)
+          .select("id").ilike("email", email).maybeSingle();
+        match = data;
+      }
+      if (!match && mobile) {
+        const { data } = await supabase.from("workshop_users" as any)
+          .select("id").eq("mobile", mobile).maybeSingle();
+        match = data;
+      }
+      if (cancelled) return;
+      if (match) {
+        setHasWorkshop(true);
+        // Silently link in the background
+        supabase.functions.invoke("link-workshop-account", {
+          body: { auth_user_id: user.id, email, mobile, full_name: prof.full_name },
+        }).catch(() => {});
+      }
     })();
-  }, [user?.id]);
+    return () => { cancelled = true; };
+  }, [user?.id, user?.email]);
   const [changingPassword, setChangingPassword] = useState(false);
   const [changingSecret, setChangingSecret] = useState(false);
   const [portalPaymentRequest, setPortalPaymentRequest] = useState<any>(null);
