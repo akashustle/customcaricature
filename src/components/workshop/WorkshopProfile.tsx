@@ -443,9 +443,16 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </p>
             </div>
             {isPending ? (
-              <Badge className="text-xs font-bold px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-900 shadow-sm hover:bg-amber-50">
+              <span
+                className="inline-flex items-center text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex-shrink-0"
+                style={{
+                  background: "hsl(38 95% 92%)",
+                  color: "hsl(28 80% 22%)",
+                  border: "1px solid hsl(38 90% 70%)",
+                }}
+              >
                 <Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Pending Review
-              </Badge>
+              </span>
             ) : (
               <Button onClick={() => setVerifyOpen(true)} size="sm"
                 className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0"
