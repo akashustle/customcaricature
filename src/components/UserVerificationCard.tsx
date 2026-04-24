@@ -4,9 +4,10 @@
  * lets users submit themselves for blue-tick verification by completing the
  * required profile fields.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SelectWithOther from "@/components/ui/select-with-other";
 import { toast } from "@/hooks/use-toast";
-import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight, Camera } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
 
 // Ivory / coral / sage palette to match WorkshopProfile
