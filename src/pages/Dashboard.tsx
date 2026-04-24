@@ -266,6 +266,13 @@ const Dashboard = () => {
   // Expose to ProfileSection (label input handler)
   useEffect(() => { (window as any).__uploadAvatar = uploadAvatar; return () => { delete (window as any).__uploadAvatar; }; }, [uploadAvatar]);
 
+  // Edit-request dialog (shown when verified user with 0 edits left clicks "Request Edit")
+  const [editRequestOpen, setEditRequestOpen] = useState(false);
+  useEffect(() => {
+    (window as any).__openEditRequest = () => setEditRequestOpen(true);
+    return () => { delete (window as any).__openEditRequest; };
+  }, []);
+
   const changeSecretCode = async () => {
     if (!user || newSecretCode.length !== 4) return;
     setChangingSecret(true);
