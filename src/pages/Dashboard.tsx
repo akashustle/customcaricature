@@ -1718,7 +1718,6 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                         event={ev}
                         userId={userId}
                         remaining={remaining}
-                        onPaid={() => fetchEvents(userId)}
                       />
                     )}
 
