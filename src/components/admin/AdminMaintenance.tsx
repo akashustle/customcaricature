@@ -328,6 +328,17 @@ const AdminMaintenance = () => {
                 onCheckedChange={(v) => updateSiteSetting("homepage_sticky_cta_visible", { enabled: v })}
               />
             </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-border/30">
+              <div>
+                <p className="text-sm font-medium">🛡️ Disable right-click & inspect on website</p>
+                <p className="text-xs text-muted-foreground">Blocks right-click menu, text selection, drag-drop, F12 and Ctrl+U for visitors. Admin pages are always exempt. OFF by default.</p>
+              </div>
+              <Switch
+                checked={(siteSettings as any).disable_right_click?.enabled === true}
+                onCheckedChange={(v) => updateSiteSetting("disable_right_click", { enabled: v })}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5 pt-2 border-t border-border/40">
