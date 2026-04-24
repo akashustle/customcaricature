@@ -375,12 +375,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       {/* ============== VERIFICATION CARD ============== */}
       {!isVerified && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-          className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.2)]"
+          className="relative overflow-hidden rounded-[24px] p-5 border shadow-[0_20px_45px_-25px_rgba(80,60,150,0.15)]"
           style={{
             background: darkMode
               ? `linear-gradient(135deg, hsl(220 30% 12%), hsl(220 25% 18%))`
-              : `linear-gradient(135deg, hsl(200 70% 95%), hsl(200 60% 90%))`,
-            borderColor: palette.sky,
+              : `linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)`,
+            borderColor: darkMode ? palette.sky : "rgba(255,255,255,0.9)",
+            boxShadow: darkMode ? undefined : "0 20px 45px -25px hsl(210 80% 50% / 0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
           }}>
           <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none"
             style={{ background: palette.sky }} />
