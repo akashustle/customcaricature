@@ -37,6 +37,7 @@ import AdminSmartSearch from "@/components/admin/AdminSmartSearch";
 import AdminOfflineBanner from "@/components/AdminOfflineBanner";
 import AdminWorkspaceSwitcher from "@/components/admin/AdminWorkspaceSwitcher";
 import AdminPageBuilder from "@/components/admin/AdminPageBuilder";
+import AdminWorkshopVerification from "@/components/workshop/AdminWorkshopVerification";
 
 const CHART_COLORS = ["#7c3aed", "#a855f7", "#3b82f6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6", "#6366f1"];
 
@@ -47,6 +48,7 @@ const sidebarItems = [
   { key: "all-users", icon: UsersRound, label: "All Users" },
   { key: "registered", icon: Users, label: "Registered" },
   { key: "manual", icon: UserPlus, label: "Manual Users" },
+  { key: "verification", icon: Shield, label: "Verification" },
   { key: "live", icon: Radio, label: "Live Sessions" },
   { key: "live-requests", icon: MonitorPlay, label: "Live Requests" },
   { key: "videos", icon: Video, label: "Videos" },
