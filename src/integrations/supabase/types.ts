@@ -3465,6 +3465,7 @@ export type Database = {
           avatar_url: string | null
           city: string | null
           created_at: string
+          created_from_workshop: boolean
           display_id: string | null
           district: string | null
           email: string
@@ -3505,6 +3506,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          created_from_workshop?: boolean
           display_id?: string | null
           district?: string | null
           email: string
@@ -3545,6 +3547,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          created_from_workshop?: boolean
           display_id?: string | null
           district?: string | null
           email?: string
