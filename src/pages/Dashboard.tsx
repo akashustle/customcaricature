@@ -534,6 +534,7 @@ const Dashboard = () => {
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             <TabsContent value="profile">
               <ProfileWithLogout
+                userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
                 profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
                 handleLogout={handleLogout}
                 newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
@@ -558,6 +559,7 @@ const Dashboard = () => {
           )}
           {activeTab === "profile" && (
             <ProfileWithLogout
+              userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
               profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
               handleLogout={handleLogout}
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
