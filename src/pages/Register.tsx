@@ -249,7 +249,8 @@ const Register = () => {
           data: {
             full_name: form.fullName, mobile: form.mobile,
             instagram_id: form.instagramId || null, address: form.address,
-            city: form.city, state: form.state, pincode: form.pincode,
+            city: form.city, state: form.state, district: form.district || null,
+            pincode: form.pincode,
             age: form.age ? parseInt(form.age) : null, gender: form.gender || null,
           },
         },

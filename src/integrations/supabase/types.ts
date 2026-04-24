@@ -3466,6 +3466,7 @@ export type Database = {
           city: string | null
           created_at: string
           display_id: string | null
+          district: string | null
           email: string
           email_verified: boolean | null
           event_booking_allowed: boolean
@@ -3505,6 +3506,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_id?: string | null
+          district?: string | null
           email: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean
@@ -3544,6 +3546,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           display_id?: string | null
+          district?: string | null
           email?: string
           email_verified?: boolean | null
           event_booking_allowed?: boolean

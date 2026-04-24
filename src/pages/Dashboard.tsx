@@ -51,7 +51,7 @@ import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
-  address: string | null; city: string | null; state: string | null; pincode: string | null;
+  address: string | null; city: string | null; state: string | null; district?: string | null; pincode: string | null;
   age?: number | null; gender?: string | null;
   event_booking_allowed?: boolean; event_edit_allowed?: boolean; secret_code?: string | null; gateway_charges_enabled?: boolean;
   is_verified?: boolean; avatar_url?: string | null; created_at?: string | null;
@@ -192,9 +192,9 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle();
+    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, district, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at").eq("user_id", userId).maybeSingle() as any;
     if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, pincode: data.pincode || null, age: (data as any).age ?? null, gender: (data as any).gender || null, event_booking_allowed: (data as any).event_booking_allowed !== false, event_edit_allowed: (data as any).event_edit_allowed === true, secret_code: (data as any).secret_code || null, gateway_charges_enabled: (data as any).gateway_charges_enabled !== false, is_verified: (data as any).is_verified === true, avatar_url: (data as any).avatar_url || null, created_at: (data as any).created_at || null };
+      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, district: data.district || null, pincode: data.pincode || null, age: data.age ?? null, gender: data.gender || null, event_booking_allowed: data.event_booking_allowed !== false, event_edit_allowed: data.event_edit_allowed === true, secret_code: data.secret_code || null, gateway_charges_enabled: data.gateway_charges_enabled !== false, is_verified: data.is_verified === true, avatar_url: data.avatar_url || null, created_at: data.created_at || null };
       setProfile(p); setEditForm(p);
     }
     setLoading(false);
@@ -224,7 +224,7 @@ const Dashboard = () => {
     const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
     const { error } = await supabase.from("profiles").update({
       full_name: editForm.full_name, mobile: editForm.mobile, instagram_id: editForm.instagram_id,
-      address: editForm.address, city: editForm.city, state: editForm.state, pincode: editForm.pincode,
+      address: editForm.address, city: editForm.city, state: editForm.state, district: editForm.district || null, pincode: editForm.pincode,
       age: Number.isFinite(ageNum as number) ? ageNum : null,
       gender: editForm.gender || null,
     } as any).eq("user_id", user.id);
@@ -1247,9 +1247,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <div><Label className="font-sans text-xs text-muted-foreground">Address</Label><Input value={editForm.address || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, address: e.target.value })} autoComplete="street-address" className="rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="font-sans text-xs text-muted-foreground">City</Label><Input value={editForm.city || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, city: e.target.value })} autoComplete="address-level2" className="rounded-xl" /></div>
-              <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} autoComplete="address-level1" className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">District</Label><Input value={editForm.district || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, district: e.target.value })} className="rounded-xl" /></div>
             </div>
-            <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} type="tel" inputMode="numeric" autoComplete="postal-code" className="rounded-xl" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="font-sans text-xs text-muted-foreground">State</Label><Input value={editForm.state || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, state: e.target.value })} autoComplete="address-level1" className="rounded-xl" /></div>
+              <div><Label className="font-sans text-xs text-muted-foreground">Pincode</Label><Input value={editForm.pincode || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 6) setEditForm({ ...editForm, pincode: d }); }} maxLength={6} type="tel" inputMode="numeric" autoComplete="postal-code" className="rounded-xl" /></div>
+            </div>
             <div className="flex gap-2 pt-2 sm:hidden">
               <Button onClick={saveProfile} className="flex-1 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-sans"><Save className="w-4 h-4 mr-1" />Save Changes</Button>
               <Button variant="outline" onClick={() => { setEditing(false); setEditForm(profile); }} className="rounded-xl font-sans"><X className="w-4 h-4" /></Button>
