@@ -784,6 +784,15 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Edit-request dialog for verified students */}
+      <EditRequestDialog
+        open={editRequestOpen}
+        onClose={() => setEditRequestOpen(false)}
+        scope="workshop"
+        userId={profileData.id}
+        userName={profileData.name}
+      />
     </div>
   );
 };
