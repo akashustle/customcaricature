@@ -5,11 +5,8 @@
  */
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, ArrowRight, Loader2, Sparkles, Link2 } from "lucide-react";
+import { GraduationCap, ArrowRight, Link2 } from "lucide-react";
 import { useWorkshopLink } from "@/hooks/useWorkshopLink";
-import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
-import WorkshopLinkRecoveryBanner from "@/components/WorkshopLinkRecoveryBanner";
 
 const palette = {
   ivory: "hsl(38 60% 96%)",
