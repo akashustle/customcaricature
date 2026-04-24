@@ -58,7 +58,6 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<"form" | "loading" | "longer">("form");
   const [submitting, setSubmitting] = useState(false);
-  const [cityMode, setCityMode] = useState<"select" | "manual">("select");
   const [form, setForm] = useState({
     full_name: profile?.full_name || "",
     mobile: profile?.mobile || "",
