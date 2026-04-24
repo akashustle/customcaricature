@@ -116,7 +116,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
     // the DB sync trigger and never hit a "statement timeout" mid-write.
     const { validateImageUpload } = await import("@/lib/image-upload-validator");
     const check = await validateImageUpload(file);
-    if (!check.valid) {
+    if (check.valid === false) {
       toast({ title: check.title, description: check.message, variant: "destructive" });
       return;
     }

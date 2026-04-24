@@ -106,7 +106,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     // Postgres "canceling statement due to statement timeout" error.
     const { validateImageUpload } = await import("@/lib/image-upload-validator");
     const check = await validateImageUpload(file);
-    if (!check.valid) {
+    if (check.valid === false) {
       toast({ title: check.title, description: check.message, variant: "destructive" });
       return;
     }
