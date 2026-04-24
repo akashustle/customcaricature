@@ -30,6 +30,7 @@ import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 // useWorkshopLink consumed inside AccountSwitcherCard / UserWorkshopOverview
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
+import EditRequestDialog from "@/components/EditRequestDialog";
 
 // Lightweight wrapper so it sits inside the dashboard layout
 const DashboardPageBuilder = () => <PageBuilderRenderer page="dashboard-builder" />;
@@ -264,6 +265,13 @@ const Dashboard = () => {
 
   // Expose to ProfileSection (label input handler)
   useEffect(() => { (window as any).__uploadAvatar = uploadAvatar; return () => { delete (window as any).__uploadAvatar; }; }, [uploadAvatar]);
+
+  // Edit-request dialog (shown when verified user with 0 edits left clicks "Request Edit")
+  const [editRequestOpen, setEditRequestOpen] = useState(false);
+  useEffect(() => {
+    (window as any).__openEditRequest = () => setEditRequestOpen(true);
+    return () => { delete (window as any).__openEditRequest; };
+  }, []);
 
   const changeSecretCode = async () => {
     if (!user || newSecretCode.length !== 4) return;
@@ -621,6 +629,17 @@ const Dashboard = () => {
 
       {/* Add Event modal */}
       {profile && <AddEventModal open={addEventOpen} onClose={() => setAddEventOpen(false)} profile={profile} />}
+
+      {/* Edit-request dialog (locked-profile request flow) */}
+      {user && (
+        <EditRequestDialog
+          open={editRequestOpen}
+          onClose={() => setEditRequestOpen(false)}
+          scope="profile"
+          userId={user.id}
+          userName={profile?.full_name || profile?.email || null}
+        />
+      )}
 
 
       {/* Portal Payment Mandatory Popup - Cannot be closed until payment */}
