@@ -5588,6 +5588,50 @@ export type Database = {
           },
         ]
       }
+      workshop_verification_history: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          performed_by: string | null
+          performed_by_user_id: string | null
+          previous_status: string | null
+          workshop_user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_by_user_id?: string | null
+          previous_status?: string | null
+          workshop_user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          performed_by_user_id?: string | null
+          previous_status?: string | null
+          workshop_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_verification_history_workshop_user_id_fkey"
+            columns: ["workshop_user_id"]
+            isOneToOne: false
+            referencedRelation: "workshop_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workshop_videos: {
         Row: {
           created_at: string

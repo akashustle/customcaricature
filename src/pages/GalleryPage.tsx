@@ -38,35 +38,49 @@ const GalleryPage = () => {
     return () => { supabase.removeChannel(ch); };
   }, [table]);
 
-  // Auto-scroll upward effect
+  // Bidirectional infinite auto-scroll. Pauses while the user is touching/scrolling
+  // and resumes after a short idle period so manual up/down feels natural.
   useEffect(() => {
     if (!scrollRef.current || items.length === 0) return;
-    let animFrame: number;
-    let scrollPos = 0;
-    const speed = 0.5;
     const el = scrollRef.current;
+    let animFrame = 0;
+    let idleTimer: number | null = null;
+    let scrollPos = 0;
+    const speed = 1.0; // 2x previous speed
+    let paused = false;
 
     const animate = () => {
-      scrollPos += speed;
-      if (scrollPos >= el.scrollHeight / 2) scrollPos = 0;
-      el.scrollTop = scrollPos;
+      if (!paused) {
+        scrollPos = el.scrollTop + speed;
+        const half = el.scrollHeight / 2;
+        if (scrollPos >= half) scrollPos -= half; // seamless wrap up
+        el.scrollTop = scrollPos;
+      }
       animFrame = requestAnimationFrame(animate);
     };
     animFrame = requestAnimationFrame(animate);
 
-    const handleTouch = () => cancelAnimationFrame(animFrame);
-    const handleTouchEnd = () => { animFrame = requestAnimationFrame(animate); };
-    el.addEventListener("touchstart", handleTouch);
-    el.addEventListener("mouseenter", handleTouch);
-    el.addEventListener("touchend", handleTouchEnd);
-    el.addEventListener("mouseleave", handleTouchEnd);
+    const pauseAndResumeLater = () => {
+      paused = true;
+      if (idleTimer) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        scrollPos = el.scrollTop;
+        paused = false;
+      }, 1500);
+    };
+
+    el.addEventListener("touchstart", pauseAndResumeLater, { passive: true });
+    el.addEventListener("touchmove", pauseAndResumeLater, { passive: true });
+    el.addEventListener("wheel", pauseAndResumeLater, { passive: true });
+    el.addEventListener("mouseenter", pauseAndResumeLater);
 
     return () => {
       cancelAnimationFrame(animFrame);
-      el.removeEventListener("touchstart", handleTouch);
-      el.removeEventListener("mouseenter", handleTouch);
-      el.removeEventListener("touchend", handleTouchEnd);
-      el.removeEventListener("mouseleave", handleTouchEnd);
+      if (idleTimer) window.clearTimeout(idleTimer);
+      el.removeEventListener("touchstart", pauseAndResumeLater);
+      el.removeEventListener("touchmove", pauseAndResumeLater);
+      el.removeEventListener("wheel", pauseAndResumeLater);
+      el.removeEventListener("mouseenter", pauseAndResumeLater);
     };
   }, [items]);
 
