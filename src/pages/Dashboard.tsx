@@ -1198,7 +1198,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
         <div className="relative flex items-center gap-4 mb-5">
-          <label className="relative cursor-pointer group">
+          <label className={`relative group ${profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "cursor-not-allowed" : "cursor-pointer"}`}>
             <div
               className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
               style={{
@@ -1212,8 +1212,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
                 <span className="text-2xl font-bold text-primary font-display">{initials}</span>
               )}
             </div>
-            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">Change</span>
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
+              {profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "🔒 Locked" : "Change"}
+            </span>
+            <input type="file" accept="image/*" className="hidden"
+              disabled={profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0}
+              onChange={(e) => {
               const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
             }} />
           </label>
@@ -1226,6 +1230,11 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs text-slate-700 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
+              {profile?.is_verified && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-amber-900 font-sans bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  ✏️ {Number(profile?.edits_remaining ?? 0)} edit{Number(profile?.edits_remaining ?? 0) === 1 ? "" : "s"} left
+                </span>
+              )}
               {profile?.created_at && (
                 <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-sans bg-white/80 backdrop-blur px-2 py-0.5 rounded-full border border-slate-200">
                   <CalIcon className="w-3 h-3" />
@@ -1235,7 +1244,11 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             </div>
           </div>
           {!editing ? (
-            <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? (
+              <Button variant="secondary" size="sm" onClick={() => { (window as any).__openEditRequest?.(); }} className="font-sans rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm"><Lock className="w-4 h-4 mr-1" />Request Edit</Button>
+            ) : (
+              <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+            )
           ) : (
             <div className="flex gap-1.5">
               <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
