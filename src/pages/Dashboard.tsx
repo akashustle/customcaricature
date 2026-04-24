@@ -2474,8 +2474,59 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
   const totalEvents = events.length;
   const totalOrders = orders.length;
 
+  // Show a heartfelt thank-you the first time the user lands on the dashboard
+  // after booking their first event. Persisted per-user so it doesn't repeat.
+  const thankYouKey = user?.id ? `ccc_thank_you_seen_${user.id}` : null;
+  const [showThankYou, setShowThankYou] = useState(false);
+  useEffect(() => {
+    if (!thankYouKey || totalEvents === 0) return;
+    try {
+      if (!localStorage.getItem(thankYouKey)) setShowThankYou(true);
+    } catch { /* ignore */ }
+  }, [thankYouKey, totalEvents]);
+  const dismissThankYou = () => {
+    setShowThankYou(false);
+    try { if (thankYouKey) localStorage.setItem(thankYouKey, "1"); } catch { /* ignore */ }
+  };
+
   return (
     <div className="space-y-5">
+      {/* First-event thank-you banner */}
+      {showThankYou && (
+        <motion.div
+          initial={{ opacity: 0, y: -10, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="relative overflow-hidden rounded-3xl border border-primary/30 p-5 shadow-[0_18px_40px_-18px_hsl(var(--primary)/0.45)]"
+          style={{
+            background: "radial-gradient(circle at 20% 0%, hsl(var(--primary)/0.18), transparent 60%), linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary)/0.55))",
+          }}
+        >
+          <button
+            onClick={dismissThankYou}
+            className="absolute top-3 right-3 text-foreground/40 hover:text-foreground/80 text-xs font-sans rounded-full px-2 py-1 hover:bg-foreground/5 transition"
+            aria-label="Dismiss thank you message"
+          >
+            ✕
+          </button>
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center text-2xl shadow-md shrink-0">
+              💛
+            </div>
+            <div className="flex-1 min-w-0 pr-6">
+              <p className="text-[10px] uppercase tracking-[0.18em] font-sans font-bold text-primary/80">
+                A heartfelt thank you
+              </p>
+              <h3 className="font-display text-xl font-bold text-foreground leading-tight mt-1">
+                Welcome to the Creative Caricature Club™ family{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}!
+              </h3>
+              <p className="text-sm font-sans text-foreground/70 mt-1.5">
+                Thank you for trusting us with your event. Our artists can't wait to make every guest smile and send them home with a memory they'll keep forever. 🎨✨
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
 
