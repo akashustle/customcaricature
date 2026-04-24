@@ -91,7 +91,7 @@ const HeroMarquee = ({ images, onImageClick }: { images: string[]; onImageClick?
   );
 };
 
-const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any }) => {
+const Hero = ({ onBook, onQuote, images, config, onImageClick }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any; onImageClick?: (i: number) => void }) => {
   const c = config || {};
   const headline: string = c.headline || "Live Caricature For Unforgettable Events";
   const highlight: string = c.headline_highlight || "Caricature";
@@ -134,7 +134,7 @@ const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote
           </div>
         </div>
         {/* Continuous right-to-left marquee */}
-        <HeroMarquee images={images} />
+        <HeroMarquee images={images} onImageClick={onImageClick} />
         <div className="h-6 sm:h-10" />
       </div>
     </section>
