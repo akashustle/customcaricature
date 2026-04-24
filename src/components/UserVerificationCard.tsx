@@ -335,9 +335,16 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
                       </Select>
                     </div>
                     <div>
-                      <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Occupation *</Label>
-                      <Input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })}
-                        placeholder="e.g. Designer, Student" className="mt-1 rounded-xl bg-card" />
+                      <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Profession *</Label>
+                      <SelectWithOther
+                        value={form.occupation}
+                        onChange={(v) => setForm({ ...form, occupation: v })}
+                        options={["Student", "Designer / Artist", "Engineer / IT", "Business Owner", "Working Professional", "Homemaker"]}
+                        placeholder="Select profession"
+                        otherLabel="Other (type manually)"
+                        otherPlaceholder="e.g. Doctor, Teacher…"
+                        triggerClassName="bg-card"
+                      />
                     </div>
                     <div>
                       <Label className="text-[11px] font-semibold" style={{ color: "hsl(20 30% 35%)" }}>Country</Label>
