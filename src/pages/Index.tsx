@@ -17,6 +17,7 @@ import HomepageUrgencyStrip from "@/components/homepage/HomepageUrgencyStrip";
 import HomepageStickyCTA from "@/components/homepage/HomepageStickyCTA";
 import HomepageVideo from "@/components/homepage/HomepageVideo";
 import HomepageTrustedBrands from "@/components/HomepageTrustedBrands";
+import SiteFooter from "@/components/SiteFooter";
 
 import g1 from "@/assets/gallery/gallery-1.jpeg";
 import g2 from "@/assets/gallery/gallery-2.jpeg";
@@ -86,47 +87,65 @@ const HeroMarquee = ({ images }: { images: string[] }) => {
   );
 };
 
-const Hero = ({ onBook, onQuote, images }: { onBook: () => void; onQuote: () => void; images: string[] }) => (
-  <section className="relative px-3 sm:px-4 mt-3">
-    <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
-      <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
-        <div className="chip-violet mx-auto mb-5 sm:mb-6">
-          <Sparkles className="w-3.5 h-3.5" />
-          India's #1 Live Caricature Studio
+const Hero = ({ onBook, onQuote, images, config }: { onBook: () => void; onQuote: () => void; images: string[]; config?: any }) => {
+  const c = config || {};
+  const headline: string = c.headline || "Live Caricature For Unforgettable Events";
+  const highlight: string = c.headline_highlight || "Caricature";
+  // Render the highlight word in gradient inside the headline if present.
+  const renderHeadline = () => {
+    if (!highlight || !headline.includes(highlight)) {
+      return <>{headline}</>;
+    }
+    const [before, ...rest] = headline.split(highlight);
+    const after = rest.join(highlight);
+    return (
+      <>
+        {before}
+        <span className="text-gradient-violet">{highlight}</span>
+        {after}
+      </>
+    );
+  };
+  return (
+    <section className="relative px-3 sm:px-4 mt-3">
+      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet overflow-hidden border border-border/40">
+        <div className="px-4 sm:px-10 lg:px-14 pt-10 sm:pt-16 lg:pt-24 pb-8 sm:pb-14 lg:pb-20 text-center">
+          <div className="chip-violet mx-auto mb-5 sm:mb-6">
+            <Sparkles className="w-3.5 h-3.5" />
+            {c.chip_text || "India's #1 Live Caricature Studio"}
+          </div>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
+            {renderHeadline()}
+          </h1>
+          <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/70 px-2">
+            {c.subtext || "Book professional caricature artists for weddings, corporate parties, baby showers & brand activations across India and worldwide."}
+          </p>
+          <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
+              <Calendar className="w-5 h-5" /> {c.primary_cta || "Book Your Event"} <ArrowRight className="w-4 h-4" />
+            </button>
+            <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
+              <Sparkles className="w-5 h-5" /> {c.secondary_cta || "Get Free Quote"}
+            </button>
+          </div>
         </div>
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight text-foreground leading-[0.95]">
-          Live <span className="text-gradient-violet">Caricature</span>
-          <br />
-          For Unforgettable Events
-        </h1>
-        <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-lg text-foreground/70 px-2">
-          Book professional caricature artists for weddings, corporate parties, baby showers
-          &amp; brand activations across India and worldwide.
-        </p>
-        <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button onClick={onBook} className="btn-square-violet w-full sm:w-auto justify-center">
-            <Calendar className="w-5 h-5" /> Book Your Event <ArrowRight className="w-4 h-4" />
-          </button>
-          <button onClick={onQuote} className="btn-square-outline w-full sm:w-auto justify-center">
-            <Sparkles className="w-5 h-5" /> Get Free Quote
-          </button>
-        </div>
+        {/* Continuous right-to-left marquee */}
+        <HeroMarquee images={images} />
+        <div className="h-6 sm:h-10" />
       </div>
-      {/* Continuous right-to-left marquee */}
-      <HeroMarquee images={images} />
-      <div className="h-6 sm:h-10" />
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------- Stat Strip ------------------------------ */
 
-const Stats = ({ items }: { items: { label: string; value: string }[] }) => {
+const Stats = ({ items, config }: { items: { label: string; value: string }[]; config?: any }) => {
+  const list = (config?.items && Array.isArray(config.items) && config.items.length) ? config.items : items;
   const icons = [Calendar, Users, Award, Star];
   return (
     <Section id="stats">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        {items.map((s, i) => {
+        {list.map((s: any, i: number) => {
           const Icon = icons[i % icons.length];
           return (
             <div key={s.label} className="rounded-2xl bg-secondary/60 border border-border/30 p-4 sm:p-5 text-center">
@@ -171,38 +190,46 @@ const EventGallery = ({ images, onView }: { images: string[]; onView: () => void
 
 /* -------------------------------- Services ------------------------------- */
 
-const Services = ({ onBook }: { onBook: () => void }) => {
-  const items = [
-    { icon: Calendar, title: "Live Event Caricatures", body: "Professional artists drawing guests live at weddings, corporate parties, baby showers and brand activations across India." },
-    { icon: Sparkles, title: "International Bookings", body: "We travel worldwide. Custom packages for destination weddings and global corporate events." },
-    { icon: Trophy, title: "Brand Activations", body: "Engage your audience at expos, mall activations and product launches with on-the-spot caricatures." },
-    { icon: Heart, title: "Personal Celebrations", body: "Birthdays, anniversaries, baby showers, retirements — make every guest feel special." },
-  ];
+const ICON_MAP: Record<string, any> = { Calendar, Sparkles, Trophy, Heart, Users, Award, Star };
+
+const Services = ({ onBook, config }: { onBook: () => void; config?: any }) => {
+  const c = config || {};
+  const items = (c.items && Array.isArray(c.items) && c.items.length ? c.items : [
+    { icon: "Calendar", title: "Live Event Caricatures", body: "Professional artists drawing guests live at weddings, corporate parties, baby showers and brand activations across India." },
+    { icon: "Sparkles", title: "International Bookings", body: "We travel worldwide. Custom packages for destination weddings and global corporate events." },
+    { icon: "Trophy", title: "Brand Activations", body: "Engage your audience at expos, mall activations and product launches with on-the-spot caricatures." },
+    { icon: "Heart", title: "Personal Celebrations", body: "Birthdays, anniversaries, baby showers, retirements — make every guest feel special." },
+  ]);
+  const titlePre = c.title_pre || "What we";
+  const titleHl = c.title_highlight || "do best";
   return (
     <Section
       id="services"
-      eyebrow="Services • Services"
-      title={<>What we <span className="text-gradient-violet">do best</span></>}
-      subtitle="Our full focus is on live event caricatures — fast, fun, photo-perfect entertainment your guests will remember forever."
+      eyebrow={c.eyebrow || "Services • Services"}
+      title={<>{titlePre} <span className="text-gradient-violet">{titleHl}</span></>}
+      subtitle={c.subtitle || "Our full focus is on live event caricatures — fast, fun, photo-perfect entertainment your guests will remember forever."}
     >
       <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-        {items.map((s) => (
-          <div key={s.title} className="card-gradient-blob p-5 sm:p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <s.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground">{s.title}</h3>
-                <p className="text-sm sm:text-base text-foreground/70 mt-1.5">{s.body}</p>
+        {items.map((s: any) => {
+          const Icon = ICON_MAP[s.icon] || Calendar;
+          return (
+            <div key={s.title} className="card-gradient-blob p-5 sm:p-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground">{s.title}</h3>
+                  <p className="text-sm sm:text-base text-foreground/70 mt-1.5">{s.body}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="text-center mt-8">
         <button onClick={onBook} className="btn-square-violet">
-          <Calendar className="w-4 h-4" /> Book for your event <ArrowRight className="w-4 h-4" />
+          <Calendar className="w-4 h-4" /> {c.cta_label || "Book for your event"} <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </Section>
@@ -211,8 +238,9 @@ const Services = ({ onBook }: { onBook: () => void }) => {
 
 /* -------------------------- How it Starts -------------------------------- */
 
-const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] }) => {
-  const steps = [
+const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: string[]; config?: any }) => {
+  const c = config || {};
+  const steps = (c.steps && Array.isArray(c.steps) && c.steps.length) ? c.steps : [
     { n: "1", title: "Share your event", body: "Tell us your date, city, guest count and event type. We'll match the right artists." },
     { n: "2", title: "Lock the booking", body: "Pay a small advance to confirm your slot. We handle artists, travel and logistics." },
     { n: "3", title: "Wow your guests", body: "Our artists arrive on time and create stunning live caricatures your guests take home." },
@@ -221,12 +249,12 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
   return (
     <Section
       id="how"
-      eyebrow="Onboarding • Onboarding"
-      title={<>How it <span className="text-gradient-violet">starts?</span></>}
+      eyebrow={c.eyebrow || "Onboarding • Onboarding"}
+      title={<>{c.title_pre || "How it"} <span className="text-gradient-violet">{c.title_highlight || "starts?"}</span></>}
     >
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         <div className="space-y-6">
-          {steps.map((s) => (
+          {steps.map((s: any) => (
             <div key={s.n} className="flex gap-4 sm:gap-5">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-primary/10 text-primary font-bold text-lg flex items-center justify-center shrink-0 border-2 border-primary/20">
                 {s.n}
@@ -238,7 +266,7 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
             </div>
           ))}
           <button onClick={onBook} className="btn-square-violet mt-3">
-            <Calendar className="w-4 h-4" /> Start your booking
+            <Calendar className="w-4 h-4" /> {c.cta_label || "Start your booking"}
           </button>
         </div>
         <div className="card-gradient-blob p-4 sm:p-8">
@@ -257,21 +285,22 @@ const HowItStarts = ({ onBook, images }: { onBook: () => void; images: string[] 
 
 /* ------------------------------- Why Us / VS ----------------------------- */
 
-const WhyUnique = () => {
-  const others = ["Slow turnaround time", "Inconsistent artist quality", "Hidden charges & surprises", "Hard to reach when needed"];
-  const ours = ["On-time, every time", "Trained, vetted top artists", "Transparent flat pricing", "Dedicated event manager"];
+const WhyUnique = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const others = (c.others && Array.isArray(c.others) && c.others.length) ? c.others : ["Slow turnaround time", "Inconsistent artist quality", "Hidden charges & surprises", "Hard to reach when needed"];
+  const ours = (c.ours && Array.isArray(c.ours) && c.ours.length) ? c.ours : ["On-time, every time", "Trained, vetted top artists", "Transparent flat pricing", "Dedicated event manager"];
   return (
     <Section
       id="why-us"
-      eyebrow="Special • Special"
-      title={<>What makes us <span className="text-gradient-violet">unique?</span></>}
-      subtitle="Creative Caricature Club V/S Others"
+      eyebrow={c.eyebrow || "Special • Special"}
+      title={<>{c.title_pre || "What makes us"} <span className="text-gradient-violet">{c.title_highlight || "unique?"}</span></>}
+      subtitle={c.subtitle || "Creative Caricature Club V/S Others"}
     >
       <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
         <div className="rounded-2xl bg-secondary/40 border border-border/40 p-5 sm:p-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-foreground/5 px-4 py-1.5 text-xs font-bold tracking-wider text-foreground/70">OTHERS</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-foreground/5 px-4 py-1.5 text-xs font-bold tracking-wider text-foreground/70">{c.others_label || "OTHERS"}</div>
           <ul className="mt-5 space-y-3">
-            {others.map((t) => (
+            {others.map((t: string) => (
               <li key={t} className="flex items-center gap-3 text-foreground/70 text-sm sm:text-base">
                 <Minus className="w-5 h-5 rounded-full p-1 bg-foreground/10" /> {t}
               </li>
@@ -279,9 +308,9 @@ const WhyUnique = () => {
           </ul>
         </div>
         <div className="rounded-2xl bg-card border border-primary/20 p-5 sm:p-8 shadow-[0_20px_60px_-30px_hsl(252_85%_62%/0.45)]">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-bold tracking-wider text-white">CREATIVE CARICATURE CLUB</div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-1.5 text-xs font-bold tracking-wider text-white">{c.ours_label || "CREATIVE CARICATURE CLUB"}</div>
           <ul className="mt-5 space-y-3">
-            {ours.map((t) => (
+            {ours.map((t: string) => (
               <li key={t} className="flex items-center gap-3 text-foreground font-medium text-sm sm:text-base">
                 <CheckCircle2 className="w-5 h-5 text-primary" /> {t}
               </li>
@@ -295,8 +324,9 @@ const WhyUnique = () => {
 
 /* --------------------------------- Reviews ------------------------------- */
 
-const Reviews = () => {
-  const reviews = [
+const Reviews = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const reviews = (c.items && Array.isArray(c.items) && c.items.length) ? c.items : [
     { name: "Naman D.", role: "Wedding · Mumbai", text: "Booked 3 artists for our reception — guests loved their caricatures so much they were the talk of the night!" },
     { name: "Rahul R.", role: "Corporate Event · Delhi", text: "Smooth booking, professional artists, perfect timing. Our team got 200+ caricatures done in 4 hours flawlessly." },
     { name: "Priya S.", role: "Baby Shower · Bengaluru", text: "Such a unique gift idea for guests! Everyone took home their own caricature. Highly recommend." },
@@ -304,11 +334,11 @@ const Reviews = () => {
   return (
     <Section
       id="reviews"
-      eyebrow="Reviews • Reviews"
-      title={<>Hear from <span className="text-gradient-violet">them</span></>}
+      eyebrow={c.eyebrow || "Reviews • Reviews"}
+      title={<>{c.title_pre || "Hear from"} <span className="text-gradient-violet">{c.title_highlight || "them"}</span></>}
     >
       <div className="grid md:grid-cols-3 gap-5">
-        {reviews.map((r, i) => (
+        {reviews.map((r: any, i: number) => (
           <div key={i} className="card-gradient-blob p-5 sm:p-6 flex flex-col">
             <Quote className="w-7 h-7 text-primary/40" />
             <p className="mt-3 text-foreground/80 leading-relaxed text-sm sm:text-base">{r.text}</p>
@@ -328,8 +358,9 @@ const Reviews = () => {
 
 /* --------------------------------- FAQs ---------------------------------- */
 
-const FAQs = () => {
-  const items = [
+const FAQs = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const items = (c.items && Array.isArray(c.items) && c.items.length) ? c.items : [
     { q: "Why should I choose Creative Caricature Club over other studios?", a: "We are India's largest live-caricature network — 12+ years of craft, 800+ events, vetted top artists, transparent flat pricing and a dedicated event manager for every booking." },
     { q: "How far in advance should I book my event?", a: "We recommend 2–4 weeks for weddings and corporate events. For peak season (Nov–Feb) lock your date as early as possible. Last-minute bookings may still be possible based on availability." },
     { q: "Do you travel outside Mumbai or India?", a: "Yes! We serve all major Indian cities and travel worldwide for destination weddings and global corporate events. Contact us for an international quote." },
@@ -339,11 +370,11 @@ const FAQs = () => {
   return (
     <Section
       id="faqs"
-      eyebrow="Help • Help"
-      title={<>Need <span className="text-gradient-violet">help?</span></>}
+      eyebrow={c.eyebrow || "Help • Help"}
+      title={<>{c.title_pre || "Need"} <span className="text-gradient-violet">{c.title_highlight || "help?"}</span></>}
     >
       <div className="divide-y divide-border/60">
-        {items.map((it, i) => (
+        {items.map((it: any, i: number) => (
           <button
             key={i}
             onClick={() => setOpen(open === i ? null : i)}
@@ -360,136 +391,6 @@ const FAQs = () => {
         ))}
       </div>
     </Section>
-  );
-};
-
-/* --------------------------------- Footer -------------------------------- */
-
-const DEFAULT_FOOTER = {
-  brand_title: "Creative Caricature Club™",
-  brand_tagline: "India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.",
-  copyright: `© ${new Date().getFullYear()} Creative Caricature Club. All rights reserved.`,
-  tagline_right: "Made with ❤️ for live events.",
-  credit_prefix: "Designed and prompted by",
-  credit_name: "Akash",
-  credit_instagram_handle: "akashustle",
-  columns: [
-    {
-      title: "Services",
-      links: [
-        { label: "Book Live Event", href: "/book-event" },
-        { label: "Get a Quote", href: "/enquiry" },
-        { label: "Track Order", href: "/track-order" },
-        { label: "Workshop", href: "/workshop" },
-        { label: "Shop", href: "/shop" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About Us", href: "/about" },
-        { label: "Blog", href: "/blog" },
-        { label: "Gallery", href: "/gallery/events" },
-        { label: "FAQs", href: "/faqs" },
-        { label: "Support", href: "/support" },
-      ],
-    },
-    {
-      title: "Policies",
-      links: [
-        { label: "Privacy Policy", href: "/privacy" },
-        { label: "Terms of Service", href: "/terms" },
-        { label: "Refund Policy", href: "/refund" },
-        { label: "Cancellation", href: "/cancellation" },
-        { label: "Shipping Policy", href: "/shipping" },
-        { label: "Event Policy", href: "/event-policy" },
-        { label: "Workshop Policy", href: "/workshop-policy" },
-        { label: "Intellectual Property", href: "/intellectual-property" },
-        { label: "Disclaimer", href: "/disclaimer" },
-      ],
-    },
-  ],
-};
-
-const Footer = ({ override }: { override?: any }) => {
-  const f = { ...DEFAULT_FOOTER, ...(override || {}) };
-  const cols: { title: string; links: { label: string; href: string }[] }[] =
-    Array.isArray(f.columns) && f.columns.length ? f.columns : DEFAULT_FOOTER.columns;
-  const igHandle = (f.credit_instagram_handle || "akashustle").replace(/^@/, "");
-  const instaUrl = `https://instagram.com/${igHandle}`;
-  return (
-    <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-5 sm:p-10">
-        {/* Brand block — full width on mobile, top-left on desktop */}
-        <div className="mb-6 sm:mb-0 sm:hidden">
-          <div className="flex items-center gap-2 mb-3">
-            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
-            <div className="text-lg font-extrabold text-foreground tracking-tight leading-tight">
-              Creative<br /><span className="text-gradient-violet">Caricature Club™</span>
-            </div>
-          </div>
-          <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
-        </div>
-
-        {/* Mobile: 2-column compact link grid */}
-        <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5">
-          {cols.map((c) => (
-            <div key={c.title}>
-              <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">{c.title}</div>
-              <ul className="space-y-1.5">
-                {c.links.slice(0, 5).map((l) => (
-                  <li key={l.href + l.label}>
-                    <a href={l.href} className="text-[13px] text-foreground/75 hover:text-primary transition-colors">{l.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: original 4-column grid */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
-              <div className="text-lg font-extrabold text-foreground tracking-tight leading-tight">
-                Creative<br /><span className="text-gradient-violet">Caricature Club™</span>
-              </div>
-            </div>
-            <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
-          </div>
-          {cols.map((c) => (
-            <div key={c.title}>
-              <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">{c.title}</div>
-              <ul className="space-y-2">
-                {c.links.map((l) => (
-                  <li key={l.href + l.label}>
-                    <a href={l.href} className="text-sm text-foreground/75 hover:text-primary transition-colors">{l.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>{f.copyright}</p>
-          <p className="flex items-center gap-1.5">
-            <span>{f.tagline_right}</span>
-            <span className="opacity-50">·</span>
-            <span>{f.credit_prefix}</span>
-            <a
-              href={instaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-primary hover:underline"
-              aria-label={`${f.credit_name} on Instagram`}
-            >
-              {f.credit_name}
-            </a>
-          </p>
-        </div>
-      </div>
-    </footer>
   );
 };
 
@@ -583,8 +484,8 @@ const Index = () => {
             ? (content as any).homepage_section_order.order
             : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
           const sections: Record<string, React.ReactNode> = {
-            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} />,
-            stats: <Stats key="stats" items={stats} />,
+            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} />,
+            stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-5 sm:p-10 lg:p-14">
@@ -606,17 +507,17 @@ const Index = () => {
                 </div>
               </section>
             ),
-            services: <Services key="services" onBook={onBook} />,
-            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} />,
-            why: <WhyUnique key="why" />,
-            reviews: <Reviews key="reviews" />,
-            faqs: <FAQs key="faqs" />,
+            services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
+            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} />,
+            why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
+            reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
+            faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
           };
           return order.map(id => sections[id]).filter(Boolean);
         })()}
       </main>
 
-      <Footer override={(content as any).homepage_footer} />
+      <SiteFooter />
 
       {(settings as any).homepage_sticky_cta_visible?.enabled && (
         <HomepageStickyCTA config={(content as any).homepage_sticky_cta || { enabled: true, admin_visible: true }} />

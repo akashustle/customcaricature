@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause } from "lucide-react";
 
-const DEFAULT = {
+type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
+type Column = { title: string; links: Link[] };
+
+const DEFAULT: {
+  brand_tagline: string;
+  copyright: string;
+  tagline_right: string;
+  credit_prefix: string;
+  credit_name: string;
+  credit_instagram_handle: string;
+  columns: Column[];
+} = {
   brand_tagline:
     "India's #1 live caricature studio. Professional artists for weddings, corporate parties, baby showers and brand activations across India and worldwide.",
   copyright: `© ${new Date().getFullYear()} Creative Caricature Club. All rights reserved.`,
@@ -14,11 +28,10 @@ const DEFAULT = {
     {
       title: "Services",
       links: [
-        { label: "Book Live Event", href: "/book-event" },
-        { label: "Get a Quote", href: "/enquiry" },
-        { label: "Track Order", href: "/track-order" },
+        { label: "Event", href: "/book-event" },
         { label: "Workshop", href: "/workshop" },
-        { label: "Shop", href: "/shop" },
+        { label: "Custom Caricature", coming_soon: true },
+        { label: "Merchandise", coming_soon: true },
       ],
     },
     {
@@ -27,15 +40,25 @@ const DEFAULT = {
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
         { label: "Gallery", href: "/gallery/events" },
-        { label: "The Lil Flea", href: "/lil-flea" },
-        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
         { label: "FAQs", href: "/faqs" },
         { label: "Support", href: "/support" },
       ],
     },
     {
-      title: "Policies",
+      title: "Contact",
       links: [
+        { label: "WhatsApp", icon: "whatsapp" },
+        { label: "Call Us", icon: "phone" },
+        { label: "Instagram", icon: "instagram" },
+        { label: "YouTube", icon: "youtube" },
+      ],
+    },
+    {
+      title: "Quick Links",
+      links: [
+        { label: "The Lil Flea", href: "/lil-flea" },
+        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
+        { label: "Track Order", href: "/track-order" },
         { label: "Privacy Policy", href: "/privacy" },
         { label: "Terms of Service", href: "/terms" },
         { label: "Refund Policy", href: "/refund" },
@@ -47,7 +70,7 @@ const DEFAULT = {
         { label: "Disclaimer", href: "/disclaimer" },
       ],
     },
-  ] as { title: string; links: { label: string; href: string }[] }[],
+  ],
 };
 
 let cached: any = null;
@@ -68,8 +91,18 @@ const fetchFooter = async () => {
   return promise;
 };
 
+const ContactIcon = ({ name }: { name?: string }) => {
+  const cls = "w-3.5 h-3.5";
+  if (name === "whatsapp") return <MessageCircle className={cls} />;
+  if (name === "phone") return <Phone className={cls} />;
+  if (name === "instagram") return <Instagram className={cls} />;
+  if (name === "youtube") return <Youtube className={cls} />;
+  return null;
+};
+
 const SiteFooter = () => {
   const [override, setOverride] = useState<any>(cached);
+  const [comingSoonOpen, setComingSoonOpen] = useState<string | null>(null);
   const contact = useSiteSetting<any>("global_contact", {});
 
   useEffect(() => {
@@ -83,91 +116,152 @@ const SiteFooter = () => {
   }, []);
 
   const f = { ...DEFAULT, ...(override || {}) };
-  const cols = Array.isArray(f.columns) && f.columns.length ? f.columns : DEFAULT.columns;
-  // Prefer global_contact for credit handle so the admin can edit social handles in one place.
+  // Always merge fresh defaults if admin hasn't migrated to 4-column layout yet.
+  // If saved footer columns don't include "Contact", fall back to DEFAULT.columns.
+  const savedCols: Column[] = Array.isArray(f.columns) && f.columns.length ? f.columns : [];
+  const hasNewLayout = savedCols.some((c) => /contact/i.test(c.title)) && savedCols.some((c) => /quick/i.test(c.title));
+  const cols: Column[] = hasNewLayout ? savedCols : DEFAULT.columns;
+
   const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
+  const wa = (contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const phone = contact?.phone_number || contact?.whatsapp_number || "918369594271";
+  const igUrl = contact?.instagram_url || `https://instagram.com/creativecaricatureclub`;
+  const ytUrl = contact?.youtube_url || `https://www.youtube.com/@creativecaricatureclub`;
+
+  const resolveContactHref = (icon?: string) => {
+    if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent("Hi! I'd like to know more.")}`;
+    if (icon === "phone") return `tel:+${phone.replace(/[^0-9]/g, "")}`;
+    if (icon === "instagram") return igUrl;
+    if (icon === "youtube") return ytUrl;
+    return "#";
+  };
+
+  const handleLinkClick = (e: React.MouseEvent, link: Link) => {
+    if (link.coming_soon) {
+      e.preventDefault();
+      setComingSoonOpen(link.label);
+    }
+  };
+
+  const renderLink = (l: Link) => {
+    const isContact = !!l.icon;
+    const href = isContact ? resolveContactHref(l.icon) : l.href || "#";
+    const externalProps = isContact || l.external ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
+    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5";
+    return (
+      <a
+        href={l.coming_soon ? "#" : href}
+        onClick={(e) => handleLinkClick(e, l)}
+        className={baseClass}
+        {...(!l.coming_soon ? externalProps : {})}
+      >
+        {isContact && <ContactIcon name={l.icon} />}
+        <span>{l.label}</span>
+        {l.coming_soon && <Pause className="w-3 h-3 text-warning" aria-label="Coming soon" />}
+      </a>
+    );
+  };
 
   return (
-    <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-5 sm:p-10">
-        {/* Brand */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
-            <div className="text-lg font-extrabold tracking-tight leading-tight">
-              <span className="text-gradient-violet">Creative</span><br />
-              <span className="text-gradient-violet">Caricature Club</span>
-              <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
+    <>
+      <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
+        <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-5 sm:p-10">
+          {/* Brand */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-lg" />
+              <div className="text-lg font-extrabold tracking-tight leading-tight">
+                <span className="text-gradient-violet">Creative</span><br />
+                <span className="text-gradient-violet">Caricature Club</span>
+                <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
+              </div>
             </div>
+            <p className="text-sm text-foreground/70 mt-3 max-w-xl">{f.brand_tagline}</p>
           </div>
-          <p className="text-sm text-foreground/70 mt-3 max-w-xl">{f.brand_tagline}</p>
-        </div>
 
-        {/* Mobile: 2-row compact links */}
-        <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
-          {cols.map((c: any) => (
-            <div key={c.title}>
-              <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
-                {c.title}
+          {/* Mobile: 2 cols × 2 rows */}
+          <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
+            {cols.slice(0, 4).map((c) => (
+              <div key={c.title}>
+                <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
+                  {c.title}
+                </div>
+                <ul className="space-y-1.5 text-[13px]">
+                  {(c.links || []).slice(0, 5).map((l, i) => (
+                    <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-1.5">
-                {(c.links || []).slice(0, 5).map((l: any) => (
-                  <li key={l.href + l.label}>
-                    <a
-                      href={l.href}
-                      className="text-[13px] text-foreground/75 hover:text-primary transition-colors"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Desktop: original column grid */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-          {cols.map((c: any) => (
-            <div key={c.title}>
-              <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">
-                {c.title}
+          {/* Desktop: 4-column grid */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+            {cols.map((c) => (
+              <div key={c.title}>
+                <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">
+                  {c.title}
+                </div>
+                <ul className="space-y-2 text-sm">
+                  {(c.links || []).map((l, i) => (
+                    <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2">
-                {(c.links || []).map((l: any) => (
-                  <li key={l.href + l.label}>
-                    <a
-                      href={l.href}
-                      className="text-sm text-foreground/75 hover:text-primary transition-colors"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-[11px] sm:text-xs text-muted-foreground text-center sm:text-left">
-          <p>{f.copyright}</p>
-          <p className="flex items-center gap-1.5 flex-wrap justify-center">
-            <span className="hidden sm:inline">{f.tagline_right}</span>
-            <span className="hidden sm:inline opacity-50">·</span>
-            <span>{f.credit_prefix}</span>
-            <a
-              href={`https://instagram.com/${igHandle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-primary hover:underline"
-              aria-label={`${f.credit_name} on Instagram`}
-            >
-              {f.credit_name}
-            </a>
-          </p>
+          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-[11px] sm:text-xs text-muted-foreground text-center sm:text-left">
+            <p>{f.copyright}</p>
+            <p className="flex items-center gap-1.5 flex-wrap justify-center">
+              <span className="hidden sm:inline">{f.tagline_right}</span>
+              <span className="hidden sm:inline opacity-50">·</span>
+              <span>{f.credit_prefix}</span>
+              <a
+                href={`https://instagram.com/${igHandle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline"
+                aria-label={`${f.credit_name} on Instagram`}
+              >
+                {f.credit_name}
+              </a>
+            </p>
+          </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+
+      {/* Coming soon modal */}
+      <Dialog open={!!comingSoonOpen} onOpenChange={(o) => !o && setComingSoonOpen(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-2">
+              <Sparkles className="w-7 h-7 text-primary" />
+            </div>
+            <DialogTitle className="text-center text-xl font-bold">
+              {comingSoonOpen}
+            </DialogTitle>
+            <DialogDescription className="text-center pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 text-warning px-3 py-1 text-xs font-semibold mb-3">
+                <Pause className="w-3 h-3" /> Currently paused
+              </span>
+              <br />
+              We're polishing this experience and it's coming back soon. In the meantime, explore our other services or get in touch — we'd love to help.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 pt-2">
+            <Button asChild className="rounded-full">
+              <a href={`https://wa.me/${wa}?text=${encodeURIComponent(`Hi! I'm interested in ${comingSoonOpen}. When will it be available?`)}`} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp Us
+              </a>
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => setComingSoonOpen(null)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
