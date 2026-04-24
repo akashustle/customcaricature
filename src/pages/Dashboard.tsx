@@ -28,7 +28,7 @@ import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import AccountSwitcherCard from "@/components/AccountSwitcherCard";
-import { useWorkshopLink } from "@/hooks/useWorkshopLink";
+// useWorkshopLink consumed inside AccountSwitcherCard / UserWorkshopOverview
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 
 // Lightweight wrapper so it sits inside the dashboard layout
