@@ -583,7 +583,7 @@ const Index = () => {
         {(() => {
           const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
             ? (content as any).homepage_section_order.order
-            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs"];
+            : ["hero", "stats", "video", "gallery", "clients", "services", "how", "why", "reviews", "faqs", "still_confused"];
           const sections: Record<string, React.ReactNode> = {
             hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
             stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
@@ -613,6 +613,7 @@ const Index = () => {
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
             reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
+            still_confused: <StillConfused key="still_confused" config={(content as any).homepage_still_confused} />,
           };
           return order.map(id => sections[id]).filter(Boolean);
         })()}
