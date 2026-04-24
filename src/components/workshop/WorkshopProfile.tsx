@@ -406,8 +406,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </p>
             </div>
             {isPending ? (
-              <Badge className="text-xs font-bold border-0 px-3 py-1.5"
-                style={{ background: `${palette.gold}30`, color: darkMode ? palette.gold : "hsl(30 70% 22%)" }}>
+              <Badge className="text-xs font-bold px-3 py-1.5 border border-amber-300 bg-amber-50 text-amber-900 shadow-sm hover:bg-amber-50">
                 <Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Pending Review
               </Badge>
             ) : (
