@@ -99,38 +99,25 @@ const YouTubeMinimalPlayer = forwardRef<HTMLElement, { url: string }>(({ url }, 
   if (!videoId) return null;
 
   return (
-    <section ref={ref as React.Ref<HTMLElement>} className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <VideoHeader />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-border"
-        >
-          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-            {!started ? (
-              <div
-                className="absolute inset-0 cursor-pointer group bg-muted flex items-center justify-center"
-                onClick={() => setStarted(true)}
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 shadow-lg">
-                  <Play className="ml-1 h-7 w-7 text-primary-foreground" />
-                </div>
-              </div>
-            ) : (
-              <iframe
-                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&cc_load_policy=0&loop=1&playlist=${videoId}`}
-                title="Experience Video"
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-                allowFullScreen={false}
-              />
-            )}
+    <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-border bg-black">
+      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        {!started ? (
+          <div className="absolute inset-0 cursor-pointer group bg-muted flex items-center justify-center" onClick={() => setStarted(true)}>
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 shadow-lg">
+              <Play className="ml-1 h-7 w-7 text-primary-foreground" />
+            </div>
           </div>
-        </motion.div>
+        ) : (
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&cc_load_policy=0&loop=1&playlist=${videoId}`}
+            title="Experience Video"
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+            allowFullScreen={false}
+          />
+        )}
       </div>
-    </section>
+    </div>
   );
 });
 YouTubeMinimalPlayer.displayName = "YouTubeMinimalPlayer";
