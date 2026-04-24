@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
+import RightClickBlocker from "./components/RightClickBlocker";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
@@ -284,9 +285,10 @@ const App = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/customcad75" element={<AdminLogin />} />
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin" element={<Navigate to="/login" replace />} />
-                <Route path="/admin-panel" element={<Admin />} />
+                {/* Public-search-friendly admin slugs are intentionally hidden — show a 404 so they don't leak. */}
+                <Route path="/admin-login" element={<NotFound />} />
+                <Route path="/admin" element={<NotFound />} />
+                <Route path="/admin-panel" element={<AdminPanelGate><Admin /></AdminPanelGate>} />
                 <Route path="/about" element={<About />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
