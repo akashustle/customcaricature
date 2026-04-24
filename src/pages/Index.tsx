@@ -427,7 +427,75 @@ const FAQs = ({ config }: { config?: any }) => {
   );
 };
 
-/* ----------------------- Still Confused / Final CTA ---------------------- */
+/* ------------------------------ About Us ------------------------------ */
+
+const AboutUs = ({ config }: { config?: any }) => {
+  const c = config || {};
+  const eyebrow = c.eyebrow || "About • About";
+  const titlePre = c.title_pre || "Who is";
+  const titleHl = c.title_highlight || "Creative Caricature?";
+  const body = c.body
+    || "Creative Caricature Club is India's largest live-caricature studio, hand-built by passionate artists over 12+ years. From intimate baby showers to 3,000-guest weddings and global brand activations, our trained network of artists turns every event into a keepsake your guests will frame for life.";
+  const points: { label: string; value: string }[] = (c.points && Array.isArray(c.points) && c.points.length)
+    ? c.points
+    : [
+        { label: "Years crafting smiles", value: "12+" },
+        { label: "Live events delivered", value: "800+" },
+        { label: "Caricatures drawn live", value: "120K+" },
+      ];
+  return (
+    <Section
+      id="about"
+      eyebrow={eyebrow}
+      title={<>{titlePre} <span className="text-gradient-violet">{titleHl}</span></>}
+    >
+      <div className="grid lg:grid-cols-5 gap-6 sm:gap-8 items-center">
+        <div className="lg:col-span-3 space-y-5">
+          <p className="text-foreground/80 leading-relaxed text-base sm:text-lg">{body}</p>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-2">
+            {points.map((p) => (
+              <div key={p.label} className="rounded-2xl bg-secondary/60 border border-border/40 p-3 sm:p-4 text-center">
+                <div className="text-xl sm:text-2xl font-extrabold text-gradient-violet">{p.value}</div>
+                <div className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{p.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold">
+              <Heart className="w-3.5 h-3.5" /> Hand-drawn live
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 text-accent-foreground px-3 py-1 text-xs font-semibold">
+              <Users className="w-3.5 h-3.5" /> Vetted artist network
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 text-warning px-3 py-1 text-xs font-semibold">
+              <Award className="w-3.5 h-3.5" /> 4.9/5 rated
+            </span>
+          </div>
+        </div>
+        <div className="lg:col-span-2 relative">
+          <div className="relative rounded-3xl overflow-hidden bg-hero-violet p-6 sm:p-8 border border-border/40 shadow-[0_20px_60px_-30px_hsl(252_85%_62%/0.45)]">
+            <div className="pointer-events-none absolute -top-16 -left-12 w-56 h-56 rounded-full opacity-50 blur-3xl"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.30), transparent 70%)" }} />
+            <Quote className="w-8 h-8 text-primary/60" />
+            <p className="mt-3 text-foreground/85 italic leading-relaxed text-sm sm:text-base">
+              {c.quote
+                || "We don't just draw faces — we capture the joy of the room. Every stroke, every laugh, every selfie at the easel — that's why people remember the night."}
+            </p>
+            <div className="mt-5 pt-5 border-t border-border/40 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                {(c.signoff_initial || "C")}
+              </div>
+              <div>
+                <div className="font-bold text-foreground text-sm">{c.signoff_name || "The CCC Crew"}</div>
+                <div className="text-xs text-muted-foreground">{c.signoff_role || "Creative Caricature Club"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+};
 
 const StillConfused = ({ config }: { config?: any }) => {
   const c = config || {};
