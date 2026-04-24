@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
+import { MAIN_SITE_URL } from "@/lib/site-config";
 
 type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
 type Column = { title: string; links: Link[] };
@@ -28,8 +29,12 @@ const DEFAULT: {
     {
       title: "Services",
       links: [
-        { label: "Event", href: "/book-event" },
+        { label: "Book an Event", href: "/book-event" },
         { label: "Workshop", href: "/workshop" },
+        { label: "AI Caricature", href: "/ai-caricature" },
+        { label: "Order Caricature", href: "/order" },
+        { label: "Shop", href: "/shop" },
+        { label: "The Lil Flea", href: "/lil-flea" },
         { label: "Custom Caricature", coming_soon: true },
         { label: "Merchandise", coming_soon: true },
       ],
@@ -39,27 +44,30 @@ const DEFAULT: {
       links: [
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
-        { label: "Gallery", href: "/gallery/events" },
+        { label: "Event Gallery", href: "/gallery/events" },
+        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
+        { label: "Explore", href: "/explore" },
         { label: "FAQs", href: "/faqs" },
         { label: "Support", href: "/support" },
+        { label: "Get a Quote", href: "/enquiry" },
+        { label: "Track Order", href: "/track-order" },
       ],
     },
     {
-      title: "Contact",
+      title: "Talk to us",
       links: [
         { label: "WhatsApp", icon: "whatsapp" },
         { label: "Call Us", icon: "phone" },
         { label: "Email Us", icon: "email" },
+        { label: "Live Chat", href: "/live-chat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
+        { label: "creativecaricatureclub.com", icon: "website" },
       ],
     },
     {
-      title: "Quick Links",
+      title: "Policies",
       links: [
-        { label: "The Lil Flea", href: "/lil-flea" },
-        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
-        { label: "Track Order", href: "/track-order" },
         { label: "Privacy Policy", href: "/privacy" },
         { label: "Terms of Service", href: "/terms" },
         { label: "Refund Policy", href: "/refund" },
