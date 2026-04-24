@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, KeyRound, Sparkles, Mail, Phone, Loader2, ArrowLeft, ArrowRight, Shield, Palette } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, Mail, Phone, Loader2, ArrowLeft, ArrowRight, Shield, Palette } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import AuthShell from "@/components/auth/AuthShell";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -162,57 +163,35 @@ const Login = () => {
   return (
     <>
     <SEOHead title="Login" description="Login to Creative Caricature Club™ to manage orders, events and workshops." canonical="/login" noindex />
-    <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-background">
-      {/* Layered 3D background */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.18), transparent 60%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.12), transparent 60%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--secondary)/0.4) 100%)" }} />
-      <motion.div
-        aria-hidden
-        className="absolute -top-20 -left-16 w-72 h-72 rounded-full opacity-40 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 70%)" }}
-        animate={{ y: [0, 18, 0], x: [0, 10, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="absolute -bottom-20 -right-12 w-80 h-80 rounded-full opacity-35 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.45), transparent 70%)" }}
-        animate={{ y: [0, -22, 0], x: [0, -10, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
+    <AuthShell
+      title="Welcome Back"
+      subtitle={`Step ${step} of 3`}
+      badge="Sign In"
+      heroTitle="Welcome back to Creative Caricature Club"
+      heroSubtitle="Pick up right where you left off — manage your orders, events and workshop bookings."
+      accent="violet"
+    >
+      {/* Progress dots */}
+      <div className="flex items-center justify-center gap-2 mb-5">
+        {[1, 2, 3].map(s => (
+          <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${s === step ? "w-8 bg-primary" : s < step ? "w-4 bg-primary/40" : "w-4 bg-slate-200"}`} />
+        ))}
+      </div>
 
-      <motion.div initial={{ y: 20, opacity: 0, rotateX: -6 }} animate={{ y: 0, opacity: 1, rotateX: 0 }} transition={{ duration: 0.55, type: "spring" }} style={{ perspective: 1200 }} className="w-full max-w-sm relative z-10">
-        <Card className="border-border/40 overflow-hidden bg-card/85 backdrop-blur-xl shadow-[0_30px_80px_-30px_hsl(252_60%_25%/0.45),0_8px_24px_-12px_hsl(252_60%_25%/0.3),inset_0_1px_0_hsl(0_0%_100%/0.5)]">
-          <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
-          <CardHeader className="text-center pb-2 pt-6">
-            <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity }}>
-              <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto shadow-xl ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
-              </div>
-            </motion.div>
-            <CardTitle className="font-display text-xl text-foreground">Welcome Back</CardTitle>
-            <CardDescription className="font-sans text-xs text-muted-foreground">Step {step} of 3</CardDescription>
-            {/* Progress dots */}
-            <div className="flex items-center justify-center gap-2 mt-2">
-              {[1, 2, 3].map(s => (
-                <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${s === step ? "w-8 bg-primary" : s < step ? "w-4 bg-primary/40" : "w-4 bg-muted"}`} />
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4 min-h-[260px] relative overflow-hidden">
+      <div className="min-h-[260px] relative overflow-hidden">
             <AnimatePresence mode="wait" custom={direction}>
               {step === 1 && (
                 <motion.div key="step1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
                   {/* Google */}
-                  <Button type="button" variant="outline" onClick={handleGoogleLogin} disabled={googleLoading} className="w-full h-11 rounded-xl font-sans font-medium gap-2 border-border/60">
+                  <Button type="button" variant="outline" onClick={handleGoogleLogin} disabled={googleLoading} className="w-full h-11 rounded-xl font-sans font-medium gap-2 border-slate-200 bg-white hover:bg-slate-50">
                     {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                       <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     )}
                     Continue with Google
                   </Button>
                   <div className="relative">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border/40" /></div>
-                    <div className="relative flex justify-center text-xs"><span className="bg-card px-2 text-muted-foreground">or</span></div>
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                    <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">— OR —</span></div>
                   </div>
                   {/* Login With toggle */}
                   <div className="flex gap-2">
@@ -224,14 +203,14 @@ const Login = () => {
                     </Button>
                   </div>
                   {loginWith === "email" ? (
-                    <div>
-                      <Label className="font-sans text-sm">Email Address</Label>
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 rounded-xl" />
+                    <div className="space-y-1.5">
+                      <Label className="font-sans text-sm text-slate-700">Email Address</Label>
+                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" />
                     </div>
                   ) : (
-                    <div>
-                      <Label className="font-sans text-sm">Phone Number</Label>
-                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" className="h-11 rounded-xl" maxLength={13} />
+                    <div className="space-y-1.5">
+                      <Label className="font-sans text-sm text-slate-700">Phone Number</Label>
+                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9+]/g, ""))} placeholder="+91 9876543210" maxLength={13} />
                     </div>
                   )}
                   <Button onClick={goNext} disabled={!canProceedStep1} className="w-full h-11 rounded-xl font-sans font-semibold gap-2">
@@ -251,24 +230,24 @@ const Login = () => {
                   <div className="space-y-3 pt-2">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       onClick={() => { setRoleChoiceOpen(false); navigate("/customcad75", { replace: true }); }}
-                      className="w-full p-4 rounded-xl border-2 border-border hover:border-primary/60 text-left flex items-center gap-3 transition-all">
+                      className="w-full p-4 rounded-xl border-2 border-slate-200 hover:border-primary/60 text-left flex items-center gap-3 transition-all bg-white">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <Shield className="w-5 h-5 text-primary" />
                       </div>
                       <div>
                         <p className="font-sans font-semibold text-sm">Admin Login</p>
-                        <p className="text-xs text-muted-foreground">Go to admin panel</p>
+                        <p className="text-xs text-slate-500">Go to admin panel</p>
                       </div>
                     </motion.button>
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       onClick={() => { setRoleChoiceOpen(false); navigate("/artistlogin", { replace: true }); }}
-                      className="w-full p-4 rounded-xl border-2 border-border hover:border-accent/60 text-left flex items-center gap-3 transition-all">
+                      className="w-full p-4 rounded-xl border-2 border-slate-200 hover:border-accent/60 text-left flex items-center gap-3 transition-all bg-white">
                       <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                         <Palette className="w-5 h-5 text-accent" />
                       </div>
                       <div>
                         <p className="font-sans font-semibold text-sm">Artist Login</p>
-                        <p className="text-xs text-muted-foreground">Go to artist dashboard</p>
+                        <p className="text-xs text-slate-500">Go to artist dashboard</p>
                       </div>
                     </motion.button>
                   </div>
@@ -277,17 +256,17 @@ const Login = () => {
 
               {step === 2 && (
                 <motion.div key="step2" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
-                  <p className="text-sm text-muted-foreground font-sans text-center">How would you like to sign in?</p>
+                  <p className="text-sm text-slate-500 font-sans text-center">How would you like to sign in?</p>
                   <div className="space-y-3">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { setLoginMethod("password"); goNext(); }}
-                      className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${loginMethod === "password" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                      className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all bg-white ${loginMethod === "password" ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary/40"}`}>
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Lock className="w-5 h-5 text-primary" /></div>
-                      <div><p className="font-sans font-semibold text-sm">Password</p><p className="text-xs text-muted-foreground">Use your account password</p></div>
+                      <div><p className="font-sans font-semibold text-sm">Password</p><p className="text-xs text-slate-500">Use your account password</p></div>
                     </motion.button>
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { setLoginMethod("secret_code"); goNext(); }}
-                      className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${loginMethod === "secret_code" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                      className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all bg-white ${loginMethod === "secret_code" ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary/40"}`}>
                       <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center"><KeyRound className="w-5 h-5 text-accent" /></div>
-                      <div><p className="font-sans font-semibold text-sm">Secret Code</p><p className="text-xs text-muted-foreground">4-digit code from dashboard</p></div>
+                      <div><p className="font-sans font-semibold text-sm">Secret Code</p><p className="text-xs text-slate-500">4-digit code from dashboard</p></div>
                     </motion.button>
                   </div>
                   <Button variant="ghost" onClick={goBack} className="w-full h-10 rounded-xl font-sans gap-2">
@@ -299,30 +278,30 @@ const Login = () => {
               {step === 3 && (
                 <motion.div key="step3" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.25 }} className="space-y-4">
                   <div className="text-center mb-2">
-                    <p className="text-xs text-muted-foreground font-sans">{loginWith === "email" ? email : phone}</p>
+                    <p className="text-xs text-slate-500 font-sans">{loginWith === "email" ? email : phone}</p>
                   </div>
                   {loginMethod === "password" ? (
                     <form onSubmit={handlePasswordLogin} className="space-y-4">
-                      <div>
-                        <Label className="font-sans text-sm">Password</Label>
+                      <div className="space-y-1.5">
+                        <Label className="font-sans text-sm text-slate-700">Password</Label>
                         <div className="relative">
-                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10 h-11 rounded-xl" />
-                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} required className="pr-10" />
+                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
                       </div>
-                      <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
+                      <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)]">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Sign In
                       </Button>
                     </form>
                   ) : (
                     <form onSubmit={handleSecretCodeLogin} className="space-y-4">
-                      <div>
-                        <Label className="font-sans text-sm">Secret Code (4-digit)</Label>
-                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12 rounded-xl" />
+                      <div className="space-y-1.5">
+                        <Label className="font-sans text-sm text-slate-700">Secret Code (4-digit)</Label>
+                        <Input type="text" value={secretCode} onChange={e => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 4) setSecretCode(d); }} maxLength={4} placeholder="• • • •" required className="font-mono text-center text-xl tracking-[0.5em] h-12" />
                       </div>
-                      <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_4px_15px_-3px_hsl(var(--primary)/0.3)]">
+                      <Button type="submit" disabled={loading || secretCode.length !== 4} className="w-full h-11 rounded-xl font-sans font-semibold shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)]">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Sign In with Code
                       </Button>
                     </form>
@@ -336,15 +315,15 @@ const Login = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+      </div>
 
-            <div className="text-center pt-4 border-t border-border/30 mt-4">
-              <a href="/register" className="text-sm text-primary hover:underline font-sans font-medium">Don't have an account? Sign up</a>
-            </div>
-          </CardContent>
-        </Card>
-        <p className="text-center text-xs text-muted-foreground/60 mt-3 font-sans"><span className="text-gradient-violet font-semibold">Creative Caricature Club</span><span className="align-super text-[0.6em] ml-0.5">™</span> © {new Date().getFullYear()}</p>
-      </motion.div>
-    </div>
+      <div className="text-center pt-5 border-t border-slate-100 mt-5">
+        <p className="text-sm text-slate-500 font-sans">
+          Don't have an account?{" "}
+          <a href="/register" className="text-primary hover:underline font-medium">Sign up</a>
+        </p>
+      </div>
+    </AuthShell>
     </>
   );
 };
