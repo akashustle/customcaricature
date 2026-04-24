@@ -248,14 +248,15 @@ const Services = ({ onBook, config }: { onBook: () => void; config?: any }) => {
 
 /* -------------------------- How it Starts -------------------------------- */
 
-const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: string[]; config?: any }) => {
+const HowItStarts = ({ onBook, images, config, onImageClick }: { onBook: () => void; images: string[]; config?: any; onImageClick?: (allImages: string[], i: number) => void }) => {
   const c = config || {};
   const steps = (c.steps && Array.isArray(c.steps) && c.steps.length) ? c.steps : [
     { n: "1", title: "Share your event", body: "Tell us your date, city, guest count and event type. We'll match the right artists." },
     { n: "2", title: "Lock the booking", body: "Pay a small advance to confirm your slot. We handle artists, travel and logistics." },
     { n: "3", title: "Wow your guests", body: "Our artists arrive on time and create stunning live caricatures your guests take home." },
   ];
-  const previews = (images.length >= 4 ? images : fallbackImages).slice(0, 4);
+  const sourceImgs = images.length >= 4 ? images : fallbackImages;
+  const previews = sourceImgs.slice(0, 4);
   return (
     <Section
       id="how"
@@ -282,9 +283,15 @@ const HowItStarts = ({ onBook, images, config }: { onBook: () => void; images: s
         <div className="card-gradient-blob p-4 sm:p-8">
           <div className="grid grid-cols-2 gap-3">
             {previews.map((src, i) => (
-              <div key={i} className="rounded-2xl overflow-hidden aspect-square border border-border/40">
+              <button
+                type="button"
+                key={i}
+                onClick={() => onImageClick?.(sourceImgs, i)}
+                className="rounded-2xl overflow-hidden aspect-square border border-border/40 transition-transform hover:scale-[1.03] cursor-zoom-in"
+                aria-label={`Open image ${i + 1}`}
+              >
                 <img src={src} alt={`Live event caricature ${i + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-              </div>
+              </button>
             ))}
           </div>
         </div>
