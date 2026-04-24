@@ -2479,40 +2479,93 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
 
-      {/* Hero overview card — soft violet fade matching homepage */}
-      <div className="relative overflow-hidden rounded-3xl bg-hero-violet border border-border/40 p-6 shadow-[0_12px_40px_-8px_hsl(var(--primary)/0.25)]">
-        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-12 w-52 h-52 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
-        <div className="relative">
-          <p className="font-sans text-xs uppercase tracking-wider text-foreground/70 font-semibold">My Activity</p>
-          <div className="mt-3 flex items-end gap-3">
-            <div>
-              <p className="font-display text-5xl font-bold text-foreground leading-none">{totalEvents + totalOrders}</p>
-              <p className="text-xs text-foreground/70 font-sans mt-1">Total bookings & orders</p>
-            </div>
-          </div>
+      {/* 3D Hero overview card — modern, layered, premium */}
+      <div className="relative" style={{ perspective: 1200 }}>
+        {/* Back depth plate */}
+        <div className="absolute inset-x-3 -bottom-2 top-3 rounded-3xl bg-primary/10 blur-2xl pointer-events-none" />
 
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Events</p>
-              <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalEvents}</p>
-            </div>
-            <div className="bg-card/85 backdrop-blur rounded-2xl p-3 border border-border/40">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-semibold">Orders</p>
-              <p className="font-display text-2xl font-bold text-foreground leading-tight">{totalOrders}</p>
-            </div>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 14, rotateX: -8 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 0.6, type: "spring" }}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card to-secondary/40 border border-border/50 p-5 sm:p-6 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.28),0_4px_12px_-4px_rgba(0,0,0,0.08)]"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {/* Ambient glow orbs */}
+          <motion.div
+            animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.6, 0.4] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-16 -right-12 w-52 h-52 rounded-full bg-primary/25 blur-3xl pointer-events-none"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute -bottom-20 -left-14 w-60 h-60 rounded-full bg-accent/25 blur-3xl pointer-events-none"
+          />
+          {/* Top sheen */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
 
-          <Button
-            onClick={handleBookEvent}
-            className="mt-5 w-full h-12 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-sans font-semibold"
-            size="lg"
-          >
-            <CalIcon className="w-4 h-4 mr-2" />
-            {canBookEvent ? "Book a Caricature Artist for Your Event" : "Get a Quote"}
-          </Button>
-          <p className="mt-2 text-[11px] text-foreground/60 font-sans text-center">Make your guests say "wow" with live caricatures ✨</p>
-        </div>
+          <div className="relative">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/8 px-2.5 py-0.5">
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-primary font-bold">My Activity</p>
+                </div>
+                <p className="mt-3 font-sans text-sm text-muted-foreground">
+                  Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""} 👋
+                </p>
+              </div>
+              {profile?.is_verified && (
+                <div className="flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-300/40 px-2 py-0.5">
+                  <BadgeCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="text-[10px] font-sans font-bold text-blue-700">Verified</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex items-end gap-2">
+              <p className="font-display text-6xl font-bold leading-none bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent">
+                {totalEvents + totalOrders}
+              </p>
+              <p className="pb-2 text-xs text-muted-foreground font-sans">total bookings & orders</p>
+            </div>
+
+            {/* 3D Stat tiles */}
+            <div className="mt-5 grid grid-cols-2 gap-2.5">
+              {[
+                { label: "Events", value: totalEvents, icon: CalIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600" },
+                { label: "Orders", value: totalOrders, icon: Package, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600" },
+              ].map((s) => (
+                <motion.div
+                  key={s.label}
+                  whileHover={{ y: -3, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className={`relative rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur`}
+                >
+                  <div className={`w-8 h-8 rounded-xl ${s.iconBg} flex items-center justify-center mb-2`}>
+                    <s.icon className="w-4 h-4" />
+                  </div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">{s.label}</p>
+                  <p className="font-display text-2xl font-bold text-foreground leading-tight">{s.value}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleBookEvent}
+              className="mt-5 w-full h-12 rounded-2xl bg-gradient-to-r from-primary via-primary to-primary/85 hover:from-primary/95 hover:to-primary text-primary-foreground font-sans font-semibold shadow-[0_12px_28px_-10px_hsl(var(--primary)/0.6),inset_0_1px_0_rgba(255,255,255,0.25)] border border-primary/40"
+              size="lg"
+            >
+              <CalIcon className="w-4 h-4 mr-2" />
+              {canBookEvent ? "Book a Caricature Artist" : "Get a Quote"}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <p className="mt-2.5 text-[11px] text-muted-foreground font-sans text-center">
+              Make your guests say "wow" with live caricatures ✨
+            </p>
+          </div>
+        </motion.div>
       </div>
 
       {/* Verified-user upsell (only when not yet verified) */}
