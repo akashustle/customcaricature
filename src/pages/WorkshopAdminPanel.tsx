@@ -1946,6 +1946,18 @@ const WorkshopAdmin = () => {
                 </div>
               )}
 
+              {tab === "verification" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h1 className={`text-xl ${textPrimary}`}>Student Verification</h1>
+                    <RefreshButton />
+                  </div>
+                  <GlassCard>
+                    <AdminWorkshopVerification adminName={adminInfo?.name || "Workshop Admin"} />
+                  </GlassCard>
+                </div>
+              )}
+
               {tab === "settings" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
