@@ -163,10 +163,27 @@ const Login = () => {
     <>
     <SEOHead title="Login" description="Login to Creative Caricature Club™ to manage orders, events and workshops." canonical="/login" noindex />
     <div className="min-h-[100dvh] flex items-center justify-center px-4 pb-24 md:pb-0 relative overflow-hidden bg-background">
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.06), transparent 60%)" }} />
+      {/* Layered 3D background */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.18), transparent 60%), radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.12), transparent 60%), linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--secondary)/0.4) 100%)" }} />
+      <motion.div
+        aria-hidden
+        className="absolute -top-20 -left-16 w-72 h-72 rounded-full opacity-40 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 70%)" }}
+        animate={{ y: [0, 18, 0], x: [0, 10, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        aria-hidden
+        className="absolute -bottom-20 -right-12 w-80 h-80 rounded-full opacity-35 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(var(--accent) / 0.45), transparent 70%)" }}
+        animate={{ y: [0, -22, 0], x: [0, -10, 0] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, type: "spring" }} className="w-full max-w-sm relative z-10">
-        <Card className="app-card border-border/30 overflow-hidden">
+      <motion.div initial={{ y: 20, opacity: 0, rotateX: -6 }} animate={{ y: 0, opacity: 1, rotateX: 0 }} transition={{ duration: 0.55, type: "spring" }} style={{ perspective: 1200 }} className="w-full max-w-sm relative z-10">
+        <Card className="border-border/40 overflow-hidden bg-card/85 backdrop-blur-xl shadow-[0_30px_80px_-30px_hsl(252_60%_25%/0.45),0_8px_24px_-12px_hsl(252_60%_25%/0.3),inset_0_1px_0_hsl(0_0%_100%/0.5)]">
+          <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
           <CardHeader className="text-center pb-2 pt-6">
             <motion.div className="relative mx-auto mb-2" animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity }}>
               <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto shadow-xl ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
