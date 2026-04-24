@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, Mail, Phone, Instagram, Calendar, Clock, Briefcase, Edit2, Save, X,
-  CreditCard, MapPin, Key, Camera, Loader2, BadgeCheck, ShieldCheck,
+  MapPin, Key, Camera, Loader2, BadgeCheck, ShieldCheck,
   Sparkles, Globe, ChevronRight, ArrowRight, Cake, Users as UsersIcon, Map, Wallet, IndianRupee,
 } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
@@ -496,8 +496,6 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     <SelectContent>
                       <SelectItem value="Male">Male</SelectItem>
                       <SelectItem value="Female">Female</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                      <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
