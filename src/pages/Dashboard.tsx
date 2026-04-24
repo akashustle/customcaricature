@@ -2547,6 +2547,16 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         </motion.div>
       )}
 
+      {/* Workshop quick-switch (only for workshop-origin users) */}
+      {user && (
+        <AccountSwitcherCard
+          authUserId={user.id}
+          fullName={profile?.full_name}
+          email={profile?.email}
+          mobile={profile?.mobile}
+        />
+      )}
+
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
 
