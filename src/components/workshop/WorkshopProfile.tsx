@@ -120,11 +120,21 @@ const WorkshopProfile = ({ user, darkMode = false }: { user: any; darkMode?: boo
   };
 
   const handleSave = async () => {
-    if (form.country === "India" && (!form.state || !form.city)) {
-      toast({ title: "Please add your State and City", variant: "destructive" }); return;
-    }
-    if (form.country !== "India" && !form.city) {
-      toast({ title: "Please add your City", variant: "destructive" }); return;
+    // India users MUST have both state + city. International users only need city.
+    if (form.country === "India") {
+      if (!form.state || form.state.trim().length < 2) {
+        toast({ title: "State required", description: "Please pick your state from the list.", variant: "destructive" });
+        return;
+      }
+      if (!form.city || form.city.trim().length < 2) {
+        toast({ title: "City required", description: "Please pick or type your city.", variant: "destructive" });
+        return;
+      }
+    } else {
+      if (!form.city || form.city.trim().length < 2) {
+        toast({ title: "City required", description: "Please type the city you live in.", variant: "destructive" });
+        return;
+      }
     }
     setSaving(true);
     const { data, error } = await callUpdate({
