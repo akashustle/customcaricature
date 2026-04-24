@@ -62,7 +62,7 @@ const DEFAULT: {
         { label: "Live Chat", href: "/live-chat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
-        { label: "creativecaricatureclub.com", icon: "website" },
+        { label: "Main Web — creativecaricatureclub.com", icon: "website" },
       ],
     },
     {
@@ -198,7 +198,7 @@ const SiteFooter = () => {
             <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
             <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-              <Globe className="w-3.5 h-3.5" /> creativecaricatureclub.com <ExternalLink className="w-3 h-3" />
+              <Globe className="w-3.5 h-3.5" /> Main Web — creativecaricatureclub.com <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 

@@ -12,17 +12,18 @@ const MobileBottomNav = () => {
   const { settings } = useSiteSettings();
 
   const shopVisible = settings.shop_nav_visible?.enabled === true;
-  const workshopVisible = settings.workshop_mobile_nav?.enabled === true;
   const chatVisible = settings.live_chat_visible?.enabled === true;
   const exploreVisible = (settings as any).explore_mobile_nav?.enabled !== false;
 
   const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel", "/workshop-dashboard", "/dashboard"];
   if (!isMobile || adminPaths.some(p => location.pathname.startsWith(p))) return null;
 
+  // Workshop tab is now ALWAYS visible on mobile so workshop students can
+  // reach their dashboard from anywhere on the site.
   const items: { icon: any; label: string; path: string }[] = [
     { icon: Home, label: "", path: "/" },
     ...(shopVisible ? [{ icon: ShoppingBag, label: "", path: "/shop" }] : []),
-    ...(workshopVisible ? [{ icon: GraduationCap, label: "", path: "/workshop" }] : []),
+    { icon: GraduationCap, label: "", path: "/workshop" },
     ...(chatVisible ? [{ icon: Sparkles, label: "", path: "/live-chat" }] : []),
     ...(exploreVisible ? [{ icon: Compass, label: "", path: "/explore" }] : []),
     ...(user
