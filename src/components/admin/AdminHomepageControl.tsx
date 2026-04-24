@@ -798,6 +798,84 @@ const AdminHomepageControl = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        {/* FAQs Editor */}
+        <TabsContent value="faqs">
+          <Card className="admin-glass-card">
+            <CardHeader><CardTitle className="text-base">FAQ Section — Add, Edit, Delete</CardTitle></CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Eyebrow</label>
+                  <Input value={faqs.eyebrow || ""} placeholder="Help • Help" onChange={e => setFaqField("eyebrow", e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Title (before)</label>
+                  <Input value={faqs.title_pre || ""} placeholder="Need" onChange={e => setFaqField("title_pre", e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1 block">Title (highlight)</label>
+                  <Input value={faqs.title_highlight || ""} placeholder="help?" onChange={e => setFaqField("title_highlight", e.target.value)} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">FAQ Items ({faqItems.length})</h4>
+                  <p className="text-[11px] text-muted-foreground">Reorder, edit, add or delete questions shown on the homepage.</p>
+                </div>
+                <Button onClick={addFaqItem} size="sm" className="rounded-full gap-2">
+                  <Plus className="w-4 h-4" /> Add FAQ
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {faqItems.length === 0 && (
+                  <div className="text-center py-8 rounded-xl border border-dashed border-border/60 text-sm text-muted-foreground">
+                    No FAQs yet. Click <span className="font-semibold text-foreground">Add FAQ</span> to create the first one.
+                  </div>
+                )}
+                {faqItems.map((it, i) => (
+                  <div key={i} className="rounded-xl border border-border/60 bg-muted/20 p-3 sm:p-4 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <div className="flex flex-col pt-1">
+                        <button onClick={() => moveFaqItem(i, "up")} disabled={i === 0} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronUp className="w-4 h-4" /></button>
+                        <button onClick={() => moveFaqItem(i, "down")} disabled={i === faqItems.length - 1} className="text-muted-foreground hover:text-primary disabled:opacity-30 p-0.5"><ChevronDown className="w-4 h-4" /></button>
+                      </div>
+                      <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded mt-1">#{i + 1}</span>
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          value={it.q || ""}
+                          placeholder="Question"
+                          onChange={e => updateFaqItem(i, { q: e.target.value })}
+                          className="font-semibold"
+                        />
+                        <Textarea
+                          value={it.a || ""}
+                          placeholder="Answer"
+                          rows={3}
+                          onChange={e => updateFaqItem(i, { a: e.target.value })}
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFaqItem(i)}
+                        title="Delete FAQ"
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                💡 Click <span className="font-semibold text-foreground">Save All</span> at the top to publish your changes.
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
       </Tabs>
     </div>
   );
