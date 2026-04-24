@@ -5444,6 +5444,7 @@ export type Database = {
           age: number | null
           artist_background: string | null
           artist_background_type: string | null
+          avatar_url: string | null
           city: string | null
           country: string | null
           created_at: string
@@ -5483,6 +5484,7 @@ export type Database = {
           age?: number | null
           artist_background?: string | null
           artist_background_type?: string | null
+          avatar_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -5522,6 +5524,7 @@ export type Database = {
           age?: number | null
           artist_background?: string | null
           artist_background_type?: string | null
+          avatar_url?: string | null
           city?: string | null
           country?: string | null
           created_at?: string

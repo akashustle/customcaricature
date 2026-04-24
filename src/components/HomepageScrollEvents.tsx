@@ -21,7 +21,8 @@ const HomepageScrollEvents = () => {
   if (items.length === 0) return null;
 
   const tripled = [...items, ...items, ...items];
-  const duration = Math.max(20, items.length * 5);
+  // Faster scroll — ~3.2s per card (was 5s)
+  const duration = Math.max(14, Math.round(items.length * 3.2));
 
   return (
     <>
