@@ -702,17 +702,21 @@ const Index = () => {
 
       <main>
         {(() => {
-          const order: string[] = Array.isArray((content as any).homepage_section_order?.order)
+          const rawOrder: string[] = Array.isArray((content as any).homepage_section_order?.order)
             ? (content as any).homepage_section_order.order
-            : ["hero", "stats", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
-          // Always make sure the new About section renders even on legacy
-          // saved orders that don't include it yet.
-          const finalOrder = order.includes("about")
-            ? order
-            : [...order.slice(0, Math.max(order.indexOf("clients") + 1, 1)), "about", ...order.slice(Math.max(order.indexOf("clients") + 1, 1))];
+            : ["hero", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
+          // Strip legacy "stats" entry — stats now live inside the About section.
+          let order = rawOrder.filter(s => s !== "stats");
+          // Make sure About is present.
+          if (!order.includes("about")) {
+            const afterClients = Math.max(order.indexOf("clients") + 1, 1);
+            order = [...order.slice(0, afterClients), "about", ...order.slice(afterClients)];
+          }
+          // Make sure "Still confused" always closes the page.
+          if (!order.includes("still_confused")) order = [...order, "still_confused"];
+
           const sections: Record<string, React.ReactNode> = {
             hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
-            stats: <Stats key="stats" items={stats} config={(content as any).homepage_stats} />,
             video: (content as any).homepage_video?.enabled ? (
               <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
@@ -734,7 +738,7 @@ const Index = () => {
                 </div>
               </section>
             ),
-            about: <AboutUs key="about" config={(content as any).homepage_about} />,
+            about: <AboutUs key="about" config={(content as any).homepage_about} stats={stats} />,
             services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
             how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
             why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
@@ -742,7 +746,7 @@ const Index = () => {
             faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
             still_confused: <StillConfused key="still_confused" config={(content as any).homepage_still_confused} />,
           };
-          return finalOrder.map(id => sections[id]).filter(Boolean);
+          return order.map(id => sections[id]).filter(Boolean);
         })()}
       </main>
 
