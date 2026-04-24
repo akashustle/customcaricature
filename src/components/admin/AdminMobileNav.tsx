@@ -69,6 +69,7 @@ const MORE_ITEMS = [
     { id: "content-editor", label: "Text Editor", icon: Type },
     { id: "form-builder", label: "Forms", icon: FormInput },
     { id: "design-control", label: "Design", icon: Palette },
+    { id: "watermark", label: "Watermark", icon: Shield },
   ]},
   { section: "Content", items: [
     { id: "homepage", label: "Homepage", icon: HomeIcon },

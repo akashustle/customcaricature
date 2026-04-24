@@ -99,6 +99,7 @@ const AdminWorkspaceSwitcher = lazy(() => import("@/components/admin/AdminWorksp
 const AdminContentEditor = lazy(() => import("@/components/admin/AdminContentEditor"));
 const AdminFormBuilder = lazy(() => import("@/components/admin/AdminFormBuilder"));
 const AdminDesignControl = lazy(() => import("@/components/admin/AdminDesignControl"));
+const AdminWatermarkSettings = lazy(() => import("@/components/admin/AdminWatermarkSettings"));
 const AdminPageBuilder = lazy(() => import("@/components/admin/AdminPageBuilder"));
 const AdminActivityLogs = lazy(() => import("@/components/admin/AdminActivityLogs"));
 const AdminSecurityDashboard = lazy(() => import("@/components/admin/AdminSecurityDashboard"));
@@ -2133,6 +2134,10 @@ const Admin = () => {
 
           <TabsContent value="design-control">
             <AdminDesignControl />
+          </TabsContent>
+
+          <TabsContent value="watermark">
+            <AdminWatermarkSettings />
           </TabsContent>
 
           <TabsContent value="workshop-builder">
