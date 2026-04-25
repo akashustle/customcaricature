@@ -1450,6 +1450,34 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
   const [rescheduleEvent, setRescheduleEvent] = useState<any>(null);
   const [pendingRescheduleIds, setPendingRescheduleIds] = useState<Set<string>>(new Set());
 
+  // Tick every 30s so virtual status (upcoming → live → completed) re-derives without DB writes.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Derive a "display" status purely from current time. The DB cron also flips it server-side
+  // (see auto_complete_past_events()), but this guarantees the UI is always in sync second-to-second.
+  const deriveDisplayStatus = (ev: any): string => {
+    if (ev.status === "cancelled" || ev.status === "refunded") return ev.status;
+    if (!ev.event_date || !ev.event_start_time) return ev.status;
+    try {
+      const [y, m, d] = ev.event_date.split("-").map(Number);
+      const [sh, sm] = (ev.event_start_time || "00:00").split(":").map(Number);
+      const [eh, em] = (ev.event_end_time || ev.event_start_time || "00:00").split(":").map(Number);
+      const start = new Date(y, (m || 1) - 1, d || 1, sh || 0, sm || 0, 0, 0).getTime();
+      let end = new Date(y, (m || 1) - 1, d || 1, eh || 0, em || 0, 0, 0).getTime();
+      if (end <= start) end += 24 * 60 * 60 * 1000;
+      const t = Date.now();
+      if (t >= start && t < end) return "live";
+      if (t >= end) return "completed";
+      return "upcoming";
+    } catch {
+      return ev.status;
+    }
+  };
+
   // Track which events already have a pending reschedule request so we can disable the button
   useEffect(() => {
     if (!userId || events.length === 0) return;
