@@ -640,6 +640,28 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 color={[palette.coral, palette.gold, palette.sage, palette.plum, palette.sky][i % 5]} />
             ))}
           </div>
+
+          {/* Centered Request Edit / Edit action under personal information */}
+          <div className="mt-5 flex justify-center">
+            {editLocked ? (
+              <Button
+                onClick={() => setEditRequestOpen(true)}
+                className="rounded-full font-semibold shadow-md text-white border-0 px-6"
+                style={{ background: `linear-gradient(135deg, hsl(40 90% 55%), hsl(20 85% 55%))` }}
+              >
+                🔒 Request Edit
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setEditing(true)}
+                className="rounded-full font-semibold shadow-md text-white border-0 px-6"
+                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Personal Information{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+              </Button>
+            )}
+          </div>
         </motion.div>
       )}
 
