@@ -498,17 +498,23 @@ const Dashboard = () => {
             </Button>
             <button
               onClick={() => setActiveTab("profile")}
-              className="relative w-10 h-10 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+              className="relative w-10 h-10 rounded-full bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
               aria-label="Open profile"
             >
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                initials
-              )}
+              <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </span>
               {profile?.is_verified && (
-                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
-                  <BadgeCheck className="w-3 h-3" />
+                <span
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background shadow-md"
+                  title="Verified user"
+                  aria-label="Verified"
+                >
+                  <BadgeCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </span>
               )}
             </button>
