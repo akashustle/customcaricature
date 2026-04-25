@@ -1408,6 +1408,30 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         ) : (
           <p className="text-muted-foreground font-sans">No profile data found.</p>
         )}
+
+        {/* Centered Request Edit / Edit action under personal info */}
+        {!editing && profile && (
+          <div className="mt-5 flex justify-center">
+            {profile.is_verified && Number(profile.edits_remaining ?? 0) <= 0 ? (
+              <Button
+                onClick={() => { (window as any).__openEditRequest?.(); }}
+                className="font-sans rounded-full px-6 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm"
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                Request Edit
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                onClick={() => { setEditForm(profile); setEditing(true); }}
+                className="font-sans rounded-full px-6 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Personal Information
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
