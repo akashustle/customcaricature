@@ -861,6 +861,52 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   </Button>
                 </div>
               )}
+
+              {verifyStage === "approved" && (
+                <div className="relative z-10 py-4 text-center space-y-4">
+                  <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200 }}
+                    className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg"
+                    style={{ background: `linear-gradient(135deg, hsl(142 70% 45%), hsl(160 70% 40%))` }}>
+                    <BadgeCheck className="w-12 h-12 text-white" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-2xl font-bold" style={{ color: "hsl(142 70% 30%)" }}>
+                      🎉 You're Verified!
+                    </h3>
+                    <p className="text-sm mt-2" style={{ color: "hsl(20 30% 25%)" }}>
+                      Your blue tick is now live on your profile. Welcome to the verified community!
+                    </p>
+                  </div>
+                  <Button onClick={() => { setVerifyOpen(false); setVerifyStage("idle"); }}
+                    className="w-full rounded-full font-bold text-white border-0 shadow-md"
+                    style={{ background: `linear-gradient(135deg, hsl(142 70% 45%), hsl(160 70% 40%))` }}>
+                    Awesome! <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              )}
+
+              {verifyStage === "rejected" && (
+                <div className="relative z-10 py-4 text-center space-y-4">
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+                    className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg"
+                    style={{ background: `linear-gradient(135deg, hsl(0 70% 55%), hsl(20 70% 50%))` }}>
+                    <X className="w-12 h-12 text-white" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl font-bold" style={{ color: "hsl(0 60% 35%)" }}>
+                      Verification Not Approved
+                    </h3>
+                    <p className="text-sm mt-2" style={{ color: "hsl(20 30% 25%)" }}>
+                      Your verification request couldn't be approved this time. Please update your profile details and try again, or contact support for help.
+                    </p>
+                  </div>
+                  <Button onClick={() => { setVerifyOpen(false); setVerifyStage("idle"); }}
+                    className="w-full rounded-full font-bold text-white border-0 shadow-md"
+                    style={{ background: `linear-gradient(135deg, hsl(0 60% 50%), hsl(20 60% 45%))` }}>
+                    Got it <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
