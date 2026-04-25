@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Clock, PartyPopper, Sparkles, CheckCircle2 } from "lucide-react";
+import { Clock, PartyPopper, Sparkles, CheckCircle2, Music2, Heart } from "lucide-react";
 
 interface EventLikeRecord {
   event_date: string;          // 'YYYY-MM-DD'
@@ -86,7 +86,7 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
           </span>
-          Live · ends in {formatHMS(deltaMs)}
+          Live now · {formatHMS(deltaMs)} left
         </span>
       );
     }
@@ -94,7 +94,7 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
       return (
         <span className="inline-flex items-center gap-1.5 text-[11px] font-sans font-semibold text-amber-700 bg-amber-100 dark:bg-amber-500/15 dark:text-amber-300 px-2 py-1 rounded-full">
           <Clock className="w-3 h-3" />
-          Starts in {formatHMS(deltaMs)}
+          Starting in {formatHMS(deltaMs)}
         </span>
       );
     }
@@ -102,7 +102,7 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
       return (
         <span className="inline-flex items-center gap-1.5 text-[11px] font-sans font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
           <CheckCircle2 className="w-3 h-3" />
-          Just completed
+          Event just completed
         </span>
       );
     }
@@ -119,27 +119,78 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
 
   // Card variant
   if (phase === "live") {
+    // Continuous celebratory animation — "guests enjoying" until the event ends.
+    const partyEmojis = ["🎉", "🎊", "✨", "🥳", "🎨", "💫"];
     return (
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl p-3 border border-emerald-300/60 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 dark:from-emerald-500/10 dark:via-emerald-500/5 dark:to-emerald-500/10"
+        className="relative overflow-hidden rounded-2xl p-3.5 border-2 border-emerald-300/70 bg-gradient-to-r from-emerald-50 via-emerald-100/60 to-emerald-50 dark:from-emerald-500/10 dark:via-emerald-500/5 dark:to-emerald-500/10 shadow-[0_8px_24px_-12px_hsl(142_70%_45%/0.4)]"
       >
-        <div className="flex items-center gap-2">
+        {/* Floating emojis drifting up (continuous) */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {partyEmojis.map((e, i) => (
+            <motion.span
+              key={i}
+              className="absolute text-base opacity-60"
+              style={{ left: `${10 + i * 14}%`, bottom: -10 }}
+              animate={{
+                y: [-4, -52, -4],
+                opacity: [0, 0.7, 0],
+                rotate: [0, 12, -8, 0],
+              }}
+              transition={{
+                duration: 3.6 + i * 0.4,
+                repeat: Infinity,
+                delay: i * 0.5,
+                ease: "easeInOut",
+              }}
+            >
+              {e}
+            </motion.span>
+          ))}
+        </div>
+
+        <div className="relative flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
           </span>
           <p className="font-display text-sm font-bold text-emerald-800 dark:text-emerald-200">
-            🎉 Your event has started — guests are enjoying!
+            Your event is live — guests are enjoying every moment! 🎨
           </p>
         </div>
-        <p className="text-[11px] font-sans text-emerald-800/80 dark:text-emerald-200/80 mt-1">
+
+        {/* Continuous shimmer line under headline */}
+        <motion.div
+          className="relative mt-2 h-px bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent"
+          animate={{ backgroundPosition: ["0% 50%", "100% 50%"] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+        />
+
+        <div className="relative flex flex-wrap items-center gap-2 mt-2">
+          <motion.span
+            className="inline-flex items-center gap-1 text-[11px] font-sans font-semibold text-emerald-900 dark:text-emerald-100 bg-white/80 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full"
+            animate={{ scale: [1, 1.04, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Music2 className="w-3 h-3" /> Vibes flowing
+          </motion.span>
+          <motion.span
+            className="inline-flex items-center gap-1 text-[11px] font-sans font-semibold text-pink-700 dark:text-pink-200 bg-white/80 dark:bg-pink-500/10 px-2 py-0.5 rounded-full"
+            animate={{ scale: [1.04, 1, 1.04] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Heart className="w-3 h-3 fill-current" /> Smiles all around
+          </motion.span>
+        </div>
+
+        <p className="relative text-[11px] font-sans text-emerald-800/80 dark:text-emerald-200/80 mt-2">
           Started {fmtTime(start)} · Ends {fmtTime(end)}
         </p>
-        <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-emerald-900 dark:text-emerald-100 bg-white/70 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full">
+        <div className="relative mt-2 inline-flex items-center gap-1.5 text-xs font-sans font-semibold text-emerald-900 dark:text-emerald-100 bg-white/80 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full">
           <Clock className="w-3.5 h-3.5" />
-          Wraps up in <span className="tabular-nums">{formatHMS(deltaMs)}</span>
+          Ends in <span className="tabular-nums">{formatHMS(deltaMs)}</span>
         </div>
       </motion.div>
     );
@@ -150,7 +201,7 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-3 border border-amber-300/60 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10">
         <p className="font-display text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
-          <Sparkles className="w-4 h-4" /> Get ready! Your event starts soon
+          <Sparkles className="w-4 h-4" /> Get ready! Your event is starting soon
         </p>
         <p className="text-[11px] font-sans text-amber-800/80 dark:text-amber-200/80 mt-0.5">
           Begins at {fmtTime(start)} · in <span className="tabular-nums font-semibold">{formatHMS(deltaMs)}</span>
@@ -164,10 +215,10 @@ const EventLiveStatus = ({ event, variant = "card" }: Props) => {
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-3 border border-primary/30 bg-primary/5">
         <p className="font-display text-sm font-bold text-primary flex items-center gap-2">
-          <PartyPopper className="w-4 h-4" /> Your event has just wrapped up!
+          <PartyPopper className="w-4 h-4" /> What a lovely event — it just finished!
         </p>
         <p className="text-[11px] font-sans text-foreground/70 mt-0.5">
-          Hope your guests had an amazing time. We'll mark it complete shortly.
+          Hope your guests had an amazing time. We'll mark it complete in a moment.
         </p>
       </motion.div>
     );

@@ -67,22 +67,25 @@ const PaymentStatusTracker = ({ bookingId, totalAmount, advanceAmount, paymentSt
   const isPartial2Paid = paymentStatus === "partial_2_paid";
   const fullyPaid = paymentStatus === "fully_paid";
   const advancePaid = paymentStatus === "confirmed" || fullyPaid;
-  const rawPaidTotal = payments.reduce((sum, p) => sum + p.amount, 0);
 
-  // Derive minimum paid amount from status when payment_history records are missing (e.g. manual admin updates)
+  // IMPORTANT: payment_history.amount is the gross charged via Razorpay (base + ~2.6% gateway fee).
+  // Per business rule, the gateway fee is an EXTRA charge on top of the event price — it must NEVER
+  // erode the base amount tracked here. We therefore derive paid totals from the event status only.
+  // (If a "remaining" payment exists in history, treat it as fully paid even if status hasn't synced.)
+  const hasRemainingRecord = payments.some((p) => /remaining|fully/i.test(p.payment_type || ""));
   const getStatusBasedPaid = () => {
-    if (fullyPaid) return totalAmount;
-    if (advancePaid) return Math.max(rawPaidTotal, advanceAmount);
-    if (isPartial2Paid && isPartialEnabled && partialConfig) return Math.max(rawPaidTotal, partialConfig.partial_1_amount + partialConfig.partial_2_amount);
-    if (isPartial1Paid && isPartialEnabled && partialConfig) return Math.max(rawPaidTotal, partialConfig.partial_1_amount);
-    if (isPartial1Paid) return Math.max(rawPaidTotal, Math.ceil(advanceAmount / 2));
-    return rawPaidTotal;
+    if (fullyPaid || hasRemainingRecord) return totalAmount;
+    if (advancePaid) return advanceAmount;
+    if (isPartial2Paid && isPartialEnabled && partialConfig) return partialConfig.partial_1_amount + partialConfig.partial_2_amount;
+    if (isPartial1Paid && isPartialEnabled && partialConfig) return partialConfig.partial_1_amount;
+    if (isPartial1Paid) return Math.ceil(advanceAmount / 2);
+    return 0;
   };
 
   const effectivePaid = getStatusBasedPaid();
   const paidTotal = effectivePaid;
-  const progressPercent = fullyPaid ? 100 : (totalAmount > 0 ? Math.min(100, Math.round((effectivePaid / totalAmount) * 100)) : 0);
-  const remaining = fullyPaid ? 0 : Math.max(0, totalAmount - effectivePaid);
+  const progressPercent = fullyPaid || hasRemainingRecord ? 100 : (totalAmount > 0 ? Math.min(100, Math.round((effectivePaid / totalAmount) * 100)) : 0);
+  const remaining = fullyPaid || hasRemainingRecord ? 0 : Math.max(0, totalAmount - effectivePaid);
   
   // Once advance is paid, hide partial steps - show simplified view
   const showPartialSteps = isPartialEnabled && !advancePaid;
