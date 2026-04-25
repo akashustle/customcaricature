@@ -357,17 +357,22 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           </motion.div>
 
           {/* Identity */}
-          <div className="flex-1 min-w-0 text-center md:text-left">
+          <div className="flex-1 min-w-0 w-full text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight"
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight break-words"
                 style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
                 {profileData.name || "Workshop Student"}
               </h2>
               {isVerified && (
-                <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring" }}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-lg"
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring" }}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full shadow-xl ring-2 ring-white"
                   style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}
-                  title="Verified student">
+                  title="Verified student"
+                  aria-label="Verified"
+                >
                   <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} fill="currentColor" />
                 </motion.div>
               )}
@@ -395,9 +400,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               )}
             </div>
 
-            <p className="text-xs md:text-sm mt-2 opacity-80"
+            {/* Email + city — wraps fully, never truncates */}
+            <p className="text-xs md:text-sm mt-2 opacity-80 break-all leading-snug"
               style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 22%)" }}>
-              {profileData.email || profileData.mobile} • {profileData.city || "City not set"}, {profileData.country || "India"}
+              {profileData.email || profileData.mobile}
+              {(profileData.city || profileData.country) && (
+                <span className="opacity-80"> • {profileData.city || "City not set"}, {profileData.country || "India"}</span>
+              )}
             </p>
 
             {/* Profile completeness ring */}
