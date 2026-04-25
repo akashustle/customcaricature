@@ -357,17 +357,22 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           </motion.div>
 
           {/* Identity */}
-          <div className="flex-1 min-w-0 text-center md:text-left">
+          <div className="flex-1 min-w-0 w-full text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight"
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight break-words"
                 style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
                 {profileData.name || "Workshop Student"}
               </h2>
               {isVerified && (
-                <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring" }}
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-lg"
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring" }}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full shadow-xl ring-2 ring-white"
                   style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}
-                  title="Verified student">
+                  title="Verified student"
+                  aria-label="Verified"
+                >
                   <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} fill="currentColor" />
                 </motion.div>
               )}
@@ -395,9 +400,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               )}
             </div>
 
-            <p className="text-xs md:text-sm mt-2 opacity-80"
+            {/* Email + city — wraps fully, never truncates */}
+            <p className="text-xs md:text-sm mt-2 opacity-80 break-all leading-snug"
               style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 22%)" }}>
-              {profileData.email || profileData.mobile} • {profileData.city || "City not set"}, {profileData.country || "India"}
+              {profileData.email || profileData.mobile}
+              {(profileData.city || profileData.country) && (
+                <span className="opacity-80"> • {profileData.city || "City not set"}, {profileData.country || "India"}</span>
+              )}
             </p>
 
             {/* Profile completeness ring */}
@@ -630,6 +639,28 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               <DetailItem key={d.label} icon={d.icon} label={d.label} value={d.value} darkMode={darkMode}
                 color={[palette.coral, palette.gold, palette.sage, palette.plum, palette.sky][i % 5]} />
             ))}
+          </div>
+
+          {/* Centered Request Edit / Edit action under personal information */}
+          <div className="mt-5 flex justify-center">
+            {editLocked ? (
+              <Button
+                onClick={() => setEditRequestOpen(true)}
+                className="rounded-full font-semibold shadow-md text-white border-0 px-6"
+                style={{ background: `linear-gradient(135deg, hsl(40 90% 55%), hsl(20 85% 55%))` }}
+              >
+                🔒 Request Edit
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setEditing(true)}
+                className="rounded-full font-semibold shadow-md text-white border-0 px-6"
+                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Personal Information{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+              </Button>
+            )}
           </div>
         </motion.div>
       )}

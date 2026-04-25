@@ -498,17 +498,23 @@ const Dashboard = () => {
             </Button>
             <button
               onClick={() => setActiveTab("profile")}
-              className="relative w-10 h-10 rounded-full overflow-hidden bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+              className="relative w-10 h-10 rounded-full bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
               aria-label="Open profile"
             >
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              ) : (
-                initials
-              )}
+              <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </span>
               {profile?.is_verified && (
-                <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background">
-                  <BadgeCheck className="w-3 h-3" />
+                <span
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center ring-2 ring-background shadow-md"
+                  title="Verified user"
+                  aria-label="Verified"
+                >
+                  <BadgeCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </span>
               )}
             </button>
@@ -1250,8 +1256,8 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           style={{ background: "radial-gradient(circle, hsl(280 80% 78% / 0.30), transparent 70%)", filter: "blur(32px)" }} />
         <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
-        <div className="relative flex items-center gap-4 mb-5">
-          <label className={`relative group ${profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "cursor-not-allowed" : "cursor-pointer"}`}>
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-5 text-center sm:text-left">
+          <label className={`relative group flex-shrink-0 ${profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "cursor-not-allowed" : "cursor-pointer"}`}>
             <div
               className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
               style={{
@@ -1265,6 +1271,17 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
                 <span className="text-2xl font-bold text-primary font-display">{initials}</span>
               )}
             </div>
+            {/* Prominent verified badge — top right of avatar */}
+            {profile?.is_verified && (
+              <span
+                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-white shadow-lg"
+                style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                title="Verified user"
+                aria-label="Verified"
+              >
+                <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </span>
+            )}
             <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
               {profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "🔒 Locked" : "Change"}
             </span>
@@ -1274,13 +1291,14 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
               const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
             }} />
           </label>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-2xl font-bold text-slate-900 truncate flex items-center gap-1.5">
-              {profile?.full_name || "User"}
+          <div className="flex-1 min-w-0 w-full">
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
+              <span className="break-words">{profile?.full_name || "User"}</span>
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
             </h3>
-            <p className="text-sm text-slate-600 font-sans truncate">{profile?.email || ""}</p>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {/* Email — wraps fully, never truncates */}
+            <p className="text-sm text-slate-600 font-sans mt-0.5 break-all leading-snug">{profile?.email || ""}</p>
+            <div className="flex items-center justify-center sm:justify-start gap-2 mt-1.5 flex-wrap">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs text-slate-700 font-sans font-semibold">{profile?.is_verified ? "Verified member" : "Active member"}</span>
               {profile?.is_verified && (
@@ -1298,12 +1316,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           </div>
           {!editing ? (
             profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? (
-              <Button variant="secondary" size="sm" onClick={() => { (window as any).__openEditRequest?.(); }} className="font-sans rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm"><Lock className="w-4 h-4 mr-1" />Request Edit</Button>
+              <Button variant="secondary" size="sm" onClick={() => { (window as any).__openEditRequest?.(); }} className="font-sans rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm flex-shrink-0"><Lock className="w-4 h-4 mr-1" />Request Edit</Button>
             ) : (
-              <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
+              <Button variant="secondary" size="sm" onClick={() => { setEditForm(profile); setEditing(true); }} className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm flex-shrink-0"><Edit2 className="w-4 h-4 mr-1" />Edit</Button>
             )
           ) : (
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 flex-shrink-0">
               <Button size="sm" onClick={saveProfile} className="font-sans rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"><Save className="w-4 h-4" /></Button>
               <Button variant="ghost" size="sm" onClick={() => { setEditing(false); setEditForm(profile); }} className="font-sans rounded-xl"><X className="w-4 h-4" /></Button>
             </div>
@@ -1389,6 +1407,30 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
           </div>
         ) : (
           <p className="text-muted-foreground font-sans">No profile data found.</p>
+        )}
+
+        {/* Centered Request Edit / Edit action under personal info */}
+        {!editing && profile && (
+          <div className="mt-5 flex justify-center">
+            {profile.is_verified && Number(profile.edits_remaining ?? 0) <= 0 ? (
+              <Button
+                onClick={() => { (window as any).__openEditRequest?.(); }}
+                className="font-sans rounded-full px-6 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm"
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                Request Edit
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                onClick={() => { setEditForm(profile); setEditing(true); }}
+                className="font-sans rounded-full px-6 bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Personal Information
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </div>
