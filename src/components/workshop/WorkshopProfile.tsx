@@ -74,6 +74,19 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     });
   }, [user]);
 
+  // Realtime: when admin approves/rejects while the verify dialog is open, jump to the
+  // appropriate final stage instead of leaving the user stuck on the loading spinner.
+  useEffect(() => {
+    if (!verifyOpen) return;
+    const status = profileData.verification_status;
+    const verified = profileData.is_verified === true || status === "verified";
+    if (verified && verifyStage !== "approved") {
+      setVerifyStage("approved");
+    } else if (status === "rejected" && verifyStage !== "rejected") {
+      setVerifyStage("rejected");
+    }
+  }, [profileData.is_verified, profileData.verification_status, verifyOpen, verifyStage]);
+
   const states = useMemo(() => getStates(), []);
   // Flatten all cities for the chosen state across districts (city-only dropdown)
   const citiesForState = useMemo(() => {
