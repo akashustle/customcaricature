@@ -1798,6 +1798,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
             const assignedArtists = assignedArtistIds.map((id: string) => artistMap[id]).filter(Boolean);
             const isExpanded = expandedEventId === ev.id;
             const dates = paymentDates[ev.id] || {};
+            const displayStatus = deriveDisplayStatus(ev);
 
             return (
               <motion.div key={ev.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -1806,7 +1807,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                     {/* Live status (starting soon / live / just-ended / today) — auto-updates every second */}
                     <EventLiveStatus event={ev} variant="card" />
                     {/* Future-day countdown (only when not today / live / just-ended) */}
-                    {ev.status === "upcoming" && (() => {
+                    {displayStatus === "upcoming" && (() => {
                       const [year, month, day] = ev.event_date.split("-").map(Number);
                       const today = new Date();
                       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -1825,7 +1826,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                       return null;
                     })()}
                     {/* Completed Event - Completion Notice with shareable summary */}
-                    {ev.status === "completed" && (
+                    {displayStatus === "completed" && (
                       <EventCompletionNotice event={ev} assignedArtists={assignedArtists} />
                     )}
                     <div className="flex justify-between items-start">
@@ -1840,7 +1841,7 @@ const EventsList = ({ events, canBookEvent, handleBookEvent, userId, editAllowed
                       <p className="font-display text-lg font-bold text-primary">{formatPrice(totalAmount)}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge className={`${EVENT_STATUS_COLORS[ev.status]} border-none text-xs`}>{EVENT_STATUS_LABELS[ev.status]}</Badge>
+                      <Badge className={`${EVENT_STATUS_COLORS[displayStatus]} border-none text-xs`}>{EVENT_STATUS_LABELS[displayStatus]}</Badge>
                       {fullyPaid ? (
                         <Badge className="border-none text-xs bg-green-100 text-green-800">
                           <CreditCard className="w-3 h-3 mr-1" />Fully Paid ✅
