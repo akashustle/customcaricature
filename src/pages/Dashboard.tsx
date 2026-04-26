@@ -27,8 +27,8 @@ import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
-import AccountSwitcherCard from "@/components/AccountSwitcherCard";
-// useWorkshopLink consumed inside AccountSwitcherCard / UserWorkshopOverview
+// AccountSwitcherCard removed: workshop switching now exclusively lives in
+// the dedicated Workshop tab via UserWorkshopOverview (per user request).
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
