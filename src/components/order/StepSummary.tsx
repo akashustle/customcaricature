@@ -28,6 +28,67 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
     try {
       const orderId = crypto.randomUUID();
 
+      // ----- Offline path: queue order + photos, sync on reconnect -----
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        const { enqueue } = await import("@/lib/sync-queue");
+
+        // Convert each photo File to a data URL so it survives the queue.
+        const queuedPhotos: { storage_path: string; file_name: string; dataUrl: string }[] = [];
+        for (const photo of data.photos) {
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const r = new FileReader();
+            r.onerror = () => reject(r.error);
+            r.onload = () => resolve(String(r.result));
+            r.readAsDataURL(photo);
+          });
+          const ext = photo.name.split(".").pop();
+          queuedPhotos.push({
+            storage_path: `${orderId}/${crypto.randomUUID()}.${ext}`,
+            file_name: photo.name,
+            dataUrl,
+          });
+        }
+
+        // Queue each image upload
+        queuedPhotos.forEach((p) => {
+          enqueue("image.upload", { bucket: "order-photos", path: p.storage_path, dataUrl: p.dataUrl });
+        });
+
+        // Queue the order row itself
+        enqueue("order.create", {
+          id: orderId,
+          caricature_type: "physical",
+          order_type: data.orderType,
+          style: data.style,
+          notes: data.notes || null,
+          customer_name: data.customerName,
+          customer_mobile: data.customerMobile,
+          customer_email: data.customerEmail,
+          instagram_id: data.instagramId || null,
+          face_count: data.faceCount,
+          amount,
+          country: data.country,
+          state: data.state,
+          city: data.city,
+          district: data.district || null,
+          is_framed: isMumbai,
+          delivery_address: data.deliveryAddress,
+          delivery_city: data.deliveryCity,
+          delivery_state: data.deliveryState,
+          delivery_pincode: data.deliveryPincode,
+          user_id: userId,
+          payment_status: "pending",
+        });
+
+        toast({
+          title: "📡 Saved offline",
+          description: "Order queued. We'll submit it and open payment when you're back online.",
+        });
+        playPaymentSuccessSound();
+        onComplete(orderId);
+        return;
+      }
+
       // 1. Upload images
       const imagePaths: { storage_path: string; file_name: string }[] = [];
       for (const photo of data.photos) {
