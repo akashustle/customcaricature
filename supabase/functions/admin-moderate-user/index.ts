@@ -196,6 +196,8 @@ Deno.serve(async (req) => {
         unban: "Your account has been restored",
         verify: "You're verified! ✓",
         unverify: "Verification removed",
+        schedule_delete: "Your account is scheduled for deletion",
+        cancel_scheduled_delete: "Account deletion cancelled",
       };
       const title = titleMap[action] ?? "Account update";
       const userMsg =
@@ -203,15 +205,14 @@ Deno.serve(async (req) => {
 
       try {
         await admin.from("notifications").insert({
-          user_id,
+          user_id: uid,
           title,
           message: userMsg,
           type: "broadcast",
           link: "/dashboard",
         });
-      } catch (_) {/* non-fatal */}
+      } catch (_e) {/* non-fatal */}
 
-      // Best-effort email via existing function
       if (email) {
         try {
           await fetch(`${SUPABASE_URL}/functions/v1/send-notification-email`, {
@@ -227,21 +228,21 @@ Deno.serve(async (req) => {
               user_name: fullName,
             }),
           });
-        } catch (_) {/* non-fatal */}
+        } catch (_e) {/* non-fatal */}
       }
     }
 
     // Log to admin activity
     try {
       await admin.from("admin_activity_logs").insert({
-        admin_id: user_id, // using target as fallback if admin id unknown
+        admin_id: uid,
         admin_name: by,
         action_type: action,
         module: "customers",
-        target_id: user_id,
+        target_id: uid,
         description: resultMsg,
       });
-    } catch (_) {/* non-fatal */}
+    } catch (_e) {/* non-fatal */}
 
     return new Response(
       JSON.stringify({ success: true, message: resultMsg }),
