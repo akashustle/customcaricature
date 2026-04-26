@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard, ChevronDown } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard, ChevronDown, BadgeCheck } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -52,14 +52,16 @@ const playNotifSound = () => {
   } catch {}
 };
 
+// Tab order matches user request: Home, Profile, Videos, Notifications,
+// Assignments, Certificates (with Feedback as a 7th scrollable tab).
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
-  { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
+  { key: "profile", icon: User, label: "Profile", settingKey: null },
   { key: "videos", icon: Video, label: "Videos", settingKey: "global_video_access" },
+  { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
   { key: "assignments", icon: FileText, label: "Tasks", settingKey: "assignment_submission_enabled" },
   { key: "certificates", icon: Award, label: "Certs", settingKey: "certificate_visibility" },
   { key: "feedback", icon: MessageSquare, label: "Feedback", settingKey: "feedback_visibility" },
-  { key: "profile", icon: User, label: "Profile", settingKey: null },
 ];
 
 const WorkshopDashboard = () => {
@@ -328,47 +330,60 @@ const WorkshopDashboard = () => {
       </div>
 
       {/* Mobile Bottom Nav — every tab including Profile, 3D */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="backdrop-blur-xl bg-card/95 border-border/70 border-t shadow-[0_-8px_30px_-10px_hsl(var(--foreground)/0.18)]">
-          <div className="flex items-center h-[60px] overflow-x-auto scrollbar-hide px-1 max-w-lg mx-auto">
+      {/* Mobile Bottom Nav — matches booking dashboard look:
+          - 56px height, evenly spaced icons
+          - Horizontally scrollable so 6+ tabs are reachable on small phones
+          - First 6 tabs are sized to fit the viewport without scroll on most phones */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Workshop navigation">
+        <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
+          <div className="flex items-center overflow-x-auto scrollbar-hide max-w-lg mx-auto h-[56px] px-1">
             {visibleTabs.map((tab) => {
               const isActive = activeTab === tab.key;
               const isProfile = tab.key === "profile";
               return (
-                <motion.button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  whileTap={{ scale: 0.85 }}
-                  className="flex flex-col items-center justify-center min-w-[52px] flex-1 h-full relative">
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className="flex items-center justify-center min-w-[16.6%] flex-1 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150"
+                  aria-label={tab.label}
+                >
                   {isProfile ? (
-                    <Avatar className={`w-7 h-7 transition-all ${isActive ? "ring-2 ring-primary scale-110" : "ring-1 ring-border/60 opacity-70"}`}>
-                      <AvatarImage src={workshopUser.avatar_url || undefined} />
-                      <AvatarFallback className="text-[9px] font-bold text-primary-foreground"
-                        style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
+                    <span className="relative">
+                      <Avatar className={`w-7 h-7 transition-all ${isActive ? "ring-2 ring-foreground" : "ring-1 ring-border/40 opacity-70"}`}>
+                        <AvatarImage src={workshopUser.avatar_url || undefined} />
+                        <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
+                          style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      {workshopUser.is_verified && (
+                        <span
+                          className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center ring-2 ring-background"
+                          style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                          aria-label="Verified"
+                        >
+                          <BadgeCheck className="w-2.5 h-2.5 text-white" strokeWidth={2.6} />
+                        </span>
+                      )}
+                    </span>
                   ) : (
                     <tab.icon
-                      className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
-                      size={isActive ? 24 : 21}
-                      strokeWidth={isActive ? 2.4 : 1.6}
+                      className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
+                      size={isActive ? 24 : 20}
+                      strokeWidth={isActive ? 2.2 : 1.4}
                       fill={isActive && tab.icon === Home ? "currentColor" : "none"}
                     />
                   )}
-                  <span className={`text-[9px] mt-0.5 font-semibold transition-colors ${isActive ? "text-foreground" : "text-muted-foreground/70"}`}>
-                    {tab.label}
-                  </span>
                   {isActive && (
-                    <motion.div layoutId="ws-dash-dot"
-                      className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+                    <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>
           <div className="h-[env(safe-area-inset-bottom)]" />
         </div>
-      </div>
+      </nav>
     </div>
   );
 };

@@ -5691,6 +5691,7 @@ export type Database = {
           prefers_recorded_note: string | null
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
+          registration_step: number
           roll_number: number | null
           secret_code: string | null
           skill_level: string | null
@@ -5741,6 +5742,7 @@ export type Database = {
           prefers_recorded_note?: string | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          registration_step?: number
           roll_number?: number | null
           secret_code?: string | null
           skill_level?: string | null
@@ -5791,6 +5793,7 @@ export type Database = {
           prefers_recorded_note?: string | null
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
+          registration_step?: number
           roll_number?: number | null
           secret_code?: string | null
           skill_level?: string | null
