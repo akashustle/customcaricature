@@ -684,7 +684,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -848,10 +848,13 @@ const Admin = () => {
     const { error } = await supabase.from("profiles").update({
       full_name: editCustomerData.full_name,
       mobile: editCustomerData.mobile,
+      email: (editCustomerData as any).email,
       instagram_id: editCustomerData.instagram_id,
       address: editCustomerData.address,
       city: editCustomerData.city,
       state: editCustomerData.state,
+      district: (editCustomerData as any).district,
+      country: (editCustomerData as any).country,
       pincode: editCustomerData.pincode,
       age: Number.isFinite(ageNum as number) ? ageNum : null,
       gender: (editCustomerData as any).gender || null,
@@ -862,6 +865,49 @@ const Admin = () => {
       toast({ title: "Customer Updated" });
       setEditingCustomer(null);
       fetchCustomers();
+    }
+  };
+
+  /** Upload a new avatar for ANY customer (admin override). */
+  const uploadCustomerAvatar = async (userId: string, file: File) => {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (upErr) { toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); return; }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    if (urlData?.publicUrl) {
+      await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", userId);
+      toast({ title: "Profile photo updated 📸" });
+      fetchCustomers();
+    }
+  };
+
+  /** Ban / unban / verify / unverify / delete a customer via the moderation edge function. */
+  const moderateCustomer = async (
+    userId: string,
+    action: "ban" | "unban" | "verify" | "unverify" | "delete",
+    opts: { reason?: string; message?: string } = {},
+  ) => {
+    const adminName =
+      sessionStorage.getItem("admin_entered_name") ||
+      sessionStorage.getItem("admin_action_name") ||
+      "Admin";
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-moderate-user", {
+        body: {
+          action,
+          user_id: userId,
+          reason: opts.reason,
+          message: opts.message,
+          admin_name: adminName,
+          notify: true,
+        },
+      });
+      if (error) throw error;
+      toast({ title: data?.message || "Done" });
+      fetchCustomers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed", variant: "destructive" });
     }
   };
 
