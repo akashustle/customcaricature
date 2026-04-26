@@ -2883,7 +2883,13 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           </div>
           <div className="space-y-2">
             {upcomingEvents.map((ev: any) => (
-              <div key={ev.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
+              <button
+                type="button"
+                key={ev.id}
+                onClick={() => setActiveTab("events")}
+                className="w-full text-left flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                aria-label={`Open event details for ${ev.event_type || "Event"}`}
+              >
                 <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
                   <CalIcon className="w-5 h-5" />
                 </div>
@@ -2895,7 +2901,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                   </div>
                 </div>
                 <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -2906,10 +2912,17 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Recent Orders</h3>
+            <button onClick={() => setActiveTab("orders")} className="text-xs font-sans text-muted-foreground hover:text-foreground">View all →</button>
           </div>
           <div className="space-y-2">
             {recentOrders.map((o: any) => (
-              <div key={o.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
+              <button
+                type="button"
+                key={o.id}
+                onClick={() => setActiveTab("orders")}
+                className="w-full text-left flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                aria-label={`Open order ${o.id.slice(0, 8).toUpperCase()}`}
+              >
                 <div className="w-10 h-10 rounded-xl bg-foreground/10 text-foreground flex items-center justify-center flex-shrink-0">
                   <Package className="w-5 h-5" />
                 </div>
@@ -2917,7 +2930,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                   <p className="font-sans font-semibold text-sm truncate capitalize">{o.style} · {o.face_count} face(s)</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{formatPrice(o.amount)} · {STATUS_LABELS[o.status] || o.status}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
