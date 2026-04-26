@@ -342,52 +342,101 @@ const NotificationBell = () => {
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            {/* Fullscreen backdrop — dark on dark mode, light on light mode.
+                Mobile bottom nav stays visible: panel pads its bottom by the
+                nav height (~76px + safe area). All notification rows are
+                fully clickable touch targets (min 56px tall). */}
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-80 max-h-96 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-md"
+              onClick={() => setOpen(false)}
+              aria-label="Close notifications"
+            />
+            <motion.aside
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="fixed inset-x-0 top-0 z-[61] flex flex-col bg-background"
+              style={{
+                bottom: "calc(76px + env(safe-area-inset-bottom))",
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Notifications"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                <h3 className="font-sans font-semibold text-sm">Notifications</h3>
+              <header className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border/60 px-4 py-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <Bell className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="font-display text-base font-bold text-foreground leading-tight">Notifications</h2>
+                    <p className="text-[11px] font-sans text-muted-foreground leading-tight">
+                      {unreadCount > 0 ? `${unreadCount} new` : "You're all caught up"}
+                    </p>
+                  </div>
+                </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
-                    <Button variant="ghost" size="sm" onClick={markAllRead} className="text-[10px] h-6 px-2 font-sans">
-                      <Check className="w-3 h-3 mr-1" /> Mark all read
+                    <Button variant="ghost" size="sm" onClick={markAllRead} className="text-[11px] h-8 px-2.5 font-sans rounded-full">
+                      <Check className="w-3.5 h-3.5 mr-1" /> Mark all read
                     </Button>
                   )}
-                  <button onClick={() => setOpen(false)} className="p-1 hover:bg-muted rounded">
-                    <X className="w-3.5 h-3.5" />
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="p-2 rounded-full hover:bg-muted transition-colors"
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4 text-foreground" />
                   </button>
                 </div>
-              </div>
-              <div className="overflow-y-auto max-h-80">
+              </header>
+
+              <div className="flex-1 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center">
-                    <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground font-sans">No notifications yet</p>
-                  </div>
-                ) : notifications.map(n => (
-                  <div
-                    key={n.id}
-                    onClick={() => handleClick(n)}
-                    className={`flex items-start gap-2 px-3 py-2.5 cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50 ${!n.read ? "bg-primary/5" : ""}`}
-                  >
-                    <span className="text-base mt-0.5">{getTypeIcon(n.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-sans ${!n.read ? "font-semibold" : "font-medium"}`}>{n.title}</p>
-                      <p className="text-[11px] text-muted-foreground font-sans truncate">{n.message}</p>
-                      <p className="text-[9px] text-muted-foreground font-sans mt-0.5">
-                        {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                  <div className="h-full flex flex-col items-center justify-center p-10 text-center">
+                    <div className="w-16 h-16 rounded-full bg-muted/60 flex items-center justify-center mb-3">
+                      <Bell className="w-7 h-7 text-muted-foreground" />
                     </div>
-                    {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
+                    <p className="text-sm text-foreground font-sans font-semibold">No notifications yet</p>
+                    <p className="text-xs text-muted-foreground font-sans mt-1">We'll let you know when something happens.</p>
                   </div>
-                ))}
+                ) : (
+                  <ul className="divide-y divide-border/60">
+                    {notifications.map((n) => (
+                      <li key={n.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleClick(n)}
+                          className={`w-full text-left flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50 active:bg-muted ${
+                            !n.read ? "bg-primary/5" : "bg-transparent"
+                          }`}
+                        >
+                          <span className="text-xl mt-0.5 flex-shrink-0">{getTypeIcon(n.type)}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className={`text-sm font-sans leading-snug text-foreground ${!n.read ? "font-semibold" : "font-medium"}`}>
+                                {n.title}
+                              </p>
+                              {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
+                            </div>
+                            <p className="text-xs text-muted-foreground font-sans mt-0.5 line-clamp-2">{n.message}</p>
+                            <p className="text-[10px] text-muted-foreground/80 font-sans mt-1">
+                              {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
