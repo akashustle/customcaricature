@@ -882,11 +882,18 @@ const Admin = () => {
     }
   };
 
-  /** Ban / unban / verify / unverify / delete a customer via the moderation edge function. */
+  /** Ban / unban / verify / unverify / delete / schedule delete via the moderation edge function. */
   const moderateCustomer = async (
     userId: string,
-    action: "ban" | "unban" | "verify" | "unverify" | "delete",
-    opts: { reason?: string; message?: string } = {},
+    action:
+      | "ban"
+      | "unban"
+      | "verify"
+      | "unverify"
+      | "delete"
+      | "schedule_delete"
+      | "cancel_scheduled_delete",
+    opts: { reason?: string; message?: string; scheduled_deletion_at?: string } = {},
   ) => {
     const adminName =
       sessionStorage.getItem("admin_entered_name") ||
@@ -899,6 +906,7 @@ const Admin = () => {
           user_id: userId,
           reason: opts.reason,
           message: opts.message,
+          scheduled_deletion_at: opts.scheduled_deletion_at,
           admin_name: adminName,
           notify: true,
         },
