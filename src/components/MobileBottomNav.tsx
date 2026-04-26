@@ -4,6 +4,7 @@ import { Home, User, ShoppingBag, Compass, GraduationCap, Sparkles } from "lucid
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useAppMode } from "@/hooks/useAppMode";
 import { supabase } from "@/integrations/supabase/client";
 
 const MobileBottomNav = () => {
@@ -12,6 +13,7 @@ const MobileBottomNav = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { settings } = useSiteSettings();
+  const isAppMode = useAppMode();
 
   // Track whether the logged-in user has a linked workshop account so we can
   // route them straight to /workshop-dashboard (private) instead of the
@@ -66,6 +68,55 @@ const MobileBottomNav = () => {
       ? [{ icon: User, label: "Me", path: "/dashboard" }]
       : [{ icon: User, label: "Login", path: "/login" }]),
   ];
+
+  // Two layouts:
+  //   - APP MODE (Capacitor / installed PWA): edge-to-edge bar that hugs the
+  //     bottom safe area, no rounded float — looks like a real native app.
+  //   - WEB MODE: existing pill-card design (untouched for the website).
+  if (isAppMode) {
+    return (
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-card/95 backdrop-blur-xl border-t border-border/60"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        aria-label="App navigation"
+      >
+        <div className="flex items-stretch justify-around px-1 pt-1.5 pb-1">
+          {items.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <button
+                key={item.path + item.label}
+                onClick={() => navigate(item.path)}
+                className="relative flex-1 flex flex-col items-center justify-center gap-0.5 min-w-0 h-14 active:scale-95 transition-transform"
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {isActive && (
+                  <span
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary"
+                    aria-hidden
+                  />
+                )}
+                <item.icon
+                  className={`w-[22px] h-[22px] transition-colors ${
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                  strokeWidth={isActive ? 2.4 : 1.8}
+                />
+                <span
+                  className={`text-[10px] truncate transition-colors ${
+                    isActive ? "text-primary font-semibold" : "text-muted-foreground font-medium"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
+  }
 
   // Pill-card mobile nav — fully matches the booking dashboard nav: rounded
   // floating bar, primary background on active, icon + tiny label, scrolls
