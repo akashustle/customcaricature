@@ -1798,11 +1798,31 @@ const Admin = () => {
                     <CardContent className="p-4">
                       {editingCustomer === c.user_id ? (
                         <div className="space-y-3">
+                          {/* Avatar uploader */}
+                          <div className="flex items-center gap-3">
+                            {(c as any).avatar_url ? (
+                              <img src={(c as any).avatar_url} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                            ) : (
+                              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs">No photo</div>
+                            )}
+                            <div>
+                              <Label className="text-xs">Profile Photo</Label>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                className="text-xs"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) uploadCustomerAvatar(c.user_id, f);
+                                }}
+                              />
+                            </div>
+                          </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div><Label className="text-xs">Full Name</Label><Input value={editCustomerData.full_name || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, full_name: e.target.value })} /></div>
                             <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
                           </div>
-                          <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                          <div><Label className="text-xs">Email</Label><Input value={(editCustomerData as any).email || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, email: e.target.value } as any)} /></div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <Label className="text-xs">Age</Label>
@@ -1831,6 +1851,10 @@ const Admin = () => {
                           </div>
                           <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
                           <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div><Label className="text-xs">Country</Label><Input value={(editCustomerData as any).country || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, country: e.target.value } as any)} /></div>
+                            <div><Label className="text-xs">District</Label><Input value={(editCustomerData as any).district || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, district: e.target.value } as any)} /></div>
+                          </div>
                           <div className="grid grid-cols-3 gap-3">
                             <div><Label className="text-xs">City</Label><Input value={editCustomerData.city || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, city: e.target.value })} /></div>
                             <div><Label className="text-xs">State</Label><Input value={editCustomerData.state || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, state: e.target.value })} /></div>
