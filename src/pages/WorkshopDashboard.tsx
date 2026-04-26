@@ -321,9 +321,7 @@ const WorkshopDashboard = () => {
         <div className="flex items-center justify-between mb-4">
           <LiveGreeting name={workshopUser.name} />
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-10 w-10 text-muted-foreground" aria-label="Toggle theme">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
+            <WorkshopNotificationBell userId={workshopUser.id} />
             <button
               onClick={() => setActiveTab("profile")}
               className="relative w-11 h-11 rounded-full overflow-visible bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground shadow-sm"
