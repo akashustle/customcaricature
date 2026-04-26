@@ -605,6 +605,14 @@ const Dashboard = () => {
             </TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            {tabsAvailable.orders && (
+              <TabsContent value="orders">
+                <OrdersList
+                  orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder}
+                  payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id}
+                />
+              </TabsContent>
+            )}
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             {tabsAvailable.workshop && (
               <TabsContent value="workshop">{user && <UserWorkshopOverview authUserId={user.id} />}</TabsContent>
