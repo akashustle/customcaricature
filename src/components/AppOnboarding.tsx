@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ONBOARDING_KEY = "ccc_onboarding_done_v2";
+const WELCOME_3D_KEY = "ccc_app_welcome_v3_done";
 
 const slides = [
   {
