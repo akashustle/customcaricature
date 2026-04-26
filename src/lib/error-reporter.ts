@@ -73,13 +73,19 @@ const push = (ev: ErrorEvent) => {
   if (!isDevLike && (ev.severity === "critical" || ev.severity === "error")) {
     if (!shouldEmit(`remote:${ev.source}:${ev.message}`)) return;
     try {
+      const ua = isBrowser ? navigator.userAgent : "";
+      const device = /android/i.test(ua) ? "android"
+        : /iphone|ipad|ipod/i.test(ua) ? "ios"
+        : /capacitor/i.test(ua) ? "capacitor"
+        : /mobile/i.test(ua) ? "mobile-web"
+        : "desktop-web";
       void supabase
         .from("admin_security_alerts")
         .insert({
           alert_type: "client_error",
           severity: ev.severity === "critical" ? "high" : "medium",
           title: `${ev.source}: ${ev.message}`.slice(0, 200),
-          description: `${ev.detail ?? ""}\nURL: ${ev.url ?? ""}`.slice(0, 1000),
+          description: `[device:${device}]\n${ev.detail ?? ""}\nURL: ${ev.url ?? ""}\nUA: ${ua}`.slice(0, 1500),
         })
         .then(() => undefined, () => undefined);
     } catch {
