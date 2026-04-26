@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.admin-create-user]
 verify_jwt = false
 
+[functions.admin-moderate-user]
+verify_jwt = false
+
 [functions.send-notification-email]
 verify_jwt = false
 
