@@ -91,6 +91,7 @@ const ArtistDashboard = lazy(() => import("./pages/ArtistDashboard"));
 const ArtistLogin = lazy(() => import("./pages/ArtistLogin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Notifications = lazy(() => import("./pages/Notifications"));
+const AppealBan = lazy(() => import("./pages/AppealBan"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const LiveChat = lazy(() => import("./pages/LiveChat"));
