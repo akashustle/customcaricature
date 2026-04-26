@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Package, Sparkles, ArrowRight, Home, Phone, Truck, Clock, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Package, Sparkles, ArrowRight, Home, Phone, Truck, Clock, ShieldCheck, Loader2, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { playPaymentSuccessSound } from "@/lib/sounds";
+import { supabase } from "@/integrations/supabase/client";
+import { reportError } from "@/lib/error-reporter";
 
 interface Props {
   orderId: string;
 }
+
+type PaymentVerifyStatus = "verifying" | "confirmed" | "pending" | "failed";
 
 const confettiColors = [
   "hsl(var(--primary))",
