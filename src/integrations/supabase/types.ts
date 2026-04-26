@@ -4814,6 +4814,54 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_queue_health: {
+        Row: {
+          client_id: string
+          created_at: string
+          device_type: string
+          failed_count: number
+          id: string
+          last_error: string | null
+          oldest_queued_at: string | null
+          pending_count: number
+          reported_at: string
+          syncing_count: number
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          device_type?: string
+          failed_count?: number
+          id?: string
+          last_error?: string | null
+          oldest_queued_at?: string | null
+          pending_count?: number
+          reported_at?: string
+          syncing_count?: number
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          device_type?: string
+          failed_count?: number
+          id?: string
+          last_error?: string | null
+          oldest_queued_at?: string | null
+          pending_count?: number
+          reported_at?: string
+          syncing_count?: number
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           created_at: string | null
