@@ -156,7 +156,7 @@ const handlers: Record<SyncActionType, (payload: any) => Promise<void>> = {
     if (error) throw error;
   },
 
-  "image.upload": async (p, action) => {
+  "image.upload": async (p) => {
     const { bucket, path, dataUrl, blobKey } = p;
     // Resumable: prefer the IndexedDB-stored Blob (survives reloads
     // without bloating localStorage). Fall back to legacy dataUrl.
@@ -170,10 +170,6 @@ const handlers: Record<SyncActionType, (payload: any) => Promise<void>> = {
     if (blobKey) { try { await deleteBlob(blobKey); } catch {/* ignore */} }
   },
 };
-
-// Handlers receive the action so they can reference its id (e.g. blob key).
-type HandlerMap = Record<SyncActionType, (payload: any, action: SyncAction) => Promise<void>>;
-const _handlers = handlers as HandlerMap;
 
 // ---- Drain worker ------------------------------------------------------
 
