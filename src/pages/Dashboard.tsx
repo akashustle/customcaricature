@@ -2755,15 +2755,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         </motion.div>
       )}
 
-      {/* Workshop quick-switch (only for workshop-origin users) */}
-      {user && (
-        <AccountSwitcherCard
-          authUserId={user.id}
-          fullName={profile?.full_name}
-          email={profile?.email}
-          mobile={profile?.mobile}
-        />
-      )}
+      {/* AccountSwitcherCard removed from Home/Profile per user request:
+          workshop-linked users now access their workshop via the dedicated
+          "Workshop" tab (see UserWorkshopOverview) instead of a switcher card. */}
 
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
