@@ -54,7 +54,7 @@ import AddEventModal from "@/components/dashboard/AddEventModal";
 import RescheduleEventDialog from "@/components/dashboard/RescheduleEventDialog";
 import EventLiveStatus, { computePhase } from "@/components/dashboard/EventLiveStatus";
 import EventDraftsCard from "@/components/dashboard/EventDraftsCard";
-import { BadgeCheck, Camera, CalendarDays } from "lucide-react";
+import { BadgeCheck, Camera, CalendarDays, Trash2, AlertTriangle } from "lucide-react";
 
 type Profile = {
   full_name: string; mobile: string; email: string; instagram_id: string | null;
@@ -605,6 +605,49 @@ const Dashboard = () => {
         <div className="hidden md:block mb-6">
           <LiveGreeting name={profile?.full_name} />
         </div>
+
+        {/* Account moderation notices */}
+        {(profile as any)?.scheduled_deletion_at && (
+          <div className="mb-4 rounded-2xl border-2 border-destructive/40 bg-destructive/5 p-4 shadow-sm animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-destructive text-sm">
+                  Your account is scheduled for deletion
+                </p>
+                <p className="text-sm text-foreground mt-1">
+                  {(profile as any).scheduled_deletion_message ||
+                    "Your account will be permanently deleted on the scheduled date."}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Scheduled for:{" "}
+                  <strong>
+                    {new Date((profile as any).scheduled_deletion_at).toLocaleString()}
+                  </strong>
+                  . Contact support if this is a mistake.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {(profile as any)?.is_banned && (
+          <div className="mb-4 rounded-2xl border-2 border-destructive bg-destructive/10 p-4 shadow-sm animate-fade-in">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-destructive text-sm">Your account has been suspended</p>
+                <p className="text-sm text-foreground mt-1">
+                  {(profile as any).ban_reason ||
+                    "Your account is currently suspended. Please contact support for more information."}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
         {user && <PaymentDemandBanner userId={user.id} events={events as any} />}

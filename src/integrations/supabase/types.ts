@@ -3544,6 +3544,9 @@ export type Database = {
           registration_lat: number | null
           registration_lng: number | null
           registration_location_name: string | null
+          scheduled_deletion_at: string | null
+          scheduled_deletion_message: string | null
+          scheduled_deletion_reason: string | null
           secret_code: string | null
           secret_code_login_enabled: boolean
           shop_access_allowed: boolean
@@ -3592,6 +3595,9 @@ export type Database = {
           registration_lat?: number | null
           registration_lng?: number | null
           registration_location_name?: string | null
+          scheduled_deletion_at?: string | null
+          scheduled_deletion_message?: string | null
+          scheduled_deletion_reason?: string | null
           secret_code?: string | null
           secret_code_login_enabled?: boolean
           shop_access_allowed?: boolean
@@ -3640,6 +3646,9 @@ export type Database = {
           registration_lat?: number | null
           registration_lng?: number | null
           registration_location_name?: string | null
+          scheduled_deletion_at?: string | null
+          scheduled_deletion_message?: string | null
+          scheduled_deletion_reason?: string | null
           secret_code?: string | null
           secret_code_login_enabled?: boolean
           shop_access_allowed?: boolean

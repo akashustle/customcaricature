@@ -10,15 +10,25 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-type Action = "ban" | "unban" | "delete" | "verify" | "unverify";
+type Action =
+  | "ban"
+  | "unban"
+  | "delete"
+  | "verify"
+  | "unverify"
+  | "schedule_delete"
+  | "cancel_scheduled_delete"
+  | "process_due_deletions";
 
 interface Body {
   action: Action;
-  user_id: string;
+  user_id?: string;
   reason?: string;
   message?: string;
   admin_name?: string;
   notify?: boolean;
+  // ISO timestamp for when the account should be deleted (schedule_delete)
+  scheduled_deletion_at?: string;
 }
 
 Deno.serve(async (req) => {
@@ -30,12 +40,38 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const body: Body = await req.json();
-    const { action, user_id, reason, message, admin_name, notify } = body;
+    const { action, user_id, reason, message, admin_name, notify, scheduled_deletion_at } = body;
 
-    if (!user_id || !action) {
+    // process_due_deletions doesn't need a user_id
+    if (action !== "process_due_deletions" && (!user_id || !action)) {
       return new Response(
         JSON.stringify({ error: "user_id and action are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // === Cron-style processor for due scheduled deletions ===
+    if (action === "process_due_deletions") {
+      const { data: due } = await admin
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .lte("scheduled_deletion_at", new Date().toISOString())
+        .not("scheduled_deletion_at", "is", null);
+
+      const processed: string[] = [];
+      for (const row of due ?? []) {
+        try {
+          await admin.from("orders").delete().eq("user_id", row.user_id);
+          await admin.from("profiles").delete().eq("user_id", row.user_id);
+          await admin.auth.admin.deleteUser(row.user_id).catch(() => {});
+          processed.push(row.user_id);
+        } catch (e) {
+          console.error("Failed to delete scheduled user", row.user_id, e);
+        }
+      }
+      return new Response(
+        JSON.stringify({ success: true, processed_count: processed.length, processed }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -43,7 +79,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await admin
       .from("profiles")
       .select("user_id, full_name, email")
-      .eq("user_id", user_id)
+      .eq("user_id", user_id!)
       .maybeSingle();
 
     const fullName = profile?.full_name ?? "Customer";
@@ -51,6 +87,8 @@ Deno.serve(async (req) => {
     const by = admin_name ?? "Admin";
 
     let resultMsg = "";
+
+    const uid = user_id as string;
 
     switch (action) {
       case "ban": {
@@ -61,10 +99,9 @@ Deno.serve(async (req) => {
             ban_reason: reason ?? message ?? "Violation of platform terms",
             banned_at: new Date().toISOString(),
           })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
 
-        // Lock the auth user so they can't sign in
-        await admin.auth.admin.updateUserById(user_id, {
+        await admin.auth.admin.updateUserById(uid, {
           ban_duration: "876000h", // 100 years
         });
 
@@ -76,11 +113,9 @@ Deno.serve(async (req) => {
         await admin
           .from("profiles")
           .update({ is_banned: false, ban_reason: null, banned_at: null })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
 
-        await admin.auth.admin.updateUserById(user_id, {
-          ban_duration: "none",
-        });
+        await admin.auth.admin.updateUserById(uid, { ban_duration: "none" });
 
         resultMsg = `Account restored for ${fullName}`;
         break;
@@ -95,22 +130,52 @@ Deno.serve(async (req) => {
             is_verified: verified,
             verification_status: verified ? "verified" : "unverified",
           })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
         resultMsg = verified
           ? `${fullName} verified ✓`
           : `Verification removed for ${fullName}`;
         break;
       }
 
-      case "delete": {
-        // Cascade-delete app data first (orders + profile)
-        await admin.from("orders").delete().eq("user_id", user_id);
-        await admin.from("profiles").delete().eq("user_id", user_id);
+      case "schedule_delete": {
+        if (!scheduled_deletion_at) {
+          return new Response(
+            JSON.stringify({ error: "scheduled_deletion_at is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        await admin
+          .from("profiles")
+          .update({
+            scheduled_deletion_at,
+            scheduled_deletion_reason: reason ?? "Account scheduled for deletion",
+            scheduled_deletion_message:
+              message ?? `Your account will be permanently deleted on ${new Date(scheduled_deletion_at).toLocaleString()}.`,
+          })
+          .eq("user_id", uid);
+        resultMsg = `Deletion scheduled for ${fullName} on ${new Date(scheduled_deletion_at).toLocaleString()}`;
+        break;
+      }
 
-        // Then remove the auth user
+      case "cancel_scheduled_delete": {
+        await admin
+          .from("profiles")
+          .update({
+            scheduled_deletion_at: null,
+            scheduled_deletion_reason: null,
+            scheduled_deletion_message: null,
+          })
+          .eq("user_id", uid);
+        resultMsg = `Scheduled deletion cancelled for ${fullName}`;
+        break;
+      }
+
+      case "delete": {
+        await admin.from("orders").delete().eq("user_id", uid);
+        await admin.from("profiles").delete().eq("user_id", uid);
         try {
-          await admin.auth.admin.deleteUser(user_id);
-        } catch (_) {
+          await admin.auth.admin.deleteUser(uid);
+        } catch (_e) {
           // Already gone — ignore
         }
         resultMsg = `Account permanently deleted for ${fullName}`;
@@ -131,6 +196,8 @@ Deno.serve(async (req) => {
         unban: "Your account has been restored",
         verify: "You're verified! ✓",
         unverify: "Verification removed",
+        schedule_delete: "Your account is scheduled for deletion",
+        cancel_scheduled_delete: "Account deletion cancelled",
       };
       const title = titleMap[action] ?? "Account update";
       const userMsg =
@@ -138,15 +205,14 @@ Deno.serve(async (req) => {
 
       try {
         await admin.from("notifications").insert({
-          user_id,
+          user_id: uid,
           title,
           message: userMsg,
           type: "broadcast",
           link: "/dashboard",
         });
-      } catch (_) {/* non-fatal */}
+      } catch (_e) {/* non-fatal */}
 
-      // Best-effort email via existing function
       if (email) {
         try {
           await fetch(`${SUPABASE_URL}/functions/v1/send-notification-email`, {
@@ -162,21 +228,21 @@ Deno.serve(async (req) => {
               user_name: fullName,
             }),
           });
-        } catch (_) {/* non-fatal */}
+        } catch (_e) {/* non-fatal */}
       }
     }
 
     // Log to admin activity
     try {
       await admin.from("admin_activity_logs").insert({
-        admin_id: user_id, // using target as fallback if admin id unknown
+        admin_id: uid,
         admin_name: by,
         action_type: action,
         module: "customers",
-        target_id: user_id,
+        target_id: uid,
         description: resultMsg,
       });
-    } catch (_) {/* non-fatal */}
+    } catch (_e) {/* non-fatal */}
 
     return new Response(
       JSON.stringify({ success: true, message: resultMsg }),

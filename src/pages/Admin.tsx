@@ -882,11 +882,18 @@ const Admin = () => {
     }
   };
 
-  /** Ban / unban / verify / unverify / delete a customer via the moderation edge function. */
+  /** Ban / unban / verify / unverify / delete / schedule delete via the moderation edge function. */
   const moderateCustomer = async (
     userId: string,
-    action: "ban" | "unban" | "verify" | "unverify" | "delete",
-    opts: { reason?: string; message?: string } = {},
+    action:
+      | "ban"
+      | "unban"
+      | "verify"
+      | "unverify"
+      | "delete"
+      | "schedule_delete"
+      | "cancel_scheduled_delete",
+    opts: { reason?: string; message?: string; scheduled_deletion_at?: string } = {},
   ) => {
     const adminName =
       sessionStorage.getItem("admin_entered_name") ||
@@ -899,6 +906,7 @@ const Admin = () => {
           user_id: userId,
           reason: opts.reason,
           message: opts.message,
+          scheduled_deletion_at: opts.scheduled_deletion_at,
           admin_name: adminName,
           notify: true,
         },
@@ -2082,6 +2090,80 @@ const Admin = () => {
                                     }}
                                   >
                                     {(c as any).is_banned ? "Unblock" : "Ban account"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+
+                            {/* Schedule deletion */}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-orange-600" title="Schedule account deletion">
+                                  <CalendarIcon className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    {(c as any).scheduled_deletion_at
+                                      ? `Cancel scheduled deletion for ${c.full_name}?`
+                                      : `Schedule deletion for ${c.full_name}`}
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {(c as any).scheduled_deletion_at
+                                      ? `Currently scheduled for ${new Date((c as any).scheduled_deletion_at).toLocaleString()}. The customer is being notified.`
+                                      : "Pick when this account should be permanently deleted. The customer will be notified immediately and shown a clear deletion message in their dashboard."}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                {!(c as any).scheduled_deletion_at && (
+                                  <div className="space-y-3 my-2">
+                                    <div>
+                                      <label className="text-xs font-medium text-muted-foreground">Delete on</label>
+                                      <input
+                                        id={`schedule-when-${c.user_id}`}
+                                        type="datetime-local"
+                                        defaultValue={(() => {
+                                          const d = new Date(Date.now() + 7 * 86400000);
+                                          d.setSeconds(0, 0);
+                                          return d.toISOString().slice(0, 16);
+                                        })()}
+                                        className="w-full mt-1 rounded-md border bg-background px-3 py-2 text-sm"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-medium text-muted-foreground">Message to customer</label>
+                                      <Textarea
+                                        id={`schedule-msg-${c.user_id}`}
+                                        rows={3}
+                                        placeholder="Your account will be deleted on the scheduled date because…"
+                                        defaultValue={`Your account will be permanently deleted on the scheduled date. If this is a mistake, please contact support.`}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Close</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => {
+                                      if ((c as any).scheduled_deletion_at) {
+                                        moderateCustomer(c.user_id, "cancel_scheduled_delete");
+                                      } else {
+                                        const whenEl = document.getElementById(`schedule-when-${c.user_id}`) as HTMLInputElement | null;
+                                        const msgEl = document.getElementById(`schedule-msg-${c.user_id}`) as HTMLTextAreaElement | null;
+                                        const when = whenEl?.value;
+                                        if (!when) {
+                                          toast({ title: "Pick a date/time", variant: "destructive" });
+                                          return;
+                                        }
+                                        moderateCustomer(c.user_id, "schedule_delete", {
+                                          scheduled_deletion_at: new Date(when).toISOString(),
+                                          message: msgEl?.value?.trim() || undefined,
+                                          reason: "Admin scheduled deletion",
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    {(c as any).scheduled_deletion_at ? "Cancel scheduled deletion" : "Schedule deletion"}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
