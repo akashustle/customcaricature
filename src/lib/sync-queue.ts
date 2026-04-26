@@ -192,18 +192,22 @@ export const drain = async (): Promise<void> => {
       try {
         await handlers[action.type](action.payload);
         updateAction(action.id, { status: "synced" });
+        // Notify UI listeners (toast/notification layer)
+        try {
+          window.dispatchEvent(new CustomEvent("ccc:sync-success", { detail: { action } }));
+        } catch {/* ignore */}
         // Auto-clean synced items after 10s so the badge clears
         setTimeout(() => removeAction(action.id), 10_000);
       } catch (err: any) {
         const attempts = action.attempts + 1;
         const status = attempts >= MAX_ATTEMPTS ? "failed" : "queued";
-        updateAction(action.id, {
-          status,
-          attempts,
-          lastError: err?.message || String(err),
-        });
+        const lastError = err?.message || String(err);
+        updateAction(action.id, { status, attempts, lastError });
         if (status === "failed") {
-          reportError(`sync-queue:${action.type}`, err?.message || String(err), action.payload, "error");
+          reportError(`sync-queue:${action.type}`, lastError, action.payload, "error");
+          try {
+            window.dispatchEvent(new CustomEvent("ccc:sync-failed", { detail: { action: { ...action, lastError } } }));
+          } catch {/* ignore */}
         }
       }
     }
