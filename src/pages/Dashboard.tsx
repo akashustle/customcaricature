@@ -761,6 +761,9 @@ const Dashboard = () => {
           {activeTab === "workshop" && tabsAvailable.workshop && user && (
             <UserWorkshopOverview authUserId={user.id} />
           )}
+          {activeTab === "alerts" && tabsAvailable.alerts && user && (
+            <AlertsSection userId={user.id} />
+          )}
           {activeTab === "profile" && (
             <ProfileWithLogout
               userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
