@@ -925,6 +925,120 @@ const Admin = () => {
     }
   };
 
+  /** Bulk-apply a moderation action to many users in parallel. */
+  const bulkModerate = async (
+    action: "ban" | "unban" | "verify" | "unverify",
+    reason?: string,
+  ) => {
+    const ids = Array.from(selectedCustomerIds);
+    if (ids.length === 0) {
+      toast({ title: "No customers selected" });
+      return;
+    }
+    const labelMap: Record<string, string> = {
+      ban: `Ban ${ids.length} customers?`,
+      unban: `Unban ${ids.length} customers?`,
+      verify: `Verify ${ids.length} customers?`,
+      unverify: `Remove verification from ${ids.length} customers?`,
+    };
+    if (!confirm(labelMap[action])) return;
+    setBulkActing(true);
+    const adminName =
+      sessionStorage.getItem("admin_entered_name") ||
+      sessionStorage.getItem("admin_action_name") ||
+      "Admin";
+    let okCount = 0;
+    let failCount = 0;
+    await Promise.all(
+      ids.map(async (uid) => {
+        try {
+          const { error } = await supabase.functions.invoke("admin-moderate-user", {
+            body: { action, user_id: uid, reason, admin_name: adminName, notify: true },
+          });
+          if (error) failCount++;
+          else okCount++;
+        } catch {
+          failCount++;
+        }
+      }),
+    );
+    setBulkActing(false);
+    setSelectedCustomerIds(new Set());
+    toast({
+      title: `Bulk ${action}: ${okCount} done${failCount ? `, ${failCount} failed` : ""}`,
+    });
+    fetchCustomers();
+  };
+
+  /** Fetch ban appeals for the admin review queue. */
+  const fetchBanAppeals = async () => {
+    const { data } = await supabase
+      .from("ban_appeals" as any)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (data) setBanAppeals(data as any[]);
+  };
+
+  /** Approve / reject / delete an individual appeal. */
+  const reviewAppeal = async (
+    appealId: string,
+    decision: "approved" | "rejected" | "delete",
+    userId?: string,
+  ) => {
+    if (decision === "delete") {
+      if (!confirm("Delete this appeal?")) return;
+      await supabase.from("ban_appeals" as any).delete().eq("id", appealId);
+      fetchBanAppeals();
+      return;
+    }
+    const adminResp = appealResponses[appealId]?.trim() || null;
+    const adminName =
+      sessionStorage.getItem("admin_entered_name") ||
+      sessionStorage.getItem("admin_action_name") ||
+      "Admin";
+
+    await supabase
+      .from("ban_appeals" as any)
+      .update({
+        status: decision,
+        admin_response: adminResp,
+        reviewed_at: new Date().toISOString(),
+      } as any)
+      .eq("id", appealId);
+
+    // If approved, automatically unban the customer.
+    if (decision === "approved" && userId) {
+      try {
+        await supabase.functions.invoke("admin-moderate-user", {
+          body: {
+            action: "unban",
+            user_id: userId,
+            reason: "Appeal approved",
+            message: adminResp || "Your appeal has been approved and your account is restored.",
+            admin_name: adminName,
+            notify: true,
+          },
+        });
+      } catch {/* non-fatal */}
+    } else if (decision === "rejected" && userId) {
+      // Notify the user the appeal was rejected
+      try {
+        await supabase.from("notifications").insert({
+          user_id: userId,
+          title: "Your ban appeal was rejected",
+          message: adminResp || "After review, we are unable to restore your account at this time.",
+          type: "broadcast",
+          link: "/appeal-ban",
+        } as any);
+      } catch {/* non-fatal */}
+    }
+    setAppealResponses((p) => ({ ...p, [appealId]: "" }));
+    fetchBanAppeals();
+    fetchCustomers();
+    toast({ title: `Appeal ${decision}` });
+  };
+
   const handleLogout = async () => {
     // Mark session as inactive and clear name
     if (currentSessionId) {
