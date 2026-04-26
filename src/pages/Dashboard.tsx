@@ -694,6 +694,11 @@ const Dashboard = () => {
                   <GraduationCap className="w-4 h-4 mr-2" />Workshop
                 </TabsTrigger>
               )}
+              {tabsAvailable.alerts !== false && (
+                <TabsTrigger value="alerts" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Bell className="w-4 h-4 mr-2" />Alerts
+                </TabsTrigger>
+              )}
               {tabsAvailable.profile && (
                 <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
