@@ -20,7 +20,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 echo "▸ Installing dependencies"
-npm install --no-audit --no-fund
+npm install --legacy-peer-deps --no-audit --no-fund
 
 echo "▸ Building web bundle"
 npm run build

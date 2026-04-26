@@ -1,26 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * Capacitor configuration — Play Store ready.
+ * Capacitor configuration — production native app shell.
  *
- * IMPORTANT: When building a *release* AAB for the Play Store, comment out
- * the `server` block entirely (or remove the `url` field) so the app loads
- * the bundled offline `dist/` build instead of the live Lovable preview.
- *
- * The current `server.url` is for hot-reload during development only —
- * pull the repo locally and run `npx cap run android` to use it.
+ * The app loads the bundled `dist/` build so APK/AAB installs work as a
+ * standalone app instead of depending on the live web preview.
  */
 const config: CapacitorConfig = {
-  appId: 'app.lovable.161b75a406564c37978eee2b04e19101',
+  appId: 'app.lovable.customcaricature',
   appName: 'Custom Caricature Club',
   webDir: 'dist',
-
-  // Comment this whole `server` block before the production Play Store build
-  server: {
-    url: 'https://161b75a4-0656-4c37-978e-ee2b04e19101.lovableproject.com?forceHideBadge=true',
-    cleartext: true,
-    androidScheme: 'https',
-  },
 
   android: {
     allowMixedContent: false,
