@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
+import { saveCredentials, verifyOfflineCredentials, hasCachedCredentials } from "@/lib/offline-credentials";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
