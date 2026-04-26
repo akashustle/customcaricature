@@ -287,9 +287,15 @@ const WorkshopDashboard = () => {
                 <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setDarkMode(!darkMode)}>
                   {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />} {darkMode ? "Light mode" : "Dark mode"}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
-                  <LayoutDashboard className="w-4 h-4 mr-2" /> Main Dashboard
-                </DropdownMenuItem>
+                {hasBookingAccount ? (
+                  <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" /> Open Booking Account
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/register?from=workshop")}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" /> Create Booking Account
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="rounded-lg cursor-pointer text-destructive focus:text-destructive" onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" /> Logout
