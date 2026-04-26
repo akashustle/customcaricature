@@ -344,6 +344,12 @@ const Admin = () => {
   const [newType, setNewType] = useState({ name: "", slug: "", price: 0, per_face: false, min_faces: 1, max_faces: 1 });
   const [newCustomer, setNewCustomer] = useState({ full_name: "", mobile: "", email: "", instagram_id: "", address: "", city: "", state: "", pincode: "", password: "" });
   const [addingCustomer, setAddingCustomer] = useState(false);
+  // Bulk-select state for the Customers tab
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<Set<string>>(new Set());
+  const [bulkActing, setBulkActing] = useState(false);
+  // Ban appeals queue
+  const [banAppeals, setBanAppeals] = useState<any[]>([]);
+  const [appealResponses, setAppealResponses] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState(() => {
     const saved = localStorage.getItem("admin_last_tab");
     return saved || "dashboard";
