@@ -6,6 +6,20 @@ import { useEffect } from "react";
  * Result: clicking a nav link feels instant — chunk is already in memory.
  */
 const PREFETCH_ROUTES: Array<() => Promise<unknown>> = [
+  // Dashboards first — these are the most-revisited screens after login
+  () => import("@/pages/Dashboard"),
+  () => import("@/pages/WorkshopDashboard"),
+  () => import("@/pages/Notifications"),
+  // Workshop sub-tabs — preload so tab switching never blocks on chunk fetch
+  () => import("@/components/workshop/WorkshopHome"),
+  () => import("@/components/workshop/WorkshopProfile"),
+  () => import("@/components/workshop/WorkshopVideos"),
+  () => import("@/components/workshop/WorkshopCertificates"),
+  () => import("@/components/workshop/WorkshopFeedback"),
+  () => import("@/components/workshop/WorkshopPayments"),
+  () => import("@/components/workshop/WorkshopAssignments"),
+  () => import("@/components/workshop/WorkshopNotifications"),
+  // Common public routes
   () => import("@/pages/Order"),
   () => import("@/pages/BookEvent"),
   () => import("@/pages/Shop"),
