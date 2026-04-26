@@ -3,8 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Award, Download, Eye } from "lucide-react";
 
-const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
-  const dm = darkMode;
+const WorkshopCertificates = ({ user }: { user: any; darkMode?: boolean }) => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [settingsEnabled, setSettingsEnabled] = useState(false);
 
@@ -63,7 +62,7 @@ const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?
     return (
       <GlassCard>
         <div className="text-center py-12">
-          <Award className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <Award className="w-16 h-16 text-primary/30 mx-auto mb-3" />
           <p className={`${textPrimary} text-base`}>Certificates</p>
           <p className={`${textSecondary} text-sm mt-2`}>After completing your assignment submission, you will receive your certificate here. 🎓</p>
         </div>
@@ -74,20 +73,20 @@ const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?
   return (
     <GlassCard>
       <h2 className={`${textPrimary} text-lg flex items-center gap-2 mb-4`}>
-        <Award className="w-5 h-5 text-purple-500" /> My Certificates
+        <Award className="w-5 h-5 text-primary" /> My Certificates
       </h2>
       {certificates.length === 0 ? (
         <div className="text-center py-12">
-          <Award className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <Award className="w-16 h-16 text-primary/30 mx-auto mb-3" />
           <p className={textSecondary}>Your certificate will appear here once issued</p>
         </div>
       ) : (
         <div className="space-y-3">
           {certificates.map((cert: any) => (
-            <div key={cert.id} className={`flex items-center justify-between p-4 rounded-xl ${dm ? "bg-purple-900/20 border-purple-700/30" : "bg-purple-50/60 border-purple-100/40"} border`}>
+            <div key={cert.id} className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-10 h-10 rounded-lg ${dm ? "bg-purple-500/20" : "bg-gradient-to-br from-purple-200/60 to-pink-200/60"} flex items-center justify-center flex-shrink-0`}>
-                  <Award className="w-5 h-5 text-purple-500" />
+                <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                  <Award className="w-5 h-5 text-primary" />
                 </div>
                 <div className="min-w-0">
                   <p className={`${textPrimary} text-sm truncate`}>{cert.file_name}</p>
@@ -98,7 +97,7 @@ const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?
                 <Button variant="ghost" size="sm" onClick={() => handleView(cert)} className={`${textMuted} hover:${textSecondary} rounded-lg`}>
                   <Eye className="w-4 h-4" />
                 </Button>
-                <Button size="sm" onClick={() => handleDownload(cert)} className="bg-purple-500 hover:bg-purple-400 rounded-lg font-bold">
+                <Button size="sm" onClick={() => handleDownload(cert)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-bold">
                   <Download className="w-4 h-4" />
                 </Button>
               </div>

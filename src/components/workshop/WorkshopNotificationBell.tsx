@@ -80,6 +80,16 @@ const WorkshopNotificationBell = ({ userId }: { userId: string }) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
+  const markUnread = async (id: string) => {
+    await supabase.from("workshop_notifications" as any).update({ read: false } as any).eq("id", id);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: false } : n)));
+  };
+
+  const toggleRead = (n: WorkshopNotification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (n.read) markUnread(n.id); else markRead(n.id);
+  };
+
   const markAllRead = async () => {
     const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
     if (!unreadIds.length) return;

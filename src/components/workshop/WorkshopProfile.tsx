@@ -432,20 +432,20 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
             <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
               <Badge
-                className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
               >
                 🎨 {profileData.student_type === "registered_online" ? "Online Student" : "Workshop Student"}
               </Badge>
               {profileData.roll_number && (
                 <Badge
-                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                  className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
                 >
                   Roll #{profileData.roll_number}
                 </Badge>
               )}
               {profileData.skill_level && (
                 <Badge
-                  className="text-[10px] font-semibold border bg-white text-slate-800 border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
+                  className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
                 >
                   {profileData.skill_level}
                 </Badge>
@@ -563,7 +563,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {personalDetails.map((d) => (
               <div key={d.key} className={d.key === "why_join" ? "md:col-span-2" : ""}>
-                <Label className="text-xs font-semibold text-slate-600">
+                <Label className="text-xs font-semibold text-muted-foreground">
                   {d.label}
                 </Label>
                 {d.key === "why_join" ? (
@@ -571,11 +571,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     value={(form as any)[d.key] || ""}
                     onChange={(e) => setForm({ ...form, [d.key]: e.target.value })}
                     rows={2}
-                    className="mt-1 rounded-xl shadow-none bg-white"
+                    className="mt-1 rounded-xl shadow-none bg-background"
                   />
                 ) : d.key === "gender" ? (
                   <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white">
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-background">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -598,11 +598,11 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
             {/* Country / State / City */}
             <div>
-              <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+              <Label className="text-xs font-semibold text-muted-foreground">
                 Country
               </Label>
               <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v, state: "", city: "" })}>
-                <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1 rounded-xl shadow-none bg-background"><SelectValue /></SelectTrigger>
                 <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -610,51 +610,51 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             {form.country === "India" ? (
               <>
                 <div>
-                  <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                  <Label className="text-xs font-semibold text-muted-foreground">
                     State *
                   </Label>
                   <Select value={form.state} onValueChange={(v) => setForm({ ...form, state: v, city: "" })}>
-                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-xl shadow-none bg-background"><SelectValue placeholder="Select state" /></SelectTrigger>
                     <SelectContent>{states.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="md:col-span-2">
                   <div className="flex items-center justify-between mb-1">
-                    <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                    <Label className="text-xs font-semibold text-muted-foreground">
                       City *
                     </Label>
                     <button type="button" onClick={() => setCityMode(cityMode === "select" ? "manual" : "select")}
-                      className="text-[10px] font-bold underline" style={{ color: palette.coral }}>
+                      className="text-[10px] font-bold underline text-primary">
                       {cityMode === "select" ? "Type manually" : "Choose from list"}
                     </button>
                   </div>
                   {cityMode === "select" && form.state && citiesForState.length > 0 ? (
                     <Select value={form.city} onValueChange={(v) => setForm({ ...form, city: v })}>
-                      <SelectTrigger className="mt-1 rounded-xl shadow-none bg-white"><SelectValue placeholder="Select city" /></SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-xl shadow-none bg-background"><SelectValue placeholder="Select city" /></SelectTrigger>
                       <SelectContent>{citiesForState.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : (
                     <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                      placeholder="Type your city" className="mt-1 rounded-xl shadow-none bg-white" />
+                      placeholder="Type your city" className="mt-1 rounded-xl shadow-none bg-background" />
                   )}
                 </div>
               </>
             ) : (
               <div className="md:col-span-2">
-                <Label className="text-xs font-semibold" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                <Label className="text-xs font-semibold text-muted-foreground">
                   City *
                 </Label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  placeholder="Your city" className="mt-1 rounded-xl shadow-none bg-white" />
+                  placeholder="Your city" className="mt-1 rounded-xl shadow-none bg-background" />
               </div>
             )}
 
             {readOnlyDetails.map((d) => (
               <div key={d.label}>
-                <Label className="text-xs font-semibold opacity-70" style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 30% 25%)" }}>
+                <Label className="text-xs font-semibold opacity-70 text-muted-foreground">
                   {d.label} (locked)
                 </Label>
-                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60 shadow-none bg-white" />
+                <Input value={d.value} disabled className="mt-1 rounded-xl opacity-60 shadow-none bg-background" />
               </div>
             ))}
           </div>
@@ -981,16 +981,16 @@ const IconInput = ({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { icon: any }) => (
   <div className="relative mt-1">
-    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+    <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/70 pointer-events-none" />
     <input
       {...props}
       className={
-        "flex h-11 w-full rounded-xl border border-slate-200 bg-white text-slate-900 " +
-        "pl-10 pr-3 py-2 text-sm placeholder:text-slate-400 " +
+        "flex h-11 w-full rounded-xl border border-border bg-background text-foreground " +
+        "pl-10 pr-3 py-2 text-sm placeholder:text-muted-foreground/60 " +
         "focus-visible:outline-none focus-visible:border-primary " +
         "focus-visible:shadow-[0_0_0_4px_hsl(var(--primary)/0.12)] " +
         "transition-[box-shadow,border-color] duration-200 " +
-        "disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-slate-50 " +
+        "disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-muted/40 " +
         className
       }
     />
@@ -1001,7 +1001,7 @@ const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
   <motion.div whileHover={{ scale: 1.02, y: -2 }}
     className="flex items-center gap-3 p-3 rounded-2xl border shadow-sm transition-all"
     style={{
-      background: darkMode ? "hsl(var(--muted) / 0.4)" : "hsl(0 0% 100% / 0.7)",
+      background: darkMode ? "hsl(var(--muted) / 0.4)" : "hsl(var(--card) / 0.85)",
       borderColor: darkMode ? "hsl(var(--border))" : `${color}40`,
       backdropFilter: "blur(8px)",
     }}>
@@ -1010,10 +1010,10 @@ const DetailItem = ({ icon: Icon, label, value, darkMode, color }: any) => (
       <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
-      <p className="text-sm font-bold truncate text-slate-900">
+      <p className="text-sm font-bold truncate text-foreground">
         {value}
       </p>
     </div>
