@@ -175,6 +175,53 @@ const cacheMyEvents = async () => {
   if (data) await putCached("my_events", data);
 };
 
+const cacheMyProfile = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (data) await putCached("my_profile", data);
+};
+
+const cacheMyWorkshop = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    const { data } = await (supabase as any)
+      .from("workshop_users")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    if (data) await putCached("my_workshop", data);
+  } catch {/* ignore */}
+};
+
+const cacheMyNotifications = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    const { data } = await (supabase as any)
+      .from("notifications")
+      .select("id, title, message, type, link, read, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (data) await putCached("my_notifications", data);
+  } catch {/* ignore */}
+};
+
+const cacheSiteSettings = async () => {
+  try {
+    const { data } = await (supabase as any)
+      .from("admin_site_settings")
+      .select("id, value");
+    if (data) await putCached("site_settings", data);
+  } catch {/* ignore */}
+};
+
 /** React-friendly install — call once on app boot in app mode. */
 export const installOfflineCache = () => {
   if (typeof window === "undefined") return;
