@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
 import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
+import WorkshopReferCard from "@/components/workshop/WorkshopReferCard";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
 /**
@@ -767,6 +768,12 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
         workshopUser={profileData}
         darkMode={darkMode}
         onLinked={(authId) => setProfileData({ ...profileData, auth_user_id: authId })}
+      />
+
+      {/* ============== REFER A FRIEND (workshop variant) ============== */}
+      <WorkshopReferCard
+        fullName={profileData.name}
+        secretCode={profileData.secret_code}
       />
 
       {/* ============== VERIFICATION MODAL ============== */}
