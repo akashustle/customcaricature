@@ -214,10 +214,9 @@ const WorkshopDashboard = () => {
       <WorkshopOnlineAttendancePopup user={workshopUser} darkMode={darkMode} />
       <WorkshopCountdownOverlay user={workshopUser} />
 
-      {/* Header — greeting LEFT, profile dropdown RIGHT */}
-      <motion.div className="sticky top-0 z-40 backdrop-blur-2xl bg-card/85 border-b border-border/60 shadow-[0_4px_20px_-8px_hsl(var(--foreground)/0.08)]"
-        initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}>
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      {/* DESKTOP top bar — same shell as booking dashboard */}
+      <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
           {/* LEFT: Greeting with logo */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <motion.div className="relative flex-shrink-0" whileHover={{ scale: 1.06, rotate: -2 }}>
