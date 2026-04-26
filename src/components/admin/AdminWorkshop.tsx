@@ -17,7 +17,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Edit2, Trash2, Save, X, Upload, Users, Video, Award, MessageSquare, Settings, Eye, EyeOff, Download, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit2, Trash2, Save, X, Upload, Users, Video, Award, MessageSquare, Settings, Eye, EyeOff, Download, Clock, ChevronDown, ChevronUp, FileClock, UserPlus } from "lucide-react";
 import ExportButton from "./ExportButton";
 
 const AdminWorkshop = () => {
@@ -235,6 +235,10 @@ const AdminWorkshop = () => {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full flex-wrap h-auto gap-1 bg-card border border-border rounded-2xl p-1.5">
           <TabsTrigger value="users" className="font-sans rounded-full text-xs"><Users className="w-3.5 h-3.5 mr-1" />Users</TabsTrigger>
+          <TabsTrigger value="drafts" className="font-sans rounded-full text-xs">
+            <FileClock className="w-3.5 h-3.5 mr-1" />Registration Drafts
+            {drafts.length > 0 && <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">{drafts.length}</Badge>}
+          </TabsTrigger>
           <TabsTrigger value="videos" className="font-sans rounded-full text-xs"><Video className="w-3.5 h-3.5 mr-1" />Videos</TabsTrigger>
           <TabsTrigger value="assignments" className="font-sans rounded-full text-xs"><Award className="w-3.5 h-3.5 mr-1" />Assignments</TabsTrigger>
           <TabsTrigger value="feedback" className="font-sans rounded-full text-xs"><MessageSquare className="w-3.5 h-3.5 mr-1" />Feedback</TabsTrigger>
@@ -307,7 +311,76 @@ const AdminWorkshop = () => {
           </div>
         </TabsContent>
 
-        {/* VIDEOS TAB */}
+        {/* REGISTRATION DRAFTS TAB — incomplete/unpaid sign-ups */}
+        <TabsContent value="drafts" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-bold">Registration Drafts ({drafts.length})</h2>
+            <p className="text-xs text-muted-foreground">Unpaid / incomplete workshop sign-ups</p>
+          </div>
+          {drafts.length === 0 ? (
+            <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No abandoned registrations 🎉</CardContent></Card>
+          ) : (
+            <div className="space-y-3">
+              {drafts.map((d: any) => {
+                const payload = (d.form_payload as any) || {};
+                const step = Math.min((d.current_step ?? 0) + 1, 4);
+                return (
+                  <Card key={d.id} className="border-l-4 border-l-amber-500">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-display font-bold">{d.name || payload.name || "Unnamed"}</h3>
+                            <Badge variant="outline" className="text-[10px]">Step {step}/4</Badge>
+                            <Badge variant="secondary" className="text-[10px]">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {new Date(d.last_activity_at).toLocaleString()}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {d.email || "—"} · {d.mobile || "—"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                        {payload.age && <div><span className="text-muted-foreground">Age:</span> {payload.age}</div>}
+                        {payload.occupation && <div><span className="text-muted-foreground">Job:</span> {payload.occupation}</div>}
+                        {payload.city && <div><span className="text-muted-foreground">City:</span> {payload.city}</div>}
+                        {payload.state && <div><span className="text-muted-foreground">State:</span> {payload.state}</div>}
+                        {payload.slot && <div><span className="text-muted-foreground">Slot:</span> {payload.slot}</div>}
+                        {payload.skill_level && <div><span className="text-muted-foreground">Skill:</span> {payload.skill_level}</div>}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                        <Button size="sm" variant="default" className="rounded-full text-xs" onClick={() => convertDraftToUser(d)}>
+                          <UserPlus className="w-3.5 h-3.5 mr-1" />Convert to Workshop User
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive" className="rounded-full text-xs">
+                              <Trash2 className="w-3.5 h-3.5 mr-1" />Delete Draft
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete this draft?</AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteDraft(d.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="videos" className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold">Workshop Videos ({videos.length})</h2>
