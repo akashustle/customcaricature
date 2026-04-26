@@ -4,8 +4,21 @@ import { RefreshCw, X, Sparkles, Rocket, CheckCircle2, Download } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
-const CHECK_INTERVAL = 30_000;
+const CHECK_INTERVAL = 5 * 60_000; // 5 min — was 30s and caused constant network chatter + re-renders
 const DISMISSED_VERSION_KEY = "ccc_update_dismissed_v";
+
+/**
+ * Skip update polling entirely on dev / preview / iframe so the dashboard
+ * doesn't constantly re-fetch settings and trigger card shimmer flashes.
+ */
+const shouldSkipUpdateCheck = (): boolean => {
+  if (typeof window === "undefined") return true;
+  if (import.meta.env.DEV) return true;
+  try { if (window.self !== window.top) return true; } catch { return true; }
+  const host = window.location.hostname;
+  if (host.includes("lovableproject.com") || host.includes("id-preview--")) return true;
+  return false;
+};
 const APPLIED_VERSION_KEY = "ccc_update_applied_v";
 const REMIND_AT_KEY = "ccc_update_remind_at";
 const POPUP_OPEN_KEY = "ccc_update_popup_open_v";
