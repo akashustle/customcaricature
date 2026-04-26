@@ -40,6 +40,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useVoiceStream } from "@/hooks/useVoiceStream";
 import FlightTicketUpload from "@/components/FlightTicketUpload";
 import PaymentReminderBanner from "@/components/PaymentReminderBanner";
+import PaymentDemandBanner from "@/components/PaymentDemandBanner";
 import PaymentSuccessOverlay from "@/components/PaymentSuccessOverlay";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
@@ -558,6 +559,7 @@ const Dashboard = () => {
         </div>
 
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
+        {user && <PaymentDemandBanner userId={user.id} events={events as any} />}
 
         {/* Desktop tab strip */}
         <div className="hidden md:block mt-4">
