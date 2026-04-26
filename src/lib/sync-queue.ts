@@ -156,15 +156,24 @@ const handlers: Record<SyncActionType, (payload: any) => Promise<void>> = {
     if (error) throw error;
   },
 
-  "image.upload": async (p) => {
-    const { bucket, path, dataUrl } = p;
-    // Convert data URL → Blob without keeping huge string in memory twice
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
+  "image.upload": async (p, action) => {
+    const { bucket, path, dataUrl, blobKey } = p;
+    // Resumable: prefer the IndexedDB-stored Blob (survives reloads
+    // without bloating localStorage). Fall back to legacy dataUrl.
+    let blob: Blob | undefined;
+    if (blobKey) blob = await getBlob(blobKey);
+    if (!blob && dataUrl) blob = await dataUrlToBlob(dataUrl);
+    if (!blob) throw new Error("Image data missing — cannot resume upload");
     const { error } = await supabase.storage.from(bucket).upload(path, blob, { upsert: true });
     if (error) throw error;
+    // Free disk only after the upload succeeds — that's what makes it resumable.
+    if (blobKey) { try { await deleteBlob(blobKey); } catch {/* ignore */} }
   },
 };
+
+// Handlers receive the action so they can reference its id (e.g. blob key).
+type HandlerMap = Record<SyncActionType, (payload: any, action: SyncAction) => Promise<void>>;
+const _handlers = handlers as HandlerMap;
 
 // ---- Drain worker ------------------------------------------------------
 
