@@ -107,6 +107,9 @@ const Dashboard = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [hasWorkshop, setHasWorkshop] = useState(false);
+  // Log Web-Vital style numbers once per dashboard mount (dev/preview only)
+  useEffect(() => { import("@/lib/perf-logger").then(m => m.logPageVitals("/dashboard")); }, []);
+
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
