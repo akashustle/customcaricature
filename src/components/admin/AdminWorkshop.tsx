@@ -17,7 +17,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Edit2, Trash2, Save, X, Upload, Users, Video, Award, MessageSquare, Settings, Eye, EyeOff, Download, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit2, Trash2, Save, X, Upload, Users, Video, Award, MessageSquare, Settings, Eye, EyeOff, Download, Clock, ChevronDown, ChevronUp, FileClock, UserPlus } from "lucide-react";
 import ExportButton from "./ExportButton";
 
 const AdminWorkshop = () => {
