@@ -48,6 +48,13 @@ const Register = () => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // ── Workshop import detection ──────────────────────────────────────────
+  // When the typed email or mobile matches an existing workshop_users row,
+  // we offer a one-click "Import from Workshop" prompt that pre-fills name,
+  // age, gender, instagram, address etc. so the user doesn't have to retype.
+  const [workshopMatch, setWorkshopMatch] = useState<any | null>(null);
+  const [workshopChecked, setWorkshopChecked] = useState(false); // becomes true after a match has been resolved or dismissed
+
   // Persist form data to localStorage (exclude passwords)
   useEffect(() => {
     const { password, confirmPassword, ...safe } = form;
@@ -228,6 +235,59 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Detect existing workshop_users by email/mobile and offer to import details.
+  // Runs after the user verifies email or types a 10-digit mobile.
+  useEffect(() => {
+    const cleanEmail = form.email.trim().toLowerCase();
+    const cleanMobile = form.mobile.replace(/\D/g, "");
+    if (!emailVerified && cleanMobile.length !== 10) return;
+    if (workshopChecked) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        let match: any = null;
+        if (cleanEmail) {
+          const { data } = await supabase.from("workshop_users" as any)
+            .select("*").ilike("email", cleanEmail).maybeSingle();
+          if (data) match = data;
+        }
+        if (!match && cleanMobile.length === 10) {
+          const { data } = await supabase.from("workshop_users" as any)
+            .select("*").eq("mobile", cleanMobile).maybeSingle();
+          if (data) match = data;
+        }
+        if (cancelled) return;
+        if (match) setWorkshopMatch(match);
+      } catch { /* silent */ }
+    })();
+    return () => { cancelled = true; };
+  }, [emailVerified, form.email, form.mobile, workshopChecked]);
+
+  const importFromWorkshop = () => {
+    if (!workshopMatch) return;
+    const ws = workshopMatch;
+    setForm(prev => ({
+      ...prev,
+      fullName: ws.name || prev.fullName,
+      mobile: (ws.mobile || prev.mobile || "").replace(/\D/g, "").slice(0, 10),
+      instagramId: ws.instagram_id || prev.instagramId,
+      age: ws.age ? String(ws.age) : prev.age,
+      gender: (ws.gender || prev.gender || "").toLowerCase(),
+      address: ws.address || prev.address,
+      city: ws.city || prev.city,
+      state: ws.state || prev.state,
+      district: ws.district || prev.district,
+    }));
+    setWorkshopChecked(true);
+    setWorkshopMatch(null);
+    toast({ title: "✨ Imported from your Workshop profile", description: "Review the details and continue." });
+  };
+
+  const dismissWorkshopImport = () => {
+    setWorkshopChecked(true);
+    setWorkshopMatch(null);
+  };
+
   const nextStep = () => {
     if (step === 1 && !canGoStep2) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
     if (step === 2 && !canGoStep3) { toast({ title: "Please verify your email first", variant: "destructive" }); return; }
@@ -334,6 +394,39 @@ const Register = () => {
                       <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="you@gmail.com" className="h-11 rounded-xl" disabled={emailVerified} />
                       {emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}
                     </div>
+
+                    {/* Import-from-Workshop prompt — appears when the entered
+                        email or mobile already matches an existing workshop_users row */}
+                    {workshopMatch && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-3 space-y-2"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-xl leading-none">🎓</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground">
+                              We found your Workshop profile
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {workshopMatch.name ? `Hi ${workshopMatch.name}! ` : ""}
+                              Import your saved details so you don't have to retype them.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button type="button" size="sm" onClick={importFromWorkshop}
+                            className="flex-1 rounded-lg h-9 text-xs font-semibold">
+                            ✨ Import from Workshop
+                          </Button>
+                          <Button type="button" size="sm" variant="outline" onClick={dismissWorkshopImport}
+                            className="rounded-lg h-9 text-xs">
+                            Type manually
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
 
                     {/* Email Verification */}
                     {!emailVerified && form.email && !emailError && form.email.includes("@") && (

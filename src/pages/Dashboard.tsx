@@ -455,10 +455,15 @@ const Dashboard = () => {
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
-  // Tab availability — admin can toggle (we only expose 5 main tabs in the new UI)
+  // Tab availability — admin can toggle (we only expose 5 main tabs in the new UI).
+  // Orders tab: even when admin has globally hidden custom-caricature ordering,
+  // any user who already placed a custom caricature order keeps an "Orders"
+  // tab so they can track existing artwork.
+  const hasCustomCaricatureOrders = orders.length > 0;
   const tabsAvailable = {
     home: true,
     events: dt.events !== false,
+    orders: hasCustomCaricatureOrders, // shown ONLY when the user has at least one caricature order
     payments: dt.payments !== false,
     chat: dt.chat !== false,
     workshop: hasWorkshop, // only visible for workshop-origin users
@@ -573,6 +578,11 @@ const Dashboard = () => {
                   <Receipt className="w-4 h-4 mr-2" />Payments
                 </TabsTrigger>
               )}
+              {tabsAvailable.orders && (
+                <TabsTrigger value="orders" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Package className="w-4 h-4 mr-2" />Orders
+                </TabsTrigger>
+              )}
               {tabsAvailable.chat && (
                 <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
@@ -595,6 +605,14 @@ const Dashboard = () => {
             </TabsContent>
             <TabsContent value="events"><EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} /></TabsContent>
             <TabsContent value="payments">{user && <PaymentHistory userId={user.id} />}</TabsContent>
+            {tabsAvailable.orders && (
+              <TabsContent value="orders">
+                <OrdersList
+                  orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder}
+                  payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id}
+                />
+              </TabsContent>
+            )}
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             {tabsAvailable.workshop && (
               <TabsContent value="workshop">{user && <UserWorkshopOverview authUserId={user.id} />}</TabsContent>
@@ -619,6 +637,12 @@ const Dashboard = () => {
           )}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "orders" && tabsAvailable.orders && (
+            <OrdersList
+              orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder}
+              payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id}
+            />
+          )}
           {activeTab === "chat" && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
@@ -646,7 +670,9 @@ const Dashboard = () => {
           {[
             { key: "home", icon: Home, label: "Home" },
             { key: "events", icon: CalIcon, label: "Events" },
-            { key: "payments", icon: Receipt, label: "Payments" },
+            // Orders shown only for users who actually placed a custom caricature order.
+            { key: "orders", icon: Package, label: "Orders" },
+            { key: "payments", icon: Receipt, label: "Pay" },
             { key: "chat", icon: MessageCircle, label: "Chat" },
             { key: "profile", icon: User, label: "Me" },
           ].filter(t => (tabsAvailable as any)[t.key]).map((item) => {
@@ -2771,24 +2797,27 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
               <p className="pb-2 text-xs text-muted-foreground font-sans">total bookings & orders</p>
             </div>
 
-            {/* 3D Stat tiles */}
+            {/* 3D Stat tiles — clickable, jump to the matching tab */}
             <div className="mt-5 grid grid-cols-2 gap-2.5">
               {[
-                { label: "Events", value: totalEvents, icon: CalIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600" },
-                { label: "Orders", value: totalOrders, icon: Package, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600" },
+                { label: "Events", value: totalEvents, icon: CalIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600", target: "events" },
+                { label: "Orders", value: totalOrders, icon: Package, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600", target: totalOrders > 0 ? "orders" : "events" },
               ].map((s) => (
-                <motion.div
+                <motion.button
+                  type="button"
                   key={s.label}
+                  onClick={() => setActiveTab(s.target)}
                   whileHover={{ y: -3, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className={`relative rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur`}
+                  className={`relative text-left rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur cursor-pointer hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/30`}
+                  aria-label={`Open ${s.label}`}
                 >
                   <div className={`w-8 h-8 rounded-xl ${s.iconBg} flex items-center justify-center mb-2`}>
                     <s.icon className="w-4 h-4" />
                   </div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">{s.label}</p>
                   <p className="font-display text-2xl font-bold text-foreground leading-tight">{s.value}</p>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
 
@@ -2854,7 +2883,13 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
           </div>
           <div className="space-y-2">
             {upcomingEvents.map((ev: any) => (
-              <div key={ev.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
+              <button
+                type="button"
+                key={ev.id}
+                onClick={() => setActiveTab("events")}
+                className="w-full text-left flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                aria-label={`Open event details for ${ev.event_type || "Event"}`}
+              >
                 <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
                   <CalIcon className="w-5 h-5" />
                 </div>
@@ -2866,7 +2901,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                   </div>
                 </div>
                 <Badge className="bg-primary/15 text-primary border-none text-[10px]">{ev.payment_status || ev.status}</Badge>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -2877,10 +2912,17 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         <div className="bg-card border border-border rounded-3xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-display text-base font-bold">Recent Orders</h3>
+            <button onClick={() => setActiveTab("orders")} className="text-xs font-sans text-muted-foreground hover:text-foreground">View all →</button>
           </div>
           <div className="space-y-2">
             {recentOrders.map((o: any) => (
-              <div key={o.id} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
+              <button
+                type="button"
+                key={o.id}
+                onClick={() => setActiveTab("orders")}
+                className="w-full text-left flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 active:scale-[0.99] transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                aria-label={`Open order ${o.id.slice(0, 8).toUpperCase()}`}
+              >
                 <div className="w-10 h-10 rounded-xl bg-foreground/10 text-foreground flex items-center justify-center flex-shrink-0">
                   <Package className="w-5 h-5" />
                 </div>
@@ -2888,7 +2930,7 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
                   <p className="font-sans font-semibold text-sm truncate capitalize">{o.style} · {o.face_count} face(s)</p>
                   <p className="text-[11px] text-muted-foreground font-sans">{formatPrice(o.amount)} · {STATUS_LABELS[o.status] || o.status}</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
