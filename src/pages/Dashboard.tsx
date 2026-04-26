@@ -307,7 +307,11 @@ const Dashboard = () => {
       gender: editForm.gender || null,
     } as any).eq("user_id", user.id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-    else { setProfile(editForm); setEditing(false); toast({ title: "Profile Updated!" }); }
+    else {
+      setProfile(editForm); setEditing(false);
+      invalidateCache(`profile:${user.id}`);
+      toast({ title: "Profile Updated!" });
+    }
   };
 
   const uploadAvatar = useCallback(async (file: File) => {
@@ -323,6 +327,7 @@ const Dashboard = () => {
       const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
       if (dbErr) throw dbErr;
       setProfile((p) => p ? { ...p, avatar_url: url } : p);
+      invalidateCache(`profile:${user.id}`);
       toast({ title: "📸 Profile photo updated!" });
     } catch (err: any) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
