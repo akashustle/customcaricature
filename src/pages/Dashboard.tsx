@@ -684,6 +684,13 @@ const Dashboard = () => {
               { key: "orders", icon: Package, label: "Orders" },
               { key: "payments", icon: Receipt, label: "Pay" },
               { key: "chat", icon: MessageCircle, label: "Chat" },
+              // Workshop tab — only filtered in via tabsAvailable.workshop
+              // (true for users whose auth account is linked to a workshop_user
+              // record, including via email/mobile fallback). This makes the
+              // Workshop overview reachable from the booking dashboard's
+              // mobile bottom nav for users like Akash who registered via the
+              // workshop dashboard's "Create Booking Account" flow.
+              { key: "workshop", icon: GraduationCap, label: "Workshop" },
               { key: "profile", icon: User, label: "Me" },
             ];
             // Admin-defined order from site settings; fallback to default order.
