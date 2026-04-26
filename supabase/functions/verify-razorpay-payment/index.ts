@@ -173,6 +173,84 @@ serve(async (req) => {
         }
       }
 
+    } else if (is_demand_payment && demand_id) {
+      // ADMIN-RAISED PAYMENT DEMAND for an event
+      const { data: demand } = await supabase
+        .from("payment_demands")
+        .select("id, event_id, amount, status_on_paid, is_paid")
+        .eq("id", demand_id)
+        .single();
+
+      if (!demand) {
+        return new Response(JSON.stringify({ error: "Demand not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Idempotent: already paid → just say ok
+      if (demand.is_paid) {
+        return new Response(JSON.stringify({ success: true, verified: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: booking } = await supabase
+        .from("event_bookings")
+        .select("id, user_id, client_name, client_email, client_mobile")
+        .eq("id", demand.event_id)
+        .single();
+
+      if (!booking) {
+        return new Response(JSON.stringify({ error: "Linked event not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (booking.user_id && booking.user_id !== user.id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const paidAmount = Number(amount ?? demand.amount);
+
+      await supabase.from("payment_history").insert({
+        user_id: booking.user_id || user.id,
+        booking_id: booking.id,
+        payment_type: "event_demand",
+        razorpay_payment_id, razorpay_order_id,
+        amount: paidAmount, status: "confirmed",
+        description: `Admin payment demand for event`,
+      });
+
+      await supabase.from("payment_demands").update({
+        is_paid: true,
+        paid_at: new Date().toISOString(),
+        paid_by_user_id: user.id,
+        paid_by_payment_id: razorpay_payment_id,
+        paid_by_order_id: razorpay_order_id,
+      }).eq("id", demand_id);
+
+      // Optionally roll the event status forward to whatever the admin chose
+      if (demand.status_on_paid) {
+        await supabase.from("event_bookings").update({
+          payment_status: demand.status_on_paid,
+        }).eq("id", booking.id);
+      }
+
+      // Generate invoice for the demand payment
+      await generateInvoice({
+        user_id: booking.user_id || user.id,
+        booking_id: booking.id,
+        invoice_type: "event_booking",
+        amount: paidAmount,
+        total_amount: paidAmount,
+        customer_name: booking.client_name,
+        customer_email: booking.client_email,
+        customer_mobile: booking.client_mobile,
+        payment_id: razorpay_payment_id,
+        items: [{ name: "Additional payment (admin request)", qty: 1, price: paidAmount, total: paidAmount }],
+      });
+
     } else if (is_partial_advance && partial_number) {
       // PARTIAL ADVANCE PAYMENT
       const { data: booking } = await supabase
