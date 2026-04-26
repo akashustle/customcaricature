@@ -1,180 +1,124 @@
-# 📱 Play Store Release Guide — Custom Caricature Club
+# 📱 APK Distribution + Play Store Guide
 
-This project is wrapped with **Capacitor** so you can publish the same web app
-to the Google Play Store as a real native Android app.
-
-> Everything below has to be run on **your own computer** (Mac, Windows, or
-> Linux) — Lovable's cloud editor cannot build native binaries.
+This project ships a real native Android app via Capacitor. You can either
+build the APK yourself (locally) or have GitHub build it for you on every push.
 
 ---
 
-## 1. One-time setup on your computer
+## 🚀 Path A — GitHub builds your APK automatically (recommended)
 
-1. Install **Android Studio** → <https://developer.android.com/studio>
-   (this also installs the Android SDK and emulator)
-2. Install **Node.js 20+** → <https://nodejs.org>
-3. Install **Java 17 (JDK)** → already bundled with Android Studio
-4. In Lovable, click **GitHub → Connect to GitHub** and push this repo to
-   your own GitHub account.
+The workflow `.github/workflows/android-apk.yml` already runs on every push to
+`main`. It always produces a **debug APK** (unsigned, instantly testable). If
+you add 4 secrets it will also produce a **signed release APK**.
+
+### One-time setup
+
+1. **Push the project to your own GitHub repo** (Lovable → GitHub → Connect).
+2. Generate a release keystore on any computer with Java installed:
+   ```bash
+   keytool -genkey -v -keystore caricature-release.jks \
+     -alias caricature -keyalg RSA -keysize 2048 -validity 10000
+   ```
+3. Base64-encode the keystore so it can be stored as a secret:
+   ```bash
+   base64 -i caricature-release.jks | tr -d '\n' > keystore.b64
+   ```
+4. In your GitHub repo → **Settings → Secrets and variables → Actions** add:
+   - `ANDROID_KEYSTORE_BASE64` — paste contents of `keystore.b64`
+   - `ANDROID_KEYSTORE_PASSWORD` — the password you set
+   - `ANDROID_KEY_ALIAS` — `caricature`
+   - `ANDROID_KEY_PASSWORD` — the same password
+5. Push any commit — the workflow runs automatically.
+
+### Where to find the APK
+
+- **Every push** → Actions tab → latest run → Artifacts → download `app-debug-...zip`
+- **Tag a release** (e.g. `git tag v1.0.0 && git push --tags`) → APK gets
+  attached to **GitHub Releases** with a permanent public download URL.
+
+### Wire it into your website
+
+1. Copy the APK URL from GitHub Releases (right-click the `.apk` → Copy link).
+2. In Lovable: **Admin Panel → App Download** tile.
+3. Paste the URL, set version, save.
+4. Users now download from `/download` on your site.
 
 ---
 
-## 2. Pull the project locally
+## 🛠 Path B — Build locally on your computer
+
+Prereqs: Android Studio, Java 17, Node 20+.
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
-npm install
+# Debug APK — fastest, perfect for testing
+./scripts/build-apk.sh
+
+# Signed release APK
+KEYSTORE_PATH=/path/to/caricature-release.jks \
+KEYSTORE_PASSWORD=yourpw KEY_ALIAS=caricature KEY_PASSWORD=yourpw \
+./scripts/build-apk.sh release
 ```
+
+Output lands in `./build/app-debug.apk` or `./build/app-release.apk`.
+
+Upload the file to:
+- GitHub Releases (free, permanent URL), or
+- Supabase Storage (`shop-images` bucket is already public), or
+- any CDN.
+
+Then paste the URL into **Admin → App Download**.
 
 ---
 
-## 3. First-time Android setup
+## 📲 What users see
 
-```bash
-# Add the native Android project (creates the /android folder)
-npx cap add android
-
-# Build the web bundle and copy it into the Android project
-npm run build
-npx cap sync android
-
-# Generate launcher icons & splash from /resources
-npx @capacitor/assets generate --android
-```
-
-> If `@capacitor/assets` isn't installed, run:
-> `npm i -D @capacitor/assets` first.
+Visit `/download` on your published site. They get:
+- One-tap APK download button
+- QR code (scan from another phone)
+- Step-by-step install instructions ("enable unknown sources")
+- Version, size, release notes (all admin-controlled)
 
 ---
 
-## 4. Test on a real phone or emulator
+## 📡 Offline-first features now live
 
-```bash
-npx cap run android
-```
+The app's `src/lib/sync-queue.ts` automatically queues these actions when the
+phone is offline and silently submits them when the connection returns:
 
-This opens Android Studio (or pushes straight to a connected USB device with
-USB debugging on).
+- ✅ **Signup** (`auth.signup`) — wired into `/register`
+- ✅ **Order create** (`order.create`)
+- ✅ **Event booking** (`event.book`)
+- ✅ **Profile update** (`profile.update`)
+- ✅ **Image upload** (`image.upload`) — base64 → Supabase Storage
 
-While you keep `capacitor.config.ts → server.url` enabled, the app live-reloads
-from the Lovable preview — perfect for testing changes fast.
+A floating pill (`SyncStatusBadge`) shows users what's queued and lets them
+tap to retry. Failed items (after 5 attempts) are reported to the Admin
+Error Inbox.
 
----
-
-## 5. Production build for Play Store
-
-### 5a. Disable hot-reload first
-
-Open `capacitor.config.ts` and **comment out the entire `server` block** so
-the app ships with the bundled offline `dist/` files:
-
+To enqueue from any other component:
 ```ts
-// server: {
-//   url: '...',
-//   cleartext: true,
-// },
+import { enqueue } from "@/lib/sync-queue";
+enqueue("order.create", { customer_name, amount, ... });
 ```
-
-### 5b. Build the release bundle
-
-```bash
-npm run build
-npx cap sync android
-cd android
-./gradlew bundleRelease
-```
-
-The signed AAB will be at:
-
-```
-android/app/build/outputs/bundle/release/app-release.aab
-```
-
-### 5c. Sign the AAB
-
-If this is your first release, generate a keystore (KEEP IT SAFE — you can
-never replace it once published):
-
-```bash
-keytool -genkey -v -keystore caricature-release.keystore \
-  -alias caricature -keyalg RSA -keysize 2048 -validity 10000
-```
-
-Then add it to `android/app/build.gradle`:
-
-```gradle
-android {
-  signingConfigs {
-    release {
-      storeFile file('../../caricature-release.keystore')
-      storePassword 'YOUR_PASSWORD'
-      keyAlias 'caricature'
-      keyPassword 'YOUR_PASSWORD'
-    }
-  }
-  buildTypes {
-    release { signingConfig signingConfigs.release }
-  }
-}
-```
-
-Re-run `./gradlew bundleRelease`.
 
 ---
 
-## 6. Upload to Play Store
+## 📦 Play Store release (when you're ready)
 
-1. Go to <https://play.google.com/console> ($25 one-time developer fee)
-2. Create app → **Custom Caricature Club**
-3. Internal testing → Create release → upload `app-release.aab`
-4. Fill out: app icon, screenshots (5+), description, privacy policy URL
-   (use your `/privacy` page), data-safety form
-5. Submit for review (1–7 days)
-
----
-
-## 7. Updating the app later
-
-Every time you change code:
+When you want to publish on the Play Store instead of distributing the APK
+directly, you need an **AAB** file (not APK):
 
 ```bash
-git pull
-npm install
-npm run build
-npx cap sync android
 cd android && ./gradlew bundleRelease
 ```
 
-Bump `versionCode` and `versionName` in `android/app/build.gradle` before
-each Play Store upload, otherwise Google rejects the bundle.
+Output: `android/app/build/outputs/bundle/release/app-release.aab` — that's
+what you upload to <https://play.google.com/console> ($25 one-time fee).
+
+**Important before release build**: comment out the `server` block in
+`capacitor.config.ts` so the app loads bundled offline files instead of the
+live preview URL.
 
 ---
 
-## ⚙️ What's already configured for you
-
-- ✅ **App ID** (`app.lovable.161b75a406564c37978eee2b04e19101`)
-- ✅ **App name** (Custom Caricature Club)
-- ✅ **Brand splash** (`resources/splash.png`) and **icon** (`resources/icon.png`)
-- ✅ **Status bar** colored to match brand cream `#fdf8f3`
-- ✅ **Hardware back button** → router back, exit on root
-- ✅ **Deep links** dispatched as `ccc:deep-link` events
-- ✅ **Keyboard handling** with smooth resize
-- ✅ **Network plugin** wired into the same offline detector the web uses
-- ✅ **Push notifications** plugin installed (use the existing OneSignal setup)
-- ✅ **Filesystem & Preferences** for offline-first storage
-- ✅ **Mixed content** disabled (Play Store requirement)
-
----
-
-## 🔮 Coming next round (per your selection)
-
-- Offline registration form queue (signup works without internet, syncs when online)
-- Offline order/booking submission queue
-- Offline image capture & upload queue
-
-These need the offline-sync layer which we'll build in the next iteration.
-
----
-
-Need help with any step? Reach out or paste the error here in the chat.
+Need help with any step? Reach out in chat with the error message.
