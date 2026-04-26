@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, GraduationCap, Phone, Sparkles, Download } from "lucide-react";
+import { saveCredentials, verifyOfflineCredentials, hasCachedCredentials } from "@/lib/offline-credentials";
 
 interface AdminInfo { name: string; email: string; mobile: string; designation: string; }
 
@@ -162,6 +163,25 @@ const WorkshopAdminLogin = () => {
     }
     if ((authMethod === "otp" || failedAttempts >= 3) && otpCode.length !== 6) { toast({ title: "Enter 6-digit OTP", variant: "destructive" }); return; }
 
+    // ---- Offline fallback (password method only) ---------------------------
+    if (
+      authMethod === "password" &&
+      typeof navigator !== "undefined" && !navigator.onLine &&
+      hasCachedCredentials("workshop")
+    ) {
+      const ok = await verifyOfflineCredentials(selectedAdmin.email, password, "workshop");
+      if (ok) {
+        const adminInfo = { id: "offline", email: selectedAdmin.email, name: selectedAdmin.name };
+        localStorage.setItem("workshop_admin", JSON.stringify(adminInfo));
+        sessionStorage.setItem("admin_entered_name", selectedAdmin.name);
+        toast({ title: `Welcome, ${selectedAdmin.name}! (Offline)` });
+        navigate("/workshop-admin-panel", { replace: true });
+        return;
+      }
+      toast({ title: "Offline login failed", description: "Connect to the internet for first-time login.", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
     try {
       if (authMethod === "otp" || failedAttempts >= 3) {
@@ -182,6 +202,8 @@ const WorkshopAdminLogin = () => {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: selectedAdmin.email, password });
         if (error) { setFailedAttempts(p => p + 1); throw error; }
+        // Cache for offline re-entry
+        void saveCredentials(selectedAdmin.email, password, "workshop");
       }
 
       const { data: userData } = await supabase.auth.getUser();
