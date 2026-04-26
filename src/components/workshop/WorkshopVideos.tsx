@@ -128,11 +128,11 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
   return (
     <GlassCard>
       <h2 className={`${textPrimary} text-lg flex items-center gap-2 mb-4`}>
-        <Play className="w-5 h-5 text-purple-500" /> Workshop Videos
+        <Play className="w-5 h-5 text-primary" /> Workshop Videos
       </h2>
       {filteredVideos.length === 0 ? (
         <div className="text-center py-12">
-          <Play className={`w-16 h-16 ${dm ? "text-white/20" : "text-purple-200"} mx-auto mb-3`} />
+          <Play className="w-16 h-16 text-primary/30 mx-auto mb-3" />
           <p className={textSecondary}>No videos available for your slot yet</p>
         </div>
       ) : (
@@ -149,8 +149,8 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
             return (
               <div key={video.id} className={`rounded-xl p-4 border ${
                 accessible
-                  ? (dm ? "bg-purple-900/20 border-purple-700/30" : "bg-purple-50/40 border-purple-100/30")
-                  : (dm ? "bg-white/5 border-white/10 opacity-60" : "bg-gray-50/40 border-gray-200/20 opacity-60")
+                  ? "bg-primary/5 border-primary/20"
+                  : "bg-muted/30 border-border/60 opacity-60"
               }`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -161,26 +161,26 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
                     </p>
                   </div>
                   {!accessible ? (
-                    <Badge className="bg-red-100 text-red-500 border-red-200 text-xs font-bold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
+                    <Badge className="bg-destructive/15 text-destructive border-destructive/30 text-xs font-bold"><Lock className="w-3 h-3 mr-1" />Locked</Badge>
                   ) : (
-                    <Badge className="bg-green-100 text-green-600 border-green-200 text-xs font-bold">Available</Badge>
+                    <Badge className="bg-primary/15 text-primary border-primary/30 text-xs font-bold">Available</Badge>
                   )}
                 </div>
 
                 {accessible && countdown && (
-                  <div className={`mt-2 ${dm ? "bg-amber-900/20 border-amber-700/30" : "bg-amber-50/80 border-amber-200/30"} border rounded-lg p-2 flex items-center gap-2`}>
+                  <div className="mt-2 bg-amber-500/10 border-amber-500/30 border rounded-lg p-2 flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
                     <div>
-                      <p className="text-[10px] text-amber-500 font-medium">Video access expires in:</p>
-                      <p className="text-xs font-mono font-bold text-amber-600">{countdown}</p>
+                      <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Video access expires in:</p>
+                      <p className="text-xs font-mono font-bold text-amber-700 dark:text-amber-300">{countdown}</p>
                     </div>
                   </div>
                 )}
 
                 {!accessible && expiry && now > expiry && (
-                  <div className={`mt-2 ${dm ? "bg-red-900/20 border-red-700/30" : "bg-red-50/80 border-red-200/30"} border rounded-lg p-2 flex items-center gap-2`}>
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                    <p className="text-xs text-red-500 font-medium">Video access has expired</p>
+                  <div className="mt-2 bg-destructive/10 border-destructive/30 border rounded-lg p-2 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
+                    <p className="text-xs text-destructive font-medium">Video access has expired</p>
                   </div>
                 )}
 
@@ -188,12 +188,12 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
                   <>
                     {isExternal ? (
                       <Button onClick={() => window.open(video.video_url, "_blank")}
-                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl font-bold">
+                        className="w-full mt-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold">
                         <ExternalLink className="w-4 h-4 mr-2" /> Open Link
                       </Button>
                     ) : !isActive ? (
                       <Button onClick={() => setActiveVideo(video.id)}
-                        className="w-full mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl font-bold">
+                        className="w-full mt-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold">
                         <Play className="w-4 h-4 mr-2" /> Watch Video
                       </Button>
                     ) : (
@@ -230,7 +230,7 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
                         )}
                         {download && (
                           <Button variant="outline" size="sm" onClick={() => handleDownload(video)}
-                            className={`w-full ${dm ? "text-purple-400 border-purple-700/30" : "text-purple-500 border-purple-200"} hover:bg-purple-50 rounded-lg font-bold`}>
+                            className="w-full text-primary border-primary/30 hover:bg-primary/5 rounded-lg font-bold">
                             <Download className="w-4 h-4 mr-1" /> Download Video
                           </Button>
                         )}
