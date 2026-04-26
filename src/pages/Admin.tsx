@@ -94,6 +94,7 @@ const AdminTeamManagement = lazy(() => import("@/components/admin/AdminTeamManag
 const AdminSmartSearch = lazy(() => import("@/components/admin/AdminSmartSearch"));
 const AdminAIIntelligence = lazy(() => import("@/components/admin/AdminAIIntelligence"));
 const AdminPushUpdate = lazy(() => import("@/components/admin/AdminPushUpdate"));
+const AdminAppDownload = lazy(() => import("@/components/admin/AdminAppDownload"));
 const AdminDashboardPremium = lazy(() => import("@/components/admin/AdminDashboardPremium"));
 const AdminQuickActions = lazy(() => import("@/components/admin/AdminQuickActions"));
 const AdminWorkspaceSwitcher = lazy(() => import("@/components/admin/AdminWorkspaceSwitcher"));
@@ -2760,6 +2761,9 @@ const Admin = () => {
 
               {/* Push App Update */}
               <AdminPushUpdate />
+
+              {/* App Download Page (APK) */}
+              <AdminAppDownload />
             </div>
           </TabsContent>
           </motion.div>
