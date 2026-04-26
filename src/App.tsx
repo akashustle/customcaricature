@@ -40,6 +40,8 @@ const FloatingButtons = lazyShell(() => import("./components/FloatingButtons"));
 const MobileBottomNav = lazyShell(() => import("./components/MobileBottomNav"));
 const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
+const AppWelcome3D = lazyShell(() => import("./components/AppWelcome3D"));
+const AppModeBoot = lazyShell(() => import("./components/AppModeBoot"));
 const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
 const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
 const SyncToastListener = lazyShell(() => import("./components/SyncToastListener"));
@@ -51,6 +53,7 @@ import useAutoUpdate from "./hooks/useAutoUpdate";
 import { installErrorReporter } from "./lib/error-reporter";
 import { installSyncWorker } from "./lib/sync-queue";
 import { installSyncHealthReporter } from "./lib/sync-health";
+import { installOfflineCache } from "./lib/offline-cache";
 
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
@@ -60,6 +63,10 @@ installSyncWorker();
 
 // Periodically report this client's offline backlog so admins see live health.
 installSyncHealthReporter();
+
+// Prime essential offline content (logo, gallery, pricing, FAQs, my orders).
+// Cheap + idle-deferred — safe to call on every boot.
+installOfflineCache();
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
@@ -287,6 +294,7 @@ const App = () => {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <DefaultThemeApplier />
+        <AppModeBoot />
         <DeferredInit />
         <RoutePrefetcher />
         <PWASplashScreen />
@@ -296,6 +304,7 @@ const App = () => {
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
+          <AppWelcome3D />
           <SyncStatusBadge />
           <SyncToastListener />
           <ApkUpdatePrompt />
