@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, CloudOff, Loader2, Trash2, Inbox,
+  ChevronDown, ChevronUp, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,10 +54,26 @@ const timeAgo = (ts: number) => {
   return `${Math.round(s / 86400)}d ago`;
 };
 
+/** Routes that make sense for a "view details" deep-link per action type. */
+const detailLink = (a: SyncAction): { href: string; label: string } | null => {
+  switch (a.type) {
+    case "order.create":  return { href: "/track-order", label: "Track this order" };
+    case "event.book":    return { href: "/dashboard", label: "Open my dashboard" };
+    case "image.upload":  {
+      // Image uploads are linked to a parent order via relatedId — surface that.
+      return { href: "/track-order", label: "Open related order" };
+    }
+    case "auth.signup":   return { href: "/login", label: "Try login" };
+    case "profile.update":return { href: "/dashboard", label: "Open my profile" };
+    default:              return null;
+  }
+};
+
 const SyncQueue = () => {
   const navigate = useNavigate();
   const [queue, setQueue] = useState<SyncAction[]>([]);
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const unsub = subscribeQueue(setQueue);
@@ -71,13 +88,15 @@ const SyncQueue = () => {
     };
   }, []);
 
-  const grouped = {
+  const grouped = useMemo(() => ({
     failed:  queue.filter((a) => a.status === "failed"),
     syncing: queue.filter((a) => a.status === "syncing"),
     queued:  queue.filter((a) => a.status === "queued"),
     synced:  queue.filter((a) => a.status === "synced"),
-  };
+  }), [queue]);
   const ordered: SyncAction[] = [...grouped.failed, ...grouped.syncing, ...grouped.queued, ...grouped.synced];
+
+  const toggle = (id: string) => setExpanded((e) => ({ ...e, [id]: !e[id] }));
 
   return (
     <>
@@ -121,6 +140,9 @@ const SyncQueue = () => {
           {ordered.map((a) => {
             const meta = STATUS_META[a.status];
             const Icon = meta.icon;
+            const link = detailLink(a);
+            const isOpen = !!expanded[a.id];
+            const showLink = link && (a.status === "failed" || a.status === "synced");
             return (
               <motion.div
                 key={a.id}
@@ -143,6 +165,11 @@ const SyncQueue = () => {
                           {a.attempts > 0 && (
                             <span className="text-xs text-muted-foreground">· {a.attempts} attempt{a.attempts === 1 ? "" : "s"}</span>
                           )}
+                          {a.refKey && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                              {a.refKey}
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm text-muted-foreground mt-1 truncate">
                           {formatPayloadSummary(a)}
@@ -152,6 +179,36 @@ const SyncQueue = () => {
                             {a.lastError}
                           </p>
                         )}
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
+                          <button
+                            onClick={() => toggle(a.id)}
+                            className="text-xs text-muted-foreground inline-flex items-center gap-1 hover:text-foreground"
+                          >
+                            {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                            {isOpen ? "Hide" : "View"} details
+                          </button>
+                          {showLink && (
+                            <Link
+                              to={link.href}
+                              className="text-xs font-medium text-primary inline-flex items-center gap-1 hover:underline"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              {link.label}
+                            </Link>
+                          )}
+                        </div>
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.pre
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-2 text-[10px] leading-snug bg-muted/50 border border-border rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-60"
+                            >
+                              {JSON.stringify(a.payload, (k, v) => (k === "dataUrl" ? "[binary blob]" : v), 2)}
+                            </motion.pre>
+                          )}
+                        </AnimatePresence>
                       </div>
                       <div className="flex flex-col gap-1 shrink-0">
                         {(a.status === "failed" || a.status === "queued") && (

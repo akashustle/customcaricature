@@ -17,6 +17,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "./error-reporter";
+import { getBlob, deleteBlob, dataUrlToBlob } from "./blob-store";
 
 const STORAGE_KEY = "ccc:sync-queue:v1";
 const MAX_ATTEMPTS = 5;
@@ -36,6 +37,10 @@ export interface SyncAction<T = any> {
   attempts: number;
   lastError?: string;
   status: "queued" | "syncing" | "synced" | "failed";
+  /** Cross-link to a related queued action (e.g. the order this image belongs to). */
+  relatedId?: string;
+  /** A human-friendly local identifier (e.g. order number) for deep-link routing. */
+  refKey?: string;
 }
 
 type Listener = (queue: SyncAction[]) => void;
@@ -69,7 +74,11 @@ export const subscribeQueue = (l: Listener) => {
   return () => listeners.delete(l);
 };
 
-export const enqueue = <T,>(type: SyncActionType, payload: T): SyncAction<T> => {
+export const enqueue = <T,>(
+  type: SyncActionType,
+  payload: T,
+  opts?: { relatedId?: string; refKey?: string },
+): SyncAction<T> => {
   const action: SyncAction<T> = {
     id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     type,
@@ -77,6 +86,8 @@ export const enqueue = <T,>(type: SyncActionType, payload: T): SyncAction<T> => 
     createdAt: Date.now(),
     attempts: 0,
     status: "queued",
+    relatedId: opts?.relatedId,
+    refKey: opts?.refKey,
   };
   const queue = safeRead();
   queue.push(action);
@@ -146,12 +157,17 @@ const handlers: Record<SyncActionType, (payload: any) => Promise<void>> = {
   },
 
   "image.upload": async (p) => {
-    const { bucket, path, dataUrl } = p;
-    // Convert data URL → Blob without keeping huge string in memory twice
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
+    const { bucket, path, dataUrl, blobKey } = p;
+    // Resumable: prefer the IndexedDB-stored Blob (survives reloads
+    // without bloating localStorage). Fall back to legacy dataUrl.
+    let blob: Blob | undefined;
+    if (blobKey) blob = await getBlob(blobKey);
+    if (!blob && dataUrl) blob = await dataUrlToBlob(dataUrl);
+    if (!blob) throw new Error("Image data missing — cannot resume upload");
     const { error } = await supabase.storage.from(bucket).upload(path, blob, { upsert: true });
     if (error) throw error;
+    // Free disk only after the upload succeeds — that's what makes it resumable.
+    if (blobKey) { try { await deleteBlob(blobKey); } catch {/* ignore */} }
   },
 };
 
@@ -176,18 +192,22 @@ export const drain = async (): Promise<void> => {
       try {
         await handlers[action.type](action.payload);
         updateAction(action.id, { status: "synced" });
+        // Notify UI listeners (toast/notification layer)
+        try {
+          window.dispatchEvent(new CustomEvent("ccc:sync-success", { detail: { action } }));
+        } catch {/* ignore */}
         // Auto-clean synced items after 10s so the badge clears
         setTimeout(() => removeAction(action.id), 10_000);
       } catch (err: any) {
         const attempts = action.attempts + 1;
         const status = attempts >= MAX_ATTEMPTS ? "failed" : "queued";
-        updateAction(action.id, {
-          status,
-          attempts,
-          lastError: err?.message || String(err),
-        });
+        const lastError = err?.message || String(err);
+        updateAction(action.id, { status, attempts, lastError });
         if (status === "failed") {
-          reportError(`sync-queue:${action.type}`, err?.message || String(err), action.payload, "error");
+          reportError(`sync-queue:${action.type}`, lastError, action.payload, "error");
+          try {
+            window.dispatchEvent(new CustomEvent("ccc:sync-failed", { detail: { action: { ...action, lastError } } }));
+          } catch {/* ignore */}
         }
       }
     }

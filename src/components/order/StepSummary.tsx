@@ -31,58 +31,79 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
       // ----- Offline path: queue order + photos, sync on reconnect -----
       if (typeof navigator !== "undefined" && !navigator.onLine) {
         const { enqueue } = await import("@/lib/sync-queue");
+        const { putBlob } = await import("@/lib/blob-store");
+        // Short, human-friendly reference (used in toast / inspector chip).
+        const refKey = `OFFLINE-${orderId.slice(0, 8).toUpperCase()}`;
 
-        // Convert each photo File to a data URL so it survives the queue.
-        const queuedPhotos: { storage_path: string; file_name: string; dataUrl: string }[] = [];
+        // Persist each photo to IndexedDB so the upload is RESUMABLE
+        // across reloads — no giant base64 strings in localStorage.
+        const queuedPhotos: { storage_path: string; file_name: string; blobKey: string }[] = [];
         for (const photo of data.photos) {
-          const dataUrl = await new Promise<string>((resolve, reject) => {
-            const r = new FileReader();
-            r.onerror = () => reject(r.error);
-            r.onload = () => resolve(String(r.result));
-            r.readAsDataURL(photo);
-          });
           const ext = photo.name.split(".").pop();
-          queuedPhotos.push({
-            storage_path: `${orderId}/${crypto.randomUUID()}.${ext}`,
-            file_name: photo.name,
-            dataUrl,
-          });
+          const storage_path = `${orderId}/${crypto.randomUUID()}.${ext}`;
+          const blobKey = `img-${orderId}-${queuedPhotos.length}`;
+          try {
+            await putBlob(blobKey, photo);
+          } catch {
+            // Fall back to dataUrl if IDB unavailable (very rare)
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const r = new FileReader();
+              r.onerror = () => reject(r.error);
+              r.onload = () => resolve(String(r.result));
+              r.readAsDataURL(photo);
+            });
+            enqueue(
+              "image.upload",
+              { bucket: "order-photos", path: storage_path, dataUrl },
+              { relatedId: orderId, refKey },
+            );
+            continue;
+          }
+          queuedPhotos.push({ storage_path, file_name: photo.name, blobKey });
         }
 
-        // Queue each image upload
+        // Queue each image upload (resumable via IndexedDB blobKey)
         queuedPhotos.forEach((p) => {
-          enqueue("image.upload", { bucket: "order-photos", path: p.storage_path, dataUrl: p.dataUrl });
+          enqueue(
+            "image.upload",
+            { bucket: "order-photos", path: p.storage_path, blobKey: p.blobKey },
+            { relatedId: orderId, refKey },
+          );
         });
 
         // Queue the order row itself
-        enqueue("order.create", {
-          id: orderId,
-          caricature_type: "physical",
-          order_type: data.orderType,
-          style: data.style,
-          notes: data.notes || null,
-          customer_name: data.customerName,
-          customer_mobile: data.customerMobile,
-          customer_email: data.customerEmail,
-          instagram_id: data.instagramId || null,
-          face_count: data.faceCount,
-          amount,
-          country: data.country,
-          state: data.state,
-          city: data.city,
-          district: data.district || null,
-          is_framed: isMumbai,
-          delivery_address: data.deliveryAddress,
-          delivery_city: data.deliveryCity,
-          delivery_state: data.deliveryState,
-          delivery_pincode: data.deliveryPincode,
-          user_id: userId,
-          payment_status: "pending",
-        });
+        enqueue(
+          "order.create",
+          {
+            id: orderId,
+            caricature_type: "physical",
+            order_type: data.orderType,
+            style: data.style,
+            notes: data.notes || null,
+            customer_name: data.customerName,
+            customer_mobile: data.customerMobile,
+            customer_email: data.customerEmail,
+            instagram_id: data.instagramId || null,
+            face_count: data.faceCount,
+            amount,
+            country: data.country,
+            state: data.state,
+            city: data.city,
+            district: data.district || null,
+            is_framed: isMumbai,
+            delivery_address: data.deliveryAddress,
+            delivery_city: data.deliveryCity,
+            delivery_state: data.deliveryState,
+            delivery_pincode: data.deliveryPincode,
+            user_id: userId,
+            payment_status: "pending",
+          },
+          { refKey },
+        );
 
         toast({
           title: "📡 Saved offline",
-          description: "Order queued. We'll submit it and open payment when you're back online.",
+          description: `Order ${refKey} queued. We'll submit it and open payment when you're back online.`,
         });
         playPaymentSuccessSound();
         onComplete(orderId);
