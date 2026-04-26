@@ -455,10 +455,15 @@ const Dashboard = () => {
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-sans text-muted-foreground">Loading...</div>;
 
-  // Tab availability — admin can toggle (we only expose 5 main tabs in the new UI)
+  // Tab availability — admin can toggle (we only expose 5 main tabs in the new UI).
+  // Orders tab: even when admin has globally hidden custom-caricature ordering,
+  // any user who already placed a custom caricature order keeps an "Orders"
+  // tab so they can track existing artwork.
+  const hasCustomCaricatureOrders = orders.length > 0;
   const tabsAvailable = {
     home: true,
     events: dt.events !== false,
+    orders: hasCustomCaricatureOrders, // shown ONLY when the user has at least one caricature order
     payments: dt.payments !== false,
     chat: dt.chat !== false,
     workshop: hasWorkshop, // only visible for workshop-origin users
