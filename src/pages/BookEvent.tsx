@@ -287,6 +287,45 @@ const BookEvent = () => {
     try {
       const dateStr = format(eventDate!, "yyyy-MM-dd");
       const finalEventType = eventType === "other" ? customEventType : eventType;
+
+      // Offline path: queue the booking, sync on reconnect (payment will need to be completed once back online)
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        const { enqueue } = await import("@/lib/sync-queue");
+        enqueue("event.book", {
+          user_id: user?.id || null,
+          client_name: clientName,
+          client_mobile: clientMobile,
+          client_email: clientEmail,
+          client_instagram: clientInstagram || null,
+          event_type: finalEventType,
+          event_date: dateStr,
+          event_start_time: startTime,
+          event_end_time: endTime,
+          state: isInternational ? intlState : state,
+          city: isInternational ? intlCity : actualCity,
+          country: isInternational ? country : "India",
+          is_international: isInternational,
+          full_address: fullAddress,
+          venue_name: venueName,
+          pincode: isInternational ? "000000" : pincode,
+          artist_count: artistCount,
+          is_mumbai: isInternational ? false : isMumbai,
+          total_price: pricing.total,
+          advance_amount: advanceWithExtraHours,
+          extra_hours: addExtraHours ? extraHours : 0,
+          travel_confirmed: travelConfirmed,
+          accommodation_confirmed: accommodationConfirmed,
+          payment_status: "pending",
+        });
+        toast({
+          title: "📡 Saved offline",
+          description: "Your booking is queued. We'll submit it and ask you to complete the advance payment when you're back online.",
+        });
+        setSubmitting(false);
+        navigate("/dashboard");
+        return;
+      }
+
       const { data: booking, error } = await supabase.from("event_bookings").insert({
         user_id: user?.id || null,
         client_name: clientName,
