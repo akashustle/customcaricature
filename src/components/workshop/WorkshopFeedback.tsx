@@ -120,7 +120,7 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
                 <button key={s} onClick={() => setRating(s)}
                   onMouseEnter={() => setHoveredStar(s)} onMouseLeave={() => setHoveredStar(0)}
                   className="transition-transform hover:scale-110">
-                  <Star className={`w-7 h-7 ${s <= (hoveredStar || rating) ? "text-amber-400 fill-amber-400" : dm ? "text-white/20" : "text-gray-200"}`} />
+                  <Star className={`w-7 h-7 ${s <= (hoveredStar || rating) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />
                 </button>
               ))}
             </div>
