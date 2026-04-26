@@ -157,10 +157,23 @@ const WorkshopDashboard = () => {
 
   if (!workshopUser) return null;
 
-  const visibleTabs = allTabs.filter(tab => {
-    if (!tab.settingKey) return true;
-    return settings[tab.settingKey]?.enabled !== false;
-  });
+  // Filter to enabled tabs, then apply admin-defined order from site settings.
+  const visibleTabs = useMemo(() => {
+    const enabled = allTabs.filter(tab => {
+      if (!tab.settingKey) return true;
+      return settings[tab.settingKey]?.enabled !== false;
+    });
+    const savedOrder: string[] | undefined = (siteSettings as any).workshop_nav_order?.order;
+    if (Array.isArray(savedOrder) && savedOrder.length > 0) {
+      const byKey = new Map(enabled.map(t => [t.key, t] as const));
+      const ordered = savedOrder.map(k => byKey.get(k)).filter(Boolean) as typeof enabled;
+      // Append any enabled tabs that weren't in the saved order (newly added)
+      const seen = new Set(ordered.map(t => t.key));
+      enabled.forEach(t => { if (!seen.has(t.key)) ordered.push(t); });
+      return ordered;
+    }
+    return enabled;
+  }, [settings, siteSettings]);
 
   if (!visibleTabs.find(t => t.key === activeTab)) {
     setActiveTab("home");
