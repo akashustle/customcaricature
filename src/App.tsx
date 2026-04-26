@@ -41,14 +41,19 @@ const MobileBottomNav = lazyShell(() => import("./components/MobileBottomNav"));
 const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
 const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
+const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
 import { installErrorReporter } from "./lib/error-reporter";
+import { installSyncWorker } from "./lib/sync-queue";
 
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
+
+// Boot the offline action queue worker (drains on reconnect)
+installSyncWorker();
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
@@ -104,6 +109,7 @@ const LilFlea = lazy(() => import("./pages/LilFlea"));
 const LilFleaGallery = lazy(() => import("./pages/LilFleaGallery"));
 const ClaimLink = lazy(() => import("./pages/ClaimLink"));
 const ChatNow = lazy(() => import("./pages/ChatNow"));
+const Download = lazy(() => import("./pages/Download"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -278,6 +284,7 @@ const App = () => {
         <RoutePrefetcher />
         <PWASplashScreen />
         <OfflineDetector />
+        <SyncStatusBadge />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
@@ -354,6 +361,8 @@ const App = () => {
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
                 <Route path="/claim-link" element={<ClaimLink />} />
                 <Route path="/chat-now" element={<ChatNow />} />
+                <Route path="/download" element={<Download />} />
+                <Route path="/install" element={<Navigate to="/download" replace />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />
