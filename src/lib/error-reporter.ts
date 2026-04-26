@@ -116,6 +116,10 @@ export const reportBurst = (key: string, count: number, windowMs: number) => {
   });
 };
 
+/** Read the in-memory ring buffer of recent client errors (newest first). */
+export const getRecentErrors = (): ErrorEvent[] => ring.slice();
+
+
 let installed = false;
 export const installErrorReporter = () => {
   if (!isBrowser || installed) return;
