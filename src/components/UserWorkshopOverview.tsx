@@ -14,14 +14,10 @@ import {
   GraduationCap, Calendar, Award, FileText, ChevronRight, ArrowRight, Loader2, Video,
 } from "lucide-react";
 
-const palette = {
-  ivory: "hsl(38 60% 96%)",
-  coral: "hsl(8 78% 70%)",
-  gold: "hsl(36 78% 60%)",
-  sage: "hsl(150 30% 65%)",
-  sky: "hsl(200 70% 70%)",
-  plum: "hsl(335 45% 55%)",
-};
+// Booking-dashboard parity: this overview lives inside the booking dashboard
+// so it must share the same brand tokens, white 3D cards, and gradient orbs
+// as the booking Home tab. No more hardcoded ivory/coral/gold palette — we
+// only use HSL design tokens (primary, accent, foreground, muted-foreground).
 
 type Props = {
   authUserId: string;
@@ -113,130 +109,114 @@ const UserWorkshopOverview = ({ authUserId }: Props) => {
 
   return (
     <div className="space-y-5">
-      {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[28px] p-5 md:p-6 border-2 shadow-[0_15px_50px_-15px_rgba(0,0,0,0.2)]"
-        style={{
-          background: `linear-gradient(135deg, ${palette.ivory} 0%, hsl(36 60% 92%) 50%, hsl(36 55% 88%) 100%)`,
-          borderColor: palette.gold,
-        }}>
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-50 pointer-events-none"
-          style={{ background: palette.gold }} />
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-30 pointer-events-none"
-          style={{ background: palette.coral }} />
+      {/* HERO — booking-dashboard parity. White 3D card with brand primary/accent
+          gradient orbs, "My Workshop" chip, semantic foreground text. */}
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="relative" style={{ perspective: 1200 }}>
+          <div className="absolute inset-x-3 -bottom-2 top-3 rounded-3xl bg-primary/10 blur-2xl pointer-events-none" />
+          <div
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card to-secondary/40 border border-border/50 p-5 sm:p-6 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.28),0_4px_12px_-4px_rgba(0,0,0,0.08)]"
+            style={{ transformStyle: "preserve-3d" }}
+          >
+            <motion.div aria-hidden animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.6, 0.4] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-16 -right-12 w-52 h-52 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
+            <motion.div aria-hidden animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute -bottom-20 -left-14 w-60 h-60 rounded-full bg-accent/25 blur-3xl pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0"
-            style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-            <GraduationCap className="w-7 h-7" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "hsl(20 40% 30%)" }}>
-              CCC Workshop
-            </p>
-            <h2 className="font-display text-xl md:text-2xl font-bold leading-tight" style={{ color: "hsl(20 40% 22%)" }}>
-              {ws.name || "Welcome, Student!"}
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {isUpcoming ? (
-                <Badge className="border-0 text-white text-[10px] font-bold px-2.5 py-1"
-                  style={{ background: `linear-gradient(135deg, ${palette.sage}, hsl(150 40% 45%))` }}>
-                  Upcoming
-                </Badge>
-              ) : (
-                <Badge className="border-0 text-white text-[10px] font-bold px-2.5 py-1"
-                  style={{ background: `linear-gradient(135deg, ${palette.plum}, ${palette.coral})` }}>
-                  Past
-                </Badge>
-              )}
-              {ws.roll_number && (
-                <Badge className="border-0 text-[10px] font-bold px-2.5 py-1"
-                  style={{ background: `${palette.plum}25`, color: "hsl(335 45% 30%)" }}>
-                  Roll #{ws.roll_number}
-                </Badge>
-              )}
-              {ws.skill_level && (
-                <Badge className="border-0 text-[10px] font-bold px-2.5 py-1"
-                  style={{ background: `${palette.sage}25`, color: "hsl(150 35% 25%)" }}>
-                  {ws.skill_level}
-                </Badge>
-              )}
+            <div className="relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5">
+                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-primary font-bold">My Workshop</p>
+                  </div>
+                  <h2 className="mt-3 font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight truncate">
+                    {ws.name || "Welcome, Student!"}
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {isUpcoming ? (
+                      <Badge className="border-0 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1">Upcoming</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px] font-bold px-2.5 py-1">Past</Badge>
+                    )}
+                    {ws.roll_number && (
+                      <Badge variant="outline" className="text-[10px] font-bold px-2.5 py-1 border-primary/30 text-primary">
+                        Roll #{ws.roll_number}
+                      </Badge>
+                    )}
+                    {ws.skill_level && (
+                      <Badge variant="outline" className="text-[10px] font-bold px-2.5 py-1 border-accent/40 text-accent-foreground bg-accent/10">
+                        {ws.skill_level}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground shadow-lg flex-shrink-0">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+              </div>
+
+              <Button onClick={goToWorkshopDash} className="mt-5 rounded-full font-bold w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+                Open Workshop Dashboard <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
             </div>
           </div>
-          <Button onClick={goToWorkshopDash} className="rounded-full font-bold text-white border-0 shadow-md"
-            style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-            Open Workshop <ArrowRight className="w-4 h-4 ml-1.5" />
-          </Button>
         </div>
       </motion.div>
 
       {/* Upcoming/last workshop card */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-        className="rounded-[24px] border-2 p-5 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)]"
-        style={{
-          background: `linear-gradient(135deg, hsl(200 70% 96%), hsl(200 65% 91%))`,
-          borderColor: palette.sky,
-        }}>
-        <h3 className="font-bold text-base mb-3 flex items-center gap-2" style={{ color: "hsl(220 40% 25%)" }}>
-          <Calendar className="w-4 h-4" /> {isUpcoming ? "Your upcoming workshop" : "Your last workshop"}
+        className="rounded-3xl border border-border/50 p-5 bg-card shadow-[0_10px_30px_-15px_hsl(var(--primary)/0.18)]">
+        <h3 className="font-bold text-base mb-3 flex items-center gap-2 text-foreground">
+          <Calendar className="w-4 h-4 text-primary" /> {isUpcoming ? "Your upcoming workshop" : "Your last workshop"}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <Cell label="Date" value={wsDate ? wsDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"} color={palette.sky} />
-          <Cell label="Slot" value={ws.slot === "12pm-3pm" ? "12 PM – 3 PM" : ws.slot === "6pm-9pm" ? "6 PM – 9 PM" : (ws.slot || "—")} color={palette.gold} />
-          <Cell label="City" value={ws.city || "—"} color={palette.sage} />
+          <Cell label="Date" value={wsDate ? wsDate.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"} />
+          <Cell label="Slot" value={ws.slot === "12pm-3pm" ? "12 PM – 3 PM" : ws.slot === "6pm-9pm" ? "6 PM – 9 PM" : (ws.slot || "—")} />
+          <Cell label="City" value={ws.city || "—"} />
         </div>
       </motion.div>
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={FileText} label="Assignments" value={counts.assignments} color={palette.coral} />
-        <StatCard icon={Award} label="Certificates" value={counts.certificates} color={palette.gold} />
+      {/* Quick stats — match booking home stat-tile look */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <StatTile icon={FileText} label="Assignments" value={counts.assignments} tint="from-violet-500/15 to-violet-500/5" iconBg="bg-violet-500/15 text-violet-600" />
+        <StatTile icon={Award} label="Certificates" value={counts.certificates} tint="from-amber-500/15 to-amber-500/5" iconBg="bg-amber-500/15 text-amber-600" />
       </div>
 
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3">
-        <QuickLink icon={Video} label="Workshop Videos" onClick={goToWorkshopDash} color={palette.sky} />
-        <QuickLink icon={GraduationCap} label="Full Workshop Dashboard" onClick={goToWorkshopDash} color={palette.plum} />
+        <QuickLink icon={Video} label="Workshop Videos" onClick={goToWorkshopDash} />
+        <QuickLink icon={GraduationCap} label="Full Dashboard" onClick={goToWorkshopDash} />
       </div>
     </div>
   );
 };
 
-const Cell = ({ label, value, color }: any) => (
-  <div className="rounded-xl bg-card/70 border p-3 shadow-sm" style={{ borderColor: `${color}40` }}>
-    <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>{label}</p>
-    <p className="text-sm font-bold mt-0.5" style={{ color: "hsl(20 30% 20%)" }}>{value}</p>
+const Cell = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-xl bg-secondary/40 border border-border/50 p-3 shadow-sm">
+    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-sm font-bold mt-0.5 text-foreground">{value}</p>
   </div>
 );
 
-const StatCard = ({ icon: Icon, label, value, color }: any) => (
+const StatTile = ({ icon: Icon, label, value, tint, iconBg }: any) => (
   <motion.div whileHover={{ y: -3, scale: 1.02 }}
-    className="relative overflow-hidden rounded-2xl p-4 border-2 bg-card shadow-md"
-    style={{ borderColor: `${color}55` }}>
-    <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full blur-2xl opacity-40 pointer-events-none" style={{ background: color }} />
-    <div className="relative z-10 flex items-center gap-3">
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0"
-        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>{label}</p>
-        <p className="font-display text-xl font-bold leading-none mt-1" style={{ color: "hsl(20 30% 20%)" }}>{value}</p>
-      </div>
+    className={`relative rounded-2xl bg-gradient-to-br ${tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur`}>
+    <div className={`w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center mb-2`}>
+      <Icon className="w-4 h-4" />
     </div>
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">{label}</p>
+    <p className="font-display text-2xl font-bold leading-tight text-foreground">{value}</p>
   </motion.div>
 );
 
-const QuickLink = ({ icon: Icon, label, onClick, color }: any) => (
+const QuickLink = ({ icon: Icon, label, onClick }: any) => (
   <motion.button whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }} onClick={onClick}
-    className="rounded-2xl p-4 text-left border-2 bg-card flex items-center justify-between shadow-md"
-    style={{ borderColor: `${color}55` }}>
+    className="rounded-2xl p-4 text-left border border-border/50 bg-card flex items-center justify-between shadow-[0_6px_16px_-8px_rgba(0,0,0,0.1)] hover:border-primary/40 hover:shadow-[0_10px_24px_-12px_hsl(var(--primary)/0.25)] transition-all">
     <div className="flex items-center gap-3 min-w-0">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow flex-shrink-0"
-        style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
+      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
         <Icon className="w-5 h-5" />
       </div>
-      <span className="font-bold text-sm truncate" style={{ color: "hsl(20 30% 20%)" }}>{label}</span>
+      <span className="font-bold text-sm truncate text-foreground">{label}</span>
     </div>
     <ChevronRight className="w-4 h-4 text-muted-foreground" />
   </motion.button>

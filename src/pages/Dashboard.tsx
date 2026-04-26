@@ -27,8 +27,8 @@ import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
-import AccountSwitcherCard from "@/components/AccountSwitcherCard";
-// useWorkshopLink consumed inside AccountSwitcherCard / UserWorkshopOverview
+// AccountSwitcherCard removed: workshop switching now exclusively lives in
+// the dedicated Workshop tab via UserWorkshopOverview (per user request).
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
@@ -2755,15 +2755,9 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
         </motion.div>
       )}
 
-      {/* Workshop quick-switch (only for workshop-origin users) */}
-      {user && (
-        <AccountSwitcherCard
-          authUserId={user.id}
-          fullName={profile?.full_name}
-          email={profile?.email}
-          mobile={profile?.mobile}
-        />
-      )}
+      {/* AccountSwitcherCard removed from Home/Profile per user request:
+          workshop-linked users now access their workshop via the dedicated
+          "Workshop" tab (see UserWorkshopOverview) instead of a switcher card. */}
 
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
@@ -3001,18 +2995,11 @@ const ProfileWithLogout = (props: any) => {
         />
       )}
 
-      {/* Workshop overview & cross-account switcher */}
-      {props.userId && (
-        <>
-          <AccountSwitcherCard
-            authUserId={props.userId}
-            fullName={props.profile?.full_name}
-            email={props.profile?.email}
-            mobile={props.profile?.mobile}
-          />
-          <UserWorkshopOverview authUserId={props.userId} />
-        </>
-      )}
+      {/* Per user request: switching to workshop is now exclusively handled by
+          the dedicated "Workshop" tab in the bottom nav (UserWorkshopOverview).
+          The profile tab no longer shows the AccountSwitcherCard to avoid
+          duplication. UserWorkshopOverview is also rendered inside the
+          Workshop tab in the main dashboard tab list. */}
 
       {/* Refer a friend — light 3D referral card */}
       <ReferAFriendCard
