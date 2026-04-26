@@ -12,7 +12,7 @@ const SyncStatusBadge = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeQueue(setQueue);
-    return () => { unsubscribe; };
+    return () => { unsubscribe(); };
   }, []);
 
   const pending = queue.filter((a) => a.status === "queued" || a.status === "syncing");
