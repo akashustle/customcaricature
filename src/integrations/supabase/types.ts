@@ -1121,6 +1121,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ban_appeals: {
+        Row: {
+          admin_response: string | null
+          created_at: string
+          email: string | null
+          evidence_url: string | null
+          full_name: string | null
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          created_at?: string
+          email?: string | null
+          evidence_url?: string | null
+          full_name?: string | null
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          created_at?: string
+          email?: string | null
+          evidence_url?: string | null
+          full_name?: string | null
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       before_after_gallery: {
         Row: {
           after_image_url: string

@@ -508,6 +508,7 @@ const Dashboard = () => {
     payments: dt.payments !== false,
     chat: dt.chat !== false,
     workshop: hasWorkshop, // only visible for workshop-origin users
+    alerts: dt.alerts !== false,
     profile: dt.profile !== false,
   };
 
@@ -644,6 +645,14 @@ const Dashboard = () => {
                   {(profile as any).ban_reason ||
                     "Your account is currently suspended. Please contact support for more information."}
                 </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="mt-3 rounded-full font-sans"
+                  onClick={() => navigate("/appeal-ban")}
+                >
+                  Appeal this ban →
+                </Button>
               </div>
             </div>
           </div>
@@ -686,6 +695,11 @@ const Dashboard = () => {
                   <GraduationCap className="w-4 h-4 mr-2" />Workshop
                 </TabsTrigger>
               )}
+              {tabsAvailable.alerts !== false && (
+                <TabsTrigger value="alerts" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Bell className="w-4 h-4 mr-2" />Alerts
+                </TabsTrigger>
+              )}
               {tabsAvailable.profile && (
                 <TabsTrigger value="profile" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <User className="w-4 h-4 mr-2" />Profile
@@ -709,6 +723,9 @@ const Dashboard = () => {
             <TabsContent value="chat">{user && <ChatSection userId={user.id} userName={profile?.full_name || ""} />}</TabsContent>
             {tabsAvailable.workshop && (
               <TabsContent value="workshop">{user && <UserWorkshopOverview authUserId={user.id} />}</TabsContent>
+            )}
+            {tabsAvailable.alerts && (
+              <TabsContent value="alerts">{user && <AlertsSection userId={user.id} />}</TabsContent>
             )}
             <TabsContent value="profile">
               <ProfileWithLogout
@@ -744,6 +761,9 @@ const Dashboard = () => {
           {activeTab === "workshop" && tabsAvailable.workshop && user && (
             <UserWorkshopOverview authUserId={user.id} />
           )}
+          {activeTab === "alerts" && tabsAvailable.alerts && user && (
+            <AlertsSection userId={user.id} />
+          )}
           {activeTab === "profile" && (
             <ProfileWithLogout
               userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
@@ -767,12 +787,7 @@ const Dashboard = () => {
               { key: "orders", icon: Package, label: "Orders" },
               { key: "payments", icon: Receipt, label: "Pay" },
               { key: "chat", icon: MessageCircle, label: "Chat" },
-              // Workshop tab — only filtered in via tabsAvailable.workshop
-              // (true for users whose auth account is linked to a workshop_user
-              // record, including via email/mobile fallback). This makes the
-              // Workshop overview reachable from the booking dashboard's
-              // mobile bottom nav for users like Akash who registered via the
-              // workshop dashboard's "Create Booking Account" flow.
+              { key: "alerts", icon: Bell, label: "Alerts" },
               { key: "workshop", icon: GraduationCap, label: "Workshop" },
               { key: "profile", icon: User, label: "Me" },
             ];
