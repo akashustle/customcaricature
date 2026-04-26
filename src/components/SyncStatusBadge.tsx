@@ -16,7 +16,10 @@ const SyncStatusBadge = () => {
   const [queue, setQueue] = useState<SyncAction[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => subscribeQueue(setQueue), []);
+  useEffect(() => {
+    const unsubscribe = subscribeQueue(setQueue);
+    return () => { unsubscribe(); };
+  }, []);
 
   const pending = queue.filter((a) => a.status === "queued" || a.status === "syncing");
   const failed = queue.filter((a) => a.status === "failed");
