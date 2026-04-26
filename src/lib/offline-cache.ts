@@ -29,7 +29,11 @@ type CacheKey =
   | "calculator"
   | "faqs"
   | "my_orders"
-  | "my_events";
+  | "my_events"
+  | "my_profile"
+  | "my_workshop"
+  | "my_notifications"
+  | "site_settings";
 
 const open = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
