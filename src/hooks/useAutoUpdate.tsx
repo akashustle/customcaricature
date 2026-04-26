@@ -1,8 +1,29 @@
 import { useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const CHECK_INTERVAL = 30_000; // 30 seconds
+const CHECK_INTERVAL = 5 * 60_000; // 5 minutes — was 30s and caused tight reload loops
 const BUILD_HASH_KEY = "ccc_build_hash";
+
+/**
+ * Skip auto-update entirely in dev / preview / iframe contexts.
+ * Vite's hashed asset filenames change on every HMR cycle, which previously
+ * caused the page to reload itself every ~30 seconds inside the Lovable
+ * editor preview and on the live preview domain.
+ */
+const shouldSkipAutoUpdate = (): boolean => {
+  if (typeof window === "undefined") return true;
+  // Dev mode (Vite serves un-hashed /src/* — no point polling)
+  if (import.meta.env.DEV) return true;
+  // Inside an iframe (Lovable editor preview)
+  try { if (window.self !== window.top) return true; } catch { return true; }
+  // Lovable preview / project hosts — the hash changes on every rebuild
+  const host = window.location.hostname;
+  if (host.includes("lovableproject.com") || host.includes("id-preview--") || host.includes("lovable.app")) {
+    // Only allow on the published custom domain, not on preview subdomains
+    if (host.includes("id-preview--") || host.includes("lovableproject.com")) return true;
+  }
+  return false;
+};
 
 /**
  * Polls index.html for changes in the built asset hashes.
@@ -49,9 +70,10 @@ const useAutoUpdate = () => {
   }, []);
 
   useEffect(() => {
+    if (shouldSkipAutoUpdate()) return;
     // Run on all pages — including admin — to ensure everyone gets updates
     const interval = setInterval(checkForUpdate, CHECK_INTERVAL);
-    
+
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
         checkForUpdate();
