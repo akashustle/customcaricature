@@ -45,6 +45,10 @@ const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
+import { installErrorReporter } from "./lib/error-reporter";
+
+// Install global error/network reporter once, before React mounts the tree.
+installErrorReporter();
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
