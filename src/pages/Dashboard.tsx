@@ -26,6 +26,7 @@ import EventBalanceFullScreen from "@/components/EventBalanceFullScreen";
 import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
+import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 // AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
@@ -3045,8 +3046,13 @@ const ProfileWithLogout = (props: any) => {
         changingPassword={props.changingPassword}
       />
 
+      {/* Stay-connected social row + dark-mode toggle. Always at the bottom
+          of the Profile tab so it's the last thing the user sees. Links use
+          openExternal() so they stay inside the PWA shell when installed. */}
+      <ProfileSocialFooter variant="booking" userName={props.profile?.full_name?.split(" ")[0]} />
+
       {/* Logout button - moved here from header */}
-      <div className="bg-white border border-border rounded-3xl p-4">
+      <div className="bg-card border border-border rounded-3xl p-4">
         <Button
           onClick={props.handleLogout}
           variant="outline"
