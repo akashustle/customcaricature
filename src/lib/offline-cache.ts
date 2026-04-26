@@ -91,6 +91,10 @@ export const primeOfflineCache = async (force = false) => {
     cacheFaqs(),
     cacheMyOrders(),
     cacheMyEvents(),
+    cacheMyProfile(),
+    cacheMyWorkshop(),
+    cacheMyNotifications(),
+    cacheSiteSettings(),
   ];
 
   await Promise.allSettled(tasks);
