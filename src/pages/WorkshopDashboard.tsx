@@ -73,6 +73,8 @@ const WorkshopDashboard = () => {
   const [settings, setSettings] = useState<any>({});
   const [accentIdx, setAccentIdx] = useState(() => parseInt(localStorage.getItem("ws_accent") || "0") || 0);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  // Whether this workshop user also has a linked booking (main) account
+  const [hasBookingAccount, setHasBookingAccount] = useState(false);
 
   const accent = ACCENT_COLORS[accentIdx] || ACCENT_COLORS[0];
 
