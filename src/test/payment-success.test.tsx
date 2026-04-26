@@ -11,7 +11,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
+import * as TL from "@testing-library/react";
+const { screen, waitFor } = TL as unknown as typeof import("@testing-library/dom") & { waitFor: typeof import("@testing-library/dom").waitFor };
 import { MemoryRouter } from "react-router-dom";
 import OrderConfirmation from "@/components/order/OrderConfirmation";
 
@@ -28,9 +30,9 @@ const channelMock = vi.fn(() => fakeChannel);
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: (...args: unknown[]) => supabaseFromMock(...args),
-    channel: (...args: unknown[]) => channelMock(...args),
-    removeChannel: (...args: unknown[]) => removeChannelMock(...args),
+    from: (...args: unknown[]) => supabaseFromMock(...(args as [unknown])),
+    channel: (...args: unknown[]) => channelMock(...(args as [string])),
+    removeChannel: (...args: unknown[]) => removeChannelMock(...(args as [unknown])),
   },
 }));
 
