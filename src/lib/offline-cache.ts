@@ -238,4 +238,14 @@ export const installOfflineCache = () => {
   window.addEventListener("online", () => {
     primeOfflineCache(true).catch(() => {});
   });
+
+  // Re-prime as soon as the user signs in, so their personal data
+  // (profile, orders, events, workshop, notifications) is captured for offline.
+  try {
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        primeOfflineCache(true).catch(() => {});
+      }
+    });
+  } catch {/* ignore */}
 };
