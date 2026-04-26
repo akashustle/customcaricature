@@ -96,6 +96,8 @@ const AppWelcome3D = () => {
 
   const finish = (target: "register" | "login") => {
     localStorage.setItem(STORAGE_KEY, "1");
+    // Suppress the legacy onboarding so the welcome flow never shows twice
+    localStorage.setItem("ccc_onboarding_done_v2", "done");
     setShow(false);
     setTimeout(() => navigate(target === "register" ? "/register" : "/login"), 60);
   };
@@ -110,6 +112,7 @@ const AppWelcome3D = () => {
 
   const skip = () => {
     localStorage.setItem(STORAGE_KEY, "1");
+    localStorage.setItem("ccc_onboarding_done_v2", "done");
     setShow(false);
   };
 
