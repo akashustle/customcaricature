@@ -410,6 +410,7 @@ Deno.serve(async (req) => {
     // Fallback — unknown type
     return new Response("Unknown sitemap type", { status: 400, headers: corsHeaders });
   } catch (err) {
-    return new Response(`Error: ${err.message}`, { status: 500, headers: corsHeaders });
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(`Error: ${message}`, { status: 500, headers: corsHeaders });
   }
 });

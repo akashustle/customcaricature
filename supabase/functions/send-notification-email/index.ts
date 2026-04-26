@@ -111,8 +111,6 @@ Deno.serve(async (req) => {
     const aiData = await aiResponse.json();
     const emailBody = aiData.choices?.[0]?.message?.content || "Thank you for choosing Creative Caricature Club!";
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    
     // Log the notification
     console.log(`[EMAIL] To: ${recipientEmail}, Subject: ${subject}`);
 
