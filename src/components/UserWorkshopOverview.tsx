@@ -36,10 +36,36 @@ const UserWorkshopOverview = ({ authUserId }: Props) => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const q: any = supabase.from("workshop_users" as any).select("*");
-      const { data: wsUsers } = await q.eq("auth_user_id", authUserId).order("workshop_date", { ascending: false }).limit(1);
-      const wsUser: any = (wsUsers as any)?.[0];
-      setWs(wsUser || null);
+      // 1) Try direct match by auth_user_id
+      let wsUser: any = null;
+      const { data: direct } = await supabase.from("workshop_users" as any).select("*")
+        .eq("auth_user_id", authUserId).order("workshop_date", { ascending: false }).limit(1);
+      wsUser = (direct as any)?.[0] || null;
+
+      // 2) Fallback: match by profile email/mobile (handles users whose
+      //    workshop record predates their booking account, e.g. Akash flow).
+      if (!wsUser) {
+        const { data: prof } = await supabase.from("profiles")
+          .select("email, mobile, full_name").eq("user_id", authUserId).maybeSingle();
+        const email = (prof?.email || "").toLowerCase().trim();
+        const mobile = (prof?.mobile || "").replace(/\D/g, "");
+        if (email) {
+          const { data } = await supabase.from("workshop_users" as any).select("*").ilike("email", email).limit(1);
+          wsUser = (data as any)?.[0] || null;
+        }
+        if (!wsUser && mobile) {
+          const { data } = await supabase.from("workshop_users" as any).select("*").eq("mobile", mobile).limit(1);
+          wsUser = (data as any)?.[0] || null;
+        }
+        if (wsUser) {
+          // Silent link in the background so subsequent loads are instant.
+          supabase.functions.invoke("link-workshop-account", {
+            body: { auth_user_id: authUserId, email, mobile, full_name: prof?.full_name },
+          }).catch(() => {});
+        }
+      }
+
+      setWs(wsUser);
 
       if (wsUser?.id) {
         const [{ count: aCount }, { count: cCount }] = await Promise.all([

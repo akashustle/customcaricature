@@ -41,7 +41,8 @@ export function useWorkshopLink(authUserId: string | null | undefined): Workshop
     if (!authUserId) { setWorkshopUser(null); setLoading(false); return; }
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // 1) Direct link by auth_user_id
+      const { data: direct, error } = await supabase
         .from("workshop_users" as any)
         .select("*")
         .eq("auth_user_id", authUserId)
@@ -49,7 +50,40 @@ export function useWorkshopLink(authUserId: string | null | undefined): Workshop
         .limit(1)
         .maybeSingle();
       if (error) throw error;
-      setWorkshopUser((data as any) || null);
+      if (direct) { setWorkshopUser(direct as any); setLastError(null); return; }
+
+      // 2) Fallback: match by email/mobile from profile, then silently link.
+      //    This catches users whose workshop record was created BEFORE they
+      //    signed up for a booking account (e.g. Akash flow).
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("email, mobile, full_name")
+        .eq("user_id", authUserId)
+        .maybeSingle();
+      if (!prof) { setWorkshopUser(null); setLastError(null); return; }
+
+      const email = (prof.email || "").toLowerCase().trim();
+      const mobile = (prof.mobile || "").replace(/\D/g, "");
+      let match: any = null;
+      if (email) {
+        const { data } = await supabase.from("workshop_users" as any)
+          .select("*").ilike("email", email).maybeSingle();
+        match = data;
+      }
+      if (!match && mobile) {
+        const { data } = await supabase.from("workshop_users" as any)
+          .select("*").eq("mobile", mobile).maybeSingle();
+        match = data;
+      }
+      if (match) {
+        setWorkshopUser(match as any);
+        // Silent link — no await so UI is instant
+        supabase.functions.invoke("link-workshop-account", {
+          body: { auth_user_id: authUserId, email, mobile, full_name: prof.full_name },
+        }).catch(() => {});
+      } else {
+        setWorkshopUser(null);
+      }
       setLastError(null);
     } catch (e: any) {
       setLastError(e?.message || "Could not load workshop account");

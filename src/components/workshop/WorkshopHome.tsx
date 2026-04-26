@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Calendar, Clock, CheckCircle, XCircle, Video as VideoIcon, ExternalLink, AlertTriangle, Instagram, Youtube, Facebook, Phone, MessageCircle, MonitorPlay, Maximize, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
 const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const dm = darkMode;
   const [now, setNow] = useState(new Date());
