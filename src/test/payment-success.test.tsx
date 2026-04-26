@@ -17,7 +17,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-// @ts-expect-error — testing-library v16 type exports vary by setup
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import OrderConfirmation from "@/components/order/OrderConfirmation";
