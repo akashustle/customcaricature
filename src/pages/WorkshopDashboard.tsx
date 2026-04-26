@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard, BadgeCheck } from "lucide-react";
+import { LogOut, Home, Award, FileText, Video, MessageSquare, Moon, Sun, User, Bell, Palette, LayoutDashboard, BadgeCheck, Receipt } from "lucide-react";
 import LiveGreeting from "@/components/LiveGreeting";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useTheme } from "next-themes";
@@ -24,6 +24,7 @@ import WorkshopVideos from "@/components/workshop/WorkshopVideos";
 import WorkshopFeedback from "@/components/workshop/WorkshopFeedback";
 import WorkshopProfile from "@/components/workshop/WorkshopProfile";
 import WorkshopNotifications from "@/components/workshop/WorkshopNotifications";
+import WorkshopPayments from "@/components/workshop/WorkshopPayments";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
@@ -54,8 +55,8 @@ const playNotifSound = () => {
   } catch {}
 };
 
-// Tab order matches user request: Home, Profile, Videos, Notifications,
-// Assignments, Certificates (with Feedback as a 7th scrollable tab).
+// Tab order: Home, Profile, Videos, Notifications, Tasks, Certs, Payments, Feedback.
+// Payments is always available (mirrors booking dashboard parity).
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
   { key: "profile", icon: User, label: "Profile", settingKey: null },
@@ -63,6 +64,7 @@ const allTabs = [
   { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
   { key: "assignments", icon: FileText, label: "Tasks", settingKey: "assignment_submission_enabled" },
   { key: "certificates", icon: Award, label: "Certs", settingKey: "certificate_visibility" },
+  { key: "payments", icon: Receipt, label: "Pay", settingKey: null },
   { key: "feedback", icon: MessageSquare, label: "Feedback", settingKey: "feedback_visibility" },
 ];
 
@@ -194,6 +196,7 @@ const WorkshopDashboard = () => {
       case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
       case "feedback": return <WorkshopFeedback user={workshopUser} darkMode={darkMode} />;
       case "profile": return <WorkshopProfile user={workshopUser} darkMode={darkMode} />;
+      case "payments": return <WorkshopPayments user={workshopUser} darkMode={darkMode} />;
       default: return null;
     }
   };
