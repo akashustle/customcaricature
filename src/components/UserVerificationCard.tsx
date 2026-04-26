@@ -257,74 +257,43 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
 
   return (
     <>
-      {/* Outer card — premium ivory + sky 3D */}
+      {/* Outer card — single-button 3D verification widget (matches Workshop verify look).
+          Dark-mode friendly: uses semantic tokens for surface/text instead of fixed
+          ivory/sky tints. Single blue CTA — no duplicate buttons. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-[24px] p-5 border-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.18)]"
-        style={{
-          background: `linear-gradient(135deg, hsl(200 70% 95%), hsl(200 60% 90%))`,
-          borderColor: palette.sky,
-        }}
+        className="relative overflow-hidden rounded-[24px] p-5 border-2 border-primary/30 bg-gradient-to-br from-card via-card to-primary/5 shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.35)]"
       >
-        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-40 pointer-events-none"
-          style={{ background: palette.sky }} />
+        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-30 pointer-events-none bg-primary" />
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
-            style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}>
-            <ShieldCheck className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 bg-gradient-to-br from-primary to-primary/70">
+            <ShieldCheck className="w-7 h-7 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base md:text-lg flex items-center gap-2" style={{ color: "hsl(220 50% 25%)" }}>
-              Get your blue tick <BadgeCheck className="w-5 h-5" style={{ color: palette.sky }} />
+            <h3 className="font-bold text-base md:text-lg flex items-center gap-2 text-foreground">
+              Become Verified <BadgeCheck className="w-5 h-5 text-primary" />
             </h3>
-            <p className="text-xs md:text-sm mt-0.5" style={{ color: "hsl(220 30% 35%)" }}>
+            <p className="text-xs md:text-sm mt-1 text-muted-foreground">
               {isPending
                 ? "Your verification is under review. We'll notify you once approved."
-                : "Two steps unlock the blue tick — fill in all your profile details and book your first event. We'll verify you automatically once both are done."}
+                : "Book your first event and complete your profile — once both are done, you'll get the blue tick automatically."}
             </p>
           </div>
           {isPending ? (
-            <span
-              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex-shrink-0"
-              style={{
-                background: "hsl(38 95% 92%)",
-                color: "hsl(28 80% 22%)",
-                border: "1px solid hsl(38 90% 70%)",
-              }}
-            >
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex-shrink-0 bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700/60">
               <Loader2 className="w-3 h-3 animate-spin" /> Pending Review
             </span>
           ) : (
-            <Button onClick={() => setOpen(true)} size="sm"
-              className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0"
-              style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
-              Complete profile <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            <Button
+              onClick={() => setOpen(true)}
+              size="sm"
+              className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
+            >
+              Become Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Button>
           )}
         </div>
-
-        {/* Quick book CTA — only show when not yet pending */}
-        {!isPending && onBookEvent && (
-          <div className="relative z-10 mt-4 flex items-center gap-3 rounded-2xl border bg-card/70 px-3 py-2.5"
-            style={{ borderColor: `${palette.coral}40` }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow"
-              style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold" style={{ color: "hsl(20 40% 25%)" }}>Book your first event</p>
-              <p className="text-[11px]" style={{ color: "hsl(20 30% 40%)" }}>
-                Booking + a complete profile gives you the blue tick automatically.
-              </p>
-            </div>
-            <Button size="sm" onClick={onBookEvent}
-              className="h-8 rounded-full text-white font-semibold shadow"
-              style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-              {canBookEvent ? "Book Now" : "Get Quote"}
-            </Button>
-          </div>
-        )}
       </motion.div>
 
       {/* Verification dialog */}

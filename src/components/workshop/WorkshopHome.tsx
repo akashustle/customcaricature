@@ -321,43 +321,76 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
         </div>
       </motion.div>
 
+      {/* WORKSHOP DETAILS — matches hero "My Workshop" 3D style */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <GlassCard>
-          <h3 className={`${textPrimary} text-sm uppercase tracking-wider mb-3`}>Workshop Details</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className={`${dm ? "bg-purple-900/20 border-purple-700/30" : "bg-purple-50/60 border-purple-100/40"} rounded-xl p-3 border`}>
-              <p className={`${textMuted} text-xs`}>Dates</p>
-              <p className={`${textPrimary} text-sm mt-1`}>14 March & 15 March 2026</p>
-            </div>
-            <div className={`${dm ? "bg-pink-900/20 border-pink-700/30" : "bg-pink-50/60 border-pink-100/40"} rounded-xl p-3 border`}>
-              <p className={`${textMuted} text-xs`}>Your Slot</p>
-              <p className={`${textPrimary} text-sm mt-1`}>{slotLabel}</p>
+        <div className="relative" style={{ perspective: 1200 }}>
+          <div className="absolute inset-x-3 -bottom-2 top-3 rounded-3xl bg-primary/10 blur-2xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card to-secondary/40 border border-border/50 p-5 sm:p-6 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.28),0_4px_12px_-4px_rgba(0,0,0,0.08)]">
+            <div className="absolute -top-12 -right-10 w-44 h-44 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 mb-3">
+                <Calendar className="w-3 h-3 text-primary" />
+                <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-primary font-bold">Workshop Details</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="relative rounded-2xl bg-gradient-to-br from-violet-500/15 to-violet-500/5 border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur">
+                  <div className="w-8 h-8 rounded-xl bg-violet-500/15 text-violet-600 flex items-center justify-center mb-2">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">Dates</p>
+                  <p className="font-display text-sm font-bold leading-tight text-foreground">14 & 15 Mar 2026</p>
+                </div>
+                <div className="relative rounded-2xl bg-gradient-to-br from-pink-500/15 to-pink-500/5 border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur">
+                  <div className="w-8 h-8 rounded-xl bg-pink-500/15 text-pink-600 flex items-center justify-center mb-2">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">Your Slot</p>
+                  <p className="font-display text-sm font-bold leading-tight text-foreground">{slotLabel}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </GlassCard>
+        </div>
       </motion.div>
 
+      {/* ATTENDANCE — matches hero "My Workshop" 3D style */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <GlassCard>
-          <h3 className={`${textPrimary} text-sm uppercase tracking-wider mb-3`}>Attendance</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {["2026-03-14", "2026-03-15"].map((date, i) => {
-              const status = getAttendance(date);
-              return (
-                <div key={date} className={`rounded-xl p-4 border text-center ${
-                  status === "present" ? (dm ? "bg-green-900/20 border-green-700/30" : "bg-green-50/80 border-green-200/40") :
-                  status === "absent" ? (dm ? "bg-red-900/20 border-red-700/30" : "bg-red-50/80 border-red-200/40") :
-                  status === "video_session" ? (dm ? "bg-blue-900/20 border-blue-700/30" : "bg-blue-50/80 border-blue-200/40") :
-                  (dm ? "bg-white/5 border-white/10" : "bg-gray-50/60 border-gray-200/30")
-                }`}>
-                  <p className={`${textMuted} text-xs`}>Day {i + 1}</p>
-                  <p className={`${textPrimary} text-sm mt-1`}>{new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
-                  <div className="mt-2">{statusBadge(status)}</div>
-                </div>
-              );
-            })}
+        <div className="relative" style={{ perspective: 1200 }}>
+          <div className="absolute inset-x-3 -bottom-2 top-3 rounded-3xl bg-accent/10 blur-2xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card to-secondary/40 border border-border/50 p-5 sm:p-6 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.28),0_4px_12px_-4px_rgba(0,0,0,0.08)]">
+            <div className="absolute -top-12 -left-10 w-44 h-44 rounded-full bg-accent/20 blur-3xl pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 mb-3">
+                <CheckCircle className="w-3 h-3 text-primary" />
+                <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-primary font-bold">Attendance</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                {["2026-03-14", "2026-03-15"].map((date, i) => {
+                  const status = getAttendance(date);
+                  const tint =
+                    status === "present" ? "from-emerald-500/15 to-emerald-500/5" :
+                    status === "absent" ? "from-red-500/15 to-red-500/5" :
+                    status === "video_session" ? "from-blue-500/15 to-blue-500/5" :
+                    "from-muted to-muted/40";
+                  return (
+                    <div
+                      key={date}
+                      className={`relative rounded-2xl bg-gradient-to-br ${tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur text-center`}
+                    >
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">Day {i + 1}</p>
+                      <p className="font-display text-sm font-bold leading-tight text-foreground mt-0.5">
+                        {new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                      </p>
+                      <div className="mt-2 flex justify-center">{statusBadge(status)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </GlassCard>
+        </div>
       </motion.div>
 
       {filteredSessions.length > 0 && settings.live_session_enabled?.enabled !== false && (

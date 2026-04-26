@@ -28,6 +28,7 @@ import WorkshopPayments from "@/components/workshop/WorkshopPayments";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
+import WorkshopNotificationBell from "@/components/workshop/WorkshopNotificationBell";
 
 // Brand-aligned palette — primary uses CCC site primary, with curated accents
 const ACCENT_COLORS = [
@@ -231,11 +232,9 @@ const WorkshopDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <WorkshopNotificationBell userId={workshopUser.id} />
             <Button variant="ghost" size="icon" onClick={() => setShowColorPicker(!showColorPicker)} className="rounded-full h-9 w-9 text-muted-foreground" title="Theme color">
               <Palette className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-9 w-9 text-muted-foreground" title="Dark / Light">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -322,9 +321,7 @@ const WorkshopDashboard = () => {
         <div className="flex items-center justify-between mb-4">
           <LiveGreeting name={workshopUser.name} />
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-10 w-10 text-muted-foreground" aria-label="Toggle theme">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
+            <WorkshopNotificationBell userId={workshopUser.id} />
             <button
               onClick={() => setActiveTab("profile")}
               className="relative w-11 h-11 rounded-full overflow-visible bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground shadow-sm"

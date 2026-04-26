@@ -27,8 +27,9 @@ import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
-// AccountSwitcherCard removed: workshop switching now exclusively lives in
-// the dedicated Workshop tab via UserWorkshopOverview (per user request).
+// AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
+// booking dashboard's Profile tab for users who also have a workshop account.
+import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
@@ -3002,11 +3003,18 @@ const ProfileWithLogout = (props: any) => {
         />
       )}
 
-      {/* Per user request: switching to workshop is now exclusively handled by
-          the dedicated "Workshop" tab in the bottom nav (UserWorkshopOverview).
-          The profile tab no longer shows the AccountSwitcherCard to avoid
-          duplication. UserWorkshopOverview is also rendered inside the
-          Workshop tab in the main dashboard tab list. */}
+      {/* Switch to Workshop — visible for any user with a linked workshop
+          account (incl. users like Akash who registered via the workshop
+          dashboard's "Create Booking Account" flow). The card itself
+          self-hides if no workshop link exists, so it's safe to always render. */}
+      {props.userId && (
+        <AccountSwitcherCard
+          authUserId={props.userId}
+          fullName={props.profile?.full_name}
+          email={props.profile?.email}
+          mobile={props.profile?.mobile}
+        />
+      )}
 
       {/* Refer a friend — light 3D referral card */}
       <ReferAFriendCard
