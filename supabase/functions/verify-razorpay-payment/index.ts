@@ -162,8 +162,7 @@ serve(async (req) => {
       // Reduce stock
       if (orderItems) {
         for (const item of orderItems) {
-          await supabase.rpc("", {}).catch(() => {});
-          // Direct update
+          // Direct stock decrement
           const { data: product } = await supabase.from("shop_products").select("stock_quantity").eq("id", item.product_id).single();
           if (product) {
             await supabase.from("shop_products").update({ 
