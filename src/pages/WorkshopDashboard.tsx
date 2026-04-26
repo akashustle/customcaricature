@@ -155,8 +155,6 @@ const WorkshopDashboard = () => {
   const handleLogout = () => { localStorage.removeItem("workshop_user"); navigate("/workshop"); };
   const getGreeting = () => { const h = new Date().getHours(); if (h < 12) return "Good Morning ☀️"; if (h < 17) return "Good Afternoon 🌤️"; return "Good Evening 🌙"; };
 
-  if (!workshopUser) return null;
-
   // Filter to enabled tabs, then apply admin-defined order from site settings.
   const visibleTabs = useMemo(() => {
     const enabled = allTabs.filter(tab => {
@@ -174,6 +172,8 @@ const WorkshopDashboard = () => {
     }
     return enabled;
   }, [settings, siteSettings]);
+
+  if (!workshopUser) return null;
 
   if (!visibleTabs.find(t => t.key === activeTab)) {
     setActiveTab("home");
