@@ -21,7 +21,9 @@ interface AppDownloadConfig {
   ios_app_url?: string;
   version?: string;
   release_notes?: string;
+  changelog?: string;
   size_mb?: number;
+  sha256?: string;
   enabled?: boolean;
 }
 
@@ -131,12 +133,35 @@ const AdminAppDownload = () => {
           </div>
 
           <div>
-            <Label>Release notes</Label>
+            <Label>SHA-256 checksum (optional)</Label>
+            <Input
+              value={cfg.sha256 || ""}
+              onChange={(e) => setCfg({ ...cfg, sha256: e.target.value.trim() })}
+              placeholder="e.g. 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+              className="font-mono text-xs"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Run <code>sha256sum app.apk</code> after building and paste the hash so users can verify integrity.
+            </p>
+          </div>
+
+          <div>
+            <Label>Release notes (one-liner)</Label>
             <Textarea
-              rows={3}
+              rows={2}
               value={cfg.release_notes || ""}
               onChange={(e) => setCfg({ ...cfg, release_notes: e.target.value })}
-              placeholder="What's new in this version?"
+              placeholder="Short summary shown in the in-app update prompt."
+            />
+          </div>
+
+          <div>
+            <Label>Full changelog</Label>
+            <Textarea
+              rows={5}
+              value={cfg.changelog || ""}
+              onChange={(e) => setCfg({ ...cfg, changelog: e.target.value })}
+              placeholder={"One bullet per line, e.g.\n- Offline order queue\n- Faster image upload\n- Bug fixes"}
             />
           </div>
 
