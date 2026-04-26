@@ -28,6 +28,8 @@ import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
+import { cachedFetch, invalidateCache, peekCache } from "@/lib/request-cache";
+import { perfMark, logPageVitals } from "@/lib/perf-logger";
 import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 // AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
 // booking dashboard's Profile tab for users who also have a workshop account.
@@ -241,30 +243,57 @@ const Dashboard = () => {
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, district, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at, edits_remaining").eq("user_id", userId).maybeSingle() as any;
-    if (data) {
-      const p: Profile = { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, district: data.district || null, pincode: data.pincode || null, age: data.age ?? null, gender: data.gender || null, event_booking_allowed: data.event_booking_allowed !== false, event_edit_allowed: data.event_edit_allowed === true, secret_code: data.secret_code || null, gateway_charges_enabled: data.gateway_charges_enabled !== false, is_verified: data.is_verified === true, avatar_url: data.avatar_url || null, created_at: data.created_at || null, edits_remaining: data.edits_remaining ?? 0 };
-      setProfile(p); setEditForm(p);
-    }
+    // Hydrate instantly from cache so tab switches never show shimmer.
+    const cached = peekCache<Profile>(`profile:${userId}`);
+    if (cached) { setProfile(cached); setEditForm(cached); setLoading(false); }
+    const stop = perfMark("dashboard:fetchProfile");
+    const data = await cachedFetch(`profile:${userId}`, async () => {
+      const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, district, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at, edits_remaining").eq("user_id", userId).maybeSingle() as any;
+      if (!data) return null;
+      return { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, district: data.district || null, pincode: data.pincode || null, age: data.age ?? null, gender: data.gender || null, event_booking_allowed: data.event_booking_allowed !== false, event_edit_allowed: data.event_edit_allowed === true, secret_code: data.secret_code || null, gateway_charges_enabled: data.gateway_charges_enabled !== false, is_verified: data.is_verified === true, avatar_url: data.avatar_url || null, created_at: data.created_at || null, edits_remaining: data.edits_remaining ?? 0 } as Profile;
+    });
+    stop();
+    if (data) { setProfile(data); setEditForm(data); }
     setLoading(false);
   };
 
   const fetchOrders = async (userId: string) => {
-    const { data } = await supabase.from("orders")
-      .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id, art_confirmation_status, ask_user_delivered")
-      .eq("user_id", userId).order("created_at", { ascending: false });
+    const cached = peekCache<any[]>(`orders:${userId}`);
+    if (cached) setOrders(cached as any);
+    const stop = perfMark("dashboard:fetchOrders");
+    const data = await cachedFetch(`orders:${userId}`, async () => {
+      const { data } = await supabase.from("orders")
+        .select("id, order_type, style, face_count, amount, status, payment_status, payment_verified, created_at, updated_at, customer_name, customer_email, customer_mobile, delivery_address, delivery_city, delivery_state, delivery_pincode, notes, expected_delivery_date, artist_name, razorpay_payment_id, razorpay_order_id, art_confirmation_status, ask_user_delivered")
+        .eq("user_id", userId).order("created_at", { ascending: false });
+      return data || [];
+    });
+    stop();
     if (data) setOrders(data as any);
   };
 
   const fetchEvents = async (userId: string) => {
     // Auto-complete past events whose end time has passed (best-effort)
     try { await supabase.rpc("auto_complete_past_events" as any); } catch { /* non-fatal */ }
-    const { data } = await supabase.from("event_bookings").select("*").eq("user_id", userId).order("event_date", { ascending: false });
+    const cached = peekCache<any[]>(`events:${userId}`);
+    if (cached) setEvents(cached as any);
+    const stop = perfMark("dashboard:fetchEvents");
+    const data = await cachedFetch(`events:${userId}`, async () => {
+      const { data } = await supabase.from("event_bookings").select("*").eq("user_id", userId).order("event_date", { ascending: false });
+      return data || [];
+    });
+    stop();
     if (data) setEvents(data as any);
   };
 
   const fetchShopOrders = async (userId: string) => {
-    const { data } = await supabase.from("shop_orders").select("*, shop_order_items(product_name, quantity, unit_price)").eq("user_id", userId).order("created_at", { ascending: false });
+    const cached = peekCache<any[]>(`shopOrders:${userId}`);
+    if (cached) setShopOrders(cached as any);
+    const stop = perfMark("dashboard:fetchShopOrders");
+    const data = await cachedFetch(`shopOrders:${userId}`, async () => {
+      const { data } = await supabase.from("shop_orders").select("*, shop_order_items(product_name, quantity, unit_price)").eq("user_id", userId).order("created_at", { ascending: false });
+      return data || [];
+    });
+    stop();
     if (data) setShopOrders(data as any);
   };
 
