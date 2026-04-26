@@ -169,7 +169,7 @@ export const drain = async (): Promise<void> => {
           lastError: err?.message || String(err),
         });
         if (status === "failed") {
-          reportError(err, { context: `sync-queue:${action.type}`, payload: action.payload });
+          reportError(`sync-queue:${action.type}`, err?.message || String(err), action.payload, "error");
         }
       }
     }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Smartphone, ShieldCheck, Wifi, ChevronRight, Sparkles, Apple } from "lucide-react";
+import { Download as DownloadIcon, Smartphone, ShieldCheck, Wifi, ChevronRight, Sparkles, Apple } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -127,7 +127,7 @@ const Download = () => {
                     {isReady ? (
                       <a href={apkUrl} download>
                         <Button size="lg" className="mt-5 w-full sm:w-auto">
-                          <Download className="w-4 h-4 mr-2" />
+                          <DownloadIcon className="w-4 h-4 mr-2" />
                           Download APK
                         </Button>
                       </a>

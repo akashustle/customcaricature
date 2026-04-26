@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cloud, CloudOff, RefreshCw, Check, AlertCircle } from "lucide-react";
+import { CloudOff, RefreshCw, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { subscribeQueue, drain, type SyncAction } from "@/lib/sync-queue";
 
@@ -10,7 +10,10 @@ import { subscribeQueue, drain, type SyncAction } from "@/lib/sync-queue";
 const SyncStatusBadge = () => {
   const [queue, setQueue] = useState<SyncAction[]>([]);
 
-  useEffect(() => subscribeQueue(setQueue), []);
+  useEffect(() => {
+    const unsubscribe = subscribeQueue(setQueue);
+    return () => { unsubscribe; };
+  }, []);
 
   const pending = queue.filter((a) => a.status === "queued" || a.status === "syncing");
   const failed = queue.filter((a) => a.status === "failed");
