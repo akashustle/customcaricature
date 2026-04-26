@@ -217,64 +217,45 @@ const WorkshopDashboard = () => {
       {/* DESKTOP top bar — same shell as booking dashboard */}
       <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
-          {/* LEFT: Greeting with logo */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <motion.div className="relative flex-shrink-0" whileHover={{ scale: 1.06, rotate: -2 }}>
-              <div className="absolute -inset-1 rounded-2xl blur opacity-50"
-                style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }} />
-              <img src="/logo.png" alt="CCC" className="relative w-10 h-10 rounded-2xl shadow-md ring-1 ring-foreground/[0.06]" />
-            </motion.div>
-            <div className="min-w-0">
-              <motion.p className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-primary/80"
-                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-                {getGreeting()}
-              </motion.p>
-              <motion.h1 className="text-foreground font-bold text-sm md:text-base tracking-tight truncate"
-                initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.25 }}>
-                {workshopUser.name?.split(" ")[0] || "Student"} 🎨
-                {workshopUser.roll_number && <span className="ml-1 text-[10px] font-semibold text-muted-foreground">#{workshopUser.roll_number}</span>}
-              </motion.h1>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
+            <div>
+              <h1 className="font-display text-lg font-bold leading-none">
+                Creative <span className="text-gradient-violet">Caricature Club™</span>
+              </h1>
+              <p className="text-[11px] text-muted-foreground font-sans mt-0.5">Workshop portal</p>
             </div>
           </div>
-
-          {/* RIGHT: Profile dropdown menu */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <div className="hidden md:flex gap-1">
-              <Button variant="ghost" size="icon" onClick={() => setShowColorPicker(!showColorPicker)} className="rounded-xl text-muted-foreground" title="Theme color">
-                <Palette className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-xl text-muted-foreground" title="Dark / Light">
-                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-            </div>
-
-            {/* Mobile: tap avatar → directly opens Profile tab (no data dropdown) */}
-            <button
-              onClick={() => setActiveTab("profile")}
-              className="md:hidden flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm"
-              aria-label="Open profile"
-            >
-              <Avatar className="w-8 h-8 ring-2 ring-primary/20">
-                <AvatarImage src={workshopUser.avatar_url || undefined} />
-                <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
-                  style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </button>
-
-            {/* Desktop keeps the rich dropdown menu */}
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setShowColorPicker(!showColorPicker)} className="rounded-full h-9 w-9 text-muted-foreground" title="Theme color">
+              <Palette className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-9 w-9 text-muted-foreground" title="Dark / Light">
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="hidden md:flex items-center gap-2 rounded-2xl pl-1 pr-2 py-1 bg-muted/50 hover:bg-muted transition-colors border border-border/60 shadow-sm">
-                  <Avatar className="w-8 h-8 ring-2 ring-primary/20">
-                    <AvatarImage src={workshopUser.avatar_url || undefined} />
-                    <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
-                      style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                <button
+                  className="relative w-10 h-10 rounded-full bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground hover:scale-105 transition-transform"
+                  aria-label="Open profile"
+                >
+                  <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                    {workshopUser.avatar_url ? (
+                      <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs">{initials}</span>
+                    )}
+                  </span>
+                  {workshopUser.is_verified && (
+                    <span
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-background shadow-lg"
+                      style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                      title="Verified user"
+                      aria-label="Verified"
+                    >
+                      <BadgeCheck className="w-4 h-4 text-white" strokeWidth={2.6} />
+                    </span>
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-xl border-border/70">
@@ -295,12 +276,6 @@ const WorkshopDashboard = () => {
                 <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => setActiveTab("profile")}>
                   <User className="w-4 h-4 mr-2" /> View / Edit Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setShowColorPicker(!showColorPicker)}>
-                  <Palette className="w-4 h-4 mr-2" /> Theme color
-                </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setDarkMode(!darkMode)}>
-                  {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />} {darkMode ? "Light mode" : "Dark mode"}
-                </DropdownMenuItem>
                 {hasBookingAccount ? (
                   <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
                     <LayoutDashboard className="w-4 h-4 mr-2" /> Open Booking Account
@@ -318,11 +293,10 @@ const WorkshopDashboard = () => {
             </DropdownMenu>
           </div>
         </div>
-
         <AnimatePresence>
           {showColorPicker && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="max-w-5xl mx-auto px-4 pb-3 flex gap-2 items-center flex-wrap">
+              <div className="max-w-5xl mx-auto px-6 pb-3 flex gap-2 items-center flex-wrap">
                 <span className="text-muted-foreground text-xs font-semibold">Theme:</span>
                 {ACCENT_COLORS.map((c, i) => (
                   <motion.button key={c.name} onClick={() => { setAccentIdx(i); setShowColorPicker(false); }}
@@ -337,7 +311,42 @@ const WorkshopDashboard = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </header>
+
+      {/* MOBILE inline greeting + circular avatar — mirrors booking dashboard */}
+      <div className="md:hidden max-w-5xl mx-auto px-4 pt-5">
+        <div className="flex items-center justify-between mb-4">
+          <LiveGreeting name={workshopUser.name} />
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-10 w-10 text-muted-foreground" aria-label="Toggle theme">
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+            <button
+              onClick={() => setActiveTab("profile")}
+              className="relative w-11 h-11 rounded-full overflow-visible bg-card border-2 border-primary flex items-center justify-center font-bold text-foreground shadow-sm"
+              aria-label="Open profile"
+            >
+              <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                {workshopUser.avatar_url ? (
+                  <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs">{initials}</span>
+                )}
+              </span>
+              {workshopUser.is_verified && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center ring-2 ring-background shadow-lg"
+                  style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                  title="Verified user"
+                  aria-label="Verified"
+                >
+                  <BadgeCheck className="w-4 h-4 text-white" strokeWidth={2.6} />
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Desktop Tab Bar — 3D pill */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-5">
