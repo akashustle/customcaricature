@@ -36,6 +36,7 @@ serve(async (req) => {
       razorpay_order_id, razorpay_payment_id, razorpay_signature,
       order_id, is_event_remaining, is_event_advance, advance_amount,
       is_partial_advance, partial_number, type,
+      is_demand_payment, demand_id, amount,
     } = await req.json();
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
