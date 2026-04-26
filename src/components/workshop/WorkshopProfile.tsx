@@ -75,6 +75,43 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     });
   }, [user]);
 
+  // Auto-link a workshop user to their booking (auth) account in the
+  // background. This catches users like akashustle@gmail.com who created a
+  // booking account via the linker form but whose workshop_users.auth_user_id
+  // wasn't set (or was lost). Result: the "Switch to Booking" card now shows
+  // instead of "Create Booking Account".
+  useEffect(() => {
+    if (!profileData?.id) return;
+    if (profileData.auth_user_id) return;
+    const email = (profileData.email || "").toLowerCase().trim();
+    const mobile = (profileData.mobile || "").replace(/\D/g, "");
+    if (!email && !mobile) return;
+    let cancelled = false;
+    (async () => {
+      // Look up an existing booking profile that matches this workshop user.
+      let prof: any = null;
+      if (email) {
+        const { data } = await supabase.from("profiles")
+          .select("user_id").ilike("email", email).maybeSingle();
+        prof = data;
+      }
+      if (!prof && mobile) {
+        const { data } = await supabase.from("profiles")
+          .select("user_id").eq("mobile", mobile).maybeSingle();
+        prof = data;
+      }
+      if (cancelled || !prof?.user_id) return;
+      // Silent server-side link so realtime sync also fires.
+      supabase.functions.invoke("link-workshop-account", {
+        body: { auth_user_id: prof.user_id, email, mobile, full_name: profileData.name },
+      }).catch(() => {});
+      // Optimistic local update so the UI flips to "linked" immediately.
+      applyUpdated({ ...profileData, auth_user_id: prof.user_id });
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileData?.id, profileData?.email, profileData?.mobile, profileData?.auth_user_id]);
+
   // Realtime: when admin approves/rejects while the verify dialog is open, jump to the
   // appropriate final stage instead of leaving the user stuck on the loading spinner.
   useEffect(() => {
