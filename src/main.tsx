@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { navigateInternally, normalizeInternalNavigationTarget } from "./lib/internal-navigation";
 import { registerPWA } from "./lib/pwa-register";
+import { initNativeShell } from "./lib/native-shell";
 
 // Capture PWA install prompt for programmatic install
 window.addEventListener("beforeinstallprompt", (e) => {
@@ -12,6 +13,9 @@ window.addEventListener("beforeinstallprompt", (e) => {
 
 // Register service worker (offline support) — guarded against iframe/preview
 registerPWA();
+
+// Bootstrap Capacitor native shell (no-op in browser)
+initNativeShell();
 
 const nativeWindowOpen = window.open.bind(window);
 window.open = ((url?: string | URL, target?: string, features?: string) => {
