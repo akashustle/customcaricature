@@ -5,8 +5,7 @@ name: Build Android APK + AAB
 # - If the four ANDROID_KEYSTORE_* secrets exist, also produces a SIGNED
 #   release APK + AAB, computes a SHA-256 checksum, and (when the optional
 #   SUPABASE_SERVICE_ROLE_KEY secret is present) writes the hash + version
-#   into the admin_site_settings.app_download row so the /download page
-#   automatically shows the new build's checksum to users.
+#   into the admin_site_settings.app_download row.
 # - Tag pushes (vX.Y.Z) attach all artefacts to a GitHub Release.
 
 on:
@@ -40,8 +39,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # Use --legacy-peer-deps to work around react-leaflet@5 wanting React 19
+      # while the project is on React 18. This is safe — Lovable uses the
+      # same flag internally.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Build web bundle
         run: npm run build
@@ -57,7 +59,7 @@ jobs:
 
       - name: Generate launcher icons & splash
         run: |
-          npm i -D @capacitor/assets --no-save
+          npm i -D @capacitor/assets --legacy-peer-deps --no-save || true
           npx capacitor-assets generate --android || true
 
       # ------ DEBUG BUILD (always, for testing) ------
@@ -104,9 +106,9 @@ jobs:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           APK="android/app/build/outputs/apk/release/app-release.apk"
-          AAB="android/app/build/outputs/bundle/release/app-release.aab"
           SHA256_APK=$(sha256sum "$APK" | awk '{print $1}')
-          SIZE_MB=$(awk "BEGIN {printf \"%.1f\", $(stat -c%s "$APK") / 1048576}")
+          SIZE_BYTES=$(stat -c%s "$APK")
+          SIZE_MB=$(awk "BEGIN {printf \"%.1f\", $SIZE_BYTES / 1048576}")
           REF_NAME="${GITHUB_REF_NAME:-${GITHUB_SHA::7}}"
           VERSION="${REF_NAME#v}"
           echo "sha256=$SHA256_APK" >> "$GITHUB_OUTPUT"
@@ -137,8 +139,6 @@ jobs:
           retention-days: 90
 
       # ---- Push the SHA-256 + version into Lovable Cloud ----
-      # Requires SUPABASE_SERVICE_ROLE_KEY secret to be set in the repo. If it
-      # isn't, this step quietly no-ops so the build still succeeds.
       - name: Update download page metadata
         if: env.ANDROID_KEYSTORE_BASE64 != '' && env.SUPABASE_SERVICE_ROLE_KEY != ''
         env:
@@ -149,32 +149,7 @@ jobs:
           SIZE_MB: ${{ steps.meta.outputs.size_mb }}
           VERSION: ${{ steps.meta.outputs.version }}
           APK_URL: ${{ vars.ANDROID_APK_URL }}
-        run: |
-          # Read existing settings (so we don't blow away non-managed fields)
-          EXISTING=$(curl -s -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-                          -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-                          "$SUPABASE_URL/rest/v1/admin_site_settings?id=eq.app_download&select=value")
-          PREV=$(echo "$EXISTING" | python3 -c 'import sys,json; r=json.load(sys.stdin); print(json.dumps((r[0]["value"] if r else {}) or {}))')
-
-          NEW=$(python3 -c "
-import json,os
-prev = json.loads(os.environ['PREV'])
-prev['version']  = os.environ['VERSION']
-prev['sha256']   = os.environ['SHA256']
-prev['size_mb']  = float(os.environ['SIZE_MB'])
-if os.environ.get('APK_URL'): prev['android_apk_url'] = os.environ['APK_URL']
-prev.setdefault('enabled', True)
-print(json.dumps(prev))
-")
-          PAYLOAD=$(python3 -c "import json,os; print(json.dumps({'id':'app_download','value':json.loads(os.environ['NEW']),'updated_at':__import__('datetime').datetime.utcnow().isoformat()+'Z'}))")
-          curl -s -X POST \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            "$SUPABASE_URL/rest/v1/admin_site_settings" \
-            -d "$PAYLOAD"
-          echo "✅ Pushed v$VERSION ($SHA256) to admin_site_settings.app_download"
+        run: python3 .github/scripts/update_download_metadata.py
 
       # ------ ATTACH TO GITHUB RELEASE on version tag ------
       - name: Attach build artefacts to GitHub Release
