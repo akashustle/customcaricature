@@ -24,11 +24,12 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
   useEffect(() => { messageRef.current = message; }, [message]);
   useEffect(() => { ratingRef.current = rating; }, [rating]);
 
-  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
-  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
-  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
-  const inputBg = dm ? "bg-white/10 border-white/20 text-white placeholder:text-white/30" : "bg-white/80 border-purple-100 text-gray-700 placeholder:text-gray-300";
+  // Booking-dashboard parity: white 3D cards with brand semantic tokens.
+  const cardBg = "bg-card border border-border/50 shadow-[0_10px_30px_-15px_hsl(var(--primary)/0.18)]";
+  const textPrimary = "text-foreground font-bold";
+  const textSecondary = "text-muted-foreground font-medium";
+  const textMuted = "text-muted-foreground/70";
+  const inputBg = "bg-background border-border text-foreground placeholder:text-muted-foreground/50";
 
   const fetchFeedbacks = useCallback(async () => {
     const { data } = await supabase.from("workshop_feedback" as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });

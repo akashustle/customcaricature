@@ -13,10 +13,12 @@ const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: bool
   const [now, setNow] = useState(new Date());
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const cardBg = dm ? "bg-[#241f33]/80 border-[#3a3150]/50" : "bg-white/50 border-purple-100/30";
-  const textPrimary = dm ? "text-white font-bold" : "text-[#3a2e22] font-bold";
-  const textSecondary = dm ? "text-white/60 font-medium" : "text-[#5a4a3a] font-medium";
-  const textMuted = dm ? "text-white/40" : "text-[#8a7a6a]";
+  // Booking-dashboard parity: white 3D cards with brand semantic tokens so
+  // the workshop tabs feel identical to the user's booking home tab.
+  const cardBg = "bg-card border border-border/50 shadow-[0_10px_30px_-15px_hsl(var(--primary)/0.18)]";
+  const textPrimary = "text-foreground font-bold";
+  const textSecondary = "text-muted-foreground font-medium";
+  const textMuted = "text-muted-foreground/70";
 
   useEffect(() => {
     fetchVideos(); fetchAccess(); fetchSettings();
