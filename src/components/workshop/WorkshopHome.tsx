@@ -4,13 +4,16 @@ import { motion } from "framer-motion";
 import { Calendar, Clock, CheckCircle, XCircle, Video as VideoIcon, ExternalLink, AlertTriangle, Instagram, Youtube, Facebook, Phone, MessageCircle, MonitorPlay, Maximize, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cachedFetch, peekCache } from "@/lib/request-cache";
+import { perfMark } from "@/lib/perf-logger";
 const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
   const dm = darkMode;
   const [now, setNow] = useState(new Date());
-  const [attendance, setAttendance] = useState<any[]>([]);
-  const [liveSessions, setLiveSessions] = useState<any[]>([]);
-  const [settings, setSettings] = useState<any>({});
-  const [liveRequests, setLiveRequests] = useState<any[]>([]);
+  // Hydrate immediately from in-memory cache so tab switches never show shimmer
+  const [attendance, setAttendance] = useState<any[]>(() => peekCache<any[]>(`ws:att:${user.id}`) || []);
+  const [liveSessions, setLiveSessions] = useState<any[]>(() => peekCache<any[]>(`ws:live`) || []);
+  const [settings, setSettings] = useState<any>(() => peekCache<any>(`ws:settings`) || {});
+  const [liveRequests, setLiveRequests] = useState<any[]>(() => peekCache<any[]>(`ws:liveReq:${user.id}`) || []);
   const [countdownFullscreen, setCountdownFullscreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [countdownFinished, setCountdownFinished] = useState(false);
@@ -52,15 +55,42 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
   };
 
   const fetchData = () => { fetchAttendance(); fetchLiveSessions(); fetchSettings(); fetchLiveRequests(); };
-  const fetchAttendance = async () => { const { data } = await supabase.from("workshop_attendance" as any).select("*").eq("user_id", user.id); if (data) setAttendance(data as any[]); };
-  const fetchLiveSessions = async () => { const { data } = await supabase.from("workshop_live_sessions" as any).select("*").order("session_date").order("slot"); if (data) setLiveSessions(data as any[]); };
+  const fetchAttendance = async () => {
+    const stop = perfMark("workshop:fetchAttendance");
+    const data = await cachedFetch(`ws:att:${user.id}`, async () => {
+      const { data } = await supabase.from("workshop_attendance" as any).select("*").eq("user_id", user.id);
+      return (data as any[]) || [];
+    });
+    stop();
+    if (data) setAttendance(data);
+  };
+  const fetchLiveSessions = async () => {
+    const stop = perfMark("workshop:fetchLiveSessions");
+    const data = await cachedFetch(`ws:live`, async () => {
+      const { data } = await supabase.from("workshop_live_sessions" as any).select("*").order("session_date").order("slot");
+      return (data as any[]) || [];
+    });
+    stop();
+    if (data) setLiveSessions(data);
+  };
   const fetchSettings = async () => {
-    const { data } = await supabase.from("workshop_settings" as any).select("*");
-    if (data) { const map: any = {}; (data as any[]).forEach((s: any) => { map[s.id] = s.value; }); setSettings(map); }
+    const stop = perfMark("workshop:fetchSettings");
+    const map = await cachedFetch(`ws:settings`, async () => {
+      const { data } = await supabase.from("workshop_settings" as any).select("*");
+      const m: any = {}; ((data as any[]) || []).forEach((s: any) => { m[s.id] = s.value; });
+      return m;
+    });
+    stop();
+    if (map) setSettings(map);
   };
   const fetchLiveRequests = async () => {
-    const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").eq("user_id", user.id);
-    if (data) setLiveRequests(data as any[]);
+    const stop = perfMark("workshop:fetchLiveRequests");
+    const data = await cachedFetch(`ws:liveReq:${user.id}`, async () => {
+      const { data } = await supabase.from("workshop_live_session_requests" as any).select("*").eq("user_id", user.id);
+      return (data as any[]) || [];
+    });
+    stop();
+    if (data) setLiveRequests(data);
   };
 
   const getAttendance = (date: string) => attendance.find((att: any) => att.session_date === date)?.status || "not_marked";

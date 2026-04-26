@@ -87,6 +87,9 @@ const WorkshopDashboard = () => {
   const setDarkMode = (val: boolean) => setTheme(val ? "dark" : "light");
   useEffect(() => { localStorage.setItem("ws_accent", accentIdx.toString()); }, [accentIdx]);
 
+  // Log Web-Vital style numbers once per dashboard mount (dev/preview only)
+  useEffect(() => { import("@/lib/perf-logger").then(m => m.logPageVitals("/workshop-dashboard")); }, []);
+
   useEffect(() => {
     const stored = localStorage.getItem("workshop_user");
     if (!stored) { navigate("/workshop"); return; }
