@@ -74,7 +74,11 @@ export const subscribeQueue = (l: Listener) => {
   return () => listeners.delete(l);
 };
 
-export const enqueue = <T,>(type: SyncActionType, payload: T): SyncAction<T> => {
+export const enqueue = <T,>(
+  type: SyncActionType,
+  payload: T,
+  opts?: { relatedId?: string; refKey?: string },
+): SyncAction<T> => {
   const action: SyncAction<T> = {
     id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     type,
@@ -82,6 +86,8 @@ export const enqueue = <T,>(type: SyncActionType, payload: T): SyncAction<T> => 
     createdAt: Date.now(),
     attempts: 0,
     status: "queued",
+    relatedId: opts?.relatedId,
+    refKey: opts?.refKey,
   };
   const queue = safeRead();
   queue.push(action);
