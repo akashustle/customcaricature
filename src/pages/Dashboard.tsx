@@ -27,8 +27,9 @@ import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
-// AccountSwitcherCard removed: workshop switching now exclusively lives in
-// the dedicated Workshop tab via UserWorkshopOverview (per user request).
+// AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
+// booking dashboard's Profile tab for users who also have a workshop account.
+import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 
