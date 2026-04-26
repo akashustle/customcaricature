@@ -294,6 +294,7 @@ const App = () => {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <TooltipProvider>
         <DefaultThemeApplier />
+        <AppModeBoot />
         <DeferredInit />
         <RoutePrefetcher />
         <PWASplashScreen />
@@ -303,6 +304,7 @@ const App = () => {
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
+          <AppWelcome3D />
           <SyncStatusBadge />
           <SyncToastListener />
           <ApkUpdatePrompt />
