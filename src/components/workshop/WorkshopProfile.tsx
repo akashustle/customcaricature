@@ -450,7 +450,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 <Button size="sm" onClick={() => setEditing(true)}
                   className="rounded-full font-semibold shadow-md text-white border-0"
                   style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-                  <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+                  <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit
                 </Button>
               )}
             </div>
