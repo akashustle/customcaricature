@@ -17,6 +17,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "./error-reporter";
+import { getBlob, deleteBlob, dataUrlToBlob } from "./blob-store";
 
 const STORAGE_KEY = "ccc:sync-queue:v1";
 const MAX_ATTEMPTS = 5;
@@ -36,6 +37,10 @@ export interface SyncAction<T = any> {
   attempts: number;
   lastError?: string;
   status: "queued" | "syncing" | "synced" | "failed";
+  /** Cross-link to a related queued action (e.g. the order this image belongs to). */
+  relatedId?: string;
+  /** A human-friendly local identifier (e.g. order number) for deep-link routing. */
+  refKey?: string;
 }
 
 type Listener = (queue: SyncAction[]) => void;
