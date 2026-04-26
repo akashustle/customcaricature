@@ -116,6 +116,10 @@ export const reportBurst = (key: string, count: number, windowMs: number) => {
   });
 };
 
+/** Read the in-memory ring buffer of recent client errors (newest first). */
+export const getRecentErrors = (): ErrorEvent[] => ring.slice();
+
+
 let installed = false;
 export const installErrorReporter = () => {
   if (!isBrowser || installed) return;
@@ -137,12 +141,16 @@ export const installErrorReporter = () => {
   // call site to add try/catch. We never modify the response — we just
   // observe failures and forward them to the reporter.
   const origFetch = window.fetch.bind(window);
+  const emitFailure = () => {
+    try { window.dispatchEvent(new CustomEvent("ccc:fetch-failure")); } catch { /* ignore */ }
+  };
   window.fetch = async (input, init) => {
     try {
       const res = await origFetch(input, init);
       if (res.status >= 500) {
         const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
         reportError("fetch", `HTTP ${res.status}`, url, "warn");
+        emitFailure();
       }
       return res;
     } catch (err) {
@@ -150,6 +158,7 @@ export const installErrorReporter = () => {
       // Skip noisy aborts caused by route changes
       if (err instanceof DOMException && err.name === "AbortError") throw err;
       reportError("fetch", "network failure", `${url}: ${(err as Error)?.message ?? err}`, "warn");
+      emitFailure();
       throw err;
     }
   };

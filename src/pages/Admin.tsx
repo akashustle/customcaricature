@@ -105,6 +105,7 @@ const AdminPageBuilder = lazy(() => import("@/components/admin/AdminPageBuilder"
 const AdminActivityLogs = lazy(() => import("@/components/admin/AdminActivityLogs"));
 const AdminSecurityDashboard = lazy(() => import("@/components/admin/AdminSecurityDashboard"));
 const AdminMonitoringAI = lazy(() => import("@/components/admin/AdminMonitoringAI"));
+const AdminErrorInbox = lazy(() => import("@/components/admin/AdminErrorInbox"));
 const AdminRevenueTargetTracker = lazy(() => import("@/components/admin/AdminRevenueTargetTracker"));
 const AdminDrillDownDialog = lazy(() => import("@/components/admin/AdminDrillDownDialog"));
 const AdminReferrals = lazy(() => import("@/components/admin/AdminReferrals"));
@@ -2187,6 +2188,10 @@ const Admin = () => {
 
           <TabsContent value="security-dashboard">
             <AdminSecurityDashboard />
+          </TabsContent>
+
+          <TabsContent value="error-inbox">
+            <AdminErrorInbox />
           </TabsContent>
 
           <TabsContent value="activity-logs">
