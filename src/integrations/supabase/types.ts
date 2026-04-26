@@ -5564,6 +5564,51 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_registration_drafts: {
+        Row: {
+          created_at: string
+          current_step: number
+          email: string | null
+          form_payload: Json
+          id: string
+          last_activity_at: string
+          mobile: string | null
+          name: string | null
+          payment_status: string
+          source: string
+          updated_at: string
+          workshop_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_step?: number
+          email?: string | null
+          form_payload?: Json
+          id?: string
+          last_activity_at?: string
+          mobile?: string | null
+          name?: string | null
+          payment_status?: string
+          source?: string
+          updated_at?: string
+          workshop_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_step?: number
+          email?: string | null
+          form_payload?: Json
+          id?: string
+          last_activity_at?: string
+          mobile?: string | null
+          name?: string | null
+          payment_status?: string
+          source?: string
+          updated_at?: string
+          workshop_id?: string | null
+        }
+        Relationships: []
+      }
       workshop_settings: {
         Row: {
           id: string
