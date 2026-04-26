@@ -115,6 +115,7 @@ const NAV_SECTIONS = [
       { id: "google-sheet", icon: Globe, label: "Google Sheet" },
       { id: "mini-database", icon: Globe, label: "Mini Database" },
       { id: "security-dashboard", icon: ShieldCheck, label: "Security" },
+      { id: "error-inbox", icon: AlertTriangle, label: "Error Inbox" },
       { id: "activity-logs", icon: Activity, label: "Activity Logs" },
       { id: "integrations", icon: Shield, label: "Integrations" },
       { id: "automation", icon: Zap, label: "Automation" },
