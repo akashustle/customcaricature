@@ -49,7 +49,7 @@ const MobileBottomNav = () => {
   const chatVisible = settings.live_chat_visible?.enabled === true;
   const exploreVisible = (settings as any).explore_mobile_nav?.enabled !== false;
 
-  const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel", "/workshop-dashboard", "/dashboard"];
+  const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel", "/workshop-dashboard", "/workshop/dashboard", "/dashboard"];
   if (!isMobile || adminPaths.some(p => location.pathname.startsWith(p))) return null;
 
   // Workshop tab is always visible. Linked students go straight to their
@@ -57,44 +57,43 @@ const MobileBottomNav = () => {
   const workshopPath = hasWorkshop ? "/workshop-dashboard" : "/workshop";
 
   const items: { icon: any; label: string; path: string }[] = [
-    { icon: Home, label: "", path: "/" },
-    ...(shopVisible ? [{ icon: ShoppingBag, label: "", path: "/shop" }] : []),
-    { icon: GraduationCap, label: "", path: workshopPath },
-    ...(chatVisible ? [{ icon: Sparkles, label: "", path: "/live-chat" }] : []),
-    ...(exploreVisible ? [{ icon: Compass, label: "", path: "/explore" }] : []),
+    { icon: Home, label: "Home", path: "/" },
+    ...(shopVisible ? [{ icon: ShoppingBag, label: "Shop", path: "/shop" }] : []),
+    { icon: GraduationCap, label: "Workshop", path: workshopPath },
+    ...(chatVisible ? [{ icon: Sparkles, label: "Chat", path: "/live-chat" }] : []),
+    ...(exploreVisible ? [{ icon: Compass, label: "Explore", path: "/explore" }] : []),
     ...(user
-      ? [{ icon: User, label: "", path: "/dashboard" }]
-      : [{ icon: User, label: "", path: "/login" }]),
+      ? [{ icon: User, label: "Me", path: "/dashboard" }]
+      : [{ icon: User, label: "Login", path: "/login" }]),
   ];
 
+  // Pill-card mobile nav — fully matches the booking dashboard nav: rounded
+  // floating bar, primary background on active, icon + tiny label, scrolls
+  // horizontally when more than ~5 items fit.
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Mobile navigation">
-      <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-        <div className="flex items-center justify-evenly max-w-lg mx-auto h-[56px] px-1">
-          {items.map((item) => {
-            const active = location.pathname === item.path;
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="flex items-center justify-center min-w-[44px] w-12 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150"
-              >
-                <item.icon
-                  className={`transition-all duration-200 ${
-                    active ? "text-foreground" : "text-muted-foreground/40"
-                  } ${item.icon === Sparkles && !active ? "animate-pulse text-primary/60" : ""}`}
-                  size={active ? 24 : 20}
-                  strokeWidth={active ? 2.2 : 1.4}
-                  fill={active && item.icon === Home ? "currentColor" : "none"}
-                />
-                {active && (
-                  <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-        <div className="h-[env(safe-area-inset-bottom)]" />
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none"
+      aria-label="Mobile navigation"
+    >
+      <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around overflow-x-auto scrollbar-hide gap-1">
+        {items.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <button
+              key={item.path + item.label}
+              onClick={() => navigate(item.path)}
+              className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 active:scale-95 ${
+                isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              }`}
+              aria-label={item.label}
+            >
+              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
+              <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
