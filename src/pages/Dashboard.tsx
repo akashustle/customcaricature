@@ -644,6 +644,14 @@ const Dashboard = () => {
                   {(profile as any).ban_reason ||
                     "Your account is currently suspended. Please contact support for more information."}
                 </p>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="mt-3 rounded-full font-sans"
+                  onClick={() => navigate("/appeal-ban")}
+                >
+                  Appeal this ban →
+                </Button>
               </div>
             </div>
           </div>
