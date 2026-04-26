@@ -351,6 +351,7 @@ const App = () => {
                 <Route path="/artist-dashboard" element={<ArtistDashboard />} />
                 <Route path="/artistlogin" element={<ArtistLogin />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/appeal-ban" element={<AppealBan />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/live-chat" element={<LiveChat />} />
