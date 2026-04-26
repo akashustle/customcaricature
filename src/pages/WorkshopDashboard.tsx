@@ -67,6 +67,7 @@ const allTabs = [
 
 const WorkshopDashboard = () => {
   const navigate = useNavigate();
+  const { settings: siteSettings } = useSiteSettings();
   const [workshopUser, setWorkshopUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("home");
   const { resolvedTheme, setTheme } = useTheme();
