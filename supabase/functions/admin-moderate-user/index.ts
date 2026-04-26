@@ -10,15 +10,25 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-type Action = "ban" | "unban" | "delete" | "verify" | "unverify";
+type Action =
+  | "ban"
+  | "unban"
+  | "delete"
+  | "verify"
+  | "unverify"
+  | "schedule_delete"
+  | "cancel_scheduled_delete"
+  | "process_due_deletions";
 
 interface Body {
   action: Action;
-  user_id: string;
+  user_id?: string;
   reason?: string;
   message?: string;
   admin_name?: string;
   notify?: boolean;
+  // ISO timestamp for when the account should be deleted (schedule_delete)
+  scheduled_deletion_at?: string;
 }
 
 Deno.serve(async (req) => {
