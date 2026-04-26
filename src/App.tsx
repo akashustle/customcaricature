@@ -335,6 +335,10 @@ const App = () => {
                 <Route path="/shop-admin" element={<ShopAdmin />} />
                 <Route path="/workshop" element={<Workshop />} />
                 <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
+                {/* Legacy alias — older nav code (mobile bottom nav, switch profile button,
+                    UserWorkshopOverview) still links to /workshop-dashboard. Keep this
+                    redirect so no in-app navigation 404s. */}
+                <Route path="/workshop-dashboard" element={<Navigate to="/workshop/dashboard" replace />} />
                 <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
                 <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
