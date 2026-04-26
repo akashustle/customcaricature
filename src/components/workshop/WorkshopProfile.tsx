@@ -654,8 +654,9 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
             ))}
           </div>
 
-          {/* Centered Request Edit / Edit action under personal information */}
-          <div className="mt-5 flex justify-center">
+          {/* Centered Request Edit / Edit action under personal information.
+              Edits-remaining counter is shown only here, only when granted. */}
+          <div className="mt-5 flex flex-col items-center gap-1.5">
             {editLocked ? (
               <Button
                 onClick={() => setEditRequestOpen(true)}
@@ -671,8 +672,13 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}
               >
                 <Edit2 className="w-4 h-4 mr-2" />
-                Edit Personal Information{isVerified && editsRemaining > 0 ? ` (${editsRemaining} left)` : ""}
+                Edit Personal Information
               </Button>
+            )}
+            {isVerified && editsRemaining > 0 && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-sans bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                ✏️ {editsRemaining} edit{editsRemaining === 1 ? "" : "s"} remaining
+              </span>
             )}
           </div>
         </motion.div>
