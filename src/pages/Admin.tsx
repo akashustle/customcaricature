@@ -2765,6 +2765,9 @@ const Admin = () => {
 
               {/* App Download Page (APK) */}
               <AdminAppDownload />
+
+              {/* Sync Failures Report — by date and device type */}
+              <AdminSyncFailures />
             </div>
           </TabsContent>
           </motion.div>
