@@ -419,29 +419,13 @@ const NotificationBell = () => {
                 ) : (
                   <ul className="divide-y divide-border/60">
                     {notifications.map((n) => (
-                      <li key={n.id}>
-                        <button
-                          type="button"
-                          onClick={() => handleClick(n)}
-                          className={`w-full text-left flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50 active:bg-muted ${
-                            !n.read ? "bg-primary/5" : "bg-transparent"
-                          }`}
-                        >
-                          <span className="text-xl mt-0.5 flex-shrink-0">{getTypeIcon(n.type)}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <p className={`text-sm font-sans leading-snug text-foreground ${!n.read ? "font-semibold" : "font-medium"}`}>
-                                {n.title}
-                              </p>
-                              {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-                            </div>
-                            <p className="text-xs text-muted-foreground font-sans mt-0.5 line-clamp-2">{n.message}</p>
-                            <p className="text-[10px] text-muted-foreground/80 font-sans mt-1">
-                              {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                            </p>
-                          </div>
-                        </button>
-                      </li>
+                      <SwipeableNotifRow
+                        key={n.id}
+                        notification={n}
+                        onClick={() => handleClick(n)}
+                        onToggleRead={(e) => toggleRead(n, e)}
+                        getTypeIcon={getTypeIcon}
+                      />
                     ))}
                   </ul>
                 )}
@@ -451,6 +435,100 @@ const NotificationBell = () => {
         )}
       </AnimatePresence>
     </div>
+  );
+};
+
+/**
+ * Notification row that supports both:
+ *  - Tap-to-toggle-read via the small dot button on the right
+ *  - Swipe-left (mobile) to reveal a "Mark read/unread" action
+ * The whole row is still tappable to navigate to the linked page.
+ */
+const SwipeableNotifRow = ({
+  notification: n,
+  onClick,
+  onToggleRead,
+  getTypeIcon,
+}: {
+  notification: Notification;
+  onClick: () => void;
+  onToggleRead: (e: React.MouseEvent) => void;
+  getTypeIcon: (t: string) => string;
+}) => {
+  const [dragX, setDragX] = useState(0);
+  const startX = useRef(0);
+  const dragging = useRef(false);
+  const moved = useRef(false);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    dragging.current = true;
+    moved.current = false;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!dragging.current) return;
+    const dx = e.touches[0].clientX - startX.current;
+    if (Math.abs(dx) > 6) moved.current = true;
+    setDragX(Math.max(-90, Math.min(0, dx))); // clamp left swipe only
+  };
+  const onTouchEnd = () => {
+    dragging.current = false;
+    if (dragX < -55) {
+      // commit: trigger toggle then snap back
+      onToggleRead({ stopPropagation: () => {} } as any);
+    }
+    setDragX(0);
+  };
+
+  return (
+    <li className="relative overflow-hidden">
+      {/* Reveal action behind the row */}
+      <div className="absolute inset-y-0 right-0 flex items-center pr-3" aria-hidden>
+        <span className={`text-[11px] font-sans font-semibold px-2.5 py-1 rounded-full ${n.read ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
+          {n.read ? "Mark unread" : "Mark read"}
+        </span>
+      </div>
+      <div
+        style={{ transform: `translateX(${dragX}px)`, transition: dragging.current ? "none" : "transform 0.2s ease-out" }}
+        className="relative bg-background"
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            if (moved.current) { e.preventDefault(); return; }
+            onClick();
+          }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          className={`w-full text-left flex items-start gap-3 px-4 py-3.5 min-h-[64px] transition-colors hover:bg-muted/50 active:bg-muted ${
+            !n.read ? "bg-primary/5" : "bg-transparent"
+          }`}
+        >
+          <span className="text-xl mt-0.5 flex-shrink-0">{getTypeIcon(n.type)}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <p className={`text-sm font-sans leading-snug text-foreground ${!n.read ? "font-semibold" : "font-medium"}`}>
+                {n.title}
+              </p>
+              {/* Tap-to-toggle dot */}
+              <button
+                type="button"
+                onClick={onToggleRead}
+                className="p-1 -m-1 rounded-full hover:bg-muted/60 flex-shrink-0"
+                aria-label={n.read ? "Mark as unread" : "Mark as read"}
+              >
+                <span className={`block w-2.5 h-2.5 rounded-full ${!n.read ? "bg-primary" : "bg-muted-foreground/30"}`} />
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground font-sans mt-0.5 line-clamp-2">{n.message}</p>
+            <p className="text-[10px] text-muted-foreground/80 font-sans mt-1">
+              {new Date(n.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </p>
+          </div>
+        </button>
+      </div>
+    </li>
   );
 };
 
