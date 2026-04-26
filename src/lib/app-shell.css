@@ -1,0 +1,66 @@
+/**
+ * Native app-shell styles. Activated by `<html data-app-mode="true">`
+ * (set by AppModeBoot). Does NOT affect normal website visitors.
+ *
+ * Goals:
+ *  - Edge-to-edge layout that respects iOS notch & Android gesture bar
+ *  - Disable text-selection / tap-highlight to feel native
+ *  - Smooth momentum scroll
+ *  - Hide web-only chrome (footer, install banners) inside the app
+ *  - Pad the bottom of the viewport so MobileBottomNav doesn't overlap content
+ */
+
+html[data-app-mode="true"],
+html[data-app-mode="true"] body {
+  /* Native scroll feel */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* Disable pull-to-refresh inside Capacitor */
+  overscroll-behavior-x: none;
+}
+
+html[data-app-mode="true"] body {
+  /* Safe-area padding driven by env() so iPhone notch + Android cutouts work */
+  padding-top: env(safe-area-inset-top);
+  /* Bottom padding is handled by MobileBottomNav itself, content gets a spacer */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  background: hsl(var(--background));
+}
+
+/* Allow selection back inside inputs / editable areas */
+html[data-app-mode="true"] input,
+html[data-app-mode="true"] textarea,
+html[data-app-mode="true"] [contenteditable="true"],
+html[data-app-mode="true"] .allow-select {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Hide pieces of web chrome that don't belong inside an installed app */
+html[data-app-mode="true"] [data-web-only="true"],
+html[data-app-mode="true"] .web-only,
+html[data-app-mode="true"] #pwa-install-banner,
+html[data-app-mode="true"] [data-pwa-install] {
+  display: none !important;
+}
+
+/* Reserve space for the bottom nav so the last bit of any page is reachable */
+html[data-app-mode="true"] main,
+html[data-app-mode="true"] [data-app-content="true"] {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* Edge-to-edge images on splash / onboarding */
+html[data-app-mode="true"] .app-fullbleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+/* Status-bar tinted overlay — when StatusBar.overlaysWebView is true */
+html[data-app-mode="true"] .app-statusbar-spacer {
+  height: env(safe-area-inset-top);
+  background: hsl(var(--background));
+}
