@@ -88,6 +88,17 @@ const WorkshopDashboard = () => {
     setWorkshopUser(user);
     refreshUser(user.id);
     fetchSettings();
+    // Detect whether a booking (main) profile exists for this user.
+    // We match on email OR mobile so the workshop dashboard can offer either
+    // "Open Booking Account" (when linked) or "Create Booking Account".
+    (async () => {
+      const filters: string[] = [];
+      if (user.email) filters.push(`email.eq.${user.email}`);
+      if (user.mobile) filters.push(`mobile.eq.${user.mobile}`);
+      if (filters.length === 0) return;
+      const { data } = await supabase.from("profiles").select("id").or(filters.join(",")).limit(1).maybeSingle();
+      setHasBookingAccount(!!data);
+    })();
 
     const handleLocalUserUpdate = (event: Event) => {
       const updated = (event as CustomEvent<any>).detail;
