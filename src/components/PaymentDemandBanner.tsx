@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/pricing";
-import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/razorpay";
+import { createRazorpayOrder, initRazorpay } from "@/lib/razorpay";
 import { Bell, CreditCard, Loader2, Sparkles } from "lucide-react";
 
 type Demand = {
@@ -50,9 +50,10 @@ const PaymentDemandBanner = ({ userId, events }: Props) => {
   }, [events]);
 
   // Only demands for events that belong to this user.
-  const myEventIds = useMemo(() => events.map((e) => e.id), [events]);
+  const eventIdsKey = useMemo(() => events.map((e) => e.id).sort().join("|"), [events]);
 
   useEffect(() => {
+    const myEventIds = eventIdsKey ? eventIdsKey.split("|") : [];
     if (!userId || myEventIds.length === 0) { setDemands([]); return; }
     let cancelled = false;
 
@@ -74,7 +75,7 @@ const PaymentDemandBanner = ({ userId, events }: Props) => {
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
-  }, [userId, myEventIds.join("|")]);
+  }, [userId, eventIdsKey]);
 
   const handlePay = async (demand: Demand) => {
     const ev = eventMap.get(demand.event_id);
@@ -92,13 +93,13 @@ const PaymentDemandBanner = ({ userId, events }: Props) => {
         customer_mobile: ev.client_mobile,
       });
 
-      await openRazorpayCheckout({
+      await initRazorpay({
         key: rzp.razorpay_key_id,
         amount: rzp.amount,
         currency: rzp.currency,
         name: "Creative Caricature Club™",
         description: demand.note || `Payment request for ${ev.event_type} event`,
-        order_id: rzp.order_id,
+        order_id: rzp.razorpay_order_id,
         prefill: { name: ev.client_name, email: ev.client_email, contact: ev.client_mobile },
         theme: { color: "#8B5CF6" },
         handler: async (response: any) => {
