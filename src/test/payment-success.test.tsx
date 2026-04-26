@@ -11,9 +11,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, act } from "@testing-library/react";
-import * as TL from "@testing-library/react";
-const { screen, waitFor } = TL as unknown as typeof import("@testing-library/dom") & { waitFor: typeof import("@testing-library/dom").waitFor };
+// @ts-expect-error — testing-library v16 type exports vary by setup
+import { render, act, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import OrderConfirmation from "@/components/order/OrderConfirmation";
 
@@ -24,15 +23,15 @@ vi.mock("@/lib/sounds", () => ({ playPaymentSuccessSound: vi.fn() }));
 // Channel mock returned by supabase.channel(...).on(...).subscribe()
 const fakeChannel = { on: vi.fn().mockReturnThis(), subscribe: vi.fn().mockReturnThis() };
 
-const supabaseFromMock = vi.fn();
-const removeChannelMock = vi.fn();
-const channelMock = vi.fn(() => fakeChannel);
+const supabaseFromMock = vi.fn<(table: string) => unknown>();
+const removeChannelMock = vi.fn<(ch: unknown) => unknown>();
+const channelMock = vi.fn<(name: string) => typeof fakeChannel>(() => fakeChannel);
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: (...args: unknown[]) => supabaseFromMock(...(args as [unknown])),
-    channel: (...args: unknown[]) => channelMock(...(args as [string])),
-    removeChannel: (...args: unknown[]) => removeChannelMock(...(args as [unknown])),
+    from: (table: string) => supabaseFromMock(table),
+    channel: (name: string) => channelMock(name),
+    removeChannel: (ch: unknown) => removeChannelMock(ch),
   },
 }));
 
