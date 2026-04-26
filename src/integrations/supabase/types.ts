@@ -3514,6 +3514,9 @@ export type Database = {
           address: string | null
           age: number | null
           avatar_url: string | null
+          ban_reason: string | null
+          banned_at: string | null
+          banned_by: string | null
           city: string | null
           country: string | null
           created_at: string
@@ -3532,6 +3535,7 @@ export type Database = {
           id: string
           instagram_id: string | null
           international_booking_allowed: boolean
+          is_banned: boolean
           is_manual: boolean
           is_verified: boolean
           mobile: string
@@ -3558,6 +3562,9 @@ export type Database = {
           address?: string | null
           age?: number | null
           avatar_url?: string | null
+          ban_reason?: string | null
+          banned_at?: string | null
+          banned_by?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -3576,6 +3583,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           international_booking_allowed?: boolean
+          is_banned?: boolean
           is_manual?: boolean
           is_verified?: boolean
           mobile: string
@@ -3602,6 +3610,9 @@ export type Database = {
           address?: string | null
           age?: number | null
           avatar_url?: string | null
+          ban_reason?: string | null
+          banned_at?: string | null
+          banned_by?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -3620,6 +3631,7 @@ export type Database = {
           id?: string
           instagram_id?: string | null
           international_booking_allowed?: boolean
+          is_banned?: boolean
           is_manual?: boolean
           is_verified?: boolean
           mobile?: string
