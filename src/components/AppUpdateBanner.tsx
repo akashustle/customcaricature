@@ -79,6 +79,7 @@ const AppUpdateBanner = () => {
   }, []);
 
   useEffect(() => {
+    if (shouldSkipUpdateCheck()) return;
     checkAdminUpdate();
     const interval = setInterval(checkAdminUpdate, CHECK_INTERVAL);
 
@@ -105,7 +106,10 @@ const AppUpdateBanner = () => {
       window.removeEventListener("storage", syncAcrossTabs);
       supabase.removeChannel(ch);
     };
-  }, [checkAdminUpdate, updateAvailable]);
+    // Intentionally omit `updateAvailable` — re-subscribing on every state change
+    // caused the dashboard to re-fetch settings every render and re-trigger shimmer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkAdminUpdate]);
 
   const handleUpdate = async () => {
     setUpdating(true);
