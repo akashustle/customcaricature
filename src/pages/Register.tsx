@@ -61,6 +61,27 @@ const Register = () => {
     localStorage.setItem(REGISTER_STORAGE_KEY, JSON.stringify({ ...safe, _step: step }));
   }, [form, step]);
 
+  // When the user lands here from the Workshop dashboard ("Create Booking
+  // Account" CTA), pre-fill email + mobile from the saved workshop_user so
+  // the auto-detect import effect runs immediately.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("from") !== "workshop") return;
+      const ws = JSON.parse(localStorage.getItem("workshop_user") || "null");
+      if (!ws) return;
+      setForm(prev => ({
+        ...prev,
+        email: prev.email || (ws.email || ""),
+        mobile: prev.mobile || (ws.mobile || "").replace(/\D/g, "").slice(0, 10),
+        fullName: prev.fullName || (ws.name || ""),
+      }));
+      // Surface a hint so the user knows what's happening
+      toast({ title: "🎓 Linking your Workshop profile", description: "Verify your email to import the rest of your details." });
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Clear draft on successful registration
   const clearDraft = () => localStorage.removeItem(REGISTER_STORAGE_KEY);
 
