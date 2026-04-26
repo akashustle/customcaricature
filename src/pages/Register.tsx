@@ -395,6 +395,39 @@ const Register = () => {
                       {emailError && <p className="text-xs text-destructive mt-1">{emailError}</p>}
                     </div>
 
+                    {/* Import-from-Workshop prompt — appears when the entered
+                        email or mobile already matches an existing workshop_users row */}
+                    {workshopMatch && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-3 space-y-2"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-xl leading-none">🎓</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground">
+                              We found your Workshop profile
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {workshopMatch.name ? `Hi ${workshopMatch.name}! ` : ""}
+                              Import your saved details so you don't have to retype them.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button type="button" size="sm" onClick={importFromWorkshop}
+                            className="flex-1 rounded-lg h-9 text-xs font-semibold">
+                            ✨ Import from Workshop
+                          </Button>
+                          <Button type="button" size="sm" variant="outline" onClick={dismissWorkshopImport}
+                            className="rounded-lg h-9 text-xs">
+                            Type manually
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+
                     {/* Email Verification */}
                     {!emailVerified && form.email && !emailError && form.email.includes("@") && (
                       <div className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-3">
