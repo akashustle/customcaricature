@@ -2021,20 +2021,90 @@ const Admin = () => {
                               </Button>
                             </div>
                           </div>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
+                          <div className="flex flex-col gap-1 flex-shrink-0">
+                            <Button variant="ghost" size="sm" title="Edit all details" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
                               <Edit2 className="w-4 h-4" />
                             </Button>
+
+                            {/* Verify / Unverify */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={(c as any).is_verified ? "Remove verified badge" : "Grant verified badge"}
+                              className={(c as any).is_verified ? "text-sky-600" : ""}
+                              onClick={() => moderateCustomer(c.user_id, (c as any).is_verified ? "unverify" : "verify")}
+                            >
+                              {(c as any).is_verified ? "✓" : "☆"}
+                            </Button>
+
+                            {/* Ban / Unban with reason dialog */}
                             <AlertDialog>
-                              <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  title={(c as any).is_banned ? "Unblock account" : "Ban / block account"}
+                                  className={(c as any).is_banned ? "text-amber-600" : "text-amber-700"}
+                                >
+                                  🚫
+                                </Button>
+                              </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will delete the customer profile and all their orders permanently.</AlertDialogDescription>
+                                  <AlertDialogTitle>
+                                    {(c as any).is_banned ? "Unblock this account?" : "Ban / block this account?"}
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {(c as any).is_banned
+                                      ? `${c.full_name} will be able to sign in and use the app again.`
+                                      : `${c.full_name} will be locked out immediately. They'll receive an in-app notification + email with the reason below.`}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                {!(c as any).is_banned && (
+                                  <Textarea
+                                    id={`ban-reason-${c.user_id}`}
+                                    placeholder="Reason shown to user (e.g. Repeated cancellations, abusive behaviour…)"
+                                    className="mt-2 text-sm"
+                                    rows={3}
+                                  />
+                                )}
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => {
+                                      if ((c as any).is_banned) {
+                                        moderateCustomer(c.user_id, "unban");
+                                      } else {
+                                        const el = document.getElementById(`ban-reason-${c.user_id}`) as HTMLTextAreaElement | null;
+                                        const reason = el?.value?.trim() || "Violation of platform terms";
+                                        moderateCustomer(c.user_id, "ban", { reason, message: reason });
+                                      }
+                                    }}
+                                  >
+                                    {(c as any).is_banned ? "Unblock" : "Ban account"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+
+                            {/* Permanent delete */}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive" title="Delete account permanently"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete {c.full_name}'s account permanently?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This removes the user from authentication, deletes their profile and all their orders. <strong>This cannot be undone.</strong>
+                                  </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction>
+                                  <AlertDialogAction
+                                    className="bg-destructive hover:bg-destructive/90"
+                                    onClick={() => moderateCustomer(c.user_id, "delete")}
+                                  >
+                                    Delete forever
+                                  </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
