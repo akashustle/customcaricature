@@ -88,6 +88,8 @@ Deno.serve(async (req) => {
 
     let resultMsg = "";
 
+    const uid = user_id as string;
+
     switch (action) {
       case "ban": {
         await admin
@@ -97,10 +99,9 @@ Deno.serve(async (req) => {
             ban_reason: reason ?? message ?? "Violation of platform terms",
             banned_at: new Date().toISOString(),
           })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
 
-        // Lock the auth user so they can't sign in
-        await admin.auth.admin.updateUserById(user_id, {
+        await admin.auth.admin.updateUserById(uid, {
           ban_duration: "876000h", // 100 years
         });
 
@@ -112,11 +113,9 @@ Deno.serve(async (req) => {
         await admin
           .from("profiles")
           .update({ is_banned: false, ban_reason: null, banned_at: null })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
 
-        await admin.auth.admin.updateUserById(user_id, {
-          ban_duration: "none",
-        });
+        await admin.auth.admin.updateUserById(uid, { ban_duration: "none" });
 
         resultMsg = `Account restored for ${fullName}`;
         break;
@@ -131,22 +130,52 @@ Deno.serve(async (req) => {
             is_verified: verified,
             verification_status: verified ? "verified" : "unverified",
           })
-          .eq("user_id", user_id);
+          .eq("user_id", uid);
         resultMsg = verified
           ? `${fullName} verified ✓`
           : `Verification removed for ${fullName}`;
         break;
       }
 
-      case "delete": {
-        // Cascade-delete app data first (orders + profile)
-        await admin.from("orders").delete().eq("user_id", user_id);
-        await admin.from("profiles").delete().eq("user_id", user_id);
+      case "schedule_delete": {
+        if (!scheduled_deletion_at) {
+          return new Response(
+            JSON.stringify({ error: "scheduled_deletion_at is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        await admin
+          .from("profiles")
+          .update({
+            scheduled_deletion_at,
+            scheduled_deletion_reason: reason ?? "Account scheduled for deletion",
+            scheduled_deletion_message:
+              message ?? `Your account will be permanently deleted on ${new Date(scheduled_deletion_at).toLocaleString()}.`,
+          })
+          .eq("user_id", uid);
+        resultMsg = `Deletion scheduled for ${fullName} on ${new Date(scheduled_deletion_at).toLocaleString()}`;
+        break;
+      }
 
-        // Then remove the auth user
+      case "cancel_scheduled_delete": {
+        await admin
+          .from("profiles")
+          .update({
+            scheduled_deletion_at: null,
+            scheduled_deletion_reason: null,
+            scheduled_deletion_message: null,
+          })
+          .eq("user_id", uid);
+        resultMsg = `Scheduled deletion cancelled for ${fullName}`;
+        break;
+      }
+
+      case "delete": {
+        await admin.from("orders").delete().eq("user_id", uid);
+        await admin.from("profiles").delete().eq("user_id", uid);
         try {
-          await admin.auth.admin.deleteUser(user_id);
-        } catch (_) {
+          await admin.auth.admin.deleteUser(uid);
+        } catch (_e) {
           // Already gone — ignore
         }
         resultMsg = `Account permanently deleted for ${fullName}`;
