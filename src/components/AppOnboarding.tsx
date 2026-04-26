@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const ONBOARDING_KEY = "ccc_onboarding_done_v2";
+const WELCOME_3D_KEY = "ccc_app_welcome_v3_done";
 
 const slides = [
   {
@@ -45,6 +46,11 @@ const AppOnboarding = () => {
     // Hard guarantee: only show once per device — even across reloads/sessions
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (done === "done") return;
+    // If the 3D welcome has already been shown, don't show this one too
+    if (localStorage.getItem(WELCOME_3D_KEY) === "1") {
+      localStorage.setItem(ONBOARDING_KEY, "done");
+      return;
+    }
     setVisible(true);
   }, [user, loading, location]);
 

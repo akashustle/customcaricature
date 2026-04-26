@@ -113,44 +113,68 @@ const OfflineDetector = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: -80, opacity: 0, scale: 0.96 }}
+        initial={{ y: -100, opacity: 0, scale: 0.92 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: -80, opacity: 0, scale: 0.96 }}
-        transition={{ type: "spring", stiffness: 220, damping: 24 }}
-        className="fixed top-3 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-md z-[9999]"
+        exit={{ y: -100, opacity: 0, scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 240, damping: 26 }}
+        className="fixed top-3 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-sm z-[9999]"
         role="alert"
         data-testid="network-banner"
         data-state={state}
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div
-          className={`relative flex items-center gap-3 rounded-2xl px-4 py-3 shadow-2xl border backdrop-blur-xl ${
+          className={`relative overflow-hidden rounded-3xl border shadow-[0_20px_50px_-12px_rgba(0,0,0,0.4)] ${
             isOffline
-              ? "bg-gradient-to-r from-rose-600/95 to-red-600/95 border-white/20 text-white"
-              : "bg-gradient-to-r from-amber-500/95 to-orange-500/95 border-white/20 text-white"
+              ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-white/10"
+              : "bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 border-white/20"
           }`}
         >
-          <div className="shrink-0 w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-            <Icon className="w-4.5 h-4.5" strokeWidth={2.4} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[13px] font-bold leading-tight">
-              {isOffline ? "You're offline" : "Slow connection"}
+          {/* Animated glow accent */}
+          <motion.div
+            aria-hidden
+            className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl ${
+              isOffline ? "bg-rose-500/30" : "bg-yellow-300/40"
+            }`}
+            animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          <div className="relative flex items-center gap-3 px-4 py-3.5">
+            {/* Pulsing icon */}
+            <div className="shrink-0 relative">
+              <motion.div
+                className={`absolute inset-0 rounded-2xl ${isOffline ? "bg-rose-500/40" : "bg-yellow-300/40"}`}
+                animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <div className={`relative w-11 h-11 rounded-2xl flex items-center justify-center ${
+                isOffline ? "bg-gradient-to-br from-rose-500 to-rose-700" : "bg-white/25"
+              }`}>
+                <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="text-[11.5px] opacity-90 leading-tight mt-0.5 truncate">
-              {isOffline
-                ? "Your data is saved on this device"
-                : "Using cached data, auto-retrying"}
+
+            <div className="flex-1 min-w-0">
+              <div className="text-[14px] font-bold leading-tight text-white tracking-tight">
+                {isOffline ? "You're offline" : "Slow connection"}
+              </div>
+              <div className="text-[11.5px] leading-snug mt-0.5 text-white/80">
+                {isOffline
+                  ? "All your data is saved on this device"
+                  : "Showing cached data — auto-retrying"}
+              </div>
             </div>
+
+            <button
+              onClick={() => void revalidate()}
+              className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold bg-white/15 hover:bg-white/25 active:scale-95 transition-all px-3 py-1.5 rounded-xl text-white border border-white/20"
+              aria-label="Retry now"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Retry
+            </button>
           </div>
-          <button
-            onClick={() => void revalidate()}
-            className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold bg-white/20 hover:bg-white/30 active:scale-95 transition-all px-3 py-1.5 rounded-full"
-            aria-label="Retry now"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Retry
-          </button>
         </div>
       </motion.div>
     </AnimatePresence>

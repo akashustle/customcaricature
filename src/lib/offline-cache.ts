@@ -29,7 +29,11 @@ type CacheKey =
   | "calculator"
   | "faqs"
   | "my_orders"
-  | "my_events";
+  | "my_events"
+  | "my_profile"
+  | "my_workshop"
+  | "my_notifications"
+  | "site_settings";
 
 const open = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
@@ -87,6 +91,10 @@ export const primeOfflineCache = async (force = false) => {
     cacheFaqs(),
     cacheMyOrders(),
     cacheMyEvents(),
+    cacheMyProfile(),
+    cacheMyWorkshop(),
+    cacheMyNotifications(),
+    cacheSiteSettings(),
   ];
 
   await Promise.allSettled(tasks);
@@ -167,6 +175,53 @@ const cacheMyEvents = async () => {
   if (data) await putCached("my_events", data);
 };
 
+const cacheMyProfile = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (data) await putCached("my_profile", data);
+};
+
+const cacheMyWorkshop = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    const { data } = await (supabase as any)
+      .from("workshop_users")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    if (data) await putCached("my_workshop", data);
+  } catch {/* ignore */}
+};
+
+const cacheMyNotifications = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    const { data } = await (supabase as any)
+      .from("notifications")
+      .select("id, title, message, type, link, read, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (data) await putCached("my_notifications", data);
+  } catch {/* ignore */}
+};
+
+const cacheSiteSettings = async () => {
+  try {
+    const { data } = await (supabase as any)
+      .from("admin_site_settings")
+      .select("id, value");
+    if (data) await putCached("site_settings", data);
+  } catch {/* ignore */}
+};
+
 /** React-friendly install — call once on app boot in app mode. */
 export const installOfflineCache = () => {
   if (typeof window === "undefined") return;
@@ -183,4 +238,14 @@ export const installOfflineCache = () => {
   window.addEventListener("online", () => {
     primeOfflineCache(true).catch(() => {});
   });
+
+  // Re-prime as soon as the user signs in, so their personal data
+  // (profile, orders, events, workshop, notifications) is captured for offline.
+  try {
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        primeOfflineCache(true).catch(() => {});
+      }
+    });
+  } catch {/* ignore */}
 };
