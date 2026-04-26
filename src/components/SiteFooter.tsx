@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
 import { MAIN_SITE_URL } from "@/lib/site-config";
+import { openExternal } from "@/lib/pwa-link";
 
 type Link = { label: string; href?: string; coming_soon?: boolean; external?: boolean; icon?: string };
 type Column = { title: string; links: Link[] };
@@ -164,6 +165,15 @@ const SiteFooter = () => {
     if (link.coming_soon) {
       e.preventDefault();
       setComingSoonOpen(link.label);
+      return;
+    }
+    // Outbound contact / explicit-external links: route through openExternal
+    // so they stay inside the PWA shell when the app is installed.
+    const isContact = !!link.icon;
+    if (isContact || link.external) {
+      e.preventDefault();
+      const href = isContact ? resolveContactHref(link.icon) : link.href || "#";
+      openExternal(href);
     }
   };
 
@@ -192,7 +202,12 @@ const SiteFooter = () => {
         <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10 lg:p-12">
           {/* Brand */}
           <div className="mb-7 sm:mb-10 max-w-xl">
-            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 mb-3 group">
+            <a
+              href={MAIN_SITE_URL}
+              onClick={(e) => { e.preventDefault(); openExternal(MAIN_SITE_URL); }}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 mb-3 group"
+            >
               <img src="/logo.png" alt="Creative Caricature Club" className="w-11 h-11 rounded-xl shadow-sm" />
               <div className="text-lg font-extrabold tracking-tight leading-tight">
                 <span className="text-gradient-violet">Creative</span><br />
@@ -201,8 +216,12 @@ const SiteFooter = () => {
               </div>
             </a>
             <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
-            <a href={MAIN_SITE_URL} target="_blank" rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+            <a
+              href={MAIN_SITE_URL}
+              onClick={(e) => { e.preventDefault(); openExternal(MAIN_SITE_URL); }}
+              target="_blank" rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+            >
               <Globe className="w-3.5 h-3.5" /> Main Web <ExternalLink className="w-3 h-3" />
             </a>
           </div>

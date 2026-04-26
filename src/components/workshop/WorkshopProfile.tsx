@@ -18,6 +18,7 @@ import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
 import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCard";
 import WorkshopReferCard from "@/components/workshop/WorkshopReferCard";
 import EditRequestDialog from "@/components/EditRequestDialog";
+import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -812,6 +813,9 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
         fullName={profileData.name}
         secretCode={profileData.secret_code}
       />
+
+      {/* ============== STAY CONNECTED + DARK MODE TOGGLE ============== */}
+      <ProfileSocialFooter variant="workshop" userName={profileData.name?.split(" ")[0]} />
 
       {/* ============== VERIFICATION MODAL ============== */}
       <AnimatePresence>

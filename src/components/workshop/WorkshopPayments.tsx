@@ -213,7 +213,10 @@ const WorkshopPayments = ({ user }: Props) => {
         </div>
       )}
 
-      {/* Help card — match booking PaymentHistory tone */}
+      {/* Help card — friendly, non-technical wording. Per product policy:
+          do NOT mention "invoices", "partial payments" or "refunds" anywhere
+          in the workshop dashboard. Keep it to a simple "reach out if you
+          face any issue" message. */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -221,11 +224,10 @@ const WorkshopPayments = ({ user }: Props) => {
         className="rounded-3xl border border-primary/30 bg-primary/5 p-5"
       >
         <h3 className="font-bold text-base flex items-center gap-2 text-foreground">
-          <Wallet className="w-4 h-4 text-primary" /> Need help with your payment?
+          <Wallet className="w-4 h-4 text-primary" /> Need help?
         </h3>
         <p className="text-sm font-sans text-muted-foreground mt-1">
-          For invoices, partial-payment plans, or refund queries, reach out to our team — we'll sort it out within
-          one working day.
+          If you're facing any issue with your payment, please reach out to us — we'll get back to you within one working day.
         </p>
       </motion.div>
     </div>
