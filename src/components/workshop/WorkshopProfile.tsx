@@ -304,14 +304,15 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
 
   const initials = (profileData.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
 
-  // Lighter, whiter palette — soft accents, white surfaces
+  // Brand-aligned palette — uses primary/accent so the profile hero matches
+  // the booking dashboard's Profile hero exactly. Light HSL surfaces only.
   const palette = {
     ivory: "#ffffff",
-    coral: "hsl(8 78% 72%)",
-    gold: "hsl(36 85% 65%)",
+    coral: "hsl(var(--primary))",
+    gold: "hsl(var(--accent))",
     sage: "hsl(150 45% 68%)",
     plum: "hsl(335 55% 65%)",
-    sky: "hsl(210 90% 70%)",
+    sky: "hsl(210 90% 55%)",
   };
 
   return (
