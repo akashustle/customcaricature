@@ -293,6 +293,7 @@ const App = () => {
         <AppUpdateBanner />
         <BrowserRouter>
           <SyncStatusBadge />
+          <SyncToastListener />
           <ApkUpdatePrompt />
           <GlobalMaintenanceGate>
             <AppOnboardingGate />
