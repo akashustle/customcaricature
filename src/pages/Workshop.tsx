@@ -132,6 +132,15 @@ const Workshop = () => {
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [secretCodeLoginEnabled, setSecretCodeLoginEnabled] = useState(false);
 
+  // Progressive login state ----------------------------------------------------
+  // Step 0: select identifier type → Step 1: enter identifier → Step 2: backend
+  // tells us if the user is "registered" (show password) or "draft" (show
+  // "Resume registration" CTA) or "new" (show "Register" CTA).
+  const [loginPhase, setLoginPhase] = useState<"identifier" | "password" | "draft_resume" | "not_found">("identifier");
+  const [draftRecord, setDraftRecord] = useState<any>(null);
+  const [checkingIdentifier, setCheckingIdentifier] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+
   useEffect(() => {
     const stored = localStorage.getItem("workshop_user");
     if (stored) { navigate("/workshop/dashboard"); return; }
@@ -139,6 +148,63 @@ const Workshop = () => {
     fetchSecretCodeSetting();
     fetchInternationalSetting();
   }, []);
+
+  // ── Draft persistence ──────────────────────────────────────────────────────
+  // Save the in-progress registration form so the user can resume on re-login.
+  // Idempotent: upserts by email/mobile so refreshing the form keeps a single row.
+  const saveDraft = async (stepIndex: number, extraOverride?: Partial<typeof regForm>) => {
+    const data = { ...regForm, ...(extraOverride || {}) };
+    const email = (data.email || "").trim().toLowerCase();
+    const mobile = (data.mobile || "").trim();
+    if (!email && !mobile) return; // nothing to key on
+    try {
+      // Strip the password from the persisted payload — we'll re-collect it later.
+      const { password: _pw, ...safePayload } = data as any;
+      const payload: any = {
+        name: data.name || null,
+        email: email || null,
+        mobile: mobile || null,
+        current_step: stepIndex,
+        form_payload: safePayload,
+        payment_status: "pending",
+        source: "workshop_signup",
+        last_activity_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      if (draftId) {
+        await supabase.from("workshop_registration_drafts" as any).update(payload).eq("id", draftId);
+      } else {
+        // Try to find existing draft for this contact
+        const orFilter: string[] = [];
+        if (email) orFilter.push(`email.eq.${email}`);
+        if (mobile) orFilter.push(`mobile.eq.${mobile}`);
+        const { data: existing } = await supabase.from("workshop_registration_drafts" as any)
+          .select("id")
+          .or(orFilter.join(","))
+          .limit(1)
+          .maybeSingle();
+        if (existing && (existing as any).id) {
+          setDraftId((existing as any).id);
+          await supabase.from("workshop_registration_drafts" as any).update(payload).eq("id", (existing as any).id);
+        } else {
+          const { data: inserted } = await supabase.from("workshop_registration_drafts" as any)
+            .insert({ ...payload, created_at: new Date().toISOString() })
+            .select("id")
+            .single();
+          if (inserted) setDraftId((inserted as any).id);
+        }
+      }
+    } catch (err) {
+      // Drafts are best-effort — never block the user
+      console.warn("Draft save failed (non-fatal):", err);
+    }
+  };
+
+  const clearDraft = async () => {
+    if (!draftId) return;
+    try { await supabase.from("workshop_registration_drafts" as any).delete().eq("id", draftId); } catch {}
+    setDraftId(null);
+  };
 
   const fetchInternationalSetting = async () => {
     // Check both workshop_settings and admin_site_settings for the toggle
@@ -214,6 +280,78 @@ const Workshop = () => {
   // Determine if password is required based on batch
   const isPasswordRequired = selectedBatch === "upcoming";
 
+  // ── Progressive login ──────────────────────────────────────────────────────
+  // Step 1: user types email or mobile → we look them up in workshop_users
+  // (paid/registered) and workshop_registration_drafts (incomplete) and route:
+  //   • registered  → reveal password / secret code box
+  //   • draft       → "Resume registration" CTA that loads form + jumps to step
+  //   • not_found   → nudge them to "Register" CTA
+  const checkIdentifier = async () => {
+    const identifier = (loginType === "mobile" ? mobile.trim() : email.trim().toLowerCase());
+    if (loginType === "mobile" ? identifier.length < 10 : !identifier.includes("@")) {
+      toast({ title: `Enter a valid ${loginType}`, variant: "destructive" });
+      return;
+    }
+    setCheckingIdentifier(true);
+    try {
+      // 1. Is this a registered (paid) workshop user? Use the existing RPC
+      //    with credential_type "none" to safely probe without exposing the row.
+      const { data: existingUsers } = await supabase.rpc("workshop_login" as any, {
+        p_identifier: identifier,
+        p_identifier_type: loginType,
+        p_credential: "",
+        p_credential_type: "none",
+      });
+      if ((existingUsers as any[])?.length) {
+        setLoginPhase("password");
+        return;
+      }
+      // 2. Is there an in-progress draft for this contact?
+      const orFilter = loginType === "email"
+        ? `email.eq.${identifier}`
+        : `mobile.eq.${identifier}`;
+      const { data: draft } = await supabase.from("workshop_registration_drafts" as any)
+        .select("*")
+        .or(orFilter)
+        .order("last_activity_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (draft) {
+        setDraftRecord(draft);
+        setDraftId((draft as any).id);
+        setLoginPhase("draft_resume");
+        return;
+      }
+      // 3. No record at all
+      setLoginPhase("not_found");
+    } catch (err: any) {
+      toast({ title: "Lookup failed", description: err.message, variant: "destructive" });
+    } finally {
+      setCheckingIdentifier(false);
+    }
+  };
+
+  const resumeFromDraft = () => {
+    if (!draftRecord) return;
+    const payload = (draftRecord.form_payload as any) || {};
+    setRegForm({
+      ...regForm,
+      ...payload,
+      // Password is never persisted, force user to set it again at the final step.
+      password: "",
+      termsAccepted: !!payload.termsAccepted,
+      noticeRead: !!payload.noticeRead,
+    });
+    // Jump to whichever step they last reached (clamped to 0..3)
+    const step = Math.min(Math.max(Number(draftRecord.current_step ?? 0), 0), 3);
+    setRegStep(step);
+    setView("register");
+    toast({
+      title: "Welcome back! ✨",
+      description: `Resuming from step ${step + 1} — your earlier answers have been restored.`,
+    });
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -263,7 +401,13 @@ const Workshop = () => {
     } finally { setLoading(false); }
   };
 
-  const handleRegister = async () => {
+  // ── Pay-to-register ────────────────────────────────────────────────────────
+  // The user only becomes a real workshop_user AFTER the payment succeeds.
+  // Until then their progress lives in workshop_registration_drafts.
+  // The button on the final step is "Pay & Register" — it opens Razorpay,
+  // and the inserted workshop_users row is only created inside the payment
+  // success handler.
+  const handlePayAndRegister = async () => {
     if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot || !regForm.password) {
       toast({ title: "Please fill all required fields", variant: "destructive" }); return;
     }
@@ -276,72 +420,127 @@ const Workshop = () => {
     if (regForm.country !== "India" && !regForm.city) {
       toast({ title: "Please enter your City", variant: "destructive" }); return;
     }
+
     setSubmittingReg(true);
     try {
-      // Check if already registered in workshop (server-side, no PII exposure)
+      // Block if a paid workshop user already exists with this email/mobile
       const { data: alreadyExists } = await supabase.rpc("workshop_user_exists" as any, {
         p_email: regForm.email.trim().toLowerCase(),
         p_mobile: regForm.mobile.trim(),
       });
       if (alreadyExists === true) {
-        toast({ title: "Already Registered", description: "Please login.", variant: "destructive" });
+        toast({ title: "Already Registered", description: "Please login instead.", variant: "destructive" });
         setView("login");
         setSubmittingReg(false);
         return;
       }
 
-      // Check if user exists in main CCC platform (profiles table)
-      const { data: cccProfile } = await supabase.from("profiles").select("user_id, full_name, email, mobile").or(`email.eq.${regForm.email.trim().toLowerCase()},mobile.eq.${regForm.mobile.trim()}`).limit(1);
-      if (cccProfile && (cccProfile as any[]).length > 0) {
-        toast({
-          title: "🎨 You're already a CCC member!",
-          description: "Login to your CCC account and register for the workshop from your Dashboard → Workshop tab.",
-          duration: 8000,
-        });
-        setSubmittingReg(false);
-        return;
-      }
+      // Make sure the latest snapshot is saved as a draft before opening Razorpay
+      // — if the user closes the modal we can resume them later.
+      await saveDraft(99);
 
-      const { data: insertedData, error } = await supabase.from("workshop_users" as any).insert({
-        name: regForm.name.trim(),
-        email: regForm.email.trim().toLowerCase(),
-        mobile: regForm.mobile.trim(),
-        instagram_id: regForm.instagram_id.trim() || null,
-        age: regForm.age ? parseInt(regForm.age) : null,
-        occupation: regForm.occupation.trim() || null,
-        artist_background: regForm.artist_background,
-        skill_level: regForm.skill_level || null,
-        artist_background_type: regForm.artist_background_type || null,
-        why_join: regForm.why_suitable.trim() || null,
-        slot: regForm.slot,
-        student_type: "registered_online",
-        workshop_date: "2026-03-14",
-        password: regForm.password,
-        country: regForm.country || "India",
-        state: regForm.state || null,
-        city: regForm.city || null,
-        district: regForm.district || null,
-        terms_accepted: regForm.termsAccepted,
-      } as any).select("id").single();
-      if (error) throw error;
-      if (insertedData) setRegisteredUserId((insertedData as any).id);
-      toast({ title: "Registration Successful! 🎉", description: "You can pay now or login and pay later." });
-      setView("reg-success");
+      // Extract price number (e.g., "₹1,999" -> 1999)
+      const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
+
+      // Use a stable order id derived from the draft so verify-razorpay can match.
+      const tempOrderRef = draftId || `wsdraft_${Date.now()}`;
+
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: priceNum,
+        order_id: tempOrderRef,
+        customer_name: regForm.name,
+        customer_email: regForm.email,
+        customer_mobile: regForm.mobile,
+      });
+
+      const options = {
+        key: rzpData.razorpay_key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: "Creative Caricature Club™",
+        description: `Workshop Registration - ${workshop.title}`,
+        order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            // 1. Verify payment server-side
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: tempOrderRef,
+            });
+
+            // 2. NOW create the workshop_users row — payment is locked in.
+            const { data: insertedData, error } = await supabase.from("workshop_users" as any).insert({
+              name: regForm.name.trim(),
+              email: regForm.email.trim().toLowerCase(),
+              mobile: regForm.mobile.trim(),
+              instagram_id: regForm.instagram_id.trim() || null,
+              age: regForm.age ? parseInt(regForm.age) : null,
+              occupation: regForm.occupation.trim() || null,
+              artist_background: regForm.artist_background,
+              skill_level: regForm.skill_level || null,
+              artist_background_type: regForm.artist_background_type || null,
+              why_join: regForm.why_suitable.trim() || null,
+              slot: regForm.slot,
+              student_type: "registered_online",
+              workshop_date: "2026-03-14",
+              password: regForm.password,
+              country: regForm.country || "India",
+              state: regForm.state || null,
+              city: regForm.city || null,
+              district: regForm.district || null,
+              terms_accepted: regForm.termsAccepted,
+              payment_status: "paid",
+              payment_amount: priceNum,
+              registration_step: 99,
+            } as any).select("id").single();
+            if (error) throw error;
+            if (insertedData) setRegisteredUserId((insertedData as any).id);
+
+            // 3. Cleanup the draft — registration is fully complete.
+            await clearDraft();
+
+            playPaymentSuccessSound();
+            toast({
+              title: "Payment Successful! 🎉",
+              description: "Your seat is confirmed. You can now login.",
+            });
+            setView("reg-success");
+          } catch (err: any) {
+            toast({
+              title: "Payment verification failed",
+              description: err?.message || "Contact support if amount was deducted.",
+              variant: "destructive",
+            });
+          }
+        },
+        prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
+        theme: { color: "#b08d57" },
+        modal: {
+          ondismiss: () => {
+            setSubmittingReg(false);
+            toast({ title: "Payment cancelled", description: "Your progress was saved — login with your email or mobile to resume." });
+          },
+        },
+      };
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally { setSubmittingReg(false); }
+    } finally {
+      setSubmittingReg(false);
+    }
   };
 
+  // Kept for backward-compat (registered_online users who still owe payment).
   const handleWorkshopPayment = async () => {
     if (!registeredUserId) return;
     setPayingNow(true);
     try {
-      // Extract price number from workshop price string (e.g., "₹1,999" -> 1999)
       const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
       const rzpData = await createRazorpayOrder(supabase, {
         amount: priceNum, order_id: registeredUserId, customer_name: regForm.name, customer_email: regForm.email, customer_mobile: regForm.mobile,
       });
-
       const options = {
         key: rzpData.razorpay_key_id,
         amount: rzpData.amount,
@@ -354,7 +553,6 @@ const Workshop = () => {
             await verifyRazorpayPayment(supabase, {
               razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: registeredUserId,
             });
-            // Update workshop user payment status
             await supabase.from("workshop_users" as any).update({
               payment_status: "paid",
               payment_amount: priceNum,
@@ -606,18 +804,20 @@ const Workshop = () => {
                 {regStep > 0 && <Button variant="outline" onClick={() => setRegStep(regStep - 1)} className="flex-1 rounded-full"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>}
                 <Button variant="outline" onClick={() => setView("details")} className="rounded-full">Cancel</Button>
                 {regStep < regSteps.length - 1 ? (
-                  <Button onClick={() => {
+                  <Button onClick={async () => {
                     if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.age)) { toast({ title: "Fill all required fields", variant: "destructive" }); return; }
                     if (regStep === 1 && (!regForm.skill_level || !regForm.artist_background_type || !regForm.why_suitable)) { toast({ title: "Fill all background fields", variant: "destructive" }); return; }
                     if (regStep === 2) {
                       if (regForm.country === "India" && (!regForm.state || !regForm.city)) { toast({ title: "Please select your State and City", variant: "destructive" }); return; }
                       if (regForm.country !== "India" && !regForm.city) { toast({ title: "Please enter your City", variant: "destructive" }); return; }
                     }
+                    // Persist progress before advancing — lets the user resume later.
+                    await saveDraft(regStep + 1);
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (
-                  <Button onClick={handleRegister} disabled={submittingReg || !regForm.slot || !regForm.password || !regForm.termsAccepted || !regForm.noticeRead} className="flex-1 rounded-full">
-                    {submittingReg ? "Registering..." : "Register"} <CheckCircle className="w-4 h-4 ml-1" />
+                  <Button onClick={handlePayAndRegister} disabled={submittingReg || !regForm.slot || !regForm.password || !regForm.termsAccepted || !regForm.noticeRead} className="flex-1 rounded-full">
+                    {submittingReg ? "Processing..." : `Pay ${workshop.price} & Register`} <CheckCircle className="w-4 h-4 ml-1" />
                   </Button>
                 )}
               </div>
@@ -656,14 +856,18 @@ const Workshop = () => {
                 </Select>
               </div>
 
-              {/* Login method tabs */}
+              {/* Identifier-type selector — always visible so user picks email or mobile */}
               <div className="space-y-2">
                 <Label className="font-body text-xs text-muted-foreground">Login With</Label>
-                <Select value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`} onValueChange={(v) => {
-                  if (v === "secret_code") { setLoginMethod("secret_code"); }
-                  else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
-                  else { setLoginType("email"); setLoginMethod("password"); }
-                }}>
+                <Select
+                  value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`}
+                  onValueChange={(v) => {
+                    setLoginPhase("identifier");
+                    if (v === "secret_code") { setLoginMethod("secret_code"); }
+                    else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
+                    else { setLoginType("email"); setLoginMethod("password"); }
+                  }}
+                >
                   <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select login method" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="mobile_password">📱 Mobile Number</SelectItem>
@@ -674,54 +878,75 @@ const Workshop = () => {
               </div>
 
               <div className="space-y-4">
-                {loginMethod === "secret_code" ? (
+                {/* Step 1 — Identifier */}
+                <div className="space-y-2">
+                  <Label className="font-body text-sm">{loginType === "mobile" ? "Mobile Number" : "Email Address"}</Label>
+                  {loginType === "mobile" ? (
+                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); setLoginPhase("identifier"); }} placeholder="Enter your mobile" className="pl-10 h-12 rounded-xl" maxLength={10} onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
+                  ) : (
+                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setLoginPhase("identifier"); }} placeholder="Enter your email" className="pl-10 h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
+                  )}
+                </div>
+
+                {/* Step 2 — Continue button (resolves the user state) */}
+                {loginPhase === "identifier" && (
+                  <Button onClick={checkIdentifier} disabled={checkingIdentifier} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                    {checkingIdentifier ? "Checking…" : <>Continue <ArrowRight className="w-4 h-4 ml-1" /></>}
+                  </Button>
+                )}
+
+                {/* Phase A — Registered user → reveal password / secret code */}
+                {loginPhase === "password" && (
                   <>
-                    <div className="space-y-2">
-                      <Label className="font-body text-sm">{loginType === "mobile" ? "Mobile Number" : "Email Address"}</Label>
-                      {loginType === "mobile" ? (
-                        <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
-                      ) : (
-                        <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-body text-sm">Secret Code</Label>
-                      <Input type="password" value={loginSecretCode} onChange={(e) => setLoginSecretCode(e.target.value)} placeholder="Enter your 4-digit code" className="h-12 rounded-xl text-center tracking-[0.5em] text-lg" maxLength={4} onKeyDown={e => e.key === "Enter" && handleLogin()} />
-                      <p className="text-[11px] text-muted-foreground text-center">Secret code provided by admin</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {loginType === "mobile" ? (
+                    {loginMethod === "secret_code" ? (
                       <div className="space-y-2">
-                        <Label className="font-body text-sm">Mobile Number</Label>
-                        <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); }} placeholder="Enter registered mobile" className="pl-10 h-12 rounded-xl" maxLength={10} /></div>
+                        <Label className="font-body text-sm">Secret Code</Label>
+                        <Input type="password" value={loginSecretCode} onChange={(e) => setLoginSecretCode(e.target.value)} placeholder="Enter your 4-digit code" className="h-12 rounded-xl text-center tracking-[0.5em] text-lg" maxLength={4} onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
+                        <p className="text-[11px] text-muted-foreground text-center">Secret code provided by admin</p>
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Label className="font-body text-sm">Email Address</Label>
-                        <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter registered email" className="pl-10 h-12 rounded-xl" /></div>
-                      </div>
-                    )}
-                    {isPasswordRequired && (
+                    ) : isPasswordRequired ? (
                       <div className="space-y-2">
                         <Label className="font-body text-sm">Password</Label>
-                        <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} />
+                        <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
                       </div>
-                    )}
-                    {!isPasswordRequired && (
+                    ) : (
                       <p className="text-xs text-center text-muted-foreground bg-accent/10 rounded-xl p-2.5 font-body">
-                        ✨ No password required for 14th & 15th March batch — login directly with your {loginType === "mobile" ? "mobile number" : "email"}.
+                        ✨ No password required for this batch — tap Login to continue.
                       </p>
                     )}
+                    <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                      {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
+                    </Button>
                   </>
                 )}
-                <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                  {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
-                </Button>
+
+                {/* Phase B — Draft found → resume registration */}
+                {loginPhase === "draft_resume" && (
+                  <div className="space-y-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+                    <p className="text-sm font-body font-bold text-foreground">👋 Welcome back, {(draftRecord?.name as string) || "there"}!</p>
+                    <p className="text-xs text-muted-foreground font-body">
+                      We saved your progress at step {Math.min((draftRecord?.current_step ?? 0) + 1, 4)} of 4. Pick up where you left off and complete payment to confirm your seat.
+                    </p>
+                    <Button onClick={resumeFromDraft} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                      Resume Registration <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Phase C — No record found → nudge to register */}
+                {loginPhase === "not_found" && (
+                  <div className="space-y-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
+                    <p className="text-sm font-body font-bold text-amber-900">No registration found</p>
+                    <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
+                    <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                      Register Now <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 rounded-xl font-body text-sm" onClick={() => setView("details")}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
-                  {isRegistrationOpen && <Button variant="outline" className="flex-1 rounded-xl font-body text-sm border-primary text-primary" onClick={() => setView("register")}>Register <ArrowRight className="w-4 h-4 ml-1" /></Button>}
+                  <Button variant="outline" className="flex-1 rounded-xl font-body text-sm" onClick={() => { setLoginPhase("identifier"); setView("details"); }}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
+                  {isRegistrationOpen && loginPhase === "identifier" && <Button variant="outline" className="flex-1 rounded-xl font-body text-sm border-primary text-primary" onClick={() => setView("register")}>Register <ArrowRight className="w-4 h-4 ml-1" /></Button>}
                 </div>
                 <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-muted-foreground text-sm font-body font-medium hover:bg-secondary transition-colors"><MessageCircle className="w-4 h-4" /> Can't login? Contact WhatsApp</a>
               </div>
