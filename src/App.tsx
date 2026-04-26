@@ -42,6 +42,7 @@ const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
 const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
 const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
+const ApkUpdatePrompt = lazyShell(() => import("./components/ApkUpdatePrompt"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
@@ -286,6 +287,8 @@ const App = () => {
         <PWASplashScreen />
         <OfflineDetector />
         <SyncStatusBadge />
+        <BrowserRouter>
+          <ApkUpdatePrompt />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
