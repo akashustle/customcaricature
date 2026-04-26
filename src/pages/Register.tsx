@@ -235,6 +235,59 @@ const Register = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Detect existing workshop_users by email/mobile and offer to import details.
+  // Runs after the user verifies email or types a 10-digit mobile.
+  useEffect(() => {
+    const cleanEmail = form.email.trim().toLowerCase();
+    const cleanMobile = form.mobile.replace(/\D/g, "");
+    if (!emailVerified && cleanMobile.length !== 10) return;
+    if (workshopChecked) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        let match: any = null;
+        if (cleanEmail) {
+          const { data } = await supabase.from("workshop_users" as any)
+            .select("*").ilike("email", cleanEmail).maybeSingle();
+          if (data) match = data;
+        }
+        if (!match && cleanMobile.length === 10) {
+          const { data } = await supabase.from("workshop_users" as any)
+            .select("*").eq("mobile", cleanMobile).maybeSingle();
+          if (data) match = data;
+        }
+        if (cancelled) return;
+        if (match) setWorkshopMatch(match);
+      } catch { /* silent */ }
+    })();
+    return () => { cancelled = true; };
+  }, [emailVerified, form.email, form.mobile, workshopChecked]);
+
+  const importFromWorkshop = () => {
+    if (!workshopMatch) return;
+    const ws = workshopMatch;
+    setForm(prev => ({
+      ...prev,
+      fullName: ws.name || prev.fullName,
+      mobile: (ws.mobile || prev.mobile || "").replace(/\D/g, "").slice(0, 10),
+      instagramId: ws.instagram_id || prev.instagramId,
+      age: ws.age ? String(ws.age) : prev.age,
+      gender: (ws.gender || prev.gender || "").toLowerCase(),
+      address: ws.address || prev.address,
+      city: ws.city || prev.city,
+      state: ws.state || prev.state,
+      district: ws.district || prev.district,
+    }));
+    setWorkshopChecked(true);
+    setWorkshopMatch(null);
+    toast({ title: "✨ Imported from your Workshop profile", description: "Review the details and continue." });
+  };
+
+  const dismissWorkshopImport = () => {
+    setWorkshopChecked(true);
+    setWorkshopMatch(null);
+  };
+
   const nextStep = () => {
     if (step === 1 && !canGoStep2) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
     if (step === 2 && !canGoStep3) { toast({ title: "Please verify your email first", variant: "destructive" }); return; }
