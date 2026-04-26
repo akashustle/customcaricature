@@ -37,19 +37,20 @@ async function createVapidJwt(endpoint: string, vapidPublicKey: string, vapidPri
 }
 
 async function encryptPayload(clientPublicKeyB64: string, clientAuthB64: string, payload: Uint8Array): Promise<{ encrypted: Uint8Array }> {
+  // Cast to BufferSource to satisfy strict TS lib check (Uint8Array<ArrayBufferLike> vs ArrayBufferView<ArrayBuffer>)
   const clientPublicKeyRaw = base64UrlDecode(clientPublicKeyB64);
   const clientAuth = base64UrlDecode(clientAuthB64);
-  const clientPublicKey = await crypto.subtle.importKey("raw", clientPublicKeyRaw, { name: "ECDH", namedCurve: "P-256" }, true, []);
-  const serverKeyPair = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const clientPublicKey = await crypto.subtle.importKey("raw", clientPublicKeyRaw as BufferSource, { name: "ECDH", namedCurve: "P-256" }, true, []);
+  const serverKeyPair = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]) as CryptoKeyPair;
   const serverPublicKey = new Uint8Array(await crypto.subtle.exportKey("raw", serverKeyPair.publicKey));
   const sharedSecret = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: clientPublicKey }, serverKeyPair.privateKey, 256));
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
   async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length: number): Promise<Uint8Array> {
-    const saltKey = await crypto.subtle.importKey("raw", salt.length > 0 ? salt : new Uint8Array(32), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const prk = new Uint8Array(await crypto.subtle.sign("HMAC", saltKey, ikm));
-    const prkKey = await crypto.subtle.importKey("raw", prk, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const okm = new Uint8Array(await crypto.subtle.sign("HMAC", prkKey, new Uint8Array([...info, 1])));
+    const saltKey = await crypto.subtle.importKey("raw", (salt.length > 0 ? salt : new Uint8Array(32)) as BufferSource, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const prk = new Uint8Array(await crypto.subtle.sign("HMAC", saltKey, ikm as BufferSource));
+    const prkKey = await crypto.subtle.importKey("raw", prk as BufferSource, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const okm = new Uint8Array(await crypto.subtle.sign("HMAC", prkKey, new Uint8Array([...info, 1]) as BufferSource));
     return okm.slice(0, length);
   }
 
@@ -59,8 +60,8 @@ async function encryptPayload(clientPublicKeyB64: string, clientAuthB64: string,
   const cek = await hkdf(salt, ikm, new Uint8Array([...enc.encode("Content-Encoding: aes128gcm\0")]), 16);
   const nonce = await hkdf(salt, ikm, new Uint8Array([...enc.encode("Content-Encoding: nonce\0")]), 12);
   const padded = new Uint8Array([...payload, 2]);
-  const aesKey = await crypto.subtle.importKey("raw", cek, { name: "AES-GCM" }, false, ["encrypt"]);
-  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, padded));
+  const aesKey = await crypto.subtle.importKey("raw", cek as BufferSource, { name: "AES-GCM" }, false, ["encrypt"]);
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, padded as BufferSource));
 
   const header = new Uint8Array(16 + 4 + 1 + serverPublicKey.length);
   header.set(salt, 0);
