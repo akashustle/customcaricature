@@ -24,10 +24,88 @@ const confettiColors = [
 
 const OrderConfirmation = ({ orderId }: Props) => {
   const navigate = useNavigate();
+  const [verifyStatus, setVerifyStatus] = useState<PaymentVerifyStatus>("verifying");
+  const pollingRef = useRef<number | null>(null);
 
   useEffect(() => {
     playPaymentSuccessSound();
   }, []);
+
+  /**
+   * Webhook polling fallback.
+   *
+   * Razorpay's `handler` callback is the happy path — but if the user closes
+   * the modal mid-redirect, has flaky network, or the success callback never
+   * fires, we still need the confirmation page to converge on the real order
+   * status. We poll the orders table every 2s for up to 30s and stop the
+   * moment payment is confirmed.
+   *
+   * The UI never re-mounts: only the small status chip swaps text, so the
+   * confetti / 3D card never flickers.
+   */
+  useEffect(() => {
+    if (!orderId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 15; // 15 × 2s ≈ 30s
+    const POLL_INTERVAL = 2000;
+
+    const checkStatus = async () => {
+      attempts += 1;
+      try {
+        const { data, error } = await supabase
+          .from("orders")
+          .select("payment_status, status")
+          .eq("id", orderId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) throw error;
+        const paid = data?.payment_status === "paid" || data?.payment_status === "completed";
+        if (paid) {
+          setVerifyStatus("confirmed");
+          if (pollingRef.current) window.clearInterval(pollingRef.current);
+          return;
+        }
+        if (attempts >= MAX_ATTEMPTS) {
+          setVerifyStatus("pending");
+          if (pollingRef.current) window.clearInterval(pollingRef.current);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        if (attempts >= MAX_ATTEMPTS) {
+          setVerifyStatus("failed");
+          if (pollingRef.current) window.clearInterval(pollingRef.current);
+          reportError("OrderConfirmation.poll", "verification failed", err, "warn");
+        }
+      }
+    };
+
+    // Run immediately, then on interval
+    void checkStatus();
+    pollingRef.current = window.setInterval(checkStatus, POLL_INTERVAL);
+
+    // Realtime channel — converge instantly when verify-razorpay-payment writes the row.
+    const channel = supabase
+      .channel(`order-${orderId}-status`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
+        (payload) => {
+          const next = payload.new as { payment_status?: string };
+          if (next?.payment_status === "paid" || next?.payment_status === "completed") {
+            setVerifyStatus("confirmed");
+            if (pollingRef.current) window.clearInterval(pollingRef.current);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      if (pollingRef.current) window.clearInterval(pollingRef.current);
+      supabase.removeChannel(channel);
+    };
+  }, [orderId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-background flex items-center justify-center px-4 py-10 relative overflow-hidden">
