@@ -329,7 +329,13 @@ const Workshop = () => {
     } finally { setLoading(false); }
   };
 
-  const handleRegister = async () => {
+  // ── Pay-to-register ────────────────────────────────────────────────────────
+  // The user only becomes a real workshop_user AFTER the payment succeeds.
+  // Until then their progress lives in workshop_registration_drafts.
+  // The button on the final step is "Pay & Register" — it opens Razorpay,
+  // and the inserted workshop_users row is only created inside the payment
+  // success handler.
+  const handlePayAndRegister = async () => {
     if (!regForm.name || !regForm.email || !regForm.mobile || !regForm.slot || !regForm.password) {
       toast({ title: "Please fill all required fields", variant: "destructive" }); return;
     }
@@ -342,72 +348,127 @@ const Workshop = () => {
     if (regForm.country !== "India" && !regForm.city) {
       toast({ title: "Please enter your City", variant: "destructive" }); return;
     }
+
     setSubmittingReg(true);
     try {
-      // Check if already registered in workshop (server-side, no PII exposure)
+      // Block if a paid workshop user already exists with this email/mobile
       const { data: alreadyExists } = await supabase.rpc("workshop_user_exists" as any, {
         p_email: regForm.email.trim().toLowerCase(),
         p_mobile: regForm.mobile.trim(),
       });
       if (alreadyExists === true) {
-        toast({ title: "Already Registered", description: "Please login.", variant: "destructive" });
+        toast({ title: "Already Registered", description: "Please login instead.", variant: "destructive" });
         setView("login");
         setSubmittingReg(false);
         return;
       }
 
-      // Check if user exists in main CCC platform (profiles table)
-      const { data: cccProfile } = await supabase.from("profiles").select("user_id, full_name, email, mobile").or(`email.eq.${regForm.email.trim().toLowerCase()},mobile.eq.${regForm.mobile.trim()}`).limit(1);
-      if (cccProfile && (cccProfile as any[]).length > 0) {
-        toast({
-          title: "🎨 You're already a CCC member!",
-          description: "Login to your CCC account and register for the workshop from your Dashboard → Workshop tab.",
-          duration: 8000,
-        });
-        setSubmittingReg(false);
-        return;
-      }
+      // Make sure the latest snapshot is saved as a draft before opening Razorpay
+      // — if the user closes the modal we can resume them later.
+      await saveDraft(99);
 
-      const { data: insertedData, error } = await supabase.from("workshop_users" as any).insert({
-        name: regForm.name.trim(),
-        email: regForm.email.trim().toLowerCase(),
-        mobile: regForm.mobile.trim(),
-        instagram_id: regForm.instagram_id.trim() || null,
-        age: regForm.age ? parseInt(regForm.age) : null,
-        occupation: regForm.occupation.trim() || null,
-        artist_background: regForm.artist_background,
-        skill_level: regForm.skill_level || null,
-        artist_background_type: regForm.artist_background_type || null,
-        why_join: regForm.why_suitable.trim() || null,
-        slot: regForm.slot,
-        student_type: "registered_online",
-        workshop_date: "2026-03-14",
-        password: regForm.password,
-        country: regForm.country || "India",
-        state: regForm.state || null,
-        city: regForm.city || null,
-        district: regForm.district || null,
-        terms_accepted: regForm.termsAccepted,
-      } as any).select("id").single();
-      if (error) throw error;
-      if (insertedData) setRegisteredUserId((insertedData as any).id);
-      toast({ title: "Registration Successful! 🎉", description: "You can pay now or login and pay later." });
-      setView("reg-success");
+      // Extract price number (e.g., "₹1,999" -> 1999)
+      const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
+
+      // Use a stable order id derived from the draft so verify-razorpay can match.
+      const tempOrderRef = draftId || `wsdraft_${Date.now()}`;
+
+      const rzpData = await createRazorpayOrder(supabase, {
+        amount: priceNum,
+        order_id: tempOrderRef,
+        customer_name: regForm.name,
+        customer_email: regForm.email,
+        customer_mobile: regForm.mobile,
+      });
+
+      const options = {
+        key: rzpData.razorpay_key_id,
+        amount: rzpData.amount,
+        currency: rzpData.currency,
+        name: "Creative Caricature Club™",
+        description: `Workshop Registration - ${workshop.title}`,
+        order_id: rzpData.razorpay_order_id,
+        handler: async (response: any) => {
+          try {
+            // 1. Verify payment server-side
+            await verifyRazorpayPayment(supabase, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: tempOrderRef,
+            });
+
+            // 2. NOW create the workshop_users row — payment is locked in.
+            const { data: insertedData, error } = await supabase.from("workshop_users" as any).insert({
+              name: regForm.name.trim(),
+              email: regForm.email.trim().toLowerCase(),
+              mobile: regForm.mobile.trim(),
+              instagram_id: regForm.instagram_id.trim() || null,
+              age: regForm.age ? parseInt(regForm.age) : null,
+              occupation: regForm.occupation.trim() || null,
+              artist_background: regForm.artist_background,
+              skill_level: regForm.skill_level || null,
+              artist_background_type: regForm.artist_background_type || null,
+              why_join: regForm.why_suitable.trim() || null,
+              slot: regForm.slot,
+              student_type: "registered_online",
+              workshop_date: "2026-03-14",
+              password: regForm.password,
+              country: regForm.country || "India",
+              state: regForm.state || null,
+              city: regForm.city || null,
+              district: regForm.district || null,
+              terms_accepted: regForm.termsAccepted,
+              payment_status: "paid",
+              payment_amount: priceNum,
+              registration_step: 99,
+            } as any).select("id").single();
+            if (error) throw error;
+            if (insertedData) setRegisteredUserId((insertedData as any).id);
+
+            // 3. Cleanup the draft — registration is fully complete.
+            await clearDraft();
+
+            playPaymentSuccessSound();
+            toast({
+              title: "Payment Successful! 🎉",
+              description: "Your seat is confirmed. You can now login.",
+            });
+            setView("reg-success");
+          } catch (err: any) {
+            toast({
+              title: "Payment verification failed",
+              description: err?.message || "Contact support if amount was deducted.",
+              variant: "destructive",
+            });
+          }
+        },
+        prefill: { name: regForm.name, email: regForm.email, contact: regForm.mobile },
+        theme: { color: "#b08d57" },
+        modal: {
+          ondismiss: () => {
+            setSubmittingReg(false);
+            toast({ title: "Payment cancelled", description: "Your progress was saved — login with your email or mobile to resume." });
+          },
+        },
+      };
+      await initRazorpay(options);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally { setSubmittingReg(false); }
+    } finally {
+      setSubmittingReg(false);
+    }
   };
 
+  // Kept for backward-compat (registered_online users who still owe payment).
   const handleWorkshopPayment = async () => {
     if (!registeredUserId) return;
     setPayingNow(true);
     try {
-      // Extract price number from workshop price string (e.g., "₹1,999" -> 1999)
       const priceNum = parseInt(workshop.price.replace(/[^0-9]/g, "")) || 1999;
       const rzpData = await createRazorpayOrder(supabase, {
         amount: priceNum, order_id: registeredUserId, customer_name: regForm.name, customer_email: regForm.email, customer_mobile: regForm.mobile,
       });
-
       const options = {
         key: rzpData.razorpay_key_id,
         amount: rzpData.amount,
@@ -420,7 +481,6 @@ const Workshop = () => {
             await verifyRazorpayPayment(supabase, {
               razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, order_id: registeredUserId,
             });
-            // Update workshop user payment status
             await supabase.from("workshop_users" as any).update({
               payment_status: "paid",
               payment_amount: priceNum,
