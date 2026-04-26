@@ -14,14 +14,10 @@ import {
   GraduationCap, Calendar, Award, FileText, ChevronRight, ArrowRight, Loader2, Video,
 } from "lucide-react";
 
-const palette = {
-  ivory: "hsl(38 60% 96%)",
-  coral: "hsl(8 78% 70%)",
-  gold: "hsl(36 78% 60%)",
-  sage: "hsl(150 30% 65%)",
-  sky: "hsl(200 70% 70%)",
-  plum: "hsl(335 45% 55%)",
-};
+// Booking-dashboard parity: this overview lives inside the booking dashboard
+// so it must share the same brand tokens, white 3D cards, and gradient orbs
+// as the booking Home tab. No more hardcoded ivory/coral/gold palette — we
+// only use HSL design tokens (primary, accent, foreground, muted-foreground).
 
 type Props = {
   authUserId: string;
