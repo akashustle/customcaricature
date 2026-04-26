@@ -52,14 +52,16 @@ const playNotifSound = () => {
   } catch {}
 };
 
+// Tab order matches user request: Home, Profile, Videos, Notifications,
+// Assignments, Certificates (with Feedback as a 7th scrollable tab).
 const allTabs = [
   { key: "home", icon: Home, label: "Home", settingKey: null },
-  { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
+  { key: "profile", icon: User, label: "Profile", settingKey: null },
   { key: "videos", icon: Video, label: "Videos", settingKey: "global_video_access" },
+  { key: "notifications", icon: Bell, label: "Alerts", settingKey: null },
   { key: "assignments", icon: FileText, label: "Tasks", settingKey: "assignment_submission_enabled" },
   { key: "certificates", icon: Award, label: "Certs", settingKey: "certificate_visibility" },
   { key: "feedback", icon: MessageSquare, label: "Feedback", settingKey: "feedback_visibility" },
-  { key: "profile", icon: User, label: "Profile", settingKey: null },
 ];
 
 const WorkshopDashboard = () => {
