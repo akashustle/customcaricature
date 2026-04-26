@@ -578,6 +578,11 @@ const Dashboard = () => {
                   <Receipt className="w-4 h-4 mr-2" />Payments
                 </TabsTrigger>
               )}
+              {tabsAvailable.orders && (
+                <TabsTrigger value="orders" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Package className="w-4 h-4 mr-2" />Orders
+                </TabsTrigger>
+              )}
               {tabsAvailable.chat && (
                 <TabsTrigger value="chat" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <MessageCircle className="w-4 h-4 mr-2" />Chat
