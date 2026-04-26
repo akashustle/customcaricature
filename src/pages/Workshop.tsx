@@ -280,6 +280,78 @@ const Workshop = () => {
   // Determine if password is required based on batch
   const isPasswordRequired = selectedBatch === "upcoming";
 
+  // ── Progressive login ──────────────────────────────────────────────────────
+  // Step 1: user types email or mobile → we look them up in workshop_users
+  // (paid/registered) and workshop_registration_drafts (incomplete) and route:
+  //   • registered  → reveal password / secret code box
+  //   • draft       → "Resume registration" CTA that loads form + jumps to step
+  //   • not_found   → nudge them to "Register" CTA
+  const checkIdentifier = async () => {
+    const identifier = (loginType === "mobile" ? mobile.trim() : email.trim().toLowerCase());
+    if (loginType === "mobile" ? identifier.length < 10 : !identifier.includes("@")) {
+      toast({ title: `Enter a valid ${loginType}`, variant: "destructive" });
+      return;
+    }
+    setCheckingIdentifier(true);
+    try {
+      // 1. Is this a registered (paid) workshop user? Use the existing RPC
+      //    with credential_type "none" to safely probe without exposing the row.
+      const { data: existingUsers } = await supabase.rpc("workshop_login" as any, {
+        p_identifier: identifier,
+        p_identifier_type: loginType,
+        p_credential: "",
+        p_credential_type: "none",
+      });
+      if ((existingUsers as any[])?.length) {
+        setLoginPhase("password");
+        return;
+      }
+      // 2. Is there an in-progress draft for this contact?
+      const orFilter = loginType === "email"
+        ? `email.eq.${identifier}`
+        : `mobile.eq.${identifier}`;
+      const { data: draft } = await supabase.from("workshop_registration_drafts" as any)
+        .select("*")
+        .or(orFilter)
+        .order("last_activity_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (draft) {
+        setDraftRecord(draft);
+        setDraftId((draft as any).id);
+        setLoginPhase("draft_resume");
+        return;
+      }
+      // 3. No record at all
+      setLoginPhase("not_found");
+    } catch (err: any) {
+      toast({ title: "Lookup failed", description: err.message, variant: "destructive" });
+    } finally {
+      setCheckingIdentifier(false);
+    }
+  };
+
+  const resumeFromDraft = () => {
+    if (!draftRecord) return;
+    const payload = (draftRecord.form_payload as any) || {};
+    setRegForm({
+      ...regForm,
+      ...payload,
+      // Password is never persisted, force user to set it again at the final step.
+      password: "",
+      termsAccepted: !!payload.termsAccepted,
+      noticeRead: !!payload.noticeRead,
+    });
+    // Jump to whichever step they last reached (clamped to 0..3)
+    const step = Math.min(Math.max(Number(draftRecord.current_step ?? 0), 0), 3);
+    setRegStep(step);
+    setView("register");
+    toast({
+      title: "Welcome back! ✨",
+      description: `Resuming from step ${step + 1} — your earlier answers have been restored.`,
+    });
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     try {
