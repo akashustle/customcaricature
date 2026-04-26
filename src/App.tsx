@@ -284,6 +284,7 @@ const App = () => {
         <RoutePrefetcher />
         <PWASplashScreen />
         <OfflineDetector />
+        <SyncStatusBadge />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
@@ -360,6 +361,8 @@ const App = () => {
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
                 <Route path="/claim-link" element={<ClaimLink />} />
                 <Route path="/chat-now" element={<ChatNow />} />
+                <Route path="/download" element={<Download />} />
+                <Route path="/install" element={<Navigate to="/download" replace />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />
