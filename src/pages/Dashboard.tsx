@@ -674,32 +674,41 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Mobile bottom nav (5 tabs, fade primary style) */}
+      {/* Mobile bottom nav (5 tabs, fade primary style) — order is admin-customizable */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
-        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around">
-          {[
-            { key: "home", icon: Home, label: "Home" },
-            { key: "events", icon: CalIcon, label: "Events" },
-            // Orders shown only for users who actually placed a custom caricature order.
-            { key: "orders", icon: Package, label: "Orders" },
-            { key: "payments", icon: Receipt, label: "Pay" },
-            { key: "chat", icon: MessageCircle, label: "Chat" },
-            { key: "profile", icon: User, label: "Me" },
-          ].filter(t => (tabsAvailable as any)[t.key]).map((item) => {
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all ${
-                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                }`}
-              >
-                <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
-                <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
-              </button>
-            );
-          })}
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around overflow-x-auto scrollbar-hide">
+          {(() => {
+            const allItems = [
+              { key: "home", icon: Home, label: "Home" },
+              { key: "events", icon: CalIcon, label: "Events" },
+              { key: "orders", icon: Package, label: "Orders" },
+              { key: "payments", icon: Receipt, label: "Pay" },
+              { key: "chat", icon: MessageCircle, label: "Chat" },
+              { key: "profile", icon: User, label: "Me" },
+            ];
+            // Admin-defined order from site settings; fallback to default order.
+            const savedOrder: string[] | undefined = (settings as any).booking_nav_order?.order;
+            const byKey = new Map(allItems.map(i => [i.key, i] as const));
+            const ordered = Array.isArray(savedOrder) && savedOrder.length > 0
+              ? [...savedOrder.map(k => byKey.get(k)).filter(Boolean) as typeof allItems,
+                 ...allItems.filter(i => !savedOrder.includes(i.key))]
+              : allItems;
+            return ordered.filter(t => (tabsAvailable as any)[t.key]).map((item) => {
+              const isActive = activeTab === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => setActiveTab(item.key)}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 ${
+                    isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
+                  <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
+                </button>
+              );
+            });
+          })()}
         </div>
       </nav>
 
