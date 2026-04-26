@@ -637,6 +637,12 @@ const Dashboard = () => {
           )}
           {activeTab === "events" && <EventsList events={events} canBookEvent={canBookEvent} handleBookEvent={handleBookEvent} userId={user?.id} editAllowed={profile?.event_edit_allowed === true} />}
           {activeTab === "payments" && user && <PaymentHistory userId={user.id} />}
+          {activeTab === "orders" && tabsAvailable.orders && (
+            <OrdersList
+              orders={orders} expandedOrder={expandedOrder} setExpandedOrder={setExpandedOrder}
+              payingOrderId={payingOrderId} handlePayNow={handlePayNow} navigate={navigate} userId={user?.id}
+            />
+          )}
           {activeTab === "chat" && user && (
             <div className="fixed inset-0 z-40 bg-background flex flex-col" style={{ paddingBottom: "calc(76px + env(safe-area-inset-bottom))" }}>
               <ChatSection userId={user.id} userName={profile?.full_name || ""} fullScreen />
