@@ -268,6 +268,40 @@ const OrderConfirmation = ({ orderId }: Props) => {
                 </span>
               </motion.div>
 
+              {/* Live verification status — never re-mounts the page, just swaps text */}
+              <div
+                className="mt-2 inline-flex items-center gap-2 text-[11px] font-sans"
+                role="status"
+                aria-live="polite"
+                data-testid="payment-verify-status"
+                data-status={verifyStatus}
+              >
+                {verifyStatus === "verifying" && (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                    <span className="text-muted-foreground">Confirming payment with bank…</span>
+                  </>
+                )}
+                {verifyStatus === "confirmed" && (
+                  <>
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span className="text-emerald-700 font-semibold">Payment confirmed</span>
+                  </>
+                )}
+                {verifyStatus === "pending" && (
+                  <>
+                    <Clock className="w-3 h-3 text-amber-600" />
+                    <span className="text-amber-700">Still processing — check Dashboard</span>
+                  </>
+                )}
+                {verifyStatus === "failed" && (
+                  <>
+                    <AlertCircle className="w-3 h-3 text-destructive" />
+                    <span className="text-destructive">Couldn't verify — contact support</span>
+                  </>
+                )}
+              </div>
+
               {/* Status grid - 3D feature tiles */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
