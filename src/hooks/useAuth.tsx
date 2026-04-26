@@ -63,6 +63,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch {
       setSession(null);
       setUser(null);
+    } finally {
+      // Wipe the offline credential cache so a different user can't sign in
+      // offline as the previous account on this device.
+      try {
+        const { clearCredentials } = await import("@/lib/offline-credentials");
+        clearCredentials();
+      } catch {/* ignore */}
     }
   }, []);
 
