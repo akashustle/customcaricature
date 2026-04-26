@@ -670,7 +670,9 @@ const Dashboard = () => {
           {[
             { key: "home", icon: Home, label: "Home" },
             { key: "events", icon: CalIcon, label: "Events" },
-            { key: "payments", icon: Receipt, label: "Payments" },
+            // Orders shown only for users who actually placed a custom caricature order.
+            { key: "orders", icon: Package, label: "Orders" },
+            { key: "payments", icon: Receipt, label: "Pay" },
             { key: "chat", icon: MessageCircle, label: "Chat" },
             { key: "profile", icon: User, label: "Me" },
           ].filter(t => (tabsAvailable as any)[t.key]).map((item) => {
