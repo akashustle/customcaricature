@@ -3291,6 +3291,9 @@ export type Database = {
           is_paid: boolean | null
           note: string | null
           paid_at: string | null
+          paid_by_order_id: string | null
+          paid_by_payment_id: string | null
+          paid_by_user_id: string | null
           status_on_paid: string | null
           updated_at: string | null
         }
@@ -3302,6 +3305,9 @@ export type Database = {
           is_paid?: boolean | null
           note?: string | null
           paid_at?: string | null
+          paid_by_order_id?: string | null
+          paid_by_payment_id?: string | null
+          paid_by_user_id?: string | null
           status_on_paid?: string | null
           updated_at?: string | null
         }
@@ -3313,6 +3319,9 @@ export type Database = {
           is_paid?: boolean | null
           note?: string | null
           paid_at?: string | null
+          paid_by_order_id?: string | null
+          paid_by_payment_id?: string | null
+          paid_by_user_id?: string | null
           status_on_paid?: string | null
           updated_at?: string | null
         }
