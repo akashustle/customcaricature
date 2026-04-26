@@ -61,7 +61,9 @@ async function encryptPayload(clientPublicKeyB64: string, clientAuthB64: string,
   const nonce = await hkdf(salt, ikm, new Uint8Array([...enc.encode("Content-Encoding: nonce\0")]), 12);
   const padded = new Uint8Array([...payload, 2]);
   const aesKey = await crypto.subtle.importKey("raw", cek as BufferSource, { name: "AES-GCM" }, false, ["encrypt"]);
-  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, padded as BufferSource));
+  const paddedBuf = new Uint8Array(new ArrayBuffer(padded.byteLength));
+  paddedBuf.set(padded);
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce as BufferSource }, aesKey, paddedBuf));
 
   const header = new Uint8Array(16 + 4 + 1 + serverPublicKey.length);
   header.set(salt, 0);
