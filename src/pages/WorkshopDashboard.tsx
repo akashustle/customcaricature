@@ -73,6 +73,8 @@ const WorkshopDashboard = () => {
   const [settings, setSettings] = useState<any>({});
   const [accentIdx, setAccentIdx] = useState(() => parseInt(localStorage.getItem("ws_accent") || "0") || 0);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  // Whether this workshop user also has a linked booking (main) account
+  const [hasBookingAccount, setHasBookingAccount] = useState(false);
 
   const accent = ACCENT_COLORS[accentIdx] || ACCENT_COLORS[0];
 
@@ -86,6 +88,17 @@ const WorkshopDashboard = () => {
     setWorkshopUser(user);
     refreshUser(user.id);
     fetchSettings();
+    // Detect whether a booking (main) profile exists for this user.
+    // We match on email OR mobile so the workshop dashboard can offer either
+    // "Open Booking Account" (when linked) or "Create Booking Account".
+    (async () => {
+      const filters: string[] = [];
+      if (user.email) filters.push(`email.eq.${user.email}`);
+      if (user.mobile) filters.push(`mobile.eq.${user.mobile}`);
+      if (filters.length === 0) return;
+      const { data } = await supabase.from("profiles").select("id").or(filters.join(",")).limit(1).maybeSingle();
+      setHasBookingAccount(!!data);
+    })();
 
     const handleLocalUserUpdate = (event: Event) => {
       const updated = (event as CustomEvent<any>).detail;
@@ -274,9 +287,15 @@ const WorkshopDashboard = () => {
                 <DropdownMenuItem className="rounded-lg cursor-pointer md:hidden" onClick={() => setDarkMode(!darkMode)}>
                   {darkMode ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />} {darkMode ? "Light mode" : "Dark mode"}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
-                  <LayoutDashboard className="w-4 h-4 mr-2" /> Main Dashboard
-                </DropdownMenuItem>
+                {hasBookingAccount ? (
+                  <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/dashboard")}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" /> Open Booking Account
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem className="rounded-lg cursor-pointer" onClick={() => navigate("/register?from=workshop")}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" /> Create Booking Account
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="rounded-lg cursor-pointer text-destructive focus:text-destructive" onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" /> Logout
