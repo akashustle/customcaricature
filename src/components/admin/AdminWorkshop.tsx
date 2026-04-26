@@ -26,6 +26,7 @@ const AdminWorkshop = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [drafts, setDrafts] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>({});
   const [showAddUser, setShowAddUser] = useState(false);
   const [showAddVideo, setShowAddVideo] = useState(false);
@@ -46,11 +47,48 @@ const AdminWorkshop = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_videos" }, fetchVideos)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_feedback" }, fetchFeedbacks)
       .on("postgres_changes", { event: "*", schema: "public", table: "workshop_assignments" }, fetchAssignments)
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_registration_drafts" }, fetchDrafts)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  const fetchAll = () => { fetchUsers(); fetchVideos(); fetchFeedbacks(); fetchAssignments(); fetchSettings(); };
+  const fetchAll = () => { fetchUsers(); fetchVideos(); fetchFeedbacks(); fetchAssignments(); fetchSettings(); fetchDrafts(); };
+
+  const fetchDrafts = async () => {
+    const { data } = await supabase.from("workshop_registration_drafts" as any)
+      .select("*").order("last_activity_at", { ascending: false });
+    if (data) setDrafts(data as any[]);
+  };
+
+  const deleteDraft = async (id: string) => {
+    await supabase.from("workshop_registration_drafts" as any).delete().eq("id", id);
+    toast({ title: "Draft Deleted" });
+    fetchDrafts();
+  };
+
+  const convertDraftToUser = async (draft: any) => {
+    const payload = (draft.form_payload as any) || {};
+    const { error } = await supabase.from("workshop_users" as any).insert({
+      name: draft.name || payload.name || "Unnamed",
+      email: draft.email || payload.email,
+      mobile: draft.mobile || payload.mobile,
+      instagram_id: payload.instagram_id || null,
+      age: payload.age ? parseInt(payload.age) : null,
+      occupation: payload.occupation || null,
+      slot: payload.slot || "12pm-3pm",
+      workshop_date: "2026-03-14",
+      student_type: "manually_added",
+      payment_status: "pending",
+      country: payload.country || "India",
+      state: payload.state || null,
+      city: payload.city || null,
+      district: payload.district || null,
+    } as any);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    await supabase.from("workshop_registration_drafts" as any).delete().eq("id", draft.id);
+    toast({ title: "Converted to Workshop User ✅" });
+    fetchAll();
+  };
 
   const fetchUsers = async () => {
     const { data } = await supabase.from("workshop_users" as any).select("*").order("created_at", { ascending: false });
