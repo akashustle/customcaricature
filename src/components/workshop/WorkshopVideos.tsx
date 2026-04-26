@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, SkipForward, SkipBack, Maximize, Lock, Clock, AlertTriangle, Download, ExternalLink } from "lucide-react";
 
-const WorkshopVideos = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
-  const dm = darkMode;
+const WorkshopVideos = ({ user }: { user: any; darkMode?: boolean }) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [userAccess, setUserAccess] = useState<any[]>([]);
   const [globalSettings, setGlobalSettings] = useState<any>({});

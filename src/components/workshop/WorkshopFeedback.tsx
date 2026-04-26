@@ -7,8 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { MessageSquare, Send, ExternalLink, Star, Reply } from "lucide-react";
 import { motion } from "framer-motion";
 
-const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
-  const dm = darkMode;
+const WorkshopFeedback = ({ user }: { user: any; darkMode?: boolean }) => {
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);

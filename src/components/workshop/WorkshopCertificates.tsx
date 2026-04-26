@@ -3,8 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Award, Download, Eye } from "lucide-react";
 
-const WorkshopCertificates = ({ user, darkMode = false }: { user: any; darkMode?: boolean }) => {
-  const dm = darkMode;
+const WorkshopCertificates = ({ user }: { user: any; darkMode?: boolean }) => {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [settingsEnabled, setSettingsEnabled] = useState(false);
 
