@@ -2995,18 +2995,11 @@ const ProfileWithLogout = (props: any) => {
         />
       )}
 
-      {/* Workshop overview & cross-account switcher */}
-      {props.userId && (
-        <>
-          <AccountSwitcherCard
-            authUserId={props.userId}
-            fullName={props.profile?.full_name}
-            email={props.profile?.email}
-            mobile={props.profile?.mobile}
-          />
-          <UserWorkshopOverview authUserId={props.userId} />
-        </>
-      )}
+      {/* Per user request: switching to workshop is now exclusively handled by
+          the dedicated "Workshop" tab in the bottom nav (UserWorkshopOverview).
+          The profile tab no longer shows the AccountSwitcherCard to avoid
+          duplication. UserWorkshopOverview is also rendered inside the
+          Workshop tab in the main dashboard tab list. */}
 
       {/* Refer a friend — light 3D referral card */}
       <ReferAFriendCard
