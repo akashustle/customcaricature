@@ -48,6 +48,13 @@ const Register = () => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // ── Workshop import detection ──────────────────────────────────────────
+  // When the typed email or mobile matches an existing workshop_users row,
+  // we offer a one-click "Import from Workshop" prompt that pre-fills name,
+  // age, gender, instagram, address etc. so the user doesn't have to retype.
+  const [workshopMatch, setWorkshopMatch] = useState<any | null>(null);
+  const [workshopChecked, setWorkshopChecked] = useState(false); // becomes true after a match has been resolved or dismissed
+
   // Persist form data to localStorage (exclude passwords)
   useEffect(() => {
     const { password, confirmPassword, ...safe } = form;
