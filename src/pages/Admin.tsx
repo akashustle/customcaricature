@@ -684,7 +684,7 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop");
+    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
     if (error) {
       console.error("Error fetching customers:", error);
     }
@@ -848,10 +848,13 @@ const Admin = () => {
     const { error } = await supabase.from("profiles").update({
       full_name: editCustomerData.full_name,
       mobile: editCustomerData.mobile,
+      email: (editCustomerData as any).email,
       instagram_id: editCustomerData.instagram_id,
       address: editCustomerData.address,
       city: editCustomerData.city,
       state: editCustomerData.state,
+      district: (editCustomerData as any).district,
+      country: (editCustomerData as any).country,
       pincode: editCustomerData.pincode,
       age: Number.isFinite(ageNum as number) ? ageNum : null,
       gender: (editCustomerData as any).gender || null,
@@ -862,6 +865,49 @@ const Admin = () => {
       toast({ title: "Customer Updated" });
       setEditingCustomer(null);
       fetchCustomers();
+    }
+  };
+
+  /** Upload a new avatar for ANY customer (admin override). */
+  const uploadCustomerAvatar = async (userId: string, file: File) => {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (upErr) { toast({ title: "Upload failed", description: upErr.message, variant: "destructive" }); return; }
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    if (urlData?.publicUrl) {
+      await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", userId);
+      toast({ title: "Profile photo updated 📸" });
+      fetchCustomers();
+    }
+  };
+
+  /** Ban / unban / verify / unverify / delete a customer via the moderation edge function. */
+  const moderateCustomer = async (
+    userId: string,
+    action: "ban" | "unban" | "verify" | "unverify" | "delete",
+    opts: { reason?: string; message?: string } = {},
+  ) => {
+    const adminName =
+      sessionStorage.getItem("admin_entered_name") ||
+      sessionStorage.getItem("admin_action_name") ||
+      "Admin";
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-moderate-user", {
+        body: {
+          action,
+          user_id: userId,
+          reason: opts.reason,
+          message: opts.message,
+          admin_name: adminName,
+          notify: true,
+        },
+      });
+      if (error) throw error;
+      toast({ title: data?.message || "Done" });
+      fetchCustomers();
+    } catch (err: any) {
+      toast({ title: "Error", description: err?.message || "Failed", variant: "destructive" });
     }
   };
 
@@ -1752,11 +1798,31 @@ const Admin = () => {
                     <CardContent className="p-4">
                       {editingCustomer === c.user_id ? (
                         <div className="space-y-3">
+                          {/* Avatar uploader */}
+                          <div className="flex items-center gap-3">
+                            {(c as any).avatar_url ? (
+                              <img src={(c as any).avatar_url} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                            ) : (
+                              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs">No photo</div>
+                            )}
+                            <div>
+                              <Label className="text-xs">Profile Photo</Label>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                className="text-xs"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) uploadCustomerAvatar(c.user_id, f);
+                                }}
+                              />
+                            </div>
+                          </div>
                           <div className="grid grid-cols-2 gap-3">
                             <div><Label className="text-xs">Full Name</Label><Input value={editCustomerData.full_name || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, full_name: e.target.value })} /></div>
                             <div><Label className="text-xs">Mobile</Label><Input value={editCustomerData.mobile || ""} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditCustomerData({ ...editCustomerData, mobile: d }); }} maxLength={10} /></div>
                           </div>
-                          <div><Label className="text-xs">Email (read-only)</Label><Input value={c.email} disabled className="opacity-60" /></div>
+                          <div><Label className="text-xs">Email</Label><Input value={(editCustomerData as any).email || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, email: e.target.value } as any)} /></div>
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <Label className="text-xs">Age</Label>
@@ -1785,6 +1851,10 @@ const Admin = () => {
                           </div>
                           <div><Label className="text-xs">Instagram</Label><Input value={editCustomerData.instagram_id || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, instagram_id: e.target.value })} /></div>
                           <div><Label className="text-xs">Address</Label><Input value={editCustomerData.address || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, address: e.target.value })} /></div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div><Label className="text-xs">Country</Label><Input value={(editCustomerData as any).country || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, country: e.target.value } as any)} /></div>
+                            <div><Label className="text-xs">District</Label><Input value={(editCustomerData as any).district || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, district: e.target.value } as any)} /></div>
+                          </div>
                           <div className="grid grid-cols-3 gap-3">
                             <div><Label className="text-xs">City</Label><Input value={editCustomerData.city || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, city: e.target.value })} /></div>
                             <div><Label className="text-xs">State</Label><Input value={editCustomerData.state || ""} onChange={(e) => setEditCustomerData({ ...editCustomerData, state: e.target.value })} /></div>
@@ -1796,30 +1866,51 @@ const Admin = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-3">
                           <div className="space-y-1 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-sans font-semibold">{c.full_name}</p>
-                              {(c as any).is_verified && (
-                                <span title="Verified" className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[11px] font-bold shadow-sm">✓</span>
+                            <div className="flex items-start gap-3">
+                              {(c as any).avatar_url ? (
+                                <img src={(c as any).avatar_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border flex-shrink-0" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground flex-shrink-0">
+                                  {(c.full_name || "?").charAt(0).toUpperCase()}
+                                </div>
                               )}
-                              {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
-                              {(c as any).created_from_workshop && (
-                                <Badge
-                                  title="This booking account was auto-created from a workshop signup"
-                                  className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none text-[10px] font-bold shadow-sm"
-                                >
-                                  🎨 Auto Created (Workshop)
-                                </Badge>
-                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-sans font-semibold">{c.full_name}</p>
+                                  {(c as any).is_verified && (
+                                    <span title="Verified" className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[11px] font-bold shadow-sm">✓</span>
+                                  )}
+                                  {(c as any).is_banned && (
+                                    <Badge title={(c as any).ban_reason || ""} className="bg-rose-600 text-white border-none text-[10px] font-bold shadow-sm">
+                                      🚫 BANNED
+                                    </Badge>
+                                  )}
+                                  {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
+                                  {(c as any).created_from_workshop && (
+                                    <Badge
+                                      title="This booking account was auto-created from a workshop signup"
+                                      className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none text-[10px] font-bold shadow-sm"
+                                    >
+                                      🎨 Auto Created (Workshop)
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground font-sans truncate">{c.email} · +91 {c.mobile}</p>
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
+                            {(c as any).is_banned && (c as any).ban_reason && (
+                              <div className="text-[11px] bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 rounded-md px-2 py-1">
+                                <span className="font-semibold">Ban reason:</span> {(c as any).ban_reason}
+                              </div>
+                            )}
                             {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
                             {c.secret_code && <p className="text-xs font-sans text-primary/80">🔑 Secret: <span className="font-mono font-bold">{c.secret_code}</span></p>}
                             {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
-                            {(c.city || c.state || c.pincode) && (
+                            {(c.city || c.state || c.pincode || (c as any).country || (c as any).district) && (
                               <p className="text-xs text-muted-foreground font-sans">
-                                {[c.city, c.state, c.pincode].filter(Boolean).join(", ")}
+                                {[(c as any).district, c.city, c.state, c.pincode, (c as any).country].filter(Boolean).join(", ")}
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground font-sans">
@@ -1930,20 +2021,90 @@ const Admin = () => {
                               </Button>
                             </div>
                           </div>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Button variant="ghost" size="sm" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
+                          <div className="flex flex-col gap-1 flex-shrink-0">
+                            <Button variant="ghost" size="sm" title="Edit all details" onClick={() => { setEditingCustomer(c.user_id); setEditCustomerData(c); }}>
                               <Edit2 className="w-4 h-4" />
                             </Button>
+
+                            {/* Verify / Unverify */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={(c as any).is_verified ? "Remove verified badge" : "Grant verified badge"}
+                              className={(c as any).is_verified ? "text-sky-600" : ""}
+                              onClick={() => moderateCustomer(c.user_id, (c as any).is_verified ? "unverify" : "verify")}
+                            >
+                              {(c as any).is_verified ? "✓" : "☆"}
+                            </Button>
+
+                            {/* Ban / Unban with reason dialog */}
                             <AlertDialog>
-                              <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  title={(c as any).is_banned ? "Unblock account" : "Ban / block account"}
+                                  className={(c as any).is_banned ? "text-amber-600" : "text-amber-700"}
+                                >
+                                  🚫
+                                </Button>
+                              </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Customer?</AlertDialogTitle>
-                                  <AlertDialogDescription>This will delete the customer profile and all their orders permanently.</AlertDialogDescription>
+                                  <AlertDialogTitle>
+                                    {(c as any).is_banned ? "Unblock this account?" : "Ban / block this account?"}
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    {(c as any).is_banned
+                                      ? `${c.full_name} will be able to sign in and use the app again.`
+                                      : `${c.full_name} will be locked out immediately. They'll receive an in-app notification + email with the reason below.`}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                {!(c as any).is_banned && (
+                                  <Textarea
+                                    id={`ban-reason-${c.user_id}`}
+                                    placeholder="Reason shown to user (e.g. Repeated cancellations, abusive behaviour…)"
+                                    className="mt-2 text-sm"
+                                    rows={3}
+                                  />
+                                )}
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => {
+                                      if ((c as any).is_banned) {
+                                        moderateCustomer(c.user_id, "unban");
+                                      } else {
+                                        const el = document.getElementById(`ban-reason-${c.user_id}`) as HTMLTextAreaElement | null;
+                                        const reason = el?.value?.trim() || "Violation of platform terms";
+                                        moderateCustomer(c.user_id, "ban", { reason, message: reason });
+                                      }
+                                    }}
+                                  >
+                                    {(c as any).is_banned ? "Unblock" : "Ban account"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+
+                            {/* Permanent delete */}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive" title="Delete account permanently"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete {c.full_name}'s account permanently?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This removes the user from authentication, deletes their profile and all their orders. <strong>This cannot be undone.</strong>
+                                  </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deleteCustomer(c.user_id)}>Delete</AlertDialogAction>
+                                  <AlertDialogAction
+                                    className="bg-destructive hover:bg-destructive/90"
+                                    onClick={() => moderateCustomer(c.user_id, "delete")}
+                                  >
+                                    Delete forever
+                                  </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
