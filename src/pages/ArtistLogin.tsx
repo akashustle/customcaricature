@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
+import { saveCredentials, verifyOfflineCredentials, hasCachedCredentials } from "@/lib/offline-credentials";
 
 const withTimeout = async (promise: Promise<any>, ms = 10000) =>
   Promise.race([promise, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("Request timed out.")), ms))]);
@@ -26,6 +27,24 @@ const ArtistLogin = () => {
     e.preventDefault();
     if (!email || !password) { toast({ title: "Please fill all fields", variant: "destructive" }); return; }
     setLoading(true);
+
+    // ---- Offline fallback ---------------------------------------------------
+    // If the device is offline AND this artist has previously signed in on
+    // this device, validate against the encrypted local cache so they can
+    // still reach their dashboard / queued events.
+    if (typeof navigator !== "undefined" && !navigator.onLine && hasCachedCredentials("artist")) {
+      const ok = await verifyOfflineCredentials(email.trim().toLowerCase(), password, "artist");
+      if (ok) {
+        toast({ title: "Offline mode", description: "Signed in from local cache. Will sync when online." });
+        navigate("/artist-dashboard");
+        setLoading(false);
+        return;
+      }
+      toast({ title: "Offline login failed", description: "Connect to the internet for first-time login.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data: authData, error: authError } = await withTimeout(
         supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password })
@@ -38,6 +57,8 @@ const ArtistLogin = () => {
         setLoading(false);
         return;
       }
+      // Cache the credential so the artist can re-open the app offline.
+      void saveCredentials(email.trim().toLowerCase(), password, "artist");
       toast({ title: "Welcome back! 🎨" });
       navigate("/artist-dashboard");
     } catch (err: any) {

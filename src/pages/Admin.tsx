@@ -96,6 +96,7 @@ const AdminAIIntelligence = lazy(() => import("@/components/admin/AdminAIIntelli
 const AdminPushUpdate = lazy(() => import("@/components/admin/AdminPushUpdate"));
 const AdminAppDownload = lazy(() => import("@/components/admin/AdminAppDownload"));
 const AdminSyncFailures = lazy(() => import("@/components/admin/AdminSyncFailures"));
+const AdminSyncQueueHealth = lazy(() => import("@/components/admin/AdminSyncQueueHealth"));
 const AdminDashboardPremium = lazy(() => import("@/components/admin/AdminDashboardPremium"));
 const AdminQuickActions = lazy(() => import("@/components/admin/AdminQuickActions"));
 const AdminWorkspaceSwitcher = lazy(() => import("@/components/admin/AdminWorkspaceSwitcher"));
@@ -2765,6 +2766,9 @@ const Admin = () => {
 
               {/* App Download Page (APK) */}
               <AdminAppDownload />
+
+              {/* Sync Queue Health — live backlog across all users */}
+              <AdminSyncQueueHealth />
 
               {/* Sync Failures Report — by date and device type */}
               <AdminSyncFailures />

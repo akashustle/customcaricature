@@ -50,12 +50,16 @@ import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
 import { installErrorReporter } from "./lib/error-reporter";
 import { installSyncWorker } from "./lib/sync-queue";
+import { installSyncHealthReporter } from "./lib/sync-health";
 
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
 
 // Boot the offline action queue worker (drains on reconnect)
 installSyncWorker();
+
+// Periodically report this client's offline backlog so admins see live health.
+installSyncHealthReporter();
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
