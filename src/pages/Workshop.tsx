@@ -132,6 +132,15 @@ const Workshop = () => {
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [secretCodeLoginEnabled, setSecretCodeLoginEnabled] = useState(false);
 
+  // Progressive login state ----------------------------------------------------
+  // Step 0: select identifier type → Step 1: enter identifier → Step 2: backend
+  // tells us if the user is "registered" (show password) or "draft" (show
+  // "Resume registration" CTA) or "new" (show "Register" CTA).
+  const [loginPhase, setLoginPhase] = useState<"identifier" | "password" | "draft_resume" | "not_found">("identifier");
+  const [draftRecord, setDraftRecord] = useState<any>(null);
+  const [checkingIdentifier, setCheckingIdentifier] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+
   useEffect(() => {
     const stored = localStorage.getItem("workshop_user");
     if (stored) { navigate("/workshop/dashboard"); return; }
@@ -139,6 +148,63 @@ const Workshop = () => {
     fetchSecretCodeSetting();
     fetchInternationalSetting();
   }, []);
+
+  // ── Draft persistence ──────────────────────────────────────────────────────
+  // Save the in-progress registration form so the user can resume on re-login.
+  // Idempotent: upserts by email/mobile so refreshing the form keeps a single row.
+  const saveDraft = async (stepIndex: number, extraOverride?: Partial<typeof regForm>) => {
+    const data = { ...regForm, ...(extraOverride || {}) };
+    const email = (data.email || "").trim().toLowerCase();
+    const mobile = (data.mobile || "").trim();
+    if (!email && !mobile) return; // nothing to key on
+    try {
+      // Strip the password from the persisted payload — we'll re-collect it later.
+      const { password: _pw, ...safePayload } = data as any;
+      const payload: any = {
+        name: data.name || null,
+        email: email || null,
+        mobile: mobile || null,
+        current_step: stepIndex,
+        form_payload: safePayload,
+        payment_status: "pending",
+        source: "workshop_signup",
+        last_activity_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      if (draftId) {
+        await supabase.from("workshop_registration_drafts" as any).update(payload).eq("id", draftId);
+      } else {
+        // Try to find existing draft for this contact
+        const orFilter: string[] = [];
+        if (email) orFilter.push(`email.eq.${email}`);
+        if (mobile) orFilter.push(`mobile.eq.${mobile}`);
+        const { data: existing } = await supabase.from("workshop_registration_drafts" as any)
+          .select("id")
+          .or(orFilter.join(","))
+          .limit(1)
+          .maybeSingle();
+        if (existing && (existing as any).id) {
+          setDraftId((existing as any).id);
+          await supabase.from("workshop_registration_drafts" as any).update(payload).eq("id", (existing as any).id);
+        } else {
+          const { data: inserted } = await supabase.from("workshop_registration_drafts" as any)
+            .insert({ ...payload, created_at: new Date().toISOString() })
+            .select("id")
+            .single();
+          if (inserted) setDraftId((inserted as any).id);
+        }
+      }
+    } catch (err) {
+      // Drafts are best-effort — never block the user
+      console.warn("Draft save failed (non-fatal):", err);
+    }
+  };
+
+  const clearDraft = async () => {
+    if (!draftId) return;
+    try { await supabase.from("workshop_registration_drafts" as any).delete().eq("id", draftId); } catch {}
+    setDraftId(null);
+  };
 
   const fetchInternationalSetting = async () => {
     // Check both workshop_settings and admin_site_settings for the toggle
