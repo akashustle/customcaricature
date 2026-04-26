@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { AlertTriangle, Globe, Home, UserPlus, LogIn, LayoutDashboard, Package, Calendar, ShoppingBag, ClipboardList, Save, Wrench, BookOpen, MessageCircle, HelpCircle, FileText, Clock, Timer, Eye, EyeOff, Receipt, Bell, User, Settings, CreditCard, Store, GraduationCap, MapPin, Mic, Camera, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import AdminMobileNavOrder from "@/components/admin/AdminMobileNavOrder";
 
 const PAGE_ICONS: Record<string, any> = {
   global: Globe, home: Home, registration: UserPlus, login: LogIn,
@@ -491,6 +492,9 @@ const AdminMaintenance = () => {
           );
         })}
       </div>
+
+      {/* Mobile bottom-nav tab order — drag-and-drop for both dashboards */}
+      <AdminMobileNavOrder />
     </div>
   );
 };

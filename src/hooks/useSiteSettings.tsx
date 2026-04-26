@@ -51,6 +51,8 @@ type SiteSettings = {
   floating_instagram_mobile: { enabled: boolean };
   floating_dark_toggle: { enabled: boolean };
   disable_right_click: { enabled: boolean };
+  booking_nav_order: { order: string[] };
+  workshop_nav_order: { order: string[] };
 };
 
 const defaults: SiteSettings = {
@@ -97,6 +99,10 @@ const defaults: SiteSettings = {
   floating_instagram_mobile: { enabled: false },
   floating_dark_toggle: { enabled: false },
   disable_right_click: { enabled: false },
+  // Default tab order for booking dashboard mobile bottom nav
+  booking_nav_order: { order: ["home", "events", "orders", "payments", "chat", "profile"] },
+  // Default tab order for workshop dashboard mobile bottom nav
+  workshop_nav_order: { order: ["home", "profile", "videos", "notifications", "assignments", "certificates", "feedback"] },
 };
 
 // Module-level cache so all instances share one fetch result
