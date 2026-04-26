@@ -42,6 +42,7 @@ const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
 const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
 const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
+const ApkUpdatePrompt = lazyShell(() => import("./components/ApkUpdatePrompt"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
@@ -110,6 +111,7 @@ const LilFleaGallery = lazy(() => import("./pages/LilFleaGallery"));
 const ClaimLink = lazy(() => import("./pages/ClaimLink"));
 const ChatNow = lazy(() => import("./pages/ChatNow"));
 const Download = lazy(() => import("./pages/Download"));
+const SyncQueue = lazy(() => import("./pages/SyncQueue"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -290,6 +292,7 @@ const App = () => {
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
+          <ApkUpdatePrompt />
           <GlobalMaintenanceGate>
             <AppOnboardingGate />
             <ScrollToTop />
@@ -363,6 +366,7 @@ const App = () => {
                 <Route path="/chat-now" element={<ChatNow />} />
                 <Route path="/download" element={<Download />} />
                 <Route path="/install" element={<Navigate to="/download" replace />} />
+                <Route path="/sync-queue" element={<SyncQueue />} />
                 {/* Programmatic SEO city/service landing pages */}
                 <Route path="/:slug" element={<SEOLandingPage />} />
                 <Route path="*" element={<NotFound />} />

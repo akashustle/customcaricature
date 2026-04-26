@@ -95,6 +95,24 @@ const updateAction = (id: string, patch: Partial<SyncAction>) => {
   safeWrite(queue);
 };
 
+/** Reset a single failed/queued action so the next drain re-attempts it. */
+export const retryAction = (id: string) => {
+  updateAction(id, { status: "queued", attempts: 0, lastError: undefined });
+  void drain();
+};
+
+/** Reset ALL failed actions so they get re-attempted on the next drain. */
+export const retryFailed = () => {
+  const queue = safeRead().map((a) =>
+    a.status === "failed" ? { ...a, status: "queued" as const, attempts: 0, lastError: undefined } : a,
+  );
+  safeWrite(queue);
+  void drain();
+};
+
+/** Permanently drop a failed action the user no longer wants to keep. */
+export const discardAction = (id: string) => removeAction(id);
+
 // ---- Action handlers ---------------------------------------------------
 
 const handlers: Record<SyncActionType, (payload: any) => Promise<void>> = {

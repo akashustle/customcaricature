@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Lock, KeyRound, Mail, Phone, Loader2, ArrowLeft, ArrowRight, Shield, Palette } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthShell from "@/components/auth/AuthShell";
+import { saveCredentials, verifyOfflineCredentials } from "@/lib/offline-credentials";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -81,11 +82,36 @@ const Login = () => {
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
+    const loginEmail = loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`;
+
+    // Offline path — verify against locally cached credentials
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const ok = await verifyOfflineCredentials(loginEmail, password);
+      if (ok) {
+        toast({
+          title: "Signed in offline",
+          description: "We'll re-validate with the server as soon as you're back online.",
+        });
+        navigate("/dashboard", { replace: true });
+      } else {
+        toast({
+          title: "Offline login failed",
+          description: "We can only sign you in offline if you've logged in on this device before.",
+          variant: "destructive",
+        });
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
-      const loginEmail = loginWith === "email" ? email.trim().toLowerCase() : `${phone.replace(/\D/g, "")}@phone.user`;
       const { error } = await withTimeout(supabase.auth.signInWithPassword({ email: loginEmail, password }));
       if (error) toast({ title: "Login failed", description: error.message, variant: "destructive" });
-      else await finalizeLogin();
+      else {
+        // Cache encrypted credentials for offline use next time
+        await saveCredentials(loginEmail, password);
+        await finalizeLogin();
+      }
     } catch (err: any) { toast({ title: "Login failed", description: err?.message || "Please try again.", variant: "destructive" }); }
     finally { setLoading(false); }
   };

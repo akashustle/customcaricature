@@ -377,6 +377,12 @@ const Register = () => {
         verification_method: verificationMethod,
       } as any).eq("user_id", data.user.id);
 
+      // Cache encrypted password locally so the user can sign in offline next time.
+      try {
+        const { saveCredentials } = await import("@/lib/offline-credentials");
+        await saveCredentials(signupPayload.email, signupPayload.password);
+      } catch {/* non-fatal */}
+
       clearDraft();
       toast({ title: "Registration Successful! 🎉", description: "Check your email to verify, then login." });
       navigate("/login");
