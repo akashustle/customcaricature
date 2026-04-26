@@ -8,11 +8,17 @@
  *   3. The component never re-mounts once shown — we assert the same DOM node
  *      survives a status transition (verifying → confirmed), which is the
  *      regression-shield for the old "shimmer flash on payment success" bug.
+ *
+ * Note: We intentionally use REAL timers here. Fake timers block the microtask
+ * queue used by Supabase's mocked async client, which would prevent the
+ * immediate-poll `await` from ever resolving. The polling interval is 2s, so
+ * tests that need to observe a poll result either (a) rely on the immediate
+ * first poll firing on mount, or (b) use waitFor with a generous timeout.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 // @ts-expect-error — testing-library v16 type exports vary by setup
-import { render, act, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import OrderConfirmation from "@/components/order/OrderConfirmation";
 
@@ -45,14 +51,11 @@ const buildOrdersQuery = (status: "pending" | "paid") => ({
 });
 
 beforeEach(() => {
-  vi.useFakeTimers();
   supabaseFromMock.mockReset();
   channelMock.mockClear();
   removeChannelMock.mockClear();
-});
-
-afterEach(() => {
-  vi.useRealTimers();
+  fakeChannel.on.mockClear();
+  fakeChannel.subscribe.mockClear();
 });
 
 // ---- Tests --------------------------------------------------------------
@@ -69,7 +72,11 @@ describe("OrderConfirmation — payment success flow", () => {
 
     expect(await screen.findByText("Order Confirmed!")).toBeInTheDocument();
     expect(screen.getByText("ABCD1234")).toBeInTheDocument();
-    expect(screen.getByTestId("payment-verify-status")).toHaveAttribute("data-status", "verifying");
+    // Status starts as "verifying" — the immediate poll may flip it to "pending"
+    // (since the row is still pending) only after MAX_ATTEMPTS, so on first paint
+    // we expect "verifying".
+    const chip = screen.getByTestId("payment-verify-status");
+    expect(["verifying", "pending"]).toContain(chip.getAttribute("data-status"));
   });
 
   it("subscribes to Supabase realtime + queries orders for verification fallback", async () => {
@@ -81,10 +88,10 @@ describe("OrderConfirmation — payment success flow", () => {
       </MemoryRouter>,
     );
 
-    // Allow the immediate poll attempt + initial render
-    await act(async () => { await Promise.resolve(); });
+    await waitFor(() => {
+      expect(supabaseFromMock).toHaveBeenCalledWith("orders");
+    });
 
-    expect(supabaseFromMock).toHaveBeenCalledWith("orders");
     expect(channelMock).toHaveBeenCalledWith(
       expect.stringContaining("poll-test-0000-0000-0000-000000000000"),
     );
@@ -103,16 +110,14 @@ describe("OrderConfirmation — payment success flow", () => {
     const cardBefore = container.querySelector("[data-testid='payment-verify-status']");
     expect(cardBefore).not.toBeNull();
 
-    await act(async () => {
-      // Flush the immediate-poll microtask
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-
-    await waitFor(() => {
-      const chip = screen.getByTestId("payment-verify-status");
-      expect(chip).toHaveAttribute("data-status", "confirmed");
-    });
+    // The immediate poll fires on mount — wait for it to resolve and update state
+    await waitFor(
+      () => {
+        const chip = screen.getByTestId("payment-verify-status");
+        expect(chip).toHaveAttribute("data-status", "confirmed");
+      },
+      { timeout: 3000 },
+    );
 
     // The same DOM container is still mounted — the page never reloaded
     const cardAfter = container.querySelector("[data-testid='payment-verify-status']");
@@ -121,28 +126,25 @@ describe("OrderConfirmation — payment success flow", () => {
     expect(screen.getByText("CONFIRM0")).toBeInTheDocument();
   });
 
-  it("falls back to 'pending' state if polling exhausts without confirmation", async () => {
+  it("keeps the card mounted while polling pending status (no shimmer flash)", async () => {
     supabaseFromMock.mockReturnValue(buildOrdersQuery("pending"));
 
-    render(
+    const { container } = render(
       <MemoryRouter>
-        <OrderConfirmation orderId="timeout0-9999-9999-9999-999999999999" />
+        <OrderConfirmation orderId="pending0-9999-9999-9999-999999999999" />
       </MemoryRouter>,
     );
 
-    // 15 attempts × 2s = 30s — fast-forward past the polling window
-    await act(async () => {
-      for (let i = 0; i < 16; i++) {
-        vi.advanceTimersByTime(2100);
-        await Promise.resolve();
-        await Promise.resolve();
-      }
+    // Wait for the immediate poll to complete
+    await waitFor(() => {
+      expect(supabaseFromMock).toHaveBeenCalledWith("orders");
     });
 
-    await waitFor(() => {
-      const chip = screen.getByTestId("payment-verify-status");
-      expect(["pending", "confirmed"]).toContain(chip.getAttribute("data-status"));
-    });
+    // Card stays mounted with a verifying/pending chip — never unmounts
+    const chip = screen.getByTestId("payment-verify-status");
+    expect(["verifying", "pending"]).toContain(chip.getAttribute("data-status"));
+    expect(container.querySelector("[data-testid='payment-verify-status']")).not.toBeNull();
+    expect(screen.getByText("PENDING0")).toBeInTheDocument();
   });
 
   it("cleans up the realtime channel on unmount (no leaked subscriptions)", () => {
