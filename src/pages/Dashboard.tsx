@@ -2797,24 +2797,27 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
               <p className="pb-2 text-xs text-muted-foreground font-sans">total bookings & orders</p>
             </div>
 
-            {/* 3D Stat tiles */}
+            {/* 3D Stat tiles — clickable, jump to the matching tab */}
             <div className="mt-5 grid grid-cols-2 gap-2.5">
               {[
-                { label: "Events", value: totalEvents, icon: CalIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600" },
-                { label: "Orders", value: totalOrders, icon: Package, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600" },
+                { label: "Events", value: totalEvents, icon: CalIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600", target: "events" },
+                { label: "Orders", value: totalOrders, icon: Package, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600", target: totalOrders > 0 ? "orders" : "events" },
               ].map((s) => (
-                <motion.div
+                <motion.button
+                  type="button"
                   key={s.label}
+                  onClick={() => setActiveTab(s.target)}
                   whileHover={{ y: -3, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className={`relative rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur`}
+                  className={`relative text-left rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur cursor-pointer hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/30`}
+                  aria-label={`Open ${s.label}`}
                 >
                   <div className={`w-8 h-8 rounded-xl ${s.iconBg} flex items-center justify-center mb-2`}>
                     <s.icon className="w-4 h-4" />
                   </div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">{s.label}</p>
                   <p className="font-display text-2xl font-bold text-foreground leading-tight">{s.value}</p>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
 
