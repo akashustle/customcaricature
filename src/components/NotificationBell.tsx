@@ -301,6 +301,16 @@ const NotificationBell = () => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
+  const markAsUnread = async (id: string) => {
+    await supabase.from("notifications").update({ read: false } as any).eq("id", id);
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n));
+  };
+
+  const toggleRead = (n: Notification, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (n.read) markAsUnread(n.id); else markAsRead(n.id);
+  };
+
   const markAllRead = async () => {
     const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
     if (unreadIds.length === 0) return;
