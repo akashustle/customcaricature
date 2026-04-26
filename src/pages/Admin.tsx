@@ -1866,30 +1866,51 @@ const Admin = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-3">
                           <div className="space-y-1 flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-sans font-semibold">{c.full_name}</p>
-                              {(c as any).is_verified && (
-                                <span title="Verified" className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[11px] font-bold shadow-sm">✓</span>
+                            <div className="flex items-start gap-3">
+                              {(c as any).avatar_url ? (
+                                <img src={(c as any).avatar_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border flex-shrink-0" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground flex-shrink-0">
+                                  {(c.full_name || "?").charAt(0).toUpperCase()}
+                                </div>
                               )}
-                              {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
-                              {(c as any).created_from_workshop && (
-                                <Badge
-                                  title="This booking account was auto-created from a workshop signup"
-                                  className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none text-[10px] font-bold shadow-sm"
-                                >
-                                  🎨 Auto Created (Workshop)
-                                </Badge>
-                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-sans font-semibold">{c.full_name}</p>
+                                  {(c as any).is_verified && (
+                                    <span title="Verified" className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[11px] font-bold shadow-sm">✓</span>
+                                  )}
+                                  {(c as any).is_banned && (
+                                    <Badge title={(c as any).ban_reason || ""} className="bg-rose-600 text-white border-none text-[10px] font-bold shadow-sm">
+                                      🚫 BANNED
+                                    </Badge>
+                                  )}
+                                  {(c as any).display_id && <Badge className="bg-primary/10 text-primary border-none text-[10px] font-mono">ID: {(c as any).display_id}</Badge>}
+                                  {(c as any).created_from_workshop && (
+                                    <Badge
+                                      title="This booking account was auto-created from a workshop signup"
+                                      className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-none text-[10px] font-bold shadow-sm"
+                                    >
+                                      🎨 Auto Created (Workshop)
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground font-sans truncate">{c.email} · +91 {c.mobile}</p>
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground font-sans">{c.email} · +91 {c.mobile}</p>
+                            {(c as any).is_banned && (c as any).ban_reason && (
+                              <div className="text-[11px] bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 rounded-md px-2 py-1">
+                                <span className="font-semibold">Ban reason:</span> {(c as any).ban_reason}
+                              </div>
+                            )}
                             {c.instagram_id && <p className="text-xs text-muted-foreground font-sans">IG: {c.instagram_id}</p>}
                             {c.secret_code && <p className="text-xs font-sans text-primary/80">🔑 Secret: <span className="font-mono font-bold">{c.secret_code}</span></p>}
                             {c.address && <p className="text-xs text-muted-foreground font-sans">{c.address}</p>}
-                            {(c.city || c.state || c.pincode) && (
+                            {(c.city || c.state || c.pincode || (c as any).country || (c as any).district) && (
                               <p className="text-xs text-muted-foreground font-sans">
-                                {[c.city, c.state, c.pincode].filter(Boolean).join(", ")}
+                                {[(c as any).district, c.city, c.state, c.pincode, (c as any).country].filter(Boolean).join(", ")}
                               </p>
                             )}
                             <p className="text-xs text-muted-foreground font-sans">
