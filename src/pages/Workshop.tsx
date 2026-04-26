@@ -732,18 +732,20 @@ const Workshop = () => {
                 {regStep > 0 && <Button variant="outline" onClick={() => setRegStep(regStep - 1)} className="flex-1 rounded-full"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>}
                 <Button variant="outline" onClick={() => setView("details")} className="rounded-full">Cancel</Button>
                 {regStep < regSteps.length - 1 ? (
-                  <Button onClick={() => {
+                  <Button onClick={async () => {
                     if (regStep === 0 && (!regForm.name || !regForm.email || !regForm.mobile || !regForm.age)) { toast({ title: "Fill all required fields", variant: "destructive" }); return; }
                     if (regStep === 1 && (!regForm.skill_level || !regForm.artist_background_type || !regForm.why_suitable)) { toast({ title: "Fill all background fields", variant: "destructive" }); return; }
                     if (regStep === 2) {
                       if (regForm.country === "India" && (!regForm.state || !regForm.city)) { toast({ title: "Please select your State and City", variant: "destructive" }); return; }
                       if (regForm.country !== "India" && !regForm.city) { toast({ title: "Please enter your City", variant: "destructive" }); return; }
                     }
+                    // Persist progress before advancing — lets the user resume later.
+                    await saveDraft(regStep + 1);
                     setRegStep(regStep + 1);
                   }} className="flex-1 rounded-full">Next <ArrowRight className="w-4 h-4 ml-1" /></Button>
                 ) : (
-                  <Button onClick={handleRegister} disabled={submittingReg || !regForm.slot || !regForm.password || !regForm.termsAccepted || !regForm.noticeRead} className="flex-1 rounded-full">
-                    {submittingReg ? "Registering..." : "Register"} <CheckCircle className="w-4 h-4 ml-1" />
+                  <Button onClick={handlePayAndRegister} disabled={submittingReg || !regForm.slot || !regForm.password || !regForm.termsAccepted || !regForm.noticeRead} className="flex-1 rounded-full">
+                    {submittingReg ? "Processing..." : `Pay ${workshop.price} & Register`} <CheckCircle className="w-4 h-4 ml-1" />
                   </Button>
                 )}
               </div>
