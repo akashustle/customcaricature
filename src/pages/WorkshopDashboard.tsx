@@ -28,6 +28,7 @@ import WorkshopPayments from "@/components/workshop/WorkshopPayments";
 import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineAttendancePopup";
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
+import WorkshopNotificationBell from "@/components/workshop/WorkshopNotificationBell";
 
 // Brand-aligned palette — primary uses CCC site primary, with curated accents
 const ACCENT_COLORS = [
