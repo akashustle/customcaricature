@@ -232,11 +232,9 @@ const WorkshopDashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <WorkshopNotificationBell userId={workshopUser.id} />
             <Button variant="ghost" size="icon" onClick={() => setShowColorPicker(!showColorPicker)} className="rounded-full h-9 w-9 text-muted-foreground" title="Theme color">
               <Palette className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)} className="rounded-full h-9 w-9 text-muted-foreground" title="Dark / Light">
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
