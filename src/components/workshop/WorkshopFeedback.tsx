@@ -110,7 +110,7 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
     <div className="space-y-4">
       <GlassCard>
         <h2 className={`${textPrimary} text-lg flex items-center gap-2 mb-4`}>
-          <MessageSquare className="w-5 h-5 text-purple-500" /> Feedback & Suggestions
+          <MessageSquare className="w-5 h-5 text-primary" /> Feedback & Suggestions
         </h2>
         <div className="space-y-4">
           <div>
@@ -132,13 +132,13 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
             className={`resize-none ${inputBg} rounded-xl focus:border-purple-400`} />
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button onClick={handleSubmit} disabled={submitting || (!message.trim() && !rating)}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl h-11 font-bold">
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-11 font-bold">
               <Send className="w-4 h-4 mr-2" /> {submitting ? "Submitting..." : "Submit Feedback"}
             </Button>
           </motion.div>
 
           <Button variant="ghost"
-            className={`w-full ${textSecondary} border ${dm ? "border-white/10 hover:bg-white/5" : "border-purple-100/40 hover:bg-purple-50/60"} rounded-xl`}
+            className={`w-full ${textSecondary} border border-border/60 hover:bg-muted/40 rounded-xl`}
             onClick={handleGoogleReview}>
             <ExternalLink className="w-4 h-4 mr-2" /> Review Us On Google ⭐
           </Button>
@@ -150,33 +150,33 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
           <h3 className={`${textSecondary} text-sm mb-3`}>Your Previous Feedback</h3>
           <div className="space-y-2">
             {feedbacks.filter(f => f.message !== "[Google Review Click]").map((f: any) => (
-              <div key={f.id} className={`p-3 rounded-xl ${dm ? "bg-white/5 border-white/10" : "bg-purple-50/40 border-purple-100/30"} border`}>
+              <div key={f.id} className="p-3 rounded-xl bg-muted/30 border border-border/60">
                 {f.rating && (
                   <div className="flex gap-0.5 mb-1">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-amber-400 fill-amber-400" : dm ? "text-white/20" : "text-gray-200"}`} />
+                      <Star key={s} className={`w-3 h-3 ${s <= f.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />
                     ))}
                   </div>
                 )}
-                <p className={`${dm ? "text-white/80" : "text-gray-600"} text-sm font-medium`}>{f.message}</p>
+                <p className={`${textSecondary} text-sm`}>{f.message}</p>
                 
                 {f.admin_reply && (
-                  <div className={`mt-2 pl-3 border-l-2 ${dm ? "border-purple-400/50" : "border-purple-300"}`}>
-                    <p className={`${dm ? "text-purple-400" : "text-purple-600"} text-xs font-bold`}>Ritesh Replied:</p>
+                  <div className="mt-2 pl-3 border-l-2 border-primary/40">
+                    <p className="text-primary text-xs font-bold">Ritesh Replied:</p>
                     <p className={`${textSecondary} text-xs`}>{f.admin_reply}</p>
                     
                     {/* User reply to admin */}
                     {f.user_reply && (
-                      <div className={`mt-1.5 pl-3 border-l-2 ${dm ? "border-pink-400/50" : "border-pink-300"}`}>
-                        <p className={`${dm ? "text-pink-400" : "text-pink-600"} text-xs font-bold`}>Your Reply:</p>
+                      <div className="mt-1.5 pl-3 border-l-2 border-accent/40">
+                        <p className="text-accent-foreground text-xs font-bold">Your Reply:</p>
                         <p className={`${textSecondary} text-xs`}>{f.user_reply}</p>
                       </div>
                     )}
 
                     {/* Admin reply to user reply */}
                     {f.admin_reply_to_user_reply && (
-                      <div className={`mt-1.5 pl-3 border-l-2 ${dm ? "border-purple-400/50" : "border-purple-300"}`}>
-                        <p className={`${dm ? "text-purple-400" : "text-purple-600"} text-xs font-bold`}>Ritesh:</p>
+                      <div className="mt-1.5 pl-3 border-l-2 border-primary/40">
+                        <p className="text-primary text-xs font-bold">Ritesh:</p>
                         <p className={`${textSecondary} text-xs`}>{f.admin_reply_to_user_reply}</p>
                       </div>
                     )}
@@ -195,13 +195,13 @@ const WorkshopFeedback = ({ user, darkMode = false }: { user: any; darkMode?: bo
                               onKeyDown={e => { if (e.key === "Enter") handleUserReply(f.id); }}
                             />
                             <Button size="sm" onClick={() => handleUserReply(f.id)}
-                              className="bg-purple-500 hover:bg-purple-400 h-7 px-3 text-xs font-bold rounded-lg">
+                              className="bg-primary hover:bg-primary/90 text-primary-foreground h-7 px-3 text-xs font-bold rounded-lg">
                               <Send className="w-3 h-3" />
                             </Button>
                           </div>
                         ) : (
                           <button onClick={() => setReplyingTo(f.id)}
-                            className={`mt-1 flex items-center gap-1 text-[10px] ${dm ? "text-purple-400 hover:text-purple-300" : "text-purple-500 hover:text-purple-400"} font-bold`}>
+                            className="mt-1 flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 font-bold">
                             <Reply className="w-3 h-3" /> Reply
                           </button>
                         )}
