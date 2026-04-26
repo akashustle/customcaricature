@@ -40,12 +40,38 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const body: Body = await req.json();
-    const { action, user_id, reason, message, admin_name, notify } = body;
+    const { action, user_id, reason, message, admin_name, notify, scheduled_deletion_at } = body;
 
-    if (!user_id || !action) {
+    // process_due_deletions doesn't need a user_id
+    if (action !== "process_due_deletions" && (!user_id || !action)) {
       return new Response(
         JSON.stringify({ error: "user_id and action are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // === Cron-style processor for due scheduled deletions ===
+    if (action === "process_due_deletions") {
+      const { data: due } = await admin
+        .from("profiles")
+        .select("user_id, full_name, email")
+        .lte("scheduled_deletion_at", new Date().toISOString())
+        .not("scheduled_deletion_at", "is", null);
+
+      const processed: string[] = [];
+      for (const row of due ?? []) {
+        try {
+          await admin.from("orders").delete().eq("user_id", row.user_id);
+          await admin.from("profiles").delete().eq("user_id", row.user_id);
+          await admin.auth.admin.deleteUser(row.user_id).catch(() => {});
+          processed.push(row.user_id);
+        } catch (e) {
+          console.error("Failed to delete scheduled user", row.user_id, e);
+        }
+      }
+      return new Response(
+        JSON.stringify({ success: true, processed_count: processed.length, processed }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -53,7 +79,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await admin
       .from("profiles")
       .select("user_id, full_name, email")
-      .eq("user_id", user_id)
+      .eq("user_id", user_id!)
       .maybeSingle();
 
     const fullName = profile?.full_name ?? "Customer";
