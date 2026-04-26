@@ -27,6 +27,7 @@ import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
+import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 // AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
 // booking dashboard's Profile tab for users who also have a workshop account.
 import AccountSwitcherCard from "@/components/AccountSwitcherCard";
@@ -2766,6 +2767,12 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
       {/* AccountSwitcherCard removed from Home/Profile per user request:
           workshop-linked users now access their workshop via the dedicated
           "Workshop" tab (see UserWorkshopOverview) instead of a switcher card. */}
+
+      {/* Compact "My Workshop" summary — only renders for users whose
+          account is linked to a workshop record. Tapping switches to the
+          Workshop tab inside the booking dashboard so they don't lose
+          context (full dashboard is still available from inside that tab). */}
+      {user && <HomeWorkshopMiniCard authUserId={user.id} onOpenWorkshopTab={() => setActiveTab?.("workshop")} />}
 
       {/* Saved event drafts — gentle reminder to finish booking */}
       {user && <EventDraftsCard userId={user.id} profile={profile} />}
