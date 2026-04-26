@@ -41,14 +41,19 @@ const MobileBottomNav = lazyShell(() => import("./components/MobileBottomNav"));
 const AppUpdateBanner = lazyShell(() => import("./components/AppUpdateBanner"));
 const AppOnboarding = lazy(() => import("./components/AppOnboarding"));
 const OfflineDetector = lazyShell(() => import("./components/OfflineDetector"));
+const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
 
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
 import { installErrorReporter } from "./lib/error-reporter";
+import { installSyncWorker } from "./lib/sync-queue";
 
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
+
+// Boot the offline action queue worker (drains on reconnect)
+installSyncWorker();
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
@@ -104,6 +109,7 @@ const LilFlea = lazy(() => import("./pages/LilFlea"));
 const LilFleaGallery = lazy(() => import("./pages/LilFleaGallery"));
 const ClaimLink = lazy(() => import("./pages/ClaimLink"));
 const ChatNow = lazy(() => import("./pages/ChatNow"));
+const Download = lazy(() => import("./pages/Download"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

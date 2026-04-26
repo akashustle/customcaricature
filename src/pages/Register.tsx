@@ -321,20 +321,48 @@ const Register = () => {
     e.preventDefault();
     if (!canSubmit) return;
     setLoading(true);
+
+    const signupPayload = {
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
+      metadata: {
+        full_name: form.fullName,
+        mobile: form.mobile,
+        instagram_id: form.instagramId || null,
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        district: form.district || null,
+        pincode: form.pincode,
+        age: form.age ? parseInt(form.age) : null,
+        gender: form.gender || null,
+      },
+    };
+
+    // ── OFFLINE PATH ───────────────────────────────────────────────
+    // No internet? Queue the signup so it auto-syncs the moment we reconnect.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const { enqueue } = await import("@/lib/sync-queue");
+      enqueue("auth.signup", signupPayload);
+      clearDraft();
+      toast({
+        title: "📡 Saved offline",
+        description: "We'll create your account automatically when you're back online.",
+      });
+      navigate("/login");
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data: existing } = await withTimeout(supabase.from("profiles").select("email").eq("email", form.email).maybeSingle() as any);
       if (existing) { toast({ title: "Email Already Registered", variant: "destructive" }); setLoading(false); return; }
       const { data, error } = await withTimeout(supabase.auth.signUp({
-        email: form.email.trim().toLowerCase(), password: form.password,
+        email: signupPayload.email,
+        password: signupPayload.password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: {
-            full_name: form.fullName, mobile: form.mobile,
-            instagram_id: form.instagramId || null, address: form.address,
-            city: form.city, state: form.state, district: form.district || null,
-            pincode: form.pincode,
-            age: form.age ? parseInt(form.age) : null, gender: form.gender || null,
-          },
+          data: signupPayload.metadata,
         },
       }));
       if (error) {
@@ -352,7 +380,19 @@ const Register = () => {
       clearDraft();
       toast({ title: "Registration Successful! 🎉", description: "Check your email to verify, then login." });
       navigate("/login");
-    } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
+    } catch (err: any) {
+      // Network glitch fallback — queue instead of dropping the form.
+      const isNetwork = err?.message?.toLowerCase().includes("fetch") || err?.message?.toLowerCase().includes("network");
+      if (isNetwork) {
+        const { enqueue } = await import("@/lib/sync-queue");
+        enqueue("auth.signup", signupPayload);
+        clearDraft();
+        toast({ title: "📡 Saved offline", description: "We'll finish creating your account when the connection is back." });
+        navigate("/login");
+      } else {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      }
+    }
     finally { setLoading(false); }
   };
 
