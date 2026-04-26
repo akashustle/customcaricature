@@ -113,31 +113,45 @@ const OfflineDetector = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: -60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -60, opacity: 0 }}
-        className={`fixed top-0 left-0 right-0 z-[9999] py-2.5 px-4 text-center text-sm font-sans font-medium flex items-center justify-center gap-2 shadow-lg ${
-          isOffline
-            ? "bg-destructive text-destructive-foreground"
-            : "bg-amber-500 text-white"
-        }`}
+        initial={{ y: -80, opacity: 0, scale: 0.96 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: -80, opacity: 0, scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 220, damping: 24 }}
+        className="fixed top-3 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:max-w-md z-[9999]"
         role="alert"
         data-testid="network-banner"
         data-state={state}
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <Icon className="w-4 h-4 shrink-0" />
-        <span className="truncate">
-          {isOffline
-            ? "You are offline — showing cached content"
-            : "Slow network — using cached data, retrying in background"}
-        </span>
-        <button
-          onClick={() => void revalidate()}
-          className="inline-flex items-center gap-1 text-xs font-semibold underline-offset-2 hover:underline"
-          aria-label="Retry now"
+        <div
+          className={`relative flex items-center gap-3 rounded-2xl px-4 py-3 shadow-2xl border backdrop-blur-xl ${
+            isOffline
+              ? "bg-gradient-to-r from-rose-600/95 to-red-600/95 border-white/20 text-white"
+              : "bg-gradient-to-r from-amber-500/95 to-orange-500/95 border-white/20 text-white"
+          }`}
         >
-          <RefreshCw className="w-3 h-3" /> Retry
-        </button>
+          <div className="shrink-0 w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <Icon className="w-4.5 h-4.5" strokeWidth={2.4} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-bold leading-tight">
+              {isOffline ? "You're offline" : "Slow connection"}
+            </div>
+            <div className="text-[11.5px] opacity-90 leading-tight mt-0.5 truncate">
+              {isOffline
+                ? "Your data is saved on this device"
+                : "Using cached data, auto-retrying"}
+            </div>
+          </div>
+          <button
+            onClick={() => void revalidate()}
+            className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold bg-white/20 hover:bg-white/30 active:scale-95 transition-all px-3 py-1.5 rounded-full"
+            aria-label="Retry now"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Retry
+          </button>
+        </div>
       </motion.div>
     </AnimatePresence>
   );

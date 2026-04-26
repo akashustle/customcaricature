@@ -42,8 +42,10 @@ const AppOnboarding = () => {
     if (loading) return;
     if (user) { localStorage.setItem(ONBOARDING_KEY, "done"); return; }
     if (location.pathname.includes("~oauth") || location.hash.includes("access_token") || location.pathname.startsWith("/lil-flea")) return;
+    // Hard guarantee: only show once per device — even across reloads/sessions
     const done = localStorage.getItem(ONBOARDING_KEY);
-    if (!done) setVisible(true);
+    if (done === "done") return;
+    setVisible(true);
   }, [user, loading, location]);
 
   const finish = () => {

@@ -115,10 +115,10 @@ const AppWelcome3D = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[99999] overflow-hidden touch-none"
+      className="fixed inset-0 z-[99999] overflow-hidden touch-none bg-background"
       style={{ height: "100dvh", perspective: "1400px" }}
     >
-      {/* Animated gradient backdrop */}
+      {/* SOLID animated gradient backdrop — fully opaque, premium look */}
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id + "-bg"}
@@ -128,23 +128,23 @@ const AppWelcome3D = () => {
           transition={{ duration: 0.6 }}
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(circle at 30% 20%, hsl(${slide.bgFrom} / 0.95), hsl(${slide.bgTo} / 0.85) 60%, hsl(240 35% 14%) 130%)`,
+            background: `linear-gradient(160deg, hsl(${slide.bgFrom}) 0%, hsl(${slide.bgTo}) 55%, hsl(240 40% 18%) 100%)`,
           }}
         />
       </AnimatePresence>
 
-      {/* Drifting glow orbs */}
+      {/* Drifting glow orbs — opaque so background never shows through */}
       <motion.div
         aria-hidden
-        className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-50"
-        style={{ background: `hsl(${slide.bgFrom} / 0.7)` }}
+        className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-70"
+        style={{ background: `hsl(${slide.bgFrom})` }}
         animate={{ y: [0, 30, 0], x: [0, 20, 0] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
-        className="absolute -bottom-32 -right-24 w-[460px] h-[460px] rounded-full blur-3xl opacity-50"
-        style={{ background: `hsl(${slide.bgTo} / 0.7)` }}
+        className="absolute -bottom-32 -right-24 w-[460px] h-[460px] rounded-full blur-3xl opacity-70"
+        style={{ background: `hsl(${slide.bgTo})` }}
         animate={{ y: [0, -30, 0], x: [0, -20, 0] }}
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       />
