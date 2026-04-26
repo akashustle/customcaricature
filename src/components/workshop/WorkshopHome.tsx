@@ -257,59 +257,64 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
         </motion.div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div
-          className="relative overflow-hidden rounded-3xl p-6 border border-white/80"
-          style={
-            dm
-              ? { background: "linear-gradient(135deg, #241f33 0%, #1a1626 100%)" }
-              : {
-                  background:
-                    "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)",
-                  boxShadow:
-                    "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 8px 24px -12px hsl(252 60% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.95)",
-                }
-          }
-        >
-          {/* ambient orbs */}
-          {!dm && (
-            <>
-              <motion.div
-                aria-hidden
-                className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-50 pointer-events-none"
-                style={{ background: "radial-gradient(circle, hsl(262 80% 75%), transparent 70%)" }}
-                animate={{ scale: [1, 1.08, 1] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <motion.div
-                aria-hidden
-                className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
-                style={{ background: "radial-gradient(circle, hsl(330 80% 78%), transparent 70%)" }}
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              />
-            </>
-          )}
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`${dm ? "text-purple-400" : "text-purple-600"} text-sm font-bold`}>
-                {now.getHours() < 12 ? "Good Morning ☀️" : now.getHours() < 17 ? "Good Afternoon 🌤️" : "Good Evening 🌙"}
-              </span>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-            </div>
-            <h2 className={`text-2xl ${textPrimary} mb-1`}>Hello, {user.name?.split(" ")[0]}! 👋</h2>
-            <p className={`${textMuted} text-sm`}>Welcome to Creative Caricature Club™ Workshop {user.roll_number && `· Roll #${user.roll_number}`}</p>
-            <div className="mt-4 flex flex-wrap gap-4">
-              <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
-                <Calendar className="w-4 h-4 text-purple-500" />
-                {now.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}
+      {/* HERO — booking-dashboard parity: brand primary/accent, "My Activity"
+          chip, big number, two stat tiles. Uses HSL semantic tokens only. */}
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="relative" style={{ perspective: 1200 }}>
+          <div className="absolute inset-x-3 -bottom-2 top-3 rounded-3xl bg-primary/10 blur-2xl pointer-events-none" />
+          <div
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card to-secondary/40 border border-border/50 p-5 sm:p-6 shadow-[0_20px_50px_-12px_hsl(var(--primary)/0.28),0_4px_12px_-4px_rgba(0,0,0,0.08)]"
+            style={{ transformStyle: "preserve-3d" }}
+          >
+            <motion.div aria-hidden animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.6, 0.4] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-16 -right-12 w-52 h-52 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
+            <motion.div aria-hidden animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute -bottom-20 -left-14 w-60 h-60 rounded-full bg-accent/25 blur-3xl pointer-events-none" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+
+            <div className="relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5">
+                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-primary font-bold">My Workshop</p>
+                  </div>
+                  <p className="mt-3 font-sans text-sm text-muted-foreground">
+                    {now.getHours() < 12 ? "Good morning" : now.getHours() < 17 ? "Good afternoon" : "Good evening"}{user?.name ? `, ${user.name.split(" ")[0]}` : ""} 👋
+                  </p>
+                </div>
+                {user.is_verified && (
+                  <div className="flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-300/40 px-2 py-0.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-[10px] font-sans font-bold text-blue-700">Verified</span>
+                  </div>
+                )}
               </div>
-              <div className={`flex items-center gap-2 ${textSecondary} text-sm`}>
-                <Clock className="w-4 h-4 text-pink-500" />
-                {now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+
+              <h2 className={`mt-4 font-display text-2xl sm:text-3xl font-bold tracking-tight ${textPrimary}`}>
+                Welcome to your workshop ✨
+              </h2>
+              <p className={`text-xs mt-1 ${textMuted}`}>
+                {user.roll_number && `Roll #${user.roll_number} · `}{slotLabel}
+              </p>
+
+              {/* Stat tiles — booking style */}
+              <div className="mt-5 grid grid-cols-2 gap-2.5">
+                {[
+                  { label: "Sessions", value: filteredSessions.length, Icon: VideoIcon, tint: "from-violet-500/15 to-violet-500/5", iconBg: "bg-violet-500/15 text-violet-600" },
+                  { label: "Attended", value: attendance.filter((a: any) => a.status === "present" || a.status === "video_session").length, Icon: CheckCircle, tint: "from-emerald-500/15 to-emerald-500/5", iconBg: "bg-emerald-500/15 text-emerald-600" },
+                ].map((s) => (
+                  <div key={s.label} className={`relative rounded-2xl bg-gradient-to-br ${s.tint} border border-border/40 p-3 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur`}>
+                    <div className={`w-8 h-8 rounded-xl ${s.iconBg} flex items-center justify-center mb-2`}>
+                      <s.Icon className="w-4 h-4" />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-bold">{s.label}</p>
+                    <p className={`font-display text-2xl font-bold leading-tight ${textPrimary}`}>{s.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className={`mt-5 flex flex-wrap items-center gap-3 text-xs ${textSecondary}`}>
+                <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary" />{now.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</span>
+                <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" />{now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>
               </div>
             </div>
           </div>
