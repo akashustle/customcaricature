@@ -287,13 +287,12 @@ const App = () => {
         <PWASplashScreen />
         <OfflineDetector />
         <SyncStatusBadge />
-        <BrowserRouter>
-          <ApkUpdatePrompt />
         <Toaster />
         <Sonner />
         {showSplash && <HomepageSplashGate onComplete={() => setShowSplash(false)} />}
         <AppUpdateBanner />
         <BrowserRouter>
+          <ApkUpdatePrompt />
           <GlobalMaintenanceGate>
             <AppOnboardingGate />
             <ScrollToTop />
