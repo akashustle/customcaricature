@@ -363,59 +363,56 @@ const WorkshopDashboard = () => {
         <PageBuilderRenderer page="workshop-dashboard-builder" className="mt-6" />
       </div>
 
-      {/* Mobile Bottom Nav — every tab including Profile, 3D */}
-      {/* Mobile Bottom Nav — matches booking dashboard look:
-          - 56px height, evenly spaced icons
-          - Horizontally scrollable so 6+ tabs are reachable on small phones
-          - First 6 tabs are sized to fit the viewport without scroll on most phones */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden" aria-label="Workshop navigation">
-        <div className="bg-background/95 backdrop-blur-lg border-t border-border/30">
-          <div className="flex items-center overflow-x-auto scrollbar-hide max-w-lg mx-auto h-[56px] px-1">
-            {visibleTabs.map((tab) => {
-              const isActive = activeTab === tab.key;
-              const isProfile = tab.key === "profile";
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className="flex items-center justify-center min-w-[16.6%] flex-1 h-14 relative flex-shrink-0 active:scale-75 transition-transform duration-150"
-                  aria-label={tab.label}
-                >
-                  {isProfile ? (
-                    <span className="relative">
-                      <Avatar className={`w-7 h-7 transition-all ${isActive ? "ring-2 ring-foreground" : "ring-1 ring-border/40 opacity-70"}`}>
-                        <AvatarImage src={workshopUser.avatar_url || undefined} />
-                        <AvatarFallback className="text-[10px] font-bold text-primary-foreground"
-                          style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}>
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      {workshopUser.is_verified && (
-                        <span
-                          className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center ring-2 ring-background"
-                          style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
-                          aria-label="Verified"
-                        >
-                          <BadgeCheck className="w-2.5 h-2.5 text-white" strokeWidth={2.6} />
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <tab.icon
-                      className={`transition-all duration-200 ${isActive ? "text-foreground" : "text-muted-foreground/40"}`}
-                      size={isActive ? 24 : 20}
-                      strokeWidth={isActive ? 2.2 : 1.4}
-                      fill={isActive && tab.icon === Home ? "currentColor" : "none"}
-                    />
-                  )}
-                  {isActive && (
-                    <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-foreground" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <div className="h-[env(safe-area-inset-bottom)]" />
+      {/* Mobile Bottom Nav — IDENTICAL pill-style as the booking dashboard:
+          rounded floating bar, primary background on the active tab,
+          icon + tiny label, scrollable when more than 6 tabs are visible. */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none"
+        aria-label="Workshop navigation"
+      >
+        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around overflow-x-auto scrollbar-hide">
+          {visibleTabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            const isProfile = tab.key === "profile";
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 ${
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                }`}
+                aria-label={tab.label}
+              >
+                {isProfile ? (
+                  <span className="relative">
+                    <Avatar className={`w-5 h-5 transition-all ${isActive ? "ring-2 ring-primary-foreground/60" : "ring-1 ring-border/40"}`}>
+                      <AvatarImage src={workshopUser.avatar_url || undefined} />
+                      <AvatarFallback
+                        className="text-[8px] font-bold text-primary-foreground"
+                        style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))` }}
+                      >
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    {workshopUser.is_verified && (
+                      <span
+                        className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center ring-2 ring-background"
+                        style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                        aria-label="Verified"
+                      >
+                        <BadgeCheck className="w-2 h-2 text-white" strokeWidth={2.6} />
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
+                )}
+                <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>
