@@ -54,10 +54,26 @@ const timeAgo = (ts: number) => {
   return `${Math.round(s / 86400)}d ago`;
 };
 
+/** Routes that make sense for a "view details" deep-link per action type. */
+const detailLink = (a: SyncAction): { href: string; label: string } | null => {
+  switch (a.type) {
+    case "order.create":  return { href: "/track-order", label: "Track this order" };
+    case "event.book":    return { href: "/dashboard", label: "Open my dashboard" };
+    case "image.upload":  {
+      // Image uploads are linked to a parent order via relatedId — surface that.
+      return { href: "/track-order", label: "Open related order" };
+    }
+    case "auth.signup":   return { href: "/login", label: "Try login" };
+    case "profile.update":return { href: "/dashboard", label: "Open my profile" };
+    default:              return null;
+  }
+};
+
 const SyncQueue = () => {
   const navigate = useNavigate();
   const [queue, setQueue] = useState<SyncAction[]>([]);
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const unsub = subscribeQueue(setQueue);
@@ -72,13 +88,15 @@ const SyncQueue = () => {
     };
   }, []);
 
-  const grouped = {
+  const grouped = useMemo(() => ({
     failed:  queue.filter((a) => a.status === "failed"),
     syncing: queue.filter((a) => a.status === "syncing"),
     queued:  queue.filter((a) => a.status === "queued"),
     synced:  queue.filter((a) => a.status === "synced"),
-  };
+  }), [queue]);
   const ordered: SyncAction[] = [...grouped.failed, ...grouped.syncing, ...grouped.queued, ...grouped.synced];
+
+  const toggle = (id: string) => setExpanded((e) => ({ ...e, [id]: !e[id] }));
 
   return (
     <>
