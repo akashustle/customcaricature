@@ -29,7 +29,7 @@ import UserVerificationCard from "@/components/UserVerificationCard";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import { cachedFetch, invalidateCache, peekCache } from "@/lib/request-cache";
-import { perfMark, logPageVitals } from "@/lib/perf-logger";
+import { perfMark } from "@/lib/perf-logger";
 import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 // AccountSwitcherCard surfaces the "Switch to Workshop" CTA inside the
 // booking dashboard's Profile tab for users who also have a workshop account.
