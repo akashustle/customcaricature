@@ -43,20 +43,22 @@ const SyncToastListener = () => {
     const onFail = (e: Event) => {
       const action = (e as CustomEvent<{ action: SyncAction }>).detail?.action;
       if (!action) return;
-      toast({
+      const t = toast({
         title: `⚠️ ${FAIL_LABEL[action.type] || "Sync failed"}`,
-        description: action.lastError?.slice(0, 140) || "Tap to inspect & retry.",
+        description: action.lastError?.slice(0, 140) || "Tap the badge to inspect & retry.",
         variant: "destructive",
-        // @ts-expect-error — toast() supports a custom action button via the toaster
-        action: (
-          <button
-            onClick={() => navigate("/sync-queue")}
-            className="text-xs font-semibold underline underline-offset-2"
-          >
-            Inspect
-          </button>
-        ),
+        duration: 8000,
       });
+      // Auto-route the user to the inspector after a short pause so the
+      // notification doubles as a "tap to fix" affordance.
+      const timer = setTimeout(() => {
+        // Only redirect if user is still online & on a non-admin route
+        if (!window.location.pathname.startsWith("/admin")) {
+          navigate("/sync-queue");
+        }
+        t.dismiss();
+      }, 6000);
+      return () => clearTimeout(timer);
     };
 
     window.addEventListener("ccc:sync-success", onSuccess);
