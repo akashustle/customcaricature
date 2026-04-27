@@ -352,6 +352,29 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
+      {/* Desktop 3D flash-card hero strip (lg+) */}
+      <div className="hidden lg:block max-w-5xl mx-auto px-4 pt-5">
+        <DesktopFlashStrip
+          greeting={getGreeting()}
+          fullName={workshopUser.name || "Workshop Student"}
+          subtitle="Your premium workshop hub — videos, certificates and live sessions in one place."
+          avatarUrl={workshopUser.avatar_url}
+          isVerified={!!workshopUser.is_verified}
+          primaryCta={{ label: "Watch videos", onClick: () => setActiveTab("videos"), Icon: Video }}
+          quickLinks={[
+            { label: "Certificates", Icon: Award, onClick: () => setActiveTab("certificates") },
+            { label: "Assignments", Icon: FileText, onClick: () => setActiveTab("assignments") },
+            { label: "Notifications", Icon: Bell, onClick: () => setActiveTab("notifications") },
+          ]}
+          stats={[
+            { key: "workshop", label: "Workshop", value: workshopUser.workshop_date ? new Date(workshopUser.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "Scheduled", hint: workshopUser.slot || "Slot TBD", onClick: () => setActiveTab("home"), ...STAT_PRESETS.workshop },
+            { key: "certificates", label: "Certificates", value: "View", hint: "Your achievements", onClick: () => setActiveTab("certificates"), ...STAT_PRESETS.events },
+            { key: "videos", label: "Videos", value: "Library", hint: "Recorded sessions", onClick: () => setActiveTab("videos"), ...STAT_PRESETS.chat },
+            { key: "payments", label: "Payments", value: workshopUser.payment_status === "paid" ? "Paid" : "Due", hint: "Workshop fees", onClick: () => setActiveTab("payments"), ...STAT_PRESETS.payments },
+          ]}
+        />
+      </div>
+
       {/* Desktop Tab Bar — 3D pill */}
       <div className="hidden md:block max-w-5xl mx-auto px-4 pt-5">
         <div className="bg-card border border-border/60 rounded-2xl p-1.5 flex gap-1 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.12)]">
