@@ -30,6 +30,7 @@ import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOve
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import WorkshopNotificationBell from "@/components/workshop/WorkshopNotificationBell";
 import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
+import DesktopTabsSidebar from "@/components/dashboard/DesktopTabsSidebar";
 import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Brand-aligned palette — primary uses CCC site primary, with curated accents
