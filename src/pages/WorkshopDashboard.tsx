@@ -401,8 +401,8 @@ const WorkshopDashboard = () => {
         />
       </div>
 
-      {/* Desktop Tab Bar — 3D pill */}
-      <div className="hidden md:block max-w-5xl mx-auto px-4 pt-5">
+      {/* Desktop Tab Bar — 3D pill (md only, hidden on lg where sidebar takes over) */}
+      <div className="hidden md:block lg:hidden max-w-5xl mx-auto px-4 pt-5">
         <div className="bg-card border border-border/60 rounded-2xl p-1.5 flex gap-1 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.12)]">
           {visibleTabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -416,12 +416,21 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 py-4 relative z-10">
-        <div key={activeTab} className="tab-content-enter">
-          {renderContent()}
+      {/* Content — desktop (lg+) renders 3D sidebar + content grid */}
+      <div className="max-w-7xl mx-auto px-4 py-4 relative z-10 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-6">
+        <DesktopTabsSidebar
+          tabs={visibleTabs.map((t) => ({ key: t.key, label: t.label, icon: t.icon }))}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          title="Workshop"
+          subtitle={workshopUser.name ? `Hi, ${workshopUser.name.split(" ")[0]}` : "Student"}
+        />
+        <div className="min-w-0">
+          <div key={activeTab} className="tab-content-enter">
+            {renderContent()}
+          </div>
+          <PageBuilderRenderer page="workshop-dashboard-builder" className="mt-6" />
         </div>
-        <PageBuilderRenderer page="workshop-dashboard-builder" className="mt-6" />
       </div>
 
       {/* Mobile Bottom Nav — IDENTICAL pill-style as the booking dashboard:
