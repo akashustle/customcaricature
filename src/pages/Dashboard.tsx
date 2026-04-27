@@ -37,6 +37,7 @@ import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
+import DesktopTabsSidebar from "@/components/dashboard/DesktopTabsSidebar";
 import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Lightweight wrapper so it sits inside the dashboard layout
@@ -684,10 +685,28 @@ const Dashboard = () => {
           ]}
         />
 
-        {/* Desktop tab strip */}
+        {/* Desktop tab strip — md only; on lg+ a 3D sidebar replaces the top pill */}
         <div className="hidden md:block mt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6 h-auto w-full bg-white border border-border rounded-2xl p-1.5 flex flex-wrap justify-start gap-1">
+            <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-6">
+              <DesktopTabsSidebar
+                tabs={[
+                  tabsAvailable.home && { key: "home", label: "Home", icon: Home },
+                  tabsAvailable.events && { key: "events", label: "Events", icon: CalIcon },
+                  tabsAvailable.payments && { key: "payments", label: "Payments", icon: Receipt },
+                  tabsAvailable.orders && { key: "orders", label: "Orders", icon: Package },
+                  tabsAvailable.chat && { key: "chat", label: "Chat", icon: MessageCircle },
+                  tabsAvailable.workshop && { key: "workshop", label: "Workshop", icon: GraduationCap },
+                  tabsAvailable.alerts !== false && { key: "alerts", label: "Alerts", icon: Bell },
+                  tabsAvailable.profile && { key: "profile", label: "Profile", icon: User },
+                ].filter(Boolean) as any}
+                activeTab={activeTab}
+                onChange={setActiveTab}
+                title="My Account"
+                subtitle={profile?.full_name ? `Hi, ${profile.full_name.split(" ")[0]}` : "Welcome"}
+              />
+              <div className="min-w-0">
+            <TabsList className="lg:hidden mb-6 h-auto w-full bg-white border border-border rounded-2xl p-1.5 flex flex-wrap justify-start gap-1">
               {tabsAvailable.home && (
                 <TabsTrigger value="home" className="font-sans rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Home className="w-4 h-4 mr-2" />Home
@@ -760,6 +779,8 @@ const Dashboard = () => {
                 confirmNewPassword={confirmNewPassword} setConfirmNewPassword={setConfirmNewPassword} changePassword={changePassword} changingPassword={changingPassword}
               />
             </TabsContent>
+              </div>
+            </div>
           </Tabs>
         </div>
 

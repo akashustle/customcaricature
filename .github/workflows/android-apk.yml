@@ -60,6 +60,9 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Generate launcher icons & splash
         run: |
           npm i -D @capacitor/assets --legacy-peer-deps --no-save || true
