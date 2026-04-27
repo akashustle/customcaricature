@@ -663,6 +663,27 @@ const Dashboard = () => {
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
         {user && <PaymentDemandBanner userId={user.id} events={events as any} />}
 
+        {/* Desktop 3D flash-card hero strip (lg+) */}
+        <DesktopFlashStrip
+          greeting="Welcome back"
+          fullName={profile?.full_name || "Your dashboard"}
+          subtitle="Track your events, payments and orders — all in one premium hub."
+          avatarUrl={profile?.avatar_url}
+          isVerified={profile?.is_verified}
+          primaryCta={canBookEvent ? { label: "Book an event", onClick: handleBookEvent, Icon: CalIcon } : undefined}
+          quickLinks={[
+            { label: "Payments", Icon: Receipt, onClick: () => setActiveTab("payments") },
+            { label: "Orders", Icon: Package, onClick: () => setActiveTab("orders") },
+            { label: "Workshop", Icon: GraduationCap, onClick: () => setActiveTab("workshop") },
+          ]}
+          stats={[
+            { key: "events", label: "Events", value: events?.length || 0, hint: "Bookings on record", onClick: () => setActiveTab("events"), ...STAT_PRESETS.events },
+            { key: "orders", label: "Orders", value: orders?.length || 0, hint: "Caricature & shop orders", onClick: () => setActiveTab("orders"), ...STAT_PRESETS.orders },
+            { key: "alerts", label: "Alerts", value: "Live", hint: "Realtime updates", onClick: () => setActiveTab("alerts"), ...STAT_PRESETS.alerts },
+            { key: "chat", label: "Chat", value: "Open", hint: "Talk to our team", onClick: () => setActiveTab("chat"), ...STAT_PRESETS.chat },
+          ]}
+        />
+
         {/* Desktop tab strip */}
         <div className="hidden md:block mt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
