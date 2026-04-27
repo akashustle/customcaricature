@@ -201,7 +201,31 @@ const WorkshopDashboard = () => {
       case "assignments": return <WorkshopAssignments user={workshopUser} darkMode={darkMode} />;
       case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
       case "feedback": return <WorkshopFeedback user={workshopUser} darkMode={darkMode} />;
-      case "profile": return <WorkshopProfile user={workshopUser} darkMode={darkMode} />;
+      case "profile": return (
+        <>
+          <MobileProfileHeader
+            fullName={workshopUser.name || "Workshop Student"}
+            handle={workshopUser.email}
+            avatarUrl={workshopUser.avatar_url}
+            isVerified={!!workshopUser.is_verified}
+            planLabel={workshopUser.payment_status === "paid" ? "Premium Student" : "Workshop Member"}
+            planSub={workshopUser.workshop_date ? `Workshop on ${new Date(workshopUser.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}` : undefined}
+            onShareProfile={() => {
+              const url = window.location.origin + "/workshop";
+              if (navigator.share) navigator.share({ title: "Workshop Profile", url }).catch(() => {});
+              else { try { navigator.clipboard?.writeText(url); } catch {} }
+            }}
+            onUpgrade={() => setActiveTab("certificates")}
+            items={[
+              { key: "certs", label: "Certificates", Icon: Award, onClick: () => setActiveTab("certificates") },
+              { key: "videos", label: "Videos library", Icon: Video, onClick: () => setActiveTab("videos") },
+              { key: "assign", label: "Assignments", Icon: FileText, onClick: () => setActiveTab("assignments") },
+              { key: "pay", label: "Payments & invoices", Icon: Receipt, onClick: () => setActiveTab("payments") },
+            ]}
+          />
+          <WorkshopProfile user={workshopUser} darkMode={darkMode} />
+        </>
+      );
       case "payments": return <WorkshopPayments user={workshopUser} darkMode={darkMode} />;
       default: return null;
     }
