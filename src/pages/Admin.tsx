@@ -2023,8 +2023,21 @@ const Admin = () => {
                 </Card>
               ) : (
                 filteredCustomers.map((c) => (
-                  <Card key={c.id}>
-                    <CardContent className="p-4">
+                  <Card key={c.id} className={selectedCustomerIds.has(c.user_id) ? "ring-2 ring-primary/40" : ""}>
+                    <CardContent className="p-4 relative">
+                      <input
+                        type="checkbox"
+                        aria-label="Select customer"
+                        className="absolute top-3 left-3 w-4 h-4 rounded z-10"
+                        checked={selectedCustomerIds.has(c.user_id)}
+                        onChange={(e) => {
+                          setSelectedCustomerIds((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(c.user_id); else next.delete(c.user_id);
+                            return next;
+                          });
+                        }}
+                      />
                       {editingCustomer === c.user_id ? (
                         <div className="space-y-3">
                           {/* Avatar uploader */}
