@@ -555,6 +555,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
+        void fetchBanAppeals();
         void logAdminSession(activeUser!.id);
       });
     };
@@ -575,6 +576,7 @@ const Admin = () => {
         setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "ban_appeals" }, () => fetchBanAppeals())
       .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {
         toast({ title: "📅 Event booking updated" });
