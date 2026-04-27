@@ -3106,8 +3106,25 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
 /* ───────── Profile + Logout combined tab ───────── */
 const ProfileWithLogout = (props: any) => {
+  const profile = props.profile || {};
   return (
     <div className="space-y-5">
+      {/* Mobile-only refreshed header (avatar + verified + plan + menu list) */}
+      <MobileProfileHeader
+        fullName={profile.full_name || "Your profile"}
+        handle={profile.display_id ? `@${profile.display_id}` : profile.email}
+        avatarUrl={profile.avatar_url}
+        isVerified={!!profile.is_verified}
+        planLabel={profile.is_verified ? "Verified Member" : "Member"}
+        planSub={profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}` : undefined}
+        onShareProfile={() => {
+          const url = window.location.origin + "/dashboard";
+          if (navigator.share) navigator.share({ title: "My Profile", url }).catch(() => {});
+          else { try { navigator.clipboard?.writeText(url); } catch {} }
+        }}
+        onUpgrade={props.openAddEvent}
+      />
+
       <ProfileSection
         profile={props.profile}
         editing={props.editing}
