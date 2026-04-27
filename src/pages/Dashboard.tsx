@@ -36,6 +36,8 @@ import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
+import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
+import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Lightweight wrapper so it sits inside the dashboard layout
 const DashboardPageBuilder = () => <PageBuilderRenderer page="dashboard-builder" />;
