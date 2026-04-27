@@ -29,6 +29,8 @@ import WorkshopOnlineAttendancePopup from "@/components/workshop/WorkshopOnlineA
 import WorkshopCountdownOverlay from "@/components/workshop/WorkshopCountdownOverlay";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import WorkshopNotificationBell from "@/components/workshop/WorkshopNotificationBell";
+import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
+import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Brand-aligned palette — primary uses CCC site primary, with curated accents
 const ACCENT_COLORS = [
@@ -199,7 +201,31 @@ const WorkshopDashboard = () => {
       case "assignments": return <WorkshopAssignments user={workshopUser} darkMode={darkMode} />;
       case "videos": return <WorkshopVideos user={workshopUser} darkMode={darkMode} />;
       case "feedback": return <WorkshopFeedback user={workshopUser} darkMode={darkMode} />;
-      case "profile": return <WorkshopProfile user={workshopUser} darkMode={darkMode} />;
+      case "profile": return (
+        <>
+          <MobileProfileHeader
+            fullName={workshopUser.name || "Workshop Student"}
+            handle={workshopUser.email}
+            avatarUrl={workshopUser.avatar_url}
+            isVerified={!!workshopUser.is_verified}
+            planLabel={workshopUser.payment_status === "paid" ? "Premium Student" : "Workshop Member"}
+            planSub={workshopUser.workshop_date ? `Workshop on ${new Date(workshopUser.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}` : undefined}
+            onShareProfile={() => {
+              const url = window.location.origin + "/workshop";
+              if (navigator.share) navigator.share({ title: "Workshop Profile", url }).catch(() => {});
+              else { try { navigator.clipboard?.writeText(url); } catch {} }
+            }}
+            onUpgrade={() => setActiveTab("certificates")}
+            items={[
+              { key: "certs", label: "Certificates", Icon: Award, onClick: () => setActiveTab("certificates") },
+              { key: "videos", label: "Videos library", Icon: Video, onClick: () => setActiveTab("videos") },
+              { key: "assign", label: "Assignments", Icon: FileText, onClick: () => setActiveTab("assignments") },
+              { key: "pay", label: "Payments & invoices", Icon: Receipt, onClick: () => setActiveTab("payments") },
+            ]}
+          />
+          <WorkshopProfile user={workshopUser} darkMode={darkMode} />
+        </>
+      );
       case "payments": return <WorkshopPayments user={workshopUser} darkMode={darkMode} />;
       default: return null;
     }
@@ -350,6 +376,29 @@ const WorkshopDashboard = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Desktop 3D flash-card hero strip (lg+) */}
+      <div className="hidden lg:block max-w-5xl mx-auto px-4 pt-5">
+        <DesktopFlashStrip
+          greeting={getGreeting()}
+          fullName={workshopUser.name || "Workshop Student"}
+          subtitle="Your premium workshop hub — videos, certificates and live sessions in one place."
+          avatarUrl={workshopUser.avatar_url}
+          isVerified={!!workshopUser.is_verified}
+          primaryCta={{ label: "Watch videos", onClick: () => setActiveTab("videos"), Icon: Video }}
+          quickLinks={[
+            { label: "Certificates", Icon: Award, onClick: () => setActiveTab("certificates") },
+            { label: "Assignments", Icon: FileText, onClick: () => setActiveTab("assignments") },
+            { label: "Notifications", Icon: Bell, onClick: () => setActiveTab("notifications") },
+          ]}
+          stats={[
+            { key: "workshop", label: "Workshop", value: workshopUser.workshop_date ? new Date(workshopUser.workshop_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "Scheduled", hint: workshopUser.slot || "Slot TBD", onClick: () => setActiveTab("home"), ...STAT_PRESETS.workshop },
+            { key: "certificates", label: "Certificates", value: "View", hint: "Your achievements", onClick: () => setActiveTab("certificates"), ...STAT_PRESETS.events },
+            { key: "videos", label: "Videos", value: "Library", hint: "Recorded sessions", onClick: () => setActiveTab("videos"), ...STAT_PRESETS.chat },
+            { key: "payments", label: "Payments", value: workshopUser.payment_status === "paid" ? "Paid" : "Due", hint: "Workshop fees", onClick: () => setActiveTab("payments"), ...STAT_PRESETS.payments },
+          ]}
+        />
       </div>
 
       {/* Desktop Tab Bar — 3D pill */}

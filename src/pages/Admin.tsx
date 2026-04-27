@@ -555,6 +555,7 @@ const Admin = () => {
       defer(() => {
         void fetchCustomers();
         void fetchArtistProfiles();
+        void fetchBanAppeals();
         void logAdminSession(activeUser!.id);
       });
     };
@@ -575,6 +576,7 @@ const Admin = () => {
         setOrders(prev => prev.filter(o => o.id !== (payload.old as any).id));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchCustomers())
+      .on("postgres_changes", { event: "*", schema: "public", table: "ban_appeals" }, () => fetchBanAppeals())
       .on("postgres_changes", { event: "*", schema: "public", table: "caricature_types" }, () => fetchCaricatureTypes())
       .on("postgres_changes", { event: "*", schema: "public", table: "event_bookings" }, () => {
         toast({ title: "📅 Event booking updated" });
@@ -1912,6 +1914,105 @@ const Admin = () => {
                 <Globe className="w-3 h-3 mr-1" /> Intl OFF (All)
               </Button>
             </div>
+
+            {/* Ban appeals review queue */}
+            {banAppeals.length > 0 && (
+              <Card className="border-amber-300/60 bg-amber-50/40 mb-3">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    ⚖️ Ban Appeals
+                    <span className="text-[10px] font-bold rounded-full bg-amber-500 text-white px-2 py-0.5">
+                      {banAppeals.filter(a => a.status === "pending").length} pending
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {banAppeals.slice(0, 10).map((a) => (
+                    <div key={a.id} className="rounded-xl border border-amber-300/50 bg-white p-3 text-xs">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-foreground truncate">
+                            {a.full_name || "Banned user"}
+                            {a.email && <span className="text-muted-foreground font-normal"> · {a.email}</span>}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {new Date(a.created_at).toLocaleString("en-IN")} · status: <b className={a.status === "pending" ? "text-amber-600" : a.status === "approved" ? "text-emerald-600" : "text-rose-600"}>{a.status}</b>
+                          </p>
+                        </div>
+                        {a.evidence_url && (
+                          <a href={a.evidence_url} target="_blank" rel="noopener noreferrer" className="text-[10px] underline text-primary">
+                            View evidence
+                          </a>
+                        )}
+                      </div>
+                      {a.reason && (
+                        <p className="mt-2 text-foreground bg-secondary/40 rounded p-2 whitespace-pre-wrap">{a.reason}</p>
+                      )}
+                      {a.status === "pending" && (
+                        <div className="mt-2 space-y-2">
+                          <Input
+                            placeholder="Optional message to the user…"
+                            value={appealResponses[a.id] || ""}
+                            onChange={(e) => setAppealResponses((p) => ({ ...p, [a.id]: e.target.value }))}
+                            className="h-8 text-xs"
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" className="h-7 text-[11px] bg-emerald-600 hover:bg-emerald-700" onClick={() => reviewAppeal(a.id, "approved", a.user_id)}>
+                              ✓ Approve & Unban
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-[11px] border-rose-300 text-rose-700" onClick={() => reviewAppeal(a.id, "rejected", a.user_id)}>
+                              ✕ Reject
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 text-[11px]" onClick={() => reviewAppeal(a.id, "delete")}>
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {a.status !== "pending" && a.admin_response && (
+                        <p className="mt-2 text-[11px] text-muted-foreground italic">Reply: {a.admin_response}</p>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Bulk-select toolbar */}
+            <div className="flex flex-wrap items-center gap-2 mb-3 p-2.5 rounded-xl border border-border bg-card">
+              <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded"
+                  checked={filteredCustomers.length > 0 && filteredCustomers.every(c => selectedCustomerIds.has(c.user_id))}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelectedCustomerIds(new Set(filteredCustomers.map(c => c.user_id)));
+                    else setSelectedCustomerIds(new Set());
+                  }}
+                />
+                Select all ({filteredCustomers.length})
+              </label>
+              <span className="text-[11px] text-muted-foreground">
+                {selectedCustomerIds.size} selected
+              </span>
+              <div className="flex-1" />
+              <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={bulkActing || selectedCustomerIds.size === 0} onClick={() => bulkModerate("verify")}>
+                ✓ Verify
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 text-[11px]" disabled={bulkActing || selectedCustomerIds.size === 0} onClick={() => bulkModerate("unverify")}>
+                Remove badge
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 text-[11px] border-rose-300 text-rose-700" disabled={bulkActing || selectedCustomerIds.size === 0} onClick={() => {
+                const reason = window.prompt("Ban reason (shown to users):") || undefined;
+                bulkModerate("ban", reason);
+              }}>
+                🚫 Ban
+              </Button>
+              <Button size="sm" variant="outline" className="h-7 text-[11px] border-emerald-300 text-emerald-700" disabled={bulkActing || selectedCustomerIds.size === 0} onClick={() => bulkModerate("unban")}>
+                ↺ Unban
+              </Button>
+            </div>
+
             <div className="space-y-3">
               {filteredCustomers.length === 0 ? (
                 <Card>
@@ -1922,8 +2023,21 @@ const Admin = () => {
                 </Card>
               ) : (
                 filteredCustomers.map((c) => (
-                  <Card key={c.id}>
-                    <CardContent className="p-4">
+                  <Card key={c.id} className={selectedCustomerIds.has(c.user_id) ? "ring-2 ring-primary/40" : ""}>
+                    <CardContent className="p-4 relative">
+                      <input
+                        type="checkbox"
+                        aria-label="Select customer"
+                        className="absolute top-3 left-3 w-4 h-4 rounded z-10"
+                        checked={selectedCustomerIds.has(c.user_id)}
+                        onChange={(e) => {
+                          setSelectedCustomerIds((prev) => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(c.user_id); else next.delete(c.user_id);
+                            return next;
+                          });
+                        }}
+                      />
                       {editingCustomer === c.user_id ? (
                         <div className="space-y-3">
                           {/* Avatar uploader */}

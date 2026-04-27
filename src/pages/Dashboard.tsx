@@ -36,6 +36,8 @@ import HomeWorkshopMiniCard from "@/components/HomeWorkshopMiniCard";
 import AccountSwitcherCard from "@/components/AccountSwitcherCard";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
+import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
+import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Lightweight wrapper so it sits inside the dashboard layout
 const DashboardPageBuilder = () => <PageBuilderRenderer page="dashboard-builder" />;
@@ -660,6 +662,27 @@ const Dashboard = () => {
 
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
         {user && <PaymentDemandBanner userId={user.id} events={events as any} />}
+
+        {/* Desktop 3D flash-card hero strip (lg+) */}
+        <DesktopFlashStrip
+          greeting="Welcome back"
+          fullName={profile?.full_name || "Your dashboard"}
+          subtitle="Track your events, payments and orders — all in one premium hub."
+          avatarUrl={profile?.avatar_url}
+          isVerified={profile?.is_verified}
+          primaryCta={canBookEvent ? { label: "Book an event", onClick: handleBookEvent, Icon: CalIcon } : undefined}
+          quickLinks={[
+            { label: "Payments", Icon: Receipt, onClick: () => setActiveTab("payments") },
+            { label: "Orders", Icon: Package, onClick: () => setActiveTab("orders") },
+            { label: "Workshop", Icon: GraduationCap, onClick: () => setActiveTab("workshop") },
+          ]}
+          stats={[
+            { key: "events", label: "Events", value: events?.length || 0, hint: "Bookings on record", onClick: () => setActiveTab("events"), ...STAT_PRESETS.events },
+            { key: "orders", label: "Orders", value: orders?.length || 0, hint: "Caricature & shop orders", onClick: () => setActiveTab("orders"), ...STAT_PRESETS.orders },
+            { key: "alerts", label: "Alerts", value: "Live", hint: "Realtime updates", onClick: () => setActiveTab("alerts"), ...STAT_PRESETS.alerts },
+            { key: "chat", label: "Chat", value: "Open", hint: "Talk to our team", onClick: () => setActiveTab("chat"), ...STAT_PRESETS.chat },
+          ]}
+        />
 
         {/* Desktop tab strip */}
         <div className="hidden md:block mt-4">
@@ -3083,8 +3106,25 @@ const DashboardHomeOverview = ({ profile, orders, events, navigate, canBookEvent
 
 /* ───────── Profile + Logout combined tab ───────── */
 const ProfileWithLogout = (props: any) => {
+  const profile = props.profile || {};
   return (
     <div className="space-y-5">
+      {/* Mobile-only refreshed header (avatar + verified + plan + menu list) */}
+      <MobileProfileHeader
+        fullName={profile.full_name || "Your profile"}
+        handle={profile.display_id ? `@${profile.display_id}` : profile.email}
+        avatarUrl={profile.avatar_url}
+        isVerified={!!profile.is_verified}
+        planLabel={profile.is_verified ? "Verified Member" : "Member"}
+        planSub={profile.created_at ? `Joined ${new Date(profile.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}` : undefined}
+        onShareProfile={() => {
+          const url = window.location.origin + "/dashboard";
+          if (navigator.share) navigator.share({ title: "My Profile", url }).catch(() => {});
+          else { try { navigator.clipboard?.writeText(url); } catch {} }
+        }}
+        onUpgrade={props.openAddEvent}
+      />
+
       <ProfileSection
         profile={props.profile}
         editing={props.editing}
