@@ -491,24 +491,55 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <GlassCard>
-          <h3 className={`${textPrimary} text-sm uppercase tracking-wider mb-3`}>Support & Connect</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <a href={`https://wa.me/91${whatsappNum}`} target="_blank" rel="noopener noreferrer"
-              className={`flex items-center gap-2 ${dm ? "bg-green-900/20 border-green-700/30" : "bg-green-50/80 border-green-200/40"} border rounded-xl p-3 ${dm ? "text-green-400" : "text-green-600"} text-xs font-bold hover:opacity-80 transition-opacity`}>
-              <MessageCircle className="w-4 h-4" /> WhatsApp
+          <div className="flex items-center justify-between mb-4 gap-2 min-w-0">
+            <div className="min-w-0">
+              <h3 className={`${textPrimary} text-sm uppercase tracking-wider truncate`}>Support & Connect</h3>
+              <p className={`${textSecondary} text-[11px] mt-0.5 truncate`}>We're here, anytime you need us</p>
+            </div>
+            <a
+              href={`tel:+91${whatsappNum}`}
+              className="flex-shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              aria-label="Call support"
+            >
+              <Phone className="w-4 h-4" />
             </a>
-            <a href="https://www.instagram.com/creativecaricatureclub" target="_blank" rel="noopener noreferrer"
-              className={`flex items-center gap-2 ${dm ? "bg-pink-900/20 border-pink-700/30" : "bg-pink-50/80 border-pink-200/40"} border rounded-xl p-3 ${dm ? "text-pink-400" : "text-pink-500"} text-xs font-bold hover:opacity-80 transition-opacity`}>
-              <Instagram className="w-4 h-4" /> Instagram
-            </a>
-            <a href="https://www.facebook.com/creativecaricatureclub" target="_blank" rel="noopener noreferrer"
-              className={`flex items-center gap-2 ${dm ? "bg-blue-900/20 border-blue-700/30" : "bg-blue-50/80 border-blue-200/40"} border rounded-xl p-3 ${dm ? "text-blue-400" : "text-blue-500"} text-xs font-bold hover:opacity-80 transition-opacity`}>
-              <Facebook className="w-4 h-4" /> Facebook
-            </a>
-            <a href="https://www.youtube.com/@creativecaricatureclub" target="_blank" rel="noopener noreferrer"
-              className={`flex items-center gap-2 ${dm ? "bg-red-900/20 border-red-700/30" : "bg-red-50/80 border-red-200/40"} border rounded-xl p-3 ${dm ? "text-red-400" : "text-red-500"} text-xs font-bold hover:opacity-80 transition-opacity`}>
-              <Youtube className="w-4 h-4" /> YouTube
-            </a>
+          </div>
+
+          <a
+            href={`https://wa.me/91${whatsappNum}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 rounded-2xl p-3.5 mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-[0_10px_30px_-12px_rgba(16,185,129,0.55)] hover:shadow-[0_14px_36px_-10px_rgba(16,185,129,0.65)] transition-shadow min-w-0"
+          >
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold truncate">Chat on WhatsApp</p>
+              <p className="text-[11px] text-white/85 truncate">Fastest reply · usually under 5 min</p>
+            </div>
+            <ExternalLink className="w-4 h-4 flex-shrink-0 opacity-80" />
+          </a>
+
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { href: "https://www.instagram.com/creativecaricatureclub", Icon: Instagram, label: "Instagram", grad: "from-pink-500 to-rose-500" },
+              { href: "https://www.facebook.com/creativecaricatureclub", Icon: Facebook, label: "Facebook", grad: "from-blue-500 to-indigo-500" },
+              { href: "https://www.youtube.com/@creativecaricatureclub", Icon: Youtube, label: "YouTube", grad: "from-red-500 to-orange-500" },
+            ].map(({ href, Icon, label, grad }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group flex flex-col items-center gap-1.5 rounded-2xl p-3 border ${dm ? "border-white/10 bg-white/5" : "border-slate-200/70 bg-white/70"} hover:-translate-y-0.5 transition-transform min-w-0`}
+              >
+                <span className={`w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white flex items-center justify-center shadow-md flex-shrink-0`}>
+                  <Icon className="w-4 h-4" />
+                </span>
+                <span className={`text-[10.5px] font-bold ${textPrimary} truncate w-full text-center`}>{label}</span>
+              </a>
+            ))}
           </div>
         </GlassCard>
       </motion.div>
