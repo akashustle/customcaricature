@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Save, Smartphone, ExternalLink, Loader2 } from "lucide-react";
+import { Save, Smartphone, ExternalLink, Loader2, Upload, ShieldCheck } from "lucide-react";
 
 /**
  * Admin panel: configure the public /download page.
@@ -31,6 +31,9 @@ const AdminAppDownload = () => {
   const [cfg, setCfg] = useState<AppDownloadConfig>({ enabled: true, version: "1.0.0" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -59,6 +62,80 @@ const AdminAppDownload = () => {
     }
   };
 
+  // Compute SHA-256 of the uploaded file in the browser using SubtleCrypto.
+  const sha256OfFile = async (file: File): Promise<string> => {
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  };
+
+  const onPickAPK = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/\.apk$/i.test(file.name)) {
+      toast({ title: "Wrong file type", description: "Please select a .apk file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 200 MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    setUploadPct(5);
+    try {
+      const version = (cfg.version || "1.0.0").trim() || "1.0.0";
+      const safeVersion = version.replace(/[^a-z0-9._-]/gi, "_");
+      const path = `releases/CreativeCaricatureClub-${safeVersion}-${Date.now()}.apk`;
+
+      // Hash + upload run in parallel-ish — hash first because it's quick on most APKs
+      const sha = await sha256OfFile(file);
+      setUploadPct(20);
+
+      const { error: upErr } = await supabase.storage
+        .from("app-builds")
+        .upload(path, file, {
+          cacheControl: "3600",
+          contentType: "application/vnd.android.package-archive",
+          upsert: true,
+        });
+      if (upErr) throw upErr;
+      setUploadPct(85);
+
+      const { data: pub } = supabase.storage.from("app-builds").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const sizeMb = Number((file.size / (1024 * 1024)).toFixed(1));
+
+      const next: AppDownloadConfig = {
+        ...cfg,
+        android_apk_url: url,
+        sha256: sha,
+        size_mb: sizeMb,
+        version,
+        enabled: true,
+      };
+      setCfg(next);
+
+      const { error: saveErr } = await supabase
+        .from("admin_site_settings")
+        .upsert({ id: "app_download", value: next as any }, { onConflict: "id" });
+      if (saveErr) throw saveErr;
+
+      setUploadPct(100);
+      toast({
+        title: "✅ APK uploaded & published",
+        description: `Version ${version} (${sizeMb} MB) is now live on /download.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      setTimeout(() => setUploadPct(0), 1500);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -69,6 +146,72 @@ const AdminAppDownload = () => {
 
   return (
     <div className="space-y-4 max-w-3xl">
+      {/* ===== Direct APK upload (no GitHub release dance needed) ===== */}
+      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5 text-primary" />
+            Upload Signed APK
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Drop the signed <code className="text-primary">.apk</code> here. We compute its SHA-256, upload it
+            to secure storage, and instantly publish it to the <code className="text-primary">/download</code> page —
+            no code change needed.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <Label>Version label for this upload</Label>
+              <Input
+                value={cfg.version || ""}
+                onChange={(e) => setCfg({ ...cfg, version: e.target.value })}
+                placeholder="1.0.0"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="w-full h-10 gap-2"
+              >
+                {uploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Uploading… {uploadPct}%</>
+                ) : (
+                  <><Upload className="w-4 h-4" /> Choose APK</>
+                )}
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".apk,application/vnd.android.package-archive"
+                hidden
+                onChange={onPickAPK}
+              />
+            </div>
+          </div>
+
+          {uploading && (
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${uploadPct}%` }}
+              />
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+            <div>
+              The APK is stored in the private <code>app-builds</code> bucket and served over HTTPS with a
+              SHA-256 checksum. Use a <strong>release-signed</strong> APK (v1+v2+v3) to avoid Chrome
+              "may be dangerous" warnings — debug-signed builds are not trusted by Safe Browsing.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

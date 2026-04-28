@@ -3890,6 +3890,27 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_buckets: {
+        Row: {
+          blocked_until: string | null
+          count: number
+          id: string
+          window_start: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          count?: number
+          id: string
+          window_start?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          count?: number
+          id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       razorpay_webhook_events: {
         Row: {
           event_id: string

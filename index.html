@@ -10,7 +10,10 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="Permissions-Policy" content="geolocation=(self), microphone=(self), camera=()" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(self), microphone=(self), camera=(), payment=(self), usb=(), interest-cohort=()" />
+    <!-- Strict-Transport-Security is normally set by the host; we also emit a meta as a hint. -->
+    <meta http-equiv="Strict-Transport-Security" content="max-age=63072000; includeSubDomains; preload" />
     <link rel="canonical" href="https://portal.creativecaricatureclub.com/" />
     
     
