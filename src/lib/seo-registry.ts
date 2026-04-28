@@ -20,6 +20,8 @@ export const SEO_REGISTRY: Record<string, RouteSEO> = {
       "Book live caricature artists for weddings, corporate events, birthdays & parties across India & internationally. Order custom hand-drawn caricatures from photos online. 10+ years, 5000+ happy clients. Mumbai, Delhi, Bangalore, Pune, Goa & more.",
     keywords:
       "caricature artist India, live caricature wedding, corporate event caricature, custom caricature from photo, caricature artist Mumbai, hire caricaturist, caricature gift, wedding entertainment, sangeet caricature, party caricature artist",
+    type: "website",
+    image: "/og-home.jpg",
   },
   "/order": {
     title: "Order a Custom Hand-Drawn Caricature Online",
@@ -78,9 +80,10 @@ export const SEO_REGISTRY: Record<string, RouteSEO> = {
   "/workshop": {
     title: "Caricature Workshop & Online Course — Learn from Pros",
     description:
-      "Join our live caricature workshops and online courses. Learn fundamentals, exaggeration, digital tools and earn a certificate. Beginner to advanced batches.",
-    keywords: "caricature workshop India, learn caricature online, caricature course, art class Mumbai, online drawing class",
+      "Join our live caricature workshops and online courses. Learn fundamentals, exaggeration, digital tools and earn a certificate. Beginner to advanced batches. Live + recorded sessions, lifetime access, real artist mentors.",
+    keywords: "caricature workshop India, learn caricature online, caricature course, art class Mumbai, online drawing class, certificate course, caricature mentor, beginner art workshop",
     type: "course",
+    image: "/og-workshop.jpg",
   },
   "/support": {
     title: "Customer Support — We're Here to Help",
@@ -126,8 +129,18 @@ export const SEO_REGISTRY: Record<string, RouteSEO> = {
   "/login": { title: "Sign In", description: "Sign in to your Creative Caricature Club account.", noindex: true },
   "/register": { title: "Create Account", description: "Create your free Creative Caricature Club account.", noindex: true },
   "/forgot-password": { title: "Reset Password", description: "Reset your account password.", noindex: true },
-  "/dashboard": { title: "My Dashboard", description: "Your account dashboard.", noindex: true },
-  "/artist-dashboard": { title: "Artist Dashboard", description: "Artist portal.", noindex: true },
+  "/dashboard": {
+    title: "My Dashboard — Orders, Events, Payments & Chat",
+    description: "Your private Creative Caricature Club dashboard — track caricature orders, manage event bookings, view payments and chat with our team in real time.",
+    noindex: true,
+    image: "/og-dashboard.jpg",
+  },
+  "/artist-dashboard": {
+    title: "Artist Dashboard — Bookings, Earnings & Payouts",
+    description: "Artist portal: manage assigned events, attendance, earnings and payout requests in real time.",
+    noindex: true,
+    image: "/og-dashboard.jpg",
+  },
   "/artistlogin": { title: "Artist Sign In", description: "Artist account sign-in.", noindex: true },
   "/appeal-ban": { title: "Account Appeal", description: "Submit an account appeal.", noindex: true },
   "/sync-queue": { title: "Sync Queue", description: "Offline sync queue.", noindex: true },
@@ -139,7 +152,12 @@ export const SEO_REGISTRY: Record<string, RouteSEO> = {
   "/shop-admin": { title: "Shop Admin", description: "Internal shop admin.", noindex: true },
   "/workshop-admin-panel": { title: "Workshop Admin", description: "Internal workshop admin.", noindex: true },
   "/database-entry-reversal": { title: "Database Recovery", description: "Internal database tool.", noindex: true },
-  "/workshop/dashboard": { title: "Workshop Dashboard", description: "Student workshop dashboard.", noindex: true },
+  "/workshop/dashboard": {
+    title: "Workshop Dashboard — Videos, Assignments & Certificates",
+    description: "Your workshop student portal — watch recorded sessions, submit assignments, track attendance, view certificates and chat with mentors.",
+    noindex: true,
+    image: "/og-workshop.jpg",
+  },
   // Policy pages
   "/terms": { title: "Terms & Conditions", description: "Read the terms & conditions for using Creative Caricature Club services." },
   "/privacy": { title: "Privacy Policy", description: "How we collect, use and protect your personal data at Creative Caricature Club." },
