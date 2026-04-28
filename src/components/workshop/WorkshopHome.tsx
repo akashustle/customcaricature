@@ -512,7 +512,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
           </div>
 
           <a
-            href={`https://wa.me/91${whatsappNum}`}
+            href={`https://wa.me/91${whatsappNum}?text=${encodeURIComponent(`Hi Creative Caricature Club! 🎨\n\nI'm ${user.full_name || "a workshop student"} from the ${slotLabel} batch. I have a question about my workshop — could you please help me?`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-2xl p-3.5 mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-[0_8px_22px_-12px_rgba(16,185,129,0.5)] min-w-0"
