@@ -524,7 +524,33 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 <Loader2 className="w-3 h-3 mr-1.5 animate-spin" /> Pending Review
               </span>
             ) : (
-              <Button onClick={() => setVerifyOpen(true)} size="sm"
+              <Button onClick={() => {
+                  // Eagerly check 100% completeness BEFORE opening the dialog.
+                  // Per request: clicking "Get Verified" must show what's missing
+                  // instead of letting the user open a dead-end dialog.
+                  const missing: string[] = [];
+                  if (!profileData.name) missing.push("Name");
+                  if (!profileData.email) missing.push("Email");
+                  if (!profileData.mobile) missing.push("Mobile");
+                  if (!profileData.age) missing.push("Age");
+                  if (!profileData.occupation) missing.push("Occupation");
+                  if (!profileData.country) missing.push("Country");
+                  if (!profileData.city) missing.push("City");
+                  if (!profileData.gender) missing.push("Gender");
+                  if (!profileData.instagram_id) missing.push("Instagram");
+                  if (!profileData.why_join) missing.push("Why join");
+                  if (!profileData.avatar_url) missing.push("Profile photo");
+                  if (missing.length > 0) {
+                    toast({
+                      title: "100% profile required",
+                      description: `Please fill: ${missing.join(", ")} to request the blue tick.`,
+                      variant: "destructive",
+                    });
+                    setEditing(true);
+                    return;
+                  }
+                  setVerifyOpen(true);
+                }} size="sm"
                 className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0"
                 style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 55%))` }}>
                 Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
