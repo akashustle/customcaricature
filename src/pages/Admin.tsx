@@ -363,6 +363,20 @@ const Admin = () => {
   useEffect(() => {
     localStorage.setItem("admin_last_tab", activeTab);
   }, [activeTab]);
+
+  // Listen for AI Assistant navigation requests
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const tab = detail?.tab;
+      if (typeof tab === "string" && tab.length > 0) {
+        setActiveTab(tab);
+        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+      }
+    };
+    window.addEventListener("admin:navigate-tab", handler as EventListener);
+    return () => window.removeEventListener("admin:navigate-tab", handler as EventListener);
+  }, []);
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
