@@ -379,6 +379,7 @@ const App = () => {
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/lil-flea" element={<LilFlea />} />
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
+                <Route path="/lil-flea/gallery" element={<LilFleaGallery />} />
                 <Route path="/claim-link" element={<ClaimLink />} />
                 <Route path="/chat-now" element={<ChatNow />} />
                 <Route path="/download" element={<Download />} />
