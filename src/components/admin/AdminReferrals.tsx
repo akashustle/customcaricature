@@ -245,6 +245,58 @@ const AdminReferrals = () => {
         </CardContent>
       </Card>
 
+      {/* Funnel from referral_events */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-body flex items-center justify-between">
+            <span>Referral Funnel (Click → Conversion)</span>
+            <Badge variant="outline" className="text-xs">{conversionRate}% conv.</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { label: "Clicks", value: evClicks, color: "bg-blue-50 text-blue-700" },
+              { label: "Registers", value: evRegisters, color: "bg-violet-50 text-violet-700" },
+              { label: "Logins", value: evLogins, color: "bg-amber-50 text-amber-700" },
+              { label: "Bookings", value: evBookings, color: "bg-emerald-50 text-emerald-700" },
+              { label: "Orders", value: evOrders, color: "bg-pink-50 text-pink-700" },
+            ].map(s => (
+              <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
+                <p className="text-2xl font-bold font-body">{s.value}</p>
+                <p className="text-[11px] font-body opacity-80">{s.label}</p>
+              </div>
+            ))}
+          </div>
+          {events.length > 0 && (
+            <div className="mt-4 max-h-64 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="font-body text-xs">When</TableHead>
+                    <TableHead className="font-body text-xs">Code</TableHead>
+                    <TableHead className="font-body text-xs">Event</TableHead>
+                    <TableHead className="font-body text-xs">Referrer</TableHead>
+                    <TableHead className="font-body text-xs">Source</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {events.slice(0, 50).map(e => (
+                    <TableRow key={e.id}>
+                      <TableCell className="text-[11px] text-muted-foreground">{new Date(e.created_at).toLocaleString()}</TableCell>
+                      <TableCell><code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">{e.referral_code}</code></TableCell>
+                      <TableCell><Badge variant="outline" className="text-[10px]">{e.event_type}</Badge></TableCell>
+                      <TableCell className="text-xs">{e.referrer_user_id ? getUserName(e.referrer_user_id) : <span className="text-muted-foreground">unknown</span>}</TableCell>
+                      <TableCell className="text-[11px] text-muted-foreground truncate max-w-[180px]">{e.source}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Recent Uses */}
       <Card>
         <CardHeader><CardTitle className="text-sm font-body">Recent Referral Uses</CardTitle></CardHeader>
