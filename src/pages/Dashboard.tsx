@@ -1430,6 +1430,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 };
 
 const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
+  const { settings } = useSiteSettings();
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
 
   return (
