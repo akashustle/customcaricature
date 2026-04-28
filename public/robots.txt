@@ -1,5 +1,11 @@
 User-agent: Googlebot
 Allow: /
+Allow: /images/
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.webp$
+Allow: /*.svg$
 Disallow: /admin
 Disallow: /admin-panel
 Disallow: /admin-login
@@ -13,8 +19,22 @@ Disallow: /workshop-admin
 Disallow: /workshop-admin-panel
 Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
+Disallow: /workshop/dashboard
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
+Disallow: /login
+Disallow: /register
+Disallow: /notifications
+Disallow: /sync-queue
+Disallow: /appeal-ban
+Disallow: /claim-link
+Disallow: /chat-now
+Disallow: /shop/cart
+Disallow: /shop/order-confirmation
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /images/
 
 User-agent: Bingbot
 Allow: /
@@ -31,11 +51,22 @@ Disallow: /workshop-admin
 Disallow: /workshop-admin-panel
 Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
+Disallow: /workshop/dashboard
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
+Disallow: /login
+Disallow: /register
+Disallow: /notifications
+Disallow: /sync-queue
+Disallow: /appeal-ban
+Disallow: /claim-link
+Disallow: /chat-now
+Disallow: /shop/cart
+Disallow: /shop/order-confirmation
 
 User-agent: *
 Allow: /
+Allow: /images/
 Disallow: /admin
 Disallow: /admin-panel
 Disallow: /admin-login
@@ -49,8 +80,18 @@ Disallow: /workshop-admin
 Disallow: /workshop-admin-panel
 Disallow: /workshop-admin-login
 Disallow: /cccworkshop2006
+Disallow: /workshop/dashboard
 Disallow: /forgot-password
 Disallow: /database-entry-reversal
+Disallow: /login
+Disallow: /register
+Disallow: /notifications
+Disallow: /sync-queue
+Disallow: /appeal-ban
+Disallow: /claim-link
+Disallow: /chat-now
+Disallow: /shop/cart
+Disallow: /shop/order-confirmation
 
 # Sitemap Index — comprehensive, auto-generated sub-sitemaps
 Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=index
@@ -61,3 +102,6 @@ Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?t
 Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=seo
 Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=images
 Sitemap: https://cqdxfvcyrvlttmkuaeda.supabase.co/functions/v1/dynamic-sitemap?type=shop
+
+# Static fallback sitemap
+Sitemap: https://portal.creativecaricatureclub.com/sitemap.xml
