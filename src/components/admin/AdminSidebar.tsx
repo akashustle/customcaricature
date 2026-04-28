@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { unlockAdminUrl, buildUnlockUrl } from "@/lib/admin-url-unlock";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -257,8 +258,19 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
               {section.items.map((item) => {
                 const isActive = activeTab === item.id;
                 const handleClick = () => {
-                  if (item.id === "link-workshop-admin") { navigate("/workshop-admin-panel"); return; }
-                  if (item.id === "link-shop-admin") { navigate("/CFCAdmin936"); return; }
+                  if (item.id === "link-workshop-admin") {
+                    // SSO: same browser session is shared via Supabase localStorage,
+                    // so we open the workshop admin panel directly in a new tab with
+                    // an unlock-hash that the new tab consumes on boot.
+                    unlockAdminUrl("workshop");
+                    window.open(buildUnlockUrl("/workshop-admin-panel", "workshop"), "_blank", "noopener");
+                    return;
+                  }
+                  if (item.id === "link-shop-admin") {
+                    unlockAdminUrl("shop");
+                    window.open(buildUnlockUrl("/shop-admin", "shop"), "_blank", "noopener");
+                    return;
+                  }
                   onTabChange(item.id);
                 };
                 return (

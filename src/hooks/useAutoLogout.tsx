@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { unlockAdminUrl } from "@/lib/admin-url-unlock";
 
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
@@ -17,6 +18,7 @@ export const useAutoLogout = (enabled: boolean = true) => {
       await supabase.auth.signOut();
     } catch {}
     sessionStorage.removeItem("admin_entered_name");
+    unlockAdminUrl("main");
     navigate("/customcad75", { replace: true });
   }, [navigate]);
 

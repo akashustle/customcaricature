@@ -17,6 +17,13 @@ import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRoute
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
+import { isAdminUrlUnlocked, consumeUnlockHash, type AdminUrlSlot } from "./lib/admin-url-unlock";
+
+// Consume any ?#admin_unlock=... hash before React renders, so the very first
+// route render already sees the sessionStorage flag set.
+if (typeof window !== "undefined") {
+  try { consumeUnlockHash(); } catch {}
+}
 
 // Lazy-loaded shell components — wrapped in a passthrough so Radix Slot / AnimatePresence
 // can't forward refs into the lazy boundary (which causes ref warnings).
@@ -305,6 +312,19 @@ const AdminPanelGate = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * Permanently 404 the admin/shop-admin/workshop-admin login URLs unless the
+ * visitor has explicitly proven they're an admin (secret keystroke on /login
+ * OR coming from main-admin SSO). The unlock flag lives in sessionStorage so
+ * it disappears when the tab closes.
+ */
+const AdminUrlGate = ({ slot, children }: { slot: AdminUrlSlot; children: React.ReactNode }) => {
+  if (typeof window !== "undefined" && !isAdminUrlUnlocked(slot)) {
+    return <Suspense fallback={<PageLoader />}><NotFound /></Suspense>;
+  }
+  return <>{children}</>;
+};
+
 const App = () => {
   // Splash on EVERY full page reload (skip only on admin-style routes).
   const [showSplash, setShowSplash] = useState(() => {
@@ -353,7 +373,7 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/customcad75" element={<AdminLogin />} />
+                <Route path="/customcad75" element={<AdminUrlGate slot="main"><AdminLogin /></AdminUrlGate>} />
                 {/* Public-search-friendly admin slugs are intentionally hidden — show a 404 so they don't leak. */}
                 <Route path="/admin-login" element={<NotFound />} />
                 <Route path="/admin" element={<NotFound />} />
@@ -387,7 +407,7 @@ const App = () => {
                 <Route path="/shop/cart" element={<ShopCart />} />
                 <Route path="/shop/order-confirmation" element={<ShopOrderConfirmation />} />
                 <Route path="/shop/ai-caricature" element={<AICaricature />} />
-                <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
+                <Route path="/CFCAdmin936" element={<AdminUrlGate slot="shop"><ShopAdminLogin /></AdminUrlGate>} />
                 <Route path="/shop-admin" element={<ShopAdmin />} />
                 <Route path="/workshop" element={<Workshop />} />
                 <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
@@ -395,7 +415,7 @@ const App = () => {
                     UserWorkshopOverview) still links to /workshop-dashboard. Keep this
                     redirect so no in-app navigation 404s. */}
                 <Route path="/workshop-dashboard" element={<Navigate to="/workshop/dashboard" replace />} />
-                <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
+                <Route path="/cccworkshop2006" element={<AdminUrlGate slot="workshop"><WorkshopAdminLogin /></AdminUrlGate>} />
                 <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />

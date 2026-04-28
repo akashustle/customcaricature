@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AuthShell from "@/components/auth/AuthShell";
 import { saveCredentials, verifyOfflineCredentials } from "@/lib/offline-credentials";
 import { logReferralEvent } from "@/hooks/useReferralTracking";
+import { installSecretKeystroke, unlockAdminUrl } from "@/lib/admin-url-unlock";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -46,6 +47,15 @@ const Login = () => {
     checkGoogleReturn();
   }, []);
 
+  // Secret keystroke "ccc999" anywhere on the login page silently unlocks admin URLs
+  useEffect(() => {
+    const cleanup = installSecretKeystroke(() => {
+      unlockAdminUrl("all");
+      toast({ title: "🔓 Admin access unlocked", description: "You can now reach the admin panels in this tab." });
+    });
+    return cleanup;
+  }, []);
+
   const finalizeLogin = async () => {
     const { data: userData, error: userError } = await withTimeout(supabase.auth.getUser());
     if (userError || !userData.user) throw userError || new Error("Could not validate session");
@@ -56,7 +66,7 @@ const Login = () => {
     if (roles?.length > 0) {
       await supabase.auth.signOut();
       toast({ title: "Admin account", description: "Use admin login.", variant: "destructive" });
-      navigate("/customcad75", { replace: true }); return;
+      unlockAdminUrl("main"); navigate("/customcad75", { replace: true }); return;
     }
     if (artistData) {
       await supabase.auth.signOut();
@@ -167,6 +177,7 @@ const Login = () => {
         setRoleChoiceOpen(true);
       } else if (isAdmin) {
         toast({ title: "Admin account detected", description: "Redirecting to admin login..." });
+        unlockAdminUrl("main");
         navigate("/customcad75", { replace: true });
       } else if (isArtist) {
         toast({ title: "Artist account detected", description: "Redirecting to artist login..." });
@@ -257,7 +268,7 @@ const Login = () => {
                   </DialogHeader>
                   <div className="space-y-3 pt-2">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                      onClick={() => { setRoleChoiceOpen(false); navigate("/customcad75", { replace: true }); }}
+                      onClick={() => { setRoleChoiceOpen(false); unlockAdminUrl("main"); navigate("/customcad75", { replace: true }); }}
                       className="w-full p-4 rounded-xl border-2 border-slate-200 hover:border-primary/60 text-left flex items-center gap-3 transition-all bg-white">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <Shield className="w-5 h-5 text-primary" />
