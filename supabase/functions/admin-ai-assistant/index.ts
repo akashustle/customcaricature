@@ -262,6 +262,11 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       }
       return { ok: true, kind: args.kind, markdown: md };
     }
+    if (name === "navigate_admin_tab") {
+      const tab = String(args.tab || "").trim();
+      if (!ALLOWED_TABS.has(tab)) return { ok: false, error: `unknown tab '${tab}'` };
+      return { ok: true, navigate_to: tab };
+    }
     return { ok: false, error: `unknown tool ${name}` };
   } catch (e: any) {
     return { ok: false, error: e.message || String(e) };
