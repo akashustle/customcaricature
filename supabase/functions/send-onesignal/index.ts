@@ -28,9 +28,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const config = configRow?.value as any;
+    // Soft-skip when channel disabled or unconfigured — never fail the broadcast
     if (!config?.enabled || !config?.app_id) {
-      return new Response(JSON.stringify({ error: "OneSignal not configured" }), {
-        status: 400,
+      return new Response(JSON.stringify({ sent: 0, skipped: true, reason: "OneSignal channel disabled or app_id missing" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -38,8 +39,8 @@ Deno.serve(async (req) => {
     // Use secret env var first, then fall back to DB config
     const apiKey = onesignalApiKey || config?.rest_api_key;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "OneSignal REST API key not configured. Add ONESIGNAL_REST_API_KEY secret." }), {
-        status: 400,
+      return new Response(JSON.stringify({ sent: 0, skipped: true, reason: "OneSignal REST API key not configured" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -99,20 +100,22 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       console.error("OneSignal API error:", result);
-      return new Response(JSON.stringify({ error: "OneSignal send failed", details: result }), {
-        status: 500,
+      // Return 200 + error info so client (Promise.allSettled) sees it as a soft failure,
+      // not a thrown invoke error. The web-push channel still delivers in parallel.
+      return new Response(JSON.stringify({ sent: 0, skipped: true, error: "OneSignal upstream error", details: result }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     console.log("OneSignal notification sent:", result);
-    return new Response(JSON.stringify({ success: true, onesignal_id: result.id, recipients: result.recipients }), {
+    return new Response(JSON.stringify({ sent: result.recipients ?? 0, success: true, onesignal_id: result.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
     console.error("send-onesignal error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ sent: 0, skipped: true, error: err.message }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

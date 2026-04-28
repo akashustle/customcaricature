@@ -107,23 +107,31 @@ const AdminNotificationSender = () => {
       // Fan-out push notifications via two parallel channels:
       //   1) Web Push (VAPID) — covers PWA + desktop browsers via push_subscriptions
       //   2) OneSignal — covers installed mobile APK + native iOS/Android subscribers
-      // Both are fire-and-forget; in-app notifications are already inserted above.
+      // Both edge functions now always return 200 with a {sent, skipped, error?} summary
+      // so a misconfigured channel never breaks the broadcast.
       const targetIds = targetUsers.map(u => u.user_id);
       const pushTitle = title.trim();
       const pushBody = message.trim();
       const pushLink = link.trim() || "/notifications";
-      await Promise.allSettled([
-        // Web push to every targeted user (server iterates their push_subscriptions)
+      const [webRes, osRes] = await Promise.allSettled([
         supabase.functions.invoke("send-web-push", {
           body: { action: "broadcast_to_users", user_ids: targetIds, title: pushTitle, message: pushBody, link: pushLink },
-        }).catch((e) => console.warn("send-web-push failed:", e)),
-        // OneSignal mobile push (single API call, scoped by external_id alias)
+        }),
         supabase.functions.invoke("send-onesignal", {
           body: { user_ids: targetIds, title: pushTitle, message: pushBody, url: pushLink },
-        }).catch((e) => console.warn("send-onesignal failed:", e)),
+        }),
       ]);
+      const webSent = webRes.status === "fulfilled" ? Number((webRes.value as any)?.data?.sent ?? 0) : 0;
+      const osSent  = osRes.status  === "fulfilled" ? Number((osRes.value  as any)?.data?.sent ?? 0) : 0;
+      const webErr  = webRes.status === "fulfilled" ? (webRes.value as any)?.data?.error : (webRes as any).reason?.message;
+      const osErr   = osRes.status  === "fulfilled" ? (osRes.value  as any)?.data?.error : (osRes as any).reason?.message;
+      if (webErr) console.warn("[broadcast] web-push:", webErr);
+      if (osErr)  console.warn("[broadcast] onesignal:", osErr);
 
-      toast({ title: `✅ Sent to ${targetUsers.length} user(s)!` });
+      toast({
+        title: `✅ Broadcast sent to ${targetUsers.length} user(s)`,
+        description: `In-app: ${targetUsers.length} · Web push: ${webSent} · Mobile push: ${osSent}`,
+      });
       setTitle(""); setMessage(""); setLink(""); setSelectedUsers([]);
       fetchBatches();
     } catch (err: any) {
