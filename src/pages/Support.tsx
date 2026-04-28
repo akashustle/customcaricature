@@ -89,7 +89,7 @@ const Support = () => {
   return (
     <>
       <SEOHead title="Contact & Support | Creative Caricature Club™" description="Contact Creative Caricature Club™ for caricature orders, event bookings, custom artwork enquiries & support. Reach us via phone, email, WhatsApp or Instagram. Based in Mumbai, serving all India & internationally." canonical="/support" />
-      <div className="min-h-screen brand-gradient-bg pb-24 md:pb-0">
+      <div data-support-page className="min-h-screen brand-gradient-bg pb-24 md:pb-0">
         {/* Hero Header */}
         <div className="relative overflow-hidden">
           {/* Animated background blobs */}
