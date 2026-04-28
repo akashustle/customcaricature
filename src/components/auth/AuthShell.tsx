@@ -199,14 +199,66 @@ export const AuthShell = ({
 
             {/* ============ RIGHT — FORM ============ */}
             <div className="bg-white p-6 sm:p-8 md:p-10 flex flex-col justify-center">
-              {/* Mobile-only logo header (matches mobile mockup) */}
-              <div className="md:hidden flex flex-col items-center text-center mb-6">
-                <button onClick={() => navigate("/")} className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-100 mb-3">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
-                </button>
-                <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-slate-500">
-                  Creative Caricature Club™
+              {/* Mobile-only 3D mini hero — same identity as desktop, vertically stacked */}
+              <div
+                className="md:hidden relative -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 mb-6 px-6 pt-6 pb-8 rounded-b-[28px] overflow-hidden"
+                style={{
+                  background: `linear-gradient(160deg, ${a.from} 0%, ${a.via} 55%, ${a.to} 100%)`,
+                  boxShadow: "inset 0 -10px 24px rgba(80,60,150,0.10)",
+                }}
+              >
+                {/* Floating 3D shapes — small + GPU-friendly */}
+                {!lowPower && (
+                  <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ contain: "paint" }}>
+                    <motion.div
+                      className="absolute right-4 top-3 w-14 h-14 rounded-full"
+                      style={{
+                        background: "radial-gradient(circle at 30% 30%, #ffffff, #e5e7eb 60%, #c7c9d1)",
+                        boxShadow: "inset -6px -6px 14px rgba(0,0,0,0.18), 6px 10px 18px rgba(80,60,150,0.25)",
+                        willChange: "transform",
+                      }}
+                      animate={{ y: [0, -6, 0] }}
+                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                      className="absolute right-20 bottom-3 w-10 h-10 rounded-xl rotate-12"
+                      style={{
+                        background: `linear-gradient(135deg, ${a.orbA}, ${a.orbB})`,
+                        boxShadow: "inset -4px -4px 10px rgba(0,0,0,0.15), 6px 8px 16px rgba(80,60,150,0.3)",
+                        willChange: "transform",
+                      }}
+                      animate={{ rotate: [12, -6, 12], y: [0, 6, 0] }}
+                      transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                      className="absolute left-4 bottom-2 w-9 h-9 rounded-full border-[5px]"
+                      style={{ borderColor: "#f5d0a9", boxShadow: "4px 6px 12px rgba(80,60,150,0.25)", willChange: "transform" }}
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+                    />
+                  </div>
+                )}
+
+                <div className="relative z-10 flex items-center gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    className="w-12 h-12 rounded-2xl bg-white/95 shadow-md overflow-hidden ring-1 ring-white shrink-0"
+                    aria-label="Home"
+                  >
+                    <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                  </button>
+                  <div className="text-left leading-tight">
+                    <p className="text-[9px] font-semibold tracking-[0.2em] uppercase text-slate-700/80">Creative</p>
+                    <p className="text-[13px] font-bold text-slate-800">Caricature Club™</p>
+                  </div>
+                </div>
+                <p className="relative z-10 text-[10px] font-semibold tracking-[0.2em] uppercase text-slate-700/85 inline-flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3" /> {badge || "Welcome"}
                 </p>
+                <h1 className="relative z-10 text-xl font-bold text-slate-900 leading-tight mt-1.5 max-w-[80%]">
+                  {heroTitle}
+                </h1>
               </div>
 
               <div className="mb-6">
