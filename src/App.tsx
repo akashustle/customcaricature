@@ -46,6 +46,10 @@ const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
 const SyncToastListener = lazyShell(() => import("./components/SyncToastListener"));
 const ApkUpdatePrompt = lazyShell(() => import("./components/ApkUpdatePrompt"));
 
+// Non-critical chrome — deferred to keep them off the boot bundle (helps TBT).
+const RoutePrefetcher = lazyShell(() => import("./components/RoutePrefetcher"));
+const RightClickBlocker = lazyShell(() => import("./components/RightClickBlocker"));
+
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
