@@ -2575,6 +2575,10 @@ const Admin = () => {
             <AdminAuditLog />
           </TabsContent>
 
+          <TabsContent value="ai-assistant">
+            <Suspense fallback={<AdminTabLoader />}><AdminAIAssistant embedded /></Suspense>
+          </TabsContent>
+
           <TabsContent value="intl-pricing">
             <AdminInternationalPricing />
           </TabsContent>
