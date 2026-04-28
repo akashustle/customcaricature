@@ -19,13 +19,17 @@ type StorageFile = {
 };
 
 const BUCKETS = [
+  { id: "homepage-assets", label: "Homepage Assets", public: true },
   { id: "blog-images", label: "Blog Images", public: true },
   { id: "shop-images", label: "Shop Images", public: true },
+  { id: "gallery-images", label: "Gallery Images", public: true },
   { id: "caricature-uploads", label: "Caricature Uploads", public: true },
+  { id: "avatars", label: "Avatars", public: true },
   { id: "order-photos", label: "Order Photos", public: false },
   { id: "artist-portfolios", label: "Artist Portfolios", public: false },
   { id: "event-documents", label: "Event Documents", public: false },
   { id: "workshop-files", label: "Workshop Files", public: false },
+  { id: "payment-claims", label: "Payment Claims", public: false },
 ];
 
 const getFileIcon = (name: string) => {
