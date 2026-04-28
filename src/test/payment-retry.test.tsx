@@ -16,7 +16,7 @@ const selectMock = vi.fn().mockReturnThis();
 const fromMock = vi.fn(() => ({
   select: selectMock, eq: eqMock, maybeSingle: maybeSingleMock,
 }));
-const invokeMock = vi.fn().mockResolvedValue({ data: null, error: null });
+const invokeMock: any = vi.fn().mockResolvedValue({ data: null, error: null });
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
