@@ -131,3 +131,14 @@ export async function removeQueued(id: number): Promise<void> {
     /* ignore */
   }
 }
+
+/**
+ * installOfflineCache — call once on app boot.
+ * Currently a no-op (cache opens lazily on first use), but exists so callers
+ * have a stable lifecycle hook for future warmup logic (e.g. pre-fetching the
+ * admin's most-used queries when the device is idle).
+ */
+export function installOfflineCache(): void {
+  // Reserved for future: pre-warm openDB, register IDB persistence permission, etc.
+  // Lazy open is sufficient for now and avoids cost on cold start.
+}
