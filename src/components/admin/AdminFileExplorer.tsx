@@ -34,16 +34,16 @@ const BUCKETS = [
 
 const getFileIcon = (name: string) => {
   const ext = name.split(".").pop()?.toLowerCase() || "";
-  if (["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"].includes(ext)) return Image;
-  if (["mp4", "mov", "avi", "webm"].includes(ext)) return Film;
-  if (["mp3", "wav", "ogg"].includes(ext)) return Music;
+  if (["jpg", "jpeg", "png", "gif", "webp", "svg", "avif", "ico"].includes(ext)) return Image;
+  if (["mp4", "mov", "avi", "webm", "mkv"].includes(ext)) return Film;
+  if (["mp3", "wav", "ogg", "m4a", "aac"].includes(ext)) return Music;
   if (["pdf", "doc", "docx", "txt"].includes(ext)) return FileText;
   return File;
 };
 
 const isImageFile = (name: string) => {
   const ext = name.split(".").pop()?.toLowerCase() || "";
-  return ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"].includes(ext);
+  return ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif", "ico"].includes(ext);
 };
 
 const formatSize = (bytes: number) => {
