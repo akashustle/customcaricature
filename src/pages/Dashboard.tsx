@@ -668,7 +668,8 @@ const Dashboard = () => {
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
         {user && <PaymentDemandBanner userId={user.id} events={events as any} />}
 
-        {/* Desktop 3D flash-card hero strip (lg+) */}
+        {/* Desktop 3D flash-card hero strip (lg+) — hidden on Profile tab */}
+        {activeTab !== "profile" && (
         <DesktopFlashStrip
           greeting="Welcome back"
           fullName={profile?.full_name || "Your dashboard"}
@@ -688,6 +689,7 @@ const Dashboard = () => {
             { key: "chat", label: "Chat", value: "Open", hint: "Talk to our team", onClick: () => setActiveTab("chat"), ...STAT_PRESETS.chat },
           ]}
         />
+        )}
 
         {/* Desktop tab strip — md only; on lg+ a 3D sidebar replaces the top pill */}
         <div className="hidden md:block mt-4">
