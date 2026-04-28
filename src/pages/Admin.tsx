@@ -682,11 +682,24 @@ const Admin = () => {
   // checkAdmin is now handled inline in the useEffect above
 
   const fetchOrders = async () => {
-    const { data } = await supabase.from("orders")
-      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
-      .order("created_at", { ascending: false });
-    if (data) setOrders(data as any);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.from("orders")
+        .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      if (data) {
+        setOrders(data as any);
+        // Persist for offline admin viewing
+        import("@/lib/offline-cache").then(m => m.cacheSet("admin:orders", data)).catch(() => {});
+      }
+    } catch {
+      // Network failure → hydrate from IndexedDB so admin still sees something
+      const m = await import("@/lib/offline-cache");
+      const cached = await m.cacheGet<any[]>("admin:orders");
+      if (cached?.value) setOrders(cached.value as any);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchCaricatureTypes = async () => {
