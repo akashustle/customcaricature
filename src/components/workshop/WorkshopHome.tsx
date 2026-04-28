@@ -490,12 +490,13 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
       )}
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.35 }}
-        style={{ contentVisibility: "auto", containIntrinsicSize: "320px" } as any}
+        style={{ contentVisibility: "auto", containIntrinsicSize: "320px", willChange: "auto" } as any}
       >
-        <GlassCard>
+        {/* Lighter wrapper than GlassCard — removes heavy box-shadow + gradient
+            that caused scroll lag in the support section per user report. */}
+        <div className={`relative rounded-3xl p-5 border ${dm ? "border-white/10 bg-card" : "border-slate-200/70 bg-white"}`}>
           <div className="flex items-center justify-between mb-4 gap-2 min-w-0">
             <div className="min-w-0">
               <h3 className={`${textPrimary} text-sm uppercase tracking-wider truncate`}>Support & Connect</h3>
