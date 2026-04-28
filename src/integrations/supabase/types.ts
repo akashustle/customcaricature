@@ -3464,6 +3464,48 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_reconciliation_log: {
+        Row: {
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          outcome: string
+          prev_status: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          source: string
+          target_id: string
+          target_table: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          outcome: string
+          prev_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          source: string
+          target_id: string
+          target_table: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          outcome?: string
+          prev_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          source?: string
+          target_id?: string
+          target_table?: string
+        }
+        Relationships: []
+      }
       portal_payment_requests: {
         Row: {
           amount: number
