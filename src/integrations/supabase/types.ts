@@ -2487,6 +2487,45 @@ export type Database = {
         }
         Relationships: []
       }
+      homepage_blocks: {
+        Row: {
+          block_type: string
+          content: Json
+          created_at: string
+          id: string
+          is_visible: boolean
+          sort_order: number
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+          variant: string | null
+        }
+        Insert: {
+          block_type: string
+          content?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          variant?: string | null
+        }
+        Update: {
+          block_type?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          variant?: string | null
+        }
+        Relationships: []
+      }
       homepage_reviews: {
         Row: {
           created_at: string | null
