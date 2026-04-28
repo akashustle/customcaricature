@@ -14,6 +14,7 @@ import LocationDropdowns from "@/components/LocationDropdowns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthShell from "@/components/auth/AuthShell";
+import { logReferralEvent } from "@/hooks/useReferralTracking";
 
 const STEPS = [
   { id: 1, title: "Personal Info", desc: "Tell us about yourself", emoji: "👤" },
