@@ -240,31 +240,57 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     return Math.round((filled / fields.length) * 100);
   })();
 
+  /**
+   * Spam / sanity check before auto-approving the blue tick.
+   * Returns { ok: true } if the profile passes, otherwise { ok: false, reason }.
+   * Heuristics:
+   *  - Name has at least 2 chars and isn't repeated chars / "test" / "asdf"
+   *  - Mobile has at least 10 digits
+   *  - Email has a valid shape
+   *  - Why-join is not just gibberish (>= 8 chars, has whitespace)
+   *  - Age between 8 and 90
+   */
+  const runSpamCheck = (): { ok: true } | { ok: false; reason: string } => {
+    const name = (profileData.name || "").trim();
+    if (name.length < 2) return { ok: false, reason: "Name looks too short." };
+    if (/^(.)\1+$/.test(name)) return { ok: false, reason: "Name looks like spam." };
+    if (/^(test|asdf|qwerty|abcd|xyz)/i.test(name)) return { ok: false, reason: "Name doesn't look real." };
+
+    const mobile = (profileData.mobile || "").replace(/\D/g, "");
+    if (mobile.length < 10) return { ok: false, reason: "Mobile number looks invalid." };
+
+    const email = (profileData.email || "").trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return { ok: false, reason: "Email looks invalid." };
+
+    const why = (profileData.why_join || "").trim();
+    if (why.length < 8) return { ok: false, reason: "'Why Join' answer is too short." };
+    if (!/\s/.test(why)) return { ok: false, reason: "'Why Join' answer looks like spam." };
+
+    const age = Number(profileData.age);
+    if (!age || age < 8 || age > 90) return { ok: false, reason: "Age looks invalid." };
+
+    return { ok: true };
+  };
+
   const handleSubmitVerification = async () => {
-    if (!profileData.avatar_url) {
+    // Build the missing-fields list. Profile photo is only required when the
+    // global avatar-upload toggle is enabled (otherwise users can't upload one).
+    const missing: string[] = [];
+    if (!profileData.name) missing.push("Name");
+    if (!profileData.email) missing.push("Email");
+    if (!profileData.mobile) missing.push("Mobile");
+    if (!profileData.age) missing.push("Age");
+    if (!profileData.occupation) missing.push("Occupation");
+    if (!profileData.country) missing.push("Country");
+    if (!profileData.city) missing.push("City");
+    if (!profileData.gender) missing.push("Gender");
+    if (!profileData.instagram_id) missing.push("Instagram");
+    if (!profileData.why_join) missing.push("Why Join");
+    if (avatarUploadEnabled && !profileData.avatar_url) missing.push("Profile photo");
+    if (missing.length > 0) {
       toast({
-        title: "📸 Profile photo required",
-        description: "Please upload your own profile photo first — verification needs your real face.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (completeness < 100) {
-      const missing: string[] = [];
-      if (!profileData.name) missing.push("Name");
-      if (!profileData.email) missing.push("Email");
-      if (!profileData.mobile) missing.push("Mobile");
-      if (!profileData.age) missing.push("Age");
-      if (!profileData.occupation) missing.push("Occupation");
-      if (!profileData.country) missing.push("Country");
-      if (!profileData.city) missing.push("City");
-      if (!profileData.gender) missing.push("Gender");
-      if (!profileData.instagram_id) missing.push("Instagram");
-      if (!profileData.why_join) missing.push("Why join");
-      if (!profileData.avatar_url) missing.push("Profile photo");
-      toast({
-        title: "100% profile required",
-        description: `Please fill: ${missing.join(", ")} to request the blue tick.`,
+        title: "Please complete your details",
+        description: `Missing: ${missing.join(", ")}`,
         variant: "destructive",
       });
       return;
@@ -272,22 +298,45 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     setVerifySubmitting(true);
     setVerifyStage("loading");
     try {
-      const { data, error } = await callUpdate({
+      // Mark as pending immediately so admin sees the request even if they
+      // open the panel during the 3s auto-verify wait.
+      await callUpdate({
         verification_status: "pending",
         verification_submitted_at: new Date().toISOString(),
       });
-      if (error || !data?.success) throw new Error(data?.error || error?.message);
-      applyUpdated(data.user || { ...profileData, verification_status: "pending", verification_submitted_at: new Date().toISOString() });
+      applyUpdated({ ...profileData, verification_status: "pending", verification_submitted_at: new Date().toISOString() });
 
-      // Show 5 sec processing, then "taking longer than expected" message
-      setTimeout(() => {
-        setVerifyStage("longer");
-      }, 5000);
+      // 3-second "we are verifying" wait, then run the spam check + auto-approve.
+      setTimeout(async () => {
+        const check = runSpamCheck();
+        if (!check.ok) {
+          await callUpdate({ verification_status: "rejected" });
+          applyUpdated({ ...profileData, verification_status: "rejected" });
+          toast({ title: "Verification on hold", description: check.reason, variant: "destructive" });
+          setVerifyStage("rejected");
+          setVerifySubmitting(false);
+          return;
+        }
+        // Auto-approve: blue tick goes live.
+        const { data, error } = await callUpdate({
+          is_verified: true,
+          verification_status: "verified",
+          verified_at: new Date().toISOString(),
+        });
+        if (error || !data?.success) {
+          // Fall back to "longer" so the admin can manually approve later.
+          setVerifyStage("longer");
+          setVerifySubmitting(false);
+          return;
+        }
+        applyUpdated(data.user || { ...profileData, is_verified: true, verification_status: "verified" });
+        setVerifyStage("approved");
+        setVerifySubmitting(false);
+      }, 3000);
     } catch (e: any) {
       toast({ title: "Submit failed", description: e.message, variant: "destructive" });
       setVerifyStage("idle");
       setVerifyOpen(false);
-    } finally {
       setVerifySubmitting(false);
     }
   };
