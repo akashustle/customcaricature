@@ -153,8 +153,9 @@ export const AuthShell = ({
                 </p>
               </div>
 
-              {/* 3D floating shapes — purely decorative */}
-              <div className="absolute inset-0 pointer-events-none">
+              {/* 3D floating shapes — purely decorative, skipped on low-power */}
+              {!lowPower && (
+              <div className="absolute inset-0 pointer-events-none" style={{ contain: "paint" }}>
                 <motion.div
                   className="absolute right-8 top-24 w-28 h-28 rounded-full"
                   style={{
