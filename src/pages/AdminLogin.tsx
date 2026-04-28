@@ -451,7 +451,7 @@ const AdminLogin = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-md">
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]"  loading="lazy" decoding="async" />
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]"  loading="eager" decoding="async" fetchpriority="high" />
             </div>
           </motion.div>
 
