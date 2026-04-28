@@ -20,6 +20,7 @@ import {
   GripVertical, Eye, EyeOff, Trash2, Copy, Plus, Pencil, Upload, ExternalLink,
   RefreshCcw, Sparkles, Image as ImageIcon, Layout, Type, AlignLeft,
   Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon, Video as VideoIcon, Star, Heart, Trophy, Calendar,
+  ChevronUp, ChevronDown, Download, Upload as UploadIcon,
 } from "lucide-react";
 import AssetPicker from "@/components/admin/AssetPicker";
 
