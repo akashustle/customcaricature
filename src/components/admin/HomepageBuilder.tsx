@@ -480,6 +480,7 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
         { key: "secondary_cta_link", type: "url",      label: "Secondary button link" },
         { key: "pricing_line",       type: "text",     label: "Pricing strip line (optional)" },
         { key: "urgency_text",       type: "text",     label: "Urgency line (optional)" },
+        { key: "images",             type: "image_list", label: "Hero marquee images (leave empty to use site gallery)" },
       ];
     case "video":
       return [
