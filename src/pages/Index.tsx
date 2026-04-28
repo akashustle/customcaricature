@@ -613,6 +613,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const { settings } = useSiteSettings();
   const { content } = useHomepageContent();
+  const { blocks: homepageBlocks } = useHomepageBlocks({ onlyVisible: true });
   const [redirectChecked, setRedirectChecked] = useState(false);
   const maintenance = useMaintenanceCheck("home");
 
