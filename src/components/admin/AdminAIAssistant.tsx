@@ -29,8 +29,17 @@ const STARTERS = [
 const STORAGE_KEY = "admin_ai_assistant_history_v1";
 const DEBUG_KEY = "admin_ai_assistant_last_debug_v1";
 
-const AdminAIAssistant = () => {
-  const [open, setOpen] = useState(false);
+interface AdminAIAssistantProps {
+  embedded?: boolean;
+  hideTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const AdminAIAssistant = ({ embedded = false, hideTrigger = false, open: openProp, onOpenChange }: AdminAIAssistantProps = {}) => {
+  const [openInternal, setOpenInternal] = useState(false);
+  const open = openProp ?? openInternal;
+  const setOpen = (v: boolean) => { if (onOpenChange) onOpenChange(v); else setOpenInternal(v); };
   const [messages, setMessages] = useState<Msg[]>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
   });
