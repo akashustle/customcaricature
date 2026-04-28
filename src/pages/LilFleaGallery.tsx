@@ -205,6 +205,9 @@ const LilFleaGallery = () => {
               imgClassName="!object-contain"
             />
           </div>
+          {images[lightboxIdx]?.caption && (
+            <p className="absolute bottom-14 left-1/2 -translate-x-1/2 text-background/85 font-semibold text-sm bg-foreground/40 px-4 py-1 rounded-full max-w-[80vw] truncate">{images[lightboxIdx].caption}</p>
+          )}
           <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-sm text-background/70 font-semibold bg-foreground/30 px-3 py-1 rounded-full">{lightboxIdx + 1} / {allUrls.length}</p>
         </div>
       )}
