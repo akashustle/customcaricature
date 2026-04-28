@@ -13,6 +13,7 @@ import { Eye, EyeOff, Lock, KeyRound, Mail, Phone, Loader2, ArrowLeft, ArrowRigh
 import { motion, AnimatePresence } from "framer-motion";
 import AuthShell from "@/components/auth/AuthShell";
 import { saveCredentials, verifyOfflineCredentials } from "@/lib/offline-credentials";
+import { logReferralEvent } from "@/hooks/useReferralTracking";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -62,6 +63,7 @@ const Login = () => {
       toast({ title: "Artist account", description: "Use artist login.", variant: "destructive" });
       navigate("/artistlogin", { replace: true }); return;
     }
+    logReferralEvent("login", { referredUserId: userData.user.id }).catch(() => {});
     navigate("/dashboard", { replace: true });
   };
 

@@ -2818,6 +2818,7 @@ export type Database = {
       }
       lead_links: {
         Row: {
+          assigned_to_user_id: string | null
           booking_id: string | null
           booking_status: string | null
           created_at: string
@@ -2837,6 +2838,7 @@ export type Database = {
           used_by_user_id: string | null
         }
         Insert: {
+          assigned_to_user_id?: string | null
           booking_id?: string | null
           booking_status?: string | null
           created_at?: string
@@ -2856,6 +2858,7 @@ export type Database = {
           used_by_user_id?: string | null
         }
         Update: {
+          assigned_to_user_id?: string | null
           booking_id?: string | null
           booking_status?: string | null
           created_at?: string

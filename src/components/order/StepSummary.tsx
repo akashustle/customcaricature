@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
+import { logReferralEvent } from "@/hooks/useReferralTracking";
 
 
 interface Props {
@@ -184,6 +185,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
             });
 
             playPaymentSuccessSound();
+            logReferralEvent("order", { referredUserId: userId || undefined, metadata: { order_id: orderId, amount } }).catch(() => {});
             onComplete(orderId);
 
             // Send confirmation email (fire-and-forget)

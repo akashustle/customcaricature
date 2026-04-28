@@ -20,6 +20,7 @@ const CHART_COLORS = ["hsl(152,45%,42%)", "hsl(210,55%,50%)", "hsl(38,75%,52%)",
 const AdminReferrals = () => {
   const [codes, setCodes] = useState<any[]>([]);
   const [uses, setUses] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -34,14 +35,16 @@ const AdminReferrals = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [codesRes, usesRes, profilesRes] = await Promise.all([
+    const [codesRes, usesRes, profilesRes, eventsRes] = await Promise.all([
       supabase.from("referral_codes").select("*").order("created_at", { ascending: false }),
       supabase.from("referral_uses").select("*").order("created_at", { ascending: false }),
       supabase.from("profiles").select("user_id, full_name, email").limit(500),
+      (supabase.from("referral_events" as any)).select("*").order("created_at", { ascending: false }).limit(500),
     ]);
     setCodes(codesRes.data || []);
     setUses(usesRes.data || []);
     setProfiles(profilesRes.data || []);
+    setEvents(((eventsRes as any).data) || []);
     setLoading(false);
   };
 
@@ -116,6 +119,14 @@ const AdminReferrals = () => {
   const pieData = Object.entries(byType).map(([name, value]) => ({ name, value }));
 
   const getUserName = (uid: string) => profiles.find(p => p.user_id === uid)?.full_name || uid?.slice(0, 8);
+
+  // Funnel from referral_events
+  const evClicks = events.filter(e => e.event_type === "click").length;
+  const evRegisters = events.filter(e => e.event_type === "register").length;
+  const evLogins = events.filter(e => e.event_type === "login").length;
+  const evBookings = events.filter(e => e.event_type === "booking").length;
+  const evOrders = events.filter(e => e.event_type === "order").length;
+  const conversionRate = evClicks > 0 ? Math.round(((evBookings + evOrders) / evClicks) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -231,6 +242,58 @@ const AdminReferrals = () => {
               )}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      {/* Funnel from referral_events */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-body flex items-center justify-between">
+            <span>Referral Funnel (Click → Conversion)</span>
+            <Badge variant="outline" className="text-xs">{conversionRate}% conv.</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { label: "Clicks", value: evClicks, color: "bg-blue-50 text-blue-700" },
+              { label: "Registers", value: evRegisters, color: "bg-violet-50 text-violet-700" },
+              { label: "Logins", value: evLogins, color: "bg-amber-50 text-amber-700" },
+              { label: "Bookings", value: evBookings, color: "bg-emerald-50 text-emerald-700" },
+              { label: "Orders", value: evOrders, color: "bg-pink-50 text-pink-700" },
+            ].map(s => (
+              <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
+                <p className="text-2xl font-bold font-body">{s.value}</p>
+                <p className="text-[11px] font-body opacity-80">{s.label}</p>
+              </div>
+            ))}
+          </div>
+          {events.length > 0 && (
+            <div className="mt-4 max-h-64 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="font-body text-xs">When</TableHead>
+                    <TableHead className="font-body text-xs">Code</TableHead>
+                    <TableHead className="font-body text-xs">Event</TableHead>
+                    <TableHead className="font-body text-xs">Referrer</TableHead>
+                    <TableHead className="font-body text-xs">Source</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {events.slice(0, 50).map(e => (
+                    <TableRow key={e.id}>
+                      <TableCell className="text-[11px] text-muted-foreground">{new Date(e.created_at).toLocaleString()}</TableCell>
+                      <TableCell><code className="text-[11px] bg-muted px-1.5 py-0.5 rounded">{e.referral_code}</code></TableCell>
+                      <TableCell><Badge variant="outline" className="text-[10px]">{e.event_type}</Badge></TableCell>
+                      <TableCell className="text-xs">{e.referrer_user_id ? getUserName(e.referrer_user_id) : <span className="text-muted-foreground">unknown</span>}</TableCell>
+                      <TableCell className="text-[11px] text-muted-foreground truncate max-w-[180px]">{e.source}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

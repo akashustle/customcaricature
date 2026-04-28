@@ -50,6 +50,8 @@ const AdminLeadLinks = () => {
   const [caricPrices, setCaricPrices] = useState<CaricPriceRow[]>([]);
   const [eventPrices, setEventPrices] = useState<EventPriceRow[]>([]);
   const [creating, setCreating] = useState(false);
+  const [assignToUserId, setAssignToUserId] = useState<string>("");
+  const [profiles, setProfiles] = useState<Array<{ user_id: string; full_name: string | null; email: string | null; mobile: string | null }>>([]);
 
   const { types: caricTypes } = usePricing();
   const { pricing: defaultEventPricing } = useEventPricing();
@@ -62,6 +64,9 @@ const AdminLeadLinks = () => {
 
   useEffect(() => {
     fetchLinks();
+    // Load profile list for "assign to existing user" selector
+    supabase.from("profiles").select("user_id, full_name, email, mobile").order("created_at", { ascending: false }).limit(500)
+      .then(({ data }) => { if (data) setProfiles(data as any); });
     const ch = supabase.channel("lead-links-rt").on("postgres_changes", { event: "*", schema: "public", table: "lead_links" }, () => fetchLinks()).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [fetchLinks]);
@@ -102,7 +107,8 @@ const AdminLeadLinks = () => {
         created_by: adminName,
         created_by_user_id: user!.id,
         notes: notes.trim() || null,
-      }).select().single();
+        assigned_to_user_id: assignToUserId || null,
+      } as any).select().single();
 
       if (error || !link) throw error;
 
@@ -147,7 +153,7 @@ const AdminLeadLinks = () => {
     setCreating(false);
   };
 
-  const resetForm = () => { setLabel(""); setNotes(""); setCaricPrices([]); setEventPrices([]); };
+  const resetForm = () => { setLabel(""); setNotes(""); setCaricPrices([]); setEventPrices([]); setAssignToUserId(""); };
 
   const copyLink = (code: string) => {
     const url = `${window.location.origin}/claim-link?code=${code}`;
@@ -319,6 +325,21 @@ const AdminLeadLinks = () => {
             <div>
               <Label>Notes (optional)</Label>
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Internal notes..." rows={2} />
+            </div>
+            <div>
+              <Label className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Pre-assign to existing user (optional)</Label>
+              <Select value={assignToUserId || "none"} onValueChange={v => setAssignToUserId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Anyone can claim (default)" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="none">Anyone can claim (default)</SelectItem>
+                  {profiles.map(p => (
+                    <SelectItem key={p.user_id} value={p.user_id}>
+                      {p.full_name || "Unnamed"} {p.email ? `· ${p.email}` : ""} {p.mobile ? `· ${p.mobile}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">If set, the custom pricing is tied to that user's account when they open the link.</p>
             </div>
 
             {/* Caricature Pricing */}
