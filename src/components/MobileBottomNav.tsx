@@ -133,13 +133,13 @@ const MobileBottomNav = () => {
             <button
               key={item.path + item.label}
               onClick={() => navigate(item.path)}
-              className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 active:scale-95 ${
+              className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[52px] h-13 px-2.5 py-1.5 rounded-2xl transition-all flex-shrink-0 active:scale-95 ${
                 isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
               }`}
               aria-label={item.label}
             >
-              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
-              <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
+              <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 1.8} />
+              <span className={`text-[9.5px] leading-none font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
                 {item.label}
               </span>
             </button>
