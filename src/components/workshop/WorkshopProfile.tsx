@@ -19,6 +19,7 @@ import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCa
 import WorkshopReferCard from "@/components/workshop/WorkshopReferCard";
 import EditRequestDialog from "@/components/EditRequestDialog";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
