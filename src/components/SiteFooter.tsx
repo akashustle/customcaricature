@@ -234,9 +234,9 @@ const SiteFooter = () => {
             </a>
           </div>
 
-          {/* Mobile: 2 cols × 2 rows */}
+          {/* Mobile: 2 cols (shows up to 6 columns wrapped) */}
           <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
-            {cols.slice(0, 4).map((c) => (
+            {cols.slice(0, 6).map((c) => (
               <div key={c.title}>
                 <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
                   {c.title}
@@ -250,8 +250,8 @@ const SiteFooter = () => {
             ))}
           </div>
 
-          {/* Desktop: 4-column grid */}
-          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          {/* Desktop: auto-grid up to 5 columns */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-8">
             {cols.map((c) => (
               <div key={c.title}>
                 <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">
