@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
+import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
+import HomepageGenericBlock from "@/components/homepage/HomepageGenericBlock";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
@@ -611,6 +613,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const { settings } = useSiteSettings();
   const { content } = useHomepageContent();
+  const { blocks: homepageBlocks } = useHomepageBlocks({ onlyVisible: true });
   const [redirectChecked, setRedirectChecked] = useState(false);
   const maintenance = useMaintenanceCheck("home");
 
@@ -691,51 +694,63 @@ const Index = () => {
 
       <main>
         {(() => {
-          const rawOrder: string[] = Array.isArray((content as any).homepage_section_order?.order)
-            ? (content as any).homepage_section_order.order
-            : ["hero", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
-          // Strip legacy "stats" entry — stats now live inside the About section.
-          let order = rawOrder.filter(s => s !== "stats");
-          // Make sure About is present.
-          if (!order.includes("about")) {
-            const afterClients = Math.max(order.indexOf("clients") + 1, 1);
-            order = [...order.slice(0, afterClients), "about", ...order.slice(afterClients)];
-          }
-          // Make sure "Still confused" always closes the page.
-          if (!order.includes("still_confused")) order = [...order, "still_confused"];
-
-          const sections: Record<string, React.ReactNode> = {
-            hero: <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={(content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
-            video: (content as any).homepage_video?.enabled ? (
-              <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
-                <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
-                  <div className="text-center mb-5 sm:mb-7">
-                    <div className="chip-violet mb-3"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
-                      See the <span className="text-gradient-violet">experience live</span>
-                    </h2>
+          // Built-in section renderers — keyed by canonical section id.
+          const builtIn: Record<string, (cfgOverride?: any) => React.ReactNode> = {
+            hero: (cfg) => <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={cfg ?? (content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
+            video: (cfg) => {
+              const vc = cfg ?? (content as any).homepage_video;
+              if (!vc?.enabled) return null;
+              return (
+                <section key="video" id="video" className="px-3 sm:px-4 my-5 sm:my-6">
+                  <div className="mx-auto max-w-7xl rounded-3xl card-soft-white p-4 sm:p-8 lg:p-10">
+                    <div className="text-center mb-5 sm:mb-7">
+                      <div className="chip-violet mb-3"><PlayCircle className="w-3.5 h-3.5" /> Watch • Watch</div>
+                      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
+                        See the <span className="text-gradient-violet">experience live</span>
+                      </h2>
+                    </div>
+                    <HomepageVideo config={vc} />
                   </div>
-                  <HomepageVideo config={(content as any).homepage_video} />
-                </div>
-              </section>
-            ) : null,
-            gallery: <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
-            clients: (
+                </section>
+              );
+            },
+            gallery: () => <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
+            clients: () => (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
                   <HomepageTrustedBrands />
                 </div>
               </section>
             ),
-            about: <AboutUs key="about" config={(content as any).homepage_about} stats={stats} />,
-            services: <Services key="services" onBook={onBook} config={(content as any).homepage_services} />,
-            how: <HowItStarts key="how" onBook={onBook} images={eventGallery} config={(content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
-            why: <WhyUnique key="why" config={(content as any).homepage_why_unique} />,
-            reviews: <Reviews key="reviews" config={(content as any).homepage_reviews} />,
-            faqs: <FAQs key="faqs" config={(content as any).homepage_faqs} />,
-            still_confused: <StillConfused key="still_confused" config={(content as any).homepage_still_confused} />,
+            about: (cfg) => <AboutUs key="about" config={cfg ?? (content as any).homepage_about} stats={stats} />,
+            services: (cfg) => <Services key="services" onBook={onBook} config={cfg ?? (content as any).homepage_services} />,
+            how: (cfg) => <HowItStarts key="how" onBook={onBook} images={eventGallery} config={cfg ?? (content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
+            why: (cfg) => <WhyUnique key="why" config={cfg ?? (content as any).homepage_why_unique} />,
+            reviews: (cfg) => <Reviews key="reviews" config={cfg ?? (content as any).homepage_reviews} />,
+            faqs: (cfg) => <FAQs key="faqs" config={cfg ?? (content as any).homepage_faqs} />,
+            still_confused: (cfg) => <StillConfused key="still_confused" config={cfg ?? (content as any).homepage_still_confused} />,
           };
-          return order.map(id => sections[id]).filter(Boolean);
+
+          // ---------- Builder mode: blocks from homepage_blocks table ----------
+          if (homepageBlocks && homepageBlocks.length > 0) {
+            return homepageBlocks.map((b) => {
+              const renderer = builtIn[b.block_type];
+              if (renderer) return <div key={b.id}>{renderer(b.content)}</div>;
+              return <HomepageGenericBlock key={b.id} type={b.block_type} content={b.content} />;
+            });
+          }
+
+          // ---------- Legacy mode: use admin_site_settings section_order ----------
+          const rawOrder: string[] = Array.isArray((content as any).homepage_section_order?.order)
+            ? (content as any).homepage_section_order.order
+            : ["hero", "video", "gallery", "clients", "about", "services", "how", "why", "reviews", "faqs", "still_confused"];
+          let order = rawOrder.filter(s => s !== "stats");
+          if (!order.includes("about")) {
+            const afterClients = Math.max(order.indexOf("clients") + 1, 1);
+            order = [...order.slice(0, afterClients), "about", ...order.slice(afterClients)];
+          }
+          if (!order.includes("still_confused")) order = [...order, "still_confused"];
+          return order.map(id => builtIn[id]?.()).filter(Boolean);
         })()}
       </main>
 

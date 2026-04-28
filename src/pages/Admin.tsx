@@ -86,7 +86,7 @@ const AdminTrustedBrands = lazy(() => import("@/components/admin/AdminTrustedBra
 const AdminSocialLinks = lazy(() => import("@/components/admin/AdminSocialLinks"));
 const AdminPages = lazy(() => import("@/components/admin/AdminPages"));
 const AdminCalculatorHistory = lazy(() => import("@/components/admin/AdminCalculatorHistory"));
-const AdminHomepageControl = lazy(() => import("@/components/admin/AdminHomepageControl"));
+const HomepageBuilder = lazy(() => import("@/components/admin/HomepageBuilder"));
 const AdminCRMPipeline = lazy(() => import("@/components/admin/AdminCRMPipeline"));
 const AdminRevenueDashboard = lazy(() => import("@/components/admin/AdminRevenueDashboard"));
 const AdminAutomation = lazy(() => import("@/components/admin/AdminAutomation"));
@@ -2595,7 +2595,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="homepage">
-            <AdminHomepageControl />
+            <HomepageBuilder />
           </TabsContent>
 
           <TabsContent value="explore-editor">
