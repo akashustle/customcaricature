@@ -26,12 +26,13 @@ const maskEmail = (email: string) => { const [l, d] = email.split("@"); return `
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
 // Warm logo-aligned palette
+// Lighter Apple-inspired palette (replaces previous dark brown look)
 const BRAND = {
-  primary: "#3A2E22",
-  accent: "#A76C4E",
-  light: "#E8D6C3",
-  highlight: "#C49A6C",
-  cream: "#FDF8F3",
+  primary: "#3F4A6B",
+  accent: "#7C8FD6",
+  light: "#E4E8F5",
+  highlight: "#A8BCEA",
+  cream: "#F7F9FE",
 };
 
 const WorkshopAdminLogin = () => {

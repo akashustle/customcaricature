@@ -165,8 +165,25 @@ const NAV_SECTIONS = [
 
 const SHOP_RELATED_TABS = ["shop", "shop-orders", "shop-products", "shop-categories", "shop-settings"];
 
+type SidebarMode = "expanded" | "collapsed" | "hidden";
+
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  // Persist user preference across reloads
+  const [mode, setMode] = useState<SidebarMode>(() => {
+    if (typeof window === "undefined") return "expanded";
+    return (localStorage.getItem("admin_sidebar_mode") as SidebarMode) || "expanded";
+  });
+  const collapsed = mode === "collapsed";
+  const hidden = mode === "hidden";
+  const updateMode = (next: SidebarMode) => {
+    setMode(next);
+    try { localStorage.setItem("admin_sidebar_mode", next); } catch {}
+  };
+  const cycleMode = () => {
+    // expanded → collapsed → hidden → expanded
+    updateMode(mode === "expanded" ? "collapsed" : mode === "collapsed" ? "hidden" : "expanded");
+  };
+  const setCollapsed = (v: boolean) => updateMode(v ? "collapsed" : "expanded");
   const [sidebarSearch, setSidebarSearch] = useState("");
   const navigate = useNavigate();
   const { settings } = useSiteSettings();
@@ -190,8 +207,23 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     return sections;
   }, [hideShop, sidebarSearch]);
 
+  // When fully hidden on desktop, show a small floating restore tab on the left edge
+  if (hidden) {
+    return (
+      <button
+        onClick={() => updateMode("expanded")}
+        className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-50 w-7 h-20 items-center justify-center rounded-r-2xl shadow-lg transition-transform hover:translate-x-0.5"
+        style={{ background: "linear-gradient(180deg, hsl(225 35% 96%), hsl(225 30% 92%))", border: "1px solid hsl(225 25% 88%)", borderLeft: "none" }}
+        title="Show admin sidebar"
+        aria-label="Show admin sidebar"
+      >
+        <ChevronRight className="w-4 h-4" style={{ color: "hsl(225 25% 40%)" }} />
+      </button>
+    );
+  }
+
   return (
-    <aside 
+    <aside
       className={cn(
         "hidden md:flex flex-col h-screen sticky top-0 transition-all duration-300 z-30",
         collapsed ? "w-[72px]" : "w-[260px]"
@@ -215,15 +247,33 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
               </motion.div>
             )}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
-            style={{ background: "hsl(30 15% 94%)" }}
-          >
-            {collapsed ? <ChevronRight className="w-3.5 h-3.5" style={{ color: "hsl(25 10% 45%)" }} /> : <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(25 10% 45%)" }} />}
-          </motion.button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCollapsed(!collapsed)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+              style={{ background: "hsl(225 30% 94%)" }}
+              title={collapsed ? "Expand sidebar" : "Collapse to icons"}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse to icons"}
+            >
+              {collapsed ? <ChevronRight className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} /> : <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} />}
+            </motion.button>
+            {!collapsed && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => updateMode("hidden")}
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                style={{ background: "hsl(225 30% 94%)" }}
+                title="Hide sidebar fully"
+                aria-label="Hide sidebar fully"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} />
+                <ChevronLeft className="w-3.5 h-3.5 -ml-2" style={{ color: "hsl(225 25% 45%)" }} />
+              </motion.button>
+            )}
+          </div>
         </div>
 
         {/* Search */}

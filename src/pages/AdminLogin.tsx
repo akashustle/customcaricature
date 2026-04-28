@@ -48,12 +48,18 @@ const maskEmail = (email: string) => {
 };
 const maskMobile = (m: string) => `${m.slice(0, 2)}••••${m.slice(-2)}`;
 
+// Lighter Apple-inspired palette (replaces previous dark brown look)
+// primary  → deep slate-indigo (readable on white, no warm brown)
+// accent   → soft periwinkle/sky
+// light    → very light lavender border
+// highlight→ pastel sky for hover states
+// cream    → near-white background tint
 const BRAND = {
-  primary: "#3A2E22",
-  accent: "#A76C4E",
-  light: "#E8D6C3",
-  highlight: "#C49A6C",
-  cream: "#FDF8F3",
+  primary: "#3F4A6B",
+  accent: "#7C8FD6",
+  light: "#E4E8F5",
+  highlight: "#A8BCEA",
+  cream: "#F7F9FE",
 };
 
 /* ───── Profile Photo Component (reused on all steps) ───── */
