@@ -9,10 +9,13 @@ import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
-import RoutePrefetcher from "./components/RoutePrefetcher";
-import RightClickBlocker from "./components/RightClickBlocker";
 import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
 import { useSiteSettings } from "./hooks/useSiteSettings";
+
+// RoutePrefetcher and RightClickBlocker are non-critical — defer their JS so
+// they don't add to TBT on first paint.
+const RoutePrefetcher = lazyShell(() => import("./components/RoutePrefetcher"));
+const RightClickBlocker = lazyShell(() => import("./components/RightClickBlocker"));
 
 import usePageTracker from "./hooks/usePageTracker";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
