@@ -409,7 +409,7 @@ const App = () => {
                     UserWorkshopOverview) still links to /workshop-dashboard. Keep this
                     redirect so no in-app navigation 404s. */}
                 <Route path="/workshop-dashboard" element={<Navigate to="/workshop/dashboard" replace />} />
-                <Route path="/cccworkshop2006" element={<WorkshopAdminLogin />} />
+                <Route path="/cccworkshop2006" element={<AdminUrlGate slot="workshop"><WorkshopAdminLogin /></AdminUrlGate>} />
                 <Route path="/workshop-admin-login" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin" element={<Navigate to="/workshop" replace />} />
                 <Route path="/workshop-admin-panel" element={<WorkshopAdminPanel />} />
