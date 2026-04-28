@@ -102,6 +102,30 @@ const AppWelcome3D = () => {
     return () => window.removeEventListener("pointermove", onMove);
   }, [show]);
 
+  // Auto-advance: each slide automatically moves to the next after AUTO_ADVANCE_MS.
+  // On the last slide, finish into /register so the user lands smoothly.
+  useEffect(() => {
+    if (!show) return;
+    const t = window.setTimeout(() => {
+      setIndex((i) => {
+        if (i >= SLIDES.length - 1) {
+          // Final slide → finish (defer to next tick so unmount is clean)
+          window.setTimeout(() => {
+            try {
+              localStorage.setItem(STORAGE_KEY, "1");
+              localStorage.setItem("ccc_onboarding_done_v2", "done");
+            } catch {/* ignore */}
+            setShow(false);
+            window.setTimeout(() => navigate("/register"), 60);
+          }, 0);
+          return i;
+        }
+        return i + 1;
+      });
+    }, AUTO_ADVANCE_MS);
+    return () => window.clearTimeout(t);
+  }, [show, index, navigate]);
+
   if (!show) return null;
 
   const slide = SLIDES[index];
