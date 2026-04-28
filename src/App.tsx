@@ -258,10 +258,14 @@ const GlobalMaintenanceGate = ({ children }: { children: React.ReactNode }) => {
   const maintenance = useMaintenanceCheck("global");
   
   const adminPaths = ["/admin", "/customcad75", "/admin-panel", "/shop-admin", "/CFCAdmin936", "/cccworkshop2006", "/workshop-admin-panel"];
+  // Auth & workshop routes stay reachable while maintenance is on so users
+  // can still log in / register / continue their workshop access.
+  const allowedDuringMaintenance = ["/login", "/register", "/forgot-password", "/reset-password", "/workshop", "/artistlogin", "/auth", "/~oauth"];
   const isAdminPath = adminPaths.some(p => location.pathname.startsWith(p));
-  
+  const isAllowedAuthPath = allowedDuringMaintenance.some(p => location.pathname === p || location.pathname.startsWith(p + "/"));
+
   // Non-blocking: don't wait for loading. Default state is isEnabled=false so children render immediately.
-  if (maintenance.isEnabled && !isAdminPath) {
+  if (maintenance.isEnabled && !isAdminPath && !isAllowedAuthPath) {
     return <MaintenanceScreen title={maintenance.title} message={maintenance.message} estimatedEnd={maintenance.estimatedEnd} isGlobal={true} />;
   }
   
