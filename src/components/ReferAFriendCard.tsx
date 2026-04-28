@@ -23,8 +23,9 @@ const ReferAFriendCard = ({ fullName, secretCode }: Props) => {
   }, [secretCode]);
 
   const referralUrl = useMemo(() => {
-    const base = "https://creativecaricatureclub.com";
-    return `${base}/?ref=${referralCode}`;
+    // Always use the booking portal so the referred user lands on the
+    // dashboard/registration flow inside this app.
+    return `https://portal.creativecaricatureclub.com/?ref=${referralCode}`;
   }, [referralCode]);
 
   const firstName = fullName ? fullName.split(" ")[0] : "";

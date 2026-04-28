@@ -46,7 +46,7 @@ const DEFAULT: {
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
         { label: "Event Gallery", href: "/gallery/events" },
-        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
+        { label: "Lil Flea Gallery", href: "/lil-flea-gallery" },
         { label: "Explore", href: "/explore" },
         { label: "FAQs", href: "/faqs" },
         { label: "Support", href: "/support" },

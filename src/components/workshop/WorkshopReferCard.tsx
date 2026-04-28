@@ -24,7 +24,9 @@ const WorkshopReferCard = ({ fullName, secretCode }: Props) => {
   }, [secretCode]);
 
   const referralUrl = useMemo(() => {
-    return `https://creativecaricatureclub.com/workshop?ref=${referralCode}`;
+    // Workshop referrals also go through the portal so /workshop opens
+    // inside this app (which then can deep-link into the workshop hub).
+    return `https://portal.creativecaricatureclub.com/workshop?ref=${referralCode}`;
   }, [referralCode]);
 
   const firstName = fullName ? fullName.split(" ")[0] : "";
