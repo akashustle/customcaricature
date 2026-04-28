@@ -2886,6 +2886,7 @@ export type Database = {
           id: string
           image_url: string
           is_featured: boolean | null
+          placement: string
           sort_order: number | null
         }
         Insert: {
@@ -2894,6 +2895,7 @@ export type Database = {
           id?: string
           image_url: string
           is_featured?: boolean | null
+          placement?: string
           sort_order?: number | null
         }
         Update: {
@@ -2902,6 +2904,7 @@ export type Database = {
           id?: string
           image_url?: string
           is_featured?: boolean | null
+          placement?: string
           sort_order?: number | null
         }
         Relationships: []
