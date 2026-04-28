@@ -370,6 +370,11 @@ const AdminLilFlea = () => {
                       {img.is_featured && (
                         <div className="absolute top-1.5 right-1.5 bg-accent text-accent-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Featured</div>
                       )}
+                      {img.placement && img.placement !== "all" && (
+                        <div className="absolute top-1.5 left-1.5 bg-foreground/80 text-background text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                          {img.placement === "slide1" ? "Slide 1" : img.placement === "slide2" ? "Slide 2" : "Scroll-up"}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
