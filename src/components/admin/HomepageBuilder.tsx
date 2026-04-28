@@ -456,6 +456,7 @@ type Field =
   | { key: string; type: "text"; label: string; placeholder?: string }
   | { key: string; type: "textarea"; label: string; placeholder?: string }
   | { key: string; type: "image"; label: string }
+  | { key: string; type: "image_list"; label: string }
   | { key: string; type: "video"; label: string }
   | { key: string; type: "url"; label: string; placeholder?: string }
   | { key: string; type: "number"; label: string; min?: number; max?: number }
