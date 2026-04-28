@@ -417,7 +417,7 @@ const WorkshopDashboard = () => {
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none"
         aria-label="Workshop navigation"
       >
-        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-start sm:justify-around overflow-x-auto scrollbar-hide gap-1 snap-x snap-mandatory">
+        <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-1.5 py-1.5 flex items-center justify-around overflow-x-auto scrollbar-hide gap-0.5 snap-x snap-mandatory">
           {visibleTabs.map((tab) => {
             const isActive = activeTab === tab.key;
             const isProfile = tab.key === "profile";
@@ -425,7 +425,7 @@ const WorkshopDashboard = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 ${
+                className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[52px] h-13 px-2.5 py-1.5 rounded-2xl transition-all flex-shrink-0 ${
                   isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
                 aria-label={tab.label}
