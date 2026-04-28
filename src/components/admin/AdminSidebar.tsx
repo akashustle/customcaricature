@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { unlockAdminUrl } from "@/lib/admin-url-unlock";
 
 interface AdminSidebarProps {
   activeTab: string;
