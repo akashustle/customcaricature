@@ -140,6 +140,50 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
+    // BROADCAST TO A LIST OF USER IDS — single edge call, fans out to all
+    // active push_subscriptions for those users. Used by Admin broadcast.
+    if (body.action === "broadcast_to_users") {
+      const { user_ids, title, message, link, image_url } = body;
+      if (!Array.isArray(user_ids) || user_ids.length === 0) {
+        return new Response(JSON.stringify({ sent: 0, reason: "no user_ids" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: subs, error } = await supabase
+        .from("push_subscriptions")
+        .select("*")
+        .eq("is_active", true)
+        .in("user_id", user_ids);
+      if (error) throw error;
+      if (!subs || subs.length === 0) {
+        return new Response(JSON.stringify({ sent: 0, failed: 0, reason: "no active subscriptions" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const payloadStr = JSON.stringify({
+        title: title || "Creative Caricature Club",
+        body: message || "You have a new notification",
+        icon: "/logo.png", badge: "/badge-96.png",
+        tag: `ccc-${Date.now()}`,
+        url: link || "/notifications",
+        image: image_url || undefined,
+      });
+      const payloadBytes = new TextEncoder().encode(payloadStr);
+      // Send in parallel chunks of 25 to keep latency low without overwhelming
+      let sent = 0, failed = 0;
+      const chunkSize = 25;
+      for (let i = 0; i < subs.length; i += chunkSize) {
+        const chunk = subs.slice(i, i + chunkSize);
+        const results = await Promise.all(
+          chunk.map((sub) => sendToSubscription(sub, payloadBytes, vapidPublicKey, vapidPrivateKey, vapidSubject, supabase))
+        );
+        for (const ok of results) ok ? sent++ : failed++;
+      }
+      return new Response(JSON.stringify({ sent, failed, total: subs.length }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // BROADCAST TO ALL SUBSCRIBERS (registered + anonymous)
     if (body.action === "broadcast_all") {
       const { title, message, link, image_url } = body;
