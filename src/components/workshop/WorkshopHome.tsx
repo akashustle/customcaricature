@@ -489,7 +489,12 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
         </motion.div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.35 }}
+        style={{ contentVisibility: "auto", containIntrinsicSize: "320px" } as any}
+      >
         <GlassCard>
           <div className="flex items-center justify-between mb-4 gap-2 min-w-0">
             <div className="min-w-0">
@@ -509,9 +514,9 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
             href={`https://wa.me/91${whatsappNum}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-2xl p-3.5 mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-[0_10px_30px_-12px_rgba(16,185,129,0.55)] hover:shadow-[0_14px_36px_-10px_rgba(16,185,129,0.65)] transition-shadow min-w-0"
+            className="flex items-center gap-3 rounded-2xl p-3.5 mb-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-[0_8px_22px_-12px_rgba(16,185,129,0.5)] min-w-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
               <MessageCircle className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
@@ -532,7 +537,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group flex flex-col items-center gap-1.5 rounded-2xl p-3 border ${dm ? "border-white/10 bg-white/5" : "border-slate-200/70 bg-white/70"} hover:-translate-y-0.5 transition-transform min-w-0`}
+                className={`group flex flex-col items-center gap-1.5 rounded-2xl p-3 border ${dm ? "border-white/10 bg-white/5" : "border-slate-200/70 bg-white/70"} min-w-0`}
               >
                 <span className={`w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white flex items-center justify-center shadow-md flex-shrink-0`}>
                   <Icon className="w-4 h-4" />
