@@ -63,6 +63,7 @@ const Login = () => {
       toast({ title: "Artist account", description: "Use artist login.", variant: "destructive" });
       navigate("/artistlogin", { replace: true }); return;
     }
+    logReferralEvent("login", { referredUserId: userData.user.id }).catch(() => {});
     navigate("/dashboard", { replace: true });
   };
 
