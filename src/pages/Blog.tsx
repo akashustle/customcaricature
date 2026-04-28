@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, User, Search, TrendingUp } from "lucide-react";
+import { Calendar, Search, TrendingUp, Sparkles, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import SiteFooter from "@/components/SiteFooter";
 
 type BlogPost = {
   id: string;
@@ -28,17 +29,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   tips: "Tips & Tricks",
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  tutorial: "bg-blue-500",
-  case_study: "bg-emerald-500",
-  news: "bg-red-500",
-  tips: "bg-amber-500",
+// Soft gradient backgrounds per category for the 3D look
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  tutorial: "from-sky-500/90 to-indigo-600/90",
+  case_study: "from-emerald-500/90 to-teal-600/90",
+  news: "from-rose-500/90 to-red-600/90",
+  tips: "from-amber-500/90 to-orange-600/90",
 };
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-const readTime = (excerpt: string) => Math.max(3, Math.ceil(excerpt.length / 200)) + " Min Read";
+const readTime = (excerpt: string) => Math.max(3, Math.ceil(excerpt.length / 200)) + " min read";
+
+const BASE_URL = "https://portal.creativecaricatureclub.com";
 
 const Blog = () => {
   const navigate = useNavigate();
@@ -78,180 +82,289 @@ const Blog = () => {
   const categories = useMemo(() => ["all", ...new Set(posts.map((p) => p.category))], [posts]);
   const [hero, ...rest] = filtered;
 
+  // ── SEO: ItemList JSON-LD so Google indexes & ranks the listing instantly ──
+  const itemListJsonLd = useMemo(() => {
+    if (posts.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Creative Caricature Club Blog",
+      itemListElement: posts.slice(0, 30).map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${BASE_URL}/blog/${p.slug}`,
+        name: p.title,
+      })),
+    };
+  }, [posts]);
+
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div
+      className="min-h-screen pb-20 md:pb-0 relative overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at 15% 0%, hsl(252 60% 96%) 0%, transparent 55%), radial-gradient(ellipse at 100% 100%, hsl(320 70% 96%) 0%, transparent 55%), linear-gradient(180deg, #fafaff 0%, #f3f1fb 100%)",
+      }}
+    >
       <SEOHead
-        title="Caricature Blog | Tips, Tutorials & Event Stories"
-        description="Read the Creative Caricature Club™ blog for caricature tips, tutorials, event case studies & behind-the-scenes stories."
+        title="Caricature Blog — Tips, Tutorials & Event Stories"
+        description="Read the Creative Caricature Club™ blog: caricature tips, hand-drawing tutorials, event case studies and behind-the-scenes stories from India's #1 live caricature studio."
         canonical="/blog"
+        keywords="caricature blog, caricature tutorials, live caricature tips, wedding caricature stories, caricature artist India, hand drawn caricature guide, custom caricature blog"
       />
 
-      {/* Sticky Nav */}
-      <nav className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
+      {/* JSON-LD ItemList for SEO ranking */}
+      {itemListJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
+
+      {/* Floating ambient orbs (desktop only) */}
+      <div aria-hidden className="hidden md:block pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 -left-20 w-[28rem] h-[28rem] rounded-full blur-3xl opacity-40"
+          style={{ background: "radial-gradient(circle, #a78bfa, transparent 70%)" }} />
+        <div className="absolute top-1/2 -right-32 w-[32rem] h-[32rem] rounded-full blur-3xl opacity-30"
+          style={{ background: "radial-gradient(circle, #f0abfc, transparent 70%)" }} />
+      </div>
+
+      {/* Sticky Nav with glass effect */}
+      <nav className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_20px_-8px_rgba(80,60,150,0.15)]">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" width={32} height={32} />
-            <span className="font-display text-base font-bold hidden sm:inline">Creative Caricature Club™</span>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-full text-xs">
+          <button onClick={() => navigate("/")} className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white shadow-md group-hover:scale-105 transition-transform">
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-full h-full object-cover" width={36} height={36} />
+            </div>
+            <span className="font-display text-base font-bold hidden sm:inline text-slate-800">Creative Caricature Club™</span>
+          </button>
+          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-full text-xs bg-white/80">
             ← Home
           </Button>
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-6 md:py-10">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-2">Our Blog</h1>
-          <p className="text-muted-foreground text-sm md:text-lg max-w-xl mx-auto">
-            Tutorials, case studies & stories from our artists
-          </p>
+      <main className="container mx-auto px-4 py-8 md:py-14 relative z-10">
+        {/* Header — 3D pill badge + clean H1, no subtitle */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8 md:mb-12"
+        >
+          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur shadow-md border border-white/80 mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+            <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-slate-700">Creative Caricature Blog</span>
+          </div>
+          <h1
+            className="font-display text-4xl md:text-6xl font-black tracking-tight"
+            style={{
+              background: "linear-gradient(135deg, #1e1b4b 0%, #6d28d9 50%, #c026d3 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Our Blog
+          </h1>
         </motion.div>
 
-        {/* Search + Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl mx-auto">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search articles..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-11 rounded-xl" />
-          </div>
-          <div className="flex gap-2 flex-wrap justify-center">
-            {categories.map((cat) => (
-              <Button
-                key={cat}
-                variant={categoryFilter === cat ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCategoryFilter(cat)}
-                className="rounded-full text-xs h-9"
-              >
-                {cat === "all" ? "All" : CATEGORY_LABELS[cat] || cat}
-              </Button>
-            ))}
+        {/* Search + Filters — floating glass card */}
+        <div className="max-w-3xl mx-auto mb-10 md:mb-14">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-xl border border-white shadow-[0_20px_60px_-25px_rgba(80,60,150,0.35)] p-4 md:p-5 flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search articles…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 h-11 rounded-2xl bg-white border-slate-200"
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={categoryFilter === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCategoryFilter(cat)}
+                  className={`rounded-full text-xs h-9 transition-all ${
+                    categoryFilter === cat
+                      ? "shadow-lg scale-105 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-0"
+                      : "bg-white/80"
+                  }`}
+                >
+                  {cat === "all" ? "All" : CATEGORY_LABELS[cat] || cat}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="space-y-6">
-            <div className="animate-pulse rounded-2xl bg-muted h-[300px] md:h-[420px]" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3].map(i => (
+          <div className="space-y-6 max-w-6xl mx-auto">
+            <div className="animate-pulse rounded-3xl bg-white/60 h-[300px] md:h-[460px]" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse space-y-3">
-                  <div className="h-44 bg-muted rounded-xl" />
-                  <div className="h-4 bg-muted rounded w-2/3" />
-                  <div className="h-3 bg-muted rounded w-full" />
+                  <div className="h-48 bg-white/60 rounded-2xl" />
+                  <div className="h-4 bg-white/60 rounded w-2/3" />
+                  <div className="h-3 bg-white/60 rounded w-full" />
                 </div>
               ))}
             </div>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">No articles found</p>
+          <div className="text-center py-24">
+            <div className="inline-block p-6 rounded-3xl bg-white/80 backdrop-blur shadow-xl">
+              <p className="text-slate-500 text-lg">No articles found</p>
+            </div>
           </div>
         ) : (
           <>
-            {/* ===== HERO POST (Full-width like reference) ===== */}
+            {/* ===== HERO POST — 3D tilted card ===== */}
             {hero && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-                <Link to={`/blog/${hero.slug}`}>
-                  <div className="relative rounded-2xl overflow-hidden group cursor-pointer">
-                    {/* Cover image */}
-                    <div className="relative h-[280px] sm:h-[360px] md:h-[460px]">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mb-12 md:mb-16 max-w-6xl mx-auto"
+              >
+                <Link to={`/blog/${hero.slug}`} aria-label={hero.title}>
+                  <article
+                    className="relative rounded-[28px] md:rounded-[36px] overflow-hidden group cursor-pointer transition-all duration-500 hover:-translate-y-1"
+                    style={{
+                      boxShadow:
+                        "0 30px 80px -25px rgba(80,60,150,0.5), 0 12px 30px -12px rgba(80,60,150,0.25), inset 0 1px 0 rgba(255,255,255,0.6)",
+                    }}
+                  >
+                    <div className="relative h-[320px] sm:h-[400px] md:h-[500px]">
                       {hero.cover_image ? (
                         <img
                           src={hero.cover_image}
                           alt={hero.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-1000"
                           loading="eager"
+                          fetchPriority="high"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5" />
+                        <div
+                          className={`w-full h-full bg-gradient-to-br ${
+                            CATEGORY_GRADIENTS[hero.category] || "from-violet-500/90 to-fuchsia-600/90"
+                          }`}
+                        />
                       )}
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                      {/* Glass shine */}
+                      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
                     </div>
 
-                    {/* Content overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
-                      <Badge className={`${CATEGORY_COLORS[hero.category] || "bg-primary"} text-white border-0 text-xs font-bold mb-3`}>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+                      <div
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase text-white mb-4 bg-gradient-to-r ${
+                          CATEGORY_GRADIENTS[hero.category] || "from-violet-500 to-fuchsia-600"
+                        } shadow-lg`}
+                      >
                         {CATEGORY_LABELS[hero.category] || hero.category}
-                      </Badge>
-                      <h2 className="text-white text-xl sm:text-2xl md:text-4xl font-black leading-tight mb-3 line-clamp-3 drop-shadow-lg">
+                      </div>
+                      <h2 className="text-white text-2xl sm:text-3xl md:text-5xl font-black leading-[1.1] mb-4 line-clamp-3 drop-shadow-2xl">
                         {hero.title}
                       </h2>
-                      <div className="flex items-center gap-4 text-white/80 text-xs md:text-sm">
-                        <span className="flex items-center gap-1.5">
-                          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">
+                      <p className="hidden sm:block text-white/85 text-sm md:text-base max-w-2xl mb-4 line-clamp-2 drop-shadow">
+                        {hero.excerpt}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 md:gap-4 text-white/90 text-xs md:text-sm">
+                        <span className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-white/25 backdrop-blur flex items-center justify-center text-white text-xs font-bold ring-1 ring-white/40">
                             {hero.author_name.charAt(0)}
                           </div>
-                          {hero.author_name}
+                          <span className="font-medium">{hero.author_name}</span>
                         </span>
-                        <span>•</span>
-                        <span>{formatDate(hero.published_at || hero.created_at)}</span>
-                        <span>•</span>
-                        <span>{readTime(hero.excerpt)}</span>
+                        <span className="opacity-50">•</span>
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {formatDate(hero.published_at || hero.created_at)}
+                        </span>
+                        <span className="opacity-50">•</span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          {readTime(hero.excerpt)}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 </Link>
               </motion.div>
             )}
 
-            {/* ===== GRID POSTS ===== */}
+            {/* ===== GRID — 3D floating cards ===== */}
             {rest.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
                 {rest.map((post, i) => (
-                  <motion.div
+                  <motion.article
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
+                    transition={{ delay: Math.min(i * 0.05, 0.4), duration: 0.5 }}
                   >
-                    <Link to={`/blog/${post.slug}`} className="block group">
-                      <div className="rounded-xl overflow-hidden bg-card border border-border hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-                        {/* Image */}
-                        <div className="relative h-44 md:h-48 overflow-hidden">
+                    <Link to={`/blog/${post.slug}`} className="block group h-full" aria-label={post.title}>
+                      <div
+                        className="rounded-2xl md:rounded-3xl overflow-hidden bg-white/85 backdrop-blur-xl border border-white h-full flex flex-col transition-all duration-500 group-hover:-translate-y-2"
+                        style={{
+                          boxShadow:
+                            "0 18px 45px -20px rgba(80,60,150,0.35), 0 6px 18px -8px rgba(80,60,150,0.2), inset 0 1px 0 rgba(255,255,255,0.8)",
+                        }}
+                      >
+                        <div className="relative h-48 md:h-52 overflow-hidden">
                           {post.cover_image ? (
                             <img
                               src={post.cover_image}
                               alt={post.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               loading="lazy"
+                              decoding="async"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                              <TrendingUp className="w-10 h-10 text-muted-foreground/30" />
+                            <div
+                              className={`w-full h-full bg-gradient-to-br ${
+                                CATEGORY_GRADIENTS[post.category] || "from-slate-400 to-slate-600"
+                              } flex items-center justify-center`}
+                            >
+                              <TrendingUp className="w-10 h-10 text-white/60" />
                             </div>
                           )}
-                          <Badge
-                            className={`absolute top-3 left-3 ${CATEGORY_COLORS[post.category] || "bg-primary"} text-white border-0 text-[10px] font-bold`}
+                          <div
+                            className={`absolute top-3 left-3 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide text-white bg-gradient-to-r ${
+                              CATEGORY_GRADIENTS[post.category] || "from-violet-500 to-fuchsia-600"
+                            } shadow-md`}
                           >
                             {CATEGORY_LABELS[post.category] || post.category}
-                          </Badge>
+                          </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-4 md:p-5 flex flex-col flex-1">
-                          <h3 className="font-display text-base md:text-lg font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <div className="p-5 md:p-6 flex flex-col flex-1">
+                          <h3 className="font-display text-lg md:text-xl font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-violet-700 transition-colors leading-snug">
                             {post.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                          <p className="text-sm text-slate-500 line-clamp-3 mb-5 flex-1 leading-relaxed">
                             {post.excerpt}
                           </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
-                            <span className="flex items-center gap-1.5">
-                              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-bold text-primary">
+                          <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+                            <span className="flex items-center gap-1.5 font-medium">
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                                 {post.author_name.charAt(0)}
                               </div>
                               {post.author_name}
                             </span>
                             <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(post.published_at || post.created_at)}
+                              <Clock className="w-3 h-3" />
+                              {readTime(post.excerpt)}
                             </span>
                           </div>
                         </div>
                       </div>
                     </Link>
-                  </motion.div>
+                  </motion.article>
                 ))}
               </div>
             )}
@@ -259,14 +372,8 @@ const Blog = () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-card/50 py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Creative Caricature Club™. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      {/* Full site footer */}
+      <SiteFooter />
     </div>
   );
 };

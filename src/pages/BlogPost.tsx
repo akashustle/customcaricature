@@ -248,6 +248,9 @@ const BlogPost = () => {
         canonical={`/blog/${post.slug}`}
         type="article"
         image={post.cover_image || undefined}
+        keywords={(post.tags && post.tags.length > 0)
+          ? post.tags.join(", ")
+          : `${post.title}, ${CATEGORY_LABELS[post.category] || post.category}, caricature blog, Creative Caricature Club`}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
 

@@ -126,8 +126,8 @@ const MaintenanceScreen = ({ title = "Under Maintenance", message = "We are perf
           <Button variant="default" onClick={() => navigate("/login")} className="rounded-full font-body gap-2 shadow-md">
             <LogIn className="w-4 h-4" /> Login
           </Button>
-          <Button variant="outline" onClick={() => navigate("/cccworkshop2006")} className="rounded-full font-body gap-2">
-            <GraduationCap className="w-4 h-4" /> Workshop Login
+          <Button variant="outline" onClick={() => navigate("/workshop")} className="rounded-full font-body gap-2">
+            <GraduationCap className="w-4 h-4" /> Workshop
           </Button>
           {allowRegistration && (
             <Button variant="secondary" onClick={() => navigate("/register")} className="rounded-full font-body gap-2">
