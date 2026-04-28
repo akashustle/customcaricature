@@ -141,13 +141,17 @@ const LilFleaGallery = () => {
             </a>
           </div>
         ) : (
-          /* Infinite scroll container — vertical, both directions */
+          /* Infinite scroll container — vertical, both directions, mobile-safe height */
           <div
             ref={scrollRef}
             className="overflow-y-auto scrollbar-hide overscroll-contain"
-            style={{ height: "calc(100vh - 65px)" }}
+            style={{
+              height: "calc(100dvh - 65px)",
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y",
+            }}
           >
-            <div className="columns-2 sm:columns-3 md:columns-4 gap-2 p-3">
+            <div className="columns-2 sm:columns-3 md:columns-4 gap-2 p-2 sm:p-3">
               {tripled.map((url, i) => (
                 <div
                   key={`${url}-${i}`}
@@ -156,7 +160,7 @@ const LilFleaGallery = () => {
                 >
                   <WatermarkedImage
                     src={url}
-                    alt={`Lil Flea photo ${(i % allUrls.length) + 1}`}
+                    alt={images[i % allUrls.length]?.caption || `Lil Flea photo ${(i % allUrls.length) + 1}`}
                     className="w-full"
                     loading={i < 12 ? "eager" : "lazy"}
                   />
@@ -172,6 +176,7 @@ const LilFleaGallery = () => {
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/90 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setLightboxIdx(null)}
+          style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
         >
           <button onClick={() => setLightboxIdx(null)} className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/20 flex items-center justify-center text-background/90 hover:bg-background/30" aria-label="Close"><X className="w-6 h-6" /></button>
           <button
