@@ -37,19 +37,26 @@ export const openExternal = (url: string) => {
   if (!url || url === "#") return;
   const lower = url.toLowerCase();
 
-  if (isStandalonePWA()) {
-    // Stay inside the PWA — same-window navigation. The browser will still
-    // hand off tel:/mailto:/whatsapp: to the OS automatically.
-    window.location.assign(url);
-    return;
-  }
-
-  // Regular tab: system schemes use same-window so the OS opens its handler.
+  // System schemes always hand off to the OS handler.
   if (SYSTEM_SCHEMES.some((s) => lower.startsWith(s))) {
     window.location.href = url;
     return;
   }
 
-  // Everything else: new tab with safe rel.
-  window.open(url, "_blank", "noopener,noreferrer");
+  // True cross-origin http(s) links → always open in a new tab/window so the
+  // PWA shell isn't replaced by the external site. The wrapped window.open
+  // in main.tsx will only intercept when the URL is recognised as internal.
+  try {
+    const parsed = new URL(url, window.location.origin);
+    const isCrossOrigin = parsed.origin !== window.location.origin;
+    if (isCrossOrigin) {
+      const win = window.open(url, "_blank", "noopener,noreferrer");
+      // Standalone PWA without a popup permission falls back to in-place nav.
+      if (!win && isStandalonePWA()) window.location.assign(url);
+      return;
+    }
+  } catch {/* fall through */}
+
+  // Same-origin → in-app navigation.
+  window.location.assign(url);
 };
