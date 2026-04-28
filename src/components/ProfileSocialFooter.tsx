@@ -43,16 +43,26 @@ const ProfileSocialFooter = ({
   useEffect(() => setMounted(true), []);
 
   const contact = useSiteSetting<any>("global_contact", {});
-  const wa = (contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
-  const phone = (contact?.phone_number || contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
-  const email = contact?.email || "creativecaricatureclub@gmail.com";
+
+  // Admin-editable per-dashboard contact overrides
+  // - dashboard_support_contact (booking dashboard)
+  // - workshop_support_contact  (workshop dashboard)
+  // Each is `{ whatsapp_number, whatsapp_message, email, email_subject }`.
+  const dashOverride = useSiteSetting<any>("dashboard_support_contact", {});
+  const wsOverride = useSiteSetting<any>("workshop_support_contact", {});
+  const override = variant === "workshop" ? (wsOverride || {}) : (dashOverride || {});
+
+  const wa = (override.whatsapp_number || contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const phone = (override.whatsapp_number || contact?.phone_number || contact?.whatsapp_number || "918369594271").replace(/[^0-9]/g, "");
+  const email = override.email || contact?.email || "creativecaricatureclub@gmail.com";
   const igUrl = contact?.instagram_url || "https://instagram.com/creativecaricatureclub";
   const ytUrl = contact?.youtube_url || "https://www.youtube.com/@creativecaricatureclub";
   const fbUrl = contact?.facebook_url || "https://facebook.com/creativecaricatureclub";
 
   const greeting = userName ? `Hi, this is ${userName}. ` : "";
-  const waMsg = greeting + (variant === "workshop" ? DEFAULT_WA_MSG_WORKSHOP : DEFAULT_WA_MSG_BOOKING);
-  const emailSubject = variant === "workshop" ? DEFAULT_EMAIL_SUBJECT_WORKSHOP : DEFAULT_EMAIL_SUBJECT_BOOKING;
+  const defaultWaMsg = variant === "workshop" ? DEFAULT_WA_MSG_WORKSHOP : DEFAULT_WA_MSG_BOOKING;
+  const waMsg = greeting + (override.whatsapp_message || defaultWaMsg);
+  const emailSubject = override.email_subject || (variant === "workshop" ? DEFAULT_EMAIL_SUBJECT_WORKSHOP : DEFAULT_EMAIL_SUBJECT_BOOKING);
 
   const items: {
     key: string;
