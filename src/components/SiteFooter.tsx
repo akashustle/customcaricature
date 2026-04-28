@@ -214,8 +214,8 @@ const SiteFooter = () => {
 
   return (
     <>
-      <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-        <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10 lg:p-12">
+      <footer className="px-2 sm:px-4 my-4 sm:my-6 mb-24 md:mb-6">
+        <div className="mx-auto max-w-7xl rounded-2xl sm:rounded-3xl bg-hero-violet border border-border/40 p-4 sm:p-10 lg:p-12">
           {/* Brand */}
           <div className="mb-7 sm:mb-10 max-w-xl">
             <a
