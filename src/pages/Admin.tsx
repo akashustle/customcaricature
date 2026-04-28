@@ -1326,6 +1326,7 @@ const Admin = () => {
           </div>
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
+        <Suspense fallback={null}><AdminAIBubble activeTab={activeTab} /></Suspense>
         {showAdminInfo && <AdminInfoPanel onClose={() => setShowAdminInfo(false)} />}
 
         <div className="px-2 py-3 sm:px-4 md:px-6 md:py-5">
