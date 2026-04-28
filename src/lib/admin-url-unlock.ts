@@ -85,6 +85,29 @@ export const lockAdminUrl = (slot: AdminUrlSlot | "all" = "all") => {
 };
 
 /**
+ * Build a URL with a one-time unlock hash so opening in a new tab inherits the
+ * unlock. The hash is consumed (and removed) by `consumeUnlockHash()` on boot.
+ */
+export const buildUnlockUrl = (path: string, slot: AdminUrlSlot | "all" = "all") => {
+  const sep = path.includes("#") ? "&" : "#";
+  return `${path}${sep}admin_unlock=${slot}`;
+};
+
+/** Read & strip the unlock hash on every page load. Called once from App. */
+export const consumeUnlockHash = () => {
+  const w = safeWindow();
+  if (!w) return;
+  const hash = window.location.hash || "";
+  const m = hash.match(/admin_unlock=(main|shop|workshop|all)/);
+  if (!m) return;
+  unlockAdminUrl(m[1] as any);
+  // Strip the marker so it doesn't linger in browser history
+  const cleaned = hash.replace(/[#&]?admin_unlock=(main|shop|workshop|all)/, "");
+  const newHash = cleaned && cleaned !== "#" ? (cleaned.startsWith("#") ? cleaned : "#" + cleaned) : "";
+  history.replaceState(null, "", window.location.pathname + window.location.search + newHash);
+};
+
+/**
  * Listen for a secret keystroke sequence on the page. Calls onMatch when the
  * user types the secret in order. Returns a cleanup function.
  *
