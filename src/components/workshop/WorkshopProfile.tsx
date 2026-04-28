@@ -309,7 +309,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
       // 3-second "we are verifying" wait, then run the spam check + auto-approve.
       setTimeout(async () => {
         const check = runSpamCheck();
-        if (!check.ok) {
+        if (check.ok === false) {
           await callUpdate({ verification_status: "rejected" });
           applyUpdated({ ...profileData, verification_status: "rejected" });
           toast({ title: "Verification on hold", description: check.reason, variant: "destructive" });
