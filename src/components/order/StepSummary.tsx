@@ -10,6 +10,7 @@ import { ShieldCheck, Loader2 } from "lucide-react";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
 import { logReferralEvent } from "@/hooks/useReferralTracking";
+import { pollOrderStatus } from "@/hooks/usePaymentReconciliation";
 
 
 interface Props {
@@ -203,11 +204,24 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
               },
             }).catch(() => {});
           } catch (err: any) {
+            // Fallback: gateway callback may have arrived but our verify call failed.
+            // Poll the order row + ask the reconciler to query Razorpay directly.
             toast({
-              title: "Payment Verification Failed",
-              description: "Please contact support with your order ID: " + orderId.slice(0, 8).toUpperCase(),
-              variant: "destructive",
+              title: "Confirming your payment…",
+              description: "This usually takes a few seconds.",
             });
+            const { paid } = await pollOrderStatus("orders", orderId, { timeoutMs: 45000 });
+            if (paid) {
+              playPaymentSuccessSound();
+              logReferralEvent("order", { referredUserId: userId || undefined, metadata: { order_id: orderId, amount } }).catch(() => {});
+              onComplete(orderId);
+            } else {
+              toast({
+                title: "Payment Verification Failed",
+                description: "Please contact support with your order ID: " + orderId.slice(0, 8).toUpperCase(),
+                variant: "destructive",
+              });
+            }
           }
         },
         prefill: {
@@ -219,8 +233,17 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
           color: "#E3DED3",
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async () => {
             setSubmitting(false);
+            // Some users actually paid but closed the modal before the
+            // success callback fired. Poll once before claiming "cancelled".
+            const { paid } = await pollOrderStatus("orders", orderId, { timeoutMs: 15000, intervalMs: 3000 });
+            if (paid) {
+              playPaymentSuccessSound();
+              logReferralEvent("order", { referredUserId: userId || undefined, metadata: { order_id: orderId, amount } }).catch(() => {});
+              onComplete(orderId);
+              return;
+            }
             toast({
               title: "Payment Cancelled",
               description: "Your order has been saved. You can pay later from your dashboard.",

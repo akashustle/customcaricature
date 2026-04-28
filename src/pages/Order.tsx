@@ -1,21 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import SEOHead from "@/components/SEOHead";
 import { motion, AnimatePresence } from "framer-motion";
 import { OrderFormData, initialFormData } from "@/lib/order-types";
 import { usePricing } from "@/hooks/usePricing";
-import StepLocation from "@/components/order/StepLocation";
-import StepCustomerDetails from "@/components/order/StepCustomerDetails";
-import StepOrderDetails from "@/components/order/StepOrderDetails";
-import StepPhotoUpload from "@/components/order/StepPhotoUpload";
-import StepDeliveryAddress from "@/components/order/StepDeliveryAddress";
-import StepSummary from "@/components/order/StepSummary";
-import OrderConfirmation from "@/components/order/OrderConfirmation";
-import { ArrowLeft } from "lucide-react";
+// Code-split heavy step components so the initial Order page payload stays
+// small. Each step is only fetched when the user reaches it.
+const StepLocation = lazy(() => import("@/components/order/StepLocation"));
+const StepCustomerDetails = lazy(() => import("@/components/order/StepCustomerDetails"));
+const StepOrderDetails = lazy(() => import("@/components/order/StepOrderDetails"));
+const StepPhotoUpload = lazy(() => import("@/components/order/StepPhotoUpload"));
+const StepDeliveryAddress = lazy(() => import("@/components/order/StepDeliveryAddress"));
+const StepSummary = lazy(() => import("@/components/order/StepSummary"));
+const OrderConfirmation = lazy(() => import("@/components/order/OrderConfirmation"));
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+const StepFallback = () => (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+  </div>
+);
 
 // New order: location → caricature details → photos → customer details → address → summary
 const STEPS = ["location", "details", "photos", "customer", "address", "summary"] as const;
@@ -118,7 +126,11 @@ const Order = () => {
   }
 
   if (orderComplete && orderId) {
-    return <OrderConfirmation orderId={orderId} />;
+    return (
+      <Suspense fallback={<StepFallback />}>
+        <OrderConfirmation orderId={orderId} />
+      </Suspense>
+    );
   }
 
   return (
@@ -158,12 +170,14 @@ const Order = () => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
-            {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} getPrice={getPrice} />}
-            {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
-            {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
-            {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
-            {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
+            <Suspense fallback={<StepFallback />}>
+              {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
+              {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} getPrice={getPrice} />}
+              {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
+              {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
+              {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
+              {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </div>

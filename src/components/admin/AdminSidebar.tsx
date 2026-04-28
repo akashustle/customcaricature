@@ -129,6 +129,8 @@ const NAV_SECTIONS = [
       { id: "lead-links", icon: Gift, label: "Lead Links" },
       { id: "lil-flea", icon: Ticket, label: "Lil Flea Page" },
       { id: "referrals", icon: Gift, label: "Referrals" },
+      { id: "referral-qa", icon: Gift, label: "Referral QA" },
+      { id: "data-exports", icon: Gift, label: "Data Exports" },
       { id: "coupons", icon: Ticket, label: "Coupons" },
       { id: "feature-gating", icon: ToggleLeft, label: "Feature Gates" },
     ],
