@@ -20,6 +20,7 @@ const CHART_COLORS = ["hsl(152,45%,42%)", "hsl(210,55%,50%)", "hsl(38,75%,52%)",
 const AdminReferrals = () => {
   const [codes, setCodes] = useState<any[]>([]);
   const [uses, setUses] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
