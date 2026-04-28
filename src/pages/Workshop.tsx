@@ -148,6 +148,23 @@ const Workshop = () => {
     fetchActiveWorkshop();
     fetchSecretCodeSetting();
     fetchInternationalSetting();
+
+    // Realtime: instantly reflect admin changes (registration toggle, status, active workshop, content).
+    const ch = supabase
+      .channel("public-workshop-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshops" }, () => {
+        fetchActiveWorkshop();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "workshop_settings" }, () => {
+        fetchActiveWorkshop();
+        fetchSecretCodeSetting();
+        fetchInternationalSetting();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, () => {
+        fetchInternationalSetting();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, []);
 
   // ── Draft persistence ──────────────────────────────────────────────────────
