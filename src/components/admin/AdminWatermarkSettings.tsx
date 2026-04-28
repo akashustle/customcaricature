@@ -228,7 +228,7 @@ const WatermarkedImagePreview = ({ config, src }: { config: WatermarkConfig; src
   const tileUrl = `url("data:image/svg+xml;utf8,${encodeURIComponent(tile)}")`;
   return (
     <div className="relative w-full h-full">
-      <img src={src} alt="" className="w-full h-full object-cover" />
+      <img src={src} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
       {config.enabled && (
         <div
           aria-hidden

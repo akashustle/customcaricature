@@ -1245,7 +1245,7 @@ const Admin = () => {
           <div className="px-4 md:px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 md:hidden">
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/10 cursor-pointer" onClick={() => navigate("/")}>
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover rounded-full" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover rounded-full"  loading="lazy" decoding="async" />
               </div>
               <AdminWorkspaceSwitcher />
             </div>
@@ -1301,7 +1301,7 @@ const Admin = () => {
                 style={{ background: `linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))`, color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14 }}
               >
                 {(adminProfile as any)?.avatar_url ? (
-                  <img src={`${(adminProfile as any).avatar_url}?t=${Date.now()}`} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={`${(adminProfile as any).avatar_url}?t=${Date.now()}`} alt="Avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   (adminProfile?.full_name || "A").charAt(0).toUpperCase()
                 )}
@@ -2065,7 +2065,7 @@ const Admin = () => {
                           {/* Avatar uploader */}
                           <div className="flex items-center gap-3">
                             {(c as any).avatar_url ? (
-                              <img src={(c as any).avatar_url} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
+                              <img src={(c as any).avatar_url} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-primary/30"  loading="lazy" decoding="async" />
                             ) : (
                               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs">No photo</div>
                             )}
@@ -2134,7 +2134,7 @@ const Admin = () => {
                           <div className="space-y-1 flex-1 min-w-0">
                             <div className="flex items-start gap-3">
                               {(c as any).avatar_url ? (
-                                <img src={(c as any).avatar_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border flex-shrink-0" />
+                                <img src={(c as any).avatar_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border flex-shrink-0"  loading="lazy" decoding="async" />
                               ) : (
                                 <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground flex-shrink-0">
                                   {(c.full_name || "?").charAt(0).toUpperCase()}
@@ -2779,7 +2779,7 @@ const Admin = () => {
                   <div className="relative group">
                     <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-xl shadow-primary/20">
                       {(adminProfile as any)?.avatar_url ? (
-                        <img src={(adminProfile as any).avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                        <img src={(adminProfile as any).avatar_url} alt="Avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                       ) : (
                         (adminProfile?.full_name || "A").charAt(0).toUpperCase()
                       )}

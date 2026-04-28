@@ -72,7 +72,7 @@ export const MobileProfileHeader = ({
         <div className="relative flex-shrink-0">
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-accent blur-md opacity-30" />
           <div className="relative w-[72px] h-[72px] rounded-3xl bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center font-display text-xl font-bold shadow-xl overflow-hidden">
-            {avatarUrl ? <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" /> : initials}
+            {avatarUrl ? <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : initials}
           </div>
           {isVerified && (
             <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-blue-500 ring-[3px] ring-card flex items-center justify-center shadow">

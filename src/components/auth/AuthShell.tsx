@@ -129,7 +129,7 @@ export const AuthShell = ({
                 className="flex items-center gap-3 group"
               >
                 <div className="w-12 h-12 rounded-2xl bg-white/90 shadow-lg overflow-hidden ring-1 ring-white">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 </div>
                 <div className="text-left leading-tight">
                   <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-slate-700/80">
@@ -246,7 +246,7 @@ export const AuthShell = ({
                     className="w-12 h-12 rounded-2xl bg-white/95 shadow-md overflow-hidden ring-1 ring-white shrink-0"
                     aria-label="Home"
                   >
-                    <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                    <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </button>
                   <div className="text-left leading-tight">
                     <p className="text-[9px] font-semibold tracking-[0.2em] uppercase text-slate-700/80">Creative</p>

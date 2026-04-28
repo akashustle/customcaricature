@@ -105,7 +105,7 @@ const Explore = () => {
                   <CardContent className="p-0">
                     <div className="flex items-center gap-4 p-4">
                       {section.image_url ? (
-                        <img src={section.image_url} alt={section.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                        <img src={section.image_url} alt={section.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0"  loading="lazy" decoding="async" />
                       ) : (
                         <div className={`w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${isDisabled ? "bg-muted" : "bg-primary/10 group-hover:bg-primary/20"}`}>
                           <IconComp className={`w-7 h-7 ${isDisabled ? "text-muted-foreground" : "text-primary"}`} />

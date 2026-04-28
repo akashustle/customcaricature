@@ -213,7 +213,7 @@ const AdminDesignControl = () => {
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Logo URL</Label>
               <Input value={logo.url || ""} onChange={e => handleLogoChange("url", e.target.value)} placeholder="/logo.png or https://..." />
-              {logo.url && <img src={logo.url} alt="Logo preview" className="w-16 h-16 rounded-lg object-contain border mt-2" />}
+              {logo.url && <img src={logo.url} alt="Logo preview" className="w-16 h-16 rounded-lg object-contain border mt-2"  loading="lazy" decoding="async" />}
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Favicon URL</Label>

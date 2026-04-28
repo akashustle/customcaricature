@@ -72,7 +72,7 @@ const StepPhotoUpload = ({ data, update, onNext }: Props) => {
                 src={URL.createObjectURL(file)}
                 alt={`Upload ${i + 1}`}
                 className="w-full h-full object-cover"
-              />
+               loading="lazy" decoding="async" />
               <button
                 onClick={() => removePhoto(i)}
                 className="absolute top-1 right-1 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -136,7 +136,7 @@ const StepPhotoUpload = ({ data, update, onNext }: Props) => {
             <div className="grid grid-cols-4 gap-2">
               {data.referencePhotos.map((file, i) => (
                 <div key={i} className="relative group rounded-lg overflow-hidden border border-primary/20 aspect-square">
-                  <img src={URL.createObjectURL(file)} alt={`Ref ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={URL.createObjectURL(file)} alt={`Ref ${i + 1}`} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   <button
                     onClick={() => removeRefPhoto(i)}
                     className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

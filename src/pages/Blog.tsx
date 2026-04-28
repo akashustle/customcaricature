@@ -134,7 +134,7 @@ const Blog = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button onClick={() => navigate("/")} className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white shadow-md group-hover:scale-105 transition-transform">
-              <img src="/logo.png" alt="Creative Caricature Club" className="w-full h-full object-cover" width={36} height={36} />
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-full h-full object-cover" width={36} height={36}  loading="lazy" decoding="async" />
             </div>
             <span className="font-display text-base font-bold hidden sm:inline text-slate-800">Creative Caricature Club™</span>
           </button>

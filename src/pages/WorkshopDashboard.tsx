@@ -228,7 +228,7 @@ const WorkshopDashboard = () => {
       <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
+            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl"  loading="lazy" decoding="async" />
             <div>
               <h1 className="font-display text-lg font-bold leading-none">
                 Creative <span className="text-gradient-violet">Caricature Club™</span>
@@ -249,7 +249,7 @@ const WorkshopDashboard = () => {
                 >
                   <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                     {workshopUser.avatar_url ? (
-                      <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                      <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                     ) : (
                       <span className="text-xs">{initials}</span>
                     )}
@@ -335,7 +335,7 @@ const WorkshopDashboard = () => {
             >
               <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                 {workshopUser.avatar_url ? (
-                  <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={workshopUser.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   <span className="text-xs">{initials}</span>
                 )}

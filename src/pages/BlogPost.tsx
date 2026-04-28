@@ -267,7 +267,7 @@ const BlogPost = () => {
       <nav className="sticky top-0 z-40 bg-card/90 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" width={32} height={32} />
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" width={32} height={32}  loading="lazy" decoding="async" />
             <span className="font-display text-base font-bold hidden sm:inline">Creative Caricature Club™</span>
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate("/blog")} className="rounded-full text-xs">

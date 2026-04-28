@@ -238,7 +238,7 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             onClick={() => navigate("/")}
           >
             <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/[0.04] shadow-sm">
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
             </div>
             {!collapsed && (
               <motion.div initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} className="min-w-0">

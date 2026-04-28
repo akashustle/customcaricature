@@ -1,5 +1,5 @@
 /**
- * WatermarkedImage — wraps an <img> with a tiled, semi-transparent watermark
+ * WatermarkedImage — wraps an <img loading="lazy" decoding="async"> with a tiled, semi-transparent watermark
  * (logo + "Creative Caricature Club™" brand text) loaded from admin settings.
  *
  * Admin can control via `admin_site_settings.watermark`:
@@ -12,7 +12,7 @@
  *
  * Only `hideWatermark` overrides at the call site (admin contexts that need
  * a clean download). Public visitors cannot remove the overlay — it is rendered
- * with `pointer-events:none` ABOVE a pointer-events-none <img>, so it cannot
+ * with `pointer-events:none` ABOVE a pointer-events-none <img loading="lazy" decoding="async">, so it cannot
  * be inspected away without DOM manipulation.
  */
 import { CSSProperties, useEffect } from "react";

@@ -202,7 +202,7 @@ const ChatWidget = ({ userId, userName, isArtistChat = false }: { userId: string
                           ) : (
                             <>
                               {msg.file_url && msg.file_name && isImage(msg.file_name) ? (
-                                <img src={msg.file_url} alt={msg.file_name} className="max-w-full rounded-lg mb-1 max-h-48 object-cover" />
+                                <img src={msg.file_url} alt={msg.file_name} className="max-w-full rounded-lg mb-1 max-h-48 object-cover"  loading="lazy" decoding="async" />
                               ) : msg.file_url && msg.file_name ? (
                                 <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 underline"><FileText className="w-3 h-3" /> {msg.file_name}</a>
                               ) : <p>{msg.message}</p>}

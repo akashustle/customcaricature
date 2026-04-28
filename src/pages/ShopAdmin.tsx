@@ -539,7 +539,7 @@ const ShopAdmin = () => {
                   <div className="flex gap-3 items-start">
                     <Checkbox checked={selectedProducts.includes(p.id)} onCheckedChange={c => setSelectedProducts(s => c ? [...s, p.id] : s.filter(x => x !== p.id))} className="mt-1" />
                     <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : <Store className="w-5 h-5 text-muted-foreground/30" />}
+                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : <Store className="w-5 h-5 text-muted-foreground/30" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1 flex-wrap">
@@ -747,7 +747,7 @@ const ShopAdmin = () => {
             {categories.map(c => (
               <Card key={c.id}><CardContent className="p-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  {c.image_url && <img src={c.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />}
+                  {c.image_url && <img src={c.image_url} alt="" className="w-10 h-10 rounded-lg object-cover"  loading="lazy" decoding="async" />}
                   <div><h3 className="font-sans font-semibold">{c.name}</h3><p className="text-xs text-muted-foreground">/{c.slug} • {products.filter(p => p.category_id === c.id).length} products</p></div>
                 </div>
                 <div className="flex gap-1">
@@ -874,7 +874,7 @@ const ShopAdmin = () => {
                 <div className="flex gap-2 flex-wrap mb-2">
                   {editProduct.images.map((img: string, i: number) => (
                     <div key={i} className="relative group w-16 h-16 rounded-lg overflow-hidden border border-border">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                       <button onClick={() => deleteProductImage(editProduct.id, img)} className="absolute inset-0 bg-destructive/70 text-destructive-foreground opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}

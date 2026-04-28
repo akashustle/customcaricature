@@ -438,7 +438,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               }}
             >
               {profileData.avatar_url ? (
-                <img src={profileData.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                <img src={profileData.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               ) : (
                 <span className="text-2xl font-bold text-primary font-display">{initials}</span>
               )}

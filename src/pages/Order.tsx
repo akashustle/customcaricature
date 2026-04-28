@@ -144,7 +144,7 @@ const Order = () => {
           </Button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full cursor-pointer" onClick={() => navigate("/")} />
+              <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full cursor-pointer" onClick={() = loading="lazy" decoding="async"> navigate("/")} />
               <h1 className="font-display text-lg md:text-xl font-bold truncate">Order Your Caricature</h1>
             </div>
             <p className="text-xs text-muted-foreground font-sans">

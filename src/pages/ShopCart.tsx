@@ -161,7 +161,7 @@ const ShopCart = () => {
                 <CardContent className="p-3 flex gap-3">
                   <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                     {item.shop_products?.images?.[0] ? (
-                      <img src={item.shop_products.images[0]} alt="" className="w-full h-full object-cover" />
+                      <img src={item.shop_products.images[0]} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                     ) : <Store className="w-8 h-8 text-muted-foreground/30" />}
                   </div>
                   <div className="flex-1 min-w-0">

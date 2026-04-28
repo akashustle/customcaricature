@@ -171,7 +171,7 @@ const AICaricature = () => {
             <motion.div key="style" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
               {uploadedImage && (
                 <div className="w-32 h-32 rounded-2xl overflow-hidden mx-auto border-2 border-primary">
-                  <img src={uploadedImage} alt="Uploaded" className="w-full h-full object-cover" />
+                  <img src={uploadedImage} alt="Uploaded" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 </div>
               )}
               <h2 className="font-display text-xl font-bold text-center">{page.step2_title}</h2>
@@ -197,7 +197,7 @@ const AICaricature = () => {
             <motion.div key="preview" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
               <h2 className="font-display text-xl font-bold text-center">{page.step3_title}</h2>
               <div className="aspect-square rounded-2xl overflow-hidden border-2 border-primary bg-muted">
-                <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain" />
+                <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain"  loading="lazy" decoding="async" />
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1 rounded-full" onClick={() => { setStep("style"); setCaricatureImage(null); }}>
@@ -216,7 +216,7 @@ const AICaricature = () => {
               <h2 className="font-display text-xl font-bold text-center">{page.step4_title}</h2>
               {caricatureImage && (
                 <div className="w-24 h-24 rounded-xl overflow-hidden mx-auto border-2 border-primary">
-                  <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain" />
+                  <img src={caricatureImage} alt="Caricature" className="w-full h-full object-contain"  loading="lazy" decoding="async" />
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">

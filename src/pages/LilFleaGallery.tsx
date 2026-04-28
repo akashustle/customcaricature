@@ -62,7 +62,7 @@ const LilFleaGallery = () => {
           <div className="container mx-auto px-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full overflow-hidden border border-accent/30 p-0.5 bg-background">
-                <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <div>
                 <h1 className="text-base font-black text-foreground">Lil Flea Gallery</h1>

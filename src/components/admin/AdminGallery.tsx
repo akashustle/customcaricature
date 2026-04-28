@@ -102,7 +102,7 @@ const GallerySection = ({ table, bucketFolder }: { table: string; bucketFolder: 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
             <div key={item.id} className="group relative rounded-xl overflow-hidden border border-border bg-card">
-              <img src={item.image_url} alt={item.caption || "Gallery"} className="w-full h-40 object-cover" />
+              <img src={item.image_url} alt={item.caption || "Gallery"} className="w-full h-40 object-cover"  loading="lazy" decoding="async" />
               {item.caption && (
                 <p className="px-2 py-1 text-xs font-sans text-muted-foreground truncate">{item.caption}</p>
               )}

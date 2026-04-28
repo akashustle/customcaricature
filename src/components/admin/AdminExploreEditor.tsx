@@ -156,7 +156,7 @@ const AdminExploreEditor = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {item.image_url && <img src={item.image_url} alt="" className="w-12 h-12 rounded-lg object-cover" />}
+              {item.image_url && <img src={item.image_url} alt="" className="w-12 h-12 rounded-lg object-cover"  loading="lazy" decoding="async" />}
               <input type="file" accept="image/*" className="hidden" ref={el => { fileRefs.current[item.id] = el; }} onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(item.id, f); }} />
               <Button size="sm" variant="outline" onClick={() => fileRefs.current[item.id]?.click()}><Upload className="w-3 h-3 mr-1" />Upload Image</Button>
               {item.image_url && <Button size="sm" variant="ghost" onClick={() => updateItem(item.id, "image_url", "")}><Trash2 className="w-3 h-3 mr-1" />Remove</Button>}

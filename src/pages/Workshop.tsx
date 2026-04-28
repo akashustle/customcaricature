@@ -1021,7 +1021,7 @@ const Workshop = () => {
             <CardContent className="p-8 md:p-10">
               <div className="flex flex-col md:flex-row gap-8 items-center">
                 <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity }} className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-border shadow-lg flex-shrink-0">
-                  <img src="/logo.png" alt={workshop.instructor_name} className="w-full h-full object-cover" />
+                  <img src="/logo.png" alt={workshop.instructor_name} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 </motion.div>
                 <div className="text-center md:text-left">
                   <h3 className="font-calligraphy text-2xl font-bold text-foreground">{workshop.instructor_name}</h3>
@@ -1061,7 +1061,7 @@ const Workshop = () => {
                   <div className="flex flex-col md:flex-row gap-6 items-center">
                     {workshop.brochure_image_url && (
                       <div className="w-full md:w-48 h-64 rounded-xl overflow-hidden border border-border shadow-md flex-shrink-0">
-                        <img src={workshop.brochure_image_url} alt="Workshop Brochure" className="w-full h-full object-cover" />
+                        <img src={workshop.brochure_image_url} alt="Workshop Brochure" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                       </div>
                     )}
                     <div className="flex-1 text-center md:text-left">

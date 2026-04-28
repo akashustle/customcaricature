@@ -286,7 +286,7 @@ const AdminBlog = () => {
               </div>
               {form.cover_image && (
                 <div className="mt-2 relative w-full h-40 rounded-xl overflow-hidden border border-border bg-muted">
-                  <img src={form.cover_image} alt="Cover" className="w-full h-full object-cover" />
+                  <img src={form.cover_image} alt="Cover" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   <Button size="sm" variant="destructive" className="absolute top-2 right-2 h-7 text-xs" onClick={() => setForm({ ...form, cover_image: "" })}>Remove</Button>
                 </div>
               )}
@@ -383,7 +383,7 @@ const AdminBlog = () => {
               <CardContent className="p-4 space-y-2">
                 {post.cover_image && (
                   <div className="w-full h-28 rounded-lg overflow-hidden mb-2">
-                    <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+                    <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </div>
                 )}
                 <div className="flex items-start justify-between gap-2">
@@ -449,7 +449,7 @@ const AdminBlog = () => {
                   <TableRow key={post.id}>
                     <TableCell>
                       {post.cover_image ? (
-                        <div className="w-12 h-8 rounded overflow-hidden"><img src={post.cover_image} alt="" className="w-full h-full object-cover" /></div>
+                        <div className="w-12 h-8 rounded overflow-hidden"><img src={post.cover_image} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" /></div>
                       ) : (
                         <div className="w-12 h-8 rounded bg-muted flex items-center justify-center"><Image className="w-4 h-4 text-muted-foreground" /></div>
                       )}

@@ -176,7 +176,7 @@ const AdminColleagues = () => {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       {adminAvatars[c.email] ? (
-                        <img src={adminAvatars[c.email]} alt={c.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20" />
+                        <img src={adminAvatars[c.email]} alt={c.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"  loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
                           <span className="text-sm font-bold text-primary/60">{c.name.charAt(0)}</span>
@@ -207,7 +207,7 @@ const AdminColleagues = () => {
               <CardHeader className="py-3 px-4 border-b flex-shrink-0">
                 <div className="flex items-center gap-3">
                   {adminAvatars[selectedColleague] ? (
-                    <img src={adminAvatars[selectedColleague]} alt={selectedColleagueInfo.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20" />
+                    <img src={adminAvatars[selectedColleague]} alt={selectedColleagueInfo.name} className="w-10 h-10 rounded-full object-cover border-2 border-primary/20"  loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center">
                       <span className="text-sm font-bold text-primary/60">{selectedColleagueInfo.name.charAt(0)}</span>

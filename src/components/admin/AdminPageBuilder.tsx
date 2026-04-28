@@ -223,7 +223,7 @@ const AdminPageBuilder = ({ page, pageLabel, bucket = "gallery-images" }: Props)
                 {block.block_type === "image" && <>
                   <div className="md:col-span-2 space-y-2">
                     {getValue(block, "url") && (
-                      <img src={getValue(block, "url")} alt="" className="w-full max-h-48 object-cover rounded-lg border border-border" />
+                      <img src={getValue(block, "url")} alt="" className="w-full max-h-48 object-cover rounded-lg border border-border"  loading="lazy" decoding="async" />
                     )}
                     <div className="flex items-center gap-2">
                       <Input placeholder="Image URL" value={getValue(block, "url")} onChange={e => updateDraft(block.id, "url", e.target.value)} className="flex-1" />

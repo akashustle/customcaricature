@@ -532,7 +532,7 @@ const Dashboard = () => {
       <header className="hidden md:block sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/40">
         <div className="container mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl" />
+            <img src="/logo.png" alt="CCC" className="w-10 h-10 rounded-xl"  loading="lazy" decoding="async" />
             <div>
               <h1 className="font-display text-lg font-bold leading-none">
                 Creative <span className="text-gradient-violet">Caricature Club™</span>
@@ -552,7 +552,7 @@ const Dashboard = () => {
             >
               <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   initials
                 )}
@@ -586,7 +586,7 @@ const Dashboard = () => {
             >
               <span className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   initials
                 )}
@@ -1297,7 +1297,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                           <div className="flex gap-2 flex-wrap">
                             {artworkPhotos[order.id].map((p: any) => (
                               <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); setArtZoom(1); }}>
-                                {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
+                                {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
                               </div>
                             ))}
                           </div>
@@ -1327,7 +1327,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
                         <div className="flex gap-2 flex-wrap">
                           {artworkPhotos[order.id].map((p: any) => (
                             <div key={p.id} className="w-20 h-20 rounded-lg border border-border overflow-hidden cursor-pointer" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setArtPreviewUrl(artworkUrls[p.id] || null); setArtZoom(1); }}>
-                              {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
+                              {artworkUrls[p.id] ? <img src={artworkUrls[p.id]} alt="Artwork" className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : <div className="w-full h-full bg-muted flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground" /></div>}
                             </div>
                           ))}
                         </div>
@@ -1415,7 +1415,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
             </button>
           )}
           <div className="overflow-auto max-w-full max-h-[75vh]">
-            <img src={artPreviewUrl} alt="Artwork Preview" className="rounded-xl shadow-2xl transition-transform duration-200" style={{ transform: `scale(${artZoom})`, transformOrigin: "center center" }} />
+            <img src={artPreviewUrl} alt="Artwork Preview" className="rounded-xl shadow-2xl transition-transform duration-200" style={{ transform: `scale(${artZoom})`, transformOrigin: "center center" }}  loading="lazy" decoding="async" />
           </div>
           {slidePhotos.length > 1 && currentSlideIdx < slidePhotos.length - 1 && (
             <button className="absolute right-0 z-10 bg-white/20 hover:bg-white/40 rounded-full p-2 text-white" onClick={() => {
@@ -1473,7 +1473,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
               }}
             >
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               ) : (
                 <span className="text-2xl font-bold text-primary font-display">{initials}</span>
               )}
@@ -2612,7 +2612,7 @@ td{padding:10px 14px;font-size:14px;border-bottom:1px solid #f0e8dc}
 .thank-you{background:linear-gradient(135deg,#fdf8f3,#f0e8dc);border:1px solid #d4c4a8;border-radius:12px;padding:20px;text-align:center;margin-top:30px}
 .thank-you h3{color:#3a2e22;font-size:18px;margin-bottom:4px}.thank-you p{color:#8b7355;font-size:13px}
 @media print{body{padding:20px;background:#fff}}</style></head><body>
-<div class="header"><div class="brand"><img src="${window.location.origin}/logo.png" alt="CCC" /><div><div class="brand-name">Creative Caricature Club<span class="brand-tm">™</span></div><div class="inv-num">${inv.invoice_number}</div></div></div>
+<div class="header"><div class="brand"><img src="${window.location.origin}/logo.png" alt="CCC"  loading="lazy" decoding="async" /><div><div class="brand-name">Creative Caricature Club<span class="brand-tm">™</span></div><div class="inv-num">${inv.invoice_number}</div></div></div>
 <div class="meta">Date: ${new Date(inv.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}<br>Status: <span class="badge">${(inv.status==='generated'?'PAID':inv.status).toUpperCase()}</span><br>${isAdvance ? '<span style="color:#b8860b;font-weight:600">⚡ Advance Payment</span>' : isRemaining ? '<span style="color:#059669;font-weight:600">✅ Full Payment</span>' : ''}</div></div>
 <div class="section"><h3>Bill To</h3><div class="detail">${inv.customer_name}<br>${inv.customer_email}<br>${inv.customer_mobile}</div></div>
 <table><thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>

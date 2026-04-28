@@ -160,7 +160,7 @@ const ShopProduct = () => {
           <div className="md:w-1/2">
             <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden relative cursor-zoom-in" onClick={() => setZoomedImage(true)}>
               {product.images?.[selectedImage] ? (
-                <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-contain" />
+                <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-contain"  loading="lazy" decoding="async" />
               ) : (
                 <Store className="w-20 h-20 text-muted-foreground/20" />
               )}
@@ -181,7 +181,7 @@ const ShopProduct = () => {
               <div className="flex gap-2 p-3 overflow-x-auto">
                 {product.images.map((img: string, i: number) => (
                   <button key={i} onClick={() => setSelectedImage(i)} className={`w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 ${i === selectedImage ? "border-primary" : "border-transparent"}`}>
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
@@ -428,7 +428,7 @@ const ShopProduct = () => {
       <AnimatePresence>
         {zoomedImage && product.images?.[selectedImage] && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-background/95 flex items-center justify-center p-4" onClick={() => setZoomedImage(false)}>
-            <img src={product.images[selectedImage]} alt="" className="max-w-full max-h-full object-contain" />
+            <img src={product.images[selectedImage]} alt="" className="max-w-full max-h-full object-contain"  loading="lazy" decoding="async" />
             <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-card flex items-center justify-center" onClick={() => setZoomedImage(false)}>✕</button>
           </motion.div>
         )}

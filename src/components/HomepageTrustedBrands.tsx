@@ -48,7 +48,7 @@ const HomepageTrustedBrands = () => {
               {govt.map((b: any, i: number) => (
                 <motion.div key={b.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                   className="w-28 h-20 rounded-xl bg-background border border-border/50 flex items-center justify-center p-3 hover:shadow-md transition-shadow">
-                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name} />
+                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name}  loading="lazy" decoding="async" />
                 </motion.div>
               ))}
             </div>
@@ -68,7 +68,7 @@ const HomepageTrustedBrands = () => {
               {entertainment.map((b: any, i: number) => (
                 <motion.div key={b.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                   className="w-28 h-20 rounded-xl bg-background border border-border/50 flex items-center justify-center p-3 hover:shadow-md transition-shadow">
-                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name} />
+                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name}  loading="lazy" decoding="async" />
                 </motion.div>
               ))}
             </div>
@@ -85,7 +85,7 @@ const HomepageTrustedBrands = () => {
               {others.map((b: any, i: number) => (
                 <motion.div key={b.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                   className="w-28 h-20 rounded-xl bg-background border border-border/50 flex items-center justify-center p-3 hover:shadow-md transition-shadow">
-                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name} />
+                  <img src={b.logo_url} alt={b.name} className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 transition-all" title={b.name}  loading="lazy" decoding="async" />
                 </motion.div>
               ))}
             </div>

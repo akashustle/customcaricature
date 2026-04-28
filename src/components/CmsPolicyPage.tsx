@@ -70,7 +70,7 @@ const CmsPolicyPage = ({ slug, fallbackTitle, fallbackDescription, canonical }: 
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-lg" />
+          <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-lg"  loading="lazy" decoding="async" />
           <h1 className="font-display text-xl font-bold">{title}</h1>
         </div>
       </div>

@@ -233,7 +233,7 @@ const AdminSplashScreen = ({ onComplete }: { onComplete: () => void }) => {
                 alt="CCC"
                 className="admin-logo-frame w-28 h-28 object-cover relative z-10"
                 style={{ boxShadow: "0 0 60px hsla(35,50%,60%,0.35), 0 0 120px hsla(18,40%,55%,0.15)" }}
-              />
+               loading="lazy" decoding="async" />
             </motion.div>
 
             {/* Title */}

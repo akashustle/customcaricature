@@ -252,7 +252,7 @@ const AdminLiveLocations = () => {
               {userPhotos.map((img) => (
                 <div key={img.id} className="relative group rounded-lg overflow-hidden border border-border">
                   {photoUrls[img.id] ? (
-                    <img src={photoUrls[img.id]} alt={img.file_name} className="w-full h-32 object-cover" />
+                    <img src={photoUrls[img.id]} alt={img.file_name} className="w-full h-32 object-cover"  loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-32 bg-muted flex items-center justify-center">
                       <Image className="w-8 h-8 text-muted-foreground" />

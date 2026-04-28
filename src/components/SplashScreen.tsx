@@ -208,7 +208,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
                 }}
                 width={112}
                 height={112}
-              />
+               loading="lazy" decoding="async" />
             </motion.div>
 
             {/* Title */}

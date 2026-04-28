@@ -306,7 +306,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
               <Button size="sm" onClick={savePreviewImage}><Image className="w-4 h-4 mr-1" />Save Preview</Button>
               {previewUrl && <Button size="sm" variant="destructive" onClick={() => { setPreviewUrl(""); supabase.from("orders").update({ preview_image_url: null } as any).eq("id", orderId).then(() => { toast({ title: "Preview removed" }); fetchOrder(); }); }}>Remove</Button>}
             </div>
-            {previewUrl && <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover rounded-lg mt-2" />}
+            {previewUrl && <img src={previewUrl} alt="Preview" className="w-32 h-32 object-cover rounded-lg mt-2"  loading="lazy" decoding="async" />}
           </CardContent>
         </Card>
 
@@ -366,7 +366,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {images.map((img) => (
                   <div key={img.id} className="relative group cursor-pointer" onClick={() => setSelectedImage(getImageUrl(img.storage_path))}>
-                    <img src={getImageUrl(img.storage_path)} alt={img.file_name} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <img src={getImageUrl(img.storage_path)} alt={img.file_name} className="w-full aspect-square object-cover rounded-lg border border-border"  loading="lazy" decoding="async" />
                     <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors rounded-lg flex items-end justify-center pb-2 gap-2">
                       <a href={getImageUrl(img.storage_path)} download={img.file_name} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-card/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-border" onClick={(e) => e.stopPropagation()}>
                         <Download className="w-4 h-4" />
@@ -388,7 +388,7 @@ const OrderDetail = ({ orderId, onBack }: Props) => {
       {selectedImage && (
         <div className="fixed inset-0 z-50 bg-foreground/80 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
           <div className="relative max-w-3xl max-h-[90vh]">
-            <img src={selectedImage} alt="Full size" className="max-w-full max-h-[90vh] object-contain rounded-lg" />
+            <img src={selectedImage} alt="Full size" className="max-w-full max-h-[90vh] object-contain rounded-lg"  loading="lazy" decoding="async" />
             <button onClick={() => setSelectedImage(null)} className="absolute top-2 right-2 w-10 h-10 bg-card rounded-full flex items-center justify-center"><X className="w-5 h-5" /></button>
           </div>
         </div>
