@@ -210,7 +210,7 @@ const WorkshopDashboard = () => {
   const initials = (workshopUser.name || "U").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8 bg-background transition-colors duration-300 relative overflow-hidden">
+    <div data-workshop-dashboard className="min-h-screen pb-24 md:pb-8 bg-background transition-colors duration-300 relative overflow-hidden">
       {/* 3D ambient background — branded soft orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full opacity-[0.10] blur-[120px] ws-orb-1"
