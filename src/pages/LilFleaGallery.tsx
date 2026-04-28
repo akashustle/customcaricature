@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 import WatermarkedImage from "@/components/WatermarkedImage";
 
+type GalleryRow = { id: string; image_url: string; caption: string | null; placement?: string | null };
+
 const LilFleaGallery = () => {
-  const [images, setImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
+  const [images, setImages] = useState<GalleryRow[]>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   const fetchImages = useCallback(async () => {
@@ -35,9 +37,15 @@ const LilFleaGallery = () => {
   }, [lightboxIdx, images.length]);
 
   const allUrls = images.map(i => i.image_url);
+  // Filter per placement (admin-controlled). 'all' images appear everywhere.
+  const slide1Imgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "slide1");
+  const slide2Imgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "slide2");
+  const scrollImgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "scroll");
   // Triple for seamless infinite scroll wrap
-  const tripled = [...images, ...images, ...images];
-  const duration = Math.max(18, Math.round(images.length * 3.2));
+  const tripled1 = [...slide1Imgs, ...slide1Imgs, ...slide1Imgs];
+  const tripled2 = [...slide2Imgs, ...slide2Imgs, ...slide2Imgs];
+  const tripledV = [...scrollImgs, ...scrollImgs, ...scrollImgs];
+  const duration = Math.max(18, Math.round(slide1Imgs.length * 3.2));
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -97,7 +105,7 @@ const LilFleaGallery = () => {
                   className="flex gap-3 will-change-transform"
                   style={{ animation: `lilflea-scroll ${duration}s linear infinite`, width: "max-content" }}
                 >
-                  {tripled.map((item, i) => (
+                  {tripled1.map((item, i) => (
                     <div
                       key={`r1-${i}`}
                       className="flex-shrink-0 w-56 h-72 sm:w-64 sm:h-80 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 transition-transform duration-300"
@@ -115,13 +123,13 @@ const LilFleaGallery = () => {
               </div>
 
               {/* Row 2 — reversed direction for visual depth, only if enough images */}
-              {images.length >= 4 && (
+              {slide2Imgs.length >= 4 && (
                 <div className="overflow-hidden py-3">
                   <div
                     className="flex gap-3 will-change-transform"
                     style={{ animation: `lilflea-scroll ${Math.round(duration * 1.2)}s linear infinite reverse`, width: "max-content" }}
                   >
-                    {tripled.map((item, i) => (
+                    {tripled2.map((item, i) => (
                       <div
                         key={`r2-${i}`}
                         className="flex-shrink-0 w-48 h-64 sm:w-56 sm:h-72 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 transition-transform duration-300"
@@ -158,10 +166,10 @@ const LilFleaGallery = () => {
                   <div
                     className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 will-change-transform"
                     style={{
-                      animation: `lilflea-vscroll ${Math.max(40, images.length * 5)}s linear infinite`,
+                      animation: `lilflea-vscroll ${Math.max(16, Math.round(scrollImgs.length * 2))}s linear infinite`,
                     }}
                   >
-                    {tripled.map((item, i) => (
+                    {tripledV.map((item, i) => (
                       <button
                         key={`v-${i}`}
                         type="button"

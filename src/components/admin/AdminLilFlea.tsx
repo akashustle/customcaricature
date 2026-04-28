@@ -15,6 +15,7 @@ type GalleryItem = {
   caption: string | null;
   is_featured: boolean;
   sort_order: number;
+  placement?: string | null;
 };
 
 type NotifyUser = {
@@ -146,6 +147,11 @@ const AdminLilFlea = () => {
 
   const updateCaption = async (id: string, caption: string) => {
     await supabase.from("lil_flea_gallery").update({ caption } as any).eq("id", id);
+  };
+
+  const updatePlacement = async (id: string, placement: string) => {
+    await supabase.from("lil_flea_gallery").update({ placement } as any).eq("id", id);
+    toast({ title: `Moved to ${placement}` });
   };
 
   const moveImage = async (id: string, direction: "up" | "down") => {
@@ -348,9 +354,26 @@ const AdminLilFlea = () => {
                           className="h-7 text-xs bg-white/20 border-white/30 text-white placeholder:text-white/50 w-4/5"
                           onClick={e => e.stopPropagation()}
                         />
+                        <select
+                          value={img.placement || "all"}
+                          onChange={e => updatePlacement(img.id, e.target.value)}
+                          onClick={e => e.stopPropagation()}
+                          className="h-7 text-[11px] rounded-md bg-white/20 border border-white/30 text-white px-2 w-4/5"
+                          aria-label="Placement"
+                        >
+                          <option value="all" className="text-foreground">📌 Show in All</option>
+                          <option value="slide1" className="text-foreground">➡️ Slide 1 (Top row)</option>
+                          <option value="slide2" className="text-foreground">⬅️ Slide 2 (Reverse row)</option>
+                          <option value="scroll" className="text-foreground">⬆️ Scroll-up Grid</option>
+                        </select>
                       </div>
                       {img.is_featured && (
                         <div className="absolute top-1.5 right-1.5 bg-accent text-accent-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5"><Star className="w-2.5 h-2.5" /> Featured</div>
+                      )}
+                      {img.placement && img.placement !== "all" && (
+                        <div className="absolute top-1.5 left-1.5 bg-foreground/80 text-background text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                          {img.placement === "slide1" ? "Slide 1" : img.placement === "slide2" ? "Slide 2" : "Scroll-up"}
+                        </div>
                       )}
                     </div>
                   ))}
