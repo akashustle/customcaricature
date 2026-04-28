@@ -64,6 +64,9 @@ const AdminLeadLinks = () => {
 
   useEffect(() => {
     fetchLinks();
+    // Load profile list for "assign to existing user" selector
+    supabase.from("profiles").select("user_id, full_name, email, mobile").order("created_at", { ascending: false }).limit(500)
+      .then(({ data }) => { if (data) setProfiles(data as any); });
     const ch = supabase.channel("lead-links-rt").on("postgres_changes", { event: "*", schema: "public", table: "lead_links" }, () => fetchLinks()).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [fetchLinks]);
