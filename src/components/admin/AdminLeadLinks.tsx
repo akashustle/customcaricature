@@ -326,6 +326,21 @@ const AdminLeadLinks = () => {
               <Label>Notes (optional)</Label>
               <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Internal notes..." rows={2} />
             </div>
+            <div>
+              <Label className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Pre-assign to existing user (optional)</Label>
+              <Select value={assignToUserId || "none"} onValueChange={v => setAssignToUserId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Anyone can claim (default)" /></SelectTrigger>
+                <SelectContent className="max-h-72">
+                  <SelectItem value="none">Anyone can claim (default)</SelectItem>
+                  {profiles.map(p => (
+                    <SelectItem key={p.user_id} value={p.user_id}>
+                      {p.full_name || "Unnamed"} {p.email ? `· ${p.email}` : ""} {p.mobile ? `· ${p.mobile}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">If set, the custom pricing is tied to that user's account when they open the link.</p>
+            </div>
 
             {/* Caricature Pricing */}
             <div className="space-y-3">
