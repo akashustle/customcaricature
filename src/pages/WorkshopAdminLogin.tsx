@@ -479,7 +479,7 @@ const WorkshopAdminLogin = () => {
             </div>
 
             <div className="text-center space-y-3">
-              <button onClick={() => navigate("/customcad75")} className="text-xs font-semibold transition-colors block mx-auto" style={{ color: BRAND.accent }}>
+              <button onClick={() => { import("@/lib/admin-url-unlock").then(m => m.unlockAdminUrl("main")); navigate("/customcad75"); }} className="text-xs font-semibold transition-colors block mx-auto" style={{ color: BRAND.accent }}>
                 🛡️ Switch to Main Admin
               </button>
               {!(window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone) && (
