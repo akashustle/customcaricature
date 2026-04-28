@@ -306,10 +306,15 @@ const SiteFooter = () => {
             </DialogTitle>
             <DialogDescription className="text-center pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 text-warning px-3 py-1 text-xs font-semibold mb-3">
-                <Pause className="w-3 h-3" /> Currently paused
+                <Pause className="w-3 h-3" />
+                {comingSoonOpen && /order caricature|custom caricature/i.test(comingSoonOpen)
+                  ? "Paused due to high demand"
+                  : "Coming soon"}
               </span>
               <br />
-              We're polishing this experience and it's coming back soon. In the meantime, explore our other services or get in touch — we'd love to help.
+              {comingSoonOpen && /order caricature|custom caricature/i.test(comingSoonOpen)
+                ? "We're temporarily paused due to overwhelming demand 🎨 — our artists are catching up. Please check back shortly or message us on WhatsApp to be notified."
+                : "We're polishing this experience and it's coming soon. In the meantime, explore our other services or get in touch — we'd love to help."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">
