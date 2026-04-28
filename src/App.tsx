@@ -11,6 +11,7 @@ import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
 import RightClickBlocker from "./components/RightClickBlocker";
+import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
@@ -320,12 +321,7 @@ const App = () => {
             
             <FloatingButtons />
             <MobileBottomNav />
-            <Suspense fallback={null}>
-              {(() => {
-                const ReferralTrackerBoot = require("./components/ReferralTrackerBoot").default;
-                return <ReferralTrackerBoot />;
-              })()}
-            </Suspense>
+            <ReferralTrackerBoot />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
