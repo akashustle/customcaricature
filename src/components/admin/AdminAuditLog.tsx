@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSharedChannel } from "@/hooks/useSharedChannel";
-import { ShieldCheck, RefreshCw, Activity, AlertCircle } from "lucide-react";
+import { ShieldCheck, RefreshCw, Activity, AlertCircle, Undo2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface AuditRow {
   id: number;
@@ -51,6 +52,25 @@ export default function AdminAuditLog() {
   const [opFilter, setOpFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [revertingId, setRevertingId] = useState<number | null>(null);
+
+  const handleRevert = async (entry: AuditRow) => {
+    if (!confirm(`Revert this ${entry.operation} on ${entry.table_name}?\n\n${entry.summary}`)) return;
+    setRevertingId(entry.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("audit-revert", {
+        body: { audit_id: entry.id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success("Change reverted successfully");
+      fetchRows();
+    } catch (e: any) {
+      toast.error(e?.message || "Revert failed");
+    } finally {
+      setRevertingId(null);
+    }
+  };
 
   const fetchRows = async () => {
     setError(null);
@@ -189,6 +209,18 @@ export default function AdminAuditLog() {
                     {r.changed_columns && r.changed_columns.length > 0 && (
                       <span>fields: {r.changed_columns.join(", ")}</span>
                     )}
+                  </div>
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-[11px]"
+                      disabled={revertingId === r.id || r.table_name === "admin_audit_log" || r.table_name === "user_roles"}
+                      onClick={() => handleRevert(r)}
+                    >
+                      <Undo2 className={`h-3 w-3 mr-1 ${revertingId === r.id ? "animate-spin" : ""}`} />
+                      {revertingId === r.id ? "Reverting…" : "Revert"}
+                    </Button>
                   </div>
                 </li>
               ))}
