@@ -356,8 +356,9 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Desktop 3D flash-card hero strip (lg+) */}
-      <div className="hidden lg:block max-w-5xl mx-auto px-4 pt-5">
+      {/* Desktop 3D flash-card hero strip (lg+) — hidden on Profile tab so the
+          profile hero is the only large surface above content. */}
+      <div className={`hidden lg:block max-w-5xl mx-auto px-4 pt-5 ${activeTab === "profile" ? "lg:hidden" : ""}`}>
         <DesktopFlashStrip
           greeting={getGreeting()}
           fullName={workshopUser.name || "Workshop Student"}
