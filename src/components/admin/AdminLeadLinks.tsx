@@ -153,7 +153,7 @@ const AdminLeadLinks = () => {
     setCreating(false);
   };
 
-  const resetForm = () => { setLabel(""); setNotes(""); setCaricPrices([]); setEventPrices([]); };
+  const resetForm = () => { setLabel(""); setNotes(""); setCaricPrices([]); setEventPrices([]); setAssignToUserId(""); };
 
   const copyLink = (code: string) => {
     const url = `${window.location.origin}/claim-link?code=${code}`;
