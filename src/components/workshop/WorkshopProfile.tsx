@@ -357,46 +357,52 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     sky: "hsl(210 90% 55%)",
   };
 
-  return (
     <div className="space-y-5">
-      {/* ============== HERO PROFILE CARD ============== */}
+      {/* ============== HERO PROFILE CARD — mirrors booking dashboard ============== */}
       <motion.div
-        initial={{ opacity: 0, y: 20, rotateX: -5 }}
-        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{ duration: 0.6, type: "spring" }}
-        className="relative overflow-hidden rounded-3xl p-6 md:p-7 border"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="relative overflow-hidden rounded-3xl p-6 border border-white/80"
         style={{
-          background: darkMode
-            ? `linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.8) 100%)`
-            : `linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)`,
-          borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.8)",
-          boxShadow: darkMode
-            ? undefined
-            : "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 12px 30px -12px hsl(220 30% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(15,23,42,0.04)",
-          transformStyle: "preserve-3d",
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)",
+          boxShadow:
+            "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 12px 30px -12px hsl(220 30% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(15,23,42,0.04)",
         }}
       >
-        {/* 3D ambient orbs */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${palette.coral}, transparent 70%)` }} />
-        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl opacity-30 pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${palette.sage}, transparent 70%)` }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${palette.gold}, transparent 70%)` }} />
+        {/* Soft 3D ambient orbs — matches booking dashboard exactly */}
+        <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(252 90% 75% / 0.35), transparent 70%)", filter: "blur(28px)" }} />
+        <div className="absolute -bottom-14 -left-14 w-48 h-48 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(280 80% 78% / 0.30), transparent 70%)", filter: "blur(32px)" }} />
+        <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-5">
-          {/* Avatar */}
-          <motion.div className="relative" whileHover={{ scale: 1.05, rotate: 2 }}>
-            <div className="absolute -inset-2 rounded-full blur-md opacity-70"
-              style={{ background: `conic-gradient(from 0deg, ${palette.coral}, ${palette.gold}, ${palette.sage}, ${palette.plum}, ${palette.coral})` }} />
-            <Avatar className="relative w-28 h-28 md:w-32 md:h-32 border-4 shadow-2xl"
-              style={{ borderColor: palette.ivory }}>
-              <AvatarImage src={profileData.avatar_url || undefined} className="object-cover" />
-              <AvatarFallback className="text-3xl md:text-4xl font-bold text-white"
-                style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+          {/* Square 2xl avatar (matches booking dashboard) */}
+          <div className="relative flex-shrink-0">
+            <div
+              className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
+              style={{
+                boxShadow:
+                  "0 14px 30px -10px hsl(252 60% 40% / 0.30), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(15,23,42,0.06)",
+              }}
+            >
+              {profileData.avatar_url ? (
+                <img src={profileData.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-primary font-display">{initials}</span>
+              )}
+            </div>
+            {isVerified && (
+              <span
+                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center ring-2 ring-white shadow-lg"
+                style={{ background: "linear-gradient(135deg, hsl(210 90% 55%), hsl(220 85% 50%))" }}
+                title="Verified user"
+                aria-label="Verified"
+              >
+                <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </span>
+            )}
             {avatarUploadEnabled && (
               <>
                 <button
@@ -405,8 +411,8 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                     fileRef.current?.click();
                   }}
                   disabled={uploading}
-                  className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
-                  style={{ background: editLocked ? "hsl(40 90% 55%)" : palette.coral, borderColor: palette.ivory, color: "white" }}
+                  className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2 border-white"
+                  style={{ background: editLocked ? "hsl(40 90% 55%)" : "hsl(var(--primary))", color: "white" }}
                   aria-label={editLocked ? "Request edit to change photo" : "Change profile photo"}
                   title={editLocked ? "Request edit access to change photo" : "Change profile photo"}
                 >
@@ -416,90 +422,58 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
               </>
             )}
-          </motion.div>
+          </div>
 
           {/* Identity */}
-          <div className="flex-1 min-w-0 w-full text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight break-words"
-                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 30% 20%)" }}>
-                {profileData.name || "Workshop Student"}
-              </h2>
-              {isVerified && (
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring" }}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full shadow-xl ring-2 ring-white"
-                  style={{ background: `linear-gradient(135deg, ${palette.sky}, hsl(220 80% 60%))` }}
-                  title="Verified student"
-                  aria-label="Verified"
-                >
-                  <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} fill="currentColor" />
-                </motion.div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-center md:justify-start gap-2 mt-1.5 flex-wrap">
-              <Badge
-                className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
-              >
-                🎨 {profileData.student_type === "registered_online" ? "Online Student" : "Workshop Student"}
-              </Badge>
-              {profileData.roll_number && (
-                <Badge
-                  className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
-                >
-                  Roll #{profileData.roll_number}
-                </Badge>
-              )}
-              {profileData.skill_level && (
-                <Badge
-                  className="text-[10px] font-semibold border bg-card text-foreground border-border shadow-[0_1px_2px_hsl(var(--foreground)/0.06)]"
-                >
-                  {profileData.skill_level}
-                </Badge>
-              )}
-            </div>
-
-            {/* Email + city — wraps fully, never truncates */}
-            <p className="text-xs md:text-sm mt-2 opacity-80 break-all leading-snug"
-              style={{ color: darkMode ? "hsl(var(--muted-foreground))" : "hsl(20 25% 22%)" }}>
+          <div className="flex-1 min-w-0 w-full">
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
+              <span className="break-words">{profileData.name || "Workshop Student"}</span>
+              {isVerified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
+            </h3>
+            <p className="text-sm text-slate-600 font-sans mt-0.5 break-all leading-snug">
               {profileData.email || profileData.mobile}
               {(profileData.city || profileData.country) && (
                 <span className="opacity-80"> • {profileData.city || "City not set"}, {profileData.country || "India"}</span>
               )}
             </p>
+            <div className="flex items-center justify-center sm:justify-start gap-2 mt-1.5 flex-wrap">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs text-slate-700 font-sans font-semibold">{isVerified ? "Verified student" : "Active student"}</span>
+              {profileData.student_type && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-sans bg-white/80 backdrop-blur px-2 py-0.5 rounded-full border border-slate-200">
+                  🎨 {profileData.student_type === "registered_online" ? "Online" : "Workshop"}
+                </span>
+              )}
+              {profileData.roll_number && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-sans bg-white/80 backdrop-blur px-2 py-0.5 rounded-full border border-slate-200">
+                  Roll #{profileData.roll_number}
+                </span>
+              )}
+            </div>
 
-            {/* Profile completeness ring */}
+            {/* Profile completeness bar */}
             <div className="mt-3 flex items-center gap-2">
-              <div className="flex-1 h-2 rounded-full overflow-hidden"
-                style={{ background: darkMode ? "hsl(var(--muted))" : "hsl(38 30% 80%)" }}>
+              <div className="flex-1 h-2 rounded-full overflow-hidden bg-slate-200">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${completeness}%` }} transition={{ duration: 1 }}
                   className="h-full rounded-full"
-                  style={{ background: `linear-gradient(90deg, ${palette.coral}, ${palette.gold}, ${palette.sage})` }} />
+                  style={{ background: `linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))` }} />
               </div>
-              <span className="text-xs font-bold"
-                style={{ color: darkMode ? "hsl(var(--foreground))" : "hsl(20 35% 22%)" }}>
-                {completeness}%
-              </span>
+              <span className="text-xs font-bold text-slate-800">{completeness}%</span>
             </div>
           </div>
 
-          {/* Action buttons */}
+          {/* Edit / Request edit */}
           {!editing && (
-            <div className="flex md:flex-col gap-2">
+            <div className="flex sm:flex-col gap-1.5 flex-shrink-0">
               {editLocked ? (
-                <Button size="sm" onClick={() => setEditRequestOpen(true)}
-                  className="rounded-full font-semibold shadow-md text-white border-0"
-                  style={{ background: `linear-gradient(135deg, hsl(40 90% 55%), hsl(20 85% 55%))` }}>
-                  🔒 Request Edit
+                <Button variant="secondary" size="sm" onClick={() => setEditRequestOpen(true)}
+                  className="font-sans rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 shadow-sm">
+                  <span className="mr-1">🔒</span> Request Edit
                 </Button>
               ) : (
-                <Button size="sm" onClick={() => setEditing(true)}
-                  className="rounded-full font-semibold shadow-md text-white border-0"
-                  style={{ background: `linear-gradient(135deg, ${palette.coral}, ${palette.gold})` }}>
-                  <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit
+                <Button variant="secondary" size="sm" onClick={() => setEditing(true)}
+                  className="font-sans rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 shadow-sm">
+                  <Edit2 className="w-4 h-4 mr-1" /> Edit
                 </Button>
               )}
             </div>
