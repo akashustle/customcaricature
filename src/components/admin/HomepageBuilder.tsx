@@ -344,6 +344,12 @@ const HomepageBuilder = () => {
                             </p>
                           </div>
                           <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => moveBlock(idx, -1)} disabled={idx === 0} title="Move up">
+                              <ChevronUp className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => moveBlock(idx, 1)} disabled={idx === blocks.length - 1} title="Move down">
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
                             <Button size="sm" variant="ghost" onClick={() => toggleVisible(b)} title={b.is_visible ? "Hide" : "Show"}>
                               {b.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </Button>
