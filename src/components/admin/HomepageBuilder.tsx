@@ -455,54 +455,115 @@ type Field =
   | { key: string; type: "text"; label: string; placeholder?: string }
   | { key: string; type: "textarea"; label: string; placeholder?: string }
   | { key: string; type: "image"; label: string }
+  | { key: string; type: "video"; label: string }
   | { key: string; type: "url"; label: string; placeholder?: string }
   | { key: string; type: "number"; label: string; min?: number; max?: number }
   | { key: string; type: "switch"; label: string }
   | { key: string; type: "select"; label: string; options: { value: string; label: string }[] }
   | { key: string; type: "html"; label: string }
-  | { key: string; type: "cards"; label: string };
+  | { key: string; type: "cards"; label: string }
+  | { key: string; type: "string_list"; label: string; placeholder?: string }
+  | { key: string; type: "items"; label: string; schema: { key: string; label: string; type?: "text" | "textarea" | "image" }[] };
 
 const buildFields = (blockType: string, _content: Record<string, any>): Field[] => {
   switch (blockType) {
     case "hero":
       return [
-        { key: "eyebrow",        type: "text",    label: "Eyebrow chip text" },
-        { key: "title",          type: "textarea",label: "Main title" },
-        { key: "subtitle",       type: "textarea",label: "Subtitle" },
-        { key: "cta_primary",    type: "text",    label: "Primary button text" },
-        { key: "cta_secondary",  type: "text",    label: "Secondary button text" },
+        { key: "chip_text",          type: "text",     label: "Chip text" },
+        { key: "headline",           type: "textarea", label: "Headline" },
+        { key: "headline_highlight", type: "text",     label: "Highlight word (will be coloured inside headline)" },
+        { key: "subtext",            type: "textarea", label: "Subtext / description" },
+        { key: "primary_cta",        type: "text",     label: "Primary button text" },
+        { key: "primary_cta_link",   type: "url",      label: "Primary button link" },
+        { key: "secondary_cta",      type: "text",     label: "Secondary button text" },
+        { key: "secondary_cta_link", type: "url",      label: "Secondary button link" },
+        { key: "pricing_line",       type: "text",     label: "Pricing strip line (optional)" },
+        { key: "urgency_text",       type: "text",     label: "Urgency line (optional)" },
       ];
     case "video":
       return [
-        { key: "enabled", type: "switch", label: "Show video section" },
-        { key: "url",     type: "url",    label: "Video URL (YouTube/Vimeo)", placeholder: "https://youtube.com/watch?v=..." },
+        { key: "enabled",          type: "switch", label: "Show video section" },
+        { key: "custom_video_url", type: "video",  label: "Upload / pick MP4 video (preferred)" },
+        { key: "youtube_url",      type: "url",    label: "YouTube URL (used if no MP4)" },
       ];
     case "about":
       return [
-        { key: "eyebrow", type: "text",     label: "Eyebrow" },
-        { key: "title",   type: "text",     label: "Title" },
-        { key: "body",    type: "textarea", label: "Body" },
-        { key: "image",   type: "image",    label: "Side image" },
+        { key: "eyebrow",         type: "text",     label: "Eyebrow" },
+        { key: "title_pre",       type: "text",     label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text",     label: "Title (highlight word)" },
+        { key: "body",            type: "textarea", label: "Body" },
+        { key: "quote",           type: "textarea", label: "Quote (right card)" },
+        { key: "signoff_name",    type: "text",     label: "Quote signoff name" },
+        { key: "signoff_role",    type: "text",     label: "Quote signoff role" },
+        { key: "signoff_initial", type: "text",     label: "Signoff initial (1 char)" },
+        { key: "rating_value",    type: "text",     label: "Rating value (e.g. 4.9)" },
+        { key: "rating_count",    type: "text",     label: "Rating count text" },
       ];
     case "services":
       return [
-        { key: "title",    type: "text",  label: "Section title" },
-        { key: "subtitle", type: "text",  label: "Section subtitle" },
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "subtitle",        type: "textarea", label: "Subtitle" },
+        { key: "cta_label",       type: "text", label: "Bottom CTA button text" },
+        { key: "items",           type: "items", label: "Service cards", schema: [
+          { key: "icon",  label: "Icon (Calendar/Sparkles/Trophy/Heart/Users/Award/Star)" },
+          { key: "title", label: "Title" },
+          { key: "body",  label: "Body", type: "textarea" },
+        ] },
+      ];
+    case "how":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "cta_label",       type: "text", label: "CTA button text" },
+        { key: "steps",           type: "items", label: "Steps", schema: [
+          { key: "n",     label: "Number" },
+          { key: "title", label: "Title" },
+          { key: "body",  label: "Body", type: "textarea" },
+        ] },
+      ];
+    case "why":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "subtitle",        type: "text", label: "Subtitle" },
+        { key: "others_label",    type: "text", label: "Left column label" },
+        { key: "ours_label",      type: "text", label: "Right column label" },
+        { key: "others",          type: "string_list", label: "Other studios bullets", placeholder: "Slow turnaround time" },
+        { key: "ours",            type: "string_list", label: "Our bullets",            placeholder: "On-time, every time" },
+      ];
+    case "reviews":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "items",           type: "items", label: "Reviews", schema: [
+          { key: "name", label: "Name" },
+          { key: "role", label: "Role / Event" },
+          { key: "text", label: "Review text", type: "textarea" },
+        ] },
+      ];
+    case "faqs":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "items",           type: "items", label: "Questions", schema: [
+          { key: "q", label: "Question" },
+          { key: "a", label: "Answer", type: "textarea" },
+        ] },
       ];
     case "still_confused":
       return [
-        { key: "title",    type: "text",     label: "Title" },
-        { key: "subtitle", type: "textarea", label: "Subtitle" },
-        { key: "cta_text", type: "text",     label: "Button text" },
-        { key: "cta_href", type: "url",      label: "Button link" },
-      ];
-    case "why":
-    case "reviews":
-    case "faqs":
-    case "how":
-      return [
-        { key: "title",    type: "text",     label: "Section title (optional override)" },
-        { key: "subtitle", type: "textarea", label: "Section subtitle (optional override)" },
+        { key: "eyebrow",         type: "text",     label: "Eyebrow" },
+        { key: "title_pre",       type: "text",     label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text",     label: "Title (highlight word)" },
+        { key: "subtitle",        type: "textarea", label: "Subtitle" },
+        { key: "whatsapp_label",  type: "text",     label: "WhatsApp button text" },
+        { key: "instagram_label", type: "text",     label: "Instagram button text" },
       ];
     case "heading":
       return [
