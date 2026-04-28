@@ -708,19 +708,25 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
-    if (error) {
+    try {
+      const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
+      if (error) throw error;
+      if (data) {
+        // Fetch admin and artist user IDs to exclude from customer list
+        const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+        const adminUserIds = new Set((roles || []).filter(r => r.role === "admin" || r.role === "shop_admin").map(r => r.user_id));
+        const { data: artists } = await supabase.from("artists").select("auth_user_id");
+        const artistUserIds = new Set((artists || []).filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id));
+
+        const filtered = data.filter((c: any) => !adminUserIds.has(c.user_id) && !artistUserIds.has(c.user_id));
+        setCustomers(filtered as any);
+        import("@/lib/offline-cache").then(m => m.cacheSet("admin:customers", filtered)).catch(() => {});
+      }
+    } catch (error) {
       console.error("Error fetching customers:", error);
-    }
-    if (data) {
-      // Fetch admin and artist user IDs to exclude from customer list
-      const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-      const adminUserIds = new Set((roles || []).filter(r => r.role === "admin" || r.role === "shop_admin").map(r => r.user_id));
-      const { data: artists } = await supabase.from("artists").select("auth_user_id");
-      const artistUserIds = new Set((artists || []).filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id));
-      
-      const filtered = data.filter((c: any) => !adminUserIds.has(c.user_id) && !artistUserIds.has(c.user_id));
-      setCustomers(filtered as any);
+      const m = await import("@/lib/offline-cache");
+      const cached = await m.cacheGet<any[]>("admin:customers");
+      if (cached?.value) setCustomers(cached.value as any);
     }
   };
 
