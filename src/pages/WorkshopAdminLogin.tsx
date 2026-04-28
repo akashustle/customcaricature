@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, GraduationCap, Phone, Sparkles, Download } from "lucide-react";
 import { saveCredentials, verifyOfflineCredentials, hasCachedCredentials } from "@/lib/offline-credentials";
+import AuthShell from "@/components/auth/AuthShell";
 
 interface AdminInfo { name: string; email: string; mobile: string; designation: string; }
 
@@ -232,99 +233,62 @@ const WorkshopAdminLogin = () => {
   const goBack = () => { setDirection(-1); if (step === 3) setStep(2); else if (step === 2) { setStep(1); setSelectedAdmin(null); setSelectedAdminEmail(""); } };
 
   return (
-    <div className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+    <AuthShell
+      title="Workshop Admin"
+      subtitle="Sign in to run the workshop console"
+      badge="Workshop Access"
+      heroTitle="Workshop Admin"
+      heroSubtitle="Run the live workshop console — attendance, videos, payments, certificates and feedback all in one place."
+      accent="emerald"
+    >
       <SEOHead title="Workshop Admin Login" noindex />
 
-      {/* Soft floating shapes */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[
-          { size: 320, x: "-6%", y: "-10%", color: `${BRAND.light}35`, dur: 24 },
-          { size: 260, x: "68%", y: "55%", color: `${BRAND.accent}12`, dur: 30 },
-          { size: 200, x: "38%", y: "-15%", color: `${BRAND.highlight}10`, dur: 22 },
-          { size: 170, x: "84%", y: "12%", color: `${BRAND.light}20`, dur: 26 },
-        ].map((orb, i) => (
-          <motion.div key={i} className="absolute rounded-full"
-            style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y, background: orb.color, filter: "blur(50px)" }}
-            animate={{ y: [0, -18, 0], x: [0, 8, 0], scale: [1, 1.06, 1] }}
-            transition={{ duration: orb.dur, repeat: Infinity, ease: "easeInOut", delay: i * 1.3 }} />
-        ))}
-      </div>
-
-      {/* Sparkles */}
-      {[...Array(6)].map((_, i) => (
-        <motion.div key={`sp-${i}`} className="absolute pointer-events-none"
-          style={{ top: `${15 + (i * 10) % 70}%`, left: `${10 + (i * 15) % 80}%` }}
-          animate={{ y: [0, -18, 0], opacity: [0, 0.4, 0], rotate: [0, 180, 360] }}
-          transition={{ duration: 4 + i * 0.4, repeat: Infinity, delay: i * 0.7 }}>
-          <Sparkles className="w-3 h-3" style={{ color: BRAND.accent }} />
-        </motion.div>
-      ))}
-
-      <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: `radial-gradient(circle, ${BRAND.primary} 1px, transparent 1px)`, backgroundSize: "34px 34px" }} />
-
-      <motion.div initial={{ opacity: 0, y: 50, scale: 0.88, rotateX: 8 }} animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-        transition={{ duration: 0.8, type: "spring", bounce: 0.2 }} className="w-full max-w-md relative z-10" style={{ perspective: "1200px" }}>
-
-        <motion.div className="absolute -inset-3 rounded-[32px] blur-2xl"
-          style={{ background: `linear-gradient(135deg, ${BRAND.light}50, ${BRAND.accent}15, ${BRAND.light}35)` }}
-          animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 4, repeat: Infinity }} />
-
-        <motion.div className="relative rounded-3xl overflow-hidden"
-          whileHover={{ rotateY: 1, rotateX: -1 }}
-          transition={{ type: "spring", stiffness: 200 }}
-          style={{
-            background: "#FFFFFF",
-            boxShadow: `0 25px 60px -12px ${BRAND.primary}15, 0 12px 30px -8px ${BRAND.accent}10, 0 0 0 1px ${BRAND.light}80 inset`,
-            transformStyle: "preserve-3d",
-          }}>
-
-          <motion.div className="absolute inset-0 pointer-events-none z-20"
-            style={{ background: `linear-gradient(105deg, transparent 35%, ${BRAND.cream}90 42%, #FFFFFF 50%, ${BRAND.cream}90 58%, transparent 65%)` }}
-            animate={{ x: ["-200%", "300%"] }} transition={{ duration: 6, repeat: Infinity, repeatDelay: 6, ease: "easeInOut" }} />
-
-          <motion.div className="h-1.5 w-full"
-            style={{ background: `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.accent}, ${BRAND.primary})`, backgroundSize: "200% 100%" }}
-            animate={{ backgroundPosition: ["0% 0%", "200% 0%"] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "linear" }} />
-
-          <div className="relative p-8 space-y-6">
-            <div className="text-center space-y-4">
-              <motion.div className="mx-auto w-20 h-20 relative" animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity }}>
-                <motion.div className="absolute -inset-4 rounded-full blur-lg"
-                  style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30, ${BRAND.light}50)` }}
-                  animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.08, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }} />
-                <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-xl">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]" />
-                </div>
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <GraduationCap className="w-5 h-5" style={{ color: BRAND.accent }} />
-                  <h1 className="text-2xl font-black" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                    Workshop Admin
-                  </h1>
-                </div>
-                <p className="text-sm font-medium" style={{ color: "#6B7280" }}>{getGreeting()}</p>
-              </motion.div>
-
-              <div className="flex items-center justify-center gap-3 mt-3">
-                {[1, 2, 3].map(s => (
-                  <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-                    <div className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-12" : s < step ? "w-8" : "w-6"}`}
-                      style={{ background: s === step ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})` : s < step ? `${BRAND.accent}50` : "#D1D5DB" }} />
-                  </motion.div>
-                ))}
-              </div>
-
-              <motion.button type="button" onClick={requestLocationAccess} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold admin-3d-button ${
-                locationGranted ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"
-              }`} animate={locationGranted ? {} : { scale: [1, 1.03, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                <MapPin className="w-3 h-3" />
-                {locationGranted ? "Location verified ✓" : "Location required — click here to allow"}
-              </motion.button>
+      <div className="space-y-5">
+        {/* Compact header rail */}
+        <div className="text-center space-y-3">
+          <motion.div className="mx-auto w-14 h-14 relative" animate={{ y: [0, -3, 0] }} transition={{ duration: 4, repeat: Infinity }}>
+            <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-md">
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]" />
             </div>
+          </motion.div>
+
+          <div>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <GraduationCap className="w-4 h-4" style={{ color: BRAND.accent }} />
+              <p className="text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: BRAND.accent }}>
+                Workshop Access
+              </p>
+            </div>
+            <p className="text-sm font-medium" style={{ color: "#6B7280" }}>{getGreeting()}</p>
+          </div>
+
+          {/* Step pills */}
+          <div className="flex items-center justify-center gap-2">
+            {[1, 2, 3].map(s => (
+              <div key={s}
+                className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-10" : s < step ? "w-7" : "w-5"}`}
+                style={{
+                  background: s === step
+                    ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`
+                    : s < step ? `${BRAND.accent}55` : "#E5E7EB",
+                }} />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={requestLocationAccess}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${
+              locationGranted ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"
+            }`}
+          >
+            <MapPin className="w-3 h-3" />
+            {locationGranted ? "Location verified ✓" : "Tap to allow location"}
+          </button>
+        </div>
+
+        <div className="relative">
+          <div className="space-y-3.5 sm:space-y-5">
 
             <div className="min-h-[270px] relative">
               <AnimatePresence mode="wait" custom={direction}>
@@ -523,9 +487,9 @@ const WorkshopAdminLogin = () => {
               )}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </div>
+        </div>
+      </div>
+    </AuthShell>
   );
 };
 

@@ -9,8 +9,6 @@ import { ThemeProvider } from "next-themes";
 import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
-import RoutePrefetcher from "./components/RoutePrefetcher";
-import RightClickBlocker from "./components/RightClickBlocker";
 import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
@@ -48,6 +46,10 @@ const SyncStatusBadge = lazyShell(() => import("./components/SyncStatusBadge"));
 const SyncToastListener = lazyShell(() => import("./components/SyncToastListener"));
 const ApkUpdatePrompt = lazyShell(() => import("./components/ApkUpdatePrompt"));
 
+// Non-critical chrome — deferred to keep them off the boot bundle (helps TBT).
+const RoutePrefetcher = lazyShell(() => import("./components/RoutePrefetcher"));
+const RightClickBlocker = lazyShell(() => import("./components/RightClickBlocker"));
+
 import { useOneSignal } from "./hooks/useOneSignal";
 import { useWebPush } from "./hooks/useWebPush";
 import useAutoUpdate from "./hooks/useAutoUpdate";
@@ -59,15 +61,22 @@ import { installOfflineCache } from "./lib/offline-cache";
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
 
-// Boot the offline action queue worker (drains on reconnect)
-installSyncWorker();
-
-// Periodically report this client's offline backlog so admins see live health.
-installSyncHealthReporter();
-
-// Prime essential offline content (logo, gallery, pricing, FAQs, my orders).
-// Cheap + idle-deferred — safe to call on every boot.
-installOfflineCache();
+// Defer the heavy boot installers off the critical path. Each runs once, when
+// the browser is idle, so they don't compete with hydration for main-thread
+// time (was the dominant source of the TBT regression on /).
+const __idleBoot = (cb: () => void) => {
+  if (typeof window === "undefined") return;
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(cb, { timeout: 3000 });
+  } else {
+    setTimeout(cb, 1500);
+  }
+};
+__idleBoot(() => {
+  installSyncWorker();
+  installSyncHealthReporter();
+  installOfflineCache();
+});
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
