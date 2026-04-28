@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 export type UISetting = {
   id: string;
@@ -45,12 +46,9 @@ export const useUISettings = () => {
 
   useEffect(() => {
     fetchSettings();
-    const ch = supabase
-      .channel("ui-settings-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "ui_settings" }, () => fetchSettings())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
   }, []);
+
+  useSharedChannel(() => fetchSettings(), { table: "ui_settings" });
 
   const updateSetting = async (id: string, value: Record<string, any>, category = "brand") => {
     const adminName = sessionStorage.getItem("admin_entered_name") || "Admin";

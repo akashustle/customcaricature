@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 type SocialLink = {
   id: string;
@@ -12,17 +13,16 @@ type SocialLink = {
 const useSocialLinks = () => {
   const [links, setLinks] = useState<SocialLink[]>([]);
 
+  const fetchLinks = async () => {
+    const { data } = await supabase.from("social_links").select("*").eq("is_active", true).order("sort_order");
+    if (data) setLinks(data as SocialLink[]);
+  };
+
   useEffect(() => {
-    const fetch = async () => {
-      const { data } = await supabase.from("social_links").select("*").eq("is_active", true).order("sort_order");
-      if (data) setLinks(data as SocialLink[]);
-    };
-    fetch();
-    const ch = supabase.channel("social-links-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "social_links" }, () => fetch())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    fetchLinks();
   }, []);
+
+  useSharedChannel(() => fetchLinks(), { table: "social_links" });
 
   return links;
 };

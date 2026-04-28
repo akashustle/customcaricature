@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 export type FormField = {
   id: string;
@@ -31,12 +32,9 @@ export const useFormFields = (formId: string) => {
 
   useEffect(() => {
     fetchFields();
-    const ch = supabase
-      .channel(`form-fields-${formId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "form_fields" }, () => fetchFields())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
   }, [formId]);
+
+  useSharedChannel(() => fetchFields(), { table: "form_fields" });
 
   const addField = async (field: Partial<FormField>) => {
     const maxSort = fields.length > 0 ? Math.max(...fields.map(f => f.sort_order)) + 1 : 0;
