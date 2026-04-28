@@ -31,6 +31,9 @@ const AdminAppDownload = () => {
   const [cfg, setCfg] = useState<AppDownloadConfig>({ enabled: true, version: "1.0.0" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -56,6 +59,80 @@ const AdminAppDownload = () => {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Compute SHA-256 of the uploaded file in the browser using SubtleCrypto.
+  const sha256OfFile = async (file: File): Promise<string> => {
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  };
+
+  const onPickAPK = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/\.apk$/i.test(file.name)) {
+      toast({ title: "Wrong file type", description: "Please select a .apk file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 200 MB.", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    setUploadPct(5);
+    try {
+      const version = (cfg.version || "1.0.0").trim() || "1.0.0";
+      const safeVersion = version.replace(/[^a-z0-9._-]/gi, "_");
+      const path = `releases/CreativeCaricatureClub-${safeVersion}-${Date.now()}.apk`;
+
+      // Hash + upload run in parallel-ish — hash first because it's quick on most APKs
+      const sha = await sha256OfFile(file);
+      setUploadPct(20);
+
+      const { error: upErr } = await supabase.storage
+        .from("app-builds")
+        .upload(path, file, {
+          cacheControl: "3600",
+          contentType: "application/vnd.android.package-archive",
+          upsert: true,
+        });
+      if (upErr) throw upErr;
+      setUploadPct(85);
+
+      const { data: pub } = supabase.storage.from("app-builds").getPublicUrl(path);
+      const url = pub.publicUrl;
+      const sizeMb = Number((file.size / (1024 * 1024)).toFixed(1));
+
+      const next: AppDownloadConfig = {
+        ...cfg,
+        android_apk_url: url,
+        sha256: sha,
+        size_mb: sizeMb,
+        version,
+        enabled: true,
+      };
+      setCfg(next);
+
+      const { error: saveErr } = await supabase
+        .from("admin_site_settings")
+        .upsert({ id: "app_download", value: next as any }, { onConflict: "id" });
+      if (saveErr) throw saveErr;
+
+      setUploadPct(100);
+      toast({
+        title: "✅ APK uploaded & published",
+        description: `Version ${version} (${sizeMb} MB) is now live on /download.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err?.message || "Try again.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      setTimeout(() => setUploadPct(0), 1500);
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
