@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, ChevronLeft, ChevronRight, ArrowUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 import WatermarkedImage from "@/components/WatermarkedImage";
@@ -7,10 +7,6 @@ import WatermarkedImage from "@/components/WatermarkedImage";
 const LilFleaGallery = () => {
   const [images, setImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
-  const [autoScroll, setAutoScroll] = useState(true);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const userInteractingRef = useRef(false);
-  const userInteractTimeoutRef = useRef<number | null>(null);
 
   const fetchImages = useCallback(async () => {
     const { data } = await supabase.from("lil_flea_gallery").select("*").order("sort_order");
@@ -26,56 +22,6 @@ const LilFleaGallery = () => {
     return () => { supabase.removeChannel(channel); };
   }, [fetchImages]);
 
-  // Infinite UPWARD auto-scroll, but pause when user manually scrolls / drags.
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || images.length === 0) return;
-
-    // Start in the middle so we can scroll both directions seamlessly.
-    const initToMiddle = () => {
-      const half = el.scrollHeight / 2;
-      if (half > 0) el.scrollTop = half;
-    };
-    initToMiddle();
-    // Re-init after images render
-    const t = setTimeout(initToMiddle, 200);
-
-    let raf: number;
-    const speed = 1.6; // px/frame upward — slightly fast
-    const tick = () => {
-      if (autoScroll && !userInteractingRef.current && el) {
-        el.scrollTop -= speed;
-        if (el.scrollTop <= 0) {
-          el.scrollTop = el.scrollHeight / 2;
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-
-    const handleUserScroll = () => {
-      userInteractingRef.current = true;
-      if (userInteractTimeoutRef.current) window.clearTimeout(userInteractTimeoutRef.current);
-      userInteractTimeoutRef.current = window.setTimeout(() => {
-        userInteractingRef.current = false;
-      }, 1500);
-      // Wrap around if user drags to extremes
-      if (el.scrollTop <= 0) el.scrollTop = el.scrollHeight / 2;
-      else if (el.scrollTop >= el.scrollHeight - el.clientHeight) el.scrollTop = el.scrollHeight / 2;
-    };
-
-    el.addEventListener("wheel", handleUserScroll, { passive: true });
-    el.addEventListener("touchmove", handleUserScroll, { passive: true });
-    el.addEventListener("scroll", handleUserScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(t);
-      el.removeEventListener("wheel", handleUserScroll);
-      el.removeEventListener("touchmove", handleUserScroll);
-      el.removeEventListener("scroll", handleUserScroll);
-    };
-  }, [images, autoScroll]);
-
   // Keyboard nav for lightbox
   useEffect(() => {
     if (lightboxIdx === null) return;
@@ -89,8 +35,11 @@ const LilFleaGallery = () => {
   }, [lightboxIdx, images.length]);
 
   const allUrls = images.map(i => i.image_url);
-  // Triple for seamless wraparound in both directions
-  const tripled = [...allUrls, ...allUrls, ...allUrls];
+  // Triple for seamless infinite scroll wrap
+  const tripled = [...images, ...images, ...images];
+  const duration = Math.max(18, Math.round(images.length * 3.2));
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <>
@@ -109,20 +58,10 @@ const LilFleaGallery = () => {
               </div>
               <div>
                 <h1 className="text-base font-black text-foreground">Lil Flea Gallery</h1>
-                <p className="text-xs text-muted-foreground">{images.length} Images · scroll up or down</p>
+                <p className="text-xs text-muted-foreground">{images.length} Images · auto-scrolling</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setAutoScroll(s => !s)}
-                className="text-[11px] font-semibold flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 hover:bg-muted/70 transition"
-                aria-label={autoScroll ? "Pause auto-scroll" : "Play auto-scroll"}
-              >
-                {autoScroll ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                {autoScroll ? "Pause" : "Auto"}
-              </button>
-              <a href="/lil-flea" className="text-sm font-semibold text-accent hover:underline">← Back</a>
-            </div>
+            <a href="/lil-flea" className="text-sm font-semibold text-accent hover:underline">← Back</a>
           </div>
         </div>
 
@@ -141,33 +80,75 @@ const LilFleaGallery = () => {
             </a>
           </div>
         ) : (
-          /* Infinite scroll container — vertical, both directions, mobile-safe height */
-          <div
-            ref={scrollRef}
-            className="overflow-y-auto scrollbar-hide overscroll-contain"
-            style={{
-              height: "calc(100dvh - 65px)",
-              WebkitOverflowScrolling: "touch",
-              touchAction: "pan-y",
-            }}
-          >
-            <div className="columns-2 sm:columns-3 md:columns-4 gap-2 p-2 sm:p-3">
-              {tripled.map((url, i) => (
+          <>
+            {/* Section heading like Event Gallery */}
+            <section className="py-8 md:py-12" style={{ contentVisibility: 'auto', containIntrinsicSize: '0 400px' }}>
+              <div className="container mx-auto px-4 mb-4 text-center">
+                <p className="text-sm font-body font-semibold uppercase tracking-widest text-accent mb-2">The Lil Flea</p>
+                <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground">Moments at the Flea</h2>
+                <p className="text-muted-foreground font-body mt-1">Live caricatures · happy customers · unforgettable memories</p>
+              </div>
+
+              <style>{`@keyframes lilflea-scroll{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-33.33%,0,0)}}`}</style>
+
+              {/* Row 1 */}
+              <div className="overflow-hidden py-3">
                 <div
-                  key={`${url}-${i}`}
-                  className="break-inside-avoid mb-2 cursor-pointer rounded-lg overflow-hidden shadow-sm border border-border/30 hover:shadow-md transition-shadow active:scale-[0.98]"
-                  onClick={() => setLightboxIdx(i % allUrls.length)}
+                  className="flex gap-3 will-change-transform"
+                  style={{ animation: `lilflea-scroll ${duration}s linear infinite`, width: "max-content" }}
                 >
-                  <WatermarkedImage
-                    src={url}
-                    alt={images[i % allUrls.length]?.caption || `Lil Flea photo ${(i % allUrls.length) + 1}`}
-                    className="w-full"
-                    loading={i < 12 ? "eager" : "lazy"}
-                  />
+                  {tripled.map((item, i) => (
+                    <div
+                      key={`r1-${i}`}
+                      className="flex-shrink-0 w-56 h-72 sm:w-64 sm:h-80 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 transition-transform duration-300"
+                      onClick={() => setLightboxIdx(i % allUrls.length)}
+                    >
+                      <WatermarkedImage
+                        src={item.image_url}
+                        alt={item.caption || `Lil Flea photo ${(i % allUrls.length) + 1}`}
+                        className="w-full h-full rounded-2xl shadow-md border border-border/50"
+                        loading={i < 8 ? "eager" : "lazy"}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+
+              {/* Row 2 — reversed direction for visual depth, only if enough images */}
+              {images.length >= 4 && (
+                <div className="overflow-hidden py-3">
+                  <div
+                    className="flex gap-3 will-change-transform"
+                    style={{ animation: `lilflea-scroll ${Math.round(duration * 1.2)}s linear infinite reverse`, width: "max-content" }}
+                  >
+                    {tripled.map((item, i) => (
+                      <div
+                        key={`r2-${i}`}
+                        className="flex-shrink-0 w-48 h-64 sm:w-56 sm:h-72 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 transition-transform duration-300"
+                        onClick={() => setLightboxIdx(i % allUrls.length)}
+                      >
+                        <WatermarkedImage
+                          src={item.image_url}
+                          alt={item.caption || `Lil Flea photo ${(i % allUrls.length) + 1}`}
+                          className="w-full h-full rounded-2xl shadow-md border border-border/50"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* Scroll-to-top FAB */}
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-24 right-4 z-40 w-12 h-12 rounded-full bg-accent text-accent-foreground shadow-lg flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
+              aria-label="Scroll to top"
+            >
+              <ArrowUp className="w-5 h-5" />
+            </button>
+          </>
         )}
       </div>
 

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink, MessagesSquare } from "lucide-react";
 import { MAIN_SITE_URL } from "@/lib/site-config";
 import { openExternal } from "@/lib/pwa-link";
 
@@ -32,9 +32,9 @@ const DEFAULT: {
       links: [
         { label: "Book an Event", href: "/book-event" },
         { label: "Workshop", href: "/workshop" },
-        { label: "AI Caricature", href: "/ai-caricature" },
-        { label: "Order Caricature", href: "/order" },
-        { label: "Shop", href: "/shop" },
+        { label: "AI Caricature", coming_soon: true },
+        { label: "Order Caricature", coming_soon: true },
+        { label: "Shop", coming_soon: true },
         { label: "The Lil Flea", href: "/lil-flea" },
         { label: "Custom Caricature", coming_soon: true },
         { label: "Merchandise", coming_soon: true },
@@ -67,11 +67,11 @@ const DEFAULT: {
         { label: "WhatsApp", icon: "whatsapp" },
         { label: "Call Us", icon: "phone" },
         { label: "Email Us", icon: "email" },
-        { label: "Live Chat", href: "/live-chat" },
+        { label: "Live Chat", href: "/live-chat", icon: "livechat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
         { label: "Facebook", icon: "facebook" },
-        { label: "Main Web", icon: "website" },
+        { label: "Main Web", href: "https://creativecaricatureclub.com", external: true, icon: "website" },
       ],
     },
     {
@@ -118,6 +118,7 @@ const ContactIcon = ({ name }: { name?: string }) => {
   if (name === "youtube") return <Youtube className={cls} />;
   if (name === "facebook") return <Facebook className={cls} />;
   if (name === "website") return <Globe className={cls} />;
+  if (name === "livechat") return <MessagesSquare className={cls} />;
   return null;
 };
 
@@ -158,16 +159,20 @@ const SiteFooter = () => {
 
   const fbUrl = contact?.facebook_url || `https://facebook.com/creativecaricatureclub`;
 
-  const resolveContactHref = (icon?: string) => {
+  const resolveContactHref = (icon?: string, fallbackHref?: string) => {
     if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`;
     if (icon === "phone") return `tel:+${phone.replace(/[^0-9]/g, "")}`;
     if (icon === "email") return `mailto:${email}?subject=${encodeURIComponent("Enquiry from website")}`;
     if (icon === "instagram") return igUrl;
     if (icon === "youtube") return ytUrl;
     if (icon === "facebook") return fbUrl;
-    if (icon === "website") return MAIN_SITE_URL;
-    return "#";
+    if (icon === "website") return fallbackHref || MAIN_SITE_URL;
+    if (icon === "livechat") return fallbackHref || "/live-chat";
+    return fallbackHref || "#";
   };
+
+  // External / outbound icons that should leave the app via openExternal.
+  const OUTBOUND_ICONS = new Set(["whatsapp", "phone", "email", "instagram", "youtube", "facebook", "website"]);
 
   const handleLinkClick = (e: React.MouseEvent, link: Link) => {
     if (link.coming_soon) {
@@ -175,21 +180,24 @@ const SiteFooter = () => {
       setComingSoonOpen(link.label);
       return;
     }
-    // Outbound contact / explicit-external links: route through openExternal
-    // so they stay inside the PWA shell when the app is installed.
-    const isContact = !!link.icon;
-    if (isContact || link.external) {
+    const isOutbound = (link.icon && OUTBOUND_ICONS.has(link.icon)) || link.external;
+    if (isOutbound) {
       e.preventDefault();
-      const href = isContact ? resolveContactHref(link.icon) : link.href || "#";
+      const href = link.icon && OUTBOUND_ICONS.has(link.icon)
+        ? resolveContactHref(link.icon, link.href)
+        : (link.href || "#");
       openExternal(href);
     }
+    // Internal links (e.g. Live Chat → /live-chat) fall through to default <a> nav.
   };
 
   const renderLink = (l: Link) => {
-    const isContact = !!l.icon;
-    const href = isContact ? resolveContactHref(l.icon) : l.href || "#";
-    const externalProps = isContact || l.external ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
-    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5 leading-snug";
+    const isOutbound = (l.icon && OUTBOUND_ICONS.has(l.icon)) || l.external;
+    const href = isOutbound
+      ? resolveContactHref(l.icon, l.href)
+      : (l.href || "#");
+    const externalProps = isOutbound ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
+    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5 leading-snug cursor-pointer";
     return (
       <a
         href={l.coming_soon ? "#" : href}
@@ -197,7 +205,7 @@ const SiteFooter = () => {
         className={baseClass}
         {...(!l.coming_soon ? externalProps : {})}
       >
-        {isContact && <ContactIcon name={l.icon} />}
+        {l.icon && <ContactIcon name={l.icon} />}
         <span className="truncate">{l.label}</span>
         {l.coming_soon && <Pause className="w-3 h-3 text-warning flex-shrink-0" aria-label="Coming soon" />}
       </a>
@@ -298,10 +306,15 @@ const SiteFooter = () => {
             </DialogTitle>
             <DialogDescription className="text-center pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 text-warning px-3 py-1 text-xs font-semibold mb-3">
-                <Pause className="w-3 h-3" /> Currently paused
+                <Pause className="w-3 h-3" />
+                {comingSoonOpen && /order caricature|custom caricature/i.test(comingSoonOpen)
+                  ? "Paused due to high demand"
+                  : "Coming soon"}
               </span>
               <br />
-              We're polishing this experience and it's coming back soon. In the meantime, explore our other services or get in touch — we'd love to help.
+              {comingSoonOpen && /order caricature|custom caricature/i.test(comingSoonOpen)
+                ? "We're temporarily paused due to overwhelming demand 🎨 — our artists are catching up. Please check back shortly or message us on WhatsApp to be notified."
+                : "We're polishing this experience and it's coming soon. In the meantime, explore our other services or get in touch — we'd love to help."}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">
