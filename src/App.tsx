@@ -17,7 +17,13 @@ import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRoute
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
-import { isAdminUrlUnlocked, type AdminUrlSlot } from "./lib/admin-url-unlock";
+import { isAdminUrlUnlocked, consumeUnlockHash, type AdminUrlSlot } from "./lib/admin-url-unlock";
+
+// Consume any ?#admin_unlock=... hash before React renders, so the very first
+// route render already sees the sessionStorage flag set.
+if (typeof window !== "undefined") {
+  try { consumeUnlockHash(); } catch {}
+}
 
 // Lazy-loaded shell components — wrapped in a passthrough so Radix Slot / AnimatePresence
 // can't forward refs into the lazy boundary (which causes ref warnings).
