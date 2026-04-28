@@ -526,6 +526,7 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
           { key: "title", label: "Title" },
           { key: "body",  label: "Body", type: "textarea" },
         ] },
+        { key: "images",          type: "image_list", label: "Step images (leave empty to use site gallery)" },
       ];
     case "why":
       return [
