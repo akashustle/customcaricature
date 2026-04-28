@@ -665,7 +665,17 @@ const Workshop = () => {
         <div><Label>WhatsApp Number *</Label><Input value={regForm.mobile} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setRegForm({...regForm, mobile: d}); }} placeholder="10-digit WhatsApp number" maxLength={10} /></div>
         <div><Label>Instagram ID</Label><Input value={regForm.instagram_id} onChange={e => setRegForm({...regForm, instagram_id: e.target.value})} placeholder="@yourid" /></div>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label>Age *</Label><Input type="number" value={regForm.age} onChange={e => setRegForm({...regForm, age: e.target.value})} placeholder="Your age" /></div>
+          <div>
+            <Label>Age *</Label>
+            <Select value={regForm.age} onValueChange={v => setRegForm({...regForm, age: v})}>
+              <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select age" /></SelectTrigger>
+              <SelectContent className="max-h-60">
+                {Array.from({ length: 89 - 12 + 1 }, (_, i) => 12 + i).map(a => (
+                  <SelectItem key={a} value={String(a)}>{a} years</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label>Occupation *</Label>
             <Select value={regForm.occupation} onValueChange={v => setRegForm({...regForm, occupation: v})}>
