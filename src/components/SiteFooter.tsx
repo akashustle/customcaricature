@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink } from "lucide-react";
+import { MessageCircle, Phone, Instagram, Youtube, Facebook, Sparkles, Pause, Mail, Globe, ExternalLink, MessagesSquare } from "lucide-react";
 import { MAIN_SITE_URL } from "@/lib/site-config";
 import { openExternal } from "@/lib/pwa-link";
 
@@ -32,9 +32,9 @@ const DEFAULT: {
       links: [
         { label: "Book an Event", href: "/book-event" },
         { label: "Workshop", href: "/workshop" },
-        { label: "AI Caricature", href: "/ai-caricature" },
-        { label: "Order Caricature", href: "/order" },
-        { label: "Shop", href: "/shop" },
+        { label: "AI Caricature", coming_soon: true },
+        { label: "Order Caricature", coming_soon: true },
+        { label: "Shop", coming_soon: true },
         { label: "The Lil Flea", href: "/lil-flea" },
         { label: "Custom Caricature", coming_soon: true },
         { label: "Merchandise", coming_soon: true },
@@ -67,11 +67,11 @@ const DEFAULT: {
         { label: "WhatsApp", icon: "whatsapp" },
         { label: "Call Us", icon: "phone" },
         { label: "Email Us", icon: "email" },
-        { label: "Live Chat", href: "/live-chat" },
+        { label: "Live Chat", href: "/live-chat", icon: "livechat" },
         { label: "Instagram", icon: "instagram" },
         { label: "YouTube", icon: "youtube" },
         { label: "Facebook", icon: "facebook" },
-        { label: "Main Web", icon: "website" },
+        { label: "Main Web", href: "https://creativecaricatureclub.com", external: true, icon: "website" },
       ],
     },
     {
@@ -118,6 +118,7 @@ const ContactIcon = ({ name }: { name?: string }) => {
   if (name === "youtube") return <Youtube className={cls} />;
   if (name === "facebook") return <Facebook className={cls} />;
   if (name === "website") return <Globe className={cls} />;
+  if (name === "livechat") return <MessagesSquare className={cls} />;
   return null;
 };
 
