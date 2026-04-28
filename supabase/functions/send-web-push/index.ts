@@ -257,8 +257,9 @@ Deno.serve(async (req) => {
     });
   } catch (err: any) {
     console.error("send-web-push error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Always 200 so admin broadcast UI doesn't see invoke throws; surfaces error inline
+    return new Response(JSON.stringify({ sent: 0, skipped: true, error: err.message }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
