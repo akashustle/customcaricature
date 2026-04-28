@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import MonthYearDatePicker from "@/components/ui/month-year-date-picker";
 import { playPaymentSuccessSound } from "@/lib/sounds";
 import { initRazorpay, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay";
+import { logReferralEvent } from "@/hooks/useReferralTracking";
 import { format } from "date-fns";
 import { CalendarIcon, ArrowLeft, CheckCircle, Loader2, Palette, Clock, Plane, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
