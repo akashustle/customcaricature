@@ -126,7 +126,11 @@ const Order = () => {
   }
 
   if (orderComplete && orderId) {
-    return <OrderConfirmation orderId={orderId} />;
+    return (
+      <Suspense fallback={<StepFallback />}>
+        <OrderConfirmation orderId={orderId} />
+      </Suspense>
+    );
   }
 
   return (
@@ -166,12 +170,14 @@ const Order = () => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
-            {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} getPrice={getPrice} />}
-            {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
-            {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
-            {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
-            {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
+            <Suspense fallback={<StepFallback />}>
+              {step === "location" && <StepLocation data={formData} update={update} onNext={next} />}
+              {step === "details" && <StepOrderDetails data={formData} update={update} onNext={next} getPrice={getPrice} />}
+              {step === "photos" && <StepPhotoUpload data={formData} update={update} onNext={next} />}
+              {step === "customer" && <StepCustomerDetails data={formData} update={update} onNext={next} />}
+              {step === "address" && <StepDeliveryAddress data={formData} update={update} onNext={next} />}
+              {step === "summary" && <StepSummary data={formData} amount={amount} onComplete={handleOrderComplete} userId={user?.id || null} />}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </div>
