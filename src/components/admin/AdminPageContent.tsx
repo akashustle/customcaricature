@@ -8,7 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Save, Plus, Trash2, FileText } from "lucide-react";
 
-const KEYS = ["page_about", "page_ai_caricature", "global_contact", "page_caricature_budgeting"];
+const KEYS = [
+  "page_about",
+  "page_ai_caricature",
+  "global_contact",
+  "page_caricature_budgeting",
+  "dashboard_support_contact",
+  "workshop_support_contact",
+];
 
 const AdminPageContent = () => {
   const [data, setData] = useState<Record<string, any>>({});
@@ -57,6 +64,8 @@ const AdminPageContent = () => {
   const about = data.page_about || {};
   const ai = data.page_ai_caricature || {};
   const contact = data.global_contact || {};
+  const dashContact = data.dashboard_support_contact || {};
+  const wsContact = data.workshop_support_contact || {};
   const cb = data.page_caricature_budgeting || {};
 
   return (
@@ -183,7 +192,7 @@ const AdminPageContent = () => {
         </TabsContent>
 
         {/* GLOBAL CONTACT */}
-        <TabsContent value="contact">
+        <TabsContent value="contact" className="space-y-4">
           <Card><CardHeader><CardTitle className="text-base">Manager & Social Links (used across the site)</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input placeholder="Manager name" value={contact.manager_name || ""} onChange={e => update("global_contact", { ...contact, manager_name: e.target.value })} />
             <Input placeholder="Manager role" value={contact.manager_role || ""} onChange={e => update("global_contact", { ...contact, manager_role: e.target.value })} />
@@ -193,6 +202,24 @@ const AdminPageContent = () => {
             <Input placeholder="Instagram URL" value={contact.instagram_url || ""} onChange={e => update("global_contact", { ...contact, instagram_url: e.target.value })} />
             <Input placeholder="Facebook URL" value={contact.facebook_url || ""} onChange={e => update("global_contact", { ...contact, facebook_url: e.target.value })} />
             <Input placeholder="YouTube URL" value={contact.youtube_url || ""} onChange={e => update("global_contact", { ...contact, youtube_url: e.target.value })} />
+          </CardContent></Card>
+
+          {/* Booking Dashboard support overrides */}
+          <Card><CardHeader><CardTitle className="text-base">Booking Dashboard — Profile Footer Contact</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <p className="md:col-span-2 text-xs text-muted-foreground">Used by the WhatsApp/Email buttons on the booking user's Profile tab. Leave any field blank to fall back to the global contact above.</p>
+            <Input placeholder="WhatsApp number (e.g. 918369594271)" value={dashContact.whatsapp_number || ""} onChange={e => update("dashboard_support_contact", { ...dashContact, whatsapp_number: e.target.value })} />
+            <Input placeholder="Email" value={dashContact.email || ""} onChange={e => update("dashboard_support_contact", { ...dashContact, email: e.target.value })} />
+            <Textarea className="md:col-span-2" rows={3} placeholder="Pre-filled WhatsApp message" value={dashContact.whatsapp_message || ""} onChange={e => update("dashboard_support_contact", { ...dashContact, whatsapp_message: e.target.value })} />
+            <Input className="md:col-span-2" placeholder="Pre-filled email subject" value={dashContact.email_subject || ""} onChange={e => update("dashboard_support_contact", { ...dashContact, email_subject: e.target.value })} />
+          </CardContent></Card>
+
+          {/* Workshop Dashboard support overrides */}
+          <Card><CardHeader><CardTitle className="text-base">Workshop Dashboard — Profile Footer Contact</CardTitle></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <p className="md:col-span-2 text-xs text-muted-foreground">Used by the WhatsApp/Email buttons on the workshop student's Profile tab. Leave any field blank to fall back to the global contact above.</p>
+            <Input placeholder="WhatsApp number (e.g. 918369594271)" value={wsContact.whatsapp_number || ""} onChange={e => update("workshop_support_contact", { ...wsContact, whatsapp_number: e.target.value })} />
+            <Input placeholder="Email" value={wsContact.email || ""} onChange={e => update("workshop_support_contact", { ...wsContact, email: e.target.value })} />
+            <Textarea className="md:col-span-2" rows={3} placeholder="Pre-filled WhatsApp message" value={wsContact.whatsapp_message || ""} onChange={e => update("workshop_support_contact", { ...wsContact, whatsapp_message: e.target.value })} />
+            <Input className="md:col-span-2" placeholder="Pre-filled email subject" value={wsContact.email_subject || ""} onChange={e => update("workshop_support_contact", { ...wsContact, email_subject: e.target.value })} />
           </CardContent></Card>
         </TabsContent>
 

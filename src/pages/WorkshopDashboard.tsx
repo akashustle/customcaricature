@@ -31,7 +31,6 @@ import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import WorkshopNotificationBell from "@/components/workshop/WorkshopNotificationBell";
 import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
 import DesktopTabsSidebar from "@/components/dashboard/DesktopTabsSidebar";
-import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Brand-aligned palette — primary uses CCC site primary, with curated accents
 const ACCENT_COLORS = [
@@ -322,8 +321,9 @@ const WorkshopDashboard = () => {
         </AnimatePresence>
       </header>
 
-      {/* MOBILE inline greeting + circular avatar — mirrors booking dashboard */}
-      <div className="md:hidden max-w-5xl mx-auto px-4 pt-5">
+      {/* MOBILE inline greeting + circular avatar — mirrors booking dashboard.
+          Hidden on the Profile tab so it doesn't duplicate the WorkshopProfile hero. */}
+      <div className={`md:hidden max-w-5xl mx-auto px-4 pt-5 ${activeTab === "profile" ? "hidden" : ""}`}>
         <div className="flex items-center justify-between mb-4">
           <LiveGreeting name={workshopUser.name} />
           <div className="flex items-center gap-2">
@@ -355,8 +355,9 @@ const WorkshopDashboard = () => {
         </div>
       </div>
 
-      {/* Desktop 3D flash-card hero strip (lg+) */}
-      <div className="hidden lg:block max-w-5xl mx-auto px-4 pt-5">
+      {/* Desktop 3D flash-card hero strip (lg+) — hidden on Profile tab so the
+          profile hero is the only large surface above content. */}
+      <div className={`hidden lg:block max-w-5xl mx-auto px-4 pt-5 ${activeTab === "profile" ? "lg:hidden" : ""}`}>
         <DesktopFlashStrip
           greeting={getGreeting()}
           fullName={workshopUser.name || "Workshop Student"}

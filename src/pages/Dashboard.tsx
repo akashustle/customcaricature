@@ -38,7 +38,6 @@ import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import EditRequestDialog from "@/components/EditRequestDialog";
 import DesktopFlashStrip, { STAT_PRESETS } from "@/components/dashboard/DesktopFlashStrip";
 import DesktopTabsSidebar from "@/components/dashboard/DesktopTabsSidebar";
-import MobileProfileHeader from "@/components/dashboard/MobileProfileHeader";
 
 // Lightweight wrapper so it sits inside the dashboard layout
 const DashboardPageBuilder = () => <PageBuilderRenderer page="dashboard-builder" />;
@@ -574,7 +573,8 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-5 md:px-6 pt-5 md:pt-8">
-        {/* Mobile inline greeting + avatar */}
+        {/* Mobile inline greeting + avatar — hidden on Profile tab to avoid duplicating the profile hero */}
+        {activeTab !== "profile" && (
         <div className="md:hidden flex items-center justify-between mb-5">
           <LiveGreeting name={profile?.full_name} />
           <div className="flex items-center gap-2">
@@ -604,11 +604,14 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
+        )}
 
-        {/* Desktop greeting */}
+        {/* Desktop greeting — hidden on Profile tab */}
+        {activeTab !== "profile" && (
         <div className="hidden md:block mb-6">
           <LiveGreeting name={profile?.full_name} />
         </div>
+        )}
 
         {/* Account moderation notices */}
         {(profile as any)?.scheduled_deletion_at && (
@@ -664,7 +667,8 @@ const Dashboard = () => {
         {user && <PaymentReminderBanner userId={user.id} onPayOrder={handlePayNow} />}
         {user && <PaymentDemandBanner userId={user.id} events={events as any} />}
 
-        {/* Desktop 3D flash-card hero strip (lg+) */}
+        {/* Desktop 3D flash-card hero strip (lg+) — hidden on Profile tab */}
+        {activeTab !== "profile" && (
         <DesktopFlashStrip
           greeting="Welcome back"
           fullName={profile?.full_name || "Your dashboard"}
@@ -684,6 +688,7 @@ const Dashboard = () => {
             { key: "chat", label: "Chat", value: "Open", hint: "Talk to our team", onClick: () => setActiveTab("chat"), ...STAT_PRESETS.chat },
           ]}
         />
+        )}
 
         {/* Desktop tab strip — md only; on lg+ a 3D sidebar replaces the top pill */}
         <div className="hidden md:block mt-4">
