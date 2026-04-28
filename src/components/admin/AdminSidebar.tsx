@@ -247,15 +247,33 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
               </motion.div>
             )}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
-            style={{ background: "hsl(30 15% 94%)" }}
-          >
-            {collapsed ? <ChevronRight className="w-3.5 h-3.5" style={{ color: "hsl(25 10% 45%)" }} /> : <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(25 10% 45%)" }} />}
-          </motion.button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCollapsed(!collapsed)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+              style={{ background: "hsl(225 30% 94%)" }}
+              title={collapsed ? "Expand sidebar" : "Collapse to icons"}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse to icons"}
+            >
+              {collapsed ? <ChevronRight className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} /> : <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} />}
+            </motion.button>
+            {!collapsed && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => updateMode("hidden")}
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                style={{ background: "hsl(225 30% 94%)" }}
+                title="Hide sidebar fully"
+                aria-label="Hide sidebar fully"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} />
+                <ChevronLeft className="w-3.5 h-3.5 -ml-2" style={{ color: "hsl(225 25% 45%)" }} />
+              </motion.button>
+            )}
+          </div>
         </div>
 
         {/* Search */}
