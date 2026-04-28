@@ -1,7 +1,30 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
+
+/**
+ * Detects "low-power" environments where heavy animation hurts TBT:
+ *  - prefers-reduced-motion: reduce
+ *  - deviceMemory < 4 GB
+ *  - Save-Data header
+ *  - hardwareConcurrency < 4
+ * On those devices we skip the floating 3D shapes & ambient orbs.
+ */
+const useLowPowerMode = () => {
+  const [low, setLow] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const dm = (navigator as any).deviceMemory;
+      const hc = navigator.hardwareConcurrency || 8;
+      const sd = (navigator as any).connection?.saveData;
+      setLow(Boolean(mq.matches || (dm && dm < 4) || hc < 4 || sd));
+    } catch { /* ignore */ }
+  }, []);
+  return low;
+};
 
 /**
  * AuthShell — premium 3D split-card auth layout.
