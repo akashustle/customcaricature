@@ -615,6 +615,10 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
       return [{ key: "height", type: "number", label: "Height (px)", min: 8, max: 400 }];
     case "html":
       return [{ key: "html", type: "html", label: "Custom HTML" }];
+    case "gallery":
+      return [
+        { key: "images", type: "image_list", label: "Event gallery images (leave empty to auto-pull from site gallery)" },
+      ];
     default:
       return [];
   }
