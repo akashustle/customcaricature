@@ -50,6 +50,8 @@ const AdminLeadLinks = () => {
   const [caricPrices, setCaricPrices] = useState<CaricPriceRow[]>([]);
   const [eventPrices, setEventPrices] = useState<EventPriceRow[]>([]);
   const [creating, setCreating] = useState(false);
+  const [assignToUserId, setAssignToUserId] = useState<string>("");
+  const [profiles, setProfiles] = useState<Array<{ user_id: string; full_name: string | null; email: string | null; mobile: string | null }>>([]);
 
   const { types: caricTypes } = usePricing();
   const { pricing: defaultEventPricing } = useEventPricing();
