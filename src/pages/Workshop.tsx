@@ -655,6 +655,29 @@ const Workshop = () => {
 
   // Registration View
   if (view === "register") {
+    // Hard gate — if admin disabled registration, do not render the form at all.
+    if (!workshop.registration_enabled) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 space-y-4 text-center">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
+                <Clock className="w-7 h-7 text-amber-700" />
+              </div>
+              <h2 className="font-calligraphy text-2xl font-bold text-foreground">Registrations Closed</h2>
+              <p className="text-sm text-muted-foreground font-body">
+                The admin has not enabled registrations for any upcoming workshop yet. Please check back soon, or contact us on WhatsApp to be notified.
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <Button onClick={() => setView("details")} className="rounded-full">Back to Workshop</Button>
+                <a className="text-xs text-primary underline font-body" href={`https://wa.me/91${whatsappNumber}`} target="_blank" rel="noopener noreferrer">Contact us on WhatsApp</a>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     const statesData = (() => { try { const { getStates } = require("@/lib/india-locations"); return getStates(); } catch { return []; } })();
     const districtsData = (() => { try { if (!regForm.state) return []; const { getDistricts } = require("@/lib/india-locations"); return getDistricts(regForm.state); } catch { return []; } })();
     const citiesData = (() => { try { if (!regForm.district) return []; const { getCities } = require("@/lib/india-locations"); return getCities(regForm.state, regForm.district); } catch { return []; } })();
