@@ -3887,6 +3887,39 @@ export type Database = {
         }
         Relationships: []
       }
+      razorpay_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          process_notes: string | null
+          processed: boolean
+          processed_at: string | null
+          received_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          id?: string
+          payload: Json
+          process_notes?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          process_notes?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           code: string
