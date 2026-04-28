@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { Save, Smartphone, ExternalLink, Loader2 } from "lucide-react";
+import { Save, Smartphone, ExternalLink, Loader2, Upload, ShieldCheck } from "lucide-react";
 
 /**
  * Admin panel: configure the public /download page.
