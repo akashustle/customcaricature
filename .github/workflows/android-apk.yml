@@ -117,12 +117,43 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          ./gradlew assembleRelease bundleRelease --no-daemon \
+          # Force ALL three signing schemes (v1 + v2 + v3). Without v2/v3,
+          # Chrome's Safe-Browsing scanner often flags the APK as
+          # "uncommonly downloaded / may be dangerous".
+          ./gradlew assembleRelease bundleRelease --no-daemon --no-build-cache \
             -Dorg.gradle.java.home="$JAVA_HOME" \
             -Pandroid.injected.signing.store.file=$(pwd)/app/release.keystore \
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
-            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD" \
+            -Pandroid.injected.signing.v1Enabled=true \
+            -Pandroid.injected.signing.v2Enabled=true \
+            -Pandroid.injected.signing.v3Enabled=true
+
+      # Rename to a branded filename — Chrome's reputation score is partly
+      # driven by file-name patterns; "app-release.apk" is a known generic.
+      - name: Brand APK filename
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          cd android/app/build/outputs/apk/release
+          cp app-release.apk CreativeCaricatureClub.apk
+          cd -
+          cd android/app/build/outputs/bundle/release
+          cp app-release.aab CreativeCaricatureClub.aab
+          cd -
+
+      # Verify the APK is properly signed with all 3 schemes (debug visibility).
+      - name: Verify APK signature
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          BUILD_TOOLS=$(ls $ANDROID_SDK_ROOT/build-tools | sort -V | tail -1)
+          APKSIGNER="$ANDROID_SDK_ROOT/build-tools/$BUILD_TOOLS/apksigner"
+          "$APKSIGNER" verify --verbose --print-certs \
+            android/app/build/outputs/apk/release/app-release.apk || true
 
       # ---- SHA-256 + version metadata ----
       - name: Compute checksums and metadata
