@@ -66,7 +66,7 @@ const Login = () => {
     if (roles?.length > 0) {
       await supabase.auth.signOut();
       toast({ title: "Admin account", description: "Use admin login.", variant: "destructive" });
-      navigate("/customcad75", { replace: true }); return;
+      unlockAdminUrl("main"); navigate("/customcad75", { replace: true }); return;
     }
     if (artistData) {
       await supabase.auth.signOut();
