@@ -2705,6 +2705,10 @@ const Admin = () => {
             <AdminDataExports />
           </TabsContent>
 
+          <TabsContent value="system-health">
+            <AdminSystemHealth />
+          </TabsContent>
+
           <TabsContent value="coupons">
             <AdminCoupons />
           </TabsContent>
