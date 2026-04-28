@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Eye, EyeOff, Lock, Mail, KeyRound, RefreshCw, ArrowLeft, User, MapPin, GraduationCap, Phone, Sparkles, Download } from "lucide-react";
 import { saveCredentials, verifyOfflineCredentials, hasCachedCredentials } from "@/lib/offline-credentials";
+import AuthShell from "@/components/auth/AuthShell";
 
 interface AdminInfo { name: string; email: string; mobile: string; designation: string; }
 
