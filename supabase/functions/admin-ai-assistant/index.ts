@@ -75,7 +75,22 @@ const tools = [
   { type: "function", function: { name: "create_coupon", description: "Create a coupon code", parameters: { type: "object", properties: { code: { type: "string" }, discount_type: { type: "string", enum: ["percentage", "fixed"] }, discount_value: { type: "number" }, max_uses: { type: "number" }, valid_until: { type: "string" } }, required: ["code", "discount_type", "discount_value"] } } },
   { type: "function", function: { name: "top_cities", description: "Top cities by enquiries or events", parameters: { type: "object", properties: { metric: { type: "string", enum: ["enquiries", "events"] }, limit: { type: "number" } }, required: ["metric"] } } },
   { type: "function", function: { name: "generate_report", description: "Generate a Markdown report", parameters: { type: "object", properties: { kind: { type: "string", enum: ["revenue", "events", "orders", "enquiries"] }, since_days: { type: "number" } }, required: ["kind"] } } },
+  { type: "function", function: { name: "navigate_admin_tab", description: "Open a specific tab on the admin panel for the current admin. Use this whenever the user says 'open', 'go to', 'show me', 'take me to' a tab/section. Pass the tab id from the allowed list.", parameters: { type: "object", properties: { tab: { type: "string", description: "Tab id, e.g. 'orders', 'faqs', 'homepage', 'pricing', 'gallery', 'ai-assistant'" } }, required: ["tab"] } } },
 ];
+
+const ALLOWED_TABS = new Set([
+  "dashboard","orders","customers","events","payments","event-payment-claims","invoices","revenue","accounting","pricing","intl-pricing",
+  "analytics","website-analytics","ai-intelligence","revenue-target","calendar","heatmap",
+  "live-chat","ai-conversations","quick-questions","notify","push-center",
+  "crm-pipeline","enquiries","support",
+  "event-users","artists","reviews","verification","edit-requests",
+  "content-editor","form-builder","design-control","watermark","workshop-builder","dashboard-builder",
+  "homepage","explore-editor","blog","gallery","hp-reviews","brands","pages","page-content","faqs","files","seo","calculator",
+  "google-sheet","mini-database","security-dashboard","error-inbox","activity-logs","integrations","automation","settings","maintenance",
+  "lead-links","lil-flea","referrals","referral-qa","data-exports","system-health","coupons","feature-gating",
+  "admin-monitoring","chatbot","voice","sessions","locations","audit-log",
+  "team","colleagues","ai-assistant",
+]);
 
 async function runTool(name: string, args: any, supabase: any, adminId: string): Promise<any> {
   try {
