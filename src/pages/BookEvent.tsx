@@ -380,6 +380,7 @@ const BookEvent = () => {
 
             setBookingConfirmed(true);
             playPaymentSuccessSound();
+            logReferralEvent("booking", { referredUserId: user?.id, metadata: { booking_id: booking.id, amount: totalPayable } }).catch(() => {});
             toast({ title: "Event Booked Successfully! 🎉" });
 
             // Send confirmation email (fire-and-forget)
