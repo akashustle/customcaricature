@@ -357,6 +357,7 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
     sky: "hsl(210 90% 55%)",
   };
 
+  return (
     <div className="space-y-5">
       {/* ============== HERO PROFILE CARD — mirrors booking dashboard ============== */}
       <motion.div
