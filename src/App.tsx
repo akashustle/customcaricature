@@ -17,6 +17,7 @@ import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRoute
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import { normalizeInternalNavigationTarget } from "./lib/internal-navigation";
+import { isAdminUrlUnlocked, type AdminUrlSlot } from "./lib/admin-url-unlock";
 
 // Lazy-loaded shell components — wrapped in a passthrough so Radix Slot / AnimatePresence
 // can't forward refs into the lazy boundary (which causes ref warnings).
