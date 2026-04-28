@@ -305,13 +305,15 @@ Deno.serve(async (req) => {
       ...messages,
     ];
 
-    // Up to 6 tool-calling rounds
-    for (let round = 0; round < 6; round++) {
+    const navActions: string[] = [];
+
+    // Up to 8 tool-calling rounds
+    for (let round = 0; round < 8; round++) {
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-2.5-flash",
           messages: conv,
           tools,
           tool_choice: "auto",
@@ -330,7 +332,7 @@ Deno.serve(async (req) => {
       conv.push(msg);
       const calls = msg.tool_calls || [];
       if (!calls.length) {
-        return new Response(JSON.stringify({ reply: msg.content || "", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ reply: msg.content || "", nav_actions: navActions, trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       for (const c of calls) {
         let args: any = {};
@@ -341,6 +343,7 @@ Deno.serve(async (req) => {
         } catch (toolErr: any) {
           result = { ok: false, error: `Tool '${c.function?.name}' threw: ${toolErr?.message || String(toolErr)}` };
         }
+        if (result?.ok && result?.navigate_to) navActions.push(result.navigate_to);
         // Log for audit (Supabase query builders are PromiseLike but not Promises — wrap in try/catch)
         try {
           await admin.from("admin_action_log").insert({
@@ -356,7 +359,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ reply: "Reached tool-call limit. Please rephrase the request.", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ reply: "Reached tool-call limit. Please rephrase the request.", nav_actions: navActions, trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e.message || String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
