@@ -133,6 +133,9 @@ const Workshop = () => {
   const [selectedBatch, setSelectedBatch] = useState<"upcoming" | "march-14-15">("upcoming");
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [secretCodeLoginEnabled, setSecretCodeLoginEnabled] = useState(false);
+  const [regOtherState, setRegOtherState] = useState(false);
+  const [regOtherDistrict, setRegOtherDistrict] = useState(false);
+  const [regOtherCity, setRegOtherCity] = useState(false);
 
   // Progressive login state ----------------------------------------------------
   // Step 0: select identifier type → Step 1: enter identifier → Step 2: backend
