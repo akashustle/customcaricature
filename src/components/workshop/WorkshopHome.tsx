@@ -547,7 +547,7 @@ const WorkshopHome = ({ user, darkMode = false }: { user: any; darkMode?: boolea
               </a>
             ))}
           </div>
-        </GlassCard>
+        </div>
       </motion.div>
     </div>
   );
