@@ -318,7 +318,7 @@ const Card3D = ({
   </motion.div>
 );
 
-const ArtScene = ({ active }: { active: boolean }) => (
+const ArtScene = ({ active, photo: _photo }: { active: boolean; photo?: string }) => (
   <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
     {/* Back paper */}
     <Card3D
@@ -376,7 +376,7 @@ const ArtScene = ({ active }: { active: boolean }) => (
   </div>
 );
 
-const EventScene = ({ active }: { active: boolean }) => (
+const EventScene = ({ active, photo: _photo }: { active: boolean; photo?: string }) => (
   <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
     {/* Stage card */}
     <Card3D
@@ -432,7 +432,7 @@ const EventScene = ({ active }: { active: boolean }) => (
   </div>
 );
 
-const BookScene = ({ active }: { active: boolean }) => (
+const BookScene = ({ active, photo: _photo }: { active: boolean; photo?: string }) => (
   <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
     {/* Phone mockup */}
     <Card3D
