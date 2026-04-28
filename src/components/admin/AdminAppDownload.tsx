@@ -146,6 +146,72 @@ const AdminAppDownload = () => {
 
   return (
     <div className="space-y-4 max-w-3xl">
+      {/* ===== Direct APK upload (no GitHub release dance needed) ===== */}
+      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-5 h-5 text-primary" />
+            Upload Signed APK
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Drop the signed <code className="text-primary">.apk</code> here. We compute its SHA-256, upload it
+            to secure storage, and instantly publish it to the <code className="text-primary">/download</code> page —
+            no code change needed.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
+              <Label>Version label for this upload</Label>
+              <Input
+                value={cfg.version || ""}
+                onChange={(e) => setCfg({ ...cfg, version: e.target.value })}
+                placeholder="1.0.0"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="w-full h-10 gap-2"
+              >
+                {uploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Uploading… {uploadPct}%</>
+                ) : (
+                  <><Upload className="w-4 h-4" /> Choose APK</>
+                )}
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".apk,application/vnd.android.package-archive"
+                hidden
+                onChange={onPickAPK}
+              />
+            </div>
+          </div>
+
+          {uploading && (
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${uploadPct}%` }}
+              />
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+            <div>
+              The APK is stored in the private <code>app-builds</code> bucket and served over HTTPS with a
+              SHA-256 checksum. Use a <strong>release-signed</strong> APK (v1+v2+v3) to avoid Chrome
+              "may be dangerous" warnings — debug-signed builds are not trusted by Safe Browsing.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
