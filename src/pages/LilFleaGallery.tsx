@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
 import WatermarkedImage from "@/components/WatermarkedImage";
 
-const LilFleaGallery = () => {
 type GalleryRow = { id: string; image_url: string; caption: string | null; placement?: string | null };
 
 const LilFleaGallery = () => {
