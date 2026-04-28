@@ -18,6 +18,7 @@ export const useAutoLogout = (enabled: boolean = true) => {
       await supabase.auth.signOut();
     } catch {}
     sessionStorage.removeItem("admin_entered_name");
+    unlockAdminUrl("main");
     navigate("/customcad75", { replace: true });
   }, [navigate]);
 
