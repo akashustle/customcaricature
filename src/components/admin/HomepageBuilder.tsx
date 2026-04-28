@@ -19,8 +19,9 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-p
 import {
   GripVertical, Eye, EyeOff, Trash2, Copy, Plus, Pencil, Upload, ExternalLink,
   RefreshCcw, Sparkles, Image as ImageIcon, Layout, Type, AlignLeft,
-  Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon,
+  Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon, Video as VideoIcon, Star, Heart, Trophy, Calendar,
 } from "lucide-react";
+import AssetPicker from "@/components/admin/AssetPicker";
 
 /* ----------------------------- Block library ------------------------------ */
 
@@ -37,18 +38,22 @@ const BLOCK_LIBRARY: BlockDef[] = [
   // Canonical homepage sections
   { type: "hero",           label: "Hero",                description: "Top hero with title, CTAs, image marquee", icon: Sparkles, group: "section",
     defaultContent: { eyebrow: "INDIA'S #1 LIVE CARICATURE STUDIO", title: "Unforgettable live caricatures, delivered with style.", subtitle: "Wedding, corporate & private events across India and worldwide.", cta_primary: "Book an event", cta_secondary: "Get instant quote" } },
-  { type: "video",          label: "Video",               description: "YouTube/Vimeo embed section", icon: Layout, group: "section",
-    defaultContent: { enabled: true, url: "" } },
+  { type: "video",          label: "Video",               description: "Watch live MP4/YouTube embed", icon: VideoIcon, group: "section",
+    defaultContent: { enabled: true, custom_video_url: "", youtube_url: "" } },
   { type: "gallery",        label: "Event Gallery",       description: "Grid of recent event photos", icon: ImageIcon, group: "section", defaultContent: {} },
   { type: "clients",        label: "Trusted Brands",      description: "Logos of clients we've worked with", icon: Layout, group: "section", defaultContent: {} },
   { type: "about",          label: "About Us",            description: "Story, stats and brand intro", icon: AlignLeft, group: "section",
-    defaultContent: { title: "About the studio", body: "We are India's leading live caricature studio." } },
+    defaultContent: { eyebrow: "About • About", title_pre: "Who is", title_highlight: "Creative Caricature?", body: "" } },
   { type: "services",       label: "Services",            description: "Service cards (event types)", icon: Grid3x3, group: "section",
-    defaultContent: { title: "What we offer", services: [] } },
-  { type: "how",            label: "How It Starts",       description: "3-step booking process", icon: Layout, group: "section", defaultContent: {} },
-  { type: "why",            label: "Why Unique",          description: "Why choose us — value props", icon: Sparkles, group: "section", defaultContent: {} },
-  { type: "reviews",        label: "Reviews",             description: "Customer testimonials carousel", icon: Sparkles, group: "section", defaultContent: {} },
-  { type: "faqs",           label: "FAQs",                description: "Frequently asked questions", icon: AlignLeft, group: "section", defaultContent: {} },
+    defaultContent: { eyebrow: "Services • Services", title_pre: "What we", title_highlight: "do best", subtitle: "", cta_label: "Book for your event", items: [] } },
+  { type: "how",            label: "How It Starts",       description: "3-step booking process", icon: Layout, group: "section",
+    defaultContent: { eyebrow: "Onboarding • Onboarding", title_pre: "How it", title_highlight: "starts?", cta_label: "Start your booking", steps: [] } },
+  { type: "why",            label: "Why Unique",          description: "Why choose us — value props", icon: Sparkles, group: "section",
+    defaultContent: { eyebrow: "Special • Special", title_pre: "What makes us", title_highlight: "unique?", subtitle: "", others_label: "OTHERS", ours_label: "CREATIVE CARICATURE CLUB", others: [], ours: [] } },
+  { type: "reviews",        label: "Reviews",             description: "Customer testimonials", icon: Star, group: "section",
+    defaultContent: { eyebrow: "Reviews • Reviews", title_pre: "Hear from", title_highlight: "them", items: [] } },
+  { type: "faqs",           label: "FAQs",                description: "Frequently asked questions", icon: AlignLeft, group: "section",
+    defaultContent: { eyebrow: "Help • Help", title_pre: "Need", title_highlight: "help?", items: [] } },
   { type: "still_confused", label: "Still Confused?",     description: "Final help / contact CTA", icon: MousePointerClick, group: "section", defaultContent: {} },
   // Generic content blocks
   { type: "heading",        label: "Heading",             description: "Bold section heading", icon: Type, group: "content",
@@ -450,54 +455,115 @@ type Field =
   | { key: string; type: "text"; label: string; placeholder?: string }
   | { key: string; type: "textarea"; label: string; placeholder?: string }
   | { key: string; type: "image"; label: string }
+  | { key: string; type: "video"; label: string }
   | { key: string; type: "url"; label: string; placeholder?: string }
   | { key: string; type: "number"; label: string; min?: number; max?: number }
   | { key: string; type: "switch"; label: string }
   | { key: string; type: "select"; label: string; options: { value: string; label: string }[] }
   | { key: string; type: "html"; label: string }
-  | { key: string; type: "cards"; label: string };
+  | { key: string; type: "cards"; label: string }
+  | { key: string; type: "string_list"; label: string; placeholder?: string }
+  | { key: string; type: "items"; label: string; schema: { key: string; label: string; type?: "text" | "textarea" | "image" }[] };
 
 const buildFields = (blockType: string, _content: Record<string, any>): Field[] => {
   switch (blockType) {
     case "hero":
       return [
-        { key: "eyebrow",        type: "text",    label: "Eyebrow chip text" },
-        { key: "title",          type: "textarea",label: "Main title" },
-        { key: "subtitle",       type: "textarea",label: "Subtitle" },
-        { key: "cta_primary",    type: "text",    label: "Primary button text" },
-        { key: "cta_secondary",  type: "text",    label: "Secondary button text" },
+        { key: "chip_text",          type: "text",     label: "Chip text" },
+        { key: "headline",           type: "textarea", label: "Headline" },
+        { key: "headline_highlight", type: "text",     label: "Highlight word (will be coloured inside headline)" },
+        { key: "subtext",            type: "textarea", label: "Subtext / description" },
+        { key: "primary_cta",        type: "text",     label: "Primary button text" },
+        { key: "primary_cta_link",   type: "url",      label: "Primary button link" },
+        { key: "secondary_cta",      type: "text",     label: "Secondary button text" },
+        { key: "secondary_cta_link", type: "url",      label: "Secondary button link" },
+        { key: "pricing_line",       type: "text",     label: "Pricing strip line (optional)" },
+        { key: "urgency_text",       type: "text",     label: "Urgency line (optional)" },
       ];
     case "video":
       return [
-        { key: "enabled", type: "switch", label: "Show video section" },
-        { key: "url",     type: "url",    label: "Video URL (YouTube/Vimeo)", placeholder: "https://youtube.com/watch?v=..." },
+        { key: "enabled",          type: "switch", label: "Show video section" },
+        { key: "custom_video_url", type: "video",  label: "Upload / pick MP4 video (preferred)" },
+        { key: "youtube_url",      type: "url",    label: "YouTube URL (used if no MP4)" },
       ];
     case "about":
       return [
-        { key: "eyebrow", type: "text",     label: "Eyebrow" },
-        { key: "title",   type: "text",     label: "Title" },
-        { key: "body",    type: "textarea", label: "Body" },
-        { key: "image",   type: "image",    label: "Side image" },
+        { key: "eyebrow",         type: "text",     label: "Eyebrow" },
+        { key: "title_pre",       type: "text",     label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text",     label: "Title (highlight word)" },
+        { key: "body",            type: "textarea", label: "Body" },
+        { key: "quote",           type: "textarea", label: "Quote (right card)" },
+        { key: "signoff_name",    type: "text",     label: "Quote signoff name" },
+        { key: "signoff_role",    type: "text",     label: "Quote signoff role" },
+        { key: "signoff_initial", type: "text",     label: "Signoff initial (1 char)" },
+        { key: "rating_value",    type: "text",     label: "Rating value (e.g. 4.9)" },
+        { key: "rating_count",    type: "text",     label: "Rating count text" },
       ];
     case "services":
       return [
-        { key: "title",    type: "text",  label: "Section title" },
-        { key: "subtitle", type: "text",  label: "Section subtitle" },
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "subtitle",        type: "textarea", label: "Subtitle" },
+        { key: "cta_label",       type: "text", label: "Bottom CTA button text" },
+        { key: "items",           type: "items", label: "Service cards", schema: [
+          { key: "icon",  label: "Icon (Calendar/Sparkles/Trophy/Heart/Users/Award/Star)" },
+          { key: "title", label: "Title" },
+          { key: "body",  label: "Body", type: "textarea" },
+        ] },
+      ];
+    case "how":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "cta_label",       type: "text", label: "CTA button text" },
+        { key: "steps",           type: "items", label: "Steps", schema: [
+          { key: "n",     label: "Number" },
+          { key: "title", label: "Title" },
+          { key: "body",  label: "Body", type: "textarea" },
+        ] },
+      ];
+    case "why":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "subtitle",        type: "text", label: "Subtitle" },
+        { key: "others_label",    type: "text", label: "Left column label" },
+        { key: "ours_label",      type: "text", label: "Right column label" },
+        { key: "others",          type: "string_list", label: "Other studios bullets", placeholder: "Slow turnaround time" },
+        { key: "ours",            type: "string_list", label: "Our bullets",            placeholder: "On-time, every time" },
+      ];
+    case "reviews":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "items",           type: "items", label: "Reviews", schema: [
+          { key: "name", label: "Name" },
+          { key: "role", label: "Role / Event" },
+          { key: "text", label: "Review text", type: "textarea" },
+        ] },
+      ];
+    case "faqs":
+      return [
+        { key: "eyebrow",         type: "text", label: "Eyebrow" },
+        { key: "title_pre",       type: "text", label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text", label: "Title (highlight word)" },
+        { key: "items",           type: "items", label: "Questions", schema: [
+          { key: "q", label: "Question" },
+          { key: "a", label: "Answer", type: "textarea" },
+        ] },
       ];
     case "still_confused":
       return [
-        { key: "title",    type: "text",     label: "Title" },
-        { key: "subtitle", type: "textarea", label: "Subtitle" },
-        { key: "cta_text", type: "text",     label: "Button text" },
-        { key: "cta_href", type: "url",      label: "Button link" },
-      ];
-    case "why":
-    case "reviews":
-    case "faqs":
-    case "how":
-      return [
-        { key: "title",    type: "text",     label: "Section title (optional override)" },
-        { key: "subtitle", type: "textarea", label: "Section subtitle (optional override)" },
+        { key: "eyebrow",         type: "text",     label: "Eyebrow" },
+        { key: "title_pre",       type: "text",     label: "Title (before highlight)" },
+        { key: "title_highlight", type: "text",     label: "Title (highlight word)" },
+        { key: "subtitle",        type: "textarea", label: "Subtitle" },
+        { key: "whatsapp_label",  type: "text",     label: "WhatsApp button text" },
+        { key: "instagram_label", type: "text",     label: "Instagram button text" },
       ];
     case "heading":
       return [
@@ -609,62 +675,104 @@ const FieldRenderer = ({ field, value, onChange }: { field: Field; value: any; o
         </div>
       );
     case "image":
-      return <ImageField label={field.label} value={value} onChange={onChange} />;
+      return <AssetPicker label={field.label} value={value} onChange={onChange} kind="image" />;
+    case "video":
+      return <AssetPicker label={field.label} value={value} onChange={onChange} kind="video" />;
     case "cards":
       return <CardsField label={field.label} value={value} onChange={onChange} />;
+    case "string_list":
+      return <StringListField label={field.label} value={value} onChange={onChange} placeholder={field.placeholder} />;
+    case "items":
+      return <ItemsField label={field.label} value={value} onChange={onChange} schema={field.schema} />;
   }
 };
 
-/* ------------------------------ Image field ------------------------------ */
+/* --------------------------- String list field --------------------------- */
 
-const ImageField = ({ label, value, onChange }: { label: string; value?: string; onChange: (v: string) => void }) => {
-  const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-
-  const upload = async (file: File) => {
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `homepage/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("homepage-assets").upload(path, file, { upsert: false });
-      if (error) throw error;
-      const { data } = supabase.storage.from("homepage-assets").getPublicUrl(path);
-      onChange(data.publicUrl);
-      toast({ title: "Uploaded" });
-    } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-    }
-  };
-
+const StringListField = ({ label, value, onChange, placeholder }: { label: string; value: any; onChange: (v: string[]) => void; placeholder?: string }) => {
+  const list: string[] = Array.isArray(value) ? value : [];
+  const update = (i: number, v: string) => onChange(list.map((s, idx) => idx === i ? v : s));
+  const remove = (i: number) => onChange(list.filter((_, idx) => idx !== i));
+  const add = () => onChange([...list, ""]);
   return (
     <div>
       <Label>{label}</Label>
       <div className="space-y-2">
-        <div className="flex gap-2">
-          <Input
-            type="url"
-            value={value || ""}
-            placeholder="https://… or upload below"
-            onChange={e => onChange(e.target.value)}
-          />
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              disabled={uploading}
-              onChange={e => e.target.files?.[0] && upload(e.target.files[0])}
-            />
-            <Button type="button" variant="outline" disabled={uploading} asChild>
-              <span><Upload className="w-4 h-4 mr-2" />{uploading ? "Uploading…" : "Upload"}</span>
+        {list.map((s, i) => (
+          <div key={i} className="flex gap-2">
+            <Input value={s} placeholder={placeholder} onChange={e => update(i, e.target.value)} />
+            <Button size="sm" variant="ghost" onClick={() => remove(i)} className="text-destructive shrink-0">
+              <Trash2 className="w-4 h-4" />
             </Button>
-          </label>
-        </div>
-        {value && (
-          <img src={value} alt="" className="w-full max-h-48 object-cover rounded-lg border border-border" />
-        )}
+          </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={add}>
+          <Plus className="w-4 h-4 mr-2" /> Add
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------- Items field ----------------------------- */
+
+const ItemsField = ({ label, value, onChange, schema }: {
+  label: string;
+  value: any;
+  onChange: (v: any[]) => void;
+  schema: { key: string; label: string; type?: "text" | "textarea" | "image" }[];
+}) => {
+  const items: any[] = Array.isArray(value) ? value : [];
+  const update = (i: number, patch: any) => onChange(items.map((it, idx) => idx === i ? { ...it, ...patch } : it));
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i));
+  const add = () => {
+    const blank: any = {};
+    schema.forEach(f => { blank[f.key] = ""; });
+    onChange([...items, blank]);
+  };
+  const moveUp = (i: number) => {
+    if (i === 0) return;
+    const next = [...items];
+    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+    onChange(next);
+  };
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
+              <div className="flex gap-1">
+                <Button size="sm" variant="ghost" onClick={() => moveUp(i)} className="h-7" disabled={i === 0}>↑</Button>
+                <Button size="sm" variant="ghost" onClick={() => remove(i)} className="h-7 text-destructive">
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+            {schema.map(f => (
+              <div key={f.key}>
+                {f.type === "image" ? (
+                  <AssetPicker label={f.label} value={item[f.key]} onChange={v => update(i, { [f.key]: v })} kind="image" />
+                ) : f.type === "textarea" ? (
+                  <>
+                    <Label className="text-xs">{f.label}</Label>
+                    <Textarea rows={2} value={item[f.key] || ""} onChange={e => update(i, { [f.key]: e.target.value })} />
+                  </>
+                ) : (
+                  <>
+                    <Label className="text-xs">{f.label}</Label>
+                    <Input value={item[f.key] || ""} onChange={e => update(i, { [f.key]: e.target.value })} />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={add}>
+          <Plus className="w-4 h-4 mr-2" /> Add item
+        </Button>
       </div>
     </div>
   );

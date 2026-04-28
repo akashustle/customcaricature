@@ -19,27 +19,31 @@ type StorageFile = {
 };
 
 const BUCKETS = [
+  { id: "homepage-assets", label: "Homepage Assets", public: true },
   { id: "blog-images", label: "Blog Images", public: true },
   { id: "shop-images", label: "Shop Images", public: true },
+  { id: "gallery-images", label: "Gallery Images", public: true },
   { id: "caricature-uploads", label: "Caricature Uploads", public: true },
+  { id: "avatars", label: "Avatars", public: true },
   { id: "order-photos", label: "Order Photos", public: false },
   { id: "artist-portfolios", label: "Artist Portfolios", public: false },
   { id: "event-documents", label: "Event Documents", public: false },
   { id: "workshop-files", label: "Workshop Files", public: false },
+  { id: "payment-claims", label: "Payment Claims", public: false },
 ];
 
 const getFileIcon = (name: string) => {
   const ext = name.split(".").pop()?.toLowerCase() || "";
-  if (["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"].includes(ext)) return Image;
-  if (["mp4", "mov", "avi", "webm"].includes(ext)) return Film;
-  if (["mp3", "wav", "ogg"].includes(ext)) return Music;
+  if (["jpg", "jpeg", "png", "gif", "webp", "svg", "avif", "ico"].includes(ext)) return Image;
+  if (["mp4", "mov", "avi", "webm", "mkv"].includes(ext)) return Film;
+  if (["mp3", "wav", "ogg", "m4a", "aac"].includes(ext)) return Music;
   if (["pdf", "doc", "docx", "txt"].includes(ext)) return FileText;
   return File;
 };
 
 const isImageFile = (name: string) => {
   const ext = name.split(".").pop()?.toLowerCase() || "";
-  return ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"].includes(ext);
+  return ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif", "ico"].includes(ext);
 };
 
 const formatSize = (bytes: number) => {
