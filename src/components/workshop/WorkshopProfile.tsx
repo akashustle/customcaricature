@@ -35,6 +35,8 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   // text stays clearly visible regardless of the global theme. Per design
   // request: don't use dark colours here.
   const darkMode = false;
+  const { settings: siteSettings } = useSiteSettings();
+  const avatarUploadEnabled = (siteSettings as any)?.avatar_upload_enabled?.enabled === true;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
