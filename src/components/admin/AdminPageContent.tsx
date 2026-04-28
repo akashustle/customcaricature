@@ -8,7 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { Save, Plus, Trash2, FileText } from "lucide-react";
 
-const KEYS = ["page_about", "page_ai_caricature", "global_contact", "page_caricature_budgeting"];
+const KEYS = [
+  "page_about",
+  "page_ai_caricature",
+  "global_contact",
+  "page_caricature_budgeting",
+  "dashboard_support_contact",
+  "workshop_support_contact",
+];
 
 const AdminPageContent = () => {
   const [data, setData] = useState<Record<string, any>>({});
