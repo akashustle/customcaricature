@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { unlockAdminUrl } from "@/lib/admin-url-unlock";
 
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
