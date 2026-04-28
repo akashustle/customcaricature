@@ -352,25 +352,31 @@ const NotificationBell = () => {
       <AnimatePresence>
         {open && (
           <>
-            {/* Fullscreen backdrop — dark on dark mode, light on light mode.
-                Mobile bottom nav stays visible: panel pads its bottom by the
-                nav height (~76px + safe area). All notification rows are
-                fully clickable touch targets (min 56px tall). */}
+            {/* Backdrop:
+                - Mobile (<md): fullscreen blur to dim the page behind sheet
+                - Desktop (md+): transparent click-catcher only — popover floats below bell */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-md"
+              className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-md md:bg-transparent md:backdrop-blur-0"
               onClick={() => setOpen(false)}
               aria-label="Close notifications"
             />
             <motion.aside
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="fixed inset-x-0 top-0 z-[61] flex flex-col bg-background"
+              /* Mobile: fullscreen sheet, leaves room for bottom nav.
+                 Desktop: floating popover anchored to bell (right-aligned, fixed width). */
+              className="
+                fixed inset-x-0 top-0 z-[61] flex flex-col bg-background shadow-2xl
+                md:inset-auto md:absolute md:top-full md:right-0 md:mt-2
+                md:w-[400px] md:max-h-[min(560px,calc(100vh-120px))]
+                md:rounded-2xl md:border md:border-border/60 md:overflow-hidden
+              "
               style={{
                 bottom: "calc(76px + env(safe-area-inset-bottom))",
               }}
@@ -407,7 +413,7 @@ const NotificationBell = () => {
                 </div>
               </header>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto md:max-h-[480px]">
                 {notifications.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center p-10 text-center">
                     <div className="w-16 h-16 rounded-full bg-muted/60 flex items-center justify-center mb-3">
