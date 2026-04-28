@@ -41,17 +41,24 @@ const DEFAULT: {
       ],
     },
     {
-      title: "Company",
+      title: "Quick Links",
       links: [
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
-        { label: "Event Gallery", href: "/gallery/events" },
-        { label: "Lil Flea Gallery", href: "/lil-flea-gallery" },
         { label: "Explore", href: "/explore" },
         { label: "FAQs", href: "/faqs" },
-        { label: "Support", href: "/support" },
         { label: "Get a Quote", href: "/enquiry" },
         { label: "Track Order", href: "/track-order" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { label: "Event Gallery", href: "/gallery/events" },
+        { label: "Lil Flea Gallery", href: "/lil-flea-gallery" },
+        { label: "Caricature Budgeting", href: "/caricature-budgeting" },
+        { label: "Support", href: "/support" },
+        { label: "Download App", href: "/download" },
       ],
     },
     {
