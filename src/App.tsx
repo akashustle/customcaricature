@@ -11,6 +11,7 @@ import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import RoutePrefetcher from "./components/RoutePrefetcher";
 import RightClickBlocker from "./components/RightClickBlocker";
+import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
@@ -320,6 +321,7 @@ const App = () => {
             
             <FloatingButtons />
             <MobileBottomNav />
+            <ReferralTrackerBoot />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -379,6 +381,7 @@ const App = () => {
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/lil-flea" element={<LilFlea />} />
                 <Route path="/lil-flea-gallery" element={<LilFleaGallery />} />
+                <Route path="/lil-flea/gallery" element={<LilFleaGallery />} />
                 <Route path="/claim-link" element={<ClaimLink />} />
                 <Route path="/chat-now" element={<ChatNow />} />
                 <Route path="/download" element={<Download />} />

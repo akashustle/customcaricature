@@ -3884,6 +3884,48 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          referral_code: string
+          referred_user_id: string | null
+          referrer_user_id: string | null
+          source: string | null
+          user_agent: string | null
+          visitor_session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          source?: string | null
+          user_agent?: string | null
+          visitor_session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          source?: string | null
+          user_agent?: string | null
+          visitor_session_id?: string | null
+        }
+        Relationships: []
+      }
       referral_uses: {
         Row: {
           created_at: string

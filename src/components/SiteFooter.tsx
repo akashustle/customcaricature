@@ -41,17 +41,24 @@ const DEFAULT: {
       ],
     },
     {
-      title: "Company",
+      title: "Quick Links",
       links: [
         { label: "About Us", href: "/about" },
         { label: "Blog", href: "/blog" },
-        { label: "Event Gallery", href: "/gallery/events" },
-        { label: "Lil Flea Gallery", href: "/lil-flea/gallery" },
         { label: "Explore", href: "/explore" },
         { label: "FAQs", href: "/faqs" },
-        { label: "Support", href: "/support" },
         { label: "Get a Quote", href: "/enquiry" },
         { label: "Track Order", href: "/track-order" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { label: "Event Gallery", href: "/gallery/events" },
+        { label: "Lil Flea Gallery", href: "/lil-flea-gallery" },
+        { label: "Caricature Budgeting", href: "/caricature-budgeting" },
+        { label: "Support", href: "/support" },
+        { label: "Download App", href: "/download" },
       ],
     },
     {
@@ -137,7 +144,8 @@ const SiteFooter = () => {
   const savedCols: Column[] = Array.isArray(f.columns) && f.columns.length ? f.columns : [];
   const hasNewLayout =
     savedCols.some((c) => /talk|contact/i.test(c.title)) &&
-    savedCols.some((c) => /polic|legal|quick/i.test(c.title));
+    savedCols.some((c) => /polic|legal/i.test(c.title)) &&
+    savedCols.some((c) => /resource|quick/i.test(c.title));
   const cols: Column[] = hasNewLayout ? savedCols : DEFAULT.columns;
 
   const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
@@ -226,9 +234,9 @@ const SiteFooter = () => {
             </a>
           </div>
 
-          {/* Mobile: 2 cols × 2 rows */}
+          {/* Mobile: 2 cols (shows up to 6 columns wrapped) */}
           <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
-            {cols.slice(0, 4).map((c) => (
+            {cols.slice(0, 6).map((c) => (
               <div key={c.title}>
                 <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
                   {c.title}
@@ -242,8 +250,8 @@ const SiteFooter = () => {
             ))}
           </div>
 
-          {/* Desktop: 4-column grid */}
-          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          {/* Desktop: auto-grid up to 5 columns */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-8">
             {cols.map((c) => (
               <div key={c.title}>
                 <div className="text-sm font-bold text-foreground tracking-wider uppercase mb-3">

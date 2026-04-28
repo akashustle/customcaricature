@@ -573,8 +573,8 @@ const Dashboard = () => {
       </header>
 
       <div className="container mx-auto max-w-5xl px-4 sm:px-5 md:px-6 pt-5 md:pt-8">
-        {/* Mobile inline greeting + avatar — hidden on Profile tab to avoid duplicating the profile hero */}
-        {activeTab !== "profile" && (
+        {/* Mobile inline greeting + avatar — visible on every tab including
+            Profile (per user request) so the header never disappears. */}
         <div className="md:hidden flex items-center justify-between mb-5">
           <LiveGreeting name={profile?.full_name} />
           <div className="flex items-center gap-2">
@@ -604,9 +604,8 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-        )}
 
-        {/* Desktop greeting — hidden on Profile tab */}
+        {/* Desktop greeting — hidden on Profile tab to avoid duplicating the profile hero on large screens */}
         {activeTab !== "profile" && (
         <div className="hidden md:block mb-6">
           <LiveGreeting name={profile?.full_name} />
@@ -828,7 +827,10 @@ const Dashboard = () => {
 
       {/* Mobile bottom nav (5 tabs, fade primary style) — order is admin-customizable */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
-        <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-around overflow-x-auto scrollbar-hide gap-1 snap-x snap-mandatory">
+        <div
+          className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center overflow-x-auto scrollbar-hide gap-1 scroll-smooth"
+          style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+        >
           {(() => {
             const allItems = [
               { key: "home", icon: Home, label: "Home" },
