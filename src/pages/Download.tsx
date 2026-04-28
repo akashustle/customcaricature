@@ -282,7 +282,40 @@ const Download = () => {
           </section>
         )}
 
-        {/* Android download card (also shown to desktop users so they can scan the QR) */}
+        {/* PWA Install card — available on all platforms */}
+        <section className="px-4">
+          <div className="max-w-2xl mx-auto mb-4">
+            <Card className="overflow-hidden border-2 border-emerald-500/30 shadow-xl bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
+              <CardContent className="p-6 sm:p-7">
+                <div className="flex items-start gap-3 mb-2">
+                  <div className="shrink-0 w-11 h-11 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                      <ShieldCheck className="w-3 h-3" /> Available now
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground">Install Web App (PWA)</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      No download needed. Works on any phone, any browser. Adds an icon to your home screen and runs full-screen, just like a native app — with offline support.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  <Button onClick={handleAddToHomeScreen} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <DownloadIcon className="w-4 h-4 mr-2" />
+                    Install Web App
+                  </Button>
+                  <Button variant="outline" onClick={() => toast({ title: "How it works", description: platform === "ios" ? "In Safari: tap Share → Add to Home Screen." : "Tap your browser menu → 'Install app' or 'Add to Home Screen'." })}>
+                    How it works
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+
         {platform !== "ios" && (
           <section className="px-4">
             <div className="max-w-2xl mx-auto">
