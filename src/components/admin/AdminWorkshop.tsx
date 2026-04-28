@@ -314,8 +314,8 @@ const AdminWorkshop = () => {
         {/* REGISTRATION DRAFTS TAB — incomplete/unpaid sign-ups */}
         <TabsContent value="drafts" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold">Registration Drafts ({drafts.length})</h2>
-            <p className="text-xs text-muted-foreground">Unpaid / incomplete workshop sign-ups</p>
+            <h2 className="font-display text-lg font-bold">Processing Users ({drafts.length})</h2>
+            <p className="text-xs text-muted-foreground">Started registration but not paid — view, edit & manually complete</p>
           </div>
           {drafts.length === 0 ? (
             <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">No abandoned registrations 🎉</CardContent></Card>
