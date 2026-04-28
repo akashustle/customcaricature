@@ -48,7 +48,7 @@ const LilFleaGallery = () => {
         description="Browse all our Lil Flea event photos — live caricatures, happy customers, and unforgettable moments."
         canonical="/lil-flea-gallery"
       />
-      <div className="min-h-screen bg-background" style={{ fontFamily: "'Nunito', sans-serif" }}>
+      <div className="min-h-screen bg-background pb-24 md:pb-6" style={{ fontFamily: "'Nunito', sans-serif" }}>
         {/* Header */}
         <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border py-3">
           <div className="container mx-auto px-4 flex items-center justify-between">
@@ -138,6 +138,51 @@ const LilFleaGallery = () => {
                   </div>
                 </div>
               )}
+            </section>
+
+            {/* Row 3 — vertical infinite UP-scroll grid (2 cols mobile, more on desktop) */}
+            <section className="py-6 md:py-10" style={{ contentVisibility: 'auto', containIntrinsicSize: '0 600px' }}>
+              <div className="container mx-auto px-4 mb-4 text-center">
+                <p className="text-xs font-body font-semibold uppercase tracking-widest text-accent mb-1">More Memories</p>
+                <h3 className="font-calligraphy text-2xl md:text-4xl font-bold text-foreground">Endless Lil Flea Vibes</h3>
+                <p className="text-muted-foreground text-xs md:text-sm font-body mt-1">Auto-scrolling grid · tap any photo to view</p>
+              </div>
+
+              <style>{`@keyframes lilflea-vscroll{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(0,-33.33%,0)}}`}</style>
+
+              <div className="container mx-auto px-3">
+                <div
+                  className="relative overflow-hidden rounded-2xl border border-border/40 bg-card/30"
+                  style={{ height: "min(70vh, 640px)" }}
+                >
+                  <div
+                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 will-change-transform"
+                    style={{
+                      animation: `lilflea-vscroll ${Math.max(40, images.length * 5)}s linear infinite`,
+                    }}
+                  >
+                    {tripled.map((item, i) => (
+                      <button
+                        key={`v-${i}`}
+                        type="button"
+                        onClick={() => setLightboxIdx(i % allUrls.length)}
+                        className="aspect-[3/4] w-full overflow-hidden rounded-xl shadow-sm border border-border/40 active:scale-[0.97] transition-transform"
+                      >
+                        <WatermarkedImage
+                          src={item.image_url}
+                          alt={item.caption || `Lil Flea grid ${(i % allUrls.length) + 1}`}
+                          className="w-full h-full"
+                          imgClassName="!object-cover w-full h-full"
+                          loading="lazy"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {/* Top + bottom fade for premium look */}
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-background to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent" />
+                </div>
+              </div>
             </section>
 
             {/* Scroll-to-top FAB */}
