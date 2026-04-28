@@ -365,6 +365,7 @@ const App = () => {
             <FloatingButtons />
             <MobileBottomNav />
             <ReferralTrackerBoot />
+            <RoutedSEO />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
