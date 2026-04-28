@@ -906,3 +906,68 @@ const CardsField = ({ label, value, onChange }: { label: string; value: any[]; o
     </div>
   );
 };
+
+/* ---------------------------- Image list field --------------------------- */
+
+const ImageListField = ({ label, value, onChange }: { label: string; value: any; onChange: (v: string[]) => void }) => {
+  const list: string[] = Array.isArray(value) ? value.filter(Boolean) : [];
+  const update = (i: number, v: string) => onChange(list.map((s, idx) => idx === i ? v : s));
+  const remove = (i: number) => onChange(list.filter((_, idx) => idx !== i));
+  const add = (url: string) => { if (url) onChange([...list, url]); };
+  const move = (i: number, delta: number) => {
+    const t = i + delta;
+    if (t < 0 || t >= list.length) return;
+    const next = [...list];
+    [next[i], next[t]] = [next[t], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label>{label}</Label>
+        <Badge variant="outline" className="text-[10px]">{list.length} image{list.length === 1 ? "" : "s"}</Badge>
+      </div>
+
+      {list.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {list.map((url, i) => (
+            <div key={i} className="relative group rounded-lg overflow-hidden border border-border bg-muted/20">
+              <div className="aspect-square">
+                <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </div>
+              <div className="absolute top-1 left-1 right-1 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
+                    className="w-6 h-6 rounded bg-black/60 text-white flex items-center justify-center disabled:opacity-30">
+                    <ChevronUp className="w-3 h-3" />
+                  </button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === list.length - 1}
+                    className="w-6 h-6 rounded bg-black/60 text-white flex items-center justify-center disabled:opacity-30">
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </div>
+                <button type="button" onClick={() => remove(i)}
+                  className="w-6 h-6 rounded bg-destructive text-destructive-foreground flex items-center justify-center">
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="px-2 py-1 text-[10px] text-muted-foreground bg-card border-t border-border">
+                #{i + 1}
+                <button type="button" onClick={() => {
+                  const v = prompt("Replace image URL:", url);
+                  if (v != null) update(i, v);
+                }} className="ml-2 underline hover:text-foreground">edit url</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-lg border border-dashed border-border p-3">
+        <p className="text-xs text-muted-foreground mb-2">Add image — pick from Library, upload from System, or paste a URL</p>
+        <AssetPicker label="" kind="image" value="" onChange={add} />
+      </div>
+    </div>
+  );
+};
