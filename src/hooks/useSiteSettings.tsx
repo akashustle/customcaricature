@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 type DashboardTabs = {
   orders: boolean; events: boolean; shop: boolean; chat: boolean;
@@ -145,7 +146,6 @@ const fetchSettingsOnce = async (): Promise<SiteSettings> => {
 export const useSiteSettings = () => {
   const [settings, setSettings] = useState<SiteSettings>(cachedSettings || defaults);
   const [loading, setLoading] = useState(!cachedSettings);
-  const channelRef = useRef<any>(null);
 
   const fetchSettings = useCallback(async () => {
     lastFetchTime = 0;
@@ -160,26 +160,14 @@ export const useSiteSettings = () => {
     fetchSettingsOnce().then(s => {
       if (mounted) { setSettings(s); setLoading(false); }
     });
-
-    if (!channelRef.current) {
-      channelRef.current = supabase
-        .channel("site-settings")
-        .on("postgres_changes", { event: "*", schema: "public", table: "admin_site_settings" }, () => {
-          lastFetchTime = 0;
-          cachedSettings = null;
-          fetchSettingsOnce().then(s => { if (mounted) setSettings(s); });
-        })
-        .subscribe();
-    }
-
-    return () => {
-      mounted = false;
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
+    return () => { mounted = false; };
   }, []);
+
+  useSharedChannel(() => {
+    lastFetchTime = 0;
+    cachedSettings = null;
+    fetchSettingsOnce().then(s => setSettings(s));
+  }, { table: "admin_site_settings" });
 
   const updateSetting = async (id: string, value: any) => {
     await supabase.from("admin_site_settings").upsert({ id, value, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
