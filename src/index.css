@@ -1142,8 +1142,159 @@
       color: hsl(82 75% 80%) !important;
     }
     [class*="text-violet-"], [class*="text-indigo-"], [class*="text-purple-"], [class*="text-fuchsia-"] {
-      color: hsl(82 75% 65%) !important;
+     color: hsl(82 75% 65%) !important;
     }
+  }
+
+  /* === ADMIN 3D FLASH-CARD GLOBAL OVERLAY ===
+     Lifts every Card/section/panel/dialog inside the admin shell into a soft
+     neumorphic "flash card" look on a light ivory canvas. Forces readable text. */
+  .admin-panel-font {
+    /* Light ivory canvas tint (overrides darker vault) */
+    --admin-flash-bg: 40 33% 97%;
+    --admin-flash-card: 0 0% 100%;
+    --admin-flash-ink: 222 22% 14%;
+    --admin-flash-muted: 222 12% 38%;
+    --admin-flash-accent: 234 38% 52%;
+    --admin-flash-accent-soft: 234 60% 94%;
+  }
+  .admin-panel-font.admin-canvas-vault,
+  .admin-canvas-vault.admin-panel-font {
+    background:
+      radial-gradient(circle at 0% 0%, hsl(234 80% 92% / 0.55), transparent 42%),
+      radial-gradient(circle at 100% 100%, hsl(40 80% 92% / 0.55), transparent 42%),
+      hsl(var(--admin-flash-bg));
+  }
+
+  /* Universal 3D flash-card on every Shadcn Card / panel inside admin */
+  .admin-panel-font [data-slot="card"],
+  .admin-panel-font .admin-settings-card,
+  .admin-panel-font .premium-stat-card,
+  .admin-panel-font [role="tabpanel"] > .card,
+  .admin-panel-font [role="tabpanel"] > div > .card {
+    background: hsl(var(--admin-flash-card)) !important;
+    border: 1px solid hsl(234 30% 90%) !important;
+    border-radius: 1.25rem !important;
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.9) inset,
+      0 12px 28px -12px hsl(234 40% 30% / 0.18),
+      0 4px 10px -4px hsl(234 30% 30% / 0.10) !important;
+    transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease !important;
+  }
+  .admin-panel-font [data-slot="card"]:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.9) inset,
+      0 22px 42px -16px hsl(234 50% 30% / 0.24),
+      0 8px 16px -6px hsl(234 40% 30% / 0.14) !important;
+  }
+
+  /* Tabs list — flash-card style */
+  .admin-panel-font [role="tablist"] {
+    background: hsl(var(--admin-flash-card)) !important;
+    border: 1px solid hsl(234 30% 90%) !important;
+    border-radius: 1rem !important;
+    padding: 0.35rem !important;
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.9) inset,
+      0 8px 22px -10px hsl(234 40% 30% / 0.15) !important;
+  }
+  .admin-panel-font [role="tab"] {
+    color: hsl(var(--admin-flash-muted)) !important;
+    border-radius: 0.7rem !important;
+    transition: all 0.2s ease !important;
+  }
+  .admin-panel-font [role="tab"][data-state="active"] {
+    background: linear-gradient(180deg, hsl(var(--admin-flash-card)), hsl(234 60% 97%)) !important;
+    color: hsl(var(--admin-flash-accent)) !important;
+    box-shadow:
+      0 1px 0 hsl(0 0% 100%) inset,
+      0 4px 10px -4px hsl(234 50% 40% / 0.25) !important;
+  }
+
+  /* Dialog & Sheet surfaces */
+  .admin-panel-font ~ * [role="dialog"],
+  body:has(.admin-panel-font) [role="dialog"] {
+    background: hsl(var(--admin-flash-card, 0 0% 100%)) !important;
+    color: hsl(222 22% 14%) !important;
+    border-radius: 1.25rem !important;
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.9) inset,
+      0 30px 60px -20px hsl(234 50% 20% / 0.35) !important;
+  }
+
+  /* TEXT VISIBILITY SAFETY NET — no near-invisible grays anywhere in admin */
+  .admin-panel-font {
+    color: hsl(var(--admin-flash-ink));
+  }
+  .admin-panel-font h1,
+  .admin-panel-font h2,
+  .admin-panel-font h3,
+  .admin-panel-font h4,
+  .admin-panel-font h5,
+  .admin-panel-font h6 {
+    color: hsl(var(--admin-flash-ink)) !important;
+  }
+  .admin-panel-font p,
+  .admin-panel-font span,
+  .admin-panel-font label,
+  .admin-panel-font td,
+  .admin-panel-font th,
+  .admin-panel-font li,
+  .admin-panel-font div {
+    color: inherit;
+  }
+  /* Force any too-light gray text up to readable contrast */
+  .admin-panel-font [class*="text-gray-300"],
+  .admin-panel-font [class*="text-gray-400"],
+  .admin-panel-font [class*="text-slate-300"],
+  .admin-panel-font [class*="text-slate-400"],
+  .admin-panel-font [class*="text-zinc-300"],
+  .admin-panel-font [class*="text-zinc-400"],
+  .admin-panel-font [class*="text-neutral-300"],
+  .admin-panel-font [class*="text-neutral-400"],
+  .admin-panel-font [class*="text-stone-300"],
+  .admin-panel-font [class*="text-stone-400"],
+  .admin-panel-font [class*="text-white/50"],
+  .admin-panel-font [class*="text-white/60"],
+  .admin-panel-font [class*="text-white/70"] {
+    color: hsl(var(--admin-flash-muted)) !important;
+  }
+  .admin-panel-font [class*="text-white"] {
+    /* Keep white text only on dark/colored backgrounds (badges, primary buttons) */
+  }
+
+  /* Inputs — soft inset flash style */
+  .admin-panel-font input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  .admin-panel-font textarea,
+  .admin-panel-font select {
+    background: hsl(40 33% 99%) !important;
+    border: 1px solid hsl(234 25% 88%) !important;
+    color: hsl(var(--admin-flash-ink)) !important;
+    border-radius: 0.7rem !important;
+    box-shadow: inset 0 1px 2px hsl(234 30% 30% / 0.06) !important;
+  }
+  .admin-panel-font input:focus,
+  .admin-panel-font textarea:focus,
+  .admin-panel-font select:focus {
+    border-color: hsl(var(--admin-flash-accent) / 0.5) !important;
+    box-shadow:
+      inset 0 1px 2px hsl(234 30% 30% / 0.06),
+      0 0 0 3px hsl(var(--admin-flash-accent) / 0.18) !important;
+    outline: none !important;
+  }
+
+  /* Tables — clean ivory with hover lift */
+  .admin-panel-font table {
+    background: hsl(var(--admin-flash-card)) !important;
+  }
+  .admin-panel-font thead th {
+    background: hsl(234 50% 97%) !important;
+    color: hsl(var(--admin-flash-accent)) !important;
+    font-weight: 600 !important;
+  }
+  .admin-panel-font tbody tr:hover td {
+    background: hsl(234 60% 98%) !important;
   }
 
   /* Smooth + fast admin tab switching */
