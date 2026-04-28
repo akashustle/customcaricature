@@ -963,7 +963,7 @@ const WorkshopAdmin = () => {
         <div className={`flex items-center justify-between px-4 py-5 border-b ${dm ? "border-white/[0.06]" : "border-slate-100"}`}>
           <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => navigate("/")}>
             <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-black/[0.04]">
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
             </div>
             {!collapsed && <div><p className={`text-sm font-bold tracking-tight ${dm ? "text-white" : "text-slate-900"}`}>Workshop</p><p className={`text-[10px] ${dm ? "text-white/40" : "text-slate-400"}`}>CCC Academy</p></div>}
           </div>
@@ -1011,7 +1011,7 @@ const WorkshopAdmin = () => {
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm ring-1 ring-black/[0.04]">
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </div>
               <AdminWorkspaceSwitcher />
             </div>

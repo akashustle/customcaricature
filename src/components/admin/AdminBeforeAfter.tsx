@@ -122,11 +122,11 @@ const AdminBeforeAfter = () => {
               <div key={item.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 <div className="grid grid-cols-2 gap-0.5">
                   <div className="relative">
-                    <img src={item.before_image_url} alt="Before" className="w-full h-32 object-cover" />
+                    <img src={item.before_image_url} alt="Before" className="w-full h-32 object-cover"  loading="lazy" decoding="async" />
                     <span className="absolute top-1 left-1 bg-foreground/60 text-background text-[10px] px-2 py-0.5 rounded-full font-sans">Before</span>
                   </div>
                   <div className="relative">
-                    <img src={item.after_image_url} alt="After" className="w-full h-32 object-cover" />
+                    <img src={item.after_image_url} alt="After" className="w-full h-32 object-cover"  loading="lazy" decoding="async" />
                     <span className="absolute top-1 left-1 bg-primary/80 text-primary-foreground text-[10px] px-2 py-0.5 rounded-full font-sans">After</span>
                   </div>
                 </div>

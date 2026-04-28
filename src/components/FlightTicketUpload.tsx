@@ -107,7 +107,7 @@ const FlightTicketUpload = ({ eventId, userId, isOutsideMumbai, advancePaid }: P
                   </div>
                 </a>
               ) : (
-                <img src={previewUrl} alt="Flight ticket" className="w-full max-h-48 object-contain bg-muted/30" />
+                <img src={previewUrl} alt="Flight ticket" className="w-full max-h-48 object-contain bg-muted/30"  loading="lazy" decoding="async" />
               )}
               <button
                 onClick={() => setShowReplace(true)}

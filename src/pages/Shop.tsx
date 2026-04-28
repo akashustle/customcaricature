@@ -287,7 +287,7 @@ const Shop = () => {
                 <div className="flex gap-3 overflow-x-auto scrollbar-hide">
                   {discountProducts.slice(0, 8).map(p => (
                     <div key={p.id} className="min-w-[120px] text-center cursor-pointer shrink-0" onClick={() => viewProduct(p)}>
-                      <div className="w-20 h-20 rounded-lg bg-muted mx-auto overflow-hidden"><img src={p.images?.[0] || ""} alt="" className="w-full h-full object-cover" /></div>
+                      <div className="w-20 h-20 rounded-lg bg-muted mx-auto overflow-hidden"><img src={p.images?.[0] || ""} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" /></div>
                       <Badge className="mt-1 text-[10px] bg-green-100 text-green-800 border-none">{Math.round((1 - p.discount_price / p.price) * 100)}% OFF</Badge>
                       <p className="text-xs font-sans font-medium truncate mt-0.5">{p.name}</p>
                     </div>
@@ -437,7 +437,7 @@ const Shop = () => {
           {quickViewProduct && (
             <div className="space-y-3">
               <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-                {quickViewProduct.images?.[0] && <img src={quickViewProduct.images[0]} alt="" className="w-full h-full object-contain" />}
+                {quickViewProduct.images?.[0] && <img src={quickViewProduct.images[0]} alt="" className="w-full h-full object-contain"  loading="lazy" decoding="async" />}
               </div>
               {quickViewProduct.brand && <p className="text-xs text-muted-foreground uppercase">{quickViewProduct.brand}</p>}
               <p className="text-sm text-muted-foreground font-sans line-clamp-4">{quickViewProduct.description}</p>

@@ -184,7 +184,7 @@ const TrackOrder = () => {
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full"><ArrowLeft className="w-5 h-5" /></Button>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full shadow-sm" />
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full shadow-sm"  loading="lazy" decoding="async" />
             <h1 className="text-lg font-bold" style={{ color: "hsl(30, 30%, 25%)" }}>Track Your Order</h1>
           </div>
         </div>
@@ -353,7 +353,7 @@ const TrackOrder = () => {
                     <Card className="border-0 shadow-md overflow-hidden" style={{ background: "white" }}>
                       <CardContent className="p-5">
                         <p className="font-semibold text-sm mb-3" style={{ color: "hsl(30, 30%, 25%)" }}>🖼️ Artwork Preview</p>
-                        <img src={orderExtras.preview_image_url} alt="Preview" className="w-full rounded-xl" />
+                        <img src={orderExtras.preview_image_url} alt="Preview" className="w-full rounded-xl"  loading="lazy" decoding="async" />
                       </CardContent>
                     </Card>
                   )}

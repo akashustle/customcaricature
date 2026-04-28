@@ -449,7 +449,7 @@ const AdminHomepageControl = () => {
                 {video.thumbnail_url && (
                   <div className="mt-3">
                     <p className="text-xs text-muted-foreground mb-1">Current Thumbnail:</p>
-                    <img src={video.thumbnail_url} alt="Video thumbnail" className="w-48 h-auto rounded-lg border border-border object-cover" />
+                    <img src={video.thumbnail_url} alt="Video thumbnail" className="w-48 h-auto rounded-lg border border-border object-cover"  loading="lazy" decoding="async" />
                   </div>
                 )}
               </div>

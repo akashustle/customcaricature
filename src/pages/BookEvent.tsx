@@ -494,7 +494,7 @@ const BookEvent = () => {
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}><ArrowLeft className="w-4 h-4" /></Button>
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full" />
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full"  loading="lazy" decoding="async" />
             <h1 className="font-display text-lg font-bold">Book an Event</h1>
           </div>
         </div>

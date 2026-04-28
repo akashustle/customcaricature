@@ -315,7 +315,7 @@ const ArtistEarnings = ({ artistId }: { artistId: string }) => {
         <Dialog open={!!viewScreenshot} onOpenChange={() => setViewScreenshot(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Payment Receipt</DialogTitle></DialogHeader>
-            <img src={viewScreenshot} alt="Receipt" className="w-full rounded-lg" />
+            <img src={viewScreenshot} alt="Receipt" className="w-full rounded-lg"  loading="lazy" decoding="async" />
           </DialogContent>
         </Dialog>
       )}

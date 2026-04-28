@@ -83,7 +83,7 @@ export const DesktopFlashStrip = ({
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-accent blur-md opacity-40" />
               <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center text-2xl font-display font-bold shadow-xl overflow-hidden">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+                  <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   initials
                 )}

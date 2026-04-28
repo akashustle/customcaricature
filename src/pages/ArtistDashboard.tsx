@@ -107,7 +107,7 @@ const ArtistOrderImages = ({ orderId }: { orderId: string }) => {
       <div className="flex gap-1 flex-wrap">
         {images.map((img, idx) => (
           <div key={img.id} className="w-14 h-14 rounded border border-border overflow-hidden cursor-pointer" onClick={() => { setCurrentIndex(idx); setViewerOpen(true); }}>
-            {urls[img.id] ? <img src={urls[img.id]} alt={img.file_name} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-muted" />}
+            {urls[img.id] ? <img src={urls[img.id]} alt={img.file_name} className="w-full h-full object-cover"  loading="lazy" decoding="async" /> : <div className="w-full h-full bg-muted" />}
           </div>
         ))}
       </div>
@@ -647,7 +647,7 @@ const ArtistDashboard = () => {
       <header className="sticky top-0 z-40 border-b border-border dashboard-header backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full border border-border" />
+            <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-full border border-border"  loading="lazy" decoding="async" />
             <h1 className="font-calligraphy text-lg font-bold">Artist Panel</h1>
           </div>
           <div className="flex items-center gap-1">

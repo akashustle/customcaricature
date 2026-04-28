@@ -228,7 +228,7 @@ const AdminEventPaymentClaims = () => {
 
       {previewUrl && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
-          <img src={previewUrl} alt="Payment screenshot" className="max-w-full max-h-full rounded-lg" />
+          <img src={previewUrl} alt="Payment screenshot" className="max-w-full max-h-full rounded-lg"  loading="lazy" decoding="async" />
         </div>
       )}
     </Card>

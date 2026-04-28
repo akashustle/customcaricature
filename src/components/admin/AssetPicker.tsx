@@ -212,7 +212,7 @@ export const AssetPicker = ({
         </Dialog>
       </div>
       {value && kind === "image" && (
-        <img src={value} alt="" className="w-full max-h-40 object-cover rounded-lg border border-border" />
+        <img src={value} alt="" className="w-full max-h-40 object-cover rounded-lg border border-border"  loading="lazy" decoding="async" />
       )}
       {value && kind === "video" && (
         <video src={value} controls className="w-full max-h-48 rounded-lg border border-border" />

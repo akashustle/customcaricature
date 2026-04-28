@@ -224,7 +224,7 @@ const SiteFooter = () => {
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 mb-3 group"
             >
-              <img src="/logo.png" alt="Creative Caricature Club" className="w-11 h-11 rounded-xl shadow-sm" />
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-11 h-11 rounded-xl shadow-sm"  loading="lazy" decoding="async" />
               <div className="text-lg font-extrabold tracking-tight leading-tight">
                 <span className="text-gradient-violet">Creative</span><br />
                 <span className="text-gradient-violet">Caricature Club</span>

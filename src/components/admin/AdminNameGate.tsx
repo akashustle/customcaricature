@@ -31,7 +31,7 @@ const AdminNameGate = ({ onNameSubmit }: AdminNameGateProps) => {
                 animate={{ y: [0, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
-                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
               </motion.div>
               <div className="flex items-center justify-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />

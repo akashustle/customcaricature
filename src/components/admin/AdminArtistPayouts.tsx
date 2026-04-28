@@ -479,7 +479,7 @@ const AdminArtistPayouts = () => {
         <Dialog open={!!viewScreenshot} onOpenChange={() => setViewScreenshot(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Payment Screenshot</DialogTitle></DialogHeader>
-            <img src={viewScreenshot} alt="Screenshot" className="w-full rounded-lg" />
+            <img src={viewScreenshot} alt="Screenshot" className="w-full rounded-lg"  loading="lazy" decoding="async" />
           </DialogContent>
         </Dialog>
       )}

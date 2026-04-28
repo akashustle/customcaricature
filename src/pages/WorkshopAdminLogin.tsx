@@ -270,7 +270,7 @@ const WorkshopAdminLogin = () => {
         <div className="text-center space-y-3">
           <motion.div className="mx-auto w-14 h-14 relative" animate={{ y: [0, -3, 0] }} transition={{ duration: 4, repeat: Infinity }}>
             <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-md">
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]" />
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]"  loading="lazy" decoding="async" />
             </div>
           </motion.div>
 
@@ -360,7 +360,7 @@ const WorkshopAdminLogin = () => {
                         <div className="relative w-full h-full rounded-full overflow-hidden shadow-lg flex items-center justify-center"
                           style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 12px ${BRAND.accent}20` }}>
                           {adminAvatars[selectedAdmin.email] ? (
-                            <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                            <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-xl font-black text-white" style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}>{selectedAdmin.name.charAt(0)}</div>
                           )}
@@ -409,7 +409,7 @@ const WorkshopAdminLogin = () => {
                           <div className="relative w-full h-full rounded-full overflow-hidden shadow-xl flex items-center justify-center"
                             style={{ background: `linear-gradient(135deg, ${BRAND.cream}, #FFF)`, boxShadow: `0 0 0 3px white, 0 4px 15px ${BRAND.accent}25` }}>
                             {adminAvatars[selectedAdmin.email] ? (
-                              <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                              <img src={adminAvatars[selectedAdmin.email]} alt={selectedAdmin.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                             ) : (
                               <User className="w-8 h-8" style={{ color: BRAND.accent }} />
                             )}

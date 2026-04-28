@@ -54,7 +54,7 @@ const About = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-full">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-lg" />
+          <img src="/logo.png" alt="CCC" className="w-8 h-8 rounded-lg"  loading="lazy" decoding="async" />
           <h1 className="font-calligraphy text-xl font-bold">About Us</h1>
         </div>
       </div>

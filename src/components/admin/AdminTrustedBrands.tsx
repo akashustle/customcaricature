@@ -95,7 +95,7 @@ const AdminTrustedBrands = () => {
           {brands.map((b: any) => (
             <Card key={b.id} className="relative group">
               <CardContent className="p-4 text-center">
-                <img src={b.logo_url} alt={b.name} className="w-full h-20 object-contain mb-2" />
+                <img src={b.logo_url} alt={b.name} className="w-full h-20 object-contain mb-2"  loading="lazy" decoding="async" />
                 <p className="text-xs font-semibold truncate">{b.name}</p>
                 <p className="text-[10px] text-muted-foreground capitalize">{b.category}</p>
                 <div className="flex items-center justify-center gap-2 mt-2">

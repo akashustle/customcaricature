@@ -167,7 +167,7 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
             <div key={p.id} className="relative group w-12 h-12 rounded border border-border overflow-hidden">
               <div className="cursor-pointer w-full h-full" onClick={() => setPreviewUrl(photoUrls[p.id] || null)}>
                 {photoUrls[p.id] ? (
-                  <img src={photoUrls[p.id]} alt={p.file_name} className="w-full h-full object-cover" />
+                  <img src={photoUrls[p.id]} alt={p.file_name} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center"><Image className="w-4 h-4 text-muted-foreground" /></div>
                 )}
@@ -189,7 +189,7 @@ const ArtworkUploadFlow = ({ orderId, orderStatus, artConfirmationStatus, onStat
       <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle className="font-display">Artwork Preview</DialogTitle></DialogHeader>
-          {previewUrl && <img src={previewUrl} alt="Artwork" className="w-full rounded-lg" />}
+          {previewUrl && <img src={previewUrl} alt="Artwork" className="w-full rounded-lg"  loading="lazy" decoding="async" />}
         </DialogContent>
       </Dialog>
     </div>

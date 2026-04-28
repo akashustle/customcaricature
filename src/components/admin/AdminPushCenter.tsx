@@ -385,7 +385,7 @@ const AdminPushCenter = () => {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-border">
-          <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+          <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
         </div>
         <div>
           <h2 className="font-display text-xl font-bold flex items-center gap-2">
@@ -496,12 +496,12 @@ const AdminPushCenter = () => {
                   <p className="text-[10px] text-muted-foreground font-sans mb-2 uppercase tracking-wider">Preview</p>
                   <div className="flex items-start gap-3 bg-background rounded-lg p-3 shadow-sm border border-border">
                     <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
+                      <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold font-sans truncate">{title || "Title"}</p>
                       <p className="text-xs text-muted-foreground font-sans line-clamp-2">{message || "Message..."}</p>
-                      {imageUrl && <div className="mt-1.5 rounded overflow-hidden h-16"><img src={imageUrl} alt="" className="w-full h-full object-cover" /></div>}
+                      {imageUrl && <div className="mt-1.5 rounded overflow-hidden h-16"><img src={imageUrl} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" /></div>}
                       <p className="text-[9px] text-muted-foreground font-sans mt-1">Creative Caricature Club™ • now</p>
                     </div>
                   </div>
@@ -792,7 +792,7 @@ const AdminPushCenter = () => {
                   <button key={f.name} onClick={() => { setImageUrl(f.url); setShowFilePicker(false); }}
                     className="border border-border rounded-lg overflow-hidden hover:ring-2 ring-primary transition-all aspect-square"
                   >
-                    <img src={f.url} alt={f.name} className="w-full h-full object-cover" />
+                    <img src={f.url} alt={f.name} className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>

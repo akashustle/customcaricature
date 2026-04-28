@@ -201,7 +201,7 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
                   boxShadow: "0 0 40px hsl(var(--accent) / 0.2)",
                 }}
               >
-                <img src="/logo.png" alt="Creative Caricature Club™" className="w-full h-full rounded-full object-cover" />
+                <img src="/logo.png" alt="Creative Caricature Club™" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
               </div>
             </motion.div>
 
@@ -258,7 +258,7 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
                     transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 18 }}
                     className={`absolute ${pos} rounded-xl overflow-hidden shadow-lg border-2 border-background z-10`}
                   >
-                    <img src={EVENT_IMAGES[i % EVENT_IMAGES.length]} alt="" className="w-full h-full object-cover" />
+                    <img src={EVENT_IMAGES[i % EVENT_IMAGES.length]} alt="" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                   </motion.div>
                 ))}
                 <motion.div
@@ -282,7 +282,7 @@ const LilFleaSplash = ({ onComplete, config }: { onComplete: () => void; config:
                 className="absolute inset-0 z-50 flex flex-col items-center justify-center px-6 bg-background/95"
               >
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent/40 p-0.5 bg-background mb-4">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
+                  <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black text-center text-foreground leading-tight" style={{ fontFamily: "'Dancing Script', cursive" }}>
                   <Typewriter text={config.splash_line4} speed={60} />
@@ -425,7 +425,7 @@ const ThankYouPopup = ({ config, onClose }: { config: EventConfig; onClose: () =
         {!showNotify && !sent && (
           <>
             <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent/40 p-0.5 bg-background mx-auto mb-4">
-              <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
+              <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
             </div>
             <h3 className="text-2xl font-black text-foreground mb-2">Thank You! 🎨</h3>
             <p className="text-muted-foreground text-sm mb-6">{config.close_message}</p>
@@ -600,7 +600,7 @@ const LilFlea = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{ fontFamily: "'Nunito', sans-serif" }}>
         <div className="text-center max-w-lg">
           <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-accent/40 p-0.5 bg-background mx-auto mb-6">
-            <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
+            <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
           </div>
           <h1 className="text-3xl font-black text-foreground mb-4">Thank You! 🎨</h1>
           <p className="text-muted-foreground mb-8">{config.close_message}</p>
@@ -663,10 +663,10 @@ const LilFlea = () => {
             <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center justify-center gap-4 mb-8 flex-wrap">
                 <div className="w-14 h-14 rounded-full border-2 overflow-hidden shadow-md p-0.5 border-accent/30 bg-background">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover" />
+                  <img src="/logo.png" alt="CCC" className="w-full h-full rounded-full object-cover"  loading="lazy" decoding="async" />
                 </div>
                 <span className="text-lg text-accent/40">✦</span>
-                <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-8 md:h-10 opacity-70" />
+                <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-8 md:h-10 opacity-70"  loading="lazy" decoding="async" />
               </motion.div>
 
               <motion.h1 initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 leading-tight tracking-tight">
@@ -841,7 +841,7 @@ const LilFlea = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="rounded-2xl p-6 bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 shadow-sm text-center">
-                  <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-10 mx-auto mb-3 opacity-80" />
+                  <img src="/images/lil-flea-logo.png" alt={config.event_name} className="h-10 mx-auto mb-3 opacity-80"  loading="lazy" decoding="async" />
                   <h3 className="text-lg font-black mb-1">Book on {config.event_name}</h3>
                   <p className="text-sm text-muted-foreground mb-5">Official event website — secure your entry passes</p>
                   <Button
@@ -855,7 +855,7 @@ const LilFlea = () => {
                 {config.show_district && (
                   <div className="rounded-2xl p-6 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 shadow-sm text-center">
                     <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-3 shadow-sm">
-                      <img src="/images/district-logo-coloured.png" alt="District by Zomato" className="w-full h-full object-cover" />
+                      <img src="/images/district-logo-coloured.png" alt="District by Zomato" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
                     </div>
                     <h3 className="text-lg font-black mb-1">Book on District App</h3>
                     <p className="text-sm text-muted-foreground mb-5">Also available on the District app by Zomato</p>
