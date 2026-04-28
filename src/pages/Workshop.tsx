@@ -829,131 +829,123 @@ const Workshop = () => {
     );
   }
 
-  // Login View
   if (view === "login") {
     const whatsappLink = `https://wa.me/91${whatsappNumber}?text=${encodeURIComponent("Hi, I'm unable to login to the Creative Caricature Club™ Workshop. Can you help me?")}`;
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 pb-24 md:pb-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
-          <Card>
-            <CardContent className="p-8 space-y-5">
-              <div className="text-center space-y-3">
-                <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity }} className="mx-auto w-20 h-20 rounded-2xl overflow-hidden border-2 border-border shadow-lg">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" />
-                </motion.div>
-                <h1 className="font-calligraphy text-3xl font-bold text-foreground">Workshop Login</h1>
-                <p className="text-muted-foreground text-sm font-body flex items-center justify-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Creative Caricature Club™</p>
-              </div>
+      <div className="pb-24 md:pb-0">
+        <AuthShell
+          title="Workshop Login"
+          subtitle="Sign in to access your batch, materials and progress."
+          badge="Workshop"
+          heroTitle="Creative Caricature Club™ Workshop"
+          heroSubtitle="Hands-on caricature training — live sessions, recordings & lifetime feedback."
+          accent="amber"
+        >
+          <div className="space-y-5">
+            {/* Batch Selector */}
+            <div className="space-y-2">
+              <Label className="font-body text-xs text-muted-foreground">Select Batch</Label>
+              <Select value={selectedBatch} onValueChange={(v: any) => setSelectedBatch(v)}>
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select batch" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upcoming">📅 Upcoming Batch</SelectItem>
+                  <SelectItem value="march-14-15">📅 14th & 15th March</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Batch Selector */}
+            {/* Identifier-type selector */}
+            <div className="space-y-2">
+              <Label className="font-body text-xs text-muted-foreground">Login With</Label>
+              <Select
+                value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`}
+                onValueChange={(v) => {
+                  setLoginPhase("identifier");
+                  if (v === "secret_code") { setLoginMethod("secret_code"); }
+                  else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
+                  else { setLoginType("email"); setLoginMethod("password"); }
+                }}
+              >
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select login method" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mobile_password">📱 Mobile Number</SelectItem>
+                  <SelectItem value="email_password">📧 Email Address</SelectItem>
+                  {secretCodeLoginEnabled && <SelectItem value="secret_code">🔑 Secret Code</SelectItem>}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-4">
+              {/* Step 1 — Identifier */}
               <div className="space-y-2">
-                <Label className="font-body text-xs text-muted-foreground">Select Batch</Label>
-                <Select value={selectedBatch} onValueChange={(v: any) => setSelectedBatch(v)}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select batch" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upcoming">📅 Upcoming Batch</SelectItem>
-                    <SelectItem value="march-14-15">📅 14th & 15th March</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="font-body text-sm">{loginType === "mobile" ? "Mobile Number" : "Email Address"}</Label>
+                {loginType === "mobile" ? (
+                  <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); setLoginPhase("identifier"); }} placeholder="Enter your mobile" className="pl-10 h-12 rounded-xl" maxLength={10} onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
+                ) : (
+                  <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setLoginPhase("identifier"); }} placeholder="Enter your email" className="pl-10 h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
+                )}
               </div>
 
-              {/* Identifier-type selector — always visible so user picks email or mobile */}
-              <div className="space-y-2">
-                <Label className="font-body text-xs text-muted-foreground">Login With</Label>
-                <Select
-                  value={loginMethod === "secret_code" ? "secret_code" : `${loginType}_password`}
-                  onValueChange={(v) => {
-                    setLoginPhase("identifier");
-                    if (v === "secret_code") { setLoginMethod("secret_code"); }
-                    else if (v === "mobile_password") { setLoginType("mobile"); setLoginMethod("password"); }
-                    else { setLoginType("email"); setLoginMethod("password"); }
-                  }}
-                >
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Select login method" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mobile_password">📱 Mobile Number</SelectItem>
-                    <SelectItem value="email_password">📧 Email Address</SelectItem>
-                    {secretCodeLoginEnabled && <SelectItem value="secret_code">🔑 Secret Code</SelectItem>}
-                  </SelectContent>
-                </Select>
-              </div>
+              {loginPhase === "identifier" && (
+                <Button onClick={checkIdentifier} disabled={checkingIdentifier} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                  {checkingIdentifier ? "Checking…" : <>Continue <ArrowRight className="w-4 h-4 ml-1" /></>}
+                </Button>
+              )}
 
-              <div className="space-y-4">
-                {/* Step 1 — Identifier */}
-                <div className="space-y-2">
-                  <Label className="font-body text-sm">{loginType === "mobile" ? "Mobile Number" : "Email Address"}</Label>
-                  {loginType === "mobile" ? (
-                    <div className="relative"><Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={mobile} onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setMobile(d); setLoginPhase("identifier"); }} placeholder="Enter your mobile" className="pl-10 h-12 rounded-xl" maxLength={10} onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
+              {loginPhase === "password" && (
+                <>
+                  {loginMethod === "secret_code" ? (
+                    <div className="space-y-2">
+                      <Label className="font-body text-sm">Secret Code</Label>
+                      <Input type="password" value={loginSecretCode} onChange={(e) => setLoginSecretCode(e.target.value)} placeholder="Enter your 4-digit code" className="h-12 rounded-xl text-center tracking-[0.5em] text-lg" maxLength={4} onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
+                      <p className="text-[11px] text-muted-foreground text-center">Secret code provided by admin</p>
+                    </div>
+                  ) : isPasswordRequired ? (
+                    <div className="space-y-2">
+                      <Label className="font-body text-sm">Password</Label>
+                      <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
+                    </div>
                   ) : (
-                    <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setLoginPhase("identifier"); }} placeholder="Enter your email" className="pl-10 h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && checkIdentifier()} /></div>
-                  )}
-                </div>
-
-                {/* Step 2 — Continue button (resolves the user state) */}
-                {loginPhase === "identifier" && (
-                  <Button onClick={checkIdentifier} disabled={checkingIdentifier} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                    {checkingIdentifier ? "Checking…" : <>Continue <ArrowRight className="w-4 h-4 ml-1" /></>}
-                  </Button>
-                )}
-
-                {/* Phase A — Registered user → reveal password / secret code */}
-                {loginPhase === "password" && (
-                  <>
-                    {loginMethod === "secret_code" ? (
-                      <div className="space-y-2">
-                        <Label className="font-body text-sm">Secret Code</Label>
-                        <Input type="password" value={loginSecretCode} onChange={(e) => setLoginSecretCode(e.target.value)} placeholder="Enter your 4-digit code" className="h-12 rounded-xl text-center tracking-[0.5em] text-lg" maxLength={4} onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
-                        <p className="text-[11px] text-muted-foreground text-center">Secret code provided by admin</p>
-                      </div>
-                    ) : isPasswordRequired ? (
-                      <div className="space-y-2">
-                        <Label className="font-body text-sm">Password</Label>
-                        <Input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Enter your password" className="h-12 rounded-xl" onKeyDown={e => e.key === "Enter" && handleLogin()} autoFocus />
-                      </div>
-                    ) : (
-                      <p className="text-xs text-center text-muted-foreground bg-accent/10 rounded-xl p-2.5 font-body">
-                        ✨ No password required for this batch — tap Login to continue.
-                      </p>
-                    )}
-                    <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                      {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
-                    </Button>
-                  </>
-                )}
-
-                {/* Phase B — Draft found → resume registration */}
-                {loginPhase === "draft_resume" && (
-                  <div className="space-y-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
-                    <p className="text-sm font-body font-bold text-foreground">👋 Welcome back, {(draftRecord?.name as string) || "there"}!</p>
-                    <p className="text-xs text-muted-foreground font-body">
-                      We saved your progress at step {Math.min((draftRecord?.current_step ?? 0) + 1, 4)} of 4. Pick up where you left off and complete payment to confirm your seat.
+                    <p className="text-xs text-center text-muted-foreground bg-accent/10 rounded-xl p-2.5 font-body">
+                      ✨ No password required for this batch — tap Login to continue.
                     </p>
-                    <Button onClick={resumeFromDraft} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                      Resume Registration <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
+                  )}
+                  <Button onClick={handleLogin} disabled={loading} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                    {loading ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full" /> : "Login to Workshop"}
+                  </Button>
+                </>
+              )}
 
-                {/* Phase C — No record found → nudge to register */}
-                {loginPhase === "not_found" && (
-                  <div className="space-y-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-                    <p className="text-sm font-body font-bold text-amber-900">No registration found</p>
-                    <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
-                    <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                      Register Now <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 rounded-xl font-body text-sm" onClick={() => { setLoginPhase("identifier"); setView("details"); }}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
-                  {isRegistrationOpen && loginPhase === "identifier" && <Button variant="outline" className="flex-1 rounded-xl font-body text-sm border-primary text-primary" onClick={() => setView("register")}>Register <ArrowRight className="w-4 h-4 ml-1" /></Button>}
+              {loginPhase === "draft_resume" && (
+                <div className="space-y-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+                  <p className="text-sm font-body font-bold text-foreground">👋 Welcome back, {(draftRecord?.name as string) || "there"}!</p>
+                  <p className="text-xs text-muted-foreground font-body">
+                    We saved your progress at step {Math.min((draftRecord?.current_step ?? 0) + 1, 4)} of 4. Pick up where you left off and complete payment to confirm your seat.
+                  </p>
+                  <Button onClick={resumeFromDraft} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                    Resume Registration <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </div>
-                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-muted-foreground text-sm font-body font-medium hover:bg-secondary transition-colors"><MessageCircle className="w-4 h-4" /> Can't login? Contact WhatsApp</a>
+              )}
+
+              {loginPhase === "not_found" && (
+                <div className="space-y-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
+                  <p className="text-sm font-body font-bold text-amber-900">No registration found</p>
+                  <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
+                  <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                    Register Now <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl font-body text-sm" onClick={() => { setLoginPhase("identifier"); setView("details"); }}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
+                {isRegistrationOpen && loginPhase === "identifier" && <Button variant="outline" className="flex-1 rounded-xl font-body text-sm border-primary text-primary" onClick={() => setView("register")}>Register <ArrowRight className="w-4 h-4 ml-1" /></Button>}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-muted-foreground text-sm font-body font-medium hover:bg-secondary transition-colors"><MessageCircle className="w-4 h-4" /> Can't login? Contact WhatsApp</a>
+            </div>
+          </div>
+        </AuthShell>
       </div>
     );
   }
