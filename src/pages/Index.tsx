@@ -696,7 +696,11 @@ const Index = () => {
         {(() => {
           // Built-in section renderers — keyed by canonical section id.
           const builtIn: Record<string, (cfgOverride?: any) => React.ReactNode> = {
-            hero: (cfg) => <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={cfg ?? (content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
+            hero: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || heroImages;
+              return <Hero key="hero" onBook={onBook} onQuote={onQuote} images={imgs} config={cfg ?? (content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: imgs, index: i })} />;
+            },
             video: (cfg) => {
               const vc = cfg ?? (content as any).homepage_video;
               if (!vc?.enabled) return null;
