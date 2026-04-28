@@ -324,38 +324,33 @@ const Download = () => {
                   <div className="grid sm:grid-cols-[1fr_auto] gap-6 items-start">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                          <AlertTriangle className="w-3 h-3" /> Coming soon
+                        </span>
                         <span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
                           v{version}
                         </span>
-                        {cfg?.size_mb && (
-                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                            <FileDown className="w-3 h-3" /> {cfg.size_mb} MB
-                          </span>
-                        )}
                         <span className="text-xs text-muted-foreground">Android 7.0+</span>
-                        {isReady && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
-                            <ShieldCheck className="w-3 h-3" /> HTTPS verified
-                          </span>
-                        )}
                       </div>
-                      <h2 className="text-2xl font-bold text-foreground">Custom Caricature Club</h2>
+                      <h2 className="text-2xl font-bold text-foreground">Android APK</h2>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Free • No ads • Signed APK
+                        Our signed Android APK is coming soon. In the meantime, install the Web App above — it works offline and has every feature.
                       </p>
 
-                      {isReady ? (
+                      <Button size="lg" disabled className="mt-5 w-full sm:w-auto">
+                        <DownloadIcon className="w-4 h-4 mr-2" />
+                        APK — Coming soon
+                      </Button>
+
+                      {false && isReady && (
                         <a href={versionPinnedUrl} download rel="noopener">
                           <Button size="lg" className="mt-5 w-full sm:w-auto">
                             <DownloadIcon className="w-4 h-4 mr-2" />
                             Download APK ({version})
                           </Button>
                         </a>
-                      ) : (
-                        <Button size="lg" disabled className="mt-5 w-full sm:w-auto">
-                          {loading ? "Loading…" : insecure ? "Insecure URL — blocked" : "Coming soon"}
-                        </Button>
                       )}
+
 
                       {/* Copyable URL */}
                       {isReady && (
