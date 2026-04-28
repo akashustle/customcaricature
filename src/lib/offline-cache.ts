@@ -1,251 +1,144 @@
 /**
- * Essential offline content cache for app mode.
- *
- * On first launch (and once every 24h when online), preloads:
- *   - Brand logo
- *   - Caricature gallery thumbnails
- *   - Pricing rows (caricature_types, calculator_pricing_sets)
- *   - FAQ entries
- *   - The signed-in user's own orders + events (if any)
- *
- * Stored in IndexedDB so it survives app restarts. When the device goes
- * offline, callers (`getCached("pricing")`, etc.) get instant data.
- *
- * Keep the surface tiny — just `primeOfflineCache()` + `getCached(key)`.
- * Existing pages keep working unchanged; this is purely additive.
+ * Tiny IndexedDB key/value cache for admin offline support.
+ * - Read-first scaffold: stores the latest snapshot of any Supabase result by key.
+ * - Last-write-wins write queue (foundation only — wire up per page later).
+ * - No external deps. ~2KB.
  */
 
-import { supabase } from "@/integrations/supabase/client";
+const DB_NAME = "ccc_admin_offline";
+const DB_VERSION = 1;
+const STORE_CACHE = "cache";
+const STORE_QUEUE = "write_queue";
 
-const DB_NAME = "ccc_offline_v1";
-const STORE = "essentials";
-const STAMP_KEY = "ccc_offline_primed_at";
-const MAX_AGE_MS = 1000 * 60 * 60 * 24; // 24h
+let dbPromise: Promise<IDBDatabase> | null = null;
 
-type CacheKey =
-  | "logo"
-  | "gallery"
-  | "caricature_types"
-  | "calculator"
-  | "faqs"
-  | "my_orders"
-  | "my_events"
-  | "my_profile"
-  | "my_workshop"
-  | "my_notifications"
-  | "site_settings";
-
-const open = () =>
-  new Promise<IDBDatabase>((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+function openDB(): Promise<IDBDatabase> {
+  if (typeof indexedDB === "undefined") {
+    return Promise.reject(new Error("IndexedDB unavailable"));
+  }
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_CACHE)) {
+        db.createObjectStore(STORE_CACHE, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains(STORE_QUEUE)) {
+        db.createObjectStore(STORE_QUEUE, { keyPath: "id", autoIncrement: true });
+      }
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
+  return dbPromise;
+}
 
-const tx = async <T = unknown>(
-  mode: IDBTransactionMode,
-  fn: (s: IDBObjectStore) => IDBRequest<T>,
-): Promise<T> => {
-  const db = await open();
-  return new Promise<T>((resolve, reject) => {
-    const t = db.transaction(STORE, mode);
-    const store = t.objectStore(STORE);
-    const req = fn(store);
-    req.onsuccess = () => resolve(req.result as T);
-    req.onerror = () => reject(req.error);
-  });
+type CacheRow<T> = { key: string; value: T; updatedAt: number };
+
+export async function cacheSet<T>(key: string, value: T): Promise<void> {
+  try {
+    const db = await openDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_CACHE, "readwrite");
+      tx.objectStore(STORE_CACHE).put({ key, value, updatedAt: Date.now() } satisfies CacheRow<T>);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    /* ignore — offline cache is best-effort */
+  }
+}
+
+export async function cacheGet<T>(key: string): Promise<{ value: T; updatedAt: number } | null> {
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_CACHE, "readonly");
+      const req = tx.objectStore(STORE_CACHE).get(key);
+      req.onsuccess = () => {
+        const row = req.result as CacheRow<T> | undefined;
+        resolve(row ? { value: row.value, updatedAt: row.updatedAt } : null);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function cacheClear(): Promise<void> {
+  try {
+    const db = await openDB();
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction(STORE_CACHE, "readwrite");
+      tx.objectStore(STORE_CACHE).clear();
+      tx.oncomplete = () => resolve();
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
+/* ── Write queue (last-write-wins) ── */
+
+export type QueuedWrite = {
+  id?: number;
+  table: string;
+  op: "insert" | "update" | "upsert" | "delete";
+  payload: any;
+  match?: Record<string, any>;
+  createdAt: number;
 };
 
-export const putCached = (key: CacheKey, value: unknown) =>
-  tx("readwrite", (s) => s.put(value, key));
+export async function queueWrite(w: Omit<QueuedWrite, "id" | "createdAt">): Promise<void> {
+  try {
+    const db = await openDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_QUEUE, "readwrite");
+      tx.objectStore(STORE_QUEUE).add({ ...w, createdAt: Date.now() });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    /* ignore */
+  }
+}
 
-export const getCached = <T = unknown>(key: CacheKey) =>
-  tx<T | undefined>("readonly", (s) => s.get(key) as IDBRequest<T | undefined>);
+export async function readQueue(): Promise<QueuedWrite[]> {
+  try {
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_QUEUE, "readonly");
+      const req = tx.objectStore(STORE_QUEUE).getAll();
+      req.onsuccess = () => resolve((req.result as QueuedWrite[]) || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return [];
+  }
+}
 
-const shouldRefresh = () => {
-  if (typeof localStorage === "undefined") return true;
-  const stamp = Number(localStorage.getItem(STAMP_KEY) || "0");
-  return !stamp || Date.now() - stamp > MAX_AGE_MS;
-};
-
-const stamp = () => {
-  try { localStorage.setItem(STAMP_KEY, String(Date.now())); } catch {/* ignore */}
-};
+export async function removeQueued(id: number): Promise<void> {
+  try {
+    const db = await openDB();
+    await new Promise<void>((resolve) => {
+      const tx = db.transaction(STORE_QUEUE, "readwrite");
+      tx.objectStore(STORE_QUEUE).delete(id);
+      tx.oncomplete = () => resolve();
+    });
+  } catch {
+    /* ignore */
+  }
+}
 
 /**
- * Idempotent: safe to call on every app start. Bails fast if recently primed.
- * Runs in the background — never blocks UI.
+ * installOfflineCache — call once on app boot.
+ * Currently a no-op (cache opens lazily on first use), but exists so callers
+ * have a stable lifecycle hook for future warmup logic (e.g. pre-fetching the
+ * admin's most-used queries when the device is idle).
  */
-export const primeOfflineCache = async (force = false) => {
-  if (typeof window === "undefined" || typeof indexedDB === "undefined") return;
-  if (!navigator.onLine) return;
-  if (!force && !shouldRefresh()) return;
-
-  // Run all fetches in parallel; one failure doesn't kill the others.
-  const tasks: Promise<unknown>[] = [
-    cacheLogo(),
-    cacheGallery(),
-    cacheCaricatureTypes(),
-    cacheCalculator(),
-    cacheFaqs(),
-    cacheMyOrders(),
-    cacheMyEvents(),
-    cacheMyProfile(),
-    cacheMyWorkshop(),
-    cacheMyNotifications(),
-    cacheSiteSettings(),
-  ];
-
-  await Promise.allSettled(tasks);
-  stamp();
-};
-
-/* ===================== individual cachers ===================== */
-
-const cacheLogo = async () => {
-  try {
-    const res = await fetch("/logo.png", { cache: "force-cache" });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    await putCached("logo", blob);
-  } catch {/* ignore */}
-};
-
-const cacheGallery = async () => {
-  const { data } = await supabase
-    .from("caricature_gallery")
-    .select("id, image_url, caption, sort_order")
-    .order("sort_order", { ascending: true })
-    .limit(40);
-  if (data) await putCached("gallery", data);
-};
-
-const cacheCaricatureTypes = async () => {
-  const { data } = await supabase
-    .from("caricature_types")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-  if (data) await putCached("caricature_types", data);
-};
-
-const cacheCalculator = async () => {
-  const { data } = await supabase
-    .from("calculator_pricing_sets")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-  if (data) await putCached("calculator", data);
-};
-
-const cacheFaqs = async () => {
-  // FAQ table name varies by project — guard with try/catch
-  try {
-    const { data } = await (supabase as any)
-      .from("faqs")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .limit(50);
-    if (data) await putCached("faqs", data);
-  } catch {/* ignore */}
-};
-
-const cacheMyOrders = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data } = await supabase
-    .from("orders")
-    .select("id, status, created_at, total_price, tracking_id")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(20);
-  if (data) await putCached("my_orders", data);
-};
-
-const cacheMyEvents = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data } = await supabase
-    .from("event_bookings")
-    .select("id, event_type, event_date, status, total_price, city")
-    .eq("user_id", user.id)
-    .order("event_date", { ascending: false })
-    .limit(20);
-  if (data) await putCached("my_events", data);
-};
-
-const cacheMyProfile = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (data) await putCached("my_profile", data);
-};
-
-const cacheMyWorkshop = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  try {
-    const { data } = await (supabase as any)
-      .from("workshop_users")
-      .select("*")
-      .eq("auth_user_id", user.id)
-      .maybeSingle();
-    if (data) await putCached("my_workshop", data);
-  } catch {/* ignore */}
-};
-
-const cacheMyNotifications = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  try {
-    const { data } = await (supabase as any)
-      .from("notifications")
-      .select("id, title, message, type, link, read, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(30);
-    if (data) await putCached("my_notifications", data);
-  } catch {/* ignore */}
-};
-
-const cacheSiteSettings = async () => {
-  try {
-    const { data } = await (supabase as any)
-      .from("admin_site_settings")
-      .select("id, value");
-    if (data) await putCached("site_settings", data);
-  } catch {/* ignore */}
-};
-
-/** React-friendly install — call once on app boot in app mode. */
-export const installOfflineCache = () => {
-  if (typeof window === "undefined") return;
-
-  // Initial prime — wait until idle so we never delay first paint
-  const kick = () => { primeOfflineCache().catch(() => {}); };
-  if ("requestIdleCallback" in window) {
-    (window as any).requestIdleCallback(kick, { timeout: 5000 });
-  } else {
-    setTimeout(kick, 2500);
-  }
-
-  // Refresh whenever the device comes back online
-  window.addEventListener("online", () => {
-    primeOfflineCache(true).catch(() => {});
-  });
-
-  // Re-prime as soon as the user signs in, so their personal data
-  // (profile, orders, events, workshop, notifications) is captured for offline.
-  try {
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        primeOfflineCache(true).catch(() => {});
-      }
-    });
-  } catch {/* ignore */}
-};
+export function installOfflineCache(): void {
+  // Reserved for future: pre-warm openDB, register IDB persistence permission, etc.
+  // Lazy open is sufficient for now and avoids cost on cold start.
+}
