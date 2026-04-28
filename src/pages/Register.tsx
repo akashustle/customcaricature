@@ -385,6 +385,7 @@ const Register = () => {
       } catch {/* non-fatal */}
 
       clearDraft();
+      logReferralEvent("register", { referredUserId: data.user.id }).catch(() => {});
       toast({ title: "Registration Successful! 🎉", description: "Check your email to verify, then login." });
       navigate("/login");
     } catch (err: any) {
