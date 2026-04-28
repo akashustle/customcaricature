@@ -107,7 +107,12 @@ const AdminAIAssistant = () => {
         response: data,
         error: null,
       });
-      setMessages(prev => [...prev, { role: "assistant", content: data?.reply || "(no reply)" }]);
+      // Fire navigation events so the AI can drive the admin panel
+      const navs: string[] = Array.isArray(data?.nav_actions) ? data.nav_actions : [];
+      for (const tab of navs) {
+        try { window.dispatchEvent(new CustomEvent("admin:navigate-tab", { detail: { tab } })); } catch {}
+      }
+      setMessages(prev => [...prev, { role: "assistant", content: data?.reply || (navs.length ? `✅ Opened **${navs.join(" → ")}**` : "(no reply)") }]);
     } catch (e: any) {
       const msg = e.message || String(e);
       toast({ title: "AI error", description: msg, variant: "destructive" });
