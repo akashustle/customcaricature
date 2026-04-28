@@ -482,7 +482,7 @@ const AdminPushCenter = () => {
                 </div>
                 {imageUrl && (
                   <div className="mt-2 rounded-lg overflow-hidden border border-border max-h-32 relative">
-                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) = loading="lazy" decoding="async"> (e.currentTarget.style.display = "none")} />
+                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
                     <Button variant="ghost" size="sm" className="absolute top-1 right-1 h-6 w-6 p-0 bg-background/80" onClick={() => setImageUrl("")}>
                       <X className="w-3 h-3" />
                     </Button>

@@ -508,7 +508,7 @@ const GalleryLightbox = ({ images, startIdx, onClose }: { images: string[]; star
         src={images[idx]}
         alt="Gallery preview"
         className="max-w-[92vw] max-h-[85vh] object-contain rounded-2xl"
-        onClick={e = loading="lazy" decoding="async"> e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       />
       <p className="absolute bottom-5 text-sm text-background/50 font-semibold">{idx + 1} / {len}</p>
     </motion.div>

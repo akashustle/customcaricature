@@ -2305,7 +2305,7 @@ const AssignmentAdminCard = ({ assignment, onGrade, dm, textPrimary, textSeconda
           <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
             <div className="relative w-full h-full flex items-center justify-center overflow-auto">
               <img src={viewingImage} alt="Assignment" className="max-w-full max-h-[85vh] object-contain cursor-zoom-in" 
-                onClick={(e) = loading="lazy" decoding="async"> { const img = e.currentTarget; img.style.transform = img.style.transform === "scale(2)" ? "scale(1)" : "scale(2)"; img.style.transition = "transform 0.3s"; }} />
+                onClick={(e) => { const img = e.currentTarget; img.style.transform = img.style.transform === "scale(2)" ? "scale(1)" : "scale(2)"; img.style.transition = "transform 0.3s"; }} />
             </div>
           </DialogContent>
         </Dialog>
