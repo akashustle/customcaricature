@@ -19,8 +19,9 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-p
 import {
   GripVertical, Eye, EyeOff, Trash2, Copy, Plus, Pencil, Upload, ExternalLink,
   RefreshCcw, Sparkles, Image as ImageIcon, Layout, Type, AlignLeft,
-  Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon,
+  Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon, Video as VideoIcon, Star, Heart, Trophy, Calendar,
 } from "lucide-react";
+import AssetPicker from "@/components/admin/AssetPicker";
 
 /* ----------------------------- Block library ------------------------------ */
 
