@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 export type ContentBlock = {
   id: string;
@@ -26,12 +27,9 @@ export const useContentBlocks = (page?: string) => {
 
   useEffect(() => {
     fetchBlocks();
-    const ch = supabase
-      .channel("content-blocks-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "content_blocks" }, () => fetchBlocks())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
   }, [page]);
+
+  useSharedChannel(() => fetchBlocks(), { table: "content_blocks" });
 
   const getBlock = (id: string): Record<string, any> => {
     const b = blocks.find(b => b.id === id);

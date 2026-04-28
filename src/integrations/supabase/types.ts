@@ -145,6 +145,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          changed_columns: string[] | null
+          created_at: string
+          id: number
+          new_data: Json | null
+          old_data: Json | null
+          operation: string
+          row_pk: string | null
+          summary: string | null
+          table_name: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          changed_columns?: string[] | null
+          created_at?: string
+          id?: number
+          new_data?: Json | null
+          old_data?: Json | null
+          operation: string
+          row_pk?: string | null
+          summary?: string | null
+          table_name: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          changed_columns?: string[] | null
+          created_at?: string
+          id?: number
+          new_data?: Json | null
+          old_data?: Json | null
+          operation?: string
+          row_pk?: string | null
+          summary?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       admin_blocked_ips: {
         Row: {
           blocked_by: string

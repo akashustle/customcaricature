@@ -69,6 +69,7 @@ const AdminMediaAuditLog = lazy(() => import("@/components/admin/AdminMediaAudit
 const AdminNotificationSender = lazy(() => import("@/components/admin/AdminNotificationSender"));
 const AdminPushCenter = lazy(() => import("@/components/admin/AdminPushCenter"));
 const AdminSessionsLog = lazy(() => import("@/components/admin/AdminSessionsLog"));
+const AdminAuditLog = lazy(() => import("@/components/admin/AdminAuditLog"));
 const AdminChatbotTraining = lazy(() => import("@/components/admin/AdminChatbotTraining"));
 const AdminAIChatConversations = lazy(() => import("@/components/admin/AdminAIChatConversations"));
 const AdminChat = lazy(() => import("@/components/admin/AdminChat"));
@@ -2554,6 +2555,10 @@ const Admin = () => {
 
           <TabsContent value="sessions">
             <AdminSessionsLog />
+          </TabsContent>
+
+          <TabsContent value="audit-log">
+            <AdminAuditLog />
           </TabsContent>
 
           <TabsContent value="intl-pricing">

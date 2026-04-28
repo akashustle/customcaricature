@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedChannel } from "@/hooks/useSharedChannel";
 
 export type HomepageBlock = {
   id: string;
@@ -45,7 +46,6 @@ export const invalidateHomepageBlocks = () => {
 export const useHomepageBlocks = (opts?: { onlyVisible?: boolean }) => {
   const [blocks, setBlocks] = useState<HomepageBlock[]>(cache || []);
   const [loading, setLoading] = useState(!cache);
-  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -55,23 +55,13 @@ export const useHomepageBlocks = (opts?: { onlyVisible?: boolean }) => {
         setLoading(false);
       }
     });
-    if (!channelRef.current) {
-      channelRef.current = supabase
-        .channel("homepage-blocks-rt")
-        .on("postgres_changes", { event: "*", schema: "public", table: "homepage_blocks" }, () => {
-          invalidateHomepageBlocks();
-          fetchOnce().then(b => { if (mounted) setBlocks(b); });
-        })
-        .subscribe();
-    }
-    return () => {
-      mounted = false;
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
+    return () => { mounted = false; };
   }, []);
+
+  useSharedChannel(() => {
+    invalidateHomepageBlocks();
+    fetchOnce().then(b => setBlocks(b));
+  }, { table: "homepage_blocks" });
 
   const refetch = async () => {
     invalidateHomepageBlocks();
