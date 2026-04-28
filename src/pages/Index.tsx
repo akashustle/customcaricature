@@ -732,7 +732,11 @@ const Index = () => {
             ),
             about: (cfg) => <AboutUs key="about" config={cfg ?? (content as any).homepage_about} stats={stats} />,
             services: (cfg) => <Services key="services" onBook={onBook} config={cfg ?? (content as any).homepage_services} />,
-            how: (cfg) => <HowItStarts key="how" onBook={onBook} images={eventGallery} config={cfg ?? (content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
+            how: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || eventGallery;
+              return <HowItStarts key="how" onBook={onBook} images={imgs} config={cfg ?? (content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />;
+            },
             why: (cfg) => <WhyUnique key="why" config={cfg ?? (content as any).homepage_why_unique} />,
             reviews: (cfg) => <Reviews key="reviews" config={cfg ?? (content as any).homepage_reviews} />,
             faqs: (cfg) => <FAQs key="faqs" config={cfg ?? (content as any).homepage_faqs} />,
