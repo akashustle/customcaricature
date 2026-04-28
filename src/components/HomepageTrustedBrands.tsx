@@ -26,8 +26,8 @@ const HomepageTrustedBrands = () => {
     <section className="py-16 md:py-24 bg-card/50 border-y border-border/50">
       <div className="container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-          <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3">Our Proud Associations</p>
-          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3">
+          <p className="text-sm font-body font-semibold uppercase tracking-widest text-primary mb-3 text-center">Our Proud Associations</p>
+          <h2 className="font-calligraphy text-3xl md:text-5xl font-bold text-foreground mb-3 text-center mx-auto">
             Trusted by Institutions, Brands<br className="hidden md:block" /> & National Platforms
           </h2>
           <p className="text-muted-foreground font-body max-w-2xl mx-auto">
