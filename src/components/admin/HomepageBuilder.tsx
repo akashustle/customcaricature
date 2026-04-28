@@ -687,56 +687,92 @@ const FieldRenderer = ({ field, value, onChange }: { field: Field; value: any; o
   }
 };
 
-/* ------------------------------ Image field ------------------------------ */
+/* --------------------------- String list field --------------------------- */
 
-const ImageField = ({ label, value, onChange }: { label: string; value?: string; onChange: (v: string) => void }) => {
-  const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-
-  const upload = async (file: File) => {
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `homepage/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("homepage-assets").upload(path, file, { upsert: false });
-      if (error) throw error;
-      const { data } = supabase.storage.from("homepage-assets").getPublicUrl(path);
-      onChange(data.publicUrl);
-      toast({ title: "Uploaded" });
-    } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-    }
-  };
-
+const StringListField = ({ label, value, onChange, placeholder }: { label: string; value: any; onChange: (v: string[]) => void; placeholder?: string }) => {
+  const list: string[] = Array.isArray(value) ? value : [];
+  const update = (i: number, v: string) => onChange(list.map((s, idx) => idx === i ? v : s));
+  const remove = (i: number) => onChange(list.filter((_, idx) => idx !== i));
+  const add = () => onChange([...list, ""]);
   return (
     <div>
       <Label>{label}</Label>
       <div className="space-y-2">
-        <div className="flex gap-2">
-          <Input
-            type="url"
-            value={value || ""}
-            placeholder="https://… or upload below"
-            onChange={e => onChange(e.target.value)}
-          />
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              disabled={uploading}
-              onChange={e => e.target.files?.[0] && upload(e.target.files[0])}
-            />
-            <Button type="button" variant="outline" disabled={uploading} asChild>
-              <span><Upload className="w-4 h-4 mr-2" />{uploading ? "Uploading…" : "Upload"}</span>
+        {list.map((s, i) => (
+          <div key={i} className="flex gap-2">
+            <Input value={s} placeholder={placeholder} onChange={e => update(i, e.target.value)} />
+            <Button size="sm" variant="ghost" onClick={() => remove(i)} className="text-destructive shrink-0">
+              <Trash2 className="w-4 h-4" />
             </Button>
-          </label>
-        </div>
-        {value && (
-          <img src={value} alt="" className="w-full max-h-48 object-cover rounded-lg border border-border" />
-        )}
+          </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={add}>
+          <Plus className="w-4 h-4 mr-2" /> Add
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------- Items field ----------------------------- */
+
+const ItemsField = ({ label, value, onChange, schema }: {
+  label: string;
+  value: any;
+  onChange: (v: any[]) => void;
+  schema: { key: string; label: string; type?: "text" | "textarea" | "image" }[];
+}) => {
+  const items: any[] = Array.isArray(value) ? value : [];
+  const update = (i: number, patch: any) => onChange(items.map((it, idx) => idx === i ? { ...it, ...patch } : it));
+  const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i));
+  const add = () => {
+    const blank: any = {};
+    schema.forEach(f => { blank[f.key] = ""; });
+    onChange([...items, blank]);
+  };
+  const moveUp = (i: number) => {
+    if (i === 0) return;
+    const next = [...items];
+    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+    onChange(next);
+  };
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-muted-foreground">#{i + 1}</span>
+              <div className="flex gap-1">
+                <Button size="sm" variant="ghost" onClick={() => moveUp(i)} className="h-7" disabled={i === 0}>↑</Button>
+                <Button size="sm" variant="ghost" onClick={() => remove(i)} className="h-7 text-destructive">
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+            {schema.map(f => (
+              <div key={f.key}>
+                {f.type === "image" ? (
+                  <AssetPicker label={f.label} value={item[f.key]} onChange={v => update(i, { [f.key]: v })} kind="image" />
+                ) : f.type === "textarea" ? (
+                  <>
+                    <Label className="text-xs">{f.label}</Label>
+                    <Textarea rows={2} value={item[f.key] || ""} onChange={e => update(i, { [f.key]: e.target.value })} />
+                  </>
+                ) : (
+                  <>
+                    <Label className="text-xs">{f.label}</Label>
+                    <Input value={item[f.key] || ""} onChange={e => update(i, { [f.key]: e.target.value })} />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={add}>
+          <Plus className="w-4 h-4 mr-2" /> Add item
+        </Button>
       </div>
     </div>
   );
