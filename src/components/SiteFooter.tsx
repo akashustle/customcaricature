@@ -243,15 +243,15 @@ const SiteFooter = () => {
           </div>
 
           {/* Mobile: 2 cols (shows up to 6 columns wrapped) */}
-          <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
+          <div className="sm:hidden grid grid-cols-2 gap-x-3 gap-y-4 mb-5">
             {cols.slice(0, 6).map((c) => (
-              <div key={c.title}>
-                <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
+              <div key={c.title} className="min-w-0">
+                <div className="text-[10.5px] font-bold text-foreground tracking-wider uppercase mb-1.5">
                   {c.title}
                 </div>
-                <ul className="space-y-1.5 text-[13px]">
+                <ul className="space-y-1 text-[12.5px]">
                   {(c.links || []).slice(0, 12).map((l, i) => (
-                    <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
+                    <li key={(l.href || l.label) + i} className="min-w-0">{renderLink(l)}</li>
                   ))}
                 </ul>
               </div>
