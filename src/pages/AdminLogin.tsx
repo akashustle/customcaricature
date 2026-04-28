@@ -404,186 +404,82 @@ const AdminLogin = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="admin-pwa-bg min-h-screen relative overflow-hidden flex items-center justify-center px-2.5 py-3 sm:px-4 sm:py-4"
-      style={{
-        background: `linear-gradient(135deg, ${BRAND.cream} 0%, #FFFFFF 38%, ${BRAND.light}66 72%, ${BRAND.highlight}33 100%)`,
-        paddingTop: "max(env(safe-area-inset-top), 0.75rem)",
-        paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
-      }}
+    <AuthShell
+      title="Admin Console"
+      subtitle="Creative Caricature Club — internal access"
+      badge="Admin Access"
+      heroTitle="Admin Console"
+      heroSubtitle="Secure 3-step verification with location, identity and credentials. Only the founding admins can sign in here."
+      accent="amber"
     >
       <SEOHead title="Admin Login" noindex />
-
-      {/* Animated background orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[
-          { size: 400, x: "-10%", y: "-15%", color: `${BRAND.light}50`, dur: 18 },
-          { size: 320, x: "68%", y: "55%", color: `${BRAND.accent}18`, dur: 24 },
-          { size: 260, x: "40%", y: "-20%", color: `${BRAND.highlight}15`, dur: 16 },
-          { size: 220, x: "80%", y: "5%", color: `${BRAND.light}30`, dur: 22 },
-          { size: 180, x: "12%", y: "68%", color: `${BRAND.accent}12`, dur: 20 },
-          { size: 150, x: "55%", y: "80%", color: `${BRAND.highlight}10`, dur: 15 },
-        ].map((orb, i) => (
+      <div className="space-y-5">
+        {/* Compact header rail (logo, step pills, location chip) */}
+        <div className="text-center space-y-3">
           <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y, background: orb.color, filter: "blur(70px)" }}
-            animate={{ y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: orb.dur, repeat: Infinity, ease: "easeInOut", delay: i * 1.2 }}
-          />
-        ))}
-      </div>
-
-      {/* Floating sparkles */}
-      {[...Array(12)].map((_, i) => (
-        <motion.div
-          key={`sp-${i}`}
-          className="absolute pointer-events-none"
-          style={{ top: `${10 + (i * 7) % 80}%`, left: `${6 + (i * 12) % 88}%` }}
-          animate={{ y: [0, -25, 0], opacity: [0, 0.6, 0], rotate: [0, 180, 360], scale: [0.3, 1.2, 0.3] }}
-          transition={{ duration: 3.5 + i * 0.5, repeat: Infinity, delay: i * 0.5 }}
-        >
-          <Sparkles className="w-3 h-3" style={{ color: BRAND.accent }} />
-        </motion.div>
-      ))}
-
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.025]"
-        style={{ backgroundImage: `radial-gradient(circle, ${BRAND.primary} 1px, transparent 1px)`, backgroundSize: "36px 36px" }}
-      />
-
-      {/* Main card */}
-      <motion.div
-        initial={{ opacity: 0, y: 60, scale: 0.85 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, type: "spring", bounce: 0.15 }}
-        className="w-full max-w-md relative z-10"
-      >
-        {/* Outer glow */}
-        <motion.div
-          className="absolute -inset-4 rounded-[32px] blur-2xl"
-          style={{ background: `linear-gradient(135deg, ${BRAND.light}60, ${BRAND.accent}25, ${BRAND.light}50)` }}
-          animate={{ opacity: [0.3, 0.55, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity }}
-        />
-
-        {/* Card */}
-        <motion.div
-          className="relative rounded-3xl overflow-hidden"
-          style={{
-            background: "#FFFFFF",
-            boxShadow: `0 30px 70px -15px ${BRAND.primary}18, 0 15px 35px -10px ${BRAND.accent}12, 0 0 0 1px ${BRAND.light}90 inset`,
-          }}
-        >
-          {/* Shimmer sweep */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none z-20"
-            style={{ background: `linear-gradient(105deg, transparent 35%, ${BRAND.cream}80 42%, #FFFFFF 50%, ${BRAND.cream}80 58%, transparent 65%)` }}
-            animate={{ x: ["-200%", "300%"] }}
-            transition={{ duration: 5, repeat: Infinity, repeatDelay: 8, ease: "easeInOut" }}
-          />
-
-          {/* Top gradient strip with animation */}
-          <motion.div
-            className="h-1.5 w-full"
-            style={{
-              background: `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight}, ${BRAND.accent}, ${BRAND.primary})`,
-              backgroundSize: "200% 100%",
-            }}
-            animate={{ backgroundPosition: ["0% 0%", "200% 0%"] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          />
-
-          <div className="relative p-4 sm:p-7 md:p-8 space-y-3.5 sm:space-y-5">
-            {/* Header — Logo + title (always visible) */}
-            <div className="text-center space-y-3">
-              <motion.div
-                className="mx-auto w-20 h-20 relative"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <motion.div
-                  className="absolute -inset-4 rounded-full blur-lg"
-                  style={{ background: `linear-gradient(135deg, ${BRAND.accent}40, ${BRAND.highlight}30, ${BRAND.light}50)` }}
-                  animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.08, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                />
-                <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-xl">
-                  <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]" />
-                </div>
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="flex items-center justify-center gap-2 mb-1.5">
-                  <Shield className="w-5 h-5" style={{ color: BRAND.accent }} />
-                  <h1
-                    className="text-[18px] xs:text-[20px] sm:text-[22px] md:text-2xl font-black leading-tight tracking-tight"
-                    style={{
-                      background: `linear-gradient(120deg, ${BRAND.primary} 0%, ${BRAND.accent} 45%, ${BRAND.highlight} 80%)`,
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    Creative Caricature Club
-                  </h1>
-                </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: BRAND.accent }}>
-                  Admin Console
-                </p>
-                <p className="text-sm font-medium mt-1" style={{ color: "#64748B" }}>{getGreeting()}</p>
-              </motion.div>
-
-              {/* Step indicators */}
-              <div className="flex items-center justify-center gap-3 mt-3">
-                {[1, 2, 3].map(s => (
-                  <motion.div key={s} className="relative" animate={s === step ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 1.5, repeat: Infinity }}>
-                    <div
-                      className={`h-2 rounded-full transition-all duration-500 ${s === step ? "w-12" : s < step ? "w-8" : "w-6"}`}
-                      style={{
-                        background: s === step
-                          ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`
-                          : s < step ? `${BRAND.accent}50` : "#CBD5E1",
-                      }}
-                    />
-                    {s === step && (
-                      <motion.div
-                        className="absolute inset-0 rounded-full blur-sm"
-                        style={{ background: `linear-gradient(90deg, ${BRAND.accent}, ${BRAND.highlight})` }}
-                        animate={{ opacity: [0.4, 0.8, 0.4] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Location chip */}
-              <motion.button
-                type="button"
-                onClick={requestLocationAccess}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold admin-3d-button ${
-                  locationGranted
-                    ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                    : "bg-red-50 text-red-500 border border-red-200"
-                }`}
-                animate={locationGranted ? {} : { scale: [1, 1.03, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <MapPin className="w-3 h-3" />
-                {locationGranted ? "Location verified ✓" : "Location required — click here to allow"}
-              </motion.button>
-
-              {failedAttempts >= 2 && (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                  className="text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-4 py-2 border border-red-200">
-                  ⚠️ {failedAttempts} failed attempts. {failedAttempts >= 3 ? "OTP required." : "1 more → OTP required."}
-                </motion.div>
-              )}
+            className="mx-auto w-14 h-14 relative"
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="admin-logo-frame relative w-full h-full flex items-center justify-center shadow-md">
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover scale-[1.02]" />
             </div>
+          </motion.div>
+
+          <div>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Shield className="w-4 h-4" style={{ color: BRAND.accent }} />
+              <p className="text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: BRAND.accent }}>
+                Admin Access
+              </p>
+            </div>
+            <p className="text-sm font-medium" style={{ color: "#64748B" }}>{getGreeting()}</p>
+          </div>
+
+          {/* Step pills */}
+          <div className="flex items-center justify-center gap-2">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  s === step ? "w-10" : s < step ? "w-7" : "w-5"
+                }`}
+                style={{
+                  background:
+                    s === step
+                      ? `linear-gradient(90deg, ${BRAND.primary}, ${BRAND.accent}, ${BRAND.highlight})`
+                      : s < step
+                      ? `${BRAND.accent}55`
+                      : "#E5E7EB",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Location chip */}
+          <button
+            type="button"
+            onClick={requestLocationAccess}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${
+              locationGranted
+                ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                : "bg-red-50 text-red-500 border border-red-200"
+            }`}
+          >
+            <MapPin className="w-3 h-3" />
+            {locationGranted ? "Location verified ✓" : "Tap to allow location"}
+          </button>
+
+          {failedAttempts >= 2 && (
+            <div className="text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-4 py-2 border border-red-200">
+              ⚠️ {failedAttempts} failed attempts. {failedAttempts >= 3 ? "OTP required." : "1 more → OTP required."}
+            </div>
+          )}
+        </div>
+
+        {/* Existing 3-step body — wrapped to preserve original structure */}
+        <div className="relative">
+          <div className="space-y-3.5 sm:space-y-5">
 
             {/* Steps */}
             <div className="min-h-[280px] relative">
