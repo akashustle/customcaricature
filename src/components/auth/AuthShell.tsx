@@ -194,6 +194,7 @@ export const AuthShell = ({
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 />
               </div>
+              )}
             </div>
 
             {/* ============ RIGHT — FORM ============ */}
