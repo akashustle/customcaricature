@@ -268,7 +268,7 @@ const Login = () => {
                   </DialogHeader>
                   <div className="space-y-3 pt-2">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                      onClick={() => { setRoleChoiceOpen(false); navigate("/customcad75", { replace: true }); }}
+                      onClick={() => { setRoleChoiceOpen(false); unlockAdminUrl("main"); navigate("/customcad75", { replace: true }); }}
                       className="w-full p-4 rounded-xl border-2 border-slate-200 hover:border-primary/60 text-left flex items-center gap-3 transition-all bg-white">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <Shield className="w-5 h-5 text-primary" />
