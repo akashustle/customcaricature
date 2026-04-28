@@ -185,6 +185,7 @@ const StepSummary = ({ data, amount, onComplete, userId }: Props) => {
             });
 
             playPaymentSuccessSound();
+            logReferralEvent("order", { referredUserId: userId || undefined, metadata: { order_id: orderId, amount } }).catch(() => {});
             onComplete(orderId);
 
             // Send confirmation email (fire-and-forget)
