@@ -144,7 +144,8 @@ const SiteFooter = () => {
   const savedCols: Column[] = Array.isArray(f.columns) && f.columns.length ? f.columns : [];
   const hasNewLayout =
     savedCols.some((c) => /talk|contact/i.test(c.title)) &&
-    savedCols.some((c) => /polic|legal|quick/i.test(c.title));
+    savedCols.some((c) => /polic|legal/i.test(c.title)) &&
+    savedCols.some((c) => /resource|quick/i.test(c.title));
   const cols: Column[] = hasNewLayout ? savedCols : DEFAULT.columns;
 
   const igHandle = (contact?.instagram_handle || f.credit_instagram_handle || "akashustle").replace(/^@/, "");
