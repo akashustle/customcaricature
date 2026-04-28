@@ -2416,3 +2416,218 @@ img, video, canvas, svg, iframe {
     max-width: 88vw;
   }
 }
+
+/* ============================================================
+   DARK MODE FRIENDLY OVERRIDES — User Dashboard, Workshop
+   Dashboard, Profile flash cards, Support/Contact cards.
+   Scoped to data-* markers so no other surface is affected.
+   ============================================================ */
+
+.dark [data-user-dashboard],
+.dark [data-workshop-dashboard],
+.dark [data-support-page] {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Lift any hardcoded white/ivory surfaces inside these scopes
+   onto the dark theme card surface */
+.dark [data-user-dashboard] [class*="bg-white"]:not([class*="/"]),
+.dark [data-workshop-dashboard] [class*="bg-white"]:not([class*="/"]),
+.dark [data-support-page] [class*="bg-white"]:not([class*="/"]),
+.dark [data-user-dashboard] [class*="bg-ivory"],
+.dark [data-workshop-dashboard] [class*="bg-ivory"],
+.dark [data-support-page] [class*="bg-ivory"],
+.dark [data-user-dashboard] [class*="bg-cream"],
+.dark [data-workshop-dashboard] [class*="bg-cream"],
+.dark [data-support-page] [class*="bg-cream"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+/* Translucent whites — keep glass effect but dark */
+.dark [data-user-dashboard] [class*="bg-white/"],
+.dark [data-workshop-dashboard] [class*="bg-white/"],
+.dark [data-support-page] [class*="bg-white/"] {
+  background-color: hsl(var(--card) / 0.6) !important;
+  backdrop-filter: blur(14px);
+}
+
+/* Force readable text inside these scopes */
+.dark [data-user-dashboard] [class*="text-black"],
+.dark [data-workshop-dashboard] [class*="text-black"],
+.dark [data-support-page] [class*="text-black"],
+.dark [data-user-dashboard] [class*="text-gray-9"],
+.dark [data-workshop-dashboard] [class*="text-gray-9"],
+.dark [data-support-page] [class*="text-gray-9"],
+.dark [data-user-dashboard] [class*="text-slate-9"],
+.dark [data-workshop-dashboard] [class*="text-slate-9"],
+.dark [data-support-page] [class*="text-slate-9"],
+.dark [data-user-dashboard] [class*="text-zinc-9"],
+.dark [data-workshop-dashboard] [class*="text-zinc-9"],
+.dark [data-support-page] [class*="text-zinc-9"],
+.dark [data-user-dashboard] [class*="text-neutral-9"],
+.dark [data-workshop-dashboard] [class*="text-neutral-9"],
+.dark [data-support-page] [class*="text-neutral-9"] {
+  color: hsl(var(--foreground)) !important;
+}
+.dark [data-user-dashboard] [class*="text-gray-7"],
+.dark [data-user-dashboard] [class*="text-gray-8"],
+.dark [data-user-dashboard] [class*="text-slate-7"],
+.dark [data-user-dashboard] [class*="text-slate-8"],
+.dark [data-workshop-dashboard] [class*="text-gray-7"],
+.dark [data-workshop-dashboard] [class*="text-gray-8"],
+.dark [data-workshop-dashboard] [class*="text-slate-7"],
+.dark [data-workshop-dashboard] [class*="text-slate-8"],
+.dark [data-support-page] [class*="text-gray-7"],
+.dark [data-support-page] [class*="text-gray-8"],
+.dark [data-support-page] [class*="text-slate-7"],
+.dark [data-support-page] [class*="text-slate-8"] {
+  color: hsl(var(--foreground) / 0.85) !important;
+}
+/* Light grays that disappear on dark */
+.dark [data-user-dashboard] [class*="text-gray-3"],
+.dark [data-user-dashboard] [class*="text-gray-4"],
+.dark [data-user-dashboard] [class*="text-slate-3"],
+.dark [data-user-dashboard] [class*="text-slate-4"],
+.dark [data-workshop-dashboard] [class*="text-gray-3"],
+.dark [data-workshop-dashboard] [class*="text-gray-4"],
+.dark [data-workshop-dashboard] [class*="text-slate-3"],
+.dark [data-workshop-dashboard] [class*="text-slate-4"],
+.dark [data-support-page] [class*="text-gray-3"],
+.dark [data-support-page] [class*="text-gray-4"],
+.dark [data-support-page] [class*="text-slate-3"],
+.dark [data-support-page] [class*="text-slate-4"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Borders */
+.dark [data-user-dashboard] [class*="border-gray-1"],
+.dark [data-user-dashboard] [class*="border-gray-2"],
+.dark [data-user-dashboard] [class*="border-slate-1"],
+.dark [data-user-dashboard] [class*="border-slate-2"],
+.dark [data-workshop-dashboard] [class*="border-gray-1"],
+.dark [data-workshop-dashboard] [class*="border-gray-2"],
+.dark [data-workshop-dashboard] [class*="border-slate-1"],
+.dark [data-workshop-dashboard] [class*="border-slate-2"],
+.dark [data-support-page] [class*="border-gray-1"],
+.dark [data-support-page] [class*="border-slate-1"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* brand-gradient-bg used by Support — softer dark variant */
+.dark [data-support-page].brand-gradient-bg,
+.dark [data-support-page] .brand-gradient-bg {
+  background: radial-gradient(circle at 0% 0%, hsl(var(--primary) / 0.15), transparent 45%),
+              radial-gradient(circle at 100% 100%, hsl(var(--accent) / 0.12), transparent 45%),
+              hsl(var(--background)) !important;
+}
+
+/* Profile flash cards (booking dashboard + workshop) */
+.dark [data-user-dashboard] [data-flash-card],
+.dark [data-workshop-dashboard] [data-flash-card],
+.dark [data-user-dashboard] .flash-card,
+.dark [data-workshop-dashboard] .flash-card {
+  background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--card) / 0.85)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  box-shadow:
+    0 1px 0 hsl(var(--foreground) / 0.04) inset,
+    0 12px 28px -12px hsl(0 0% 0% / 0.6),
+    0 4px 10px -4px hsl(0 0% 0% / 0.4) !important;
+}
+
+/* Shadcn Cards inside these scopes auto-adopt dark surface */
+.dark [data-user-dashboard] [data-slot="card"],
+.dark [data-workshop-dashboard] [data-slot="card"],
+.dark [data-support-page] [data-slot="card"] {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Inputs */
+.dark [data-user-dashboard] input,
+.dark [data-user-dashboard] textarea,
+.dark [data-user-dashboard] select,
+.dark [data-workshop-dashboard] input,
+.dark [data-workshop-dashboard] textarea,
+.dark [data-workshop-dashboard] select,
+.dark [data-support-page] input,
+.dark [data-support-page] textarea,
+.dark [data-support-page] select {
+  background-color: hsl(var(--input, var(--card))) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* ============================================================
+   MOBILE FRIENDLINESS PASS — Admin panels + Home page
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Admin: prevent horizontal scroll & cramped padding */
+  .admin-panel-font {
+    font-size: 14px;
+  }
+  .admin-panel-font [data-slot="card"] {
+    border-radius: 1rem !important;
+  }
+  .admin-panel-font [role="tablist"] {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-panel-font [role="tablist"]::-webkit-scrollbar { display: none; }
+  .admin-panel-font [role="tab"] {
+    flex: 0 0 auto !important;
+    white-space: nowrap;
+  }
+  /* Tables in admin go horizontally scrollable instead of overflowing */
+  .admin-panel-font table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Dialogs — full width with safe padding */
+  .admin-panel-font [role="dialog"] {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  /* Stat / KPI grids stack */
+  .admin-panel-font .grid.grid-cols-2,
+  .admin-panel-font .grid.grid-cols-3,
+  .admin-panel-font .grid.grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.6rem !important;
+  }
+  .admin-panel-font .text-3xl,
+  .admin-panel-font .text-4xl {
+    font-size: 1.4rem !important;
+    line-height: 1.2 !important;
+  }
+  .admin-panel-font .px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .admin-panel-font .p-8 { padding: 1rem !important; }
+
+  /* HOME page mobile audit */
+  body { overflow-x: hidden; }
+  main, section { max-width: 100vw; }
+  /* Hero/section text scaling */
+  .home-hero-title, [data-hero-title] {
+    font-size: clamp(2rem, 8vw, 3.2rem) !important;
+    line-height: 1.05 !important;
+    word-break: break-word;
+  }
+  /* Long buttons wrap nicely */
+  a.btn, button { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .admin-panel-font .grid.grid-cols-2,
+  .admin-panel-font .grid.grid-cols-3,
+  .admin-panel-font .grid.grid-cols-4 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}

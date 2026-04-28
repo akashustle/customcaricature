@@ -61,7 +61,7 @@ const Support = () => {
     return (
       <>
         <SEOHead title="Contact & Support | Creative Caricature Club™" description="Contact Creative Caricature Club™ for caricature orders, event bookings, custom artwork enquiries & support. Reach us via phone, email, WhatsApp or Instagram. Based in Mumbai, serving all India & internationally." canonical="/support" />
-        <div className="min-h-screen brand-gradient-bg flex items-center justify-center p-4">
+        <div data-support-page className="min-h-screen brand-gradient-bg flex items-center justify-center p-4">
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <Card className="w-full max-w-md shadow-3d border-glow text-center">
               <CardContent className="p-8 space-y-4">
@@ -89,7 +89,7 @@ const Support = () => {
   return (
     <>
       <SEOHead title="Contact & Support | Creative Caricature Club™" description="Contact Creative Caricature Club™ for caricature orders, event bookings, custom artwork enquiries & support. Reach us via phone, email, WhatsApp or Instagram. Based in Mumbai, serving all India & internationally." canonical="/support" />
-      <div className="min-h-screen brand-gradient-bg pb-24 md:pb-0">
+      <div data-support-page className="min-h-screen brand-gradient-bg pb-24 md:pb-0">
         {/* Hero Header */}
         <div className="relative overflow-hidden">
           {/* Animated background blobs */}
