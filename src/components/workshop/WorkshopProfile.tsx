@@ -574,9 +574,9 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
               </span>
             ) : (
               <Button onClick={() => {
-                  // Eagerly check 100% completeness BEFORE opening the dialog.
-                  // Per request: clicking "Get Verified" must show what's missing
-                  // instead of letting the user open a dead-end dialog.
+                  // Eagerly show what's missing before opening the dialog.
+                  // Profile photo is only required when the global avatar
+                  // upload toggle is enabled (otherwise users can't add one).
                   const missing: string[] = [];
                   if (!profileData.name) missing.push("Name");
                   if (!profileData.email) missing.push("Email");
@@ -587,12 +587,12 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                   if (!profileData.city) missing.push("City");
                   if (!profileData.gender) missing.push("Gender");
                   if (!profileData.instagram_id) missing.push("Instagram");
-                  if (!profileData.why_join) missing.push("Why join");
-                  if (!profileData.avatar_url) missing.push("Profile photo");
+                  if (!profileData.why_join) missing.push("Why Join");
+                  if (avatarUploadEnabled && !profileData.avatar_url) missing.push("Profile photo");
                   if (missing.length > 0) {
                     toast({
-                      title: "100% profile required",
-                      description: `Please fill: ${missing.join(", ")} to request the blue tick.`,
+                      title: "Please complete your details",
+                      description: `Missing: ${missing.join(", ")}. Fill these to request the blue tick.`,
                       variant: "destructive",
                     });
                     setEditing(true);
