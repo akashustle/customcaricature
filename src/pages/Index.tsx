@@ -718,7 +718,11 @@ const Index = () => {
                 </section>
               );
             },
-            gallery: () => <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
+            gallery: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || (eventGallery.length > 0 ? eventGallery : fallbackImages);
+              return <EventGallery key="gallery" images={imgs} onView={onViewGallery} onImageClick={(i) => { setLightbox({ images: imgs.slice(0, 8), index: i }); }} />;
+            },
             clients: () => (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
