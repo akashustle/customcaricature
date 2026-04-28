@@ -675,9 +675,15 @@ const FieldRenderer = ({ field, value, onChange }: { field: Field; value: any; o
         </div>
       );
     case "image":
-      return <ImageField label={field.label} value={value} onChange={onChange} />;
+      return <AssetPicker label={field.label} value={value} onChange={onChange} kind="image" />;
+    case "video":
+      return <AssetPicker label={field.label} value={value} onChange={onChange} kind="video" />;
     case "cards":
       return <CardsField label={field.label} value={value} onChange={onChange} />;
+    case "string_list":
+      return <StringListField label={field.label} value={value} onChange={onChange} placeholder={field.placeholder} />;
+    case "items":
+      return <ItemsField label={field.label} value={value} onChange={onChange} schema={field.schema} />;
   }
 };
 
