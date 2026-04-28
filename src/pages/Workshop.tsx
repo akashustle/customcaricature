@@ -720,51 +720,61 @@ const Workshop = () => {
         <h3 className="font-body font-bold text-foreground">Your Location</h3>
         <div>
           <Label>Country *</Label>
-          <Select value={regForm.country} onValueChange={v => setRegForm({...regForm, country: v, state: "", district: "", city: ""})}>
-            <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select country (default India)" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="India">🇮🇳 India</SelectItem>
-              <SelectItem value="USA">🇺🇸 USA</SelectItem>
-              <SelectItem value="UK">🇬🇧 UK</SelectItem>
-              <SelectItem value="UAE">🇦🇪 UAE</SelectItem>
-              <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
-              <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
-              <SelectItem value="Singapore">🇸🇬 Singapore</SelectItem>
-              <SelectItem value="Germany">🇩🇪 Germany</SelectItem>
-              <SelectItem value="Other">🌍 Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="mt-1">
+            <CountrySearchSelect
+              value={regForm.country || "India"}
+              onChange={(v) => setRegForm({ ...regForm, country: v, state: "", district: "", city: "" })}
+              placeholder="Select country (default India)"
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">🌍 Default India · Search across 196 countries</p>
         </div>
         {regForm.country === "India" ? (
           <>
             <div>
               <Label>State *</Label>
-              <Select value={regForm.state} onValueChange={v => setRegForm({...regForm, state: v, district: "", city: ""})}>
-                <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select state" /></SelectTrigger>
-                <SelectContent>{statesData.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
-              </Select>
-              {regForm.state === "Other" && <Input className="mt-2" value={regForm.state === "Other" ? "" : regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Type your state" />}
+              {regOtherState ? (
+                <div className="space-y-1.5 mt-1">
+                  <Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Type your state" />
+                  <button type="button" onClick={() => { setRegOtherState(false); setRegForm({...regForm, state: "", district: "", city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>
+                </div>
+              ) : (
+                <Select value={regForm.state} onValueChange={v => { if (v === "__other__") { setRegOtherState(true); setRegForm({...regForm, state: "", district: "", city: ""}); } else { setRegForm({...regForm, state: v, district: "", city: ""}); } }}>
+                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select state" /></SelectTrigger>
+                  <SelectContent className="max-h-64">{statesData.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
+                </Select>
+              )}
             </div>
-            {regForm.state && regForm.state !== "Other" && (
+            {regForm.state && (
               <div>
                 <Label>District</Label>
-                <Select value={regForm.district} onValueChange={v => setRegForm({...regForm, district: v, city: ""})}>
-                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
-                  <SelectContent>{districtsData.map((d: string) => <SelectItem key={d} value={d}>{d}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
-                </Select>
-                {regForm.district === "Other" && <Input className="mt-2" onChange={e => setRegForm({...regForm, district: e.target.value})} placeholder="Type your district" />}
+                {regOtherDistrict || regOtherState ? (
+                  <div className="space-y-1.5 mt-1">
+                    <Input value={regForm.district} onChange={e => setRegForm({...regForm, district: e.target.value})} placeholder="Type your district" />
+                    {!regOtherState && <button type="button" onClick={() => { setRegOtherDistrict(false); setRegForm({...regForm, district: "", city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>}
+                  </div>
+                ) : (
+                  <Select value={regForm.district} onValueChange={v => { if (v === "__other__") { setRegOtherDistrict(true); setRegForm({...regForm, district: "", city: ""}); } else { setRegForm({...regForm, district: v, city: ""}); } }}>
+                    <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
+                    <SelectContent className="max-h-64">{districtsData.map((d: string) => <SelectItem key={d} value={d}>{d}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
+                  </Select>
+                )}
               </div>
             )}
             <div>
               <Label>City *</Label>
-              {regForm.district && regForm.district !== "Other" && citiesData.length > 0 ? (
-                <Select value={regForm.city} onValueChange={v => setRegForm({...regForm, city: v})}>
+              {regOtherCity || regOtherDistrict || regOtherState || citiesData.length === 0 ? (
+                <div className="space-y-1.5 mt-1">
+                  <Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Type your city" />
+                  {!regOtherDistrict && !regOtherState && citiesData.length > 0 && (
+                    <button type="button" onClick={() => { setRegOtherCity(false); setRegForm({...regForm, city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>
+                  )}
+                </div>
+              ) : (
+                <Select value={regForm.city} onValueChange={v => { if (v === "__other__") { setRegOtherCity(true); setRegForm({...regForm, city: ""}); } else { setRegForm({...regForm, city: v}); } }}>
                   <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select city" /></SelectTrigger>
-                  <SelectContent>{citiesData.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
+                  <SelectContent className="max-h-64">{citiesData.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
                 </Select>
-              ) : null}
-              {(!regForm.district || regForm.district === "Other" || regForm.city === "Other" || citiesData.length === 0) && (
-                <Input className="mt-1" value={regForm.city === "Other" ? "" : regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Type your city" />
               )}
             </div>
           </>
@@ -773,6 +783,7 @@ const Workshop = () => {
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
               🌍 You're registering from <span className="font-bold text-primary">{regForm.country}</span>. Just enter your city — state is optional.
             </div>
+            <div><Label>State / Region (optional)</Label><Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Your state or region" /></div>
             <div><Label>City *</Label><Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Your city" /></div>
           </>
         )}
