@@ -10,7 +10,7 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 // Stub helper that mirrors the Razorpay /orders/:id/payments response we use.
-const buildPaymentResponse = (status: "captured" | "created" | null) =>
+const buildPaymentResponse = (status: string | null) =>
   status
     ? { items: [{ id: "pay_TEST123", status, amount: 49900 }] }
     : { items: [] };
