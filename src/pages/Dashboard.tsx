@@ -1451,7 +1451,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-5 text-center sm:text-left">
-          <label className={`relative group flex-shrink-0 ${profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "cursor-not-allowed" : "cursor-pointer"}`}>
+          {(() => {
+            const avatarUploadEnabled = (settings as any)?.avatar_upload_enabled?.enabled === true;
+            const editingAllowed = !(profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0);
+            const canChange = avatarUploadEnabled && editingAllowed;
+            return (
+            <label className={`relative group flex-shrink-0 ${canChange ? "cursor-pointer" : "cursor-not-allowed"}`}>
             <div
               className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
               style={{
@@ -1476,15 +1481,19 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
                 <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} />
               </span>
             )}
-            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
-              {profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "🔒 Locked" : "Change"}
-            </span>
+            {canChange && (
+              <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
+                Change
+              </span>
+            )}
             <input type="file" accept="image/*" className="hidden"
-              disabled={profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0}
+              disabled={!canChange}
               onChange={(e) => {
               const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
             }} />
           </label>
+            );
+          })()}
           <div className="flex-1 min-w-0 w-full">
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
               <span className="break-words">{profile?.full_name || "User"}</span>
