@@ -35,14 +35,16 @@ const AdminReferrals = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [codesRes, usesRes, profilesRes] = await Promise.all([
+    const [codesRes, usesRes, profilesRes, eventsRes] = await Promise.all([
       supabase.from("referral_codes").select("*").order("created_at", { ascending: false }),
       supabase.from("referral_uses").select("*").order("created_at", { ascending: false }),
       supabase.from("profiles").select("user_id, full_name, email").limit(500),
+      (supabase.from("referral_events" as any)).select("*").order("created_at", { ascending: false }).limit(500),
     ]);
     setCodes(codesRes.data || []);
     setUses(usesRes.data || []);
     setProfiles(profilesRes.data || []);
+    setEvents(((eventsRes as any).data) || []);
     setLoading(false);
   };
 
