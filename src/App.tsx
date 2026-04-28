@@ -401,7 +401,7 @@ const App = () => {
                 <Route path="/shop/cart" element={<ShopCart />} />
                 <Route path="/shop/order-confirmation" element={<ShopOrderConfirmation />} />
                 <Route path="/shop/ai-caricature" element={<AICaricature />} />
-                <Route path="/CFCAdmin936" element={<ShopAdminLogin />} />
+                <Route path="/CFCAdmin936" element={<AdminUrlGate slot="shop"><ShopAdminLogin /></AdminUrlGate>} />
                 <Route path="/shop-admin" element={<ShopAdmin />} />
                 <Route path="/workshop" element={<Workshop />} />
                 <Route path="/workshop/dashboard" element={<WorkshopDashboard />} />
