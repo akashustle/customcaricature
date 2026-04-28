@@ -159,16 +159,20 @@ const SiteFooter = () => {
 
   const fbUrl = contact?.facebook_url || `https://facebook.com/creativecaricatureclub`;
 
-  const resolveContactHref = (icon?: string) => {
+  const resolveContactHref = (icon?: string, fallbackHref?: string) => {
     if (icon === "whatsapp") return `https://wa.me/${wa}?text=${encodeURIComponent(waMessage)}`;
     if (icon === "phone") return `tel:+${phone.replace(/[^0-9]/g, "")}`;
     if (icon === "email") return `mailto:${email}?subject=${encodeURIComponent("Enquiry from website")}`;
     if (icon === "instagram") return igUrl;
     if (icon === "youtube") return ytUrl;
     if (icon === "facebook") return fbUrl;
-    if (icon === "website") return MAIN_SITE_URL;
-    return "#";
+    if (icon === "website") return fallbackHref || MAIN_SITE_URL;
+    if (icon === "livechat") return fallbackHref || "/live-chat";
+    return fallbackHref || "#";
   };
+
+  // External / outbound icons that should leave the app via openExternal.
+  const OUTBOUND_ICONS = new Set(["whatsapp", "phone", "email", "instagram", "youtube", "facebook", "website"]);
 
   const handleLinkClick = (e: React.MouseEvent, link: Link) => {
     if (link.coming_soon) {
@@ -176,21 +180,24 @@ const SiteFooter = () => {
       setComingSoonOpen(link.label);
       return;
     }
-    // Outbound contact / explicit-external links: route through openExternal
-    // so they stay inside the PWA shell when the app is installed.
-    const isContact = !!link.icon;
-    if (isContact || link.external) {
+    const isOutbound = (link.icon && OUTBOUND_ICONS.has(link.icon)) || link.external;
+    if (isOutbound) {
       e.preventDefault();
-      const href = isContact ? resolveContactHref(link.icon) : link.href || "#";
+      const href = link.icon && OUTBOUND_ICONS.has(link.icon)
+        ? resolveContactHref(link.icon, link.href)
+        : (link.href || "#");
       openExternal(href);
     }
+    // Internal links (e.g. Live Chat → /live-chat) fall through to default <a> nav.
   };
 
   const renderLink = (l: Link) => {
-    const isContact = !!l.icon;
-    const href = isContact ? resolveContactHref(l.icon) : l.href || "#";
-    const externalProps = isContact || l.external ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
-    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5 leading-snug";
+    const isOutbound = (l.icon && OUTBOUND_ICONS.has(l.icon)) || l.external;
+    const href = isOutbound
+      ? resolveContactHref(l.icon, l.href)
+      : (l.href || "#");
+    const externalProps = isOutbound ? { target: "_blank" as const, rel: "noopener noreferrer" } : {};
+    const baseClass = "text-foreground/75 hover:text-primary transition-colors flex items-center gap-1.5 leading-snug cursor-pointer";
     return (
       <a
         href={l.coming_soon ? "#" : href}
@@ -198,7 +205,7 @@ const SiteFooter = () => {
         className={baseClass}
         {...(!l.coming_soon ? externalProps : {})}
       >
-        {isContact && <ContactIcon name={l.icon} />}
+        {l.icon && <ContactIcon name={l.icon} />}
         <span className="truncate">{l.label}</span>
         {l.coming_soon && <Pause className="w-3 h-3 text-warning flex-shrink-0" aria-label="Coming soon" />}
       </a>
