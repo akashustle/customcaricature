@@ -277,6 +277,28 @@ const AdminLogin = () => {
     if (admin) { setSelectedAdmin(admin); setVerifyInput(""); setVerifyMethod("email"); setDirection(1); setStep(2); }
   };
 
+  // Email-driven auto-detect: as admin types their email, find matching profile
+  const [emailLookup, setEmailLookup] = useState("");
+  const [lookupError, setLookupError] = useState("");
+  const handleEmailDetect = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const normalized = emailLookup.trim().toLowerCase();
+    if (!normalized) { setLookupError("Enter your admin email"); return; }
+    if (adminLocationRequired && !locationGranted) {
+      toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
+      return;
+    }
+    const admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
+    if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    setLookupError("");
+    setSelectedAdminEmail(admin.email);
+    setSelectedAdmin(admin);
+    setDirection(1);
+    // Skip the redundant "verify email/mobile" step — email IS the identity proof
+    setStep(3);
+    setPassword(""); setSecretCode(""); setOtpCode(""); setOtpSent(false); setAuthMethod("password");
+  };
+
   const handleVerifyIdentity = () => {
     if (!selectedAdmin || !verifyInput.trim()) { toast({ title: "Enter your " + verifyMethod, variant: "destructive" }); return; }
     const match = verifyMethod === "email"
@@ -485,60 +507,41 @@ const AdminLogin = () => {
             {/* Steps */}
             <div className="min-h-[280px] relative">
               <AnimatePresence mode="wait" custom={direction}>
-                {/* STEP 1 — Profile Select */}
+                {/* STEP 1 — Email Auto-Detect */}
                 {step === 1 && (
                   <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-5">
                     <Label className="text-sm font-bold flex items-center gap-2" style={{ color: BRAND.primary }}>
-                      <User className="w-4 h-4" style={{ color: BRAND.accent }} /> Select Your Profile
+                      <Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Enter Your Admin Email
                     </Label>
-                    <Select value={selectedAdminEmail} onValueChange={handleProfileSelect}>
-                      <SelectTrigger
-                        className="h-14 rounded-2xl text-base transition-all border"
-                        style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: BRAND.light }}
+                    <form onSubmit={handleEmailDetect} className="space-y-3">
+                      <Input
+                        type="email"
+                        autoFocus
+                        autoComplete="email"
+                        inputMode="email"
+                        value={emailLookup}
+                        onChange={(e) => { setEmailLookup(e.target.value); setLookupError(""); }}
+                        placeholder="you@gmail.com"
+                        className="h-14 rounded-2xl text-base px-4 border"
+                        style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: lookupError ? "#EF4444" : BRAND.light, color: BRAND.primary }}
+                      />
+                      {lookupError && (
+                        <p className="text-xs font-semibold text-red-500 flex items-center gap-1.5 px-1">
+                          <Shield className="w-3.5 h-3.5" /> {lookupError}
+                        </p>
+                      )}
+                      <Button
+                        type="submit"
+                        className="w-full h-12 rounded-2xl font-bold text-white shadow-lg"
+                        style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}
                       >
-                        <SelectValue placeholder="Choose admin profile..." />
-                      </SelectTrigger>
-                      <SelectContent
-                        className="border rounded-xl shadow-2xl overflow-visible"
-                        style={{ borderColor: BRAND.light, background: "#FFFFFF" }}
-                      >
-                        {ADMIN_LIST.map(admin => (
-                          <SelectItem
-                            key={admin.email}
-                            value={admin.email}
-                            className="rounded-lg cursor-pointer transition-all duration-200 py-2.5 focus:!bg-[#F0F9FF] hover:!bg-[#F0F9FF] data-[highlighted]:!bg-[#F0F9FF]"
-                            style={{ color: BRAND.primary }}
-                          >
-                            <div className="flex items-center gap-3">
-                              {/* Profile photo in dropdown */}
-                              <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border-2" style={{ borderColor: BRAND.light }}>
-                                {adminAvatars[admin.email] ? (
-                                  <img src={adminAvatars[admin.email]} alt={admin.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div
-                                    className="w-full h-full flex items-center justify-center text-sm font-bold text-white"
-                                    style={{ background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.accent})` }}
-                                  >
-                                    {admin.name.charAt(0)}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex flex-col gap-0.5 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-bold truncate" style={{ color: BRAND.primary }}>{admin.name}</span>
-                                  <span className="text-xs shrink-0" style={{ color: "#94A3B8" }}>({maskEmail(admin.email)})</span>
-                                </div>
-                                <span className="text-[10px] font-semibold flex items-center gap-1 truncate" style={{ color: BRAND.accent }}>
-                                  {admin.emoji} {admin.designation}
-                                </span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-center font-medium" style={{ color: "#94A3B8" }}>Select your profile to proceed securely</p>
+                        <Sparkles className="w-4 h-4 mr-2" /> Detect My Profile
+                      </Button>
+                    </form>
+                    <p className="text-xs text-center font-medium" style={{ color: "#94A3B8" }}>
+                      Your profile auto-loads when your email matches an admin record
+                    </p>
                   </motion.div>
                 )}
 
