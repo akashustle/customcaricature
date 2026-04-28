@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AuthShell from "@/components/auth/AuthShell";
 import { saveCredentials, verifyOfflineCredentials } from "@/lib/offline-credentials";
 import { logReferralEvent } from "@/hooks/useReferralTracking";
+import { installSecretKeystroke, unlockAdminUrl } from "@/lib/admin-url-unlock";
 
 const Login = () => {
   const navigate = useNavigate();
