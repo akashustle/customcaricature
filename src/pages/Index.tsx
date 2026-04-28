@@ -696,7 +696,11 @@ const Index = () => {
         {(() => {
           // Built-in section renderers — keyed by canonical section id.
           const builtIn: Record<string, (cfgOverride?: any) => React.ReactNode> = {
-            hero: (cfg) => <Hero key="hero" onBook={onBook} onQuote={onQuote} images={heroImages} config={cfg ?? (content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: heroImages, index: i })} />,
+            hero: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || heroImages;
+              return <Hero key="hero" onBook={onBook} onQuote={onQuote} images={imgs} config={cfg ?? (content as any).homepage_hero} onImageClick={(i) => setLightbox({ images: imgs, index: i })} />;
+            },
             video: (cfg) => {
               const vc = cfg ?? (content as any).homepage_video;
               if (!vc?.enabled) return null;
@@ -714,7 +718,11 @@ const Index = () => {
                 </section>
               );
             },
-            gallery: () => <EventGallery key="gallery" images={eventGallery.length > 0 ? eventGallery : fallbackImages} onView={onViewGallery} onImageClick={(i) => { const imgs = eventGallery.length > 0 ? eventGallery : fallbackImages; setLightbox({ images: imgs.slice(0, 8), index: i }); }} />,
+            gallery: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || (eventGallery.length > 0 ? eventGallery : fallbackImages);
+              return <EventGallery key="gallery" images={imgs} onView={onViewGallery} onImageClick={(i) => { setLightbox({ images: imgs.slice(0, 8), index: i }); }} />;
+            },
             clients: () => (
               <section key="clients" id="clients" className="px-3 sm:px-4 my-5 sm:my-6">
                 <div className="mx-auto max-w-7xl rounded-3xl card-soft-white overflow-hidden">
@@ -724,7 +732,11 @@ const Index = () => {
             ),
             about: (cfg) => <AboutUs key="about" config={cfg ?? (content as any).homepage_about} stats={stats} />,
             services: (cfg) => <Services key="services" onBook={onBook} config={cfg ?? (content as any).homepage_services} />,
-            how: (cfg) => <HowItStarts key="how" onBook={onBook} images={eventGallery} config={cfg ?? (content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />,
+            how: (cfg) => {
+              const blockImgs = Array.isArray(cfg?.images) && cfg.images.filter(Boolean).length > 0 ? cfg.images.filter(Boolean) : null;
+              const imgs = blockImgs || eventGallery;
+              return <HowItStarts key="how" onBook={onBook} images={imgs} config={cfg ?? (content as any).homepage_how_it_starts} onImageClick={(allImgs, i) => setLightbox({ images: allImgs, index: i })} />;
+            },
             why: (cfg) => <WhyUnique key="why" config={cfg ?? (content as any).homepage_why_unique} />,
             reviews: (cfg) => <Reviews key="reviews" config={cfg ?? (content as any).homepage_reviews} />,
             faqs: (cfg) => <FAQs key="faqs" config={cfg ?? (content as any).homepage_faqs} />,

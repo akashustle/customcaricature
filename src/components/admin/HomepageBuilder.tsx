@@ -20,6 +20,7 @@ import {
   GripVertical, Eye, EyeOff, Trash2, Copy, Plus, Pencil, Upload, ExternalLink,
   RefreshCcw, Sparkles, Image as ImageIcon, Layout, Type, AlignLeft,
   Square as SquareIcon, Grid3x3, MousePointerClick, Code as CodeIcon, Video as VideoIcon, Star, Heart, Trophy, Calendar,
+  ChevronUp, ChevronDown, Download, Upload as UploadIcon,
 } from "lucide-react";
 import AssetPicker from "@/components/admin/AssetPicker";
 
@@ -194,19 +195,80 @@ const HomepageBuilder = () => {
     toast({ title: "Deleted" });
   };
 
+  const persistOrder = async (ordered: HomepageBlock[]) => {
+    for (let i = 0; i < ordered.length; i++) {
+      await supabase.from("homepage_blocks").update({ sort_order: i * 10 } as any).eq("id", ordered[i].id);
+    }
+    invalidateHomepageBlocks();
+    refetch();
+  };
+
   const onDragEnd = async (res: DropResult) => {
     if (!res.destination) return;
     const reordered = Array.from(blocks);
     const [moved] = reordered.splice(res.source.index, 1);
     reordered.splice(res.destination.index, 0, moved);
-    // Re-stamp sort_order in tens, then persist
-    const updates = reordered.map((b, i) => ({ id: b.id, sort_order: i * 10 }));
-    // optimistic — Supabase realtime will refresh
-    for (const u of updates) {
-      await supabase.from("homepage_blocks").update({ sort_order: u.sort_order } as any).eq("id", u.id);
+    await persistOrder(reordered);
+  };
+
+  const moveBlock = async (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= blocks.length) return;
+    const next = Array.from(blocks);
+    [next[idx], next[target]] = [next[target], next[idx]];
+    await persistOrder(next);
+  };
+
+  const exportBlocks = () => {
+    const payload = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      blocks: blocks.map(b => ({
+        block_type: b.block_type,
+        title: b.title,
+        content: b.content,
+        is_visible: b.is_visible,
+        sort_order: b.sort_order,
+        variant: b.variant,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `homepage-blocks-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${blocks.length} blocks downloaded as JSON.` });
+  };
+
+  const importBlocks = async (file: File) => {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const incoming = Array.isArray(parsed) ? parsed : parsed.blocks;
+      if (!Array.isArray(incoming)) throw new Error("Invalid file format");
+      if (!confirm(`Import ${incoming.length} blocks? This REPLACES the current homepage layout.`)) return;
+      setBusy(true);
+      await supabase.from("homepage_blocks").delete().gte("sort_order", -1);
+      const rows = incoming.map((b: any, i: number) => ({
+        block_type: b.block_type,
+        title: b.title || null,
+        content: b.content || {},
+        is_visible: b.is_visible !== false,
+        sort_order: typeof b.sort_order === "number" ? b.sort_order : i * 10,
+        variant: b.variant || null,
+      }));
+      const { error } = await supabase.from("homepage_blocks").insert(rows as any);
+      setBusy(false);
+      if (error) throw error;
+      invalidateHomepageBlocks();
+      refetch();
+      toast({ title: "Imported ✅", description: `Restored ${rows.length} blocks.` });
+    } catch (e: any) {
+      setBusy(false);
+      toast({ title: "Import failed", description: e.message, variant: "destructive" });
     }
-    invalidateHomepageBlocks();
-    refetch();
   };
 
   const resetToDefaults = async () => {
@@ -246,6 +308,24 @@ const HomepageBuilder = () => {
           <Button variant="outline" size="sm" onClick={() => window.open("/", "_blank")}>
             <ExternalLink className="w-4 h-4 mr-2" /> View live
           </Button>
+          <Button variant="outline" size="sm" onClick={exportBlocks} disabled={blocks.length === 0}>
+            <Download className="w-4 h-4 mr-2" /> Export JSON
+          </Button>
+          <label>
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={e => {
+                const f = e.target.files?.[0];
+                if (f) importBlocks(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" asChild disabled={busy}>
+              <span className="cursor-pointer"><UploadIcon className="w-4 h-4 mr-2" /> Import JSON</span>
+            </Button>
+          </label>
           <Button variant="outline" size="sm" onClick={resetToDefaults} disabled={busy}>
             <RefreshCcw className="w-4 h-4 mr-2" /> Reset
           </Button>
@@ -343,6 +423,12 @@ const HomepageBuilder = () => {
                             </p>
                           </div>
                           <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => moveBlock(idx, -1)} disabled={idx === 0} title="Move up">
+                              <ChevronUp className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => moveBlock(idx, 1)} disabled={idx === blocks.length - 1} title="Move down">
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
                             <Button size="sm" variant="ghost" onClick={() => toggleVisible(b)} title={b.is_visible ? "Hide" : "Show"}>
                               {b.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                             </Button>
@@ -455,6 +541,7 @@ type Field =
   | { key: string; type: "text"; label: string; placeholder?: string }
   | { key: string; type: "textarea"; label: string; placeholder?: string }
   | { key: string; type: "image"; label: string }
+  | { key: string; type: "image_list"; label: string }
   | { key: string; type: "video"; label: string }
   | { key: string; type: "url"; label: string; placeholder?: string }
   | { key: string; type: "number"; label: string; min?: number; max?: number }
@@ -479,6 +566,7 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
         { key: "secondary_cta_link", type: "url",      label: "Secondary button link" },
         { key: "pricing_line",       type: "text",     label: "Pricing strip line (optional)" },
         { key: "urgency_text",       type: "text",     label: "Urgency line (optional)" },
+        { key: "images",             type: "image_list", label: "Hero marquee images (leave empty to use site gallery)" },
       ];
     case "video":
       return [
@@ -523,6 +611,7 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
           { key: "title", label: "Title" },
           { key: "body",  label: "Body", type: "textarea" },
         ] },
+        { key: "images",          type: "image_list", label: "Step images (leave empty to use site gallery)" },
       ];
     case "why":
       return [
@@ -611,6 +700,10 @@ const buildFields = (blockType: string, _content: Record<string, any>): Field[] 
       return [{ key: "height", type: "number", label: "Height (px)", min: 8, max: 400 }];
     case "html":
       return [{ key: "html", type: "html", label: "Custom HTML" }];
+    case "gallery":
+      return [
+        { key: "images", type: "image_list", label: "Event gallery images (leave empty to auto-pull from site gallery)" },
+      ];
     default:
       return [];
   }
@@ -676,6 +769,8 @@ const FieldRenderer = ({ field, value, onChange }: { field: Field; value: any; o
       );
     case "image":
       return <AssetPicker label={field.label} value={value} onChange={onChange} kind="image" />;
+    case "image_list":
+      return <ImageListField label={field.label} value={value} onChange={onChange} />;
     case "video":
       return <AssetPicker label={field.label} value={value} onChange={onChange} kind="video" />;
     case "cards":
@@ -807,6 +902,71 @@ const CardsField = ({ label, value, onChange }: { label: string; value: any[]; o
         <Button type="button" variant="outline" size="sm" onClick={addCard}>
           <Plus className="w-4 h-4 mr-2" /> Add card
         </Button>
+      </div>
+    </div>
+  );
+};
+
+/* ---------------------------- Image list field --------------------------- */
+
+const ImageListField = ({ label, value, onChange }: { label: string; value: any; onChange: (v: string[]) => void }) => {
+  const list: string[] = Array.isArray(value) ? value.filter(Boolean) : [];
+  const update = (i: number, v: string) => onChange(list.map((s, idx) => idx === i ? v : s));
+  const remove = (i: number) => onChange(list.filter((_, idx) => idx !== i));
+  const add = (url: string) => { if (url) onChange([...list, url]); };
+  const move = (i: number, delta: number) => {
+    const t = i + delta;
+    if (t < 0 || t >= list.length) return;
+    const next = [...list];
+    [next[i], next[t]] = [next[t], next[i]];
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label>{label}</Label>
+        <Badge variant="outline" className="text-[10px]">{list.length} image{list.length === 1 ? "" : "s"}</Badge>
+      </div>
+
+      {list.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {list.map((url, i) => (
+            <div key={i} className="relative group rounded-lg overflow-hidden border border-border bg-muted/20">
+              <div className="aspect-square">
+                <img src={url} alt="" className="w-full h-full object-cover" loading="lazy" />
+              </div>
+              <div className="absolute top-1 left-1 right-1 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-1">
+                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
+                    className="w-6 h-6 rounded bg-black/60 text-white flex items-center justify-center disabled:opacity-30">
+                    <ChevronUp className="w-3 h-3" />
+                  </button>
+                  <button type="button" onClick={() => move(i, 1)} disabled={i === list.length - 1}
+                    className="w-6 h-6 rounded bg-black/60 text-white flex items-center justify-center disabled:opacity-30">
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </div>
+                <button type="button" onClick={() => remove(i)}
+                  className="w-6 h-6 rounded bg-destructive text-destructive-foreground flex items-center justify-center">
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="px-2 py-1 text-[10px] text-muted-foreground bg-card border-t border-border">
+                #{i + 1}
+                <button type="button" onClick={() => {
+                  const v = prompt("Replace image URL:", url);
+                  if (v != null) update(i, v);
+                }} className="ml-2 underline hover:text-foreground">edit url</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="rounded-lg border border-dashed border-border p-3">
+        <p className="text-xs text-muted-foreground mb-2">Add image — pick from Library, upload from System, or paste a URL</p>
+        <AssetPicker label="" kind="image" value="" onChange={add} />
       </div>
     </div>
   );
