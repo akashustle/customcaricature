@@ -64,6 +64,8 @@ const AdminPageContent = () => {
   const about = data.page_about || {};
   const ai = data.page_ai_caricature || {};
   const contact = data.global_contact || {};
+  const dashContact = data.dashboard_support_contact || {};
+  const wsContact = data.workshop_support_contact || {};
   const cb = data.page_caricature_budgeting || {};
 
   return (
