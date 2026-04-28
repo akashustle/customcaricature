@@ -306,6 +306,19 @@ const AdminPanelGate = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * Permanently 404 the admin/shop-admin/workshop-admin login URLs unless the
+ * visitor has explicitly proven they're an admin (secret keystroke on /login
+ * OR coming from main-admin SSO). The unlock flag lives in sessionStorage so
+ * it disappears when the tab closes.
+ */
+const AdminUrlGate = ({ slot, children }: { slot: AdminUrlSlot; children: React.ReactNode }) => {
+  if (typeof window !== "undefined" && !isAdminUrlUnlocked(slot)) {
+    return <Suspense fallback={<PageLoader />}><NotFound /></Suspense>;
+  }
+  return <>{children}</>;
+};
+
 const App = () => {
   // Splash on EVERY full page reload (skip only on admin-style routes).
   const [showSplash, setShowSplash] = useState(() => {
