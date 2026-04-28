@@ -60,7 +60,7 @@ const ShopAdminLogin = () => {
         title="Shop Admin Login"
         subtitle="Manage your Creative Caricature Club store with ease."
         badge="Store"
-        accent="amber"
+        accent="sky"
         heroTitle="Run the Caricature Store"
         heroSubtitle="Update products, track orders, and keep your shop fresh — all from one beautiful panel."
       >
