@@ -10,6 +10,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import DefaultThemeApplier from "./components/DefaultThemeApplier";
 import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
+import RoutedSEO from "./components/RoutedSEO";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
 import usePageTracker from "./hooks/usePageTracker";
