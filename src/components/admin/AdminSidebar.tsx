@@ -145,6 +145,7 @@ const NAV_SECTIONS = [
       { id: "voice", icon: Radio, label: "Voice Monitor" },
       { id: "sessions", icon: Monitor, label: "Sessions" },
       { id: "locations", icon: MapPin, label: "Locations" },
+      { id: "audit-log", icon: ShieldCheck, label: "Audit Log" },
     ],
   },
   {
