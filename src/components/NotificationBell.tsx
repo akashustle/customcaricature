@@ -372,12 +372,6 @@ const NotificationBell = () => {
               /* Mobile: fullscreen sheet, leaves room for bottom nav.
                  Desktop: floating popover anchored to bell (right-aligned, fixed width). */
               className="
-                fixed inset-x-0 top-0 z-[61] flex flex-col bg-background shadow-2xl
-                md:inset-auto md:absolute md:top-full md:right-0 md:mt-2
-                md:w-[400px] md:max-h-[min(560px,calc(100vh-120px))]
-                md:rounded-2xl md:border md:border-border/60 md:overflow-hidden
-              "
-              className="
                 fixed inset-x-0 top-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[61] flex flex-col bg-background shadow-2xl
                 md:inset-auto md:bottom-auto md:absolute md:top-full md:right-0 md:mt-2
                 md:w-[400px] md:max-h-[min(560px,calc(100vh-120px))]
