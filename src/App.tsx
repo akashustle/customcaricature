@@ -64,19 +64,29 @@ installErrorReporter();
 // Defer the heavy boot installers off the critical path. Each runs once, when
 // the browser is idle, so they don't compete with hydration for main-thread
 // time (was the dominant source of the TBT regression on /).
-const __idleBoot = (cb: () => void) => {
+// Idle boot helper — schedules work for when the browser is free, but ALWAYS
+// runs it within `timeoutMs` even if the tab never becomes idle (e.g. user is
+// on a CPU-bound page). Each callback is wrapped in try/catch so one failing
+// installer can never block the others.
+const __idleBoot = (cb: () => void, timeoutMs = 3000) => {
   if (typeof window === "undefined") return;
+  let fired = false;
+  const safe = () => {
+    if (fired) return;
+    fired = true;
+    try { cb(); } catch (e) { console.warn("[idleBoot] installer failed", e); }
+  };
   if (typeof (window as any).requestIdleCallback === "function") {
-    (window as any).requestIdleCallback(cb, { timeout: 3000 });
-  } else {
-    setTimeout(cb, 1500);
+    (window as any).requestIdleCallback(safe, { timeout: timeoutMs });
   }
+  // Hard fallback — guarantees execution even if requestIdleCallback never
+  // fires (e.g. background tab throttled by browser).
+  setTimeout(safe, timeoutMs);
 };
-__idleBoot(() => {
-  installSyncWorker();
-  installSyncHealthReporter();
-  installOfflineCache();
-});
+// Each installer gets its own slot so a crash in one cannot starve the others.
+__idleBoot(() => { installSyncWorker(); (window as any).__bootInstalled_sync = true; });
+__idleBoot(() => { installSyncHealthReporter(); (window as any).__bootInstalled_health = true; });
+__idleBoot(() => { installOfflineCache(); (window as any).__bootInstalled_cache = true; });
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));

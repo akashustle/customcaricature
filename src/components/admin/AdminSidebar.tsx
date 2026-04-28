@@ -131,6 +131,7 @@ const NAV_SECTIONS = [
       { id: "referrals", icon: Gift, label: "Referrals" },
       { id: "referral-qa", icon: Gift, label: "Referral QA" },
       { id: "data-exports", icon: Gift, label: "Data Exports" },
+      { id: "system-health", icon: ToggleLeft, label: "System Health" },
       { id: "coupons", icon: Ticket, label: "Coupons" },
       { id: "feature-gating", icon: ToggleLeft, label: "Feature Gates" },
     ],

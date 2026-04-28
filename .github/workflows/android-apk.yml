@@ -74,9 +74,23 @@ jobs:
           npx capacitor-assets generate --android || true
 
       # ------ DEBUG BUILD (always, for testing) ------
+      - name: Verify Java toolchain
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          javac -version
+          # Pin Gradle to the JDK 21 that setup-java installed. This fixes
+          # "error: invalid source release: 21" when capacitor-android
+          # (which targets Java 21) is compiled against an older javac.
+          mkdir -p android
+          {
+            echo "org.gradle.java.home=$JAVA_HOME"
+            echo "org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8"
+          } >> android/gradle.properties
+
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon -Dorg.gradle.java.home="$JAVA_HOME"
 
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
@@ -104,6 +118,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease bundleRelease --no-daemon \
+            -Dorg.gradle.java.home="$JAVA_HOME" \
             -Pandroid.injected.signing.store.file=$(pwd)/app/release.keystore \
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \

@@ -114,6 +114,7 @@ const AdminDrillDownDialog = lazy(() => import("@/components/admin/AdminDrillDow
 const AdminReferrals = lazy(() => import("@/components/admin/AdminReferrals"));
 const AdminReferralQA = lazy(() => import("@/components/admin/AdminReferralQA"));
 const AdminDataExports = lazy(() => import("@/components/admin/AdminDataExports"));
+const AdminSystemHealth = lazy(() => import("@/components/admin/AdminSystemHealth"));
 const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminMaintenance = lazy(() => import("@/components/admin/AdminMaintenance"));
 const AdminInvoices = lazy(() => import("@/components/admin/AdminInvoices"));
@@ -2702,6 +2703,10 @@ const Admin = () => {
 
           <TabsContent value="data-exports">
             <AdminDataExports />
+          </TabsContent>
+
+          <TabsContent value="system-health">
+            <AdminSystemHealth />
           </TabsContent>
 
           <TabsContent value="coupons">

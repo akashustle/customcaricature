@@ -1,7 +1,30 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
+
+/**
+ * Detects "low-power" environments where heavy animation hurts TBT:
+ *  - prefers-reduced-motion: reduce
+ *  - deviceMemory < 4 GB
+ *  - Save-Data header
+ *  - hardwareConcurrency < 4
+ * On those devices we skip the floating 3D shapes & ambient orbs.
+ */
+const useLowPowerMode = () => {
+  const [low, setLow] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const dm = (navigator as any).deviceMemory;
+      const hc = navigator.hardwareConcurrency || 8;
+      const sd = (navigator as any).connection?.saveData;
+      setLow(Boolean(mq.matches || (dm && dm < 4) || hc < 4 || sd));
+    } catch { /* ignore */ }
+  }, []);
+  return low;
+};
 
 /**
  * AuthShell — premium 3D split-card auth layout.
@@ -32,6 +55,7 @@ export const AuthShell = ({
   accent?: "violet" | "rose" | "emerald" | "amber" | "sky";
 }) => {
   const navigate = useNavigate();
+  const lowPower = useLowPowerMode();
 
   // Each accent maps to a soft pastel hero gradient + 3D shape colors.
   const ACCENTS: Record<
@@ -54,21 +78,25 @@ export const AuthShell = ({
           "radial-gradient(ellipse at 20% 0%, hsl(252 60% 96%) 0%, transparent 55%), radial-gradient(ellipse at 100% 100%, hsl(320 70% 96%) 0%, transparent 55%), linear-gradient(180deg, #f7f7fb 0%, #eef0fa 100%)",
       }}
     >
-      {/* Ambient floating orbs — desktop only */}
-      <motion.div
-        aria-hidden
-        className="hidden md:block absolute -top-24 -left-20 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-50"
-        style={{ background: `radial-gradient(circle, ${a.orbA}, transparent 70%)` }}
-        animate={{ y: [0, 22, 0], x: [0, 16, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="hidden md:block absolute -bottom-24 -right-16 w-[28rem] h-[28rem] rounded-full blur-3xl pointer-events-none opacity-50"
-        style={{ background: `radial-gradient(circle, ${a.orbB}, transparent 70%)` }}
-        animate={{ y: [0, -28, 0], x: [0, -14, 0] }}
-        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Ambient floating orbs — desktop only, skipped on low-power devices */}
+      {!lowPower && (
+        <>
+          <motion.div
+            aria-hidden
+            className="hidden md:block absolute -top-24 -left-20 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-50"
+            style={{ background: `radial-gradient(circle, ${a.orbA}, transparent 70%)`, willChange: "transform" }}
+            animate={{ y: [0, 22, 0], x: [0, 16, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            aria-hidden
+            className="hidden md:block absolute -bottom-24 -right-16 w-[28rem] h-[28rem] rounded-full blur-3xl pointer-events-none opacity-50"
+            style={{ background: `radial-gradient(circle, ${a.orbB}, transparent 70%)`, willChange: "transform" }}
+            animate={{ y: [0, -28, 0], x: [0, -14, 0] }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </>
+      )}
 
       {/* Mobile only soft shapes */}
       <div className="md:hidden absolute top-10 right-8 w-24 h-24 rounded-full blur-2xl opacity-50 pointer-events-none"
@@ -125,8 +153,9 @@ export const AuthShell = ({
                 </p>
               </div>
 
-              {/* 3D floating shapes — purely decorative */}
-              <div className="absolute inset-0 pointer-events-none">
+              {/* 3D floating shapes — purely decorative, skipped on low-power */}
+              {!lowPower && (
+              <div className="absolute inset-0 pointer-events-none" style={{ contain: "paint" }}>
                 <motion.div
                   className="absolute right-8 top-24 w-28 h-28 rounded-full"
                   style={{
@@ -165,6 +194,7 @@ export const AuthShell = ({
                   transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                 />
               </div>
+              )}
             </div>
 
             {/* ============ RIGHT — FORM ============ */}
