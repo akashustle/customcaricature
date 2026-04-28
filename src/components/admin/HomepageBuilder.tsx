@@ -195,19 +195,80 @@ const HomepageBuilder = () => {
     toast({ title: "Deleted" });
   };
 
+  const persistOrder = async (ordered: HomepageBlock[]) => {
+    for (let i = 0; i < ordered.length; i++) {
+      await supabase.from("homepage_blocks").update({ sort_order: i * 10 } as any).eq("id", ordered[i].id);
+    }
+    invalidateHomepageBlocks();
+    refetch();
+  };
+
   const onDragEnd = async (res: DropResult) => {
     if (!res.destination) return;
     const reordered = Array.from(blocks);
     const [moved] = reordered.splice(res.source.index, 1);
     reordered.splice(res.destination.index, 0, moved);
-    // Re-stamp sort_order in tens, then persist
-    const updates = reordered.map((b, i) => ({ id: b.id, sort_order: i * 10 }));
-    // optimistic — Supabase realtime will refresh
-    for (const u of updates) {
-      await supabase.from("homepage_blocks").update({ sort_order: u.sort_order } as any).eq("id", u.id);
+    await persistOrder(reordered);
+  };
+
+  const moveBlock = async (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= blocks.length) return;
+    const next = Array.from(blocks);
+    [next[idx], next[target]] = [next[target], next[idx]];
+    await persistOrder(next);
+  };
+
+  const exportBlocks = () => {
+    const payload = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      blocks: blocks.map(b => ({
+        block_type: b.block_type,
+        title: b.title,
+        content: b.content,
+        is_visible: b.is_visible,
+        sort_order: b.sort_order,
+        variant: b.variant,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `homepage-blocks-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${blocks.length} blocks downloaded as JSON.` });
+  };
+
+  const importBlocks = async (file: File) => {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const incoming = Array.isArray(parsed) ? parsed : parsed.blocks;
+      if (!Array.isArray(incoming)) throw new Error("Invalid file format");
+      if (!confirm(`Import ${incoming.length} blocks? This REPLACES the current homepage layout.`)) return;
+      setBusy(true);
+      await supabase.from("homepage_blocks").delete().gte("sort_order", -1);
+      const rows = incoming.map((b: any, i: number) => ({
+        block_type: b.block_type,
+        title: b.title || null,
+        content: b.content || {},
+        is_visible: b.is_visible !== false,
+        sort_order: typeof b.sort_order === "number" ? b.sort_order : i * 10,
+        variant: b.variant || null,
+      }));
+      const { error } = await supabase.from("homepage_blocks").insert(rows as any);
+      setBusy(false);
+      if (error) throw error;
+      invalidateHomepageBlocks();
+      refetch();
+      toast({ title: "Imported ✅", description: `Restored ${rows.length} blocks.` });
+    } catch (e: any) {
+      setBusy(false);
+      toast({ title: "Import failed", description: e.message, variant: "destructive" });
     }
-    invalidateHomepageBlocks();
-    refetch();
   };
 
   const resetToDefaults = async () => {
