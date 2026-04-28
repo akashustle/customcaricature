@@ -37,9 +37,15 @@ const LilFleaGallery = () => {
   }, [lightboxIdx, images.length]);
 
   const allUrls = images.map(i => i.image_url);
+  // Filter per placement (admin-controlled). 'all' images appear everywhere.
+  const slide1Imgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "slide1");
+  const slide2Imgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "slide2");
+  const scrollImgs = images.filter(i => !i.placement || i.placement === "all" || i.placement === "scroll");
   // Triple for seamless infinite scroll wrap
-  const tripled = [...images, ...images, ...images];
-  const duration = Math.max(18, Math.round(images.length * 3.2));
+  const tripled1 = [...slide1Imgs, ...slide1Imgs, ...slide1Imgs];
+  const tripled2 = [...slide2Imgs, ...slide2Imgs, ...slide2Imgs];
+  const tripledV = [...scrollImgs, ...scrollImgs, ...scrollImgs];
+  const duration = Math.max(18, Math.round(slide1Imgs.length * 3.2));
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
