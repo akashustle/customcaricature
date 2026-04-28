@@ -40,7 +40,7 @@ const AdminDataExports = () => {
   const [to, setTo] = useState(todayISO());
   const [refCode, setRefCode] = useState("");
   const [refEventType, setRefEventType] = useState<RefEvent>("all");
-  const [orderType, setOrderType] = useState<"all" | "personal" | "corporate" | "gift">("all");
+  const [orderType, setOrderType] = useState<"all" | "single" | "couple" | "group">("all");
   const [busy, setBusy] = useState<string | null>(null);
 
   const dateBounds = useMemo(() => {
@@ -94,7 +94,7 @@ const AdminDataExports = () => {
         .lte("created_at", dateBounds.toIso)
         .order("created_at", { ascending: false })
         .limit(10000);
-      if (orderType !== "all") q = q.eq("order_type", orderType);
+      if (orderType !== "all") q = q.eq("order_type", orderType as any);
       const { data, error } = await q;
       if (error) throw error;
       const rows = (data || []).map((o: any) => ({
@@ -245,9 +245,9 @@ const AdminDataExports = () => {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="personal">Personal</SelectItem>
-                <SelectItem value="corporate">Corporate</SelectItem>
-                <SelectItem value="gift">Gift</SelectItem>
+                <SelectItem value="single">Single</SelectItem>
+                <SelectItem value="couple">Couple</SelectItem>
+                <SelectItem value="group">Group</SelectItem>
               </SelectContent>
             </Select>
           </div>
