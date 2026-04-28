@@ -20,6 +20,7 @@ import {
 import SEOHead from "@/components/SEOHead";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import AuthShell from "@/components/auth/AuthShell";
+import CountrySearchSelect from "@/components/CountrySearchSelect";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
@@ -132,6 +133,9 @@ const Workshop = () => {
   const [selectedBatch, setSelectedBatch] = useState<"upcoming" | "march-14-15">("upcoming");
   const [allWorkshops, setAllWorkshops] = useState<any[]>([]);
   const [secretCodeLoginEnabled, setSecretCodeLoginEnabled] = useState(false);
+  const [regOtherState, setRegOtherState] = useState(false);
+  const [regOtherDistrict, setRegOtherDistrict] = useState(false);
+  const [regOtherCity, setRegOtherCity] = useState(false);
 
   // Progressive login state ----------------------------------------------------
   // Step 0: select identifier type → Step 1: enter identifier → Step 2: backend
@@ -651,6 +655,29 @@ const Workshop = () => {
 
   // Registration View
   if (view === "register") {
+    // Hard gate — if admin disabled registration, do not render the form at all.
+    if (!workshop.registration_enabled) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 space-y-4 text-center">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
+                <Clock className="w-7 h-7 text-amber-700" />
+              </div>
+              <h2 className="font-calligraphy text-2xl font-bold text-foreground">Registrations Closed</h2>
+              <p className="text-sm text-muted-foreground font-body">
+                The admin has not enabled registrations for any upcoming workshop yet. Please check back soon, or contact us on WhatsApp to be notified.
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <Button onClick={() => setView("details")} className="rounded-full">Back to Workshop</Button>
+                <a className="text-xs text-primary underline font-body" href={`https://wa.me/91${whatsappNumber}`} target="_blank" rel="noopener noreferrer">Contact us on WhatsApp</a>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     const statesData = (() => { try { const { getStates } = require("@/lib/india-locations"); return getStates(); } catch { return []; } })();
     const districtsData = (() => { try { if (!regForm.state) return []; const { getDistricts } = require("@/lib/india-locations"); return getDistricts(regForm.state); } catch { return []; } })();
     const citiesData = (() => { try { if (!regForm.district) return []; const { getCities } = require("@/lib/india-locations"); return getCities(regForm.state, regForm.district); } catch { return []; } })();
@@ -664,7 +691,17 @@ const Workshop = () => {
         <div><Label>WhatsApp Number *</Label><Input value={regForm.mobile} onChange={e => { const d = e.target.value.replace(/\D/g,""); if(d.length<=10) setRegForm({...regForm, mobile: d}); }} placeholder="10-digit WhatsApp number" maxLength={10} /></div>
         <div><Label>Instagram ID</Label><Input value={regForm.instagram_id} onChange={e => setRegForm({...regForm, instagram_id: e.target.value})} placeholder="@yourid" /></div>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label>Age *</Label><Input type="number" value={regForm.age} onChange={e => setRegForm({...regForm, age: e.target.value})} placeholder="Your age" /></div>
+          <div>
+            <Label>Age *</Label>
+            <Select value={regForm.age} onValueChange={v => setRegForm({...regForm, age: v})}>
+              <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select age" /></SelectTrigger>
+              <SelectContent className="max-h-60">
+                {Array.from({ length: 89 - 12 + 1 }, (_, i) => 12 + i).map(a => (
+                  <SelectItem key={a} value={String(a)}>{a} years</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label>Occupation *</Label>
             <Select value={regForm.occupation} onValueChange={v => setRegForm({...regForm, occupation: v})}>
@@ -709,51 +746,61 @@ const Workshop = () => {
         <h3 className="font-body font-bold text-foreground">Your Location</h3>
         <div>
           <Label>Country *</Label>
-          <Select value={regForm.country} onValueChange={v => setRegForm({...regForm, country: v, state: "", district: "", city: ""})}>
-            <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select country (default India)" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="India">🇮🇳 India</SelectItem>
-              <SelectItem value="USA">🇺🇸 USA</SelectItem>
-              <SelectItem value="UK">🇬🇧 UK</SelectItem>
-              <SelectItem value="UAE">🇦🇪 UAE</SelectItem>
-              <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
-              <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
-              <SelectItem value="Singapore">🇸🇬 Singapore</SelectItem>
-              <SelectItem value="Germany">🇩🇪 Germany</SelectItem>
-              <SelectItem value="Other">🌍 Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="mt-1">
+            <CountrySearchSelect
+              value={regForm.country || "India"}
+              onChange={(v) => setRegForm({ ...regForm, country: v, state: "", district: "", city: "" })}
+              placeholder="Select country (default India)"
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">🌍 Default India · Search across 196 countries</p>
         </div>
         {regForm.country === "India" ? (
           <>
             <div>
               <Label>State *</Label>
-              <Select value={regForm.state} onValueChange={v => setRegForm({...regForm, state: v, district: "", city: ""})}>
-                <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select state" /></SelectTrigger>
-                <SelectContent>{statesData.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
-              </Select>
-              {regForm.state === "Other" && <Input className="mt-2" value={regForm.state === "Other" ? "" : regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Type your state" />}
+              {regOtherState ? (
+                <div className="space-y-1.5 mt-1">
+                  <Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Type your state" />
+                  <button type="button" onClick={() => { setRegOtherState(false); setRegForm({...regForm, state: "", district: "", city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>
+                </div>
+              ) : (
+                <Select value={regForm.state} onValueChange={v => { if (v === "__other__") { setRegOtherState(true); setRegForm({...regForm, state: "", district: "", city: ""}); } else { setRegForm({...regForm, state: v, district: "", city: ""}); } }}>
+                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select state" /></SelectTrigger>
+                  <SelectContent className="max-h-64">{statesData.map((s: string) => <SelectItem key={s} value={s}>{s}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
+                </Select>
+              )}
             </div>
-            {regForm.state && regForm.state !== "Other" && (
+            {regForm.state && (
               <div>
                 <Label>District</Label>
-                <Select value={regForm.district} onValueChange={v => setRegForm({...regForm, district: v, city: ""})}>
-                  <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
-                  <SelectContent>{districtsData.map((d: string) => <SelectItem key={d} value={d}>{d}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
-                </Select>
-                {regForm.district === "Other" && <Input className="mt-2" onChange={e => setRegForm({...regForm, district: e.target.value})} placeholder="Type your district" />}
+                {regOtherDistrict || regOtherState ? (
+                  <div className="space-y-1.5 mt-1">
+                    <Input value={regForm.district} onChange={e => setRegForm({...regForm, district: e.target.value})} placeholder="Type your district" />
+                    {!regOtherState && <button type="button" onClick={() => { setRegOtherDistrict(false); setRegForm({...regForm, district: "", city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>}
+                  </div>
+                ) : (
+                  <Select value={regForm.district} onValueChange={v => { if (v === "__other__") { setRegOtherDistrict(true); setRegForm({...regForm, district: "", city: ""}); } else { setRegForm({...regForm, district: v, city: ""}); } }}>
+                    <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select district" /></SelectTrigger>
+                    <SelectContent className="max-h-64">{districtsData.map((d: string) => <SelectItem key={d} value={d}>{d}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
+                  </Select>
+                )}
               </div>
             )}
             <div>
               <Label>City *</Label>
-              {regForm.district && regForm.district !== "Other" && citiesData.length > 0 ? (
-                <Select value={regForm.city} onValueChange={v => setRegForm({...regForm, city: v})}>
+              {regOtherCity || regOtherDistrict || regOtherState || citiesData.length === 0 ? (
+                <div className="space-y-1.5 mt-1">
+                  <Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Type your city" />
+                  {!regOtherDistrict && !regOtherState && citiesData.length > 0 && (
+                    <button type="button" onClick={() => { setRegOtherCity(false); setRegForm({...regForm, city: ""}); }} className="text-[11px] text-primary hover:underline">← Back to list</button>
+                  )}
+                </div>
+              ) : (
+                <Select value={regForm.city} onValueChange={v => { if (v === "__other__") { setRegOtherCity(true); setRegForm({...regForm, city: ""}); } else { setRegForm({...regForm, city: v}); } }}>
                   <SelectTrigger className="h-11 rounded-xl mt-1"><SelectValue placeholder="Select city" /></SelectTrigger>
-                  <SelectContent>{citiesData.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}<SelectItem value="Other">Other</SelectItem></SelectContent>
+                  <SelectContent className="max-h-64">{citiesData.map((c: string) => <SelectItem key={c} value={c}>{c}</SelectItem>)}<SelectItem value="__other__">Other (type manually)</SelectItem></SelectContent>
                 </Select>
-              ) : null}
-              {(!regForm.district || regForm.district === "Other" || regForm.city === "Other" || citiesData.length === 0) && (
-                <Input className="mt-1" value={regForm.city === "Other" ? "" : regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Type your city" />
               )}
             </div>
           </>
@@ -762,6 +809,7 @@ const Workshop = () => {
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
               🌍 You're registering from <span className="font-bold text-primary">{regForm.country}</span>. Just enter your city — state is optional.
             </div>
+            <div><Label>State / Region (optional)</Label><Input value={regForm.state} onChange={e => setRegForm({...regForm, state: e.target.value})} placeholder="Your state or region" /></div>
             <div><Label>City *</Label><Input value={regForm.city} onChange={e => setRegForm({...regForm, city: e.target.value})} placeholder="Your city" /></div>
           </>
         )}
@@ -948,10 +996,16 @@ const Workshop = () => {
               {loginPhase === "not_found" && (
                 <div className="space-y-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
                   <p className="text-sm font-body font-bold text-amber-900">No registration found</p>
-                  <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
-                  <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                    Register Now <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  {isRegistrationOpen ? (
+                    <>
+                      <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
+                      <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                        Register Now <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-amber-800 font-body">Registrations are currently <span className="font-bold">closed</span> by admin. Please check back later or contact us on WhatsApp for assistance.</p>
+                  )}
                 </div>
               )}
 
