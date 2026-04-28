@@ -682,11 +682,24 @@ const Admin = () => {
   // checkAdmin is now handled inline in the useEffect above
 
   const fetchOrders = async () => {
-    const { data } = await supabase.from("orders")
-      .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
-      .order("created_at", { ascending: false });
-    if (data) setOrders(data as any);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.from("orders")
+        .select("id, caricature_type, order_type, customer_name, customer_mobile, customer_email, city, amount, negotiated_amount, is_framed, status, payment_status, priority, created_at, expected_delivery_date, art_confirmation_status, ask_user_delivered")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      if (data) {
+        setOrders(data as any);
+        // Persist for offline admin viewing
+        import("@/lib/offline-cache").then(m => m.cacheSet("admin:orders", data)).catch(() => {});
+      }
+    } catch {
+      // Network failure → hydrate from IndexedDB so admin still sees something
+      const m = await import("@/lib/offline-cache");
+      const cached = await m.cacheGet<any[]>("admin:orders");
+      if (cached?.value) setOrders(cached.value as any);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchCaricatureTypes = async () => {
@@ -695,19 +708,25 @@ const Admin = () => {
   };
 
   const fetchCustomers = async () => {
-    const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
-    if (error) {
+    try {
+      const { data, error } = await supabase.from("profiles").select("id, user_id, full_name, mobile, email, instagram_id, address, city, state, district, country, pincode, secret_code, age, gender, created_at, is_manual, event_booking_allowed, event_edit_allowed, gateway_charges_enabled, secret_code_login_enabled, display_id, is_verified, verification_status, created_from_workshop, avatar_url, is_banned, ban_reason, banned_at, international_booking_allowed");
+      if (error) throw error;
+      if (data) {
+        // Fetch admin and artist user IDs to exclude from customer list
+        const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+        const adminUserIds = new Set((roles || []).filter(r => r.role === "admin" || r.role === "shop_admin").map(r => r.user_id));
+        const { data: artists } = await supabase.from("artists").select("auth_user_id");
+        const artistUserIds = new Set((artists || []).filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id));
+
+        const filtered = data.filter((c: any) => !adminUserIds.has(c.user_id) && !artistUserIds.has(c.user_id));
+        setCustomers(filtered as any);
+        import("@/lib/offline-cache").then(m => m.cacheSet("admin:customers", filtered)).catch(() => {});
+      }
+    } catch (error) {
       console.error("Error fetching customers:", error);
-    }
-    if (data) {
-      // Fetch admin and artist user IDs to exclude from customer list
-      const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-      const adminUserIds = new Set((roles || []).filter(r => r.role === "admin" || r.role === "shop_admin").map(r => r.user_id));
-      const { data: artists } = await supabase.from("artists").select("auth_user_id");
-      const artistUserIds = new Set((artists || []).filter((a: any) => a.auth_user_id).map((a: any) => a.auth_user_id));
-      
-      const filtered = data.filter((c: any) => !adminUserIds.has(c.user_id) && !artistUserIds.has(c.user_id));
-      setCustomers(filtered as any);
+      const m = await import("@/lib/offline-cache");
+      const cached = await m.cacheGet<any[]>("admin:customers");
+      if (cached?.value) setCustomers(cached.value as any);
     }
   };
 

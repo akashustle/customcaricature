@@ -144,9 +144,20 @@ const AdminEvents = ({ customers }: { customers: Profile[] }) => {
   }, [dbPricing]);
 
   const fetchEvents = async () => {
-    const { data } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: false });
-    if (data) setEvents(data as any);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.from("event_bookings").select("*").order("event_date", { ascending: false });
+      if (error) throw error;
+      if (data) {
+        setEvents(data as any);
+        import("@/lib/offline-cache").then(m => m.cacheSet("admin:events", data)).catch(() => {});
+      }
+    } catch {
+      const m = await import("@/lib/offline-cache");
+      const cached = await m.cacheGet<any[]>("admin:events");
+      if (cached?.value) setEvents(cached.value as any);
+    } finally {
+      setLoading(false);
+    }
   };
   const fetchBlockedDates = async () => {
     const { data } = await supabase.from("artist_blocked_dates").select("*").order("blocked_date", { ascending: false });
