@@ -258,8 +258,19 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
               {section.items.map((item) => {
                 const isActive = activeTab === item.id;
                 const handleClick = () => {
-                  if (item.id === "link-workshop-admin") { navigate("/workshop-admin-panel"); return; }
-                  if (item.id === "link-shop-admin") { navigate("/CFCAdmin936"); return; }
+                  if (item.id === "link-workshop-admin") {
+                    // SSO: same browser session is shared via Supabase localStorage,
+                    // so we unlock the URL and open the workshop admin panel directly
+                    // in a new tab. WorkshopAdminPanel itself validates the session.
+                    unlockAdminUrl("workshop");
+                    window.open("/workshop-admin-panel", "_blank", "noopener");
+                    return;
+                  }
+                  if (item.id === "link-shop-admin") {
+                    unlockAdminUrl("shop");
+                    window.open("/shop-admin", "_blank", "noopener");
+                    return;
+                  }
                   onTabChange(item.id);
                 };
                 return (
