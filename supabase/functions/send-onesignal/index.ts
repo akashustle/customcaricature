@@ -28,9 +28,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const config = configRow?.value as any;
+    // Soft-skip when channel disabled or unconfigured — never fail the broadcast
     if (!config?.enabled || !config?.app_id) {
-      return new Response(JSON.stringify({ error: "OneSignal not configured" }), {
-        status: 400,
+      return new Response(JSON.stringify({ sent: 0, skipped: true, reason: "OneSignal channel disabled or app_id missing" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -38,8 +39,8 @@ Deno.serve(async (req) => {
     // Use secret env var first, then fall back to DB config
     const apiKey = onesignalApiKey || config?.rest_api_key;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "OneSignal REST API key not configured. Add ONESIGNAL_REST_API_KEY secret." }), {
-        status: 400,
+      return new Response(JSON.stringify({ sent: 0, skipped: true, reason: "OneSignal REST API key not configured" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
