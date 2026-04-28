@@ -214,24 +214,24 @@ const SiteFooter = () => {
 
   return (
     <>
-      <footer className="px-3 sm:px-4 my-6 mb-24 md:mb-6">
-        <div className="mx-auto max-w-7xl rounded-3xl bg-hero-violet border border-border/40 p-6 sm:p-10 lg:p-12">
+      <footer className="px-2 sm:px-4 my-4 sm:my-6 mb-24 md:mb-6">
+        <div className="mx-auto max-w-7xl rounded-2xl sm:rounded-3xl bg-hero-violet border border-border/40 p-4 sm:p-10 lg:p-12">
           {/* Brand */}
-          <div className="mb-7 sm:mb-10 max-w-xl">
+          <div className="mb-5 sm:mb-10 max-w-xl">
             <a
               href={MAIN_SITE_URL}
               onClick={(e) => { e.preventDefault(); openExternal(MAIN_SITE_URL); }}
               target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 mb-3 group"
+              className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-3 group"
             >
-              <img src="/logo.png" alt="Creative Caricature Club" className="w-11 h-11 rounded-xl shadow-sm"  loading="lazy" decoding="async" />
-              <div className="text-lg font-extrabold tracking-tight leading-tight">
+              <img src="/logo.png" alt="Creative Caricature Club" className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl shadow-sm"  loading="lazy" decoding="async" />
+              <div className="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
                 <span className="text-gradient-violet">Creative</span><br />
                 <span className="text-gradient-violet">Caricature Club</span>
                 <span className="align-super text-[0.55em] font-semibold text-foreground/60 ml-0.5">™</span>
               </div>
             </a>
-            <p className="text-sm text-foreground/70 mt-3">{f.brand_tagline}</p>
+            <p className="text-[12.5px] sm:text-sm text-foreground/70 mt-2 sm:mt-3 leading-relaxed">{f.brand_tagline}</p>
             <a
               href={MAIN_SITE_URL}
               onClick={(e) => { e.preventDefault(); openExternal(MAIN_SITE_URL); }}
@@ -243,15 +243,15 @@ const SiteFooter = () => {
           </div>
 
           {/* Mobile: 2 cols (shows up to 6 columns wrapped) */}
-          <div className="sm:hidden grid grid-cols-2 gap-x-4 gap-y-5 mb-6">
+          <div className="sm:hidden grid grid-cols-2 gap-x-3 gap-y-4 mb-5">
             {cols.slice(0, 6).map((c) => (
-              <div key={c.title}>
-                <div className="text-[11px] font-bold text-foreground tracking-wider uppercase mb-2">
+              <div key={c.title} className="min-w-0">
+                <div className="text-[10.5px] font-bold text-foreground tracking-wider uppercase mb-1.5">
                   {c.title}
                 </div>
-                <ul className="space-y-1.5 text-[13px]">
+                <ul className="space-y-1 text-[12.5px]">
                   {(c.links || []).slice(0, 12).map((l, i) => (
-                    <li key={(l.href || l.label) + i}>{renderLink(l)}</li>
+                    <li key={(l.href || l.label) + i} className="min-w-0">{renderLink(l)}</li>
                   ))}
                 </ul>
               </div>
