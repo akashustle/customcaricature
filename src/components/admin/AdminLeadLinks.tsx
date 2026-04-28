@@ -107,7 +107,8 @@ const AdminLeadLinks = () => {
         created_by: adminName,
         created_by_user_id: user!.id,
         notes: notes.trim() || null,
-      }).select().single();
+        assigned_to_user_id: assignToUserId || null,
+      } as any).select().single();
 
       if (error || !link) throw error;
 
