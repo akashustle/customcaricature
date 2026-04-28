@@ -762,9 +762,9 @@ const AdminLogin = () => {
               )}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </div>
+      </div>
+    </AuthShell>
   );
 };
 
