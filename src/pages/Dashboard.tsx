@@ -517,7 +517,7 @@ const Dashboard = () => {
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "U";
 
   return (
-    <div className="min-h-screen bg-background pb-28 md:pb-10 overflow-x-hidden">
+    <div data-user-dashboard className="min-h-screen bg-background pb-28 md:pb-10 overflow-x-hidden">
       <SEOHead title="My Dashboard" noindex />
 
       {/* Permanent fullscreen 3D balance page — shown across the whole dashboard
