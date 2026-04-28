@@ -55,6 +55,7 @@ export const AuthShell = ({
   accent?: "violet" | "rose" | "emerald" | "amber" | "sky";
 }) => {
   const navigate = useNavigate();
+  const lowPower = useLowPowerMode();
 
   // Each accent maps to a soft pastel hero gradient + 3D shape colors.
   const ACCENTS: Record<
