@@ -135,6 +135,7 @@ const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
 const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
 const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
+const AdminAIBubble = lazy(() => import("@/components/admin/AdminAIBubble"));
 const EditRequestsInbox = lazy(() => import("@/components/admin/EditRequestsInbox"));
 const AdminProfileVerification = lazy(() => import("@/components/admin/AdminProfileVerification"));
 
@@ -363,6 +364,20 @@ const Admin = () => {
   useEffect(() => {
     localStorage.setItem("admin_last_tab", activeTab);
   }, [activeTab]);
+
+  // Listen for AI Assistant navigation requests
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const tab = detail?.tab;
+      if (typeof tab === "string" && tab.length > 0) {
+        setActiveTab(tab);
+        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+      }
+    };
+    window.addEventListener("admin:navigate-tab", handler as EventListener);
+    return () => window.removeEventListener("admin:navigate-tab", handler as EventListener);
+  }, []);
   const [customerPricingUserId, setCustomerPricingUserId] = useState<string | null>(null);
   const [customerPricingUserName, setCustomerPricingUserName] = useState("");
   const [customerEventPricingUserId, setCustomerEventPricingUserId] = useState<string | null>(null);
@@ -1311,6 +1326,7 @@ const Admin = () => {
           </div>
         </header>
         <Suspense fallback={null}><AdminLiveActivityTicker /></Suspense>
+        <Suspense fallback={null}><AdminAIBubble activeTab={activeTab} /></Suspense>
         {showAdminInfo && <AdminInfoPanel onClose={() => setShowAdminInfo(false)} />}
 
         <div className="px-2 py-3 sm:px-4 md:px-6 md:py-5">
@@ -2559,6 +2575,10 @@ const Admin = () => {
 
           <TabsContent value="audit-log">
             <AdminAuditLog />
+          </TabsContent>
+
+          <TabsContent value="ai-assistant">
+            <Suspense fallback={<AdminTabLoader />}><AdminAIAssistant embedded /></Suspense>
           </TabsContent>
 
           <TabsContent value="intl-pricing">

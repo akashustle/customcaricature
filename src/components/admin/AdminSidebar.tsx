@@ -140,6 +140,7 @@ const NAV_SECTIONS = [
   {
     label: "AI & Tools",
     items: [
+      { id: "ai-assistant", icon: Bot, label: "AI Assistant" },
       { id: "admin-monitoring", icon: Brain, label: "AI Monitor" },
       { id: "chatbot", icon: Settings, label: "AI Training" },
       { id: "voice", icon: Radio, label: "Voice Monitor" },

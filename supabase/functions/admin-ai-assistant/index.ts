@@ -32,6 +32,9 @@ Capabilities you have via tools:
 - create_coupon(code, discount_type, discount_value, max_uses, valid_until) — create coupon
 - top_cities(metric, limit) — top cities by enquiries/events
 - generate_report(kind, since_days) — kind = "revenue" | "events" | "orders" | "enquiries", returns a Markdown table the admin can copy
+- navigate_admin_tab(tab) — open ANY admin tab on the admin's screen. Allowed: dashboard, orders, customers, events, payments, event-payment-claims, invoices, revenue, accounting, pricing, intl-pricing, analytics, website-analytics, ai-intelligence, revenue-target, calendar, heatmap, live-chat, ai-conversations, quick-questions, notify, push-center, crm-pipeline, enquiries, support, event-users, artists, reviews, verification, edit-requests, content-editor, form-builder, design-control, watermark, workshop-builder, dashboard-builder, homepage, explore-editor, blog, gallery, hp-reviews, brands, pages, page-content, faqs, files, seo, calculator, google-sheet, mini-database, security-dashboard, error-inbox, activity-logs, integrations, automation, settings, maintenance, lead-links, lil-flea, referrals, referral-qa, data-exports, system-health, coupons, feature-gating, admin-monitoring, chatbot, voice, sessions, locations, audit-log, team, colleagues, ai-assistant.
+
+Whenever the admin says "open / go to / show me / take me to / switch to <X>", IMMEDIATELY call navigate_admin_tab. If they say "open faqs and show me list of faqs", call navigate_admin_tab(tab='faqs') — the page itself is the answer.
 
 Behavioral rules (AGENTIC — ACT, DO NOT STALL, DO NOT EXPLAIN INSTEAD OF DOING):
 1. **YOU MUST CALL TOOLS.** When the admin asks for ANY action you have a tool for, CALL THE TOOL IMMEDIATELY in this same turn. NEVER reply with text like "I will do X" or "Let me know if you want me to do X" without actually calling the tool first. Talking is failing — calling tools is succeeding.
@@ -75,7 +78,22 @@ const tools = [
   { type: "function", function: { name: "create_coupon", description: "Create a coupon code", parameters: { type: "object", properties: { code: { type: "string" }, discount_type: { type: "string", enum: ["percentage", "fixed"] }, discount_value: { type: "number" }, max_uses: { type: "number" }, valid_until: { type: "string" } }, required: ["code", "discount_type", "discount_value"] } } },
   { type: "function", function: { name: "top_cities", description: "Top cities by enquiries or events", parameters: { type: "object", properties: { metric: { type: "string", enum: ["enquiries", "events"] }, limit: { type: "number" } }, required: ["metric"] } } },
   { type: "function", function: { name: "generate_report", description: "Generate a Markdown report", parameters: { type: "object", properties: { kind: { type: "string", enum: ["revenue", "events", "orders", "enquiries"] }, since_days: { type: "number" } }, required: ["kind"] } } },
+  { type: "function", function: { name: "navigate_admin_tab", description: "Open a specific tab on the admin panel for the current admin. Use this whenever the user says 'open', 'go to', 'show me', 'take me to' a tab/section. Pass the tab id from the allowed list.", parameters: { type: "object", properties: { tab: { type: "string", description: "Tab id, e.g. 'orders', 'faqs', 'homepage', 'pricing', 'gallery', 'ai-assistant'" } }, required: ["tab"] } } },
 ];
+
+const ALLOWED_TABS = new Set([
+  "dashboard","orders","customers","events","payments","event-payment-claims","invoices","revenue","accounting","pricing","intl-pricing",
+  "analytics","website-analytics","ai-intelligence","revenue-target","calendar","heatmap",
+  "live-chat","ai-conversations","quick-questions","notify","push-center",
+  "crm-pipeline","enquiries","support",
+  "event-users","artists","reviews","verification","edit-requests",
+  "content-editor","form-builder","design-control","watermark","workshop-builder","dashboard-builder",
+  "homepage","explore-editor","blog","gallery","hp-reviews","brands","pages","page-content","faqs","files","seo","calculator",
+  "google-sheet","mini-database","security-dashboard","error-inbox","activity-logs","integrations","automation","settings","maintenance",
+  "lead-links","lil-flea","referrals","referral-qa","data-exports","system-health","coupons","feature-gating",
+  "admin-monitoring","chatbot","voice","sessions","locations","audit-log",
+  "team","colleagues","ai-assistant",
+]);
 
 async function runTool(name: string, args: any, supabase: any, adminId: string): Promise<any> {
   try {
@@ -244,6 +262,11 @@ async function runTool(name: string, args: any, supabase: any, adminId: string):
       }
       return { ok: true, kind: args.kind, markdown: md };
     }
+    if (name === "navigate_admin_tab") {
+      const tab = String(args.tab || "").trim();
+      if (!ALLOWED_TABS.has(tab)) return { ok: false, error: `unknown tab '${tab}'` };
+      return { ok: true, navigate_to: tab };
+    }
     return { ok: false, error: `unknown tool ${name}` };
   } catch (e: any) {
     return { ok: false, error: e.message || String(e) };
@@ -282,13 +305,15 @@ Deno.serve(async (req) => {
       ...messages,
     ];
 
-    // Up to 6 tool-calling rounds
-    for (let round = 0; round < 6; round++) {
+    const navActions: string[] = [];
+
+    // Up to 8 tool-calling rounds
+    for (let round = 0; round < 8; round++) {
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-2.5-flash",
           messages: conv,
           tools,
           tool_choice: "auto",
@@ -307,7 +332,7 @@ Deno.serve(async (req) => {
       conv.push(msg);
       const calls = msg.tool_calls || [];
       if (!calls.length) {
-        return new Response(JSON.stringify({ reply: msg.content || "", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ reply: msg.content || "", nav_actions: navActions, trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       for (const c of calls) {
         let args: any = {};
@@ -318,6 +343,7 @@ Deno.serve(async (req) => {
         } catch (toolErr: any) {
           result = { ok: false, error: `Tool '${c.function?.name}' threw: ${toolErr?.message || String(toolErr)}` };
         }
+        if (result?.ok && result?.navigate_to) navActions.push(result.navigate_to);
         // Log for audit (Supabase query builders are PromiseLike but not Promises — wrap in try/catch)
         try {
           await admin.from("admin_action_log").insert({
@@ -333,7 +359,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ reply: "Reached tool-call limit. Please rephrase the request.", trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ reply: "Reached tool-call limit. Please rephrase the request.", nav_actions: navActions, trace: conv.slice(1) }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e.message || String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
