@@ -149,6 +149,11 @@ const AdminLilFlea = () => {
     await supabase.from("lil_flea_gallery").update({ caption } as any).eq("id", id);
   };
 
+  const updatePlacement = async (id: string, placement: string) => {
+    await supabase.from("lil_flea_gallery").update({ placement } as any).eq("id", id);
+    toast({ title: `Moved to ${placement}` });
+  };
+
   const moveImage = async (id: string, direction: "up" | "down") => {
     const idx = images.findIndex(i => i.id === id);
     if ((direction === "up" && idx <= 0) || (direction === "down" && idx >= images.length - 1)) return;
