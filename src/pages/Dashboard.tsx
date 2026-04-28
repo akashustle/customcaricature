@@ -823,7 +823,7 @@ const Dashboard = () => {
 
       {/* Mobile bottom nav (5 tabs, fade primary style) — order is admin-customizable */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
-        <div className="pointer-events-auto mx-auto max-w-md bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-2 py-2 flex items-center justify-start sm:justify-around overflow-x-auto scrollbar-hide gap-1 snap-x snap-mandatory">
+        <div className="pointer-events-auto mx-auto w-fit max-w-[calc(100vw-1.5rem)] bg-card border border-border/60 rounded-[28px] shadow-[0_8px_30px_hsl(var(--primary)/0.08)] px-1.5 py-1.5 flex items-center justify-around overflow-x-auto scrollbar-hide gap-0.5 snap-x snap-mandatory">
           {(() => {
             const allItems = [
               { key: "home", icon: Home, label: "Home" },
@@ -848,12 +848,12 @@ const Dashboard = () => {
                 <button
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-14 px-3 rounded-2xl transition-all flex-shrink-0 ${
+                  className={`relative flex flex-col items-center justify-center gap-0.5 min-w-[52px] h-13 px-2.5 py-1.5 rounded-2xl transition-all flex-shrink-0 ${
                     isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
-                  <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
+                  <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 1.8} />
+                  <span className={`text-[9.5px] leading-none font-sans ${isActive ? "font-semibold" : "font-medium"}`}>{item.label}</span>
                 </button>
               );
             });
@@ -1430,6 +1430,7 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
 };
 
 const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
+  const { settings } = useSiteSettings();
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
 
   return (
@@ -1451,7 +1452,12 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         <div className="absolute top-3 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-5 text-center sm:text-left">
-          <label className={`relative group flex-shrink-0 ${profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "cursor-not-allowed" : "cursor-pointer"}`}>
+          {(() => {
+            const avatarUploadEnabled = (settings as any)?.avatar_upload_enabled?.enabled === true;
+            const editingAllowed = !(profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0);
+            const canChange = avatarUploadEnabled && editingAllowed;
+            return (
+            <label className={`relative group flex-shrink-0 ${canChange ? "cursor-pointer" : "cursor-not-allowed"}`}>
             <div
               className="w-20 h-20 rounded-2xl bg-white overflow-hidden flex items-center justify-center"
               style={{
@@ -1476,15 +1482,19 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
                 <BadgeCheck className="w-5 h-5 text-white" strokeWidth={2.5} />
               </span>
             )}
-            <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
-              {profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0 ? "🔒 Locked" : "Change"}
-            </span>
+            {canChange && (
+              <span className="absolute inset-0 rounded-2xl bg-foreground/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition">
+                Change
+              </span>
+            )}
             <input type="file" accept="image/*" className="hidden"
-              disabled={profile?.is_verified && Number(profile?.edits_remaining ?? 0) <= 0}
+              disabled={!canChange}
               onChange={(e) => {
               const f = e.target.files?.[0]; if (f && (window as any).__uploadAvatar) (window as any).__uploadAvatar(f);
             }} />
           </label>
+            );
+          })()}
           <div className="flex-1 min-w-0 w-full">
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
               <span className="break-words">{profile?.full_name || "User"}</span>

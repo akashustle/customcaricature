@@ -3060,6 +3060,13 @@ const Admin = () => {
                     </div>
                     <Switch checked={(settings as any).live_chat_visible?.enabled || false} onCheckedChange={async (checked) => { await updateSetting("live_chat_visible", { enabled: checked }); toast({ title: checked ? "Live Chat shown in mobile nav" : "Live Chat hidden from mobile nav" }); }} />
                   </div>
+                  <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                    <div>
+                      <p className="font-sans font-medium text-sm">Allow Profile Photo Upload</p>
+                      <p className="text-xs text-muted-foreground font-sans">When OFF, users cannot upload or change their avatar from any dashboard (booking & workshop). Default: OFF.</p>
+                    </div>
+                    <Switch checked={(settings as any).avatar_upload_enabled?.enabled === true} onCheckedChange={async (checked) => { await updateSetting("avatar_upload_enabled", { enabled: checked }); toast({ title: checked ? "Profile photo upload enabled" : "Profile photo upload disabled" }); }} />
+                  </div>
                 </CardContent>
               </div>
 

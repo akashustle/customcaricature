@@ -19,6 +19,7 @@ import WorkshopBookingLinkCard from "@/components/workshop/WorkshopBookingLinkCa
 import WorkshopReferCard from "@/components/workshop/WorkshopReferCard";
 import EditRequestDialog from "@/components/EditRequestDialog";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 /**
  * Premium colourful 3D Workshop Profile Card.
@@ -34,6 +35,8 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
   // text stays clearly visible regardless of the global theme. Per design
   // request: don't use dark colours here.
   const darkMode = false;
+  const { settings: siteSettings } = useSiteSettings();
+  const avatarUploadEnabled = (siteSettings as any)?.avatar_upload_enabled?.enabled === true;
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -361,13 +364,15 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
         initial={{ opacity: 0, y: 20, rotateX: -5 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
-        className="relative overflow-hidden rounded-[28px] p-6 md:p-7 border shadow-[0_30px_60px_-25px_rgba(80,60,150,0.18)]"
+        className="relative overflow-hidden rounded-3xl p-6 md:p-7 border"
         style={{
           background: darkMode
             ? `linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.8) 100%)`
             : `linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #eef2ff 100%)`,
-          borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.95)",
-          boxShadow: darkMode ? undefined : "0 30px 60px -25px hsl(252 60% 40% / 0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
+          borderColor: darkMode ? "hsl(var(--border))" : "rgba(255,255,255,0.8)",
+          boxShadow: darkMode
+            ? undefined
+            : "0 30px 60px -25px hsl(252 60% 40% / 0.18), 0 12px 30px -12px hsl(220 30% 40% / 0.10), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(15,23,42,0.04)",
           transformStyle: "preserve-3d",
         }}
       >
@@ -392,21 +397,25 @@ const WorkshopProfile = ({ user, darkMode: _darkMode = false }: { user: any; dar
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <button
-              onClick={() => {
-                if (editLocked) { setEditRequestOpen(true); return; }
-                fileRef.current?.click();
-              }}
-              disabled={uploading}
-              className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
-              style={{ background: editLocked ? "hsl(40 90% 55%)" : palette.coral, borderColor: palette.ivory, color: "white" }}
-              aria-label={editLocked ? "Request edit to change photo" : "Change profile photo"}
-              title={editLocked ? "Request edit access to change photo" : "Change profile photo"}
-            >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : editLocked ? <span className="text-[10px] font-bold">🔒</span> : <Camera className="w-4 h-4" />}
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
+            {avatarUploadEnabled && (
+              <>
+                <button
+                  onClick={() => {
+                    if (editLocked) { setEditRequestOpen(true); return; }
+                    fileRef.current?.click();
+                  }}
+                  disabled={uploading}
+                  className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition border-2"
+                  style={{ background: editLocked ? "hsl(40 90% 55%)" : palette.coral, borderColor: palette.ivory, color: "white" }}
+                  aria-label={editLocked ? "Request edit to change photo" : "Change profile photo"}
+                  title={editLocked ? "Request edit access to change photo" : "Change profile photo"}
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : editLocked ? <span className="text-[10px] font-bold">🔒</span> : <Camera className="w-4 h-4" />}
+                </button>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatarUpload(f); e.target.value = ""; }} />
+              </>
+            )}
           </motion.div>
 
           {/* Identity */}
