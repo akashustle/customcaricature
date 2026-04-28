@@ -177,6 +177,7 @@ const Login = () => {
         setRoleChoiceOpen(true);
       } else if (isAdmin) {
         toast({ title: "Admin account detected", description: "Redirecting to admin login..." });
+        unlockAdminUrl("main");
         navigate("/customcad75", { replace: true });
       } else if (isArtist) {
         toast({ title: "Artist account detected", description: "Redirecting to artist login..." });
