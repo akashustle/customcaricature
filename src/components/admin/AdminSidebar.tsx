@@ -260,15 +260,15 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                 const handleClick = () => {
                   if (item.id === "link-workshop-admin") {
                     // SSO: same browser session is shared via Supabase localStorage,
-                    // so we unlock the URL and open the workshop admin panel directly
-                    // in a new tab. WorkshopAdminPanel itself validates the session.
+                    // so we open the workshop admin panel directly in a new tab with
+                    // an unlock-hash that the new tab consumes on boot.
                     unlockAdminUrl("workshop");
-                    window.open("/workshop-admin-panel", "_blank", "noopener");
+                    window.open(buildUnlockUrl("/workshop-admin-panel", "workshop"), "_blank", "noopener");
                     return;
                   }
                   if (item.id === "link-shop-admin") {
                     unlockAdminUrl("shop");
-                    window.open("/shop-admin", "_blank", "noopener");
+                    window.open(buildUnlockUrl("/shop-admin", "shop"), "_blank", "noopener");
                     return;
                   }
                   onTabChange(item.id);
