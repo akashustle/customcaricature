@@ -12,11 +12,6 @@ import AdminLightThemeForcer from "./components/AdminLightThemeForcer";
 import ReferralTrackerBoot from "./components/ReferralTrackerBoot";
 import { useSiteSettings } from "./hooks/useSiteSettings";
 
-// RoutePrefetcher and RightClickBlocker are non-critical — defer their JS so
-// they don't add to TBT on first paint.
-const RoutePrefetcher = lazyShell(() => import("./components/RoutePrefetcher"));
-const RightClickBlocker = lazyShell(() => import("./components/RightClickBlocker"));
-
 import usePageTracker from "./hooks/usePageTracker";
 import { useRouteMemory, getLastRoute, clearRouteMemory } from "./hooks/useRouteMemory";
 import { useMaintenanceCheck } from "./hooks/useMaintenanceCheck";
