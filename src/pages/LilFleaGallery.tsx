@@ -5,7 +5,10 @@ import SEOHead from "@/components/SEOHead";
 import WatermarkedImage from "@/components/WatermarkedImage";
 
 const LilFleaGallery = () => {
-  const [images, setImages] = useState<{ id: string; image_url: string; caption: string | null }[]>([]);
+type GalleryRow = { id: string; image_url: string; caption: string | null; placement?: string | null };
+
+const LilFleaGallery = () => {
+  const [images, setImages] = useState<GalleryRow[]>([]);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   const fetchImages = useCallback(async () => {
