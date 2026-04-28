@@ -15,6 +15,17 @@ import { Palette, Sparkles, PartyPopper, ChevronRight, ArrowRight } from "lucide
 
 const STORAGE_KEY = "ccc_app_welcome_v3_done";
 
+// Real event photos from the gallery — one per slide. Preloaded for instant
+// paint so the flash cards never show a blank/loading state.
+const EVENT_IMAGES = [
+  "https://cqdxfvcyrvlttmkuaeda.supabase.co/storage/v1/object/public/gallery-images/scroll-events/76f20bf5-4d62-4ced-9359-f4afaf4649e1.jpeg",
+  "https://cqdxfvcyrvlttmkuaeda.supabase.co/storage/v1/object/public/gallery-images/scroll-events/d1951e67-00b2-46dc-ab53-65f06eb306a2.jpeg",
+  "https://cqdxfvcyrvlttmkuaeda.supabase.co/storage/v1/object/public/gallery-images/scroll-events/fe9b773c-bf6f-4c17-8e39-74168c0a99e8.jpeg",
+];
+
+// Auto-advance interval per slide (ms). Last slide auto-finishes to /register.
+const AUTO_ADVANCE_MS = 3500;
+
 interface SlideDef {
   id: string;
   badge: string;
@@ -37,7 +48,7 @@ const SLIDES: SlideDef[] = [
     icon: Palette,
     bgFrom: "252 85% 62%",
     bgTo: "320 80% 75%",
-    scene: (active) => <ArtScene active={active} />,
+    scene: (active) => <ArtScene active={active} photo={EVENT_IMAGES[0]} />,
   },
   {
     id: "events",
@@ -48,7 +59,7 @@ const SLIDES: SlideDef[] = [
     icon: PartyPopper,
     bgFrom: "285 80% 70%",
     bgTo: "215 90% 75%",
-    scene: (active) => <EventScene active={active} />,
+    scene: (active) => <EventScene active={active} photo={EVENT_IMAGES[1]} />,
   },
   {
     id: "book",
@@ -59,7 +70,7 @@ const SLIDES: SlideDef[] = [
     icon: Sparkles,
     bgFrom: "258 70% 50%",
     bgTo: "340 85% 78%",
-    scene: (active) => <BookScene active={active} />,
+    scene: (active) => <BookScene active={active} photo={EVENT_IMAGES[2]} />,
   },
 ];
 
@@ -74,6 +85,8 @@ const AppWelcome3D = () => {
     if (!isAppMode) return;
     if (typeof window === "undefined") return;
     if (localStorage.getItem(STORAGE_KEY) === "1") return;
+    // Preload all event images so flash cards paint instantly when each slide enters
+    EVENT_IMAGES.forEach((src) => { const img = new Image(); img.src = src; });
     setShow(true);
   }, [isAppMode]);
 
