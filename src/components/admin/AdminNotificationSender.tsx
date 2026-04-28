@@ -144,6 +144,18 @@ const AdminNotificationSender = () => {
         if (error) throw error;
       }
       await supabase.from("notification_batches").update({ sent_to_count: batch.sent_to_count + users.length } as any).eq("id", batch.id);
+
+      // Re-fan-out push to web + OneSignal mobile
+      const resendIds = users.map(u => u.user_id);
+      await Promise.allSettled([
+        supabase.functions.invoke("send-web-push", {
+          body: { action: "broadcast_to_users", user_ids: resendIds, title: batch.title, message: batch.message, link: batch.link || "/notifications" },
+        }).catch((e) => console.warn("send-web-push failed:", e)),
+        supabase.functions.invoke("send-onesignal", {
+          body: { user_ids: resendIds, title: batch.title, message: batch.message, url: batch.link || "/notifications" },
+        }).catch((e) => console.warn("send-onesignal failed:", e)),
+      ]);
+
       toast({ title: `✅ Resent to ${users.length} user(s)!` });
       fetchBatches();
     } catch (err: any) {
