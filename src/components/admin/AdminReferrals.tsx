@@ -120,6 +120,14 @@ const AdminReferrals = () => {
 
   const getUserName = (uid: string) => profiles.find(p => p.user_id === uid)?.full_name || uid?.slice(0, 8);
 
+  // Funnel from referral_events
+  const evClicks = events.filter(e => e.event_type === "click").length;
+  const evRegisters = events.filter(e => e.event_type === "register").length;
+  const evLogins = events.filter(e => e.event_type === "login").length;
+  const evBookings = events.filter(e => e.event_type === "booking").length;
+  const evOrders = events.filter(e => e.event_type === "order").length;
+  const conversionRate = evClicks > 0 ? Math.round(((evBookings + evOrders) / evClicks) * 100) : 0;
+
   return (
     <div className="space-y-6">
       {/* Stats */}
