@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, User, Share2, BookOpen, Link2, Printer, ChevronUp, Facebook, Twitter, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import BlogEngagement from "@/components/blog/BlogEngagement";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { toast } from "@/hooks/use-toast";
 import { gtagBlogView, gtagShareClick } from "@/lib/gtag";
@@ -407,14 +408,8 @@ const BlogPost = () => {
               </div>
             )}
 
-            {/* CTA */}
-            {!caricatureOff && (
-            <div className="mt-10 p-6 rounded-2xl bg-primary/5 border border-primary/20 text-center">
-              <h3 className="font-display text-xl font-semibold mb-2">Ready to Order Your Caricature?</h3>
-              <p className="text-muted-foreground text-sm mb-4">Turn your photos into art — delivered to your doorstep.</p>
-              <Button onClick={() => navigate("/order")} className="rounded-full">Order Now →</Button>
-            </div>
-            )}
+            {/* Engagement: like/dislike + Book Caricature CTA + 3D social cards */}
+            <BlogEngagement postId={post.id} postTitle={post.title} postSlug={post.slug} />
           </article>
 
           {/* Right sidebar — Popular Posts (desktop) */}
