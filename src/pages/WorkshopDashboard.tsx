@@ -432,7 +432,7 @@ const WorkshopDashboard = () => {
               >
                 {isProfile ? (
                   <span className="relative">
-                    <Avatar className={`w-5 h-5 transition-all ${isActive ? "ring-2 ring-primary-foreground/60" : "ring-1 ring-border/40"}`}>
+                    <Avatar className={`w-[18px] h-[18px] transition-all ${isActive ? "ring-2 ring-primary-foreground/60" : "ring-1 ring-border/40"}`}>
                       <AvatarImage src={workshopUser.avatar_url || undefined} />
                       <AvatarFallback
                         className="text-[8px] font-bold text-primary-foreground"
@@ -452,9 +452,9 @@ const WorkshopDashboard = () => {
                     )}
                   </span>
                 ) : (
-                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.4 : 1.8} />
+                  <tab.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 1.8} />
                 )}
-                <span className={`text-[10px] font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
+                <span className={`text-[9.5px] leading-none font-sans ${isActive ? "font-semibold" : "font-medium"}`}>
                   {tab.label}
                 </span>
               </button>
