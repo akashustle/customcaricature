@@ -1,4 +1,12 @@
-const INTERNAL_HOST_PATTERNS = [/lovable\.app$/i, /creativecaricatureclub\.com$/i];
+// Only the Lovable preview/published hosts and the app's *portal* subdomain
+// are treated as "internal". The marketing root (creativecaricatureclub.com)
+// is intentionally NOT internal — it is a separate site and must open in a
+// real browser tab when users click "Main Web" from the portal footer.
+const INTERNAL_HOST_PATTERNS = [
+  /lovable\.app$/i,
+  /lovableproject\.com$/i,
+  /^portal\.creativecaricatureclub\.com$/i,
+];
 const SOCIAL_HOST_PATTERNS = [
   /(^|\.)instagram\.com$/i,
   /(^|\.)facebook\.com$/i,
