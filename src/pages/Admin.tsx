@@ -2595,7 +2595,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="homepage">
-            <AdminHomepageControl />
+            <HomepageBuilder />
           </TabsContent>
 
           <TabsContent value="explore-editor">
