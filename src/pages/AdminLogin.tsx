@@ -277,6 +277,28 @@ const AdminLogin = () => {
     if (admin) { setSelectedAdmin(admin); setVerifyInput(""); setVerifyMethod("email"); setDirection(1); setStep(2); }
   };
 
+  // Email-driven auto-detect: as admin types their email, find matching profile
+  const [emailLookup, setEmailLookup] = useState("");
+  const [lookupError, setLookupError] = useState("");
+  const handleEmailDetect = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const normalized = emailLookup.trim().toLowerCase();
+    if (!normalized) { setLookupError("Enter your admin email"); return; }
+    if (adminLocationRequired && !locationGranted) {
+      toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
+      return;
+    }
+    const admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
+    if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    setLookupError("");
+    setSelectedAdminEmail(admin.email);
+    setSelectedAdmin(admin);
+    setDirection(1);
+    // Skip the redundant "verify email/mobile" step — email IS the identity proof
+    setStep(3);
+    setPassword(""); setSecretCode(""); setOtpCode(""); setOtpSent(false); setAuthMethod("password");
+  };
+
   const handleVerifyIdentity = () => {
     if (!selectedAdmin || !verifyInput.trim()) { toast({ title: "Enter your " + verifyMethod, variant: "destructive" }); return; }
     const match = verifyMethod === "email"
