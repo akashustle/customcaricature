@@ -236,7 +236,7 @@ const AdminWorkshop = () => {
         <TabsList className="w-full flex-wrap h-auto gap-1 bg-card border border-border rounded-2xl p-1.5">
           <TabsTrigger value="users" className="font-sans rounded-full text-xs"><Users className="w-3.5 h-3.5 mr-1" />Users</TabsTrigger>
           <TabsTrigger value="drafts" className="font-sans rounded-full text-xs">
-            <FileClock className="w-3.5 h-3.5 mr-1" />Registration Drafts
+            <FileClock className="w-3.5 h-3.5 mr-1" />Processing Users
             {drafts.length > 0 && <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">{drafts.length}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="videos" className="font-sans rounded-full text-xs"><Video className="w-3.5 h-3.5 mr-1" />Videos</TabsTrigger>
