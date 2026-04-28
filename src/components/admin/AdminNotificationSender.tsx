@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { broadcastWebPush } from "@/lib/webpush";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,17 +104,24 @@ const AdminNotificationSender = () => {
         if (error) throw error;
       }
 
-      // Also send direct web push for users who may not have DB trigger
-      try {
-        await broadcastWebPush({
-          title: title.trim(),
-          message: message.trim(),
-          link: link.trim() || undefined,
-          userIds: targetUsers.map(u => u.user_id),
-        });
-      } catch (pushErr) {
-        console.warn("Direct web push failed (non-fatal):", pushErr);
-      }
+      // Fan-out push notifications via two parallel channels:
+      //   1) Web Push (VAPID) — covers PWA + desktop browsers via push_subscriptions
+      //   2) OneSignal — covers installed mobile APK + native iOS/Android subscribers
+      // Both are fire-and-forget; in-app notifications are already inserted above.
+      const targetIds = targetUsers.map(u => u.user_id);
+      const pushTitle = title.trim();
+      const pushBody = message.trim();
+      const pushLink = link.trim() || "/notifications";
+      await Promise.allSettled([
+        // Web push to every targeted user (server iterates their push_subscriptions)
+        supabase.functions.invoke("send-web-push", {
+          body: { action: "broadcast_to_users", user_ids: targetIds, title: pushTitle, message: pushBody, link: pushLink },
+        }).catch((e) => console.warn("send-web-push failed:", e)),
+        // OneSignal mobile push (single API call, scoped by external_id alias)
+        supabase.functions.invoke("send-onesignal", {
+          body: { user_ids: targetIds, title: pushTitle, message: pushBody, url: pushLink },
+        }).catch((e) => console.warn("send-onesignal failed:", e)),
+      ]);
 
       toast({ title: `✅ Sent to ${targetUsers.length} user(s)!` });
       setTitle(""); setMessage(""); setLink(""); setSelectedUsers([]);
@@ -137,6 +144,18 @@ const AdminNotificationSender = () => {
         if (error) throw error;
       }
       await supabase.from("notification_batches").update({ sent_to_count: batch.sent_to_count + users.length } as any).eq("id", batch.id);
+
+      // Re-fan-out push to web + OneSignal mobile
+      const resendIds = users.map(u => u.user_id);
+      await Promise.allSettled([
+        supabase.functions.invoke("send-web-push", {
+          body: { action: "broadcast_to_users", user_ids: resendIds, title: batch.title, message: batch.message, link: batch.link || "/notifications" },
+        }).catch((e) => console.warn("send-web-push failed:", e)),
+        supabase.functions.invoke("send-onesignal", {
+          body: { user_ids: resendIds, title: batch.title, message: batch.message, url: batch.link || "/notifications" },
+        }).catch((e) => console.warn("send-onesignal failed:", e)),
+      ]);
+
       toast({ title: `✅ Resent to ${users.length} user(s)!` });
       fetchBatches();
     } catch (err: any) {
