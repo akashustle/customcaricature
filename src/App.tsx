@@ -59,15 +59,22 @@ import { installOfflineCache } from "./lib/offline-cache";
 // Install global error/network reporter once, before React mounts the tree.
 installErrorReporter();
 
-// Boot the offline action queue worker (drains on reconnect)
-installSyncWorker();
-
-// Periodically report this client's offline backlog so admins see live health.
-installSyncHealthReporter();
-
-// Prime essential offline content (logo, gallery, pricing, FAQs, my orders).
-// Cheap + idle-deferred — safe to call on every boot.
-installOfflineCache();
+// Defer the heavy boot installers off the critical path. Each runs once, when
+// the browser is idle, so they don't compete with hydration for main-thread
+// time (was the dominant source of the TBT regression on /).
+const __idleBoot = (cb: () => void) => {
+  if (typeof window === "undefined") return;
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(cb, { timeout: 3000 });
+  } else {
+    setTimeout(cb, 1500);
+  }
+};
+__idleBoot(() => {
+  installSyncWorker();
+  installSyncHealthReporter();
+  installOfflineCache();
+});
 
 // All pages lazy loaded for performance
 const Index = lazy(() => import("./pages/Index"));
