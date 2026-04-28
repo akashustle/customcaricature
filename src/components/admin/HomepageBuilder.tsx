@@ -308,6 +308,24 @@ const HomepageBuilder = () => {
           <Button variant="outline" size="sm" onClick={() => window.open("/", "_blank")}>
             <ExternalLink className="w-4 h-4 mr-2" /> View live
           </Button>
+          <Button variant="outline" size="sm" onClick={exportBlocks} disabled={blocks.length === 0}>
+            <Download className="w-4 h-4 mr-2" /> Export JSON
+          </Button>
+          <label>
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={e => {
+                const f = e.target.files?.[0];
+                if (f) importBlocks(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <Button type="button" variant="outline" size="sm" asChild disabled={busy}>
+              <span className="cursor-pointer"><UploadIcon className="w-4 h-4 mr-2" /> Import JSON</span>
+            </Button>
+          </label>
           <Button variant="outline" size="sm" onClick={resetToDefaults} disabled={busy}>
             <RefreshCcw className="w-4 h-4 mr-2" /> Reset
           </Button>
