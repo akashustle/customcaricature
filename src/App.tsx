@@ -320,6 +320,12 @@ const App = () => {
             
             <FloatingButtons />
             <MobileBottomNav />
+            <Suspense fallback={null}>
+              {(() => {
+                const ReferralTrackerBoot = require("./components/ReferralTrackerBoot").default;
+                return <ReferralTrackerBoot />;
+              })()}
+            </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
