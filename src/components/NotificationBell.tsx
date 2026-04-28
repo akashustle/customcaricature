@@ -377,9 +377,12 @@ const NotificationBell = () => {
                 md:w-[400px] md:max-h-[min(560px,calc(100vh-120px))]
                 md:rounded-2xl md:border md:border-border/60 md:overflow-hidden
               "
-              style={{
-                bottom: "calc(76px + env(safe-area-inset-bottom))",
-              }}
+              className="
+                fixed inset-x-0 top-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[61] flex flex-col bg-background shadow-2xl
+                md:inset-auto md:bottom-auto md:absolute md:top-full md:right-0 md:mt-2
+                md:w-[400px] md:max-h-[min(560px,calc(100vh-120px))]
+                md:rounded-2xl md:border md:border-border/60 md:overflow-hidden md:shadow-2xl
+              "
               role="dialog"
               aria-modal="true"
               aria-label="Notifications"
