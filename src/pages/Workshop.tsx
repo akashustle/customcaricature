@@ -973,10 +973,16 @@ const Workshop = () => {
               {loginPhase === "not_found" && (
                 <div className="space-y-3 rounded-2xl border border-amber-300 bg-amber-50 p-4">
                   <p className="text-sm font-body font-bold text-amber-900">No registration found</p>
-                  <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
-                  <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
-                    Register Now <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  {isRegistrationOpen ? (
+                    <>
+                      <p className="text-xs text-amber-800 font-body">We couldn't find an account for this {loginType}. Register to reserve your seat — it only takes a couple of minutes.</p>
+                      <Button onClick={() => { setRegForm({ ...regForm, [loginType]: loginType === "mobile" ? mobile : email } as any); setView("register"); setRegStep(0); }} className="w-full h-12 rounded-xl text-base font-body font-semibold">
+                        Register Now <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </>
+                  ) : (
+                    <p className="text-xs text-amber-800 font-body">Registrations are currently <span className="font-bold">closed</span> by admin. Please check back later or contact us on WhatsApp for assistance.</p>
+                  )}
                 </div>
               )}
 
