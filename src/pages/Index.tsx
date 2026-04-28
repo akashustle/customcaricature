@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useMaintenanceCheck } from "@/hooks/useMaintenanceCheck";
 import { useHomepageContent } from "@/hooks/useHomepageContent";
+import { useHomepageBlocks } from "@/hooks/useHomepageBlocks";
+import HomepageGenericBlock from "@/components/homepage/HomepageGenericBlock";
 import SEOHead from "@/components/SEOHead";
 import JsonLd from "@/components/JsonLd";
 import MaintenanceScreen from "@/components/MaintenanceScreen";
