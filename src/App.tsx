@@ -367,7 +367,7 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/customcad75" element={<AdminLogin />} />
+                <Route path="/customcad75" element={<AdminUrlGate slot="main"><AdminLogin /></AdminUrlGate>} />
                 {/* Public-search-friendly admin slugs are intentionally hidden — show a 404 so they don't leak. */}
                 <Route path="/admin-login" element={<NotFound />} />
                 <Route path="/admin" element={<NotFound />} />
