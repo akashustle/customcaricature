@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const maybeSingleMock = vi.fn();
 const eqMock = vi.fn().mockReturnThis();
 const selectMock = vi.fn().mockReturnThis();
-const fromMock = vi.fn(() => ({
+const fromMock: any = vi.fn(() => ({
   select: selectMock, eq: eqMock, maybeSingle: maybeSingleMock,
 }));
 const invokeMock: any = vi.fn().mockResolvedValue({ data: null, error: null });
