@@ -135,6 +135,7 @@ const AdminLeadLinks = lazy(() => import("@/components/admin/AdminLeadLinks"));
 const AdminAccounting = lazy(() => import("@/components/admin/AdminAccounting"));
 const AdminPageContent = lazy(() => import("@/components/admin/AdminPageContent"));
 const AdminAIAssistant = lazy(() => import("@/components/admin/AdminAIAssistant"));
+const AdminAIBubble = lazy(() => import("@/components/admin/AdminAIBubble"));
 const EditRequestsInbox = lazy(() => import("@/components/admin/EditRequestsInbox"));
 const AdminProfileVerification = lazy(() => import("@/components/admin/AdminProfileVerification"));
 
