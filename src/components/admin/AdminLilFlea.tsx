@@ -15,6 +15,7 @@ type GalleryItem = {
   caption: string | null;
   is_featured: boolean;
   sort_order: number;
+  placement?: string | null;
 };
 
 type NotifyUser = {
