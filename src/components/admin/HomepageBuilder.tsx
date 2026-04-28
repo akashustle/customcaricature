@@ -684,6 +684,8 @@ const FieldRenderer = ({ field, value, onChange }: { field: Field; value: any; o
       );
     case "image":
       return <AssetPicker label={field.label} value={value} onChange={onChange} kind="image" />;
+    case "image_list":
+      return <ImageListField label={field.label} value={value} onChange={onChange} />;
     case "video":
       return <AssetPicker label={field.label} value={value} onChange={onChange} kind="video" />;
     case "cards":
