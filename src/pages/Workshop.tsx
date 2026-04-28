@@ -20,6 +20,7 @@ import {
 import SEOHead from "@/components/SEOHead";
 import PageBuilderRenderer from "@/components/PageBuilderRenderer";
 import AuthShell from "@/components/auth/AuthShell";
+import CountrySearchSelect from "@/components/CountrySearchSelect";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
