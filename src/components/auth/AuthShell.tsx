@@ -78,21 +78,25 @@ export const AuthShell = ({
           "radial-gradient(ellipse at 20% 0%, hsl(252 60% 96%) 0%, transparent 55%), radial-gradient(ellipse at 100% 100%, hsl(320 70% 96%) 0%, transparent 55%), linear-gradient(180deg, #f7f7fb 0%, #eef0fa 100%)",
       }}
     >
-      {/* Ambient floating orbs — desktop only */}
-      <motion.div
-        aria-hidden
-        className="hidden md:block absolute -top-24 -left-20 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-50"
-        style={{ background: `radial-gradient(circle, ${a.orbA}, transparent 70%)` }}
-        animate={{ y: [0, 22, 0], x: [0, 16, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="hidden md:block absolute -bottom-24 -right-16 w-[28rem] h-[28rem] rounded-full blur-3xl pointer-events-none opacity-50"
-        style={{ background: `radial-gradient(circle, ${a.orbB}, transparent 70%)` }}
-        animate={{ y: [0, -28, 0], x: [0, -14, 0] }}
-        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Ambient floating orbs — desktop only, skipped on low-power devices */}
+      {!lowPower && (
+        <>
+          <motion.div
+            aria-hidden
+            className="hidden md:block absolute -top-24 -left-20 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-50"
+            style={{ background: `radial-gradient(circle, ${a.orbA}, transparent 70%)`, willChange: "transform" }}
+            animate={{ y: [0, 22, 0], x: [0, 16, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            aria-hidden
+            className="hidden md:block absolute -bottom-24 -right-16 w-[28rem] h-[28rem] rounded-full blur-3xl pointer-events-none opacity-50"
+            style={{ background: `radial-gradient(circle, ${a.orbB}, transparent 70%)`, willChange: "transform" }}
+            animate={{ y: [0, -28, 0], x: [0, -14, 0] }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </>
+      )}
 
       {/* Mobile only soft shapes */}
       <div className="md:hidden absolute top-10 right-8 w-24 h-24 rounded-full blur-2xl opacity-50 pointer-events-none"
