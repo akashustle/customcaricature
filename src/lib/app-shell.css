@@ -12,31 +12,39 @@
 
 html[data-app-mode="true"],
 html[data-app-mode="true"] body {
-  /* Native scroll feel */
+  /* Native scroll feel — let body scroll, never lock height */
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  /* Disable pull-to-refresh inside Capacitor */
+  overscroll-behavior-y: auto;
   overscroll-behavior-x: none;
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
 }
 
 html[data-app-mode="true"] body {
   /* Safe-area padding driven by env() so iPhone notch + Android cutouts work */
   padding-top: env(safe-area-inset-top);
-  /* Bottom padding is handled by MobileBottomNav itself, content gets a spacer */
-  user-select: none;
-  -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   background: hsl(var(--background));
 }
 
-/* Allow selection back inside inputs / editable areas */
+/* Re-enable text selection inside inputs / editable areas */
 html[data-app-mode="true"] input,
 html[data-app-mode="true"] textarea,
 html[data-app-mode="true"] [contenteditable="true"],
 html[data-app-mode="true"] .allow-select {
   user-select: text;
   -webkit-user-select: text;
+}
+
+/* Make sure root containers never trap scroll inside the app */
+html[data-app-mode="true"] #root {
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
 }
 
 /* Hide pieces of web chrome that don't belong inside an installed app */
