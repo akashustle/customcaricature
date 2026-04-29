@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 /**
  * Light, premium 3D PWA splash — layered parallax cards, typewriter calligraphy,
@@ -50,9 +51,13 @@ const Typewriter = ({ text, onDone }: { text: string; onDone?: () => void }) => 
 const PWASplashScreen = () => {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
+  const { settings } = useSiteSettings();
+  const pwaSplashEnabled = (settings as any)?.pwa_splash_enabled?.enabled === true;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Admin-controlled: paused by default. Only render when explicitly enabled.
+    if (!pwaSplashEnabled) return;
     const isStandalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-ignore iOS Safari
@@ -61,7 +66,7 @@ const PWASplashScreen = () => {
     if (sessionStorage.getItem("ccc_pwa_splash_done") === "1") return;
     setShow(true);
     sessionStorage.setItem("ccc_pwa_splash_done", "1");
-  }, []);
+  }, [pwaSplashEnabled]);
 
   useEffect(() => {
     if (!show) return;
@@ -145,7 +150,7 @@ const PWASplashScreen = () => {
           className="font-calligraphy text-4xl sm:text-5xl mt-12 mb-3 text-center"
           style={{ color: "hsl(25 30% 20%)" }}
         >
-          Custom Caricature Club
+          Creative Caricature Club
         </motion.h1>
 
         {/* Typewriter tagline (advances through 3 phrases) */}
