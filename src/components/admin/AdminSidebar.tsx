@@ -239,39 +239,53 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       {/* Floating container */}
       <div className="flex flex-col h-full m-3 mr-0 rounded-2xl admin-sidebar-premium overflow-hidden">
         {/* Logo + Collapse */}
-        <div className="flex items-center justify-between px-4 py-4">
-          <div 
-            className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
-            onClick={() => navigate("/")}
-          >
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/[0.04] shadow-sm">
-              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover"  loading="lazy" decoding="async" />
-            </div>
-            {!collapsed && (
+        <div className={cn("flex items-center px-3 py-4", collapsed ? "flex-col gap-2" : "justify-between gap-2")}>
+          {!collapsed && (
+            <div 
+              className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
+              onClick={() => navigate("/")}
+            >
+              <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/[0.04] shadow-sm">
+                <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+              </div>
               <motion.div initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} className="min-w-0">
                 <p className="text-[13px] font-bold tracking-tight admin-panel-font" style={{ color: "hsl(25 20% 18%)" }}>Admin Panel</p>
                 <p className="text-[9px] tracking-wide admin-panel-font" style={{ color: "hsl(25 10% 55%)" }}>Creative Caricature Club™</p>
               </motion.div>
-            )}
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+            </div>
+          )}
+          {collapsed && (
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-black/[0.04] shadow-sm cursor-pointer" onClick={() => navigate("/")}>
+              <img src="/logo.png" alt="CCC" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+            </div>
+          )}
+          <div className={cn("flex items-center gap-1 flex-shrink-0", collapsed && "flex-col")}>
+            {/* Primary toggle — ALWAYS visible, big enough to spot when collapsed */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={() => setCollapsed(!collapsed)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-              style={{ background: "hsl(225 30% 94%)" }}
-              title={collapsed ? "Expand sidebar" : "Collapse to icons"}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse to icons"}
+              className={cn(
+                "rounded-xl flex items-center justify-center gap-1 transition-colors shadow-sm",
+                collapsed ? "w-10 h-10" : "w-8 h-8"
+              )}
+              style={{
+                background: collapsed
+                  ? "linear-gradient(135deg, hsl(25 40% 55%), hsl(18 45% 58%))"
+                  : "hsl(225 30% 94%)",
+                color: collapsed ? "white" : "hsl(225 25% 45%)",
+              }}
+              title={collapsed ? "Expand to full sidebar" : "Collapse to icons"}
+              aria-label={collapsed ? "Expand to full sidebar" : "Collapse to icons"}
             >
-              {collapsed ? <ChevronRight className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} /> : <ChevronLeft className="w-3.5 h-3.5" style={{ color: "hsl(225 25% 45%)" }} />}
+              {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
             </motion.button>
             {!collapsed && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => updateMode("hidden")}
-                className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
                 style={{ background: "hsl(225 30% 94%)" }}
                 title="Hide sidebar fully"
                 aria-label="Hide sidebar fully"
@@ -282,6 +296,22 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             )}
           </div>
         </div>
+
+        {/* Floating "Expand" pill at bottom of collapsed sidebar — second clear way to restore */}
+        {collapsed && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="mx-2 mb-1 mt-1 px-2 py-2 rounded-xl flex items-center justify-center gap-1 text-[10px] font-bold admin-panel-font shadow-sm transition-all hover:scale-105"
+            style={{
+              background: "linear-gradient(135deg, hsl(30 35% 96%), hsl(28 30% 90%))",
+              border: "1px solid hsl(30 25% 85%)",
+              color: "hsl(25 30% 30%)",
+            }}
+            title="Expand sidebar"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        )}
 
         {/* Search */}
         {!collapsed && (
