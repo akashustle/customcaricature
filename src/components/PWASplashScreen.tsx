@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 /**
  * Light, premium 3D PWA splash — layered parallax cards, typewriter calligraphy,
