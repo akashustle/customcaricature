@@ -529,17 +529,17 @@ const AdminLogin = () => {
                   <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-5">
                     <Label className="text-sm font-bold flex items-center gap-2" style={{ color: BRAND.primary }}>
-                      <Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Enter Your Admin Email
+                      <Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Enter Email or Mobile Number
                     </Label>
                     <form onSubmit={handleEmailDetect} className="space-y-3">
                       <Input
-                        type="email"
+                        type="text"
                         autoFocus
-                        autoComplete="email"
-                        inputMode="email"
+                        autoComplete="username"
+                        inputMode="text"
                         value={emailLookup}
                         onChange={(e) => { setEmailLookup(e.target.value); setLookupError(""); }}
-                        placeholder="you@gmail.com"
+                        placeholder="you@gmail.com or 98XXXXXXXX"
                         className="h-14 rounded-2xl text-base px-4 border"
                         style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: lookupError ? "#EF4444" : BRAND.light, color: BRAND.primary }}
                       />
@@ -556,8 +556,8 @@ const AdminLogin = () => {
                         <Sparkles className="w-4 h-4 mr-2" /> Detect My Profile
                       </Button>
                     </form>
-                    <p className="text-xs text-center font-medium" style={{ color: "#94A3B8" }}>
-                      Your profile auto-loads when your email matches an admin record
+                    <p className="text-xs text-center font-medium flex items-center justify-center gap-1.5" style={{ color: "#94A3B8" }}>
+                      <Phone className="w-3 h-3" /> Sign in with your email or registered mobile number
                     </p>
                   </motion.div>
                 )}
