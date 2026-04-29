@@ -214,12 +214,17 @@ const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     return (
       <button
         onClick={() => updateMode("expanded")}
-        className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-50 w-7 h-20 items-center justify-center rounded-r-2xl shadow-lg transition-transform hover:translate-x-0.5"
-        style={{ background: "linear-gradient(180deg, hsl(225 35% 96%), hsl(225 30% 92%))", border: "1px solid hsl(225 25% 88%)", borderLeft: "none" }}
+        className="hidden md:flex fixed left-3 top-20 z-50 items-center gap-2 px-3 py-2 rounded-2xl shadow-xl transition-all hover:translate-x-0.5 hover:shadow-2xl group"
+        style={{
+          background: "linear-gradient(135deg, hsl(30 35% 96%), hsl(28 30% 92%))",
+          border: "1px solid hsl(30 25% 85%)",
+          color: "hsl(25 30% 25%)",
+        }}
         title="Show admin sidebar"
         aria-label="Show admin sidebar"
       >
-        <ChevronRight className="w-4 h-4" style={{ color: "hsl(225 25% 40%)" }} />
+        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+        <span className="text-[12px] font-semibold admin-panel-font">Show Menu</span>
       </button>
     );
   }
