@@ -152,6 +152,7 @@ const AdminMaintenance = () => {
   const adminSplashEnabled = (siteSettings as any).admin_splash_enabled?.enabled === true;
   const homepageSplashEnabled = (siteSettings as any).homepage_splash_enabled?.enabled === true;
   const workshopSplashEnabled = (siteSettings as any).workshop_splash_enabled?.enabled === true;
+  const pwaSplashEnabled = (siteSettings as any).pwa_splash_enabled?.enabled === true;
   const appOnboardingEnabled = (siteSettings as any).app_onboarding_enabled?.enabled === true;
   const adminLocationRequired = (siteSettings as any).admin_location_required?.enabled ?? false;
   const hideHowItWorks = (siteSettings as any).hide_how_it_works?.enabled ?? true;
@@ -232,6 +233,13 @@ const AdminMaintenance = () => {
               <p className="text-xs text-muted-foreground">Show splash on workshop area</p>
             </div>
             <Switch checked={workshopSplashEnabled} onCheckedChange={(v) => updateSiteSetting("workshop_splash_enabled", { enabled: v })} />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">PWA / App Splash Screen</p>
+              <p className="text-xs text-muted-foreground">Show animated splash when app/PWA launches (paused by default)</p>
+            </div>
+            <Switch checked={pwaSplashEnabled} onCheckedChange={(v) => updateSiteSetting("pwa_splash_enabled", { enabled: v })} />
           </div>
           <div className="flex items-center justify-between">
             <div>
