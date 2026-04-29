@@ -288,19 +288,30 @@ const AdminLogin = () => {
   const [lookupError, setLookupError] = useState("");
   const handleEmailDetect = (e?: React.FormEvent) => {
     e?.preventDefault();
-    const normalized = emailLookup.trim().toLowerCase();
-    if (!normalized) { setLookupError("Enter your admin email"); return; }
+    const raw = emailLookup.trim();
+    if (!raw) { setLookupError("Enter your admin email or mobile number"); return; }
     if (adminLocationRequired && !locationGranted) {
       toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
       return;
     }
-    const admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
-    if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    // Accept either email OR mobile number — auto-detect by content
+    const digitsOnly = raw.replace(/[\s+\-()]/g, "");
+    const isMobile = /^\d{10,13}$/.test(digitsOnly);
+    let admin;
+    if (isMobile) {
+      const last10 = digitsOnly.slice(-10);
+      admin = ADMIN_LIST.find(a => a.mobile.replace(/\s/g, "").slice(-10) === last10);
+      if (!admin) { setLookupError("No admin profile found for this mobile number"); return; }
+    } else {
+      const normalized = raw.toLowerCase();
+      admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
+      if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    }
     setLookupError("");
     setSelectedAdminEmail(admin.email);
     setSelectedAdmin(admin);
     setDirection(1);
-    // Skip the redundant "verify email/mobile" step — email IS the identity proof
+    // Skip the redundant "verify email/mobile" step — identity already proven
     setStep(3);
     setPassword(""); setSecretCode(""); setOtpCode(""); setOtpSent(false); setAuthMethod("password");
   };
