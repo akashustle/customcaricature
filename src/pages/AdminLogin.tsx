@@ -288,19 +288,30 @@ const AdminLogin = () => {
   const [lookupError, setLookupError] = useState("");
   const handleEmailDetect = (e?: React.FormEvent) => {
     e?.preventDefault();
-    const normalized = emailLookup.trim().toLowerCase();
-    if (!normalized) { setLookupError("Enter your admin email"); return; }
+    const raw = emailLookup.trim();
+    if (!raw) { setLookupError("Enter your admin email or mobile number"); return; }
     if (adminLocationRequired && !locationGranted) {
       toast({ title: "📍 Location Required", description: "Please allow location access to continue", variant: "destructive" });
       return;
     }
-    const admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
-    if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    // Accept either email OR mobile number — auto-detect by content
+    const digitsOnly = raw.replace(/[\s+\-()]/g, "");
+    const isMobile = /^\d{10,13}$/.test(digitsOnly);
+    let admin;
+    if (isMobile) {
+      const last10 = digitsOnly.slice(-10);
+      admin = ADMIN_LIST.find(a => a.mobile.replace(/\s/g, "").slice(-10) === last10);
+      if (!admin) { setLookupError("No admin profile found for this mobile number"); return; }
+    } else {
+      const normalized = raw.toLowerCase();
+      admin = ADMIN_LIST.find(a => a.email.toLowerCase() === normalized);
+      if (!admin) { setLookupError("No admin profile found for this email"); return; }
+    }
     setLookupError("");
     setSelectedAdminEmail(admin.email);
     setSelectedAdmin(admin);
     setDirection(1);
-    // Skip the redundant "verify email/mobile" step — email IS the identity proof
+    // Skip the redundant "verify email/mobile" step — identity already proven
     setStep(3);
     setPassword(""); setSecretCode(""); setOtpCode(""); setOtpSent(false); setAuthMethod("password");
   };
@@ -518,17 +529,17 @@ const AdminLogin = () => {
                   <motion.div key="s1" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit"
                     transition={{ duration: 0.35, type: "spring", stiffness: 300, damping: 30 }} className="space-y-5">
                     <Label className="text-sm font-bold flex items-center gap-2" style={{ color: BRAND.primary }}>
-                      <Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Enter Your Admin Email
+                      <Mail className="w-4 h-4" style={{ color: BRAND.accent }} /> Enter Email or Mobile Number
                     </Label>
                     <form onSubmit={handleEmailDetect} className="space-y-3">
                       <Input
-                        type="email"
+                        type="text"
                         autoFocus
-                        autoComplete="email"
-                        inputMode="email"
+                        autoComplete="username"
+                        inputMode="text"
                         value={emailLookup}
                         onChange={(e) => { setEmailLookup(e.target.value); setLookupError(""); }}
-                        placeholder="you@gmail.com"
+                        placeholder="you@gmail.com or 98XXXXXXXX"
                         className="h-14 rounded-2xl text-base px-4 border"
                         style={{ background: `linear-gradient(135deg, #FFFFFF, ${BRAND.cream})`, borderColor: lookupError ? "#EF4444" : BRAND.light, color: BRAND.primary }}
                       />
@@ -545,8 +556,8 @@ const AdminLogin = () => {
                         <Sparkles className="w-4 h-4 mr-2" /> Detect My Profile
                       </Button>
                     </form>
-                    <p className="text-xs text-center font-medium" style={{ color: "#94A3B8" }}>
-                      Your profile auto-loads when your email matches an admin record
+                    <p className="text-xs text-center font-medium flex items-center justify-center gap-1.5" style={{ color: "#94A3B8" }}>
+                      <Phone className="w-3 h-3" /> Sign in with your email or registered mobile number
                     </p>
                   </motion.div>
                 )}
