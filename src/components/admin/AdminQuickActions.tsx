@@ -21,7 +21,7 @@ const AdminQuickActions = ({ onAction }: AdminQuickActionsProps) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 right-4 z-50 flex flex-col-reverse items-end gap-2">
+    <div className="fixed bottom-[calc(5rem+64px)] md:bottom-24 right-4 md:right-6 z-[55] flex flex-col-reverse items-end gap-2">
       <AnimatePresence>
         {open && ACTIONS.map((action, i) => (
           <motion.div
