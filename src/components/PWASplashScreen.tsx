@@ -50,9 +50,13 @@ const Typewriter = ({ text, onDone }: { text: string; onDone?: () => void }) => 
 const PWASplashScreen = () => {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
+  const { settings } = useSiteSettings();
+  const pwaSplashEnabled = (settings as any)?.pwa_splash_enabled?.enabled === true;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Admin-controlled: paused by default. Only render when explicitly enabled.
+    if (!pwaSplashEnabled) return;
     const isStandalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-ignore iOS Safari
@@ -61,7 +65,7 @@ const PWASplashScreen = () => {
     if (sessionStorage.getItem("ccc_pwa_splash_done") === "1") return;
     setShow(true);
     sessionStorage.setItem("ccc_pwa_splash_done", "1");
-  }, []);
+  }, [pwaSplashEnabled]);
 
   useEffect(() => {
     if (!show) return;
