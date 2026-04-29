@@ -34,6 +34,7 @@ type SiteSettings = {
   admin_splash_enabled: { enabled: boolean };
   homepage_splash_enabled: { enabled: boolean };
   workshop_splash_enabled: { enabled: boolean };
+  pwa_splash_enabled: { enabled: boolean };
   app_onboarding_enabled: { enabled: boolean };
   permission_location: { enabled: boolean };
   permission_notifications: { enabled: boolean };
@@ -82,6 +83,7 @@ const defaults: SiteSettings = {
   admin_splash_enabled: { enabled: false },
   homepage_splash_enabled: { enabled: false },
   workshop_splash_enabled: { enabled: false },
+  pwa_splash_enabled: { enabled: false },
   app_onboarding_enabled: { enabled: false },
   permission_location: { enabled: false },
   permission_notifications: { enabled: false },
