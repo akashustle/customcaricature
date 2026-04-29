@@ -145,7 +145,7 @@ const PWASplashScreen = () => {
           className="font-calligraphy text-4xl sm:text-5xl mt-12 mb-3 text-center"
           style={{ color: "hsl(25 30% 20%)" }}
         >
-          Custom Caricature Club
+          Creative Caricature Club
         </motion.h1>
 
         {/* Typewriter tagline (advances through 3 phrases) */}
