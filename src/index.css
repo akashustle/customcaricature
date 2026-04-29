@@ -725,12 +725,12 @@
       0 8px 32px hsl(0 0% 0% / 0.2);
   }
 
-  /* Sidebar nav item states — Vault lime/black active pill */
+  /* Sidebar nav item states — soft warm cream active pill (lighter palette) */
   .admin-sidebar-item-active {
-    background: hsl(0 0% 8%);
-    color: hsl(0 0% 100%);
+    background: linear-gradient(135deg, hsl(30 35% 94%), hsl(28 30% 90%));
+    color: hsl(25 30% 22%);
     font-weight: 600;
-    box-shadow: 0 4px 12px hsl(0 0% 0% / 0.15), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    box-shadow: 0 2px 6px hsl(25 25% 60% / 0.18), inset 0 1px 0 hsl(0 0% 100% / 0.7);
   }
   .dark .admin-sidebar-item-active {
     background: hsl(82 75% 55%);
