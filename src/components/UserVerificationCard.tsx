@@ -59,6 +59,7 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<"form" | "loading" | "longer">("form");
   const [submitting, setSubmitting] = useState(false);
+  const [autoVerifying, setAutoVerifying] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [localAvatarUrl, setLocalAvatarUrl] = useState<string | null>(profile?.avatar_url || null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -94,6 +95,66 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
       pincode: profile?.pincode || "",
     });
   }, [profile]);
+
+  // Required-field check used by the "Get Verified" button.
+  // Per product requirement: clicking "Get Verified" must NOT open a popup —
+  // instead, if all required profile data is filled, we auto-verify the user
+  // after a 5-second confirmation. If anything is missing, we ask them to
+  // fill the profile tab first.
+  const requiredOk = !!(
+    (profile?.full_name || "").trim() &&
+    (profile?.mobile || "").replace(/\D/g, "").length >= 10 &&
+    (profile?.email || "").trim() &&
+    (profile?.address || "").trim() &&
+    (profile?.city || "").trim() &&
+    (profile?.state || "").trim() &&
+    profile?.age &&
+    (profile?.gender || "").trim()
+  );
+
+  const handleQuickVerify = async () => {
+    if (!requiredOk) {
+      toast({
+        title: "Please fill your profile first",
+        description: "Open the Profile tab, fill all your details (name, mobile, address, city, state, age, gender), save it, then click Get Verified again.",
+      });
+      return;
+    }
+    if (autoVerifying) return;
+    setAutoVerifying(true);
+    toast({
+      title: "✨ Verifying your details…",
+      description: "Hold on for 5 seconds while we confirm your profile.",
+    });
+    setTimeout(async () => {
+      try {
+        await supabase.from("profiles" as any).update({
+          verification_status: "verified",
+          is_verified: true,
+          verification_submitted_at: new Date().toISOString(),
+          verified_at: new Date().toISOString(),
+        } as any).eq("user_id", userId);
+        try {
+          await supabase.from("notifications").insert({
+            user_id: userId,
+            title: "✅ Your details are now verified",
+            message: "Please book your first event to get the blue tick on your profile.",
+            type: "system",
+            link: "/dashboard",
+          } as any);
+        } catch {/* non-fatal */}
+        toast({
+          title: "✅ Your details are now verified!",
+          description: "Please book your first event to get the blue tick.",
+        });
+        onProfileSaved?.();
+      } catch (e: any) {
+        toast({ title: "Verification failed", description: e?.message || "Try again", variant: "destructive" });
+      } finally {
+        setAutoVerifying(false);
+      }
+    }, 5000);
+  };
 
   const verificationStatus = profile?.verification_status || (profile?.is_verified ? "verified" : "unverified");
   const isVerified = profile?.is_verified === true || verificationStatus === "verified";
