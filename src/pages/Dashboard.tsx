@@ -1552,6 +1552,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
               <span className="break-words">{profile?.full_name || "User"}</span>
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
+              <VerificationBadge profile={profile} className="ml-1" />
             </h3>
             {/* Email — wraps fully, never truncates */}
             <p className="text-sm text-slate-600 font-sans mt-0.5 break-all leading-snug">{profile?.email || ""}</p>
