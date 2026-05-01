@@ -17,6 +17,7 @@ import SelectWithOther from "@/components/ui/select-with-other";
 import { toast } from "@/hooks/use-toast";
 import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight, Camera } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
+import { profileCompleteness } from "@/components/ProfileCompleteness";
 
 // Ivory / coral / sage palette to match WorkshopProfile
 const palette = {
@@ -101,16 +102,10 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   // instead, if all required profile data is filled, we auto-verify the user
   // after a 5-second confirmation. If anything is missing, we ask them to
   // fill the profile tab first.
-  const requiredOk = !!(
-    (profile?.full_name || "").trim() &&
-    (profile?.mobile || "").replace(/\D/g, "").length >= 10 &&
-    (profile?.email || "").trim() &&
-    (profile?.address || "").trim() &&
-    (profile?.city || "").trim() &&
-    (profile?.state || "").trim() &&
-    profile?.age &&
-    (profile?.gender || "").trim()
-  );
+  // Use the shared completeness helper so the badge, the dashboard progress
+  // bar, and this gate stay perfectly aligned.
+  const completenessInfo = profileCompleteness(profile as any);
+  const requiredOk = completenessInfo.percent === 100;
 
   const handleQuickVerify = async () => {
     if (!requiredOk) {
@@ -346,18 +341,26 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
               <Loader2 className="w-3 h-3 animate-spin" /> Pending Review
             </span>
           ) : (
-            <Button
-              onClick={handleQuickVerify}
-              size="sm"
-              disabled={autoVerifying}
-              className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
-            >
-              {autoVerifying ? (
-                <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Verifying…</>
-              ) : (
-                <>Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+              <Button
+                onClick={handleQuickVerify}
+                size="sm"
+                disabled={autoVerifying || !requiredOk}
+                title={requiredOk ? "Get verified now" : "Fill all profile details first"}
+                className="rounded-full font-semibold shadow-md text-white border-0 bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {autoVerifying ? (
+                  <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Verifying…</>
+                ) : (
+                  <>Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>
+                )}
+              </Button>
+              {!requiredOk && (
+                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-200">
+                  Profile {completenessInfo.percent}% — fill all fields
+                </span>
               )}
-            </Button>
+            </div>
           )}
         </div>
       </motion.div>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/pricing";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download, ArrowRight } from "lucide-react";
+import { LogOut, Edit2, Save, X, MessageCircle, Package, User, Home, CreditCard, Loader2, ShoppingBag, Settings, Lock, KeyRound, RefreshCw, Calendar as CalIcon, Sparkles, Receipt, ChevronDown, ChevronUp, Star, Bell, Store, Truck, GraduationCap, FileText, Download, ArrowRight, Check } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ import EventBalanceFullScreen from "@/components/EventBalanceFullScreen";
 import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
+import { VerificationBadge, ProfileCompleteness, profileCompleteness } from "@/components/ProfileCompleteness";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import { cachedFetch, invalidateCache, peekCache } from "@/lib/request-cache";
@@ -1436,9 +1437,54 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   );
 };
 
-const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
+const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile, setProfile }: any) => {
   const { settings } = useSiteSettings();
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
+
+  // ── Auto-save (debounced) ────────────────────────────────────────────
+  // While the user is editing, persist every change to the profiles table
+  // 600 ms after they stop typing. This keeps the admin panel + realtime
+  // listeners in sync without forcing the user to hit "Save".
+  const [autoStatus, setAutoStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const autoSavedAtRef = useRef<number>(0);
+  useEffect(() => {
+    if (!editing || !editForm || !profile?.user_id && !editForm?.email) return;
+    // Compare meaningful fields against the loaded profile — skip the first
+    // tick (no diff) so we don't trigger a write the moment editing opens.
+    const fields = ["full_name", "mobile", "instagram_id", "address", "city", "state", "district", "pincode", "age", "gender"] as const;
+    const dirty = fields.some((k) => (profile?.[k] ?? "") !== (editForm?.[k] ?? ""));
+    if (!dirty) return;
+    setAutoStatus("saving");
+    const t = setTimeout(async () => {
+      try {
+        const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { error } = await supabase.from("profiles").update({
+          full_name: editForm.full_name,
+          mobile: editForm.mobile,
+          instagram_id: editForm.instagram_id,
+          address: editForm.address,
+          city: editForm.city,
+          state: editForm.state,
+          district: editForm.district || null,
+          pincode: editForm.pincode,
+          age: Number.isFinite(ageNum as number) ? ageNum : null,
+          gender: editForm.gender || null,
+        } as any).eq("user_id", user.id);
+        if (error) throw error;
+        setProfile?.({ ...profile, ...editForm });
+        invalidateCache(`profile:${user.id}`);
+        autoSavedAtRef.current = Date.now();
+        setAutoStatus("saved");
+        setTimeout(() => setAutoStatus(s => (s === "saved" && Date.now() - autoSavedAtRef.current > 1500 ? "idle" : s)), 1800);
+      } catch {
+        setAutoStatus("error");
+      }
+    }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editForm, editing]);
 
   return (
     <div className="space-y-4">
@@ -1506,6 +1552,7 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
             <h3 className="font-display text-xl sm:text-2xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-1.5 flex-wrap break-words">
               <span className="break-words">{profile?.full_name || "User"}</span>
               {profile?.is_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" aria-label="Verified user" />}
+              <VerificationBadge profile={profile} className="ml-1" />
             </h3>
             {/* Email — wraps fully, never truncates */}
             <p className="text-sm text-slate-600 font-sans mt-0.5 break-all leading-snug">{profile?.email || ""}</p>
@@ -1538,10 +1585,31 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         </div>
       </div>
 
+      {/* Profile completeness — drives the Get Verified gate */}
+      <ProfileCompleteness profile={profile} />
+
       {/* Detail card — dark-mode friendly */}
       <div className="bg-card rounded-3xl p-5 border border-border shadow-sm">
         {editing && editForm ? (
           <div className="space-y-3">
+            {/* Auto-save status pill */}
+            <div className="flex items-center justify-end -mt-1 -mb-1">
+              {autoStatus === "saving" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Saving…
+                </span>
+              )}
+              {autoStatus === "saved" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
+              )}
+              {autoStatus === "error" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                  <X className="w-3 h-3" /> Save failed — retry
+                </span>
+              )}
+            </div>
             <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">WhatsApp Number</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} type="tel" inputMode="numeric" className="rounded-xl" /></div>
