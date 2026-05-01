@@ -247,7 +247,7 @@ const Dashboard = () => {
     return () => { cancelled = true; clearInterval(portalPoll); supabase.removeChannel(channel); };
   }, [user, authLoading, fetchLatestPortalPaymentRequest]);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, opts: { force?: boolean } = {}) => {
     // Hydrate instantly from cache so tab switches never show shimmer.
     const cached = peekCache<Profile>(`profile:${userId}`);
     if (cached) { setProfile(cached); setEditForm(cached); setLoading(false); }
@@ -256,7 +256,7 @@ const Dashboard = () => {
       const { data } = await supabase.from("profiles").select("full_name, mobile, email, instagram_id, address, city, state, district, pincode, age, gender, event_booking_allowed, event_edit_allowed, secret_code, gateway_charges_enabled, is_verified, avatar_url, created_at, edits_remaining").eq("user_id", userId).maybeSingle() as any;
       if (!data) return null;
       return { full_name: data.full_name || "", mobile: data.mobile || "", email: data.email || "", instagram_id: data.instagram_id || null, address: data.address || null, city: data.city || null, state: data.state || null, district: data.district || null, pincode: data.pincode || null, age: data.age ?? null, gender: data.gender || null, event_booking_allowed: data.event_booking_allowed !== false, event_edit_allowed: data.event_edit_allowed === true, secret_code: data.secret_code || null, gateway_charges_enabled: data.gateway_charges_enabled !== false, is_verified: data.is_verified === true, avatar_url: data.avatar_url || null, created_at: data.created_at || null, edits_remaining: data.edits_remaining ?? 0 } as Profile;
-    });
+    }, { force: opts.force });
     stop();
     if (data) { setProfile(data); setEditForm(data); }
     setLoading(false);
