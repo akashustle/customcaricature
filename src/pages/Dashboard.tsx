@@ -775,7 +775,7 @@ const Dashboard = () => {
             )}
             <TabsContent value="profile">
               <ProfileWithLogout
-                userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
+                userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id, { force: true })}
                 profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
                 handleLogout={handleLogout}
                 newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
@@ -814,7 +814,7 @@ const Dashboard = () => {
           )}
           {activeTab === "profile" && (
             <ProfileWithLogout
-              userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id)}
+              userId={user?.id} canBookEvent={canBookEvent} openAddEvent={() => setAddEventOpen(true)} refreshProfile={() => user?.id && fetchProfile(user.id, { force: true })}
               profile={profile} editing={editing} editForm={editForm} setEditing={setEditing} setEditForm={setEditForm} saveProfile={saveProfile} setProfile={setProfile}
               handleLogout={handleLogout}
               newSecretCode={newSecretCode} setNewSecretCode={setNewSecretCode} changeSecretCode={changeSecretCode} changingSecret={changingSecret}
