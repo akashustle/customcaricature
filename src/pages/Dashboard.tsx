@@ -1437,9 +1437,54 @@ const OrdersList = ({ orders, expandedOrder, setExpandedOrder, payingOrderId, ha
   );
 };
 
-const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile }: any) => {
+const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, saveProfile, setProfile }: any) => {
   const { settings } = useSiteSettings();
   const initials = profile?.full_name?.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) || "?";
+
+  // ── Auto-save (debounced) ────────────────────────────────────────────
+  // While the user is editing, persist every change to the profiles table
+  // 600 ms after they stop typing. This keeps the admin panel + realtime
+  // listeners in sync without forcing the user to hit "Save".
+  const [autoStatus, setAutoStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const autoSavedAtRef = useRef<number>(0);
+  useEffect(() => {
+    if (!editing || !editForm || !profile?.user_id && !editForm?.email) return;
+    // Compare meaningful fields against the loaded profile — skip the first
+    // tick (no diff) so we don't trigger a write the moment editing opens.
+    const fields = ["full_name", "mobile", "instagram_id", "address", "city", "state", "district", "pincode", "age", "gender"] as const;
+    const dirty = fields.some((k) => (profile?.[k] ?? "") !== (editForm?.[k] ?? ""));
+    if (!dirty) return;
+    setAutoStatus("saving");
+    const t = setTimeout(async () => {
+      try {
+        const ageNum = editForm.age != null && String(editForm.age).trim() !== "" ? parseInt(String(editForm.age), 10) : null;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { error } = await supabase.from("profiles").update({
+          full_name: editForm.full_name,
+          mobile: editForm.mobile,
+          instagram_id: editForm.instagram_id,
+          address: editForm.address,
+          city: editForm.city,
+          state: editForm.state,
+          district: editForm.district || null,
+          pincode: editForm.pincode,
+          age: Number.isFinite(ageNum as number) ? ageNum : null,
+          gender: editForm.gender || null,
+        } as any).eq("user_id", user.id);
+        if (error) throw error;
+        setProfile?.({ ...profile, ...editForm });
+        invalidateCache(`profile:${user.id}`);
+        autoSavedAtRef.current = Date.now();
+        setAutoStatus("saved");
+        setTimeout(() => setAutoStatus(s => (s === "saved" && Date.now() - autoSavedAtRef.current > 1500 ? "idle" : s)), 1800);
+      } catch {
+        setAutoStatus("error");
+      }
+    }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editForm, editing]);
 
   return (
     <div className="space-y-4">
