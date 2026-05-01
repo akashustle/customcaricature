@@ -372,11 +372,33 @@ const Register = () => {
       }
       if (!data.user) throw new Error("Registration failed");
 
-      // Update profile with verification info
-      await supabase.from("profiles" as any).update({
-        email_verified: emailVerified,
-        verification_method: verificationMethod,
-      } as any).eq("user_id", data.user.id);
+      // Persist FULL profile — the handle_new_user trigger only fires when the
+      // auth row is first inserted, which may have happened earlier during OTP
+      // delivery (signInWithOtp creates the user). At that point raw_user_meta_data
+      // was empty, so the profile row would be blank. Explicitly upsert here so
+      // every field the user entered shows up on the dashboard + admin panel.
+      try {
+        await supabase.from("profiles" as any).upsert({
+          user_id: data.user.id,
+          full_name: form.fullName,
+          mobile: form.mobile,
+          email: signupPayload.email,
+          instagram_id: form.instagramId || null,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          district: form.district || null,
+          pincode: form.pincode,
+          age: form.age ? parseInt(form.age) : null,
+          gender: form.gender || null,
+          email_verified: emailVerified,
+          verification_method: verificationMethod,
+          updated_at: new Date().toISOString(),
+        } as any, { onConflict: "user_id" });
+      } catch (e) {
+        // Non-fatal — trigger may have already populated. Log only.
+        console.warn("[register] profile upsert failed (non-fatal)", e);
+      }
 
       // Cache encrypted password locally so the user can sign in offline next time.
       try {
