@@ -347,11 +347,16 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
             </span>
           ) : (
             <Button
-              onClick={() => setOpen(true)}
+              onClick={handleQuickVerify}
               size="sm"
+              disabled={autoVerifying}
               className="rounded-full font-semibold shadow-md text-white border-0 flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
             >
-              Become Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              {autoVerifying ? (
+                <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Verifying…</>
+              ) : (
+                <>Get Verified <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></>
+              )}
             </Button>
           )}
         </div>
