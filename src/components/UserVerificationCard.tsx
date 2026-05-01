@@ -17,6 +17,7 @@ import SelectWithOther from "@/components/ui/select-with-other";
 import { toast } from "@/hooks/use-toast";
 import { BadgeCheck, ShieldCheck, Sparkles, Loader2, ArrowRight, Clock, ChevronRight, Camera } from "lucide-react";
 import { getStates, INDIA_LOCATIONS } from "@/lib/india-locations";
+import { profileCompleteness } from "@/components/ProfileCompleteness";
 
 // Ivory / coral / sage palette to match WorkshopProfile
 const palette = {
