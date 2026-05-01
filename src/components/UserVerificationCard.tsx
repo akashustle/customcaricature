@@ -101,16 +101,10 @@ const UserVerificationCard = ({ userId, profile, onProfileSaved, onBookEvent, ca
   // instead, if all required profile data is filled, we auto-verify the user
   // after a 5-second confirmation. If anything is missing, we ask them to
   // fill the profile tab first.
-  const requiredOk = !!(
-    (profile?.full_name || "").trim() &&
-    (profile?.mobile || "").replace(/\D/g, "").length >= 10 &&
-    (profile?.email || "").trim() &&
-    (profile?.address || "").trim() &&
-    (profile?.city || "").trim() &&
-    (profile?.state || "").trim() &&
-    profile?.age &&
-    (profile?.gender || "").trim()
-  );
+  // Use the shared completeness helper so the badge, the dashboard progress
+  // bar, and this gate stay perfectly aligned.
+  const completenessInfo = profileCompleteness(profile as any);
+  const requiredOk = completenessInfo.percent === 100;
 
   const handleQuickVerify = async () => {
     if (!requiredOk) {
