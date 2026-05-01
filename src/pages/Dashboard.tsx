@@ -26,6 +26,7 @@ import EventBalanceFullScreen from "@/components/EventBalanceFullScreen";
 import EventPaymentTimeline from "@/components/EventPaymentTimeline";
 import ReferAFriendCard from "@/components/ReferAFriendCard";
 import UserVerificationCard from "@/components/UserVerificationCard";
+import { VerificationBadge, ProfileCompleteness, profileCompleteness } from "@/components/ProfileCompleteness";
 import ProfileSocialFooter from "@/components/ProfileSocialFooter";
 import UserWorkshopOverview from "@/components/UserWorkshopOverview";
 import { cachedFetch, invalidateCache, peekCache } from "@/lib/request-cache";
