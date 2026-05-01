@@ -1585,10 +1585,31 @@ const ProfileSection = ({ profile, editing, editForm, setEditing, setEditForm, s
         </div>
       </div>
 
+      {/* Profile completeness — drives the Get Verified gate */}
+      <ProfileCompleteness profile={profile} />
+
       {/* Detail card — dark-mode friendly */}
       <div className="bg-card rounded-3xl p-5 border border-border shadow-sm">
         {editing && editForm ? (
           <div className="space-y-3">
+            {/* Auto-save status pill */}
+            <div className="flex items-center justify-end -mt-1 -mb-1">
+              {autoStatus === "saving" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Saving…
+                </span>
+              )}
+              {autoStatus === "saved" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
+              )}
+              {autoStatus === "error" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                  <X className="w-3 h-3" /> Save failed — retry
+                </span>
+              )}
+            </div>
             <div><Label className="font-sans text-xs text-muted-foreground">Full Name</Label><Input value={editForm.full_name || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditForm({ ...editForm, full_name: e.target.value })} className="rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">Email (read-only)</Label><Input value={editForm.email || ""} disabled className="opacity-60 rounded-xl" /></div>
             <div><Label className="font-sans text-xs text-muted-foreground">WhatsApp Number</Label><Input value={editForm.mobile || ""} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const d = e.target.value.replace(/\D/g, ""); if (d.length <= 10) setEditForm({ ...editForm, mobile: d }); }} maxLength={10} type="tel" inputMode="numeric" className="rounded-xl" /></div>
