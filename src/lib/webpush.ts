@@ -213,6 +213,22 @@ export const initWebPush = async (userId?: string) => {
         timezone: locationInfo.timezone || null,
         is_active: true,
       } as any).eq("id", existing.id);
+
+      // If we never sent the welcome (e.g. registered anonymously, now logged in), send it now
+      if (!existing.welcome_sent && userId) {
+        try {
+          await supabase.from("notifications").insert({
+            user_id: userId,
+            title: "🎉 Welcome to Creative Caricature Club™",
+            message: "Notifications are enabled. We'll keep you posted on orders, events & exclusive offers.",
+            type: "broadcast",
+            link: "/notifications",
+          } as any);
+          await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
+        } catch (e) {
+          console.warn("Late welcome push failed:", e);
+        }
+      }
     }
 
     console.log("Web Push initialized successfully");
