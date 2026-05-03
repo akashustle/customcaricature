@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { Phone, Mail, MapPin, Clock, Instagram, MessageCircle, Youtube, Facebook, Send, CheckCircle2, ArrowLeft, Headphones, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
+import SupportThread from "@/components/SupportThread";
 const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 import { motion } from "framer-motion";
 
