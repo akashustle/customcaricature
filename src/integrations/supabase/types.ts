@@ -1573,6 +1573,86 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_replies: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          read_at: string | null
+          read_by: string | null
+          sender_id: string | null
+          submission_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          sender_id?: string | null
+          submission_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          sender_id?: string | null
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_replies_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "contact_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          mobile: string | null
+          name: string
+          subject: string | null
+          user_id: string | null
+          who_are_you: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          mobile?: string | null
+          name: string
+          subject?: string | null
+          user_id?: string | null
+          who_are_you?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          mobile?: string | null
+          name?: string
+          subject?: string | null
+          user_id?: string | null
+          who_are_you?: string | null
+        }
+        Relationships: []
+      }
       content_blocks: {
         Row: {
           block_type: string
@@ -3186,6 +3266,42 @@ export type Database = {
           sent_by?: string
           sent_to_count?: number
           title?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          admin_contact_replies: boolean
+          admin_updates: boolean
+          created_at: string
+          credit_card_bills: boolean
+          emi_due_dates: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_contact_replies?: boolean
+          admin_updates?: boolean
+          created_at?: string
+          credit_card_bills?: boolean
+          emi_due_dates?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_contact_replies?: boolean
+          admin_updates?: boolean
+          created_at?: string
+          credit_card_bills?: boolean
+          emi_due_dates?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -6454,6 +6570,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_contact_replies_read: {
+        Args: { _submission_id: string }
+        Returns: undefined
+      }
       track_order: {
         Args: { customer_verify: string; order_id_input: string }
         Returns: {
@@ -6471,6 +6591,10 @@ export type Database = {
       }
       user_has_event_with_artist: {
         Args: { _artist_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_owns_contact_submission: {
+        Args: { _sub_id: string; _user_id: string }
         Returns: boolean
       }
       user_owns_event_booking: {
