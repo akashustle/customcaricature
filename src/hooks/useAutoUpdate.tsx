@@ -52,17 +52,19 @@ const useAutoUpdate = () => {
       }
 
       if (newHash !== storedHash) {
+        // NEVER auto-reload — that caused the entire site (admin, dashboard,
+        // public pages) to spontaneously refresh while users were typing /
+        // navigating. Just refresh the SW silently in the background; the new
+        // build will take effect on the user's next manual navigation/refresh.
         sessionStorage.setItem(BUILD_HASH_KEY, newHash);
-        
         if ("serviceWorker" in navigator) {
-          const reg = await navigator.serviceWorker.getRegistration();
-          if (reg) {
-            await reg.update();
-            reg.waiting?.postMessage({ type: "SKIP_WAITING" });
-          }
+          try {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg) await reg.update();
+          } catch { /* ignore */ }
         }
-
-        window.location.reload();
+        // The visible "Update available" banner (AppUpdateBanner) lets the
+        // user opt-in to a reload when they're ready.
       }
     } catch {
       // Silent fail
