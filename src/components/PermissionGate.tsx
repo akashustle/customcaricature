@@ -64,31 +64,46 @@ const PermissionGate = () => {
   }, []);
 
   useEffect(() => {
-    const done = localStorage.getItem(GATE_KEY) === "done";
     if (typeof Notification !== "undefined" && Notification.permission === "granted") {
       requestBrowserNotificationPermission(user?.id);
     }
-    if (done) return;
 
-    if (!askLocation && !askNotifications && !askMicrophone && !askCamera) {
-      localStorage.setItem(GATE_KEY, "done");
-      return;
-    }
+    if (!askLocation && !askNotifications && !askMicrophone && !askCamera) return;
 
-    const allGranted = (!askLocation || locationStatus === "granted") && (!askNotifications || typeof Notification === "undefined" || Notification.permission === "granted");
+    // If notifications are required and already granted (along with any other required perms), nothing to do.
+    const allGranted =
+      (!askLocation || locationStatus === "granted") &&
+      (!askNotifications || typeof Notification === "undefined" || Notification.permission === "granted");
     if (allGranted) {
-      localStorage.setItem(GATE_KEY, "done");
       setVisible(false);
       return;
     }
 
-    const delayMs = (isAdminRoute || isStandalone) ? 3000 : 20000;
+    // Re-prompt logic: if notifications are not granted/denied permanently we keep nudging every 6h.
+    const lastPromptIso = localStorage.getItem(GATE_LAST_PROMPT);
+    const lastPromptMs = lastPromptIso ? Date.parse(lastPromptIso) : 0;
+    const sinceLast = Date.now() - lastPromptMs;
+    const doneFlag = localStorage.getItem(GATE_KEY) === "done";
+
+    // First-time visitor (never prompted): show fast (5s anon, 3s admin/standalone, 20s logged-in extra grace).
+    let delayMs: number;
+    if (!lastPromptMs) {
+      delayMs = (isAdminRoute || isStandalone) ? 3000 : (user ? 20000 : ANON_FIRST_DELAY_MS);
+    } else if (sinceLast >= REMIND_INTERVAL_MS) {
+      delayMs = 4000; // gentle re-nudge
+    } else if (!doneFlag) {
+      delayMs = 12000; // shown earlier in session, re-show later
+    } else {
+      return; // recently dismissed and gate marked done — wait for 6h window
+    }
+
     const timer = setTimeout(() => {
-      if (localStorage.getItem(GATE_KEY) === "done") return;
+      // Recheck right before showing
+      if (typeof Notification !== "undefined" && Notification.permission === "granted") return;
       setVisible(true);
     }, delayMs);
     return () => clearTimeout(timer);
-  }, [user?.id, isAdminRoute, isStandalone, locationStatus, askLocation, askNotifications, askMicrophone, askCamera]);
+  }, [user?.id, isAdminRoute, isStandalone, locationStatus, notificationStatus, askLocation, askNotifications, askMicrophone, askCamera]);
 
   useEffect(() => {
     if (!requesting && visible && requiredPermissionsGranted) {
