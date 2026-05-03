@@ -2594,6 +2594,10 @@ const Admin = () => {
             <AdminChat adminUserId={user?.id || ""} />
           </TabsContent>
 
+          <TabsContent value="contact-replies">
+            <AdminContactReplies adminUserId={user?.id || ""} />
+          </TabsContent>
+
           <TabsContent value="quick-questions">
             <AdminQuickQuestions />
           </TabsContent>
