@@ -64,11 +64,28 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpeg,jpg,woff,woff2,webp,avif}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         importScripts: ["/sw-push.js"],
-        navigateFallback: "/offline.html",
+        // IMPORTANT: do NOT set navigateFallback to /offline.html here.
+        // Workbox would serve it whenever a navigation request misses the
+        // precache, which fires even when the user is fully online — causing
+        // the dreaded fullscreen "You're offline" screen for everyone.
+        // Instead we register a NetworkFirst handler for navigations below
+        // and only fall back to /offline.html on a real network failure.
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
+          {
+            // HTML navigations: always try network first, only use cache /
+            // offline.html when the network truly fails.
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-navigations",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 },
+              precacheFallback: { fallbackURL: "/offline.html" },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
