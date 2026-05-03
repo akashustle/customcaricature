@@ -6589,6 +6589,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      user_first_name: { Args: { _user_id: string }; Returns: string }
       user_has_event_with_artist: {
         Args: { _artist_id: string; _user_id: string }
         Returns: boolean
