@@ -127,6 +127,7 @@ const PermissionGate = () => {
 
   const completeGate = () => {
     localStorage.setItem(GATE_KEY, "done");
+    localStorage.setItem(GATE_LAST_PROMPT, new Date().toISOString());
     setVisible(false);
   };
 
