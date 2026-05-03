@@ -106,6 +106,12 @@ const Notifications = () => {
       </header>
 
       <div className="container mx-auto px-4 py-4 max-w-2xl">
+        <Tabs defaultValue="inbox" className="w-full">
+          <TabsList className="grid grid-cols-2 w-full mb-4">
+            <TabsTrigger value="inbox">Inbox</TabsTrigger>
+            <TabsTrigger value="prefs">Preferences</TabsTrigger>
+          </TabsList>
+          <TabsContent value="inbox">
         {notifications.length === 0 ? (
           <div className="text-center py-16">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
@@ -151,6 +157,11 @@ const Notifications = () => {
             </AnimatePresence>
           </div>
         )}
+          </TabsContent>
+          <TabsContent value="prefs">
+            <NotificationPreferencesPanel />
+          </TabsContent>
+        </Tabs>
       </div>
       <MobileBottomNav />
     </div>
