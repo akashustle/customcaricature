@@ -2,7 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      (function(){
+        try {
+          var standalone =
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true ||
+            /CapacitorWebView|wv\)|Median|TWA/i.test(navigator.userAgent) ||
+            window.matchMedia('(display-mode: fullscreen)').matches ||
+            window.matchMedia('(display-mode: minimal-ui)').matches;
+          if (standalone) {
+            var vp = document.querySelector('meta[name=viewport]');
+            if (vp) vp.setAttribute('content',
+              'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+            document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, { passive:false });
+            document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive:false });
+            document.addEventListener('gestureend', function(e){ e.preventDefault(); }, { passive:false });
+            var lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e){
+              var now = Date.now();
+              if (now - lastTouchEnd <= 350) e.preventDefault();
+              lastTouchEnd = now;
+            }, { passive:false });
+            window.addEventListener('wheel', function(e){ if (e.ctrlKey) e.preventDefault(); }, { passive:false });
+            window.addEventListener('keydown', function(e){
+              if ((e.ctrlKey||e.metaKey) && (e.key==='+'||e.key==='-'||e.key==='=')) e.preventDefault();
+            });
+          }
+        } catch(_){}
+      })();
+    </script>
     <title>Creative Caricature Club™ — Book Live Caricature Artist for Events | Order Custom Caricatures Online India</title>
     <meta name="description" content="Creative Caricature Club™ — India&#39;s #1 caricature studio. Book live caricature artists for weddings, corporate events, birthday parties &amp; college fests in Mumbai, Delhi, Bangalore &amp; across India. Order custom hand-crafted caricatures from photos online. International event bookings available. 5000+ happy clients.">
     <meta name="keywords" content="Creative Caricature Club, caricature, caricature artist, caricature artist near me, caricature artist in Mumbai, caricature artist for wedding, live caricature, live caricature artist, book caricature artist, caricature artist for events, wedding caricature artist, corporate event caricature, birthday party caricature, custom caricature, custom caricature from photo, caricature online India, hand-crafted caricature, couple caricature, group caricature, gift caricature, caricature for birthday, caricature for anniversary, caricature price, caricature studio India, caricature artist booking, live event entertainment, caricature artist international, caricature artist Mumbai, caricature artist Delhi, caricature artist Bangalore, caricature workshop, learn caricature, caricature merchandise" />
