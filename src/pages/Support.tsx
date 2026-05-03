@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 const Support = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -32,14 +33,20 @@ const Support = () => {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("support_messages" as any).insert({
+      // New: insert into contact_submissions (admins are notified via trigger).
+      // Also keep legacy support_messages insert for backward compatibility.
+      const payload = {
+        user_id: user?.id ?? null,
         name: name.trim(),
         email: email.trim(),
         mobile: mobile.trim() || null,
         subject: subject.trim() || null,
         message: message.trim(),
-      } as any);
+      };
+      const { error } = await supabase.from("contact_submissions" as any).insert(payload as any);
       if (error) throw error;
+      // Legacy mirror — non-fatal
+      supabase.from("support_messages" as any).insert(payload as any).then(() => {}, () => {});
       setSubmitted(true);
       toast({ title: "Message sent successfully!" });
     } catch (err: any) {
