@@ -58,6 +58,7 @@ const NAV_SECTIONS = [
     label: "Communication",
     items: [
       { id: "live-chat", icon: MessageCircle, label: "Live Chat" },
+      { id: "contact-replies", icon: MessageCircle, label: "Contact Replies" },
       { id: "ai-conversations", icon: Bot, label: "AI Chats" },
       { id: "quick-questions", icon: Brain, label: "Quick Q&A" },
       { id: "notify", icon: Bell, label: "Notifications" },
