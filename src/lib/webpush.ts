@@ -150,7 +150,7 @@ export const initWebPush = async (userId?: string) => {
       .maybeSingle();
 
     if (!existing) {
-      await supabase.from("push_subscriptions").insert({
+      const { data: inserted } = await supabase.from("push_subscriptions").insert({
         user_id: subUserId,
         endpoint: subscription.endpoint,
         p256dh,
@@ -162,11 +162,41 @@ export const initWebPush = async (userId?: string) => {
         city: locationInfo.city || null,
         timezone: locationInfo.timezone || null,
         is_active: true,
-        welcome_sent: true,
-      } as any);
+        welcome_sent: false,
+      } as any).select("id").maybeSingle();
 
-      // Single local-only welcome notification (no DB insert → no trigger → no spam)
+      // Local in-page notification (instant feedback when tab is open)
       await showLocalWelcomeNotification(registration);
+
+      // Real push delivery — works even when PWA is closed.
+      // For logged-in users insert a notification row (DB trigger fans out to web push + OneSignal).
+      // For anonymous, call edge directly to deliver to this fresh subscription.
+      try {
+        if (userId) {
+          await supabase.from("notifications").insert({
+            user_id: userId,
+            title: "🎉 Welcome to Creative Caricature Club™",
+            message: "Notifications are enabled. We'll keep you posted on orders, events & exclusive offers.",
+            type: "broadcast",
+            link: "/notifications",
+          } as any);
+        } else {
+          await supabase.functions.invoke("send-web-push", {
+            body: {
+              action: "broadcast_to_endpoints",
+              endpoints: [subscription.endpoint],
+              title: "🎉 Welcome to Creative Caricature Club™",
+              message: "Notifications are enabled. We'll keep you posted!",
+              link: "/notifications",
+            },
+          });
+        }
+        if (inserted?.id) {
+          await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", inserted.id);
+        }
+      } catch (e) {
+        console.warn("Welcome push send failed:", e);
+      }
       console.log("New push subscriber registered");
     } else {
       await supabase.from("push_subscriptions").update({
@@ -183,6 +213,22 @@ export const initWebPush = async (userId?: string) => {
         timezone: locationInfo.timezone || null,
         is_active: true,
       } as any).eq("id", existing.id);
+
+      // If we never sent the welcome (e.g. registered anonymously, now logged in), send it now
+      if (!existing.welcome_sent && userId) {
+        try {
+          await supabase.from("notifications").insert({
+            user_id: userId,
+            title: "🎉 Welcome to Creative Caricature Club™",
+            message: "Notifications are enabled. We'll keep you posted on orders, events & exclusive offers.",
+            type: "broadcast",
+            link: "/notifications",
+          } as any);
+          await supabase.from("push_subscriptions").update({ welcome_sent: true } as any).eq("id", existing.id);
+        } catch (e) {
+          console.warn("Late welcome push failed:", e);
+        }
+      }
     }
 
     console.log("Web Push initialized successfully");
