@@ -122,6 +122,11 @@ const Support = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 pb-16">
+          {user && (
+            <div className="mb-8">
+              <SupportThread />
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Contact Info */}
             <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="space-y-6">
