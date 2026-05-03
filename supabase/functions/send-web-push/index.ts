@@ -185,6 +185,40 @@ Deno.serve(async (req) => {
       });
     }
 
+    // SEND TO SPECIFIC ENDPOINTS (used for anonymous welcome on fresh subscription)
+    if (body.action === "broadcast_to_endpoints") {
+      const { endpoints, title, message, link, image_url } = body;
+      if (!Array.isArray(endpoints) || endpoints.length === 0) {
+        return new Response(JSON.stringify({ sent: 0, reason: "no endpoints" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: subs } = await supabase
+        .from("push_subscriptions").select("*").eq("is_active", true).in("endpoint", endpoints);
+      if (!subs || subs.length === 0) {
+        return new Response(JSON.stringify({ sent: 0, failed: 0 }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const payloadStr = JSON.stringify({
+        title: title || "Creative Caricature Club",
+        body: message || "You have a new notification",
+        icon: "/logo.png", badge: "/badge-96.png",
+        tag: `ccc-welcome-${Date.now()}`,
+        url: link || "/notifications",
+        image: image_url || undefined,
+      });
+      const payloadBytes = new TextEncoder().encode(payloadStr);
+      let sent = 0, failed = 0;
+      for (const sub of subs) {
+        const ok = await sendToSubscription(sub, payloadBytes, vapidPublicKey, vapidPrivateKey, vapidSubject, supabase);
+        if (ok) sent++; else failed++;
+      }
+      return new Response(JSON.stringify({ sent, failed }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // BROADCAST TO ALL SUBSCRIBERS (registered + anonymous)
     if (body.action === "broadcast_all") {
       const { title, message, link, image_url } = body;
