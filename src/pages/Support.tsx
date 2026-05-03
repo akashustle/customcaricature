@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,13 @@ import { toast } from "@/hooks/use-toast";
 import { Phone, Mail, MapPin, Clock, Instagram, MessageCircle, Youtube, Facebook, Send, CheckCircle2, ArrowLeft, Headphones, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
+import SupportThread from "@/components/SupportThread";
 const SiteFooter = lazy(() => import("@/components/SiteFooter"));
 import { motion } from "framer-motion";
 
 const Support = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -30,14 +33,20 @@ const Support = () => {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("support_messages" as any).insert({
+      // New: insert into contact_submissions (admins are notified via trigger).
+      // Also keep legacy support_messages insert for backward compatibility.
+      const payload = {
+        user_id: user?.id ?? null,
         name: name.trim(),
         email: email.trim(),
         mobile: mobile.trim() || null,
         subject: subject.trim() || null,
         message: message.trim(),
-      } as any);
+      };
+      const { error } = await supabase.from("contact_submissions" as any).insert(payload as any);
       if (error) throw error;
+      // Legacy mirror — non-fatal
+      supabase.from("support_messages" as any).insert(payload as any).then(() => {}, () => {});
       setSubmitted(true);
       toast({ title: "Message sent successfully!" });
     } catch (err: any) {
@@ -113,6 +122,11 @@ const Support = () => {
         </div>
 
         <div className="max-w-6xl mx-auto px-4 pb-16">
+          {user && (
+            <div className="mb-8">
+              <SupportThread />
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Contact Info */}
             <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.5 }} className="space-y-6">
