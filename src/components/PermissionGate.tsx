@@ -8,7 +8,10 @@ import { requestBrowserNotificationPermission } from "@/lib/webpush";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const GATE_KEY = "ccc_permissions_gate_v3";
+const GATE_KEY = "ccc_permissions_gate_v3";              // legacy "done" flag (still respected)
+const GATE_LAST_PROMPT = "ccc_permissions_last_prompt"; // ISO timestamp of last prompt close
+const REMIND_INTERVAL_MS = 6 * 60 * 60 * 1000;          // 6 hours
+const ANON_FIRST_DELAY_MS = 5000;                       // 5 seconds for first-time anonymous visit
 const ADMIN_ROUTES = ["/customcad75", "/admin-panel", "/admin-login", "/cccworkshop2006", "/workshop-admin-panel"];
 
 const PermissionGate = () => {
