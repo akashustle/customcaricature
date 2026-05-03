@@ -73,6 +73,7 @@ const AdminAuditLog = lazy(() => import("@/components/admin/AdminAuditLog"));
 const AdminChatbotTraining = lazy(() => import("@/components/admin/AdminChatbotTraining"));
 const AdminAIChatConversations = lazy(() => import("@/components/admin/AdminAIChatConversations"));
 const AdminChat = lazy(() => import("@/components/admin/AdminChat"));
+const AdminContactReplies = lazy(() => import("@/components/admin/AdminContactReplies"));
 const AdminEnquiries = lazy(() => import("@/components/admin/AdminEnquiries"));
 const AdminSupport = lazy(() => import("@/components/admin/AdminSupport"));
 const AdminSEOSettings = lazy(() => import("@/components/admin/AdminSEOSettings"));
